@@ -751,7 +751,8 @@ function refreshPanel(editor: HTMLElement): void {
     .map((issue) => {
       const excerpt = issue.excerpt ? `<p class="rte-content-rules-excerpt">${escapeHtml(issue.excerpt)}</p>` : '';
       const suggestion = issue.suggestion ? `<p class="rte-content-rules-suggestion">${escapeHtml(issue.suggestion)}</p>` : '';
-      const locateLabel = `${options.labels.locateText}: ${issue.message}`;
+      // The name starts with the words on the button (axe: label in name), then says what a click does.
+      const locateLabel = `${severityLabel(issue.severity)} ${issue.message}. ${options.labels.locateText}`;
 
       return `
         <li class="rte-content-rules-item rte-content-rules-item-${issue.severity}">
@@ -1182,7 +1183,7 @@ function ensureStylesInjected(): void {
     .rte-content-rules-btn-primary:hover,
     .rte-content-rules-btn-primary:focus-visible {
       border-color: #0369a1;
-      background: #0284c7;
+      background: #0369a1;
       color: #ffffff;
     }
 

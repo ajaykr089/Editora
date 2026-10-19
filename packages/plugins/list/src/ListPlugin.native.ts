@@ -1,5 +1,11 @@
 import { Plugin } from '@editora/core';
 import { recordDomHistory } from '../../shared/historyHelpers';
+import {
+  getCaretOffsetInBlock,
+  liftListsOutOfParagraphs,
+  removeEmptyParagraphsAroundLists,
+  restoreCaretOffsetInBlock,
+} from './listMarkup';
 
 /**
  * List Plugin - Native Implementation
@@ -125,11 +131,19 @@ function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'):
   if (!content.contains(range.commonAncestorContainer)) return false;
 
   const beforeHTML = content.innerHTML;
+  const caretOffset = getCaretOffsetInBlock(content);
   content.focus({ preventScroll: true });
   const executed = document.execCommand(command, false);
 
   normalizeListMarkup(content);
+  // Chromium either puts the list inside the paragraph (which re-parses as empty paragraphs around it) or
+  // leaves empty paragraphs where it split the one that became the list. Neither belongs in the document.
+  liftListsOutOfParagraphs(content);
+  removeEmptyParagraphsAroundLists(content);
   wrapOrphanedInlineContent(content);
+  // The browser leaves the caret in front of the line it has just made a list item; the text did not change,
+  // so the caret goes back to the same character.
+  if (caretOffset !== null) restoreCaretOffsetInBlock(content, caretOffset);
   // execCommand edits aren't visible to the history plugin, so Undo would skip them.
   recordDomHistory(content, beforeHTML);
   content.dispatchEvent(new Event('input', { bubbles: true }));

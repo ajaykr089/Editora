@@ -796,7 +796,8 @@ function focusFirstFocusable(root: HTMLElement): void {
 }
 
 function trapFocus(event: KeyboardEvent, root: HTMLElement): void {
-  if (event.key !== 'Tab') return;
+  // The shared dialog handler has usually moved the focus already.
+  if (event.key !== 'Tab' || event.defaultPrevented) return;
   const focusable = Array.from(root.querySelectorAll<HTMLElement>(
     'button:not([disabled]), select:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
   )).filter((el) => !el.hasAttribute('disabled'));
@@ -893,7 +894,7 @@ function renderDialog(
       <button type="button" role="tab" class="rte-version-diff-tab" data-tab="side" aria-selected="false">${escapeHtml(labels.tabSideBySide)}</button>
     </div>
 
-    <main class="rte-version-diff-body">
+    <div class="rte-version-diff-body">
       <div class="rte-version-diff-summary" aria-live="polite"></div>
       <section class="rte-version-diff-panel active" data-panel="inline" role="tabpanel">
         <div class="rte-version-diff-inline" aria-label="Inline diff result"></div>
@@ -910,7 +911,7 @@ function renderDialog(
           </div>
         </div>
       </section>
-    </main>
+    </div>
 
     <footer class="rte-version-diff-footer">
       <small>Shortcut: Ctrl/Cmd + Alt + D (fallback: F8)</small>

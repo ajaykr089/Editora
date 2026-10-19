@@ -259,6 +259,7 @@ function injectMergeTagStyles(): void {
       --rte-mt-subtle-hover: #eef2f7;
       --rte-mt-muted-text: #5f6b7d;
       --rte-mt-accent: #1976d2;
+      --rte-mt-accent-fill: #1976d2;
       --rte-mt-accent-strong: #1565c0;
       position: fixed;
       inset: 0;
@@ -281,7 +282,8 @@ function injectMergeTagStyles(): void {
       --rte-mt-subtle-hover: #344256;
       --rte-mt-muted-text: #a5b1c5;
       --rte-mt-accent: #58a6ff;
-      --rte-mt-accent-strong: #4598f4;
+      --rte-mt-accent-fill: #1f6feb;
+      --rte-mt-accent-strong: #1a5fd0;
     }
 
     .rte-merge-tag-dialog {
@@ -348,7 +350,7 @@ function injectMergeTagStyles(): void {
     .rte-merge-tag-empty { padding: 24px; text-align: center; color: var(--rte-mt-muted-text); }
     .rte-merge-tag-preview { padding:8px; background:var(--rte-mt-subtle-bg); border-radius:4px; font-family:monospace; font-size:12px; color:var(--rte-mt-dialog-text); overflow-wrap:anywhere; word-break:break-word; }
     .rte-merge-tag-footer { padding:12px 16px; border-top:1px solid var(--rte-mt-border); display:flex; gap:8px; justify-content:flex-end; background:var(--rte-mt-subtle-bg); }
-    .rte-merge-tag-btn-primary { padding:8px 16px; border:none; border-radius:4px; background:var(--rte-mt-accent); color:#fff; cursor:pointer; }
+    .rte-merge-tag-btn-primary { padding:8px 16px; border:none; border-radius:4px; background:var(--rte-mt-accent-fill); color:#fff; cursor:pointer; }
     .rte-merge-tag-btn-primary:hover { background: var(--rte-mt-accent-strong); }
     .rte-merge-tag-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .rte-merge-tag-btn-secondary { padding:8px 16px; border:1px solid var(--rte-mt-border); border-radius:4px; background:var(--rte-mt-subtle-bg); color:var(--rte-mt-dialog-text); cursor:pointer; }

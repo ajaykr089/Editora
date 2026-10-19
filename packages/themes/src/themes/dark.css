@@ -253,7 +253,8 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item:hover,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item[data-active="true"] {
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item[data-active="true"],
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item:focus {
   background: #3a4554;
   color: var(--rte-color-text-primary);
 }
@@ -451,6 +452,8 @@
   color: #e5e7eb;
 }
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:hover,
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:focus,
+.rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item:focus,
 .rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item:hover {
     background-color: #2f3946;
 }

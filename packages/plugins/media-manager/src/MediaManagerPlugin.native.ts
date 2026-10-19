@@ -1,5 +1,7 @@
 import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
+import { recordDomHistory } from '../../shared/historyHelpers';
+import { confirmAction, promptText } from '../../shared/confirmDialog';
 import { Plugin } from '@editora/core';
 
 /**
@@ -66,7 +68,7 @@ const injectMediaDialogStyles = (): void => {
       --rte-media-border: #d6dbe4;
       --rte-media-surface: #f7f9fc;
       --rte-media-surface-hover: #eef2f7;
-      --rte-media-accent: #1f75fe;
+      --rte-media-accent: #1560e8;
       --rte-media-accent-hover: #165fd6;
       --rte-media-danger: #dc3545;
       --rte-media-danger-hover: #b92735;
@@ -94,7 +96,7 @@ const injectMediaDialogStyles = (): void => {
       --rte-media-border: #49566c;
       --rte-media-surface: #2a3444;
       --rte-media-surface-hover: #344256;
-      --rte-media-accent: #58a6ff;
+      --rte-media-accent: #1f6feb;
       --rte-media-accent-hover: #4598f4;
       --rte-media-danger: #ff7b72;
       --rte-media-danger-hover: #ff645b;
@@ -523,6 +525,21 @@ const createDialogOverlay = (contextElement?: HTMLElement | null): HTMLDivElemen
   return overlay;
 };
 
+/** After a re-render the tab that was clicked is a new element: keep keyboard focus on the tab that is now active. */
+const focusActiveTab = (dialog: HTMLElement, tab: 'upload' | 'url') => {
+  dialog.querySelector<HTMLElement>(tab === 'upload' ? '.tab-upload' : '.tab-url')?.focus();
+};
+
+/** The dropzone opens the file chooser on click; Enter and Space do the same for someone without a pointer. */
+const makeDropzoneKeyboardAccessible = (dropzone: HTMLElement | null, fileInput: HTMLInputElement | null) => {
+  dropzone?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      fileInput?.click();
+    }
+  });
+};
+
 const createDialogShell = (compact = false): HTMLDivElement => {
   const dialog = document.createElement('div');
   dialog.className = compact ? 'rte-media-dialog rte-media-dialog-compact' : 'rte-media-dialog';
@@ -548,6 +565,15 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
   let heightValue = '';
   let altValue = '';
 
+  const previewFieldHTML = () => `
+    <div class="rte-media-field rte-media-preview-field">
+      <span class="rte-media-label">Preview</span>
+      <div class="rte-media-preview">
+        ${type === 'image' ? `<img src="${escapeHtml(urlValue)}" alt="Preview">` : `<video src="${escapeHtml(urlValue)}" controls></video>`}
+      </div>
+    </div>
+  `;
+
   const renderDialog = () => {
     dialog.innerHTML = `
       <div class="rte-media-header">
@@ -555,21 +581,21 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
         <button class="close-btn rte-media-close-btn" type="button" aria-label="Close">×</button>
       </div>
 
-      <div class="rte-media-tabs">
-        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button">Upload</button>
-        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button">URL</button>
+      <div class="rte-media-tabs" role="tablist" aria-label="Where to get the ${type === 'image' ? 'image' : 'video'} from">
+        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'upload'}">Upload</button>
+        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'url'}">URL</button>
       </div>
 
       <div class="rte-media-body">
         ${activeTab === 'upload' ? `
           <div id="upload-section">
-            <div class="dropzone rte-media-dropzone">
-              <div class="rte-media-dropzone-icon">📁</div>
+            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Drag and drop your ${type} here or click to browse. Max file size: 50MB">
+              <div class="rte-media-dropzone-icon" aria-hidden="true">📁</div>
               <p class="rte-media-dropzone-title">Drag and drop your ${type} here</p>
               <p class="rte-media-muted">or click to browse</p>
               <p class="rte-media-hint">Max file size: 50MB</p>
             </div>
-            <input type="file" id="file-input" accept="${type === 'image' ? 'image/*' : 'video/*'}" style="display: none;">
+            <input type="file" id="file-input" aria-label="${type === 'image' ? 'Choose an image file' : 'Choose a video file'}" accept="${type === 'image' ? 'image/*' : 'video/*'}" style="display: none;">
             <div id="upload-progress" class="rte-media-progress" style="display: none;">
               <div class="rte-media-progress-track">
                 <div id="progress-bar" class="rte-media-progress-bar"></div>
@@ -580,33 +606,26 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
         ` : `
           <div id="url-section">
             <div class="rte-media-field">
-              <label class="rte-media-label">URL</label>
-              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/${type}.${type === 'image' ? 'jpg' : 'mp4'}" value="${urlValue}">
+              <label class="rte-media-label" for="url-input">URL</label>
+              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/${type}.${type === 'image' ? 'jpg' : 'mp4'}" value="${escapeHtml(urlValue)}">
             </div>
             ${type === 'image' ? `
               <div class="rte-media-field">
-                <label class="rte-media-label">Alt Text (for accessibility)</label>
-                <input type="text" id="alt-input" class="rte-media-input" placeholder="Describe the image" value="${altValue}">
+                <label class="rte-media-label" for="alt-input">Alt Text (for accessibility)</label>
+                <input type="text" id="alt-input" class="rte-media-input" placeholder="Describe the image" value="${escapeHtml(altValue)}">
               </div>
             ` : ''}
             <div class="rte-media-grid">
               <div class="rte-media-field">
-                <label class="rte-media-label">Width (px)</label>
-                <input type="number" id="width-input" class="rte-media-input" placeholder="Auto" value="${widthValue}">
+                <label class="rte-media-label" for="width-input">Width (px)</label>
+                <input type="number" id="width-input" class="rte-media-input" placeholder="Auto" value="${escapeHtml(widthValue)}">
               </div>
               <div class="rte-media-field">
-                <label class="rte-media-label">Height (px)</label>
-                <input type="number" id="height-input" class="rte-media-input" placeholder="Auto" value="${heightValue}">
+                <label class="rte-media-label" for="height-input">Height (px)</label>
+                <input type="number" id="height-input" class="rte-media-input" placeholder="Auto" value="${escapeHtml(heightValue)}">
               </div>
             </div>
-            ${urlValue ? `
-              <div class="rte-media-field">
-                <label class="rte-media-label">Preview</label>
-                <div class="rte-media-preview">
-                  ${type === 'image' ? `<img src="${urlValue}" alt="Preview">` : `<video src="${urlValue}" controls></video>`}
-                </div>
-              </div>
-            ` : ''}
+            ${urlValue ? previewFieldHTML() : ''}
           </div>
         `}
       </div>
@@ -658,12 +677,42 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       mediaEl.style.cssText = `display: block; margin: 1em 0; cursor: pointer; ${widthValue ? `width: ${widthValue}px;` : 'max-width: 100%;'} ${heightValue ? `height: ${heightValue}px;` : 'height: auto;'}`;
     }
 
-    if (savedSelection) {
+    // Where it goes: the selection the dialog was opened from, else the end of the editor it was opened for.
+    const host =
+      (savedSelection
+        ? (savedSelection.commonAncestorContainer instanceof HTMLElement
+            ? savedSelection.commonAncestorContainer
+            : savedSelection.commonAncestorContainer.parentElement
+          )?.closest<HTMLElement>('[contenteditable="true"]')
+        : null) ??
+      resolveDialogContext(contextElement)?.closest<HTMLElement>('[contenteditable="true"]') ??
+      null;
+    const beforeHTML = host?.innerHTML ?? '';
+
+    if (savedSelection && host?.contains(savedSelection.commonAncestorContainer)) {
       savedSelection.deleteContents();
       savedSelection.insertNode(mediaEl);
+    } else if (host) {
+      host.appendChild(mediaEl);
     }
 
     closeDialog();
+
+    if (host && mediaEl.isConnected) {
+      // The editor has to hear about it (its change callback, and Undo), and the caret goes after the new media
+      // so that what is typed next follows it.
+      host.focus({ preventScroll: true });
+      const selection = window.getSelection();
+      if (selection) {
+        const after = document.createRange();
+        after.setStartAfter(mediaEl);
+        after.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(after);
+      }
+      recordDomHistory(host, beforeHTML);
+      host.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -718,12 +767,14 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       activeTab = 'upload';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     tabUrl?.addEventListener('click', () => {
       activeTab = 'url';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     if (activeTab === 'upload') {
@@ -731,6 +782,7 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       const fileInput = dialog.querySelector('#file-input') as HTMLInputElement;
 
       dropzone?.addEventListener('click', () => fileInput?.click());
+      makeDropzoneKeyboardAccessible(dropzone, fileInput);
 
       dropzone?.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -760,10 +812,31 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       const widthInput = dialog.querySelector('#width-input') as HTMLInputElement;
       const heightInput = dialog.querySelector('#height-input') as HTMLInputElement;
 
+      // Rebuilding the dialog here took the focus out of the field after every letter, so a URL could
+      // only be pasted. Keep the field, and bring the button and the preview up to date around it.
+      let previewTimer: ReturnType<typeof setTimeout> | undefined;
       urlInput?.addEventListener('input', () => {
         urlValue = urlInput.value;
-        renderDialog();
-        attachEventHandlers();
+        const insertButton = dialog.querySelector<HTMLButtonElement>('#insert-btn');
+        if (insertButton) insertButton.disabled = !urlValue;
+
+        clearTimeout(previewTimer);
+        previewTimer = setTimeout(() => {
+          const section = dialog.querySelector('#url-section');
+          const existing = section?.querySelector('.rte-media-preview-field');
+          if (!section) return;
+          if (!urlValue) {
+            existing?.remove();
+            return;
+          }
+          if (existing) {
+            const media = existing.querySelector<HTMLElement>('img, video');
+            if (media) media.setAttribute('src', urlValue);
+            return;
+          }
+          const grid = section.querySelector('.rte-media-grid');
+          grid?.insertAdjacentHTML('afterend', previewFieldHTML());
+        }, 400);
       });
 
       altInput?.addEventListener('input', () => {
@@ -984,15 +1057,22 @@ const showLinkDialogForMedia = (media: HTMLImageElement | HTMLVideoElement) => {
     }
   });
 
-  removeLinkBtn?.addEventListener('click', () => {
-    if (existingLink && confirm('Remove link from this media?')) {
-      existingLink.replaceWith(media);
-      closeDialog();
-      
-      // Update toolbar
-      if (floatingToolbar && selectedMedia) {
-        showFloatingToolbar(selectedMedia);
-      }
+  removeLinkBtn?.addEventListener('click', async () => {
+    if (!existingLink) return;
+    const confirmed = await confirmAction('Remove link from this media?', {
+      title: 'Remove link',
+      confirmText: 'Remove link',
+      danger: true,
+      context: media,
+    });
+    if (!confirmed || !existingLink.isConnected) return;
+
+    existingLink.replaceWith(media);
+    closeDialog();
+
+    // Update toolbar
+    if (floatingToolbar && selectedMedia) {
+      showFloatingToolbar(selectedMedia);
     }
   });
 
@@ -1014,20 +1094,20 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
         <button class="close-btn rte-media-close-btn" type="button" aria-label="Close">×</button>
       </div>
 
-      <div class="rte-media-tabs">
-        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button">Upload</button>
-        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button">URL</button>
+      <div class="rte-media-tabs" role="tablist" aria-label="Where to get the image from">
+        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'upload'}">Upload</button>
+        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'url'}">URL</button>
       </div>
 
       <div class="rte-media-body">
         ${activeTab === 'upload' ? `
           <div id="upload-section">
-            <div class="dropzone rte-media-dropzone">
-              <div class="rte-media-dropzone-icon">📁</div>
+            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Drag and drop your image here or click to browse">
+              <div class="rte-media-dropzone-icon" aria-hidden="true">📁</div>
               <p class="rte-media-dropzone-title">Drag and drop your image here</p>
               <p class="rte-media-muted">or click to browse</p>
             </div>
-            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            <input type="file" id="file-input" aria-label="Choose an image file" accept="image/*" style="display: none;">
             <div id="upload-progress" class="rte-media-progress" style="display: none;">
               <div class="rte-media-progress-track">
                 <div id="progress-bar" class="rte-media-progress-bar"></div>
@@ -1038,14 +1118,14 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
         ` : `
           <div id="url-section">
             <div class="rte-media-field">
-              <label class="rte-media-label">Image URL</label>
-              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/image.jpg" value="${urlValue}">
+              <label class="rte-media-label" for="url-input">Image URL</label>
+              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/image.jpg" value="${escapeHtml(urlValue)}">
             </div>
             ${urlValue ? `
               <div class="rte-media-field">
-                <label class="rte-media-label">Preview</label>
+                <span class="rte-media-label">Preview</span>
                 <div class="rte-media-preview">
-                  <img src="${urlValue}" alt="Preview" onerror="this.parentElement.innerHTML='<p class=&quot;rte-media-muted&quot;>Failed to load image</p>'">
+                  <img src="${escapeHtml(urlValue)}" alt="Preview" onerror="this.parentElement.innerHTML='<p class=&quot;rte-media-muted&quot;>Failed to load image</p>'">
                 </div>
               </div>
             ` : ''}
@@ -1130,12 +1210,14 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
       activeTab = 'upload';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     tabUrl?.addEventListener('click', () => {
       activeTab = 'url';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     if (activeTab === 'upload') {
@@ -1143,6 +1225,7 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
       const fileInput = dialog.querySelector('#file-input') as HTMLInputElement;
 
       dropzone?.addEventListener('click', () => fileInput?.click());
+      makeDropzoneKeyboardAccessible(dropzone, fileInput);
       
       dropzone?.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -1169,10 +1252,11 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
     if (activeTab === 'url') {
       const urlInput = dialog.querySelector('#url-input') as HTMLInputElement;
 
+      // As in the insert dialog: keep the field (a rebuild took the focus after every letter).
       urlInput?.addEventListener('input', () => {
         urlValue = urlInput.value;
-        renderDialog();
-        attachEventHandlers();
+        const replaceButton = dialog.querySelector<HTMLButtonElement>('#replace-btn');
+        if (replaceButton) replaceButton.disabled = !urlValue;
       });
     }
   };
@@ -1185,19 +1269,39 @@ const updatePosition = () => {
   if (!floatingToolbar || !selectedMedia) return;
 
   const toolbarHeight = floatingToolbar.offsetHeight || 40;
-  const mediaTop = selectedMedia.offsetTop;
-  const mediaLeft = selectedMedia.offsetLeft;
-  const mediaWidth = selectedMedia.offsetWidth;
+  const toolbarWidth = floatingToolbar.offsetWidth || 120;
 
-  // Position above the image, centered
-  const top = mediaTop - toolbarHeight - 8;
-  const left = mediaLeft + (mediaWidth / 2) - ((floatingToolbar.offsetWidth || 120) / 2);
+  // The toolbar is placed against its parent (the containing block). Measure from the parent's own box, not from
+  // the image's offsetTop: when the parent is an inline link, browsers disagree about where its box starts.
+  const parent = floatingToolbar.parentElement || selectedMedia;
+  const parentRect = parent.getBoundingClientRect();
+  const mediaRect = selectedMedia.getBoundingClientRect();
+  const mediaTop = mediaRect.top - parentRect.top - parent.clientTop + parent.scrollTop;
+  const mediaLeft = mediaRect.left - parentRect.left - parent.clientLeft + parent.scrollLeft;
+
+  // Position above the image, centered, unless that would leave the editing area (an image at the top of the
+  // document): there the toolbar would lie over the editor toolbar, which takes the clicks. Put it below then.
+  const host = selectedMedia.closest('[contenteditable="true"]');
+  const roomAbove = host ? mediaRect.top - host.getBoundingClientRect().top - toolbarHeight - 8 : 1;
+  const top = roomAbove < 0 ? mediaTop + mediaRect.height + 8 : mediaTop - toolbarHeight - 8;
+  const left = mediaLeft + mediaRect.width / 2 - toolbarWidth / 2;
 
   floatingToolbar.style.top = `${top}px`;
   floatingToolbar.style.left = `${left}px`;
   setTimeout(() => {  
     if (floatingToolbar) floatingToolbar.style.display = "flex";
   },100);
+};
+
+// The element the floating toolbar is placed in. An inline parent (an image inside a link) is a poor containing
+// block: browsers differ on where its box starts, which put the toolbar over the editor toolbar. Use the nearest
+// block-level ancestor.
+const getToolbarParent = (media: HTMLElement): HTMLElement | null => {
+  let parent = media.parentElement;
+  while (parent && parent.parentElement && getComputedStyle(parent).display === 'inline') {
+    parent = parent.parentElement;
+  }
+  return parent;
 };
 
 // Show floating toolbar
@@ -1211,7 +1315,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   }
 
   // Ensure parent has relative positioning
-  const mediaParent = media.parentElement;
+  const mediaParent = getToolbarParent(media);
   if (mediaParent) {
     const originalPosition = mediaParent.style.position;
     if (!originalPosition || originalPosition === 'static') {
@@ -1340,19 +1444,32 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     }
   });
 
-  toolbar.querySelector('.btn-resize')?.addEventListener('click', () => {
-    const width = prompt('Enter width in pixels:', String(media.width || media.offsetWidth));
-    if (width && !isNaN(parseInt(width))) {
-      const w = parseInt(width);
-      media.style.width = `${w}px`;
-      media.setAttribute('width', String(w));
-      updateResizeHandles();
-      updatePosition();
-    }
+  toolbar.querySelector('.btn-resize')?.addEventListener('click', async () => {
+    const width = await promptText('Enter width in pixels:', {
+      title: 'Resize',
+      label: 'Width (px)',
+      initialValue: String(media.width || media.offsetWidth),
+      inputMode: 'numeric',
+      confirmText: 'Resize',
+      context: media,
+      validate: (value) => (/^\s*\d+\s*$/.test(value) && parseInt(value, 10) > 0 ? null : 'Enter a whole number of pixels, such as 480.'),
+    });
+    if (width === null) return;
+    const w = parseInt(width, 10);
+    media.style.width = `${w}px`;
+    media.setAttribute('width', String(w));
+    updateResizeHandles();
+    updatePosition();
   });
 
-  toolbar.querySelector('.btn-remove')?.addEventListener('click', () => {
-    if (confirm('Remove this media?')) {
+  toolbar.querySelector('.btn-remove')?.addEventListener('click', async () => {
+    const confirmed = await confirmAction('Remove this media?', {
+      title: 'Remove media',
+      confirmText: 'Remove',
+      danger: true,
+      context: media,
+    });
+    if (confirmed) {
       media.remove();
       if (floatingToolbar) {
         if ((floatingToolbar as any)._cleanup) {
@@ -1418,8 +1535,8 @@ const initMediaManager = (editorEl?: HTMLElement) => {
         floatingToolbar = null;
         
         // Restore parent position
-        if (selectedMedia && selectedMedia.parentElement) {
-          const parent = selectedMedia.parentElement;
+        const parent = selectedMedia && getToolbarParent(selectedMedia);
+        if (parent) {
           if ((parent as any)._originalPosition !== undefined) {
             parent.style.position = (parent as any)._originalPosition;
             delete (parent as any)._originalPosition;

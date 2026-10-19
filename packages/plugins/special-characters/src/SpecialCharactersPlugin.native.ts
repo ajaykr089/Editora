@@ -163,7 +163,7 @@ const injectStyles = (): void => {
       --rte-sc-subtle-bg: #f7f9fc;
       --rte-sc-subtle-hover: #eef2f7;
       --rte-sc-muted-text: #5f6b7d;
-      --rte-sc-accent: #1f75fe;
+      --rte-sc-accent: #1560e8;
       --rte-sc-accent-strong: #165fd6;
       --rte-sc-ring: rgba(31, 117, 254, 0.18);
       --rte-picker-dialog-width: min(640px, 96vw);
@@ -209,7 +209,7 @@ const injectStyles = (): void => {
       --rte-sc-subtle-bg: #2a3444;
       --rte-sc-subtle-hover: #344256;
       --rte-sc-muted-text: #a5b1c5;
-      --rte-sc-accent: #58a6ff;
+      --rte-sc-accent: #1f6feb;
       --rte-sc-accent-strong: #4598f4;
       --rte-sc-ring: rgba(88, 166, 255, 0.22);
     }

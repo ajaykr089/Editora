@@ -681,6 +681,9 @@ function refreshPanel(editor: HTMLElement): void {
     }`;
   }
 
+  // The dropdown must follow the style too: cycling it from the toolbar or the shortcut left it saying the old one.
+  updateStyleField(editor, panel, options);
+
   if (styleButton) {
     styleButton.textContent = `${options.labels.styleButtonPrefix}: ${style.toUpperCase()}`;
     styleButton.setAttribute('aria-label', `${options.labels.styleButtonPrefix}: ${style.toUpperCase()}`);

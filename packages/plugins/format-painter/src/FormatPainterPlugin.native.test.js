@@ -255,3 +255,76 @@ runCase('paints table and table cell styles onto selected target cells', () => {
   assert.equal(target.style.borderLeftWidth, '2px');
   assert.equal(target.style.borderLeftStyle, 'solid');
 });
+
+runCase('does not write styles the target already shows (they change nothing and only clutter the markup)', () => {
+  // Source and target look the same apart from the bold: the painted text must not get a span of copied styles.
+  const editor = createEditor(`
+    <p id="source" style="line-height: 21px; font-size: 14px; color: rgb(15, 23, 42);"><b>Source</b></p>
+    <p id="target" style="line-height: 21px; font-size: 14px; color: rgb(15, 23, 42);">Target word here</p>
+  `);
+  const plugin = FormatPainterPlugin();
+
+  selectText(editor.querySelector('#source b'));
+  assert.equal(plugin.commands.toggleFormatPainter(undefined, { contentElement: editor }), true);
+  selectText(editor.querySelector('#target'));
+  assert.equal(plugin.commands.paintFormats(undefined, { contentElement: editor }), true);
+
+  const target = editor.querySelector('#target');
+  assert.ok(target.querySelector('b'), 'the bold is painted');
+  assert.equal(target.querySelector('.rte-format-painted'), null, 'no span of copied font, size and colour');
+  assert.doesNotMatch(target.innerHTML, /font-family|font-size|color:/);
+  assert.equal(target.getAttribute('style'), 'line-height: 21px; font-size: 14px; color: rgb(15, 23, 42);', 'the paragraph keeps its own style');
+});
+
+runCase('still writes the styles that differ from the target', () => {
+  const editor = createEditor(`
+    <p id="source" style="font-size: 14px;"><span style="color: rgb(255, 0, 0); font-size: 20px;">Source</span></p>
+    <p id="target" style="font-size: 14px;">Target</p>
+  `);
+  const plugin = FormatPainterPlugin();
+
+  selectText(editor.querySelector('#source span'));
+  assert.equal(plugin.commands.toggleFormatPainter(undefined, { contentElement: editor }), true);
+  selectText(editor.querySelector('#target'));
+  assert.equal(plugin.commands.paintFormats(undefined, { contentElement: editor }), true);
+
+  const painted = editor.querySelector('#target .rte-format-painted');
+  assert.ok(painted, 'a span carries what differs');
+  assert.equal(painted.style.color, 'rgb(255, 0, 0)');
+  assert.equal(painted.style.fontSize, '20px');
+});
+
+runCase('leaves out only the styles the target has, and keeps the rest', () => {
+  const editor = createEditor(`
+    <p id="source"><span style="color: rgb(255, 0, 0); font-size: 20px;">Source</span></p>
+    <p id="target" style="font-size: 20px;">Target</p>
+  `);
+  const plugin = FormatPainterPlugin();
+
+  selectText(editor.querySelector('#source span'));
+  plugin.commands.toggleFormatPainter(undefined, { contentElement: editor });
+  selectText(editor.querySelector('#target'));
+  plugin.commands.paintFormats(undefined, { contentElement: editor });
+
+  const painted = editor.querySelector('#target .rte-format-painted');
+  assert.ok(painted);
+  assert.equal(painted.style.color, 'rgb(255, 0, 0)');
+  assert.equal(painted.style.fontSize, '', 'the size was already 20px');
+});
+
+runCase('does not repeat a block style the paragraph already has', () => {
+  const editor = createEditor(`
+    <p id="source" style="text-align: center; line-height: 2;">Source</p>
+    <p id="target" style="text-align: center;">Target</p>
+  `);
+  const plugin = FormatPainterPlugin();
+
+  selectText(editor.querySelector('#source'));
+  plugin.commands.toggleFormatPainter(undefined, { contentElement: editor });
+  selectText(editor.querySelector('#target'));
+  plugin.commands.paintFormats(undefined, { contentElement: editor });
+
+  const target = editor.querySelector('#target');
+  assert.equal(target.style.textAlign, 'center');
+  assert.equal(target.style.lineHeight, '2', 'what was missing is still painted');
+});

@@ -2,12 +2,30 @@ import type { Plugin } from '@editora/core';
 
 type CommandHandler = (...args: any[]) => any;
 
+type TypingGroup = 'insert' | 'delete';
+
 interface DomHistoryEntry {
   undo: () => void;
   redo: () => void;
   /** Set on whole-content transactions so an identical duplicate can be ignored. */
   beforeHTML?: string;
   afterHTML?: string;
+  /** Set while the entry is a run of typed or deleted characters that later keystrokes may extend. */
+  group?: TypingGroup;
+  startedAt?: number;
+  updatedAt?: number;
+  /** A closed entry is never extended: a word boundary, a click, a caret key, undo or redo ended it. */
+  closed?: boolean;
+}
+
+/** Details the host passes with a transaction so keystrokes can be grouped into one undo step. */
+export interface DomTransactionOptions {
+  /** `InputEvent.inputType` of the change. */
+  inputType?: string | null;
+  /** `InputEvent.data` of the change (the typed text). */
+  data?: string | null;
+  /** False when text was selected as the key was pressed: typing over it, or deleting it, is not a plain keystroke. */
+  selectionCollapsed?: boolean;
 }
 
 interface EditorHistoryState {
@@ -23,7 +41,16 @@ interface ElementSnapshot {
 }
 
 const ROOT_EDITOR_SELECTOR = '.rte-content, .editora-content';
-const MAX_DOM_HISTORY = 100;
+const MAX_DOM_HISTORY = 200;
+/**
+ * Each step keeps the whole content from before and after it, so a long document makes each step big. The oldest steps
+ * go once the steps together hold more than this many characters (a step is always kept, however big).
+ */
+const MAX_DOM_HISTORY_CHARACTERS = 40_000_000;
+/** Typing, or deleting, stays one undo step until the user pauses this long. */
+const TYPING_GROUP_PAUSE_MS = 1000;
+/** ...or until the step has been growing this long, so a minute of typing is not one undo. */
+const TYPING_GROUP_MAX_MS = 8000;
 const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
 
 const domHistoryByEditor = new Map<HTMLElement, EditorHistoryState>();
@@ -150,6 +177,116 @@ function dispatchEditorInput(editor: HTMLElement | null): void {
   editor.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function typingGroupOf(inputType: string | null | undefined): TypingGroup | null {
+  if (inputType === 'insertText' || inputType === 'insertCompositionText') return 'insert';
+  if (inputType === 'deleteContentBackward' || inputType === 'deleteContentForward') return 'delete';
+  return null;
+}
+
+/** Ends the run of keystrokes the editor's newest history step is collecting. */
+function closeTypingGroup(editor: HTMLElement | null): void {
+  if (!editor) return;
+  const stack = domHistoryByEditor.get(editor)?.undoStack;
+  const top = stack && stack[stack.length - 1];
+  if (top) top.closed = true;
+}
+
+/** The text of some HTML, with a no-break space counted as a space: browsers swap one for the other as you type. */
+function textOf(html: string): string {
+  const holder = document.createElement('div');
+  holder.innerHTML = html;
+  return (holder.textContent ?? '').replace(/\u00a0/g, ' ');
+}
+
+/**
+ * Where the two versions of the content differ, as text offsets: the changed text of `beforeHTML` is
+ * `[start, beforeEnd)` and the changed text of `afterHTML` is `[start, afterEnd)`.
+ */
+function changedRegion(beforeHTML: string, afterHTML: string): { start: number; beforeEnd: number; afterEnd: number } {
+  const before = textOf(beforeHTML);
+  const after = textOf(afterHTML);
+  const limit = Math.min(before.length, after.length);
+  let start = 0;
+  while (start < limit && before.charCodeAt(start) === after.charCodeAt(start)) start++;
+  let suffix = 0;
+  while (
+    suffix < limit - start &&
+    before.charCodeAt(before.length - 1 - suffix) === after.charCodeAt(after.length - 1 - suffix)
+  ) {
+    suffix++;
+  }
+  return { start, beforeEnd: before.length - suffix, afterEnd: after.length - suffix };
+}
+
+/** Puts the caret at a text offset of the editor's content (setting innerHTML had left it at the start). */
+function placeCaretAtTextOffset(editor: HTMLElement, offset: number): void {
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+  let remaining = Math.max(0, offset);
+  let node: Node | null = null;
+  let last: Text | null = null;
+  while ((node = walker.nextNode())) {
+    const text = node as Text;
+    last = text;
+    if (remaining <= text.data.length) {
+      const range = document.createRange();
+      range.setStart(text, remaining);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
+    remaining -= text.data.length;
+  }
+
+  const range = document.createRange();
+  if (last) {
+    range.setStart(last, last.data.length);
+  } else {
+    range.selectNodeContents(editor);
+  }
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function restoreCaretAfterHistory(editor: HTMLElement, beforeHTML: string, afterHTML: string, direction: 'undo' | 'redo'): void {
+  const active = document.activeElement;
+  const root = editor.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null;
+  // Keep the caret in the editor when undo came from its own toolbar, but never take focus from another field.
+  const editorOwnsFocus = !active || active === document.body || editor.contains(active) || !!root?.contains(active);
+  if (!editorOwnsFocus) return;
+
+  const region = changedRegion(beforeHTML, afterHTML);
+  placeCaretAtTextOffset(editor, direction === 'undo' ? region.beforeEnd : region.afterEnd);
+  if (!editor.contains(document.activeElement)) editor.focus({ preventScroll: true });
+}
+
+let historyBreakListenersInstalled = false;
+
+/** A click or a caret key moves the insertion point, so what is typed next is a new undo step. */
+function installTypingBreakListeners(): void {
+  if (historyBreakListenersInstalled || typeof document === 'undefined') return;
+  historyBreakListenersInstalled = true;
+
+  document.addEventListener(
+    'pointerdown',
+    (event) => closeTypingGroup(resolveEditorFromNode(event.target as Node | null)),
+    true,
+  );
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      // Tab moves the caret too: between the cells of a table, or the fields of a form.
+      if (!/^(Arrow(Left|Right|Up|Down)|Home|End|Page(Up|Down)|Tab)$/.test(event.key)) return;
+      closeTypingGroup(resolveEditorFromNode(event.target as Node | null));
+    },
+    true,
+  );
+}
+
 function pushDomHistoryEntry(editor: HTMLElement | null, entry: DomHistoryEntry): void {
   if (!editor) return;
 
@@ -160,6 +297,19 @@ function pushDomHistoryEntry(editor: HTMLElement | null, entry: DomHistoryEntry)
   if (state.undoStack.length > MAX_DOM_HISTORY) {
     state.undoStack.splice(0, state.undoStack.length - MAX_DOM_HISTORY);
   }
+
+  // Keep the history within a budget of characters: drop the oldest steps while it is over, but never the newest.
+  let held = 0;
+  state.undoStack.forEach((step) => {
+    held += (step.beforeHTML?.length ?? 0) + (step.afterHTML?.length ?? 0);
+  });
+  let dropped = 0;
+  while (held > MAX_DOM_HISTORY_CHARACTERS && state.undoStack.length - dropped > 1) {
+    const oldest = state.undoStack[dropped];
+    held -= (oldest.beforeHTML?.length ?? 0) + (oldest.afterHTML?.length ?? 0);
+    dropped += 1;
+  }
+  if (dropped > 0) state.undoStack.splice(0, dropped);
 
   lastTouchedEditor = editor;
 }
@@ -263,6 +413,7 @@ const execEditorCommand = (cmd: string, ...args: any[]): any => {
 function initializeCommandSystem(): void {
   if (commandSystemInitialized || typeof window === 'undefined') return;
   commandSystemInitialized = true;
+  installTypingBreakListeners();
 
   if (!(window as any).execEditorCommand) {
     (window as any).execEditorCommand = execEditorCommand;
@@ -371,6 +522,7 @@ export const recordDomTransaction = (
   editor: HTMLElement,
   beforeHTML: string,
   afterHTML?: string,
+  options?: DomTransactionOptions,
 ): boolean => {
   if (!(editor instanceof HTMLElement)) return false;
 
@@ -380,23 +532,59 @@ export const recordDomTransaction = (
   // A plugin that records explicitly and the host's native-input recorder can
   // both log the same change (browsers that fire beforeinput for execCommand).
   // Ignore the repeat so one action never needs two Undo clicks.
-  const topEntry = getEditorHistoryState(editor).undoStack.slice(-1)[0];
+  const state = getEditorHistoryState(editor);
+  const topEntry = state.undoStack[state.undoStack.length - 1];
   if (topEntry && topEntry.beforeHTML === beforeHTML && topEntry.afterHTML === finalAfter) {
     return false;
   }
 
-  pushDomHistoryEntry(editor, {
-    beforeHTML,
+  const now = Date.now();
+  // Only a keystroke that really is one joins a run. Typing over a selection, or deleting a selection, is reported
+  // as insertText or deleteContentBackward like any other keystroke, but it is an edit of its own: the host says
+  // when a selection was involved (a host that says nothing is taken to be reporting plain keystrokes).
+  const group = options?.selectionCollapsed === false ? null : typingGroupOf(options?.inputType);
+  // The data of a space or a line end is where a word ends: it joins the word before it, and the next key starts a new step.
+  const endsWord = group === 'insert' && typeof options?.data === 'string' && /\s/.test(options.data);
+
+  // Keystrokes that continue the previous run (same kind, nothing else changed in between, no long pause)
+  // extend its step, so one Undo takes back a word, not a letter.
+  if (
+    group &&
+    topEntry &&
+    topEntry.group === group &&
+    !topEntry.closed &&
+    topEntry.afterHTML === beforeHTML &&
+    now - (topEntry.updatedAt ?? 0) <= TYPING_GROUP_PAUSE_MS &&
+    now - (topEntry.startedAt ?? 0) <= TYPING_GROUP_MAX_MS
+  ) {
+    topEntry.afterHTML = finalAfter;
+    topEntry.updatedAt = now;
+    if (endsWord) topEntry.closed = true;
+    state.redoStack.length = 0;
+    lastTouchedEditor = editor;
+    return true;
+  }
+
+  const entry: DomHistoryEntry = {
+    // A step that starts where the one before it ended shares its string, instead of holding a second copy of the document.
+    beforeHTML: topEntry && topEntry.afterHTML === beforeHTML ? topEntry.afterHTML : beforeHTML,
     afterHTML: finalAfter,
+    group: group ?? undefined,
+    startedAt: now,
+    updatedAt: now,
+    closed: endsWord,
     undo: () => {
       if (!editor.isConnected) return;
-      editor.innerHTML = beforeHTML;
+      editor.innerHTML = entry.beforeHTML as string;
+      restoreCaretAfterHistory(editor, entry.beforeHTML as string, entry.afterHTML as string, 'undo');
     },
     redo: () => {
       if (!editor.isConnected) return;
-      editor.innerHTML = finalAfter;
+      editor.innerHTML = entry.afterHTML as string;
+      restoreCaretAfterHistory(editor, entry.beforeHTML as string, entry.afterHTML as string, 'redo');
     },
-  });
+  };
+  pushDomHistoryEntry(editor, entry);
 
   return true;
 };
@@ -411,6 +599,7 @@ export const undoDom = (targetEditor?: HTMLElement): boolean => {
 
   entry.undo();
   state.redoStack.push(entry);
+  closeTypingGroup(editor);
   lastTouchedEditor = editor;
   dispatchEditorInput(editor);
   return true;
@@ -426,6 +615,7 @@ export const redoDom = (targetEditor?: HTMLElement): boolean => {
 
   entry.redo();
   state.undoStack.push(entry);
+  closeTypingGroup(editor);
   lastTouchedEditor = editor;
   dispatchEditorInput(editor);
   return true;

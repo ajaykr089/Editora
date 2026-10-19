@@ -19,10 +19,14 @@ export interface PartialApiConfig extends Partial<ApiConfig> {}
 
 /**
  * Default API configuration
- * IMPORTANT: Override this in production using plugin-specific configuration functions
+ *
+ * There is no default server: `apiUrl` is empty, and a plugin that can work without a backend (Word export builds
+ * the file in the browser) does so without sending anything anywhere. This used to be
+ * `http://localhost:3001/api/`, which made every visitor's browser try their own machine first.
+ * Set it with `setGlobalApiConfig({ apiUrl: 'https://your-api.com' })` to use a backend.
  */
 export const DEFAULT_API_CONFIG: ApiConfig = {
-  apiUrl: "http://localhost:3001/api/", // Replace with your production API URL
+  apiUrl: "",
   headers: {
     // Add default headers if needed (e.g., API key)
     // 'Authorization': 'Bearer YOUR_API_KEY',
@@ -82,6 +86,8 @@ export function getGlobalApiHeaders(): Record<string, string> {
  * @returns Full API URL
  */
 export function buildApiUrl(baseUrl: string, path: string): string {
+  // No API configured: there is no URL to build, and a relative one would send the request to the page's own origin.
+  if (!baseUrl) return '';
   // Remove trailing slash from baseUrl and leading slash from path
   const cleanBaseUrl = baseUrl.replace(/\/$/, '');
   const cleanPath = path.replace(/^\//, '');

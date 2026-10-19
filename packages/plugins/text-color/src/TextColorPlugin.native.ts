@@ -1,5 +1,6 @@
 import type { Plugin } from '@editora/core';
 import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
+import { returnFocusToText } from '../../shared/dialogHelpers';
 import {
   attachAnchoredPopover,
   type AnchoredPopoverHandle,
@@ -284,6 +285,8 @@ function createColorPicker(button: HTMLElement): void {
     gap: 4,
     margin: 8,
     zIndex: 10000,
+    label: 'Text color',
+    initialFocus: '.rte-color-swatch.selected, .rte-color-swatch',
   });
 
   // Attach event listeners
@@ -403,6 +406,10 @@ function updateTextInput(color: string): void {
  * Close color picker
  */
 function closeColorPicker(): void {
+  // The picker took the focus when it opened (or a swatch was just chosen): hand it back to the text, selection and all.
+  const hadFocus = !!colorPickerElement && colorPickerElement.contains(document.activeElement);
+  const rangeToRestore = savedRange;
+  const editorToFocus = hadFocus ? getActiveEditorRoot() : null;
   if (popoverHandle) {
     popoverHandle.destroy();
     popoverHandle = null;
@@ -412,6 +419,7 @@ function closeColorPicker(): void {
     colorPickerElement = null;
   }
   savedRange = null;
+  if (hadFocus) returnFocusToText(editorToFocus, rangeToRestore);
 }
 
 /**

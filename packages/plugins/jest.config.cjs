@@ -22,7 +22,7 @@ module.exports = {
       },
     ],
   },
-  moduleFileExtensions: ['js', 'json'],
+  moduleFileExtensions: ['js', 'ts', 'json'],
   clearMocks: true,
   restoreMocks: true,
 };

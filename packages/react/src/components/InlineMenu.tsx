@@ -12,6 +12,10 @@ export interface InlineMenuProps {
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement>;
   className?: string;
+  /** What the menu is for; it names the menu for assistive technology. */
+  label?: string;
+  /** Set when the menu was opened from the keyboard: the focus then goes into it, on this item. */
+  focusRequest?: 'first' | 'last' | null;
 }
 
 export const InlineMenu: React.FC<InlineMenuProps> = ({
@@ -20,9 +24,12 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
   onSelect,
   onClose,
   anchorRef,
-  className = ''
+  className = '',
+  label,
+  focusRequest = null
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const focusedOnOpenRef = useRef(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
@@ -77,6 +84,57 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
     };
   }, [isOpen, options.length, anchorRef]);
 
+  const menuItems = (): HTMLElement[] =>
+    Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+
+  // An element that is not visible cannot take focus, so wait until the menu has been placed.
+  useEffect(() => {
+    if (!isOpen) {
+      focusedOnOpenRef.current = false;
+      return;
+    }
+    if (!position || !focusRequest || focusedOnOpenRef.current) return;
+    focusedOnOpenRef.current = true;
+    const items = menuItems();
+    (focusRequest === 'last' ? items[items.length - 1] : items[0])?.focus();
+  }, [isOpen, position, focusRequest]);
+
+  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = menuItems();
+    if (items.length === 0) return;
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    const move = (to: number) => {
+      event.preventDefault();
+      items[(to + items.length) % items.length].focus();
+    };
+
+    switch (event.key) {
+      case 'ArrowDown':
+        return move(index + 1);
+      case 'ArrowUp':
+        return move(index < 0 ? items.length - 1 : index - 1);
+      case 'Home':
+        return move(0);
+      case 'End':
+        return move(items.length - 1);
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        if (index >= 0) items[index].click();
+        return;
+      case 'Escape':
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+        anchorRef.current?.focus();
+        return;
+      case 'Tab':
+        onClose();
+        return;
+      default:
+    }
+  };
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -124,6 +182,9 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
     <div
       ref={menuRef}
       className={`rte-inline-menu ${isDarkTheme ? 'rte-inline-menu-theme-dark' : ''} ${className}`}
+      role="menu"
+      aria-label={label}
+      onKeyDown={handleMenuKeyDown}
       style={{
         top: position?.top ?? -9999,
         left: position?.left ?? -9999,
@@ -134,6 +195,8 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
         <div
           key={option.value}
           className="rte-inline-menu-item"
+          role="menuitem"
+          tabIndex={-1}
           onMouseDown={(event) => {
             event.preventDefault();
           }}

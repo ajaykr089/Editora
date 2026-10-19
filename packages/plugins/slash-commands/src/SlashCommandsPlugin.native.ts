@@ -1,6 +1,8 @@
 import type { Plugin } from '@editora/core';
 import { normalizeOptions } from './SlashCommandsOptions';
 import { ensureStylesInjected } from './SlashCommandsStyles';
+import { keepCaretBlockSelectable } from './emptyBlock';
+import { announceActiveOption } from '../../shared/dialogHelpers';
 import type {
   SlashCommandActionContext,
   SlashCommandItem,
@@ -275,6 +277,7 @@ function closePanel(state: SlashState): void {
   state.query = '';
   state.replaceRange = null;
   state.anchorRange = null;
+  announceActiveOption(state.editor, null, null);
 }
 
 function filterItems(items: SlashCommandItem[], query: string, maxSuggestions: number): SlashCommandItem[] {
@@ -309,6 +312,7 @@ function renderList(state: SlashState, options: Required<SlashCommandsPluginOpti
     empty.textContent = options.emptyStateText;
     list.appendChild(empty);
     list.removeAttribute('aria-activedescendant');
+    announceActiveOption(state.editor, null, null);
     return;
   }
 
@@ -339,7 +343,11 @@ function renderList(state: SlashState, options: Required<SlashCommandsPluginOpti
   });
 
   if (state.filteredItems.length > 0) {
-    list.setAttribute('aria-activedescendant', `rte-slash-item-${state.instanceId}-${state.activeIndex}`);
+    const activeId = `rte-slash-item-${state.instanceId}-${state.activeIndex}`;
+    list.setAttribute('aria-activedescendant', activeId);
+    announceActiveOption(state.editor, list, list.querySelector<HTMLElement>(`[id="${activeId}"]`));
+  } else {
+    announceActiveOption(state.editor, null, null);
   }
 }
 
@@ -486,17 +494,22 @@ function executeCommand(editor: HTMLElement, command: string, value?: any): bool
     }
   }
 
-  const executor = (window as any).execEditorCommand || (window as any).executeEditorCommand;
-  if (typeof executor === 'function') {
+  // The page can have more than one command bridge (the toolbar's and the history plugin's), and each only
+  // knows the commands registered with it: ask every one before settling for the browser's raw command, which
+  // skips what the plugin does around it (a list command tidies the markup the browser leaves behind).
+  const bridges = [(window as any).executeEditorCommand, (window as any).execEditorCommand].filter(
+    (bridge, index, all) => typeof bridge === 'function' && all.indexOf(bridge) === index,
+  );
+  const commandContext = {
+    editorElement: editorRoot,
+    contentElement: editor,
+  };
+  for (const bridge of bridges) {
     try {
-      const commandContext = {
-        editorElement: editorRoot,
-        contentElement: editor,
-      };
-      const result = executor(command, value, commandContext);
+      const result = bridge(command, value, commandContext);
       if (result !== false) return true;
     } catch {
-      // Fall through to mapped commands.
+      // Try the next bridge, then the mapped commands.
     }
   }
 
@@ -552,6 +565,8 @@ async function selectItemAtIndex(
   replaceRange.deleteContents();
   const caret = replaceRange.cloneRange();
   caret.collapse(true);
+  // On an otherwise empty line the block is now empty, and a block command would land on a neighbour.
+  keepCaretBlockSelectable(editor, caret);
   setSelectionRange(editor, caret);
 
   let executed = false;
@@ -590,6 +605,7 @@ function moveActive(state: SlashState, delta: number): void {
   const active = rows[state.activeIndex];
   if (active) {
     state.list.setAttribute('aria-activedescendant', active.id);
+    announceActiveOption(state.editor, state.list, active);
     active.scrollIntoView({ block: 'nearest' });
   }
 }

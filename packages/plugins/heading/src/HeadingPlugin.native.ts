@@ -304,6 +304,13 @@ function setBlockTypeImpl(level: string, context?: any): boolean {
   const beforeHTML = editor.innerHTML;
   const insertedBlocks: HTMLElement[] = [];
   const selectedListItems = getSelectedListItems(editor, range);
+  // Plain values, not the Range: moving a text node into the new block resets any live Range that points into it.
+  const saved = {
+    startContainer: range.startContainer,
+    startOffset: range.startOffset,
+    endContainer: range.endContainer,
+    endOffset: range.endOffset,
+  };
 
   if (selectedListItems.size > 0) {
     selectedListItems.forEach((items, list) => {
@@ -336,7 +343,18 @@ function setBlockTypeImpl(level: string, context?: any): boolean {
 
   recordDomTransaction(editor, beforeHTML, afterHTML);
   dispatchEditorInput(editor);
-  placeCaretInNode(insertedBlocks[0]);
+  // The text moved into the new block with its nodes, so the selection can go back to the same characters. Only
+  // when the nodes it pointed at are gone (an empty block was replaced) does the caret start the new block.
+  if (editor.contains(saved.startContainer) && editor.contains(saved.endContainer)) {
+    const restored = document.createRange();
+    restored.setStart(saved.startContainer, saved.startOffset);
+    restored.setEnd(saved.endContainer, saved.endOffset);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(restored);
+  } else {
+    placeCaretInNode(insertedBlocks[0]);
+  }
   return true;
 }
 

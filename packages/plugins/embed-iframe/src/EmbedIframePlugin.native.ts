@@ -932,8 +932,8 @@ function injectEmbedDialogStyles(): void {
 
     .rte-tab-button.active {
       background-color: #e3f2fd;
-      color: #1976d2;
-      border-right-color: #1976d2;
+      color: #1565c0;
+      border-right-color: #1565c0;
       font-weight: 600;
     }
 
@@ -1034,12 +1034,12 @@ function injectEmbedDialogStyles(): void {
 
     .rte-constrain-btn:hover {
       background-color: #f5f5f5;
-      border-color: #1976d2;
+      border-color: #1565c0;
     }
 
     .rte-constrain-btn.locked {
       background-color: #e3f2fd;
-      border-color: #1976d2;
+      border-color: #1565c0;
     }
 
     .rte-checkbox-label {
@@ -1150,7 +1150,7 @@ function injectEmbedDialogStyles(): void {
     }
 
     .rte-embed-iframe-overlay.rte-theme-dark .rte-btn-primary {
-      background: #3b82f6;
+      background: #2563eb;
       color: #fff;
     }
 

@@ -536,6 +536,87 @@ export class ToolbarRenderer {
   }
 
   /**
+   * What a toolbar menu needs besides its look, so it can be used without a mouse: the trigger says it opens a menu
+   * and whether it is open, the menu and its items have menu roles, and the keyboard works in it. Enter, Space or an
+   * arrow key on the trigger opens it and moves the focus to the first (or, with ArrowUp, the last) item; arrows,
+   * Home and End move between items; Escape closes it and gives the focus back to the trigger; Tab closes it. A
+   * mouse click leaves the focus alone, so the editor keeps its selection.
+   */
+  private makeMenuAccessible(
+    container: HTMLElement,
+    trigger: HTMLButtonElement,
+    menu: HTMLElement,
+    label: string,
+  ): void {
+    trigger.setAttribute("aria-haspopup", "menu");
+    trigger.setAttribute("aria-expanded", "false");
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-label", label);
+    menu.querySelectorAll<HTMLElement>(".editora-toolbar-dropdown-item").forEach((item) => {
+      item.setAttribute("role", "menuitem");
+      item.tabIndex = -1;
+    });
+
+    const items = () => Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    const isOpen = () => menu.style.display === "block";
+
+    // The menu is opened and closed by setting its display from several places; follow the display, not the callers.
+    const observer = new MutationObserver(() => {
+      trigger.setAttribute("aria-expanded", isOpen() ? "true" : "false");
+    });
+    observer.observe(menu, { attributes: true, attributeFilter: ["style"] });
+    const previousCleanup = (container as any)._cleanupDropdown as (() => void) | undefined;
+    (container as any)._cleanupDropdown = () => {
+      observer.disconnect();
+      previousCleanup?.();
+    };
+
+    // A click with no pointer behind it is Enter or Space on the button: take the focus into the menu.
+    trigger.addEventListener("click", (event) => {
+      if (event.detail === 0 && isOpen()) items()[0]?.focus();
+    });
+
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+      event.preventDefault();
+      if (!isOpen()) trigger.click();
+      const list = items();
+      (event.key === "ArrowUp" ? list[list.length - 1] : list[0])?.focus();
+    });
+
+    menu.addEventListener("keydown", (event) => {
+      const list = items();
+      if (list.length === 0) return;
+      const index = list.indexOf(document.activeElement as HTMLElement);
+      const move = (to: number) => {
+        event.preventDefault();
+        list[(to + list.length) % list.length].focus();
+      };
+
+      switch (event.key) {
+        case "ArrowDown":
+          return move(index + 1);
+        case "ArrowUp":
+          return move(index < 0 ? list.length - 1 : index - 1);
+        case "Home":
+          return move(0);
+        case "End":
+          return move(list.length - 1);
+        case "Escape":
+          event.preventDefault();
+          event.stopPropagation();
+          menu.style.display = "none";
+          trigger.focus();
+          return;
+        case "Tab":
+          menu.style.display = "none";
+          return;
+        default:
+      }
+    });
+  }
+
+  /**
    * Create a dropdown element
    */
   private createDropdown(button: ToolbarButton): HTMLElement {
@@ -605,6 +686,7 @@ export class ToolbarRenderer {
 
     container.appendChild(trigger);
     container.appendChild(menu);
+    this.makeMenuAccessible(container, trigger, menu, button.label);
 
     return container;
   }
@@ -705,6 +787,7 @@ export class ToolbarRenderer {
 
     container.appendChild(trigger);
     container.appendChild(menu);
+    this.makeMenuAccessible(container, trigger, menu, button.label);
 
     return container;
   }

@@ -273,7 +273,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
   const debounceTimerRef = useRef<NodeJS.Timeout>();
-  const pendingHistorySnapshotRef = useRef<{ beforeHTML: string; inputType: string | null } | null>(null);
+  const pendingHistorySnapshotRef = useRef<{ beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null>(null);
   const autoHeightEnabled = contentConfig?.autoHeight === true;
   const minEditorHeight = typeof contentConfig?.minHeight === 'number' ? contentConfig.minHeight : 200;
   const maxEditorHeight = typeof contentConfig?.maxHeight === 'number' ? contentConfig.maxHeight : 0;
@@ -411,7 +411,12 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
       const executor = (window as any).execEditorCommand;
       if (typeof executor === 'function') {
-        executor('recordDomTransaction', el, snapshot.beforeHTML, afterHTML);
+        // inputType and data let the history group a run of keystrokes into one undo step.
+        executor('recordDomTransaction', el, snapshot.beforeHTML, afterHTML, {
+          inputType: snapshot.inputType,
+          data: snapshot.data,
+          selectionCollapsed: snapshot.selectionCollapsed,
+        });
       }
     };
 
@@ -427,6 +432,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       pendingHistorySnapshotRef.current = {
         beforeHTML: contentRef.current.innerHTML,
         inputType,
+        data: typeof event.data === 'string' ? event.data : null,
+        selectionCollapsed: window.getSelection()?.isCollapsed ?? true,
       };
     };
 

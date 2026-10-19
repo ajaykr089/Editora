@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { focusPanel, keepPanelFocus, panelHasFocus } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
 
 interface CommentReply {
@@ -231,14 +232,18 @@ function setPanelVisibility(state: CommentsEditorState, visible: boolean): void 
       state.panelElement.setAttribute('aria-hidden', 'false');
     }
     startSelectionTracking(state);
+    focusPanel(state.panelElement);
     return;
   }
 
   state.root.removeAttribute('data-rte-comments-open');
   stopSelectionTracking(state);
   if (state.panelElement) {
+    // The panel goes with the focus that is in it: hand that back to the text instead of dropping it on the page.
+    const hadFocus = panelHasFocus(state.panelElement);
     state.panelElement.remove();
     state.panelElement = null;
+    if (hadFocus) state.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
   }
 }
 
@@ -449,8 +454,10 @@ function refreshCommentsPanel(state?: CommentsEditorState): void {
   if (!targetState?.panelElement) return;
 
   const comments = getCommentsInDisplayOrder(targetState);
+  const panelElement = targetState.panelElement;
 
-  targetState.panelElement.innerHTML = `
+  keepPanelFocus(panelElement, () => {
+    panelElement.innerHTML = `
     <div class="rte-comments-header">
       <div>
         <h3>Comments (${comments.length})</h3>
@@ -470,10 +477,15 @@ function refreshCommentsPanel(state?: CommentsEditorState): void {
         : '<div class="rte-comments-list"></div>'
     }
   `;
+  });
 
   const closeBtn = targetState.panelElement.querySelector('.rte-comments-close');
   closeBtn?.addEventListener('click', () => {
     setPanelVisibility(targetState, false);
+    // A click does not focus a button in every browser, so the panel may not have held the focus: give it to the text.
+    if (!targetState.root.contains(document.activeElement) || document.activeElement === document.body) {
+      targetState.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
+    }
   });
 
   const textarea = targetState.panelElement.querySelector(
@@ -784,7 +796,9 @@ function ensurePanelStyles(): void {
       opacity: 0;
       pointer-events: none;
       transition: transform 180ms ease, opacity 180ms ease;
-      z-index: 55;
+      /* Above the editor's sticky toolbar (z-index 100): on a narrow screen the panel lies over the editor, and
+         under the toolbar its header, and the button that closes it, could not be clicked. */
+      z-index: 110;
     }
 
     .rte-comments-panel.is-open {
@@ -793,7 +807,16 @@ function ensurePanelStyles(): void {
       pointer-events: auto;
     }
 
-    [data-rte-comments-open="true"] :is(.rte-toolbar, .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
+    /* The panel's width is set on the editor itself, not only on the panel: the toolbar and the text make room for the
+       panel with a margin of that width, and a variable set on the panel is not visible to them (the margin was
+       silently 0, so the panel lay over the toolbar and the text and its header could not be reached). */
+    [data-rte-comments-open="true"] {
+      --rte-comments-panel-width: min(360px, 42vw);
+    }
+
+    /* The toolbar's wrapper is the element that is as wide as the editor, and it sits above the panel (it is sticky,
+       z-index 100): it has to give up the panel's width too, or its empty right-hand end covers the panel's header. */
+    [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
       margin-right: var(--rte-comments-panel-width);
       transition: margin-right 180ms ease;
     }
@@ -1074,11 +1097,12 @@ function ensurePanelStyles(): void {
     }
 
     @media (max-width: 900px) {
+      [data-rte-comments-open="true"],
       .rte-comments-panel {
         --rte-comments-panel-width: min(420px, 100%);
       }
 
-      [data-rte-comments-open="true"] :is(.rte-toolbar, .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
+      [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
         margin-right: 0;
       }
     }

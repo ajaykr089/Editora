@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { notify } from '../../shared/notify';
 import { sanitizeHtml } from '../../shared/sanitizeHtml';
 
 const DOCUMENT_MANAGER_BUSY_STYLE_ID = 'rte-document-manager-styles';
@@ -163,7 +164,7 @@ export const DocumentManagerPlugin = (): Plugin => {
               }
             } catch (error) {
               console.error('Import failed:', error);
-              alert('Failed to import Word document. Please check the console for details.');
+              notify('Failed to import Word document. Please check the console for details.', 'error');
             }
           }
         };
@@ -201,7 +202,7 @@ export const DocumentManagerPlugin = (): Plugin => {
             return true;
           } catch (error) {
             console.error('Export failed:', error);
-            alert('Failed to export to Word. Please check the console for details.');
+            notify('Failed to export to Word. Please check the console for details.', 'error');
             return false;
           }
         });
@@ -234,12 +235,12 @@ export const DocumentManagerPlugin = (): Plugin => {
               await exportToPdf(htmlContent, 'document.pdf', editorElement);
             } else {
               console.error('PDF Export: No editor element found');
-              alert('No active editor found. Please click in the editor area first.');
+              notify('No active editor found. Please click in the editor area first.');
             }
             return true;
           } catch (error) {
             console.error('PDF Export: Export failed:', error);
-            alert('Failed to export to PDF. Please check the console for details.');
+            notify('Failed to export to PDF. Please check the console for details.', 'error');
             return false;
           }
         });

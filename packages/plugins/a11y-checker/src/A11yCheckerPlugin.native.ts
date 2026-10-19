@@ -517,13 +517,14 @@ const createA11yDialog = () => {
       border: '#3b4657',
       text: '#e2e8f0',
       muted: '#9fb0c6',
+      success: '#4ade80',
       closeHover: '#334155',
       summaryBg: '#111827',
       issueBg: '#1f2937',
       issueHoverBg: '#273244',
       issueBorder: '#4b5563',
       issueHoverBorder: '#58a6ff',
-      fixBtn: '#3b82f6',
+      fixBtn: '#2563eb',
       fixBtnHover: '#2563eb',
     }
     : {
@@ -533,6 +534,7 @@ const createA11yDialog = () => {
       border: '#e0e0e0',
       text: '#1f2937',
       muted: '#666666',
+      success: '#2e7d32',
       closeHover: '#f0f0f0',
       summaryBg: '#f5f5f5',
       issueBg: '#ffffff',
@@ -597,7 +599,7 @@ const createA11yDialog = () => {
     font-weight: bold;
     padding: 8px 16px;
     border-radius: 4px;
-    background: ${score >= 80 ? '#4caf50' : score >= 60 ? '#ff9800' : '#f44336'};
+    background: ${score >= 80 ? '#2e7d32' : score >= 60 ? '#b45309' : '#c62828'};
     color: white;
   `;
   scoreDisplay.textContent = `${score}/100`;
@@ -653,7 +655,7 @@ const createA11yDialog = () => {
     content.innerHTML = `
       <div style="text-align: center; padding: 40px 20px;">
         <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-        <h3 style="margin: 0 0 8px 0; color: #4caf50;">No issues found!</h3>
+        <h3 style="margin: 0 0 8px 0; color: ${palette.success};">No issues found!</h3>
         <p style="margin: 0; color: ${palette.muted};">Your content meets WCAG 2.1 AA standards.</p>
       </div>
     `;

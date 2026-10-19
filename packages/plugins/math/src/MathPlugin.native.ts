@@ -36,7 +36,10 @@ const MATH_TEMPLATES = {
 
 let savedSelection: Range | null = null;
 let editingMathElement: HTMLElement | null = null;
-let katexLoaded = false;
+/** KaTeX, once it has loaded (a host page may also provide its own as `window.katex`). */
+let katexInstance: any = null;
+let katexLoading: Promise<any> | null = null;
+const KATEX_FALLBACK_VERSION = '0.16.9';
 let activeMathEditorContent: HTMLElement | null = null;
 let selectedMathElement: HTMLElement | null = null;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
@@ -96,36 +99,63 @@ declare global {
   }
 }
 
+const getKatex = (): any => (window as any).katex ?? katexInstance;
+
+/**
+ * KaTeX's stylesheet. Without it a formula shows twice (KaTeX writes an accessible MathML copy next to the visual
+ * one and hides it with CSS) and fractions and superscripts lose their layout. The layout rules come with the
+ * package, so they work with no network. Its font files are the one thing taken from a CDN, and only for looks: with
+ * that blocked the formula is laid out correctly in the page's own serif font.
+ */
+const ensureKatexStyles = (css: string | null, version: string): void => {
+  if (css && !document.getElementById('rte-katex-layout')) {
+    const style = document.createElement('style');
+    style.id = 'rte-katex-layout';
+    // The @font-face rules point at font files next to the original stylesheet; they cannot resolve from here.
+    style.textContent = css.replace(/@font-face\s*\{[^}]*\}/g, '');
+    document.head.appendChild(style);
+  }
+  if (document.querySelector('link[data-rte-katex-css], link[href*="katex"][rel="stylesheet"]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://cdn.jsdelivr.net/npm/katex@${version}/dist/katex.min.css`;
+  link.setAttribute('data-rte-katex-css', '');
+  document.head.appendChild(link);
+};
+
+let katexCss: string | null = null;
+
+/**
+ * Loads KaTeX from the npm package, on first use. It never rejects: if KaTeX cannot be loaded the dialog still
+ * opens (the preview then shows the formula as typed), and a later attempt tries again. The dialog used to wait for a
+ * script injected from a CDN, so on an offline or locked-down page it never opened at all.
+ */
 const loadKaTeX = (): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    if ((window as any).katex) {
-      resolve((window as any).katex);
-      return;
-    }
+  const ready = getKatex();
+  if (ready) {
+    ensureKatexStyles(katexCss, ready.version ?? KATEX_FALLBACK_VERSION);
+    return Promise.resolve(ready);
+  }
 
-    if (katexLoaded) {
-      const checkInterval = setInterval(() => {
-        if ((window as any).katex) {
-          clearInterval(checkInterval);
-          resolve((window as any).katex);
-        }
-      }, 100);
-      return;
-    }
-
-    katexLoaded = true;
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
-    document.head.appendChild(link);
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
-    script.onload = () => resolve((window as any).katex);
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+  if (!katexLoading) {
+    katexLoading = (async () => {
+      try {
+        const loaded: any = await import('katex');
+        katexInstance = loaded.default ?? loaded;
+      } catch {
+        katexInstance = null;
+      }
+      try {
+        katexCss = (await import('katex/dist/katex.min.css?raw')).default;
+      } catch {
+        katexCss = null;
+      }
+      ensureKatexStyles(katexCss, katexInstance?.version ?? KATEX_FALLBACK_VERSION);
+      if (!katexInstance) katexLoading = null;
+      return katexInstance;
+    })();
+  }
+  return katexLoading;
 };
 
 const getEditorContentFromSelection = (): HTMLElement | null => {
@@ -368,13 +398,13 @@ const showMathDialog = async (
       fieldBg: '#ffffff',
       fieldBorder: '#ced4da',
       text: '#1f2937',
-      muted: '#6c757d',
+      muted: '#5c636a',
       templateBtnBg: '#ffffff',
       templateBtnHover: '#f8f9fa',
       templateBtnText: '#1f2937',
-      templateSubText: '#6c757d',
+      templateSubText: '#5c636a',
       previewBg: '#f8f9fa',
-      previewText: '#6c757d',
+      previewText: '#5c636a',
       cancelBg: '#ffffff',
       cancelText: '#1f2937',
       cancelBorder: '#ced4da',
@@ -405,16 +435,16 @@ const showMathDialog = async (
     
     <div style="padding: 20px; overflow-y: auto; flex: 1;">
       <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Format:</label>
-        <div style="display: flex; gap: 16px;">
+        <span id="math-format-label" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Format:</span>
+        <div role="radiogroup" aria-labelledby="math-format-label" style="display: flex; gap: 16px;">
           <label style="cursor: pointer; color: ${palette.text};"><input type="radio" name="format" value="latex" ${currentFormat === 'latex' ? 'checked' : ''} style="margin-right: 6px;"> LaTeX</label>
           <label style="cursor: pointer; color: ${palette.text};"><input type="radio" name="format" value="mathml" ${currentFormat === 'mathml' ? 'checked' : ''} style="margin-right: 6px;"> MathML</label>
         </div>
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Quick Templates:</label>
-        <div id="templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+        <span id="math-templates-label" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Quick Templates:</span>
+        <div id="templates-grid" role="group" aria-labelledby="math-templates-label" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px;"></div>
       </div>
 
       <div style="margin-bottom: 20px;">
@@ -422,13 +452,13 @@ const showMathDialog = async (
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Formula:</label>
+        <label for="formula-input" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Formula:</label>
         <textarea id="formula-input" rows="4" style="width: 100%; min-height: 112px; padding: 10px 12px; border: 1px solid ${palette.fieldBorder}; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.45; background: ${palette.fieldBg}; color: ${palette.text}; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; resize: vertical;">${escapeHtml(currentFormula)}</textarea>
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Preview:</label>
-        <div id="preview-area" style="min-height: 60px; padding: 15px; border: 1px solid ${palette.fieldBorder}; border-radius: 4px; background: ${palette.previewBg}; display: flex; align-items: center; justify-content: center; color: ${palette.previewText};"></div>
+        <span id="math-preview-label" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Preview:</span>
+        <div id="preview-area" role="status" aria-labelledby="math-preview-label" style="min-height: 60px; padding: 15px; border: 1px solid ${palette.fieldBorder}; border-radius: 4px; background: ${palette.previewBg}; display: flex; align-items: center; justify-content: center; color: ${palette.previewText};"></div>
       </div>
     </div>
 
@@ -485,8 +515,10 @@ const showMathDialog = async (
 
     try {
       if (currentFormat === 'latex') {
-        const katex = (window as any).katex;
-        previewArea.innerHTML = katex.renderToString(formula, { displayMode: false, throwOnError: false });
+        const katex = getKatex();
+        previewArea.innerHTML = katex
+          ? katex.renderToString(formula, { displayMode: false, throwOnError: false })
+          : `<code style="font-family: 'Courier New', monospace; color: ${palette.previewText};">${escapeHtml(formula)}</code>`;
       } else {
         // For MathML, check if it starts with <math>, if not, wrap it
         if (formula.trim().startsWith('<math')) {
@@ -590,8 +622,9 @@ const showMathDialog = async (
     
     // Render with KaTeX for LaTeX formulas
     if (currentFormat === 'latex') {
-      const katex = (window as any).katex;
+      const katex = getKatex();
       try {
+        if (!katex) throw new Error('KaTeX is not available');
         mathEl.innerHTML = katex.renderToString(formula, { 
           displayMode: !mathData.inline, 
           throwOnError: false 

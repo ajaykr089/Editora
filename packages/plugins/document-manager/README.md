@@ -137,6 +137,11 @@ interface DocumentManagerConfig {
 
 ### Environment-Specific Configuration
 
+With no `apiUrl` set (the default), nothing is sent anywhere: Word export builds the `.docx` file in the browser. Set
+`apiUrl`, here or for all plugins with `setGlobalApiConfig`, to export through your own backend instead; if that request
+fails, `useClientSideFallback` (on by default) still produces the file in the browser. An empty `apiUrl` set on the
+plugin means "no API", even when a global one is configured.
+
 ```tsx
 // Development
 setDocumentManagerConfig({

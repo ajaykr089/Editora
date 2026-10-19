@@ -1,4 +1,6 @@
 import { initDialogOverlay } from '../../shared/dialogHelpers';
+import { notify } from '../../shared/notify';
+import { confirmAction } from '../../shared/confirmDialog';
 import { Plugin } from '@editora/core';
 import {
   createEditor,
@@ -314,7 +316,7 @@ const SOURCE_EDITOR_CSS = `/* Source Editor Dialog Styles */
 }
 
 .rte-source-editor-overlay.rte-theme-dark .rte-source-editor-toolbar-btn.active {
-  background: #3b82f6;
+  background: #2563eb;
   color: #ffffff;
 }
 
@@ -356,11 +358,11 @@ const SOURCE_EDITOR_CSS = `/* Source Editor Dialog Styles */
 }
 
 .rte-source-editor-overlay.rte-theme-dark .rte-source-editor-btn-save {
-  background: #3b82f6;
+  background: #2563eb;
 }
 
 .rte-source-editor-overlay.rte-theme-dark .rte-source-editor-btn-save:hover:not(:disabled) {
-  background: #2563eb;
+  background: #1d4ed8;
 }
 
 /* Responsive design */
@@ -484,7 +486,7 @@ export const CodePlugin = (): Plugin => ({
 
       if (!contentElement) {
         console.error("[CodePlugin] Editor content area not found");
-        alert(
+        notify(
           "Editor content area not found. Please click inside the editor first.",
         );
         return false;
@@ -758,10 +760,16 @@ export const CodePlugin = (): Plugin => ({
           }
         };
 
-        const handleCancel = () => {
+        const handleCancel = async () => {
           if (
             hasUnsavedChanges &&
-            !confirm("You have unsaved changes. Are you sure you want to cancel?")
+            !(await confirmAction("You have unsaved changes. Are you sure you want to cancel?", {
+              title: 'Discard changes?',
+              confirmText: 'Discard changes',
+              cancelText: 'Keep editing',
+              danger: true,
+              context: contentElement,
+            }))
           ) {
             return;
           }
@@ -794,7 +802,7 @@ export const CodePlugin = (): Plugin => ({
             setUnsavedState(false);
             closeDialog();
           } catch (error) {
-            alert("Failed to update HTML. Please check your syntax.");
+            notify("Failed to update HTML. Please check your syntax.", "error");
             console.error("HTML update error:", error);
           }
         };

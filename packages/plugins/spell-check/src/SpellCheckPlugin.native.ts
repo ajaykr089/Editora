@@ -1,5 +1,7 @@
 import { Plugin } from '@editora/core';
+import { focusPanel, keepPanelFocus, panelHasFocus } from '../../shared/dialogHelpers';
 import { COMMON_ENGLISH_WORDS } from './englishDictionary';
+import { getSuggestions as rankSuggestions } from './suggestions';
 
 /**
  * Spell Check Plugin - Native Implementation
@@ -717,29 +719,6 @@ const saveCustomDictionary = () => {
 // ===== Spell Check Engine =====
 
 /**
- * Edit distance algorithm (Levenshtein distance) for suggestions
- */
-function editDistance(a: string, b: string): number {
-  const matrix: number[][] = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
-        );
-      }
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
-/**
  * Check if word is in dictionary
  */
 function checkWord(word: string): boolean {
@@ -748,14 +727,10 @@ function checkWord(word: string): boolean {
 }
 
 /**
- * Get spelling suggestions using edit distance
+ * Get spelling suggestions (see suggestions.ts for how they are ranked)
  */
 function getSuggestions(word: string, maxSuggestions = 5): string[] {
-  const wordLower = word.toLowerCase();
-  const words = Array.from(ENGLISH_DICTIONARY);
-  const distances = words.map(w => ({ word: w, distance: editDistance(wordLower, w) }));
-  distances.sort((a, b) => a.distance - b.distance);
-  return distances.filter(d => d.distance <= 3).slice(0, maxSuggestions).map(d => d.word);
+  return rankSuggestions(word, ENGLISH_DICTIONARY, maxSuggestions);
 }
 
 /**
@@ -1179,6 +1154,9 @@ function createSidePanel(): HTMLElement {
 
   const panel = document.createElement('div');
   panel.className = 'rte-spell-check-panel';
+  // A named region, so it can be found and its purpose is known without seeing it.
+  panel.setAttribute('role', 'complementary');
+  panel.setAttribute('aria-label', 'Spell check');
 
   const computedHostStyle = window.getComputedStyle(host);
   if (computedHostStyle.position === 'static') {
@@ -1198,7 +1176,9 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   const issues = precomputedIssues || scanDocumentForMisspellings();
   const stats = getSpellCheckStats(issues); // Pass issues to avoid duplicate scan
   
-  sidePanelElement.innerHTML = `
+  const panelElement = sidePanelElement;
+  keepPanelFocus(panelElement, () => {
+    panelElement.innerHTML = `
     <div class="rte-spellcheck-header">
       <div>
         <h3 class="rte-spellcheck-title">Spell Check</h3>
@@ -1248,13 +1228,15 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
       }
     </div>
   `;
+  });
   
   // Event listeners
   const closeBtn = sidePanelElement.querySelector('.rte-spellcheck-close');
   closeBtn?.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    disableSpellCheck();
+    // A click does not focus a button in every browser, so the panel may not hold the focus: give it to the text.
+    disableSpellCheck(true);
   });
   
   // Toggle expand/collapse
@@ -1353,8 +1335,18 @@ function attachSpellCheckEscapeListener(): void {
   if (spellCheckEscapeListener) return;
   spellCheckEscapeListener = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !isSpellCheckEnabled) return;
+    // Only an Escape pressed in the editor or the panel: not one meant for a dialog or a menu opened over the page
+    // (this listener sees every key on the page, and used to switch spell check off for all of them).
+    const target = event.target as Node | null;
+    const inScope = !!target && (!!sidePanelElement?.contains(target) || !!activeEditorElement?.contains(target));
+    if (!inScope) return;
     event.preventDefault();
     event.stopPropagation();
+    // A suggestion menu open over the word is closed first; the next Escape closes spell check.
+    if (document.querySelector('.rte-spellcheck-menu')) {
+      removeSpellcheckMenus();
+      return;
+    }
     disableSpellCheck();
   };
   document.addEventListener('keydown', spellCheckEscapeListener, true);
@@ -1366,7 +1358,7 @@ function detachSpellCheckEscapeListener(): void {
   spellCheckEscapeListener = null;
 }
 
-function disableSpellCheck(): boolean {
+function disableSpellCheck(returnFocus = false): boolean {
   if (!isSpellCheckEnabled) return false;
 
   clearSpellCheckHighlights();
@@ -1374,6 +1366,8 @@ function disableSpellCheck(): boolean {
   detachSpellCheckContextMenu();
   removeSpellcheckMenus();
 
+  // The panel goes with whatever focus is in it: hand that back to the text, not to the page.
+  const editorToRefocus = returnFocus || panelHasFocus(sidePanelElement) ? activeEditorElement : null;
   if (sidePanelElement) {
     sidePanelElement.remove();
     sidePanelElement = null;
@@ -1383,6 +1377,7 @@ function disableSpellCheck(): boolean {
   pendingToggleEditorElement = null;
   isSpellCheckEnabled = false;
   detachSpellCheckEscapeListener();
+  editorToRefocus?.focus({ preventScroll: true });
   return false;
 }
 
@@ -1412,6 +1407,7 @@ function toggleSpellCheck(): boolean {
     startMutationObserver();
     sidePanelElement = createSidePanel();
     updateSidePanel();
+    focusPanel(sidePanelElement);
     return true;
   }
 
@@ -1435,6 +1431,7 @@ function toggleSpellCheck(): boolean {
   }
   sidePanelElement = createSidePanel();
   updateSidePanel();
+  focusPanel(sidePanelElement);
   return true;
 }
 
