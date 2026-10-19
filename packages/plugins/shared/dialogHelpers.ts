@@ -189,6 +189,31 @@ export function keepPanelFocus(panel: HTMLElement | null, render: () => void): v
   else focusPanel(panel);
 }
 
+/**
+ * Gives the focus back to the text after a popover that held it closes, and puts the selection back as it was when
+ * the popover opened (when that text is still there). `root` is the editor, or any element inside or around it.
+ */
+export function returnFocusToText(root: HTMLElement | null, range: Range | null): void {
+  const container = range?.commonAncestorContainer ?? null;
+  const fromRange = container
+    ? (container instanceof HTMLElement ? container : container.parentElement)?.closest<HTMLElement>('[contenteditable="true"]') ?? null
+    : null;
+  const editable =
+    fromRange ??
+    (!root
+      ? null
+      : root.matches('[contenteditable="true"]')
+        ? root
+        : root.querySelector<HTMLElement>('[contenteditable="true"]') ?? root.closest<HTMLElement>('[contenteditable="true"]'));
+  if (!editable || !editable.isConnected) return;
+  editable.focus({ preventScroll: true });
+  if (!range || !range.startContainer.isConnected || !range.endContainer.isConnected || !editable.contains(range.commonAncestorContainer)) return;
+  const selection = window.getSelection();
+  if (!selection) return;
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 let listSequence = 0;
 
 /**

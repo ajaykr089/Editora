@@ -1,6 +1,7 @@
 import type { Plugin } from '@editora/core';
 import { notify } from '../../shared/notify';
 import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
+import { returnFocusToText } from '../../shared/dialogHelpers';
 import {
   attachAnchoredPopover,
   type AnchoredPopoverHandle,
@@ -704,6 +705,10 @@ function applyBackgroundColor(color: string): boolean {
  * Close and cleanup the color picker
  */
 function closeColorPicker() {
+  // The picker took the focus when it opened (or a swatch was just chosen): hand it back to the text, selection and all.
+  const hadFocus = !!colorPickerElement && colorPickerElement.contains(document.activeElement);
+  const rangeToRestore = savedRange;
+  const editorToFocus = hadFocus ? getActiveEditorRoot() : null;
   if (popoverHandle) {
     popoverHandle.destroy();
     popoverHandle = null;
@@ -715,6 +720,7 @@ function closeColorPicker() {
   }
   currentButton = null;
   savedRange = null;
+  if (hadFocus) returnFocusToText(editorToFocus, rangeToRestore);
 }
 
 /**
@@ -769,6 +775,8 @@ function openBackgroundColorPicker(): boolean {
     gap: 8,
     margin: 8,
     zIndex: 10000,
+    label: 'Background color',
+    initialFocus: '.rte-bg-color-swatch.selected, .rte-bg-color-swatch',
   });
 
   // Initialize preview
