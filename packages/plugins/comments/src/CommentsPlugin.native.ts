@@ -482,6 +482,10 @@ function refreshCommentsPanel(state?: CommentsEditorState): void {
   const closeBtn = targetState.panelElement.querySelector('.rte-comments-close');
   closeBtn?.addEventListener('click', () => {
     setPanelVisibility(targetState, false);
+    // A click does not focus a button in every browser, so the panel may not have held the focus: give it to the text.
+    if (!targetState.root.contains(document.activeElement) || document.activeElement === document.body) {
+      targetState.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
+    }
   });
 
   const textarea = targetState.panelElement.querySelector(

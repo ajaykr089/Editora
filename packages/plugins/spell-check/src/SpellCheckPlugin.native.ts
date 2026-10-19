@@ -1235,7 +1235,8 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   closeBtn?.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    disableSpellCheck();
+    // A click does not focus a button in every browser, so the panel may not hold the focus: give it to the text.
+    disableSpellCheck(true);
   });
   
   // Toggle expand/collapse
@@ -1357,7 +1358,7 @@ function detachSpellCheckEscapeListener(): void {
   spellCheckEscapeListener = null;
 }
 
-function disableSpellCheck(): boolean {
+function disableSpellCheck(returnFocus = false): boolean {
   if (!isSpellCheckEnabled) return false;
 
   clearSpellCheckHighlights();
@@ -1366,7 +1367,7 @@ function disableSpellCheck(): boolean {
   removeSpellcheckMenus();
 
   // The panel goes with whatever focus is in it: hand that back to the text, not to the page.
-  const editorToRefocus = panelHasFocus(sidePanelElement) ? activeEditorElement : null;
+  const editorToRefocus = returnFocus || panelHasFocus(sidePanelElement) ? activeEditorElement : null;
   if (sidePanelElement) {
     sidePanelElement.remove();
     sidePanelElement = null;
