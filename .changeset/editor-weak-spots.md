@@ -29,6 +29,7 @@ Undo, dialogs, menus and a few plugins that did not do their job.
 - The slash menu ran a block command on the previous or next paragraph when the line was otherwise empty; it also now asks every command bridge before the browser's own command, so lists made from it match the toolbar.
 - Dialogs and panels pass an axe-core sweep in the light and dark themes: names for the code sample language select and the background colour input, tabs inside a tablist, text contrast of at least 4.5:1, and no `main` landmark inside the version diff dialog.
 - The floating toolbar of an image inside a link no longer lands on top of the editor toolbar.
+- Cycling the citation style (toolbar button or shortcut) now updates the Style dropdown in the Citations panel; it kept showing the old style.
 - Making a paragraph a list no longer leaves an empty paragraph before and after it, or moves the caret to the start of the line.
 - Choosing a heading keeps the selection.
 - The Math dialog opens with no network (KaTeX comes from the `katex` package, not a script from a CDN) and renders formulas with its layout rules embedded; its template grid no longer hides its last row.
