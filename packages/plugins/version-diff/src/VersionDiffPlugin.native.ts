@@ -796,7 +796,8 @@ function focusFirstFocusable(root: HTMLElement): void {
 }
 
 function trapFocus(event: KeyboardEvent, root: HTMLElement): void {
-  if (event.key !== 'Tab') return;
+  // The shared dialog handler has usually moved the focus already.
+  if (event.key !== 'Tab' || event.defaultPrevented) return;
   const focusable = Array.from(root.querySelectorAll<HTMLElement>(
     'button:not([disabled]), select:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
   )).filter((el) => !el.hasAttribute('disabled'));

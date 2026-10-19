@@ -144,11 +144,35 @@ describe('keeping Tab inside the dialog', () => {
     expect(document.activeElement?.id).toBe('last');
   });
 
-  it('leaves Tab between the controls in the middle to the browser', () => {
+  it('moves the focus itself between the controls in the middle, so a browser that skips buttons cannot leave', () => {
     open(html);
-    (document.getElementById('mid') as HTMLElement).focus();
-    expect(key(document.getElementById('mid')!, { key: 'Tab' }).defaultPrevented).toBe(false);
-    expect(key(document.getElementById('mid')!, { key: 'Tab', shiftKey: true }).defaultPrevented).toBe(false);
+    (document.getElementById('first') as HTMLElement).focus();
+    expect(key(document.getElementById('first')!, { key: 'Tab' }).defaultPrevented).toBe(true);
+    expect(document.activeElement?.id).toBe('mid');
+    key(document.getElementById('mid')!, { key: 'Tab' });
+    expect(document.activeElement?.id).toBe('last');
+    key(document.getElementById('last')!, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement?.id).toBe('mid');
+  });
+
+  it('counts a radio group once', () => {
+    open(
+      '<div class="box"><input id="a"><input type="radio" name="g" id="r1"><input type="radio" name="g" id="r2" checked><input type="radio" name="g" id="r3"><button id="b">b</button></div>',
+    );
+    (document.getElementById('a') as HTMLElement).focus();
+    key(document.getElementById('a')!, { key: 'Tab' });
+    expect(document.activeElement?.id).toBe('r2');
+    key(document.getElementById('r2')!, { key: 'Tab' });
+    expect(document.activeElement?.id).toBe('b');
+  });
+
+  it('leaves a Tab that a control has already handled alone', () => {
+    open(html);
+    const field = document.getElementById('first') as HTMLElement;
+    field.addEventListener('keydown', (e) => e.preventDefault());
+    (field as HTMLElement).focus();
+    key(field, { key: 'Tab' });
+    expect(document.activeElement?.id).toBe('first');
   });
 
   it('brings focus back in when it has strayed outside the dialog', () => {

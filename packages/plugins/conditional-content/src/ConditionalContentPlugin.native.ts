@@ -1782,7 +1782,8 @@ function openConditionalDialog(
   };
 
   const trapFocus = (event: KeyboardEvent) => {
-    if (event.key !== 'Tab') return;
+    // The shared dialog handler has usually moved the focus already.
+    if (event.key !== 'Tab' || event.defaultPrevented) return;
 
     const focusable = Array.from(
       dialog.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'),

@@ -104,6 +104,19 @@ function focusableIn(root: HTMLElement): HTMLElement[] {
   );
 }
 
+/** What Tab visits: the focusable items, with a radio group counted once (its checked radio, else its first). */
+function tabStops(root: HTMLElement): HTMLElement[] {
+  const items = focusableIn(root);
+  return items.filter((item) => {
+    if (!(item instanceof HTMLInputElement) || item.type !== 'radio' || !item.name) return true;
+    const group = items.filter(
+      (other): other is HTMLInputElement => other instanceof HTMLInputElement && other.type === 'radio' && other.name === item.name,
+    );
+    const stop = group.find((radio) => radio.checked) ?? group[0];
+    return item === stop;
+  });
+}
+
 /** The corner "x" that closes a dialog is not where someone who has just opened it wants to start. */
 function isCloseControl(element: HTMLElement): boolean {
   const label = `${element.getAttribute('aria-label') ?? ''} ${element.className?.toString() ?? ''}`.toLowerCase();
@@ -238,21 +251,19 @@ function makeDialogAccessible(overlay: HTMLElement): void {
 
   overlay.addEventListener('keydown', (event) => {
     if (event.key !== 'Tab' || event.defaultPrevented) return;
-    const items = focusableIn(overlay);
+    // Move the focus ourselves for every Tab, not only at the ends. Left to the browser, Tab would skip the
+    // buttons in Safari (its default) and so slip out of the dialog from the last text field.
+    const items = tabStops(overlay);
     if (items.length === 0) {
       event.preventDefault();
       return;
     }
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = document.activeElement;
-    if (event.shiftKey && (active === first || !overlay.contains(active))) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && (active === last || !overlay.contains(active))) {
-      event.preventDefault();
-      first.focus();
-    }
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    const step = event.shiftKey ? -1 : 1;
+    const next =
+      index === -1 ? (event.shiftKey ? items[items.length - 1] : items[0]) : items[(index + step + items.length) % items.length];
+    event.preventDefault();
+    next.focus();
   });
 
   let wasShown = false;
