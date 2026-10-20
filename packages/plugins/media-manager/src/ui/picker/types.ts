@@ -15,7 +15,10 @@ export const kindNoun = (kinds: PickerKind[], plural = false): string =>
 
 /** What every view of the picker can see and ask for. */
 export interface PickerContext {
+  /** What the library is showing now (the filter pills): one kind, or all that are allowed. */
   readonly kinds: PickerKind[];
+  /** Everything the dialog can take: what uploads accept and what an address may point at. */
+  readonly allowedKinds: PickerKind[];
   readonly config?: Partial<MediaManagerConfig>;
   readonly provider: MediaProvider;
   readonly selection: SelectionModel<MediaItem>;

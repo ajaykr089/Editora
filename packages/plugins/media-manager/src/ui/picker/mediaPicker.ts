@@ -2,11 +2,12 @@ import { resolveMediaManagerConfig } from '../../constants';
 import { isLocalLibrary, resolveProvider } from '../../providers';
 import type { MediaItem, MediaManagerConfig } from '../../types/media';
 import { attachEscapeCloseHandler, createDialogOverlay, createDialogShell } from '../dialogKit';
+import { openImageEditor } from '../imageEditor/imageEditor';
 import { DetailsPanel } from './detailsPanel';
 import { EmbedView } from './embedView';
 import { icons } from './icons';
 import type { MediaSpec } from './insertMedia';
-import { LibraryView } from './libraryView';
+import { LibraryView, type LibrarySort } from './libraryView';
 import { SelectionModel } from './selection';
 import { stockAsList } from './stock';
 import { el } from './tile';
@@ -32,10 +33,19 @@ export interface PickerOptions {
 
 const NAV: Record<View, { label: string; icon: string; className: string }> = {
   library: { label: 'Library', icon: icons.library, className: 'tab-library' },
-  stock: { label: 'Stock', icon: icons.stock, className: 'tab-stock' },
+  stock: { label: 'Stock photos', icon: icons.stock, className: 'tab-stock' },
   upload: { label: 'Upload', icon: icons.upload, className: 'tab-upload' },
-  url: { label: 'URL', icon: icons.link, className: 'tab-url' },
+  url: { label: 'From URL', icon: icons.link, className: 'tab-url' },
   embed: { label: 'Embed', icon: icons.embed, className: 'tab-embed' },
+};
+
+const ALL_KINDS: PickerKind[] = ['image', 'video', 'audio'];
+
+/** What to call what is chosen: "image" for one picture, "videos" for several, "items" for a mix. */
+const nounFor = (items: Array<{ type: string }>, count: number): string => {
+  const types = new Set(items.map((item) => item.type));
+  const one = types.size === 1 ? (types.values().next().value as PickerKind) : null;
+  return one && ALL_KINDS.includes(one) ? kindNoun([one], count > 1) : count > 1 ? 'items' : 'item';
 };
 
 /**
@@ -43,11 +53,14 @@ const NAV: Record<View, { label: string; icon: string; className: string }> = {
  * details panel for what is chosen. Built once and updated in place, never rebuilt, so the focus stays where it is.
  */
 export const openMediaPicker = (options: PickerOptions): void => {
-  const { mode, kinds } = options;
+  const { mode } = options;
   const config = resolveMediaManagerConfig(options.config);
   const provider = resolveProvider(config);
-  const stock = kinds.length === 1 && kinds[0] === 'image' && mode === 'insert' ? config.stockProvider : undefined;
-  const canEmbed = mode === 'insert' && kinds.length === 1 && kinds[0] === 'video';
+  // The picker is one place for all media: what the command was for decides which filter it opens on, and the
+  // person can change it. Replacing an image takes an image.
+  const allowedKinds: PickerKind[] = mode === 'insert' ? ALL_KINDS : ['image'];
+  const stock = mode === 'insert' ? config.stockProvider : undefined;
+  const canEmbed = mode === 'insert';
   const hasLibrary = typeof provider.list === 'function';
   const views: View[] = [
     ...(hasLibrary ? (['library'] as const) : []),
@@ -73,8 +86,12 @@ export const openMediaPicker = (options: PickerOptions): void => {
   let active: MediaItem | null = null;
 
   // ── context shared with the views ────────────────────────────────────────────────────────────
+  let library: LibraryView | null = null;
   const ctx: PickerContext = {
-    kinds,
+    get kinds() {
+      return library?.kinds ?? allowedKinds;
+    },
+    allowedKinds,
     config: options.config,
     provider,
     selection,
@@ -91,7 +108,18 @@ export const openMediaPicker = (options: PickerOptions): void => {
     },
   };
 
-  const library = hasLibrary ? new LibraryView(ctx, () => showView('upload')) : null;
+  const upload = new UploadView(
+    ctx,
+    (item) => library?.addUploaded(item),
+    () => library?.syncPending(),
+  );
+  library = hasLibrary
+    ? new LibraryView(ctx, () => showView('upload'), {
+        pills: mode === 'insert' ? { filter: options.kinds.length === 1 ? options.kinds[0] : 'all' } : undefined,
+        queue: () => upload.queue,
+        dropHint: true,
+      })
+    : null;
   const stockView = stock
     ? new LibraryView(ctx, () => {}, {
         id: 'stock',
@@ -99,11 +127,12 @@ export const openMediaPicker = (options: PickerOptions): void => {
         emptyTitle: `Search ${stock.name}`,
         emptyHint: `Photos from ${stock.name} will show up here.`,
         offerUpload: false,
+        kinds: ['image'],
+        sortable: false,
       })
     : null;
   const searchable: Partial<Record<View, LibraryView | null>> = { library, stock: stockView };
-  const upload = new UploadView(ctx, () => library?.markStale());
-  const url = new UrlView(kinds, options.initialUrl ?? '', options.initialAlt, () => updateChrome(), () => commit());
+  const url = new UrlView(allowedKinds, options.initialUrl ?? '', options.initialAlt, () => updateChrome(), () => commit(), options.kinds[0] ?? 'image');
   const embed = canEmbed ? new EmbedView(config.embedProviders ?? [], () => updateChrome(), () => commit()) : null;
   const details = new DetailsPanel(selection, {
     defaultAlt: options.initialAlt,
@@ -118,12 +147,30 @@ export const openMediaPicker = (options: PickerOptions): void => {
         if (entry) upload.queue.remove(entry.id);
         ctx.setActive(selection.items.at(-1) ?? null);
       }),
+    onEdit: (item) =>
+      openImageEditor({
+        src: item.src,
+        name: item.name,
+        config: options.config,
+        contextElement: dialog,
+        // The edited picture is a new file: it takes the place of the original in what is chosen.
+        onApply: ({ item: edited }) => {
+          selection.remove(item.id);
+          library?.addUploaded(edited);
+          if (mode === 'insert') selection.toggle(edited);
+          else selection.only(edited);
+          ctx.setActive(edited);
+          ctx.announce(`${edited.name} saved`);
+        },
+      }),
   });
 
   // ── layout ──────────────────────────────────────────────────────────────────────────────────
   const header = el('div', 'rte-mp-header');
   const title = el('h2', 'rte-media-title');
-  title.textContent = options.title;
+  // The window is one place for all media; what it was opened for is its accessible name.
+  title.textContent = mode === 'insert' ? 'Media' : options.title;
+  dialog.setAttribute('aria-label', options.title);
 
   const searchBox = el('label', 'rte-mp-search');
   const searchInput = el('input');
@@ -136,11 +183,42 @@ export const openMediaPicker = (options: PickerOptions): void => {
   searchBox.hidden = !(hasLibrary || stock);
   const searches: Partial<Record<View, string>> = {};
 
+  // What the library can be changed to look like: its order and whether it is a grid or a list.
+  const viewTools = el('div', 'rte-mp-viewtools');
+  const sortSelect = el('select', 'rte-mp-sort');
+  sortSelect.setAttribute('aria-label', 'Sort by');
+  for (const [value, label] of [['newest', 'Newest'], ['oldest', 'Oldest'], ['name', 'Name']] as const) {
+    const option = el('option');
+    option.value = value;
+    option.textContent = label;
+    sortSelect.append(option);
+  }
+  const layoutGroup = el('div', 'rte-mp-layout');
+  layoutGroup.setAttribute('role', 'group');
+  layoutGroup.setAttribute('aria-label', 'Layout');
+  const layoutButtons = new Map<'grid' | 'list', HTMLButtonElement>();
+  for (const [value, label, icon] of [['grid', 'Grid', icons.grid], ['list', 'List', icons.list]] as const) {
+    const button = el('button', 'rte-mp-iconbtn');
+    button.type = 'button';
+    button.setAttribute('aria-label', `${label} view`);
+    button.setAttribute('aria-pressed', String(value === 'grid'));
+    button.innerHTML = icon;
+    button.addEventListener('click', () => {
+      library?.setLayout(value);
+      layoutButtons.forEach((other, key) => other.setAttribute('aria-pressed', String(key === value)));
+    });
+    layoutButtons.set(value, button);
+    layoutGroup.append(button);
+  }
+  sortSelect.addEventListener('change', () => library?.setSort(sortSelect.value as LibrarySort));
+  viewTools.append(sortSelect, layoutGroup);
+  viewTools.hidden = !library;
+
   const closeButton = el('button', 'close-btn rte-media-close-btn');
   closeButton.type = 'button';
   closeButton.setAttribute('aria-label', 'Close');
   closeButton.innerHTML = icons.close;
-  header.append(title, searchBox, el('span', 'rte-mp-spacer'), closeButton);
+  header.append(title, searchBox, viewTools, closeButton);
 
   const nav = el('div', 'rte-mp-nav');
   nav.setAttribute('role', 'tablist');
@@ -153,7 +231,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
     button.setAttribute('role', 'tab');
     button.setAttribute('aria-controls', `rte-mp-panel-${name}`);
     button.innerHTML = `${NAV[name].icon}<span></span>`;
-    button.querySelector('span')!.textContent = name === 'stock' && stock ? stock.name : NAV[name].label;
+    button.querySelector('span')!.textContent = NAV[name].label;
     button.addEventListener('click', () => {
       showView(name);
       // Safari does not focus a button when it is clicked; the keyboard has to be left where the person chose.
@@ -222,6 +300,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
     }
     const searchable_ = searchable[next];
     searchBox.hidden = !searchable_;
+    viewTools.hidden = next !== 'library';
     if (searchable_) {
       searchInput.value = searches[next] ?? '';
       searchInput.setAttribute('aria-label', next === 'stock' ? `Search ${stock!.name}` : 'Search the library');
@@ -257,16 +336,17 @@ export const openMediaPicker = (options: PickerOptions): void => {
 
   function updateChrome(): void {
     const pickCount = view === 'url' ? (url.url ? 1 : 0) : view === 'embed' ? (embed?.spec ? 1 : 0) : selection.size;
-    const noun = view === 'embed' ? 'video' : kindNoun(kinds);
+    const noun = view === 'embed' ? 'video' : view === 'url' ? nounFor(url.spec() ? [url.spec()!] : [], 1) : nounFor(selection.items, pickCount);
     if (mode === 'replace') insertButton.textContent = 'Replace';
-    else insertButton.textContent = pickCount > 1 ? `Insert ${pickCount} ${kindNoun(kinds, true)}` : pickCount === 1 ? `Insert ${noun}` : 'Insert';
+    else insertButton.textContent = pickCount > 1 ? `Insert ${pickCount} ${noun}` : pickCount === 1 ? `Insert ${noun}` : 'Insert';
     insertButton.disabled = pickCount === 0;
 
     // Several pictures can go in as one gallery.
-    galleryButton.hidden = !(mode === 'insert' && kinds.length === 1 && kinds[0] === 'image' && isBrowse() && selection.size >= 2);
+    const onlyPictures = selection.size >= 2 && selection.items.every((item) => item.type === 'image');
+    galleryButton.hidden = !(mode === 'insert' && isBrowse() && onlyPictures);
 
     if (view === 'url' || view === 'embed') count.textContent = '';
-    else count.textContent = selection.size ? `${selection.size} selected` : mode === 'insert' ? `Select ${kinds.length === 1 ? kindNoun(kinds, true) : 'media'} to insert` : 'Select an image';
+    else count.textContent = selection.size ? `${selection.size} selected` : mode === 'insert' ? 'Select media to insert' : 'Select an image';
 
     const showDetails = isBrowse() && active !== null && selection.size > 0;
     dialog.classList.toggle('no-details', !showDetails);
@@ -327,16 +407,20 @@ export const openMediaPicker = (options: PickerOptions): void => {
     const files = Array.from(event.dataTransfer?.files ?? []);
     if (!files.length) return;
     event.preventDefault();
-    showView('upload');
-    upload.add(files);
+    receive(files);
   });
   dialog.addEventListener('paste', (event) => {
     const files = Array.from(event.clipboardData?.files ?? []);
     if (!files.length) return;
     event.preventDefault();
-    showView('upload');
-    upload.add(files);
+    receive(files);
   });
+
+  /** Files dropped or pasted: they go up, and show where they will end up (the library grid, else the Upload view). */
+  function receive(files: File[]): void {
+    if (view !== 'library' && view !== 'upload') showView(library ? 'library' : 'upload');
+    upload.add(files);
+  }
 
   showView(view);
   touched = false;

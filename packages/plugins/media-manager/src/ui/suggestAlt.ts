@@ -23,6 +23,8 @@ export const createSuggestControl = (options: {
   input: HTMLTextAreaElement | HTMLInputElement;
   /** Called after the field has been filled, so that what listens for typing hears it. */
   onFilled?: () => void;
+  /** The words on the button (its accessible name stays "Suggest alt text"). */
+  label?: string;
 }): { button: HTMLButtonElement; status: HTMLElement; abort: () => void } => {
   const generate = resolveMediaManagerConfig(options.config).generateAltText;
   let controller: AbortController | null = null;
@@ -30,7 +32,9 @@ export const createSuggestControl = (options: {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'rte-mp-suggest';
-  button.innerHTML = `${icons.sparkle}<span>Suggest</span>`;
+  const idle = options.label ?? 'Suggest';
+  button.innerHTML = `${icons.sparkle}<span></span>`;
+  button.querySelector('span')!.textContent = idle;
   button.setAttribute('aria-label', 'Suggest alt text');
 
   const status = document.createElement('p');
@@ -67,7 +71,7 @@ export const createSuggestControl = (options: {
     } finally {
       if (controller === mine) controller = null;
       button.disabled = false;
-      label.textContent = 'Suggest';
+      label.textContent = idle;
     }
   });
 

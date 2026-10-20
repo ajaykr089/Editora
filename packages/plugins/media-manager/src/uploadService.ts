@@ -1,5 +1,6 @@
 import { resolveMediaManagerConfig } from './constants';
 import { MediaUploadError, createBase64Provider, isAbort, resolveProvider } from './providers';
+import { probeDuration } from './mediaDuration';
 import { isOptimizable, optimizeImageFile, resolveOptimize } from './imaging/optimize';
 import type { MediaItem, MediaManagerConfig, UploadProgress } from './types/media';
 
@@ -69,10 +70,18 @@ export const uploadMedia = async (original: File, options: UploadOptions = {}): 
   assertSize(file, config);
 
   const context = { signal: options.signal, onProgress: options.onProgress };
+  const duration = probeDuration(file);
+  const timed = async (item: MediaItem): Promise<MediaItem> => {
+    if (item.duration === undefined) {
+      const seconds = await duration;
+      if (seconds !== undefined) item.duration = seconds;
+    }
+    return item;
+  };
   try {
-    return await resolveProvider(config).upload(file, context);
+    return await timed(await resolveProvider(config).upload(file, context));
   } catch (error) {
     if (isAbort(error) || !config.fallbackToBase64) throw error;
-    return createBase64Provider().upload(file, context);
+    return timed(await createBase64Provider().upload(file, context));
   }
 };

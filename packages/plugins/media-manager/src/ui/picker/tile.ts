@@ -1,4 +1,5 @@
 import type { MediaItem } from '../../types/media';
+import { formatDuration } from '../../mediaDuration';
 import { icons } from './icons';
 
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className?: string): HTMLElementTagNameMap[K] => {
@@ -52,6 +53,12 @@ export const checkBadge = (): HTMLElement => {
   return badge;
 };
 
+export const durationBadge = (seconds: number): HTMLElement => {
+  const badge = el('span', 'rte-mp-tile-duration');
+  badge.textContent = formatDuration(seconds);
+  return badge;
+};
+
 export const nameOverlay = (name: string): HTMLElement => {
   const label = el('span', 'rte-mp-tile-name');
   label.textContent = name;
@@ -68,8 +75,20 @@ export const createLibraryTile = (item: MediaItem): HTMLElement => {
   tile.dataset.id = item.id;
   tile.append(thumbnail(item));
   if (item.type === 'video' || item.type === 'audio') tile.append(kindBadge(item.type));
-  tile.append(nameOverlay(item.name), checkBadge());
+  if ((item.type === 'video' || item.type === 'audio') && item.duration) {
+    tile.classList.add('has-duration');
+    tile.append(durationBadge(item.duration));
+  }
+  tile.append(nameOverlay(item.name), tileMeta(item), checkBadge());
   return tile;
+};
+
+/** What the list layout shows next to the name: the kind, the size and how long it plays. */
+const tileMeta = (item: MediaItem): HTMLElement => {
+  const meta = el('span', 'rte-mp-tile-meta');
+  const kind = item.mime.split('/')[1]?.toUpperCase() ?? item.type;
+  meta.textContent = [kind, formatBytes(item.size), item.duration ? formatDuration(item.duration) : ''].filter(Boolean).join(' · ');
+  return meta;
 };
 
 export const formatBytes = (bytes: number): string => {

@@ -164,7 +164,7 @@ describe('the library', () => {
     const { provider } = makeProvider(0);
     open(provider);
     await vi.waitFor(() => expect(q('.rte-mp-empty')).not.toBeNull());
-    expect(q('.rte-mp-empty strong').textContent).toBe('Nothing in your library yet');
+    expect(q('.rte-mp-empty strong').textContent).toBe('No images in your library yet');
     q<HTMLButtonElement>('.rte-mp-empty button').click();
     expect(q('.tab-upload').getAttribute('aria-selected')).toBe('true');
   });
@@ -193,7 +193,7 @@ describe('choosing and inserting', () => {
     open(provider);
     await loaded();
     expect(insertButton().disabled).toBe(true);
-    expect(q('.rte-mp-count').textContent).toBe('Select images to insert');
+    expect(q('.rte-mp-count').textContent).toBe('Select media to insert');
 
     click(tiles()[0]);
     expect(tiles()[0].getAttribute('aria-selected')).toBe('true');
@@ -415,7 +415,7 @@ describe('uploading in the picker', () => {
     const tile = () => q('.rte-mp-queue .rte-mp-tile');
     expect(tile().classList.contains('is-uploading')).toBe(true);
     report(0.42);
-    expect(tile().querySelector('.rte-mp-tile-status')!.textContent).toBe('42%');
+    expect(tile().querySelector('.rte-mp-tile-status')!.textContent).toBe('Uploading 42%');
     expect(tile().querySelector('[role="progressbar"]')!.getAttribute('aria-valuenow')).toBe('42');
     expect(insertButton().disabled).toBe(true);
 
@@ -478,7 +478,7 @@ describe('uploading in the picker', () => {
     expect(signals.every((s) => s.aborted)).toBe(true);
   });
 
-  it('turns files dropped anywhere on the dialog into uploads, switching to the Upload view', async () => {
+  it('turns files dropped anywhere on the dialog into uploads, shown in the library grid while it is open', async () => {
     const { provider } = makeProvider();
     open(provider);
     await loaded();
@@ -488,8 +488,26 @@ describe('uploading in the picker', () => {
     expect(dialog().classList.contains('is-dropping')).toBe(true);
     dialog().dispatchEvent(Object.assign(new Event('drop', { bubbles: true, cancelable: true }), { dataTransfer: dt }));
     expect(dialog().classList.contains('is-dropping')).toBe(false);
-    expect(q('.tab-upload').getAttribute('aria-selected')).toBe('true');
+    expect(q('.tab-library').getAttribute('aria-selected')).toBe('true');
     await vi.waitFor(() => expect(q('.rte-mp-queue .is-selected')).not.toBeNull());
+    await vi.waitFor(() => expect(tiles().some((t) => t.getAttribute('aria-label') === 'dropped.png')).toBe(true));
+  });
+
+  it('shows a file that is going up as a tile in the library grid, with its progress, and not as a choosable item', async () => {
+    let finish!: (url: string) => void;
+    const { provider } = makeProvider(2, {
+      upload: (f: File, ctx: any) => new Promise((resolve) => { ctx.onProgress?.({ loaded: 1, total: 2, fraction: 0.5 }); finish = (url) => resolve(makeItem(77, { name: f.name, src: url })); }),
+    });
+    open(provider);
+    await loaded();
+    dialog().dispatchEvent(Object.assign(new Event('drop', { bubbles: true, cancelable: true }), { dataTransfer: { files: [file('up.png')], types: ['Files'] } }));
+    const pending = () => dialog().querySelector('#rte-mp-panel-library [data-upload]');
+    await vi.waitFor(() => expect(pending()).not.toBeNull());
+    expect(pending()!.textContent).toContain('Uploading 50%');
+    expect(pending()!.getAttribute('data-id')).toBeNull();
+    finish('https://cdn.test/up.png');
+    await vi.waitFor(() => expect(pending()).toBeNull());
+    await vi.waitFor(() => expect(tiles().some((t) => t.getAttribute('aria-label') === 'up.png')).toBe(true));
   });
 
   it('turns a pasted image into an upload', async () => {
@@ -498,7 +516,7 @@ describe('uploading in the picker', () => {
     await vi.waitFor(() => expect(q('.rte-mp-queue .is-selected')).not.toBeNull());
   });
 
-  it('marks the library out of date after an upload, so that it shows the new file', async () => {
+  it('puts a finished upload at the top of the library without asking again', async () => {
     const { provider, list } = makeProvider(2);
     open(provider);
     await loaded();
@@ -506,7 +524,9 @@ describe('uploading in the picker', () => {
     choose([file('new.png')]);
     await vi.waitFor(() => expect(q('.rte-mp-queue .is-selected')).not.toBeNull());
     q<HTMLButtonElement>('.tab-library').click();
-    await vi.waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    // The new file is put at the top without asking the server again.
+    await vi.waitFor(() => expect(tiles().some((t) => t.getAttribute('aria-label') === 'new.png')).toBe(true));
+    expect(list).toHaveBeenCalledTimes(1);
   });
 });
 

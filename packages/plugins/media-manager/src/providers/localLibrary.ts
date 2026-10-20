@@ -155,7 +155,7 @@ export const withLocalLibrary = (inner: MediaProvider): MediaProvider => {
       const search = (query.search ?? '').trim().toLowerCase();
       const matching = (await store().all())
         .filter((item) => (!query.type || item.type === query.type) && (!search || `${item.name} ${item.alt ?? ''}`.toLowerCase().includes(search)))
-        .sort((a, b) => b.createdAt - a.createdAt);
+        .sort((a, b) => (query.sort === 'oldest' ? a.createdAt - b.createdAt : query.sort === 'name' ? a.name.localeCompare(b.name) : b.createdAt - a.createdAt));
       const limit = query.limit ?? 24;
       const page = query.page ?? 1;
       return { items: matching.slice((page - 1) * limit, page * limit), total: matching.length };

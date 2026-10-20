@@ -83,14 +83,17 @@ afterEach(() => {
 });
 
 describe('embedding a video', () => {
-  it('is a tab of the Insert Video dialog only', () => {
-    open(undefined, 'insertVideo');
-    expect(q('.tab-embed')).not.toBeNull();
-    document.querySelectorAll('.rte-media-overlay').forEach((n) => n.remove());
-    open(undefined, 'insertImage');
-    expect(q('.tab-embed')).toBeNull();
-    document.querySelectorAll('.rte-media-overlay').forEach((n) => n.remove());
-    open(undefined, 'insertAudio');
+  it('is a source of every insert dialog, but not of replacing a picture', async () => {
+    for (const command of ['insertVideo', 'insertImage', 'insertAudio'] as const) {
+      open(undefined, command);
+      expect(q('.tab-embed')).not.toBeNull();
+      document.querySelectorAll('.rte-media-overlay').forEach((n) => n.remove());
+    }
+    const { showReplaceImageDialog } = await import('../ui/replaceDialog');
+    const img = document.createElement('img');
+    img.src = 'https://cdn.test/a.png';
+    editor.append(img);
+    showReplaceImageDialog(img);
     expect(q('.tab-embed')).toBeNull();
   });
 
@@ -155,12 +158,9 @@ describe('embedding a video', () => {
 describe('audio', () => {
   it('has its own dialog, that accepts and names audio', () => {
     open(undefined, 'insertAudio');
-    expect(q('.rte-media-title').textContent).toBe('Insert Audio');
+    expect(dialog().getAttribute('aria-label')).toBe('Insert Audio');
     expect(q<HTMLInputElement>('#file-input').accept).toContain('audio/mpeg');
-    expect(q<HTMLInputElement>('#file-input').accept).not.toContain('image/');
-    expect(q('.dropzone').getAttribute('aria-label')).toMatch(/audio files/);
-    expect(q('#file-input').getAttribute('aria-label')).toBe('Choose an audio file');
-    expect(q('.rte-mp-count').textContent).toBe('Select audio files to insert');
+    expect(q('.rte-mp-chip[aria-pressed="true"]').textContent).toBe('Audio');
   });
 
   it('inserts from an address as a figure with an audio player', () => {
@@ -260,13 +260,15 @@ describe('inserting several pictures as a gallery', () => {
 });
 
 describe('stock photos', () => {
-  it('is a tab named for the service, in the Insert Image dialog only', () => {
+  it('is a Stock photos source of the insert dialogs, searched by the name of the service, and only when there is one', () => {
     const { stock } = makeStock();
     open({ stockProvider: stock });
-    expect(q('.tab-stock span').textContent).toBe('Unsplash');
+    expect(q('.tab-stock span').textContent).toBe('Stock photos');
+    q<HTMLButtonElement>('.tab-stock').click();
+    expect((q('#mp-search') as HTMLInputElement).placeholder).toBe('Search Unsplash');
     document.querySelectorAll('.rte-media-overlay').forEach((n) => n.remove());
     open({ stockProvider: stock }, 'insertVideo');
-    expect(q('.tab-stock')).toBeNull();
+    expect(q('.tab-stock')).not.toBeNull();
     document.querySelectorAll('.rte-media-overlay').forEach((n) => n.remove());
     open(undefined);
     expect(q('.tab-stock')).toBeNull();
@@ -380,7 +382,7 @@ describe('suggesting alt text', () => {
     await vi.waitFor(() => expect(q<HTMLTextAreaElement>('#detail-alt').value).toBe('A red barn at dusk.'));
     expect(fn.mock.calls[0][0]).toEqual({ src: 'https://cdn.test/1.jpg', name: 'photo-1.jpg' });
     expect(button.disabled).toBe(false);
-    expect(button.textContent).toBe('Suggest');
+    expect(button.textContent).toBe('Alt');
     expect(decorative.checked).toBe(false);
     expect(q('.rte-mp-details .rte-mp-hint[role="status"]').textContent).toMatch(/Read it and change it/);
     expect(editor.querySelector('img')).toBeNull();

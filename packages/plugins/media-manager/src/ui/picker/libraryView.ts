@@ -2,11 +2,23 @@ import { confirmAction } from '../../../../shared/confirmDialog';
 import type { MediaItem, MediaPage, MediaProvider } from '../../types/media';
 import { isAbort } from '../../providers';
 import { icons } from './icons';
+import type { UploadQueue } from '../../uploadQueue';
 import { createLibraryTile, el } from './tile';
-import { isPickable, type PickerContext } from './types';
+import { isPickable, type PickerContext, type PickerKind } from './types';
+import { createUploadTile, updateUploadTile } from './uploadTile';
 
 const PAGE_SIZE = 24;
 const SEARCH_DELAY = 300;
+
+export type LibrarySort = 'newest' | 'oldest' | 'name';
+export type LibraryLayout = 'grid' | 'list';
+type Filter = PickerKind | 'all';
+const FILTERS: Array<{ id: Filter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'image', label: 'Images' },
+  { id: 'video', label: 'Video' },
+  { id: 'audio', label: 'Audio' },
+];
 
 /** The searchable, paginated grid of what the provider holds. */
 export class LibraryView {
@@ -25,6 +37,11 @@ export class LibraryView {
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
   private observer: IntersectionObserver | null = null;
   private focusId: string | null = null;
+  private sort: LibrarySort = 'newest';
+  private layout: LibraryLayout = 'grid';
+  private filter: Filter;
+  private readonly pending = new Map<string, HTMLElement>();
+  private readonly toolbar = el('div', 'rte-mp-toolbar');
 
   constructor(
     private readonly ctx: PickerContext,
@@ -37,12 +54,37 @@ export class LibraryView {
       emptyHint?: string;
       /** Offer the Upload tab from the empty state (a library can be filled by uploading; a stock service cannot). */
       offerUpload?: boolean;
+      /** Show the All / Images / Video / Audio filter, starting at `filter`. */
+      pills?: { filter: Filter };
+      /** The kinds this grid is for when it is not the dialog's (stock photos are pictures). */
+      kinds?: PickerKind[];
+      /** Whether the source can be ordered (a stock service lists in its own order). */
+      sortable?: boolean;
+      /** The uploads under way, shown first in the grid. */
+      queue?: () => UploadQueue | null;
+      /** Say that files can be dropped anywhere on the dialog. */
+      dropHint?: boolean;
     } = {},
   ) {
+    this.filter = options.pills?.filter ?? 'all';
     this.element.setAttribute('role', 'tabpanel');
     this.element.id = `rte-mp-panel-${options.id ?? 'library'}`;
     this.element.hidden = true;
     this.scroll.append(this.content);
+    if (options.pills) {
+      this.toolbar.setAttribute('role', 'group');
+      this.toolbar.setAttribute('aria-label', 'Show');
+      for (const { id, label } of FILTERS) {
+        const chip = el('button', 'rte-mp-chip');
+        chip.type = 'button';
+        chip.dataset.filter = id;
+        chip.textContent = label;
+        chip.setAttribute('aria-pressed', String(id === this.filter));
+        chip.addEventListener('click', () => this.setFilter(id));
+        this.toolbar.append(chip);
+      }
+      this.element.append(this.toolbar);
+    }
     this.element.append(this.scroll);
     this.content.addEventListener('keydown', this.onKeyDown);
   }
@@ -54,6 +96,78 @@ export class LibraryView {
 
   markStale(): void {
     this.stale = true;
+  }
+
+  /** The kinds the grid lists: one when a filter is chosen, else everything the dialog takes. */
+  get kinds(): PickerKind[] {
+    if (this.options.kinds) return this.options.kinds;
+    return this.filter === 'all' ? this.ctx.allowedKinds : [this.filter];
+  }
+
+  setFilter(filter: Filter): void {
+    if (filter === this.filter) return;
+    this.filter = filter;
+    this.toolbar.querySelectorAll<HTMLElement>('.rte-mp-chip').forEach((chip) => chip.setAttribute('aria-pressed', String(chip.dataset.filter === filter)));
+    void this.reload();
+  }
+
+  setSort(sort: LibrarySort): void {
+    if (sort === this.sort) return;
+    this.sort = sort;
+    void this.reload();
+  }
+
+  setLayout(layout: LibraryLayout): void {
+    this.layout = layout;
+    this.content.querySelector('.rte-mp-grid')?.classList.toggle('is-list', layout === 'list');
+  }
+
+  /** A file that has just been uploaded (or edited): at the top of the list without asking the server again. */
+  addUploaded(item: MediaItem): void {
+    if (!this.loaded) return;
+    if (this.sort !== 'newest' || this.search || !isPickable(item, this.kinds)) {
+      // Where it belongs in this listing is the server's to say.
+      this.stale = true;
+      if (!this.element.hidden) void this.reload();
+      return;
+    }
+    if (this.items.some((entry) => entry.id === item.id)) return;
+    this.items.unshift(item);
+    this.total += 1;
+    this.render();
+  }
+
+  /** Show the files that are going up as tiles at the start of the grid, updating them as they progress. */
+  syncPending(): void {
+    const queue = this.options.queue?.();
+    const entries = (queue?.entries ?? []).filter((entry) => entry.status !== 'done' && !entry.item);
+    const grid = this.content.querySelector<HTMLElement>('.rte-mp-grid');
+    if (!queue) return;
+    if (!grid && entries.length) {
+      // The library had nothing to show (an empty state): it has now.
+      this.render();
+      return;
+    }
+    for (const [id, tile] of this.pending) {
+      if (!entries.some((entry) => entry.id === id)) {
+        tile.remove();
+        this.pending.delete(id);
+      }
+    }
+    if (!grid) return;
+    entries.forEach((entry, index) => {
+      let tile = this.pending.get(entry.id);
+      if (!tile) {
+        tile = createUploadTile(entry, 'div');
+        // A listbox holds options and groups: this is a group, not something to choose yet.
+        tile.setAttribute('role', 'group');
+        tile.setAttribute('aria-label', entry.file.name);
+        this.pending.set(entry.id, tile);
+      }
+      updateUploadTile(tile, entry, queue);
+      if (grid.children[index] !== tile) grid.insertBefore(tile, grid.children[index] ?? null);
+    });
+    if (entries.length === 0 && this.items.length === 0 && this.loaded && !this.loading) this.render();
   }
 
   setSearch(value: string): void {
@@ -136,7 +250,8 @@ export class LibraryView {
           page: this.page + 1,
           limit: PAGE_SIZE,
           search: this.search || undefined,
-          type: this.ctx.kinds.length === 1 ? this.ctx.kinds[0] : undefined,
+          type: this.kinds.length === 1 ? this.kinds[0] : undefined,
+          sort: this.options.sortable === false || this.sort === 'newest' ? undefined : this.sort,
         },
         { signal: controller.signal },
       );
@@ -144,7 +259,7 @@ export class LibraryView {
       this.page += 1;
       this.total = next.total;
       const known = new Set(this.items.map((item) => item.id));
-      this.items.push(...next.items.filter((item) => isPickable(item, this.ctx.kinds) && !known.has(item.id)));
+      this.items.push(...next.items.filter((item) => isPickable(item, this.kinds) && !known.has(item.id)));
       this.failed = null;
       this.loaded = true;
       this.ctx.announce(this.items.length ? `${this.total} item${this.total === 1 ? '' : 's'}` : 'No results');
@@ -170,7 +285,9 @@ export class LibraryView {
     this.focusId = focused && this.content.contains(document.activeElement) ? focused : null;
     this.content.replaceChildren();
 
-    const hasItems = this.items.length > 0;
+    this.pending.clear();
+    const hasPending = (this.options.queue?.()?.entries ?? []).some((entry) => entry.status !== 'done' && !entry.item);
+    const hasItems = this.items.length > 0 || hasPending;
     if (this.failed && !hasItems) {
       this.content.append(this.errorBlock(this.failed));
       return;
@@ -188,6 +305,7 @@ export class LibraryView {
     }
 
     const grid = el('div', 'rte-mp-grid');
+    grid.classList.toggle('is-list', this.layout === 'list');
     grid.setAttribute('role', 'listbox');
     grid.setAttribute('aria-label', 'Media library');
     if (this.ctx.selection.multiple) grid.setAttribute('aria-multiselectable', 'true');
@@ -198,9 +316,15 @@ export class LibraryView {
       grid.append(tile);
     }
     this.content.append(grid);
+    this.syncPending();
 
     if (this.failed) this.content.append(this.errorBlock(this.failed, true));
     if (this.items.length < this.total || this.loading) this.content.append(this.moreButton());
+    if (this.options.dropHint) {
+      const hint = el('p', 'rte-mp-drop-hint');
+      hint.textContent = 'Drop files anywhere in this window to upload';
+      this.content.append(hint);
+    }
 
     // Keep one tile in the tab order, and put the focus back where it was after the rebuild.
     const tiles = this.tiles();
@@ -232,7 +356,10 @@ export class LibraryView {
     const searching = Boolean(this.search);
     box.innerHTML = `<span aria-hidden="true">${icons.photo}</span>`;
     const title = el('strong');
-    title.textContent = searching ? `No results for “${this.search}”` : this.options.emptyTitle ?? 'Nothing in your library yet';
+    const kindLabel = FILTERS.find((entry) => entry.id === this.filter)?.label.toLowerCase();
+    title.textContent = searching
+      ? `No results for “${this.search}”`
+      : this.options.emptyTitle ?? (this.filter !== 'all' && !this.options.kinds ? `No ${kindLabel} in your library yet` : 'Nothing in your library yet');
     const hint = el('span');
     hint.textContent = searching ? 'Try a different word.' : this.options.emptyHint ?? 'Upload files and they will show up here.';
     box.append(title, hint);

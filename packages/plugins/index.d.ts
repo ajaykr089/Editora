@@ -949,6 +949,8 @@ export interface MediaQuery {
   search?: string;
   type?: MediaItem['type'];
   folderId?: string | null;
+  /** The order of the listing (default `newest`). A provider that cannot sort may ignore it. */
+  sort?: 'newest' | 'oldest' | 'name';
 }
 
 export interface MediaPage {

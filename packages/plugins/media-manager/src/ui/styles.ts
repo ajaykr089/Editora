@@ -17,6 +17,9 @@ export const injectMediaDialogStyles = (): void => {
       --rte-media-surface: #f7f9fc;
       --rte-media-surface-hover: #eef2f7;
       --rte-media-accent: #1560e8;
+      --rte-media-primary: #101828;
+      --rte-media-primary-hover: #2a3345;
+      --rte-media-primary-text: #ffffff;
       --rte-media-accent-hover: #165fd6;
       --rte-media-danger: #dc3545;
       --rte-media-danger-hover: #b92735;
@@ -47,6 +50,9 @@ export const injectMediaDialogStyles = (): void => {
       --rte-media-surface-hover: #344256;
       --rte-media-accent: #1f6feb;
       --rte-media-accent-hover: #4598f4;
+      --rte-media-primary: #e8effc;
+      --rte-media-primary-hover: #ffffff;
+      --rte-media-primary-text: #101828;
       --rte-media-danger: #ff7b72;
       --rte-media-danger-hover: #ff645b;
       --rte-media-danger-text: #ffa39d;
@@ -337,12 +343,12 @@ export const injectMediaDialogStyles = (): void => {
     }
 
     .rte-media-btn-primary {
-      background: var(--rte-media-accent);
-      color: #fff;
+      background: var(--rte-media-primary);
+      color: var(--rte-media-primary-text);
     }
 
     .rte-media-btn-primary:hover {
-      background: var(--rte-media-accent-hover);
+      background: var(--rte-media-primary-hover);
     }
 
     .rte-media-btn-primary:disabled {
@@ -388,6 +394,7 @@ export const injectMediaDialogStyles = (): void => {
       height: min(88vh, 640px);
       max-height: none;
       position: relative;
+      border-radius: 16px;
     }
 
     .rte-mp-header {
@@ -406,7 +413,6 @@ export const injectMediaDialogStyles = (): void => {
     .rte-mp-search {
       flex: 1;
       min-width: 0;
-      max-width: 420px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -531,12 +537,13 @@ export const injectMediaDialogStyles = (): void => {
 
     .rte-mp-toolbar {
       display: flex;
-      gap: 6px;
-      padding: 12px 16px 0;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 16px 0;
     }
 
     .rte-mp-chip {
-      padding: 4px 12px;
+      padding: 6px 16px;
       border: 1px solid var(--rte-media-border);
       border-radius: 999px;
       background: transparent;
@@ -572,7 +579,7 @@ export const injectMediaDialogStyles = (): void => {
       position: relative;
       aspect-ratio: 1;
       border: 0;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       background: var(--rte-media-surface-hover);
       color: var(--rte-media-muted);
@@ -975,6 +982,210 @@ export const injectMediaDialogStyles = (): void => {
       outline-offset: 2px;
     }
 
+
+    .rte-mp-viewtools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .rte-mp-viewtools[hidden] {
+      display: none;
+    }
+
+    .rte-mp-sort {
+      height: 34px;
+      padding: 0 8px 0 12px;
+      border: 1px solid var(--rte-media-border);
+      border-radius: 8px;
+      background: var(--rte-media-bg);
+      color: var(--rte-media-text);
+      font-size: 14px;
+    }
+
+    .rte-mp-sort:focus-visible,
+    .rte-mp-iconbtn:focus-visible {
+      outline: 2px solid var(--rte-media-accent);
+      outline-offset: 2px;
+    }
+
+    .rte-mp-layout {
+      display: flex;
+      gap: 4px;
+    }
+
+    .rte-mp-iconbtn {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--rte-media-border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--rte-media-muted);
+      cursor: pointer;
+    }
+
+    .rte-mp-iconbtn:hover {
+      background: var(--rte-media-surface-hover);
+    }
+
+    .rte-mp-iconbtn[aria-pressed="true"] {
+      border-color: var(--rte-media-text);
+      background: var(--rte-media-surface-hover);
+      color: var(--rte-media-text);
+    }
+
+    .rte-mp-tile-duration {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      z-index: 1;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.64);
+      color: #fff;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rte-mp-tile.has-duration .rte-mp-tile-name {
+      padding-right: 58px;
+    }
+
+    .rte-mp-tile-meta {
+      display: none;
+    }
+
+    /* A file going up: an outline where it will land, the preview faded, and how far it has got. */
+    .rte-mp-tile.is-uploading {
+      background: var(--rte-media-surface);
+      box-shadow: none;
+    }
+
+    .rte-mp-tile.is-uploading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1.5px dashed var(--rte-media-border);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .rte-mp-tile.is-uploading img,
+    .rte-mp-tile.is-uploading video {
+      opacity: 0.22;
+    }
+
+    .rte-mp-tile.is-uploading .rte-mp-tile-status {
+      background: transparent;
+      color: var(--rte-media-text);
+      font-weight: 600;
+    }
+
+    .rte-mp-tile.is-uploading .rte-mp-progress {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border-radius: 2px;
+      background: var(--rte-media-border);
+    }
+
+    .rte-mp-drop-hint {
+      margin: 18px 0 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--rte-media-muted);
+    }
+
+    /* The list layout: a row for each file, with the picture small at the start. */
+    .rte-mp-grid.is-list {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile {
+      aspect-ratio: auto;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-left: 68px;
+      border-radius: 10px;
+      background: transparent;
+      box-shadow: none;
+      color: var(--rte-media-text);
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile:hover {
+      background: var(--rte-media-surface-hover);
+      box-shadow: none;
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile[aria-selected="true"] {
+      background: var(--rte-media-ring);
+      box-shadow: inset 0 0 0 2px var(--rte-media-accent);
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile img,
+    .rte-mp-grid.is-list .rte-mp-tile video {
+      right: auto;
+      width: 56px;
+      border-radius: 10px;
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile-icon {
+      right: auto;
+      width: 56px;
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile-name {
+      position: static;
+      flex: 1;
+      min-width: 0;
+      padding: 0 !important;
+      background: none;
+      color: var(--rte-media-text);
+      font-size: 14px;
+      opacity: 1;
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile-meta {
+      display: block;
+      padding-right: 44px;
+      font-size: 12px;
+      color: var(--rte-media-muted);
+      white-space: nowrap;
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile-check {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .rte-mp-grid.is-list .rte-mp-tile-kind,
+    .rte-mp-grid.is-list .rte-mp-tile-duration {
+      display: none;
+    }
+
+    .rte-mp-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .rte-mp-actions .rte-mp-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
     .rte-mp-label-row {
       display: flex;
       align-items: center;

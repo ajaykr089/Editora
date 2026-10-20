@@ -98,13 +98,15 @@ app.get('/api/media/library', async (req, res) => {
     params.push(req.query.type);
   }
   const condition = where.join(' AND ');
+  // `sort` is newest (default), oldest or name; anything else falls back to newest.
+  const order = req.query.sort === 'oldest' ? 'created_at ASC' : req.query.sort === 'name' ? 'original_filename ASC, created_at DESC' : 'created_at DESC';
 
   try {
     const sql = `
-      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, mime_type AS mimeType, file_size AS size, width, height, alt_text AS alt, folder_id, created_at AS createdAt 
+      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, mime_type AS mimeType, file_size AS size, width, height, duration, alt_text AS alt, folder_id, created_at AS createdAt 
       FROM media 
       WHERE ${condition} 
-      ORDER BY created_at DESC 
+      ORDER BY ${order} 
       LIMIT ${limit} OFFSET ${offset}
     `;
     const [rows] = await pool.execute<RowDataPacket[]>(sql, params);

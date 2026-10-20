@@ -31,13 +31,15 @@ export class UrlView {
     private readonly initialAlt: string | undefined,
     private readonly onChange: () => void,
     private readonly onSubmit: () => void,
+    /** What an address that does not say is taken for, and what the example in the field shows. */
+    private readonly preferred: PickerKind = kinds[0] ?? 'image',
   ) {
     this.element.setAttribute('role', 'tabpanel');
     this.element.id = 'rte-mp-panel-url';
     this.element.hidden = true;
 
     const form = el('div', 'rte-mp-form');
-    const noun = kinds.length === 1 ? (kinds[0] === 'audio' ? 'clip' : kinds[0]) : 'image';
+    const noun = preferred === 'audio' ? 'clip' : preferred;
     const field = (labelText: string, input: HTMLInputElement, id: string, extra: Partial<HTMLInputElement> = {}) => {
       const wrap = el('div', 'rte-media-field');
       const label = el('label', 'rte-media-label');
@@ -49,7 +51,7 @@ export class UrlView {
       return wrap;
     };
 
-    const ext = kinds.length === 1 && kinds[0] === 'video' ? 'mp4' : kinds.length === 1 && kinds[0] === 'audio' ? 'mp3' : 'jpg';
+    const ext = preferred === 'video' ? 'mp4' : preferred === 'audio' ? 'mp3' : 'jpg';
     form.append(
       field('URL', this.urlInput, 'url-input', { type: 'text', placeholder: `https://example.com/${noun}.${ext}`, value: initialUrl }),
       ...(kinds.includes('image')
@@ -90,7 +92,7 @@ export class UrlView {
   /** The element to insert, or null while there is no address. */
   spec(): MediaSpec | null {
     if (!this.url) return null;
-    const type = guessType(this.url, this.kinds[0]);
+    const type = guessType(this.url, this.preferred);
     return {
       src: this.url,
       type,
@@ -112,7 +114,7 @@ export class UrlView {
       return;
     }
     const existing = this.previewBox.querySelector<HTMLElement>('img, video, audio');
-    const type = guessType(url, this.kinds[0]);
+    const type = guessType(url, this.preferred);
     const tag = type === 'image' ? 'img' : type === 'video' ? 'video' : 'audio';
     if (existing && existing.tagName.toLowerCase() === tag) {
       existing.setAttribute('src', url);

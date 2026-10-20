@@ -167,6 +167,7 @@ export const createRestProvider = (options: RestProviderOptions): MediaProvider 
       if (query.limit) params.set('limit', String(query.limit));
       if (query.search) params.set('q', query.search);
       if (query.type) params.set('type', query.type);
+      if (query.sort) params.set('sort', query.sort);
       if (query.folderId) params.set('folder_id', query.folderId);
       const url = params.toString() ? `${libraryUrl}${libraryUrl.includes('?') ? '&' : '?'}${params}` : libraryUrl;
       const body = await (await request(url, { signal: context.signal })).json();

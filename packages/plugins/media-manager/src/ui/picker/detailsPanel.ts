@@ -16,6 +16,8 @@ export class DetailsPanel {
   private readonly captions = new Map<string, string>();
   private shown: MediaItem | null = null;
   private suggest: { abort: () => void } | null = null;
+  /** The Suggest button of the alt field, which the actions row takes in (when there is one). */
+  private suggestButton: HTMLButtonElement | null = null;
 
   constructor(
     private readonly selection: SelectionModel<MediaItem>,
@@ -28,6 +30,8 @@ export class DetailsPanel {
       captions?: boolean;
       canDelete: (item: MediaItem) => boolean;
       onDelete: (item: MediaItem) => void;
+      /** Open the image editor on an image (Edit). Not given: no Edit button. */
+      onEdit?: (item: MediaItem) => void;
     },
   ) {
     this.element.setAttribute('aria-label', 'Details');
@@ -62,6 +66,7 @@ export class DetailsPanel {
     this.shown = item;
     this.suggest?.abort();
     this.suggest = null;
+    this.suggestButton = null;
     this.element.replaceChildren();
     if (!item) {
       this.element.hidden = true;
@@ -88,6 +93,7 @@ export class DetailsPanel {
     }
 
     if (item.type === 'image') this.element.append(this.altField(item));
+    if (item.type === 'image' && this.options.onEdit) this.element.append(this.actions(item));
     if (this.options.captions !== false) this.element.append(this.captionField(item));
 
     if (this.options.canDelete(item)) {
@@ -133,6 +139,21 @@ export class DetailsPanel {
       };
       probe.src = item.src;
     }
+  }
+
+  /** Edit, and (when a service is configured) Alt: the two things to do with the picture itself. */
+  private actions(item: MediaItem): HTMLElement {
+    const row = el('div', 'rte-mp-actions');
+    const edit = el('button', 'rte-media-btn rte-media-btn-secondary rte-mp-action');
+    edit.type = 'button';
+    edit.innerHTML = `${icons.edit}<span></span>`;
+    edit.querySelector('span')!.textContent = 'Edit';
+    edit.setAttribute('aria-label', `Edit ${item.name}`);
+    edit.addEventListener('click', () => this.options.onEdit?.(item));
+    row.append(edit);
+    const suggest = this.suggestButton;
+    if (suggest) row.append(suggest);
+    return row;
   }
 
   private captionField(item: MediaItem): HTMLElement {
@@ -201,6 +222,7 @@ export class DetailsPanel {
       const control = createSuggestControl({
         config: this.options.config,
         image: () => ({ src: item.src, name: item.name }),
+        label: this.options.onEdit ? 'Alt' : undefined,
         input,
         // A description fills the field, so the picture is no longer decorative.
         onFilled: () => {
@@ -209,7 +231,12 @@ export class DetailsPanel {
         },
       });
       this.suggest = control;
-      labelRow.append(control.button);
+      if (this.options.onEdit) {
+        control.button.classList.add('rte-media-btn', 'rte-media-btn-secondary', 'rte-mp-action');
+        this.suggestButton = control.button;
+      } else {
+        labelRow.append(control.button);
+      }
       hint.after(control.status);
     }
     return wrap;

@@ -5,6 +5,9 @@ import { DARK_THEME_SELECTOR, injectMediaDialogStyles } from './styles';
 export const attachEscapeCloseHandler = (overlay: HTMLElement, closeDialog: () => void): (() => void) => {
   const onEscape = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !overlay.isConnected) return;
+    // Another dialog opened from this one (the image editor over the picker) is closed first.
+    const overlays = document.querySelectorAll('.rte-media-overlay');
+    if (overlays.length > 1 && overlays[overlays.length - 1] !== overlay) return;
     event.preventDefault();
     event.stopPropagation();
     closeDialog();
