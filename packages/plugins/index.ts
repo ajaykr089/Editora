@@ -176,6 +176,17 @@ export {
   validateTemplate,
   type Template,
 } from './template/src';
-export { CommentsPlugin } from './comments/src';
+export {
+  CommentsPlugin,
+  getCommentThreads,
+  setCommentThreads,
+  configureComments,
+  type CommentReplyData,
+  type CommentThread,
+  type CommentUser,
+  type CommentsChange,
+  type CommentsChangeReason,
+  type CommentsOptions,
+} from './comments/src';
 export { SpellCheckPlugin } from './spell-check/src';
 export { A11yCheckerPlugin } from './a11y-checker/src';
