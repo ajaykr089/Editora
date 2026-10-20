@@ -58,6 +58,10 @@ With no configuration, uploaded files are embedded in the document as data URLs.
 | `withCredentials` | `boolean` | `false` | Send cookies on a cross-origin upload |
 | `uploadFieldName` | `string` | `file` | Multipart field name |
 | `fallbackToBase64` | `boolean` | `false` | Insert a data URL when the upload fails |
+| `audio` | `boolean` | `false` | Put an Audio button in the toolbar (`insertAudio` always works) |
+| `embedProviders` | `EmbedProvider[]` | none | More services to embed; YouTube and Vimeo are built in |
+| `stockProvider` | `StockProvider` | none | `{ name, search({ search, page, limit }, { signal }) => { items, total? }, caption? }`: adds a Stock tab to Insert Image |
+| `generateAltText` | `({ src, name }, { signal }) => Promise<string>` | none | Adds a Suggest button for alt text; the result is only put in the field |
 | `wrapInFigure` | `boolean` | `true` | Insert `<figure>` media that can be aligned and captioned; `false` for a bare `<img>` / `<video>` |
 | `uploadOnPaste` | `boolean` | `true` | Upload images and videos pasted or dropped into the editor |
 | `optimizeImages` | `boolean \| { maxWidth?, quality?, format? }` | off | Scale down and re-encode large JPEG, PNG and WebP uploads (`true`: wider than 2048px is scaled to 2048, quality 0.85); the size limit is checked on the result |
@@ -82,6 +86,13 @@ Provider contract for the library: `list({ page, limit, search, type }, { signal
 - **Edit image** (crop button in the toolbar): rotate, flip, crop (free or to a shape), scale to a width, and pick JPEG, WebP or PNG with a quality slider and a size estimate. It is stored as a new file through your upload settings, so the original stays where it was; the image keeps `data-original-src` for **Restore original**. Needs the picture's server to allow CORS.
 - `SlashCommandsPlugin({ items: mediaSlashItems })` adds `/image` and `/video`.
 - The toolbar, handles and placeholders are drawn outside the editor; the editor strips the editing-only `contenteditable` and empty captions from the HTML it emits.
+
+## Audio, embeds and galleries
+
+- **Audio**: `insertAudio` and a picker for audio files; the result is a figure with an `<audio controls>`.
+- **Embedded video**: the Insert Video dialog's Embed tab takes a YouTube or Vimeo link (or its iframe snippet). Only the video id is read; the iframe address is built from it, using YouTube's privacy-enhanced host and Vimeo's do-not-track setting. The iframe carries `data-editora-embed="true"`, which keeps the sanitizer from removing it.
+- **Gallery**: choose two or more pictures and Insert as gallery: one `figure.rte-gallery` with a 2 to 5 column grid and one caption.
+- **Stock photos** and **suggested alt text** call functions you provide; the editor contacts no service by itself.
 
 ## Behavior
 
