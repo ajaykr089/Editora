@@ -60,6 +60,7 @@ With no configuration, uploaded files are embedded in the document as data URLs.
 | `fallbackToBase64` | `boolean` | `false` | Insert a data URL when the upload fails |
 | `wrapInFigure` | `boolean` | `true` | Insert `<figure>` media that can be aligned and captioned; `false` for a bare `<img>` / `<video>` |
 | `uploadOnPaste` | `boolean` | `true` | Upload images and videos pasted or dropped into the editor |
+| `optimizeImages` | `boolean \| { maxWidth?, quality?, format? }` | off | Scale down and re-encode large JPEG, PNG and WebP uploads (`true`: wider than 2048px is scaled to 2048, quality 0.85); the size limit is checked on the result |
 | `maxFileSize` | `number` | `10MB` | Checked before sending |
 | `allowedTypes` | `string[]` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg | `image/*` wildcards work |
 
@@ -78,6 +79,7 @@ Provider contract for the library: `list({ page, limit, search, type }, { signal
 - Pasted images and dropped image or video files become uploads: a placeholder with progress and a cancel button where they will go, replaced by the media when stored (one undo step). Text pasted with a picture (spreadsheet cells, a copied page) stays text.
 - Media is a `<figure class="rte-media" data-align>` with an optional `<figcaption>`: align it, caption it, size it (Size menu: small, medium, large, full width, original, relative to the text width) or drag a corner (mouse, touch, pen).
 - Keyboard: an arrow key at the edge of the paragraph beside the media selects it, Alt+F10 moves into its toolbar (arrows, Enter or Space, Escape or Tab back), Enter in a caption goes on below, Backspace in an empty caption removes it.
+- **Edit image** (crop button in the toolbar): rotate, flip, crop (free or to a shape), scale to a width, and pick JPEG, WebP or PNG with a quality slider and a size estimate. It is stored as a new file through your upload settings, so the original stays where it was; the image keeps `data-original-src` for **Restore original**. Needs the picture's server to allow CORS.
 - `SlashCommandsPlugin({ items: mediaSlashItems })` adds `/image` and `/video`.
 - The toolbar, handles and placeholders are drawn outside the editor; the editor strips the editing-only `contenteditable` and empty captions from the HTML it emits.
 

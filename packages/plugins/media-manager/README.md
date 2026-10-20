@@ -53,6 +53,7 @@ One dialog for Insert Image, Insert Video and Replace Image, with a **Library**,
 - **Captioned, aligned media.** Inserted media is a `<figure>`: align it left, centre or right, and add a caption under it (Enter in the caption goes on in a new paragraph, Backspace in an empty one removes it, pasting into it gives one line of plain text). Media without a figure (from earlier versions) gets one when you align or caption it.
 - **Select it** by clicking, or with the keyboard: an arrow key at the edge of the paragraph beside it steps onto it, the next one carries on past it. Escape lets go.
 - **The toolbar** over a selected image or video: align, **Size** (small, medium, large, full width, original size; relative to the width of the text), caption, alt text, link, replace, remove. From the keyboard, Alt+F10 moves into it; the arrow keys go along it, Enter or Space uses a button, Escape or Tab goes back to the text.
+- **Edit image** (the crop button in the toolbar): turn it a quarter either way, flip it, crop it (free, or to 1:1, 4:3, 3:2, 16:9 or the picture's own shape; drag the box and its handles, or use the arrow keys, Shift and the arrows resize it), scale it down to a width, and choose how it is saved (JPEG, WebP or PNG, with a quality slider and the size the file will come out at). Nothing changes in the document until Apply. The edit is stored as a **new file** through your upload settings, so the original is still where it was, and the image remembers it (`data-original-src`) so that **Restore original** can bring it back. A picture from a server that does not send CORS headers can be shown but not edited, and the editor says so; GIFs are saved as still pictures.
 - **Drag a corner** to resize (mouse, touch or pen); the size shows while you drag.
 - **Slash menu.** `SlashCommandsPlugin({ items: mediaSlashItems })` adds `/image` and `/video`.
 - The toolbar, the handles and the upload placeholders are drawn outside the editor, so none of them end up in the document.
@@ -105,6 +106,7 @@ const plugins = [MediaManagerPlugin({ uploadHandler })];
 | `fallbackToBase64` | `false` | Insert a data URL when the upload fails, instead of showing the error |
 | `wrapInFigure` | `true` | Insert `<figure>` media that can be aligned and captioned; `false` for a bare `<img>` / `<video>` |
 | `uploadOnPaste` | `true` | Upload images and videos that are pasted or dropped into the editor |
+| `optimizeImages` | off | Scale down and re-encode large JPEG, PNG and WebP files before they are stored: `true` (wider than 2048px is scaled to 2048, quality 0.85) or `{ maxWidth, quality, format: 'keep' \| 'webp' \| 'jpeg' }`. The size limit is checked on the result, so a 12 MB photo can pass when it comes out at 600 KB; a file that cannot be made smaller is left as it is |
 | `maxFileSize` | 10 MB | Checked before sending; the dialog states it |
 | `allowedTypes` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg video | `image/*` wildcards work |
 
