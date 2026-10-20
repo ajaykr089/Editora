@@ -683,9 +683,11 @@ export const COMMENTS_CSS = `
     border-radius: 999px;
     background: #1f2937;
     color: #ffffff;
-    font: inherit;
+    /* It lives on the page, outside the editor, so it must bring its own font: inheriting would show the host page's. */
+    font-family: var(--rte-font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
     font-size: 13px;
     font-weight: 500;
+    line-height: 1;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
   }

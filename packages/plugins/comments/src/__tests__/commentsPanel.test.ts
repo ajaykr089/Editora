@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommentsPlugin, getAllComments } from '../CommentsPlugin.native';
+import { COMMENTS_CSS } from '../styles';
 
 let root: HTMLElement;
 let content: HTMLElement;
@@ -540,6 +541,12 @@ describe('the bubble over a selection', () => {
     document.dispatchEvent(new Event('pointerup'));
     await settle();
     expect(visible()).toBe(true);
+  });
+
+  it('brings its own font: it lives on the page, outside the editor, and would show the page\'s otherwise', () => {
+    const rule = COMMENTS_CSS.match(/\.rte-comments-bubble \{[^}]*\}/)![0];
+    expect(rule).toMatch(/font-family:/);
+    expect(rule).not.toMatch(/font: inherit\s*;/);
   });
 
   it('is not offered in a read-only document', async () => {
