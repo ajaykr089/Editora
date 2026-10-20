@@ -12,6 +12,7 @@ export type {
   MediaPage,
   MediaProvider,
   MediaQuery,
+  MediaUpdate,
   MediaUploadHandler,
   UploadContext,
   UploadProgress,

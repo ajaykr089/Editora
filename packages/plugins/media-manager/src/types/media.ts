@@ -15,6 +15,8 @@ export interface MediaItem {
   createdAt: number;
   metadata: Record<string, any>;
   thumbnailUrl?: string;
+  /** The description kept with the file in the library, offered as the alt text when it is inserted. */
+  alt?: string;
 }
 
 export interface MediaSource {
@@ -91,6 +93,12 @@ export interface MediaQuery {
   folderId?: string | null;
 }
 
+/** What can be changed about a file that is already in the library. */
+export interface MediaUpdate {
+  name?: string;
+  alt?: string;
+}
+
 export interface MediaPage {
   items: MediaItem[];
   total: number;
@@ -104,7 +112,7 @@ export interface MediaProvider {
   readonly name?: string;
   upload(file: File, context: UploadContext): Promise<MediaItem>;
   list?(query?: MediaQuery, context?: { signal?: AbortSignal }): Promise<MediaPage>;
-  update?(id: string, updates: Partial<Pick<MediaItem, 'name' | 'metadata'>>): Promise<MediaItem>;
+  update?(id: string, updates: MediaUpdate): Promise<void>;
   delete?(id: string): Promise<void>;
 }
 

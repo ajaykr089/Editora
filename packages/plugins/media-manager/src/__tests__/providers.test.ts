@@ -187,8 +187,8 @@ describe('the REST provider', () => {
   it('lists, updates and deletes through the library URL', async () => {
     const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
       if (init?.method === 'DELETE') return new Response(null, { status: 204 });
-      if (init?.method === 'PATCH') return Response.json({ id: 'a b', url: 'https://cdn.test/x.png', name: 'renamed' });
-      return Response.json({ items: [{ id: '1', url: 'https://cdn.test/1.png', name: 'one', type: 'image', size: 10, width: 4, height: 3, createdAt: '2026-01-01T00:00:00Z' }], total: 41 });
+      if (init?.method === 'PATCH') return Response.json({ success: true });
+      return Response.json({ items: [{ id: '1', url: 'https://cdn.test/1.png', name: 'one', alt_text: 'First', type: 'image', size: 10, width: 4, height: 3, createdAt: '2026-01-01T00:00:00Z' }], total: 41 });
     });
     vi.stubGlobal('fetch', fetchMock);
     const provider = make();
@@ -197,11 +197,12 @@ describe('the REST provider', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('https://api.test/media/library?page=2&limit=20&q=cat&type=image');
     expect((fetchMock.mock.calls[0][1] as RequestInit).headers).toMatchObject({ Authorization: 'Bearer t' });
     expect(page.total).toBe(41);
-    expect(page.items[0]).toMatchObject({ id: '1', src: 'https://cdn.test/1.png', name: 'one', width: 4 });
+    expect(page.items[0]).toMatchObject({ id: '1', src: 'https://cdn.test/1.png', name: 'one', width: 4, alt: 'First' });
 
-    await provider.update!('a b', { name: 'renamed' });
+    await provider.update!('a b', { name: 'renamed', alt: 'A cat' });
     expect(fetchMock.mock.calls[1][0]).toBe('https://api.test/media/library/a%20b');
     expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe('PATCH');
+    expect(JSON.parse((fetchMock.mock.calls[1][1] as RequestInit).body as string)).toEqual({ title: 'renamed', alt_text: 'A cat' });
 
     await provider.delete!('a b');
     expect(fetchMock.mock.calls[2][0]).toBe('https://api.test/media/library/a%20b');

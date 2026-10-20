@@ -3,6 +3,7 @@ import type {
   MediaPage,
   MediaProvider,
   MediaQuery,
+  MediaUpdate,
   UploadContext,
 } from '../types/media';
 import { MediaUploadError } from './errors';
@@ -46,6 +47,7 @@ export const mediaItemFromResponse = (raw: any, file?: File): MediaItem => {
     createdAt: raw.createdAt ? Date.parse(raw.createdAt) || Date.now() : Date.now(),
     metadata: raw.metadata && typeof raw.metadata === 'object' ? raw.metadata : {},
     thumbnailUrl: raw.thumbnailUrl ?? raw.thumbnail_url ?? undefined,
+    alt: typeof (raw.alt ?? raw.alt_text) === 'string' ? raw.alt ?? raw.alt_text : undefined,
   };
 };
 
@@ -166,15 +168,16 @@ export const createRestProvider = (options: RestProviderOptions): MediaProvider 
       return { items: rows.map((row) => mediaItemFromResponse(row)), total: Number(body?.total ?? rows.length) };
     };
 
-    provider.update = async (id, updates) => {
-      const body = await (
-        await request(itemUrl(libraryUrl, id), {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates),
-        })
-      ).json();
-      return mediaItemFromResponse(body);
+    // The field names are those of the repository's own API (`title`, `alt_text`).
+    provider.update = async (id: string, updates: MediaUpdate) => {
+      const body: Record<string, string> = {};
+      if (updates.name !== undefined) body.title = updates.name;
+      if (updates.alt !== undefined) body.alt_text = updates.alt;
+      await request(itemUrl(libraryUrl, id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
     };
 
     const deleteUrl = options.deleteUrl || libraryUrl;
