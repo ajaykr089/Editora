@@ -1,4 +1,11 @@
-export { CommentsPlugin, getCommentThreads, setCommentThreads, configureComments } from './CommentsPlugin.native';
+export {
+  CommentsPlugin,
+  getCommentThreads,
+  setCommentThreads,
+  upsertCommentThread,
+  removeCommentThread,
+  configureComments,
+} from './CommentsPlugin.native';
 export type {
   CommentReplyData,
   CommentThread,

@@ -1173,6 +1173,10 @@ export function CommentsPlugin(options?: CommentsOptions): Plugin;
 export function getCommentThreads(target: Element): CommentThread[];
 /** Show these threads in an editor in place of the ones it has. Does not call `onChange`. */
 export function setCommentThreads(target: Element, threads: CommentThread[]): void;
+/** Add or replace a single thread that arrived while the editor is open, without disturbing what the person is typing. Returns false when `thread` cannot be used. Does not call `onChange`. */
+export function upsertCommentThread(target: Element, thread: CommentThread): boolean;
+/** Take away a single thread that was deleted elsewhere. Returns false when the editor has no such thread. Does not call `onChange`. */
+export function removeCommentThread(target: Element, threadId: string): boolean;
 /** Give an editor the options `CommentsPlugin(options)` takes, when the plugin cannot know which editor is its own. */
 export function configureComments(target: Element, options: CommentsOptions): void;
 export function SpellCheckPlugin(): Plugin;

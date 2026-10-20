@@ -180,6 +180,8 @@ export {
   CommentsPlugin,
   getCommentThreads,
   setCommentThreads,
+  upsertCommentThread,
+  removeCommentThread,
   configureComments,
   type CommentReplyData,
   type CommentThread,
