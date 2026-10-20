@@ -56,6 +56,12 @@ describe('sanitizeHTML', () => {
     expect(result).toBe(html);
   });
 
+  it('keeps a captioned image: <figure>, <img> and <figcaption>, with the classes that style them', () => {
+    const html = '<figure class="rte-media" data-align="center"><img src="https://example.com/a.png" alt="A"><figcaption>Caption</figcaption></figure>';
+    expect(sanitizeHTML(html)).toBe(html);
+    expect(sanitizeInputHTML(html)).toBe(html);
+  });
+
   it('keeps the start number and direction of an ordered list', () => {
     const html = '<ol start="5"><li>five</li><li>six</li></ol><ol reversed=""><li>b</li><li>a</li></ol>';
     expect(sanitizeHTML(html)).toBe(html);

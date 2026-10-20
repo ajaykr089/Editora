@@ -41,6 +41,8 @@ const DEFAULT_ALLOWED_TAGS = [
   'table', 'thead', 'tbody', 'tr', 'th', 'td',
   'blockquote', 'pre', 'code',
   'span', 'div', 'section',
+  // A captioned image or video (the media manager's output). Neither carries behaviour of its own.
+  'figure', 'figcaption',
   'sup', 'sub',
   'hr'
   // 'iframe' is deliberately not in the default allowlist. Arbitrary pasted
