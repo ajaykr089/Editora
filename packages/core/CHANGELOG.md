@@ -1,5 +1,45 @@
 # Change Log
 
+## 1.0.25
+
+### Patch Changes
+
+- fe65119: Media manager: paste and drop, captions, alignment and size, and the keyboard.
+
+  - **Paste and drop to upload.** Pasting an image (a screenshot, a copied picture) or dropping image and video files on the editor puts a placeholder where they go, with its own progress and a cancel button, and swaps in the media when it is stored, as one undo step. Failures and refused files (too large, wrong type) say why. Text pasted together with a picture (spreadsheet cells, a copied page) stays text. `uploadOnPaste: false` turns it off.
+  - **Figures and captions.** Inserted media is now `<figure class="rte-media" data-align>` with an optional `<figcaption>`; it can be aligned left, centre or right, captioned, and sized from a Size menu (small, medium, large, full width, original; relative to the visible width of the text). Alignment is plain margins and the figure shrinks to the picture (`display: table`), so saved HTML renders the same without the editor's CSS. Media from earlier versions is wrapped when it is aligned or captioned. `wrapInFigure: false` keeps the bare `<img>` / `<video>`. Enter in a caption goes on below, Backspace in an empty one removes it, and pasting into one is a line of plain text.
+  - **Inserting at a caret splits the block.** A figure cannot live inside a paragraph (the HTML parser tears it out), so inserting splits the paragraph or heading around the caret instead of putting the figure inside it; at the end of the editor an empty paragraph is left to type in.
+  - **Keyboard.** An arrow key at the edge of the paragraph beside media selects it (browsers skip over it), Alt+F10 moves into its toolbar (arrow keys, Enter or Space, Escape or Tab back to the text) and the toolbar keeps the focus on the button used. The corner handles use pointer events, so touch and pen drag them too, and show the size while dragging; they are larger on touch screens.
+  - `mediaSlashItems` for `SlashCommandsPlugin({ items })` adds `/image` and `/video`. `getCleanEditorHTML` (core) now drops unfinished uploads, the editing-only `contenteditable` of figures, and captions nobody wrote in, so none of it reaches `onChange` or saved content.
+  - **React:** `EditorContent` set `resize: both; overflow: auto; display: inline-block` on every image or video that was clicked, which put a second native resize grip on it, changed the saved content, and overrode block alignment. It no longer does.
+  - Selecting by clicking a video's control bar no longer takes the click away from the video's own controls.
+
+- 3e2a3a7: Media manager: uploads that upload, and a selection that does not leak into the document.
+
+  **Uploads and configuration:**
+  - The upload progress bar was a random-number timer, and the plugin never read `setMediaManagerConfig`, so the documented API-backed upload did nothing: every file became a data URL. Files now go where you point them, in this order: a `provider`, an `uploadHandler` function, a REST backend (`apiUrl` and `apiEndpoints`), or, with nothing configured, a data URL as before. Settings can be given to one plugin (`MediaManagerPlugin({ uploadHandler })`) and win over the global ones.
+  - The progress is real (bytes sent for a server, bytes read for a data URL), an upload can be cancelled with a button or by closing the dialog, and a failure says what happened: the server's own message, or that the file is too large or of a type that is not allowed. A file over `maxFileSize` or outside `allowedTypes` is refused before anything is sent.
+  - The drop zone states the real size limit (it said 50 MB whatever the setting). The default limit is 10 MB, and the default types now include WebP and AVIF; `image/*` wildcards work in `allowedTypes`.
+  - New exports: `createRestProvider`, `createCallbackProvider`, `createBase64Provider`, `MediaUploadError` and the `MediaProvider`, `MediaItem`, `UploadContext` types. `apiEndpoints` is merged one key at a time, so setting only `upload` keeps the other defaults.
+  - `fallbackToBase64` (new, off by default) inserts a data URL when an upload fails. The `offline.*`, `upload.*`, `storage`, `library` and `manipulation` options of the exported `MediaManagerConfig` type were never implemented and are removed from it.
+
+  **Selecting media:**
+  - The floating toolbar was inserted into the editor's own content while an image was selected, so it could end up in a saved document; it, and the resize handles, are now drawn outside the editor.
+  - Selecting an image no longer edits it (it used to force `display: block`), and aligning, editing alt text, linking, replacing, removing and resizing now tell the editor the content changed and can be undone.
+  - Every initialisation of the plugin added another set of document listeners and four more resize handles; there is now one of each however many editors are on the page, and the plugin's `destroy` removes them. The toolbar's scroll listeners were leaked on every selection.
+  - Removing a linked image removes the link around it too, when the link held only the image.
+
+  **Core:** `<figure>` and `<figcaption>` are kept by the default sanitizer, in preparation for captioned media.
+
+- 7e14517: Media manager: audio, embedded videos, galleries, stock photos and suggested alt text.
+
+  - **Audio.** `insertAudio` and a picker for audio files; the result is a figure with an `<audio controls>` player that can be aligned and captioned, and is selected without taking the click from its controls. The Audio toolbar button is opt-in (`audio: true`) so that existing toolbars do not change; `audio` is a name for toolbar item lists in both toolbars, and `mediaSlashItems` has `/audio`. The default allowed types include MP3, WAV, Ogg, MP4/M4A, AAC and WebM audio. The repository's API server accepts and types audio (databases made before need `ALTER TABLE media MODIFY type ENUM('image', 'video', 'audio') NOT NULL`).
+  - **Embedded videos.** The Insert Video dialog has an Embed tab for YouTube and Vimeo links, or the iframe snippet a site offers. Only the video's id is read; the iframe's address is built from it, so a pasted link cannot bring in another host, a script URL or extra parameters (YouTube's privacy-enhanced host, Vimeo's do-not-track setting). The player is a block figure that keeps its shape, loads lazily, can be aligned, captioned and sized, takes no mouse while editing (clicking it selects its figure) and survives the editor's sanitizer through the existing trusted-embed mark. `embedProviders` adds more services.
+  - **Galleries.** Choosing two or more pictures offers Insert as gallery: one figure with a grid of equal-shaped pictures in 2 to 5 columns (a Columns menu in the toolbar) and one caption; each picture still has its own alt text, link, edit and replace, and can be removed alone. A gallery of stock photos carries their credits as its caption.
+  - **Stock photos.** `stockProvider` adds a tab to the Insert Image dialog: you write `search` (calling your own backend, where the API key lives) and get a searchable, paged grid. Photos are inserted by address with their description as alt text and, by default, "Photo by <author> on <service>" as the caption. The editor calls no service itself.
+  - **Suggested alt text.** `generateAltText` adds a Suggest button next to the alt text field in the picker and in the Edit alt text dialog. What comes back is tidied and put in the field for the person to read and change, never inserted on its own; failures are said next to the button.
+  - An upload's type is now taken from the file that was sent rather than from the server's reply, so a server that files audio under another type cannot make it insert as something else.
+
 ## 1.0.24
 
 ### Patch Changes
