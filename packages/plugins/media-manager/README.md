@@ -8,7 +8,25 @@
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
-Inserts images and videos from a URL or a file, and edits them in place.
+The advanced media manager for Editora: one **Media** window for images, video, audio and embedded players, with a searchable library, uploads that show their progress, an image editor, captions and alt text. It works with no backend, and with your own storage through one function or a full provider.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/media-manager/docs/images/media-library.png" alt="The Media window: sources on the left, a grid of pictures with filter pills, a video with its length, an upload at 64 percent, and a details panel with alt text, Edit and Alt" width="900">
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/media-manager/docs/images/media-in-editor.png" alt="A captioned picture selected in the document, with its toolbar and resize handles" width="440">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/media-manager/docs/images/media-image-editor.png" alt="The image editor with a 16 to 9 crop box" width="440">
+  <br>
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/media-manager/docs/images/media-list.png" alt="The library as a list with two pictures chosen" width="440">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/media-manager/docs/images/media-phone-dark.png" alt="The Media window on a phone in the dark theme" width="180">
+</p>
+
+- **Library, Upload, From URL, Stock photos and Embed** in one window, with All / Images / Video / Audio filters, search, sort, and a grid or list layout.
+- **Uploads you can see**: drop or paste files and they appear in the grid with their own progress; paste or drop into the document and a placeholder holds the place.
+- **Image editing**: rotate, flip, crop, scale and re-encode, keeping the original.
+- **Accessible**: alt text with a decorative switch and optional suggested descriptions, real `<figure>` captions, keyboard, touch and screen reader support.
+- **Your storage**: `uploadHandler`, a `provider` with `list`, `update` and `delete`, or the REST API in the repository.
 
 ## Installation
 

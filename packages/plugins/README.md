@@ -147,7 +147,7 @@ what you write in the `plugins` attribute of `<editora-editor>`.
 | `LinkPlugin` | Links | `link` | `lite` | `link` | `link` |
 | `ListPlugin` | Bulleted and numbered lists | `bullist` `numlist` | `lite` | `list` | `list` |
 | `MathPlugin` | Math formulas (LaTeX or MathML) | `math` |  | `math` | `math` |
-| `MediaManagerPlugin` | Insert images and video | `image` `video` | `enterprise` | `media-manager` | `image` |
+| `MediaManagerPlugin` | Advanced media manager: library, uploads, image editing, audio, video and embeds | `image` `video` | `enterprise` | `media-manager` | `image` |
 | `MentionPlugin` | @mentions from a list you provide | `mention` | `enterprise` | `mentions` | `mentions` |
 | `MergeTagPlugin` | Merge tags such as `{{ First name }}` | `mergetag` | `enterprise` | `merge-tag` | `mergeTag` |
 | `PIIRedactionPlugin` | Scan for personal data | `piiredaction` | `enterprise` | `pii-redaction` | `piiRedaction` |
