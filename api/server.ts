@@ -84,18 +84,34 @@ app.get('/api/media/library', async (req, res) => {
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 20)); // clamp for safety
   const offset = (page - 1) * limit;
 
+  // Filters the editor's media picker sends: `q` searches names and alt text, `type` is image or video.
+  const where = ["deleted_at IS NULL", "status = 'ready'"];
+  const params: string[] = [];
+  const search = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+  if (search) {
+    const pattern = `%${search.replace(/[\\%_]/g, '\\$&')}%`;
+    where.push('(original_filename LIKE ? OR alt_text LIKE ?)');
+    params.push(pattern, pattern);
+  }
+  if (req.query.type === 'image' || req.query.type === 'video') {
+    where.push('type = ?');
+    params.push(req.query.type);
+  }
+  const condition = where.join(' AND ');
+
   try {
     const sql = `
-      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, file_size AS size, width, height, folder_id, created_at AS createdAt 
+      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, mime_type AS mimeType, file_size AS size, width, height, alt_text AS alt, folder_id, created_at AS createdAt 
       FROM media 
-      WHERE deleted_at IS NULL AND status = 'ready' 
+      WHERE ${condition} 
       ORDER BY created_at DESC 
       LIMIT ${limit} OFFSET ${offset}
     `;
-    const [rows] = await pool.execute<RowDataPacket[]>(sql);
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
 
     const [countResult] = await pool.execute<RowDataPacket[]>(
-      "SELECT COUNT(*) as total FROM media WHERE deleted_at IS NULL AND status = 'ready'"
+      `SELECT COUNT(*) as total FROM media WHERE ${condition}`,
+      params
     );
 
     res.json({
