@@ -1,69 +1,62 @@
 # Custom Server Upload Configuration
 
-This guide explains how to set up your own custom media upload server and configure the media-manager plugin to use it.
+How to point the media-manager at your own upload server, and what that server has to answer.
 
 ## Overview
 
-The media-manager can work in three modes:
+Where an inserted file goes is decided in this order:
 
-1. **API Mode** (Default): Uses the built-in API server
-2. **Custom Server Mode**: Uploads to your own custom endpoint
-3. **Base64 Mode**: Stores images as base64 directly in content (offline-first)
+1. **`provider`**: a complete provider object (upload, and optionally list, update and delete).
+2. **`uploadHandler`**: one function, `(file, { onProgress, signal }) => url`. The shortest way to plug in any backend or SDK.
+3. **`apiUrl`**: a REST backend that answers the format in [Response Format](#response-format).
+4. **Nothing configured**: the file becomes a data URL and stays in the document (no server needed).
 
-All three can be combined with fallback behavior.
+The upload dialog shows true progress for 1-3 (`onProgress` for a handler), has a Cancel button, and shows the failure message when it fails.
 
 ---
 
 ## Configuration
 
-### Option 1: Custom Upload Server (Recommended for Production)
+### Option 1: a REST server
 
 ```typescript
-const mediaManagerConfig = {
-  offline: {
-    customUploadUrl: 'https://your-domain.com/api/upload',
-    customUploadHeaders: {
-      'Authorization': 'Bearer YOUR_API_TOKEN',
-      'X-Custom-Header': 'value'
-    },
-    fallbackToBase64: true // Fall back to base64 if upload fails
-  }
-};
+import { setMediaManagerConfig } from '@editora/media-manager';
+
+setMediaManagerConfig({
+  apiUrl: 'https://your-domain.com',
+  apiEndpoints: { upload: '/api/upload' }, // only the keys you change; library and delete keep their defaults
+  headers: { Authorization: 'Bearer YOUR_API_TOKEN' },
+  withCredentials: false,       // true to send cookies on a cross-origin upload
+  uploadFieldName: 'file',      // the multipart field that carries the file
+  maxFileSize: 50 * 1024 * 1024,
+  allowedTypes: ['image/*', 'video/mp4'],
+});
 ```
 
-### Option 2: Base64 Only (No Server)
+### Option 2: an upload function
 
 ```typescript
-const mediaManagerConfig = {
-  offline: {
-    useBase64Permanently: true // Always store images as base64
-  }
-};
+setMediaManagerConfig({
+  uploadHandler: async (file, { onProgress, signal }) => {
+    const result = await myStorageSdk.upload(file, { onProgress: (p) => onProgress?.({ loaded: p, total: 1, fraction: p }), signal });
+    return result.url; // or { url, width, height, thumbnailUrl }
+  },
+});
 ```
 
-### Option 3: Graceful Fallback (Recommended)
+The same can be given to one plugin instance, and wins over the global settings: `MediaManagerPlugin({ uploadHandler })`.
+
+### Option 3: no server
+
+Configure nothing. Files are read in the browser and embedded as data URLs. The default limit is 10 MB, because a data URL is a third larger than the file and lives in your document.
+
+### Falling back to a data URL
 
 ```typescript
-const mediaManagerConfig = {
-  offline: {
-    enabled: true,
-    fallbackToBase64: true // Auto-fallback if servers unavailable
-    // No customUploadUrl = tries API first, falls back to base64
-  }
-};
+setMediaManagerConfig({ apiUrl: 'https://your-domain.com', fallbackToBase64: true });
 ```
 
-### Option 4: Custom Server with Fallback
-
-```typescript
-const mediaManagerConfig = {
-  offline: {
-    customUploadUrl: 'https://your-domain.com/api/upload',
-    fallbackToBase64: true,
-    customUploadHeaders: { /* headers */ }
-  }
-};
-```
+Off by default: when the server is unreachable the person sees the error and can try again. Turn it on only if inserting a very large document body is better for you than a failure message.
 
 ---
 
@@ -410,31 +403,18 @@ handle_upload();
 
 ---
 
-## Configuration in React Component
+## Configuration in React
+
+The settings are global to the page, so set them once, before the editor renders:
 
 ```tsx
-import { EditoraEditor } from '@editora/react';
+import { setMediaManagerConfig } from '@editora/media-manager';
 
-export function MyEditor() {
-  const config = {
-    mediaManager: {
-      offline: {
-        customUploadUrl: 'https://api.example.com/upload',
-        customUploadHeaders: {
-          'Authorization': `Bearer ${process.env.REACT_APP_API_TOKEN}`
-        },
-        fallbackToBase64: true
-      },
-      upload: {
-        enabled: true,
-        maxFileSize: 52428800, // 50MB
-        allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
-      }
-    }
-  };
-
-  return <EditoraEditor config={config} />;
-}
+setMediaManagerConfig({
+  apiUrl: 'https://api.example.com',
+  apiEndpoints: { upload: '/upload' },
+  headers: { Authorization: `Bearer ${token}` },
+});
 ```
 
 ---
@@ -457,32 +437,21 @@ Your server MUST return JSON in this format:
 ```
 
 ### Required Fields
-- `url` - Full URL to uploaded file
-- `width` - Image width in pixels
-- `height` - Image height in pixels
+- `url` - Full URL to the uploaded file (`src` and `location` are accepted too)
 
 ### Optional Fields
-- `filename` - Original or sanitized filename
-- `size` - File size in bytes
-- `thumbnailUrl` - URL to thumbnail (defaults to url)
-- `mimeType` - MIME type
-- `uploadedAt` - ISO timestamp
+- `id` - Your identifier for the file; used for the library, update and delete calls
+- `width`, `height` - Pixel dimensions (a `0` means "not measured" and is ignored)
+- `filename`, `size`, `mimeType`, `uploadedAt`
+- `thumbnailUrl` - URL to a thumbnail (defaults to `url`)
+
+An error is any non-2xx status; the plugin shows `error` or `message` from a JSON body, or a plain sentence for 401, 403 and 413.
 
 ---
 
 ## Fallback Behavior
 
-When uploads fail, the editor automatically inserts images as base64:
-
-```typescript
-// If this happens:
-// 1. customUploadUrl fails → fallback to base64
-// 2. Both customUploadUrl and API fail → fallback to base64
-// 3. All fail but fallbackToBase64: false → show error
-
-// Users won't lose their work - images are embedded in content
-// Later, you can migrate base64 images to your server
-```
+By default a failed upload is reported and nothing is inserted. With `fallbackToBase64: true` the file is inserted as a data URL instead. A cancelled upload never falls back.
 
 ---
 
@@ -504,7 +473,7 @@ When uploads fail, the editor automatically inserts images as base64:
 - ✅ Set proper cache headers
 
 ### Reliability
-- ✅ Fallback to base64 for offline support
+- ✅ Decide whether a failed upload should fall back to a data URL (`fallbackToBase64`) or show the error
 - ✅ Log all uploads
 - ✅ Return image dimensions
 - ✅ Handle large files gracefully
@@ -514,14 +483,13 @@ When uploads fail, the editor automatically inserts images as base64:
 
 ## Troubleshooting
 
-### Upload fails silently
-- Check if `fallbackToBase64` is true (should default to true)
-- Image is inserted as base64 instead - this is expected behavior
-- Check server logs for actual error
+### The dialog shows an error
+- It carries the server's own message when the server sent one as JSON (`{ "error": "..." }`)
+- Check the Network tab for the real status; 413 is usually a proxy body-size limit
+- With `fallbackToBase64: true` the image is inserted as a data URL instead of showing the error
 
 ### Wrong dimensions returned
-- Ensure your server correctly reads image dimensions
-- Alternatively, browser will auto-detect if not provided
+- Dimensions are optional; the browser measures the image when the server sends none
 
 ### CORS errors
 - Add proper CORS headers to your upload endpoint

@@ -59,6 +59,7 @@ const COMMAND_ALIASES: Record<string, string> = {
   link: 'openLinkDialog',
   image: 'insertImage',
   video: 'insertVideo',
+  audio: 'insertAudio',
   table: 'insertTable',
   trackchanges: 'toggleTrackChanges',
   accepttrackchanges: 'acceptAllTrackChanges',

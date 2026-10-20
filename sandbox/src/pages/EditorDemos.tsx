@@ -417,7 +417,7 @@ export function EditoraEnterpriseDemo() {
   return (
     <div>
       <h2 style={h2}>Enterprise Editor</h2>
-      <Grid style={{ gap: 20 }}>
+      <Grid style={{ gap: 20, gridTemplateColumns: 'minmax(0, 1fr)' }}>
         <div style={panel}>
           <h3 style={h3}>Document workflow setup</h3>
           {editorShell(
@@ -496,7 +496,7 @@ export function EditoraAllToolbarsDemo() {
   return (
     <div>
       <h2 style={h2}>All Editor Toolbars</h2>
-      <Grid style={{ gap: 20 }}>
+      <Grid style={{ gap: 20, gridTemplateColumns: 'minmax(0, 1fr)' }}>
         <div style={panel}>
           <h3 style={h3}>Storybook Basic: all available native toolbar plugins</h3>
           {editorShell(

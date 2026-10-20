@@ -62,7 +62,7 @@ npx @editora/cli add ui-select
 - ✅ **Lists**: Ordered and unordered lists with nesting
 - ✅ **Blockquotes**: Quoted content blocks
 - ✅ **Links**: URL management with validation
-- ✅ **Images**: Upload with validation and controls
+- ✅ **Media**: An [advanced media manager](packages/plugins/media-manager/README.md) for images, video, audio and embeds: library, uploads, image editing, captions
 - ✅ **Tables**: Full table editing with resize and merge
 - ✅ **Code Blocks**: Syntax highlighting for 30+ languages
 - ✅ **History**: Undo/redo with configurable depth
@@ -91,7 +91,7 @@ npx @editora/cli add ui-select
   <img src="images/features-overview-2.png" alt="Advanced Tables" width="400" style="margin: 10px;">
   <br>
   <img src="images/features-overview-3.png" alt="Code Syntax Highlighting" width="400" style="margin: 10px;">
-  <img src="images/features-overview-4.png" alt="Media Management" width="400" style="margin: 10px;">
+  <img src="images/features-overview-4.png" alt="The Media window: a library of pictures with a details panel and an upload under way" width="400" style="margin: 10px;">
   <br>
   <img src="images/features-overview-5.png" alt="Accessibility Checker" width="400" style="margin: 10px;">
   <img src="images/features-overview-6.png" alt="Theme Support" width="400" style="margin: 10px;">
@@ -99,6 +99,41 @@ npx @editora/cli add ui-select
   <img src="images/features-overview-7.png" alt="Plugin Architecture" width="400" style="margin: 10px;">
   <img src="images/features-overview-8.png" alt="Performance Monitoring" width="400" style="margin: 10px;">
 </div>
+
+## 🖼️ Advanced Media Manager
+
+Images, video, audio and embedded players go through one **Media** window instead of a bare file picker. It works with no backend at all (files stay in the document, and a library of what you uploaded is kept in the browser), and with your own storage through one function or a full provider.
+
+<div align="center">
+  <img src="packages/plugins/media-manager/docs/images/media-library.png" alt="The Media window: sources on the left, a grid of pictures with filter pills, a video with its length, an upload at 64 percent, and a details panel with alt text, Edit and Alt" width="900" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Library, upload progress inside the grid, and a details panel with alt text, caption, Edit and Alt</em></p>
+</div>
+
+- **One window for all media**: Library, Upload, From URL, Stock photos and Embed (YouTube and Vimeo) in a sidebar; All / Images / Video / Audio pills; search, sort and a grid or list layout.
+- **Uploads you can see**: drop or paste files anywhere in the window and they appear in the grid with their own progress, cancel and retry. Paste or drop a picture straight into the document and it gets a placeholder where it will land.
+- **Edit in place**: rotate, flip, crop to a shape, scale and re-encode with the built-in image editor, and keep the original.
+- **Accessible by design**: alt text with a "decorative" switch and an optional **Alt** button that calls your own description service, captions as real `<figure><img><figcaption>`, keyboard control of the grid, the toolbar and resizing.
+- **Bring your own backend**: `uploadHandler(file, { onProgress, signal })`, a `provider` with `list`, `update` and `delete`, or the REST API in [`api/`](api). Stock photo services plug in the same way.
+- **Everywhere**: touch handles, a bottom sheet on phones, light and dark themes, tested in Chromium, Firefox and WebKit.
+
+<div align="center">
+  <img src="packages/plugins/media-manager/docs/images/media-in-editor.png" alt="A captioned picture selected in the document, with its toolbar for alignment, size, caption, edit and replace, and resize handles at the corners" width="440">
+  <img src="packages/plugins/media-manager/docs/images/media-image-editor.png" alt="The image editor with a 16 to 9 crop box over a picture" width="440">
+  <br>
+  <img src="packages/plugins/media-manager/docs/images/media-list.png" alt="The library as a list, with two pictures chosen and Insert as gallery offered" width="440">
+  <img src="packages/plugins/media-manager/docs/images/media-phone-dark.png" alt="The Media window on a phone in the dark theme" width="180">
+</div>
+
+```ts
+import { MediaManagerPlugin } from "@editora/plugins";
+
+MediaManagerPlugin({
+  uploadHandler: async (file, { onProgress, signal }) => (await myUpload(file, onProgress, signal)).url,
+  optimizeImages: { maxWidth: 1600, quality: 0.85 },
+});
+```
+
+See the [media manager guide](packages/plugins/media-manager/README.md) for providers, stock photos, suggested alt text, galleries and the REST API.
 
 ## 📦 Installation
 

@@ -29,7 +29,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm'];
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/webm'];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -54,7 +54,7 @@ app.post('/api/media/upload', upload.single('file'), async (req, res) => {
 
   const id = uuidv4();
   const url = `http://localhost:${PORT}/uploads/${req.file.filename}`;
-  const type = req.file.mimetype.startsWith('image') ? 'image' : 'video';
+  const type = req.file.mimetype.startsWith('image') ? 'image' : req.file.mimetype.startsWith('audio') ? 'audio' : 'video';
   const storagePath = `/uploads/${req.file.filename}`;
 
   try {
@@ -84,18 +84,36 @@ app.get('/api/media/library', async (req, res) => {
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 20)); // clamp for safety
   const offset = (page - 1) * limit;
 
+  // Filters the editor's media picker sends: `q` searches names and alt text, `type` is image or video.
+  const where = ["deleted_at IS NULL", "status = 'ready'"];
+  const params: string[] = [];
+  const search = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+  if (search) {
+    const pattern = `%${search.replace(/[\\%_]/g, '\\$&')}%`;
+    where.push('(original_filename LIKE ? OR alt_text LIKE ?)');
+    params.push(pattern, pattern);
+  }
+  if (req.query.type === 'image' || req.query.type === 'video' || req.query.type === 'audio') {
+    where.push('type = ?');
+    params.push(req.query.type);
+  }
+  const condition = where.join(' AND ');
+  // `sort` is newest (default), oldest or name; anything else falls back to newest.
+  const order = req.query.sort === 'oldest' ? 'created_at ASC' : req.query.sort === 'name' ? 'original_filename ASC, created_at DESC' : 'created_at DESC';
+
   try {
     const sql = `
-      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, file_size AS size, width, height, folder_id, created_at AS createdAt 
+      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, mime_type AS mimeType, file_size AS size, width, height, duration, alt_text AS alt, folder_id, created_at AS createdAt 
       FROM media 
-      WHERE deleted_at IS NULL AND status = 'ready' 
-      ORDER BY created_at DESC 
+      WHERE ${condition} 
+      ORDER BY ${order} 
       LIMIT ${limit} OFFSET ${offset}
     `;
-    const [rows] = await pool.execute<RowDataPacket[]>(sql);
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
 
     const [countResult] = await pool.execute<RowDataPacket[]>(
-      "SELECT COUNT(*) as total FROM media WHERE deleted_at IS NULL AND status = 'ready'"
+      `SELECT COUNT(*) as total FROM media WHERE ${condition}`,
+      params
     );
 
     res.json({

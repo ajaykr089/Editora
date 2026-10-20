@@ -56,6 +56,12 @@ describe('sanitizeHTML', () => {
     expect(result).toBe(html);
   });
 
+  it('keeps a captioned image: <figure>, <img> and <figcaption>, with the classes that style them', () => {
+    const html = '<figure class="rte-media" data-align="center"><img src="https://example.com/a.png" alt="A"><figcaption>Caption</figcaption></figure>';
+    expect(sanitizeHTML(html)).toBe(html);
+    expect(sanitizeInputHTML(html)).toBe(html);
+  });
+
   it('keeps the start number and direction of an ordered list', () => {
     const html = '<ol start="5"><li>five</li><li>six</li></ol><ol reversed=""><li>b</li><li>a</li></ol>';
     expect(sanitizeHTML(html)).toBe(html);
@@ -174,5 +180,45 @@ describe('trusted embed iframes mixed with other iframes in one document', () =>
   it('still honours an allowlist that explicitly includes iframe', () => {
     const result = sanitizeInputHTML(`${marked}${unmarked}`, { allowedTags: ['p', 'iframe'] });
     expect(count(result)).toBe(2);
+  });
+});
+
+describe('media manager output', () => {
+  const embed =
+    '<figure class="rte-media rte-embed" data-align="center" data-provider="youtube" contenteditable="false" style="display: block; width: 100%; max-width: 720px; margin: 1em auto;">' +
+    '<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="YouTube video" allow="autoplay; fullscreen" allowfullscreen="" loading="lazy" frameborder="0" data-editora-embed="true" style="display: block; width: 100%; aspect-ratio: 1.7778; border: 0;"></iframe>' +
+    '<figcaption contenteditable="true">Caption</figcaption></figure>';
+
+  it('keeps an embedded player, with its title and its shape, through the input path', () => {
+    const result = sanitizeInputHTML(`<p>a</p>${embed}`);
+    expect(result).toContain('<iframe');
+    expect(result).toContain('src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"');
+    expect(result).toContain('title="YouTube video"');
+    expect(result).toContain('aspect-ratio');
+    expect(result).toContain('class="rte-media rte-embed"');
+    expect(result).toContain('data-provider="youtube"');
+  });
+
+  it('keeps a player that has been saved and loaded again (it carries its own trust mark)', () => {
+    const once = sanitizeInputHTML(embed);
+    expect(sanitizeInputHTML(once)).toContain('<iframe');
+  });
+
+  it('does not keep an iframe of the same shape without the mark, or one pasted in', () => {
+    const unmarked = embed.replace(' data-editora-embed="true"', '');
+    expect(sanitizeInputHTML(unmarked)).not.toContain('<iframe');
+    expect(sanitizePastedHTML(embed)).not.toContain('<iframe');
+  });
+
+  it('keeps audio with controls, and a gallery grid', () => {
+    const audio = '<figure class="rte-media"><audio src="https://cdn.test/a.mp3" controls="" style="display: block; width: 320px;"></audio></figure>';
+    expect(sanitizeInputHTML(audio)).toContain('<audio');
+    expect(sanitizeInputHTML(audio)).toContain('controls');
+    const gallery =
+      '<figure class="rte-media rte-gallery" data-columns="3" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;"><img src="https://cdn.test/1.jpg" alt="One" style="aspect-ratio: 4 / 3; object-fit: cover;"><figcaption style="grid-column: 1 / -1;">Cap</figcaption></figure>';
+    const result = sanitizeInputHTML(gallery);
+    expect(result).toContain('class="rte-media rte-gallery"');
+    expect(result).toContain('grid-template-columns');
+    expect(result).toContain('<figcaption');
   });
 });

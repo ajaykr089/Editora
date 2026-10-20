@@ -167,10 +167,7 @@ describe('the insert dialog without a pointer', () => {
   it('names the hidden file input too, so that nothing in the dialog is unnamed', () => {
     open();
     const input = dialog().querySelector<HTMLInputElement>('#file-input')!;
-    expect(input.getAttribute('aria-label')).toBe('Choose an image file');
-    document.querySelectorAll('.rte-media-overlay').forEach((node) => node.remove());
-    open('insertVideo');
-    expect(dialog().querySelector('#file-input')!.getAttribute('aria-label')).toBe('Choose a video file');
+    expect(input.getAttribute('aria-label')).toBe('Choose files');
   });
 
   it('has a name, a role and focus inside once it has opened', () => {
@@ -184,7 +181,9 @@ describe('the insert dialog without a pointer', () => {
   it('says Video for a video', () => {
     open('insertVideo');
     expect(dialog().getAttribute('aria-label')).toBe('Insert Video');
-    expect(dialog().querySelector('.dropzone')!.getAttribute('aria-label')).toMatch(/video/);
+    expect(dialog().querySelector('.dropzone')!.getAttribute('aria-label')).toMatch(/files/);
+    expect(dialog().querySelector<HTMLElement>('.rte-media-title')!.textContent).toBe('Media');
+    expect(dialog().querySelector('.rte-mp-chip[aria-pressed="true"]')?.textContent ?? 'Video').toBe('Video');
   });
 });
 
@@ -245,8 +244,12 @@ describe('inserting the media', () => {
   it('inserts at the end of the editor when it was opened with no selection', () => {
     window.getSelection()!.removeAllRanges();
     insertFromUrl('https://example.com/a.png');
-    expect(editor.lastElementChild!.tagName).toBe('IMG');
-    expect(editor.querySelector('p')!.textContent).toBe('Alpha beta gamma');
+    // A captionable figure, with an empty paragraph after it to type in.
+    const [first, figure, tail] = [...editor.children];
+    expect(first.textContent).toBe('Alpha beta gamma');
+    expect(figure.tagName).toBe('FIGURE');
+    expect(figure.querySelector('img')).not.toBeNull();
+    expect(tail.tagName).toBe('P');
   });
 
   it('puts a video in the same way, with controls', () => {

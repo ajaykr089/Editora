@@ -566,15 +566,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       }
     };
 
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
-        target.style.resize = 'both';
-        target.style.overflow = 'auto';
-        target.style.display = 'inline-block';
-      }
-    };
-
     const handleContextMenu = (e: MouseEvent) => {
       if (contextMenuConfig?.enabled === false) {
         e.preventDefault();
@@ -594,7 +585,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     el.addEventListener('beforeinput', handleBeforeInput as EventListener);
     el.addEventListener('input', handleInput);
     el.addEventListener('paste', handlePaste);
-    el.addEventListener('click', handleClick);
     el.addEventListener('contextmenu', handleContextMenu);
     el.addEventListener('focus', handleFocusOrBlur);
     el.addEventListener('blur', handleFocusOrBlur);
@@ -606,7 +596,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.removeEventListener('beforeinput', handleBeforeInput as EventListener);
       el.removeEventListener('input', handleInput);
       el.removeEventListener('paste', handlePaste);
-      el.removeEventListener('click', handleClick);
       el.removeEventListener('contextmenu', handleContextMenu);
       el.removeEventListener('focus', handleFocusOrBlur);
       el.removeEventListener('blur', handleFocusOrBlur);
