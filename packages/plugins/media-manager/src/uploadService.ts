@@ -1,5 +1,6 @@
 import { resolveMediaManagerConfig } from './constants';
 import { MediaUploadError, createBase64Provider, isAbort, resolveProvider } from './providers';
+import { isOptimizable, optimizeImageFile, resolveOptimize } from './imaging/optimize';
 import type { MediaItem, MediaManagerConfig, UploadProgress } from './types/media';
 
 export interface UploadOptions {
@@ -33,11 +34,8 @@ export const acceptFor = (kind: 'image' | 'video', config?: Partial<MediaManager
   return matching.length ? matching.join(',') : `${kind}/*`;
 };
 
-/** Throws a MediaUploadError for a file the settings do not allow. */
-export const validateFile = (file: File, config: MediaManagerConfig): void => {
-  if (config.allowedTypes && !isTypeAllowed(file.type, config.allowedTypes)) {
-    throw new MediaUploadError('type-not-allowed', `${file.name || 'This file'} isn't a type that can be uploaded here.`);
-  }
+/** Throws when the file is over the size limit. */
+export const assertSize = (file: File, config: MediaManagerConfig): void => {
   if (config.maxFileSize && file.size > config.maxFileSize) {
     throw new MediaUploadError(
       'too-large',
@@ -47,12 +45,28 @@ export const validateFile = (file: File, config: MediaManagerConfig): void => {
 };
 
 /**
+ * Throws a MediaUploadError for a file the settings do not allow. A picture that is going to be made smaller
+ * (`optimizeImages`) is not held to the size limit yet: a 12 MB photo may be 600 KB once it has been.
+ */
+export const validateFile = (file: File, config: MediaManagerConfig): void => {
+  if (config.allowedTypes && !isTypeAllowed(file.type, config.allowedTypes)) {
+    throw new MediaUploadError('type-not-allowed', `${file.name || 'This file'} isn't a type that can be uploaded here.`);
+  }
+  if (!(resolveOptimize(config.optimizeImages) && isOptimizable(file.type))) assertSize(file, config);
+};
+
+/**
  * Checks the file against the settings and sends it to the provider in force, with progress and cancellation.
  * Rejects with a MediaUploadError (code `aborted` when the person cancelled).
  */
-export const uploadMedia = async (file: File, options: UploadOptions = {}): Promise<MediaItem> => {
+export const uploadMedia = async (original: File, options: UploadOptions = {}): Promise<MediaItem> => {
   const config = resolveMediaManagerConfig(options.config);
-  validateFile(file, config);
+  validateFile(original, config);
+
+  const optimize = resolveOptimize(config.optimizeImages);
+  const file = optimize ? await optimizeImageFile(original, optimize) : original;
+  // Whatever it is now, it has to fit.
+  assertSize(file, config);
 
   const context = { signal: options.signal, onProgress: options.onProgress };
   try {

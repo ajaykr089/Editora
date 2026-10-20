@@ -158,6 +158,14 @@ export interface MediaManagerConfig {
   /** Upload images and videos that are pasted or dropped into the editor (default `true`). */
   uploadOnPaste?: boolean;
 
+  /**
+   * Scale down and re-encode large pictures before they are stored, so that a camera photo does not have to be
+   * 12 MB. `true` for the defaults (wider than 2048px is scaled to it, quality 0.85), or `{ maxWidth, quality,
+   * format }`. JPEG, PNG and WebP only; the file is left as it is when nothing is gained. Off by default.
+   * The size limit is checked on the result, so a photo over `maxFileSize` can pass once it is smaller.
+   */
+  optimizeImages?: boolean | { maxWidth?: number; quality?: number; format?: 'keep' | 'webp' | 'jpeg' };
+
   /** Maximum file size in bytes. */
   maxFileSize?: number;
   /** Allowed MIME types; `image/*` style wildcards work. */
