@@ -7,7 +7,7 @@ export {
   createRestProvider,
   MediaUploadError,
 } from './providers';
-export { parseEmbedUrl, youtube, vimeo } from './embeds/providers';
+export { parseEmbedUrl } from './embeds/providers';
 export type { EmbedProvider, EmbedSpec } from './embeds/providers';
 export type {
   AltTextGenerator,
