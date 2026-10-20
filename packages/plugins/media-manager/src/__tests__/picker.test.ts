@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetLocalLibrary } from '../providers';
 import { MediaManagerPlugin } from '../MediaManagerPlugin.native';
 import type { MediaItem, MediaProvider, MediaQuery } from '../types/media';
 
@@ -59,6 +60,7 @@ const click = (el: Element, init: MouseEventInit = {}) => el.dispatchEvent(new M
 const key = (el: Element, k: string, init: KeyboardEventInit = {}) => el.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...init }));
 
 beforeEach(() => {
+  resetLocalLibrary();
   document.body.innerHTML = '<div class="rte-content" contenteditable="true" tabindex="0"><p>Alpha beta gamma</p></div>';
   editor = document.querySelector('.rte-content') as HTMLElement;
   editor.focus();
@@ -91,11 +93,37 @@ describe('the library', () => {
     expect(list.mock.calls[0][0]).toMatchObject({ type: 'video', page: 1, limit: 24 });
   });
 
-  it('has no library when the provider cannot list, and starts at Upload', () => {
+  it('keeps a library of this browser when the provider cannot list, and starts at Upload while it is empty', () => {
     open(undefined);
+    expect(q('.tab-library')).not.toBeNull();
+    expect(q('.tab-upload').getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('has no library at all when localLibrary is off', () => {
+    placeCaret();
+    (MediaManagerPlugin({ localLibrary: false }).commands as any).insertImage(undefined, { contentElement: editor });
     expect(q('.tab-library')).toBeNull();
     expect(q('.tab-upload').getAttribute('aria-selected')).toBe('true');
     expect(q('.rte-mp-search').hidden).toBe(true);
+  });
+
+  it('remembers what was uploaded and opens on it next time, with search and a caption field', async () => {
+    const plugin = MediaManagerPlugin({ uploadHandler: async (file) => `https://cdn.test/${file.name}` });
+    const { uploadMedia } = await import('../uploadService');
+    const config = { uploadHandler: async (file: File) => `https://cdn.test/${file.name}` };
+    await uploadMedia(new File(['a'], 'lake.png', { type: 'image/png' }), { config });
+    await uploadMedia(new File(['b'], 'dune.png', { type: 'image/png' }), { config });
+    placeCaret();
+    (plugin.commands as any).insertImage(undefined, { contentElement: editor });
+    await vi.waitFor(() => expect(q('.tab-library').getAttribute('aria-selected')).toBe('true'));
+    await loaded();
+    expect(tiles()).toHaveLength(2);
+    click(tiles()[0]);
+    expect(q('#detail-caption')).not.toBeNull();
+    q<HTMLInputElement>('#detail-caption').value = 'Sunset';
+    q<HTMLInputElement>('#detail-caption').dispatchEvent(new Event('input', { bubbles: true }));
+    insertButton().click();
+    expect(editor.querySelector('figure figcaption')!.textContent).toBe('Sunset');
   });
 
   it('loads the next page on request, without repeating items', async () => {

@@ -13,6 +13,7 @@ interface AltState {
 export class DetailsPanel {
   readonly element = el('aside', 'rte-mp-details');
   private readonly alts = new Map<string, AltState>();
+  private readonly captions = new Map<string, string>();
   private shown: MediaItem | null = null;
   private suggest: { abort: () => void } | null = null;
 
@@ -23,6 +24,8 @@ export class DetailsPanel {
       defaultAlt?: string;
       /** The settings, for the Suggest button (shown when `generateAltText` is configured). */
       config?: Partial<MediaManagerConfig>;
+      /** Whether media goes in a figure, which is what a caption needs. */
+      captions?: boolean;
       canDelete: (item: MediaItem) => boolean;
       onDelete: (item: MediaItem) => void;
     },
@@ -43,6 +46,14 @@ export class DetailsPanel {
     const state = this.alts.get(item.id);
     if (state) return state.decorative ? '' : state.text || undefined;
     return item.alt || this.options.defaultAlt || undefined;
+  }
+
+  /** The caption for an item: what was typed, else the one kept with it (a photo credit). */
+  captionFor(item: MediaItem): string | undefined {
+    if (this.options.captions === false) return undefined;
+    const typed = this.captions.get(item.id);
+    const text = typed ?? (typeof item.metadata?.caption === 'string' ? item.metadata.caption : '');
+    return text.trim() || undefined;
   }
 
   show(item: MediaItem | null): void {
@@ -77,6 +88,7 @@ export class DetailsPanel {
     }
 
     if (item.type === 'image') this.element.append(this.altField(item));
+    if (this.options.captions !== false) this.element.append(this.captionField(item));
 
     if (this.options.canDelete(item)) {
       const button = el('button', 'rte-media-btn rte-media-btn-secondary');
@@ -121,6 +133,21 @@ export class DetailsPanel {
       };
       probe.src = item.src;
     }
+  }
+
+  private captionField(item: MediaItem): HTMLElement {
+    const wrap = el('div', 'rte-media-field');
+    const label = el('label', 'rte-media-label');
+    label.htmlFor = 'detail-caption';
+    label.textContent = 'Caption';
+    const input = el('input', 'rte-media-input');
+    input.type = 'text';
+    input.id = 'detail-caption';
+    input.placeholder = 'Shown under the media';
+    input.value = this.captions.get(item.id) ?? (typeof item.metadata?.caption === 'string' ? item.metadata.caption : '');
+    input.addEventListener('input', () => this.captions.set(item.id, input.value));
+    wrap.append(label, input);
+    return wrap;
   }
 
   private altField(item: MediaItem): HTMLElement {

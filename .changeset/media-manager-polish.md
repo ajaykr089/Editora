@@ -13,3 +13,6 @@ Media manager: TypeScript types that match the plugin, and fixes found by testin
 - `youtube` and `vimeo` are no longer exported (they were never declared or documented; `parseEmbedUrl` is the API).
 - The Storybook story for the media manager described `offline` options that never existed; it now shows what does (an upload handler, a library, stock photos and suggested alt text, audio, embeds and the slash menu, optimized uploads). The stale `IMPLEMENTATION.md` is replaced by `ARCHITECTURE.md`.
 - Pasting or dropping a picture into an Editora editor whose toolbar has no Image, Video or Audio button is left to that editor; the resize handles are 24px on touch screens.
+- **A library without a backend.** The dialog showed only Upload and URL unless the provider could list, which left the grid, search and details panel out of every demo and every `uploadHandler` setup. Providers that cannot list now get a library of what was uploaded from this browser (IndexedDB, in memory where that is unavailable; `localLibrary: false` turns it off). The dialog opens on it once it has something in it.
+- **Caption in the details panel.** The details panel has a Caption field (and stock photo credits fill it); it is inserted as the figure's `<figcaption>`.
+

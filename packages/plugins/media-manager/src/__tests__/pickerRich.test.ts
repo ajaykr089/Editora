@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MediaManagerPlugin } from '../MediaManagerPlugin.native';
 import { setMediaManagerConfig } from '../constants';
+import { resetLocalLibrary } from '../providers';
 import { photoToItem, creditFor, stockAsList } from '../ui/picker/stock';
 import { showAltTextDialog } from '../ui/altTextDialog';
 import { tidyAltText } from '../ui/suggestAlt';
@@ -68,6 +69,7 @@ const open = (config: Partial<MediaManagerConfig> | undefined, command: 'insertI
 };
 
 beforeEach(() => {
+  resetLocalLibrary();
   document.body.innerHTML = '<div class="rte-content" contenteditable="true"><p>Alpha beta gamma</p></div>';
   editor = document.querySelector('.rte-content') as HTMLElement;
   getMediaController().detach();

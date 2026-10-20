@@ -41,7 +41,7 @@ With no configuration, files you upload are embedded in the document as data URL
 
 One dialog for Insert Image, Insert Video and Replace Image, with a **Library**, an **Upload** and a **URL** tab:
 
-- **Library** (when the provider can list; see below): a searchable grid of what you have uploaded, paged as you scroll. Click to choose (several are fine; Shift-click chooses a range, Ctrl/Cmd+A everything loaded), double-click or Enter to insert. A details panel shows the item last touched, with its alt text (prefilled from the library) and a "decorative image" switch that inserts an empty `alt`. Providers that can delete get a Delete button there.
+- **Library**: a searchable grid of what you have uploaded, paged as you scroll. It comes from the provider when it can list (see below); otherwise it is the library of this browser, kept in IndexedDB (`localLibrary: false` turns it off), and the dialog opens on it once it has something in it. Click to choose (several are fine; Shift-click chooses a range, Ctrl/Cmd+A everything loaded), double-click or Enter to insert. A details panel shows the item last touched, with its alt text (prefilled from the library), a "decorative image" switch that inserts an empty `alt`, and a caption that goes under the media. Providers that can delete get a Delete button there.
 - **Upload**: drop files on the zone, anywhere on the dialog, or paste an image; several at once. Each file is a tile with its own real progress, a cancel button, and, if it fails or is refused (too large, wrong type), the reason, with Retry where trying again can help. A finished upload is chosen for you, and shows up in the library.
 - **URL**: the address, alt text, width and height, with a preview. An address that ends like a video is inserted as a video.
 - It works from the keyboard (arrows through the grid, Space to choose, Enter to insert), on a phone (it becomes a bottom sheet), and in the dark theme.
@@ -146,7 +146,7 @@ const plugins = [MediaManagerPlugin({ uploadHandler })];
 | `maxFileSize` | 10 MB | Checked before sending; the dialog states it |
 | `allowedTypes` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg video | `image/*` wildcards work |
 
-The library appears when the provider has a `list(query, { signal })` that answers `{ items, total }` for `{ page, limit, search, type }`: the REST backend has one (`GET <library>?page=&limit=&q=&type=`), and a custom `provider` can bring its own. With an `uploadHandler` alone there is no library, only Upload and URL.
+The library appears when the provider has a `list(query, { signal })` that answers `{ items, total }` for `{ page, limit, search, type }`: the REST backend has one (`GET <library>?page=&limit=&q=&type=`), and a custom `provider` can bring its own. With an `uploadHandler` alone, or no backend at all, the library is the one kept in this browser: the pictures uploaded here, newest first, searchable by name and alt text, up to 60. It holds the items (a data URL, or the URL your handler returned), not copies of your files, so removing one only removes it from the list.
 
 `createRestProvider`, `createCallbackProvider` and `createBase64Provider` are exported for building your own provider. There is no default API server: with no `apiUrl`, nothing is sent anywhere. An empty `apiUrl` set here means "no API" even when a global one is configured.
 

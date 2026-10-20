@@ -1056,6 +1056,8 @@ export interface MediaManagerConfig {
   audio?: boolean;
   /** Upload images, videos and audio that are pasted or dropped into the editor (default `true`). */
   uploadOnPaste?: boolean;
+  /** Keep a library of what is uploaded from this browser (IndexedDB) for providers that cannot list. Default `true`. */
+  localLibrary?: boolean;
   /** Scale down and re-encode large JPEG, PNG and WebP files before they are stored. Off by default. */
   optimizeImages?: boolean | { maxWidth?: number; quality?: number; format?: 'keep' | 'webp' | 'jpeg' };
   /** Maximum file size in bytes (checked on the result when `optimizeImages` is on). */

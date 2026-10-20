@@ -1,5 +1,5 @@
 import { resolveMediaManagerConfig } from '../../constants';
-import { resolveProvider } from '../../providers';
+import { isLocalLibrary, resolveProvider } from '../../providers';
 import type { MediaItem, MediaManagerConfig } from '../../types/media';
 import { attachEscapeCloseHandler, createDialogOverlay, createDialogShell } from '../dialogKit';
 import { DetailsPanel } from './detailsPanel';
@@ -57,7 +57,10 @@ export const openMediaPicker = (options: PickerOptions): void => {
     ...(canEmbed ? (['embed'] as const) : []),
   ];
   // Replacing an image starts from the address it has now; inserting starts from what can be browsed or dropped.
-  let view: View = mode === 'replace' && !hasLibrary ? 'url' : views[0];
+  // The library kept in this browser starts empty: open on what can be uploaded, and move to it if it has something.
+  const localOnly = hasLibrary && isLocalLibrary(provider);
+  let view: View = mode === 'replace' && (!hasLibrary || localOnly) ? 'url' : localOnly ? views.find((name) => name !== 'library')! : views[0];
+  let touched = false;
 
   const overlay = createDialogOverlay(options.contextElement);
   const dialog = createDialogShell();
@@ -105,6 +108,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
   const details = new DetailsPanel(selection, {
     defaultAlt: options.initialAlt,
     config: options.config,
+    captions: config.wrapInFigure !== false,
     // Only what is in the library can be deleted from it: not a stock photo, not a loose address.
     canDelete: (item) => Boolean(library && provider.delete && !item.metadata?.stock),
     onDelete: (item) =>
@@ -206,6 +210,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
   const isBrowse = () => view === 'library' || view === 'stock' || view === 'upload';
 
   function showView(next: View): void {
+    touched = true;
     searches[view] = searchInput.value;
     view = next;
     for (const name of views) {
@@ -231,7 +236,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
       src: item.src,
       type: item.type,
       alt: details.altFor(item),
-      caption: typeof item.metadata?.caption === 'string' ? item.metadata.caption : undefined,
+      caption: details.captionFor(item),
     }));
   }
 
@@ -334,6 +339,18 @@ export const openMediaPicker = (options: PickerOptions): void => {
   });
 
   showView(view);
+  touched = false;
+  if (localOnly && mode === 'insert') {
+    void provider.list!({ limit: 1 }).then(
+      (page) => {
+        if (page.total > 0 && !touched && overlay.isConnected) {
+          showView('library');
+          searchInput.focus({ preventScroll: true });
+        }
+      },
+      () => {},
+    );
+  }
   if (searchable[view]) searchInput.focus({ preventScroll: true });
   else if (view === 'upload') upload.focusDropzone();
   else if (view === 'embed') embed?.focus();

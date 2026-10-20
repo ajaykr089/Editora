@@ -218,6 +218,12 @@ export interface MediaManagerConfig {
   uploadOnPaste?: boolean;
 
   /**
+   * Keep a library of what is uploaded from this browser (IndexedDB) for providers that cannot list, so the picker
+   * has a Library tab with search and details without a backend (default `true`). `false` shows only Upload and URL.
+   */
+  localLibrary?: boolean;
+
+  /**
    * Scale down and re-encode large pictures before they are stored, so that a camera photo does not have to be
    * 12 MB. `true` for the defaults (wider than 2048px is scaled to it, quality 0.85), or `{ maxWidth, quality,
    * format }`. JPEG, PNG and WebP only; the file is left as it is when nothing is gained. Off by default.
