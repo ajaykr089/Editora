@@ -264,6 +264,33 @@ function snapshotThreads(state: CommentsEditorState): CommentThread[] {
     .map(toPublic);
 }
 
+/** The comments kept in localStorage for this editor, or null when nothing usable is there (or storage is off). */
+function readStoredThreads(options: CommentsOptions): CommentThread[] | null {
+  if (!options.storageKey) return null;
+  try {
+    const raw = window.localStorage.getItem(options.storageKey);
+    if (raw === null) return null;
+    return normalizeThreads(JSON.parse(raw));
+  } catch {
+    return null; // private mode, blocked storage, or something else wrote here: start without
+  }
+}
+
+let storageWarned = false;
+
+function writeStoredThreads(options: CommentsOptions, threads: CommentThread[]): void {
+  if (!options.storageKey) return;
+  try {
+    window.localStorage.setItem(options.storageKey, JSON.stringify(threads));
+  } catch (error) {
+    // Full, or blocked: commenting must go on. Say so once.
+    if (!storageWarned) {
+      storageWarned = true;
+      console.warn('[comments] the comments could not be saved to localStorage', error);
+    }
+  }
+}
+
 /** Tell the host: a DOM event on the editor, and the `onChange` option. A throwing handler must not break commenting. */
 function emitChange(state: CommentsEditorState, reason: CommentsChangeReason, threadId?: string): void {
   const threads = snapshotThreads(state);
@@ -273,6 +300,7 @@ function emitChange(state: CommentsEditorState, reason: CommentsChangeReason, th
   } catch (error) {
     console.error('[comments] a change listener threw', error);
   }
+  if (state.instance) writeStoredThreads(state.instance.options, threads);
   try {
     state.instance?.options.onChange?.(threads, change);
   } catch (error) {
@@ -301,16 +329,18 @@ function attachInstance(state: CommentsEditorState, instance: PluginInstance, as
     return;
   }
   const replacedGuess = state.instanceAssumed && state.instance;
-  if (replacedGuess && state.instance?.options.initialThreads) state.comments.clear();
+  if (replacedGuess && (state.instance?.options.initialThreads || state.instance?.options.storageKey)) state.comments.clear();
 
   state.instance = instance;
   state.instanceAssumed = assumed;
   const waiting = waitingInstances.indexOf(instance);
   if (waiting !== -1) waitingInstances.splice(waiting, 1);
 
-  if (!instance.initialApplied && instance.options.initialThreads) {
+  if (!instance.initialApplied) {
     instance.initialApplied = true;
-    replaceThreads(state, instance.options.initialThreads);
+    // What this browser kept for the key is newer than what the page was given.
+    const initial = readStoredThreads(instance.options) ?? instance.options.initialThreads;
+    if (initial) replaceThreads(state, initial);
   }
 }
 

@@ -975,6 +975,13 @@ export interface CommentsOptions {
   currentUser?: CommentUser | string;
   /** Threads to show when the editor starts, for example the ones you saved with the document. */
   initialThreads?: CommentThread[];
+  /**
+   * Keep the comments in the browser's localStorage under this key: they are saved after every change and loaded
+   * when the editor starts (they win over `initialThreads` when something is stored). The key must be yours alone,
+   * one per document: editors that share a key share their comments. Only the comments are kept: save the
+   * document's HTML as well (for example with the editor's `autosave`), or the highlights they belong to are gone.
+   */
+  storageKey?: string;
   /** Called after every change to the comments, with all of them. Store them here. */
   onChange?: (threads: CommentThread[], change: CommentsChange) => void;
   /** Whether `user` may edit or delete something `author` wrote. By default people can change their own comments when both have an id, and anyone can change anything when there are no ids. */

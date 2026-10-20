@@ -88,6 +88,7 @@ afterEach(() => {
   window.getSelection()?.removeAllRanges();
   document.body.innerHTML = '';
   document.getElementById('rte-comments-orphans')?.remove();
+  window.localStorage.clear();
 });
 
 describe('who is commenting', () => {
@@ -395,5 +396,106 @@ describe('a thread whose text comes back', () => {
     await settle();
     expect(getCommentThreads(root).map((t) => t.id)).toEqual(['t1']);
     expect(reasons).toEqual(['delete', 'document']);
+  });
+});
+
+describe('storageKey (comments kept in localStorage)', () => {
+  const KEY = 'my-doc-comments';
+  const stored = () => JSON.parse(window.localStorage.getItem(KEY) || 'null') as CommentThread[] | null;
+
+  it('saves after every change, and the next editor with the same key starts with them', async () => {
+    const root = editor();
+    const plugin = make({ storageKey: KEY, currentUser: { id: 'u1', name: 'Grace' } });
+    expect(stored()).toBeNull(); // nothing is written until something happens
+    post(root, plugin, 'first', 'beta');
+    expect(stored()!.map((t) => t.text)).toEqual(['first']);
+    expect(stored()![0].author).toEqual({ id: 'u1', name: 'Grace' });
+
+    const reply = cards(root)[0].querySelector<HTMLTextAreaElement>('.rte-comment-reply-textarea')!;
+    type(reply, 'a reply');
+    reply.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    expect(stored()![0].replies.map((r) => r.text)).toEqual(['a reply']);
+    const html = contentOf(root).innerHTML;
+
+    // "Reload": a new editor, with the document's HTML saved by whoever saves it.
+    plugins.forEach((p) => p.destroy?.());
+    plugins = [];
+    document.body.innerHTML = '';
+    const again = editor(html);
+    const second = make({ storageKey: KEY });
+    await settle();
+    second.commands?.toggleComments?.(undefined, ctx(again));
+    expect(cards(again).map((card) => card.querySelector('.rte-comment-text')!.textContent)).toEqual(['first']);
+    expect(cards(again)[0].querySelector('.rte-comment-reply-text')!.textContent).toBe('a reply');
+    expect(document.getElementById('rte-comments-orphans')).toBeNull(); // the highlight is live
+  });
+
+  it('what is stored wins over initialThreads, including an empty list', async () => {
+    const a = anchored('t1', 'beta');
+    window.localStorage.setItem(KEY, JSON.stringify([]));
+    const root = editor(`<p>Alpha ${a.html}</p>`);
+    make({ storageKey: KEY, initialThreads: [a.thread] });
+    await settle();
+    expect(getCommentThreads(root)).toEqual([]);
+  });
+
+  it('uses initialThreads when nothing is stored yet', async () => {
+    const a = anchored('t1', 'beta');
+    const root = editor(`<p>Alpha ${a.html}</p>`);
+    make({ storageKey: KEY, initialThreads: [a.thread] });
+    await settle();
+    expect(getCommentThreads(root).map((t) => t.id)).toEqual(['t1']);
+  });
+
+  it('starts empty when what is stored is not comments', async () => {
+    window.localStorage.setItem(KEY, '{not json');
+    const root = editor();
+    make({ storageKey: KEY });
+    await settle();
+    expect(getCommentThreads(root)).toEqual([]);
+    window.localStorage.setItem(KEY, JSON.stringify({ a: 1 }));
+    const other = editor();
+    make({ storageKey: KEY });
+    await settle();
+    expect(getCommentThreads(other)).toEqual([]);
+  });
+
+  it('keeps going, and says so once, when localStorage refuses', () => {
+    const root = editor();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const set = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+    const plugin = make({ storageKey: KEY });
+    post(root, plugin, 'one', 'beta');
+    post(root, plugin, 'two', 'zeta');
+    set.mockRestore();
+    expect(cards(root)).toHaveLength(2);
+    expect(warn.mock.calls.filter((call) => String(call[0]).includes('localStorage'))).toHaveLength(1);
+    warn.mockRestore();
+  });
+
+  it('writes nothing without a key, and still calls onChange when there is one', () => {
+    const root = editor();
+    const onChange = vi.fn();
+    const plugin = make({ onChange });
+    post(root, plugin, 'one', 'beta');
+    expect(window.localStorage.length).toBe(0);
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    const withBoth = editor();
+    const calls: string[] = [];
+    const second = make({ storageKey: KEY, onChange: () => calls.push(String(!!stored())) });
+    post(withBoth, second, 'two', 'zeta');
+    expect(calls).toEqual(['true']); // already saved by the time the host hears about it
+  });
+
+  it('removing the last comment is saved too', () => {
+    const root = editor();
+    const plugin = make({ storageKey: KEY });
+    post(root, plugin, 'one', 'beta');
+    (cards(root)[0].querySelector('[data-action="more"]') as HTMLButtonElement).click();
+    (cards(root)[0].querySelector('.rte-comment-menu-item[data-action="delete"]') as HTMLButtonElement).click();
+    expect(stored()).toEqual([]);
   });
 });

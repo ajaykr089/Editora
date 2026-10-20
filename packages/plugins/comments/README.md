@@ -71,10 +71,13 @@ CommentsPlugin({
 
 The highlight that anchors a comment is part of the document's HTML, so save the HTML and the threads together. Create one `CommentsPlugin(...)` per editor.
 
+No backend yet? `CommentsPlugin({ storageKey: "comments:my-document" })` keeps the comments in this browser's `localStorage`, saved after every change and loaded when the editor starts.
+
 | Option | Description |
 | --- | --- |
 | `currentUser` | `{ id?, name, avatar? }` or a name. Signs new comments, replies and resolutions. Default `{ name: "User" }`. |
 | `initialThreads` | Threads to show when the editor starts. |
+| `storageKey` | Keep the comments in `localStorage` under this key (one per document): saved after every change, loaded at start, and preferred over `initialThreads` when something is stored. Save the HTML too, for example with the editor's `autosave`. |
 | `onChange(threads, change)` | After every change, with all threads. `change.reason` is `create`, `reply`, `edit`, `resolve`, `reopen`, `delete` or `document`. |
 | `canModify(author, user)` | Who may edit or delete a comment. Default: your own, when both have an `id`; anyone, when there are no ids. |
 

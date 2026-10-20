@@ -40,12 +40,28 @@ const plugins = useMemo(
 
 Comments are anchored to the text with a highlight that is part of the document's HTML, so save the HTML and the threads together.
 
+### Without a backend: `storageKey`
+
+To keep comments in the browser, give the plugin a key. Pair it with the editor's own `autosave` so the HTML (with its highlights) is kept too:
+
+```tsx
+<RichTextEditor
+  plugins={[CommentsPlugin({ storageKey: `comments:${documentId}`, currentUser })]}
+  autosave={{ enabled: true, intervalMs: 1000, provider: 'localStorage', storageKey: `document:${documentId}` }}
+/>
+```
+
+Autosave saves on an interval and comments are saved at once, so keep `intervalMs` short (the example in this repo uses 1000): a page closed in between would otherwise come back with a comment but without its highlight.
+
+`localStorage` belongs to one browser: other people and other devices do not see these comments. For shared comments use `onChange` and your backend. If the browser refuses to store (private mode, full), commenting carries on and a warning is logged once.
+
 ## Options
 
 | Option | Type | Description |
 | --- | --- | --- |
 | `currentUser` | `{ id?, name, avatar? }` or a name | Who is commenting. New comments, replies and resolutions are signed with this. Default `{ name: 'User' }`. |
 | `initialThreads` | `CommentThread[]` | Threads to show when the editor starts. |
+| `storageKey` | `string` | Keep the comments in `localStorage` under this key: saved after every change, loaded when the editor starts (stored comments win over `initialThreads`). Use one key per document. Only the comments are kept, so save the HTML too (see below). |
 | `onChange` | `(threads, { reason, threadId? }) => void` | Called after every change with all threads. `reason` is `create`, `reply`, `edit`, `resolve`, `reopen`, `delete`, or `document` (a change that came from the text, such as the editor's own Undo). |
 | `canModify` | `(author, user) => boolean` | Who may edit or delete a comment. By default people change their own comments when both have an `id`, and anyone may when there are no ids. Anyone can always reply and resolve. |
 
