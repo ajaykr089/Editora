@@ -39,9 +39,13 @@ With no configuration, files you upload are embedded in the document as data URL
 
 ## Inserting
 
-- The dialog has an **Upload** tab (drag a file onto the zone or choose one with the keyboard) and a **URL** tab (URL, alt text, width and height, with a preview).
-- Uploads show their real progress, can be cancelled (the Cancel upload button, or closing the dialog), and say what went wrong when they fail: a file that is too large or of a type that is not allowed is refused before anything is sent.
-- The media is inserted at the caret, the caret is put after it, the editor is told its content changed, and the insertion can be undone.
+One dialog for Insert Image, Insert Video and Replace Image, with a **Library**, an **Upload** and a **URL** tab:
+
+- **Library** (when the provider can list; see below): a searchable grid of what you have uploaded, paged as you scroll. Click to choose (several are fine; Shift-click chooses a range, Ctrl/Cmd+A everything loaded), double-click or Enter to insert. A details panel shows the item last touched, with its alt text (prefilled from the library) and a "decorative image" switch that inserts an empty `alt`. Providers that can delete get a Delete button there.
+- **Upload**: drop files on the zone, anywhere on the dialog, or paste an image; several at once. Each file is a tile with its own real progress, a cancel button, and, if it fails or is refused (too large, wrong type), the reason, with Retry where trying again can help. A finished upload is chosen for you, and shows up in the library.
+- **URL**: the address, alt text, width and height, with a preview. An address that ends like a video is inserted as a video.
+- It works from the keyboard (arrows through the grid, Space to choose, Enter to insert), on a phone (it becomes a bottom sheet), and in the dark theme.
+- The media is inserted at the caret, the caret is put after it, the editor is told its content changed, and the insertion can be undone. Several chosen items go in as one undoable step, in the order they were chosen.
 
 ## Editing an inserted image or video
 
@@ -84,6 +88,8 @@ const plugins = [MediaManagerPlugin({ uploadHandler })];
 | `fallbackToBase64` | `false` | Insert a data URL when the upload fails, instead of showing the error |
 | `maxFileSize` | 10 MB | Checked before sending; the dialog states it |
 | `allowedTypes` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg video | `image/*` wildcards work |
+
+The library appears when the provider has a `list(query, { signal })` that answers `{ items, total }` for `{ page, limit, search, type }`: the REST backend has one (`GET <library>?page=&limit=&q=&type=`), and a custom `provider` can bring its own. With an `uploadHandler` alone there is no library, only Upload and URL.
 
 `createRestProvider`, `createCallbackProvider` and `createBase64Provider` are exported for building your own provider. There is no default API server: with no `apiUrl`, nothing is sent anywhere. An empty `apiUrl` set here means "no API" even when a global one is configured.
 

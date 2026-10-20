@@ -61,6 +61,16 @@ With no configuration, uploaded files are embedded in the document as data URLs.
 | `maxFileSize` | `number` | `10MB` | Checked before sending |
 | `allowedTypes` | `string[]` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg | `image/*` wildcards work |
 
+## The dialog
+
+Insert Image, Insert Video and Replace Image share one picker with three tabs:
+
+- **Library** (when the provider can `list`): searchable, paged grid; click to choose several, Shift-click for a range, double-click or Enter to insert; a details panel with alt text (prefilled from the library) and a decorative-image switch; Delete when the provider can delete
+- **Upload**: drop files on the zone or anywhere on the dialog, or paste an image; each file has its own progress, cancel, error and retry
+- **URL**: address, alt text and size, with a preview
+
+Provider contract for the library: `list({ page, limit, search, type }, { signal }) => Promise<{ items, total }>`; for the REST backend, `GET <library>?page=&limit=&q=&type=` answering `{ items, total }`.
+
 ## Behavior
 
 - Resolves active editor context before opening dialog
