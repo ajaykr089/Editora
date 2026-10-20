@@ -12,6 +12,23 @@
 
 Comments plugin for Editora rich text editor.
 
+![Comment threads beside the document: avatars, the quoted text, replies, Open / Resolved / All tabs](https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/comments/docs/images/comments-panel.png)
+
+<table>
+  <tr>
+    <td width="50%"><img alt="A Comment button appears under selected text" src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/comments/docs/images/comments-selection.png"></td>
+    <td width="50%"><img alt="The new-comment form quotes the selected text" src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/comments/docs/images/comments-new.png"></td>
+  </tr>
+  <tr>
+    <td align="center">Select text and a <b>Comment</b> button appears (or press Cmd/Ctrl+Alt+M).</td>
+    <td align="center">The form says what the comment is about.</td>
+  </tr>
+</table>
+
+On a phone the panel is a bottom sheet:
+
+<img alt="The comments panel as a bottom sheet on a phone, in the dark theme" src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/comments/docs/images/comments-mobile-dark.png" width="260">
+
 ## What It Does
 
 - Adds inline comment anchors to selected text, or a note about the whole document.
