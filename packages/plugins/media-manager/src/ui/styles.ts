@@ -1117,6 +1117,138 @@ export const injectMediaDialogStyles = (): void => {
       color: var(--rte-media-toolbar-danger-hover-text);
     }
 
+    .media-resize-handle {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      margin: -6px 0 0 -6px;
+      box-sizing: border-box;
+      background: #1f6feb;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      z-index: 10001;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+      touch-action: none;
+    }
+
+    /* A finger needs more to hold on to than a mouse does. */
+    @media (pointer: coarse) {
+      .media-resize-handle {
+        width: 22px;
+        height: 22px;
+        margin: -11px 0 0 -11px;
+      }
+    }
+
+    .rte-mp-pending {
+      position: fixed;
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      background-color: rgba(127, 127, 127, 0.22);
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      font: 13px/1.4 system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    .rte-mp-pending::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .rte-mp-pending > * {
+      position: relative;
+    }
+
+    .rte-mp-pending .rte-mp-icon-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    .rte-mp-pending-bar {
+      width: 60%;
+      max-width: 220px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.35);
+      overflow: hidden;
+    }
+
+    .rte-mp-pending-bar > span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: #fff;
+      transition: width 0.15s ease;
+    }
+
+    /* The picture the upload stands in for shows through the shade. */
+    .rte-mp-pending-label {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .media-resize-label {
+      position: fixed;
+      z-index: 10002;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(15, 23, 36, 0.86);
+      color: #fff;
+      font: 12px/1.6 system-ui, sans-serif;
+      pointer-events: none;
+    }
+
+    .media-floating-toolbar-btn[aria-pressed="true"] {
+      background: var(--rte-media-toolbar-active-bg);
+      color: var(--rte-media-toolbar-hover-text);
+    }
+
+    .media-floating-toolbar-btn:focus-visible,
+    .media-size-menu-item:focus-visible {
+      outline: 2px solid #1f6feb;
+      outline-offset: 1px;
+    }
+
+    .media-size-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 150px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--rte-media-toolbar-border);
+      border-radius: 8px;
+      background: var(--rte-media-toolbar-bg);
+      box-shadow: 0 10px 24px rgba(15, 23, 36, 0.18);
+    }
+
+    .media-size-menu-item {
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--rte-media-toolbar-text);
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .media-size-menu-item:hover {
+      background: var(--rte-media-toolbar-hover-bg);
+      color: var(--rte-media-toolbar-hover-text);
+    }
+
     .media-floating-toolbar-separator {
       width: 1px;
       height: 20px;

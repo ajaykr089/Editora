@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SelectionModel } from '../ui/picker/selection';
-import { UploadQueue } from '../ui/picker/uploadQueue';
+import { UploadQueue } from '../uploadQueue';
 
 const item = (id: string) => ({ id });
 const png = (name = 'a.png') => new File(['x'], name, { type: 'image/png' });

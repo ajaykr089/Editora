@@ -1,6 +1,7 @@
 import type { MediaManagerConfig } from '../types/media';
 import { openMediaPicker } from './picker/mediaPicker';
-import { buildMediaElement, insertAtSelection } from './picker/insertMedia';
+import { resolveMediaManagerConfig } from '../constants';
+import { buildMediaNode, insertAtSelection } from './picker/insertMedia';
 
 /** Insert Image / Insert Video: the picker, and what to do with what it returns. */
 export const showMediaDialog = (
@@ -22,7 +23,8 @@ export const showMediaDialog = (
     contextElement,
     config,
     onPick: (specs) => {
-      const elements = specs.map(buildMediaElement).filter((element): element is HTMLImageElement | HTMLVideoElement => element !== null);
+      const figure = resolveMediaManagerConfig(config).wrapInFigure !== false;
+      const elements = specs.map((spec) => buildMediaNode(spec, { figure })).filter((element): element is HTMLElement => element !== null);
       insertAtSelection(elements, { savedSelection, contextElement });
     },
   });

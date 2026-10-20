@@ -1,5 +1,6 @@
 export { MediaManagerPlugin } from './MediaManagerPlugin.native';
 export { setMediaManagerConfig, getMediaManagerConfig } from './constants';
+export { mediaSlashItems } from './slashItems';
 export {
   createBase64Provider,
   createCallbackProvider,

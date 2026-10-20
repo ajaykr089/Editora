@@ -47,9 +47,26 @@ One dialog for Insert Image, Insert Video and Replace Image, with a **Library**,
 - It works from the keyboard (arrows through the grid, Space to choose, Enter to insert), on a phone (it becomes a bottom sheet), and in the dark theme.
 - The media is inserted at the caret, the caret is put after it, the editor is told its content changed, and the insertion can be undone. Several chosen items go in as one undoable step, in the order they were chosen.
 
-## Editing an inserted image or video
+## In the editor
 
-Click it for a floating toolbar: align left, centre or right, edit the alt text, add or remove a link, replace the image and remove it. Drag the corner handles to resize. Removing asks first.
+- **Paste and drop.** Paste an image (a screenshot, a copied picture) or drop image and video files onto the editor and each one gets a placeholder where it will go, with its own progress and a cancel button, then becomes the real media when it is stored. It is one undo step. Several files at once are fine. What is pasted along with text (a spreadsheet's cells, a copied page) is left as text. Turn it off with `uploadOnPaste: false`.
+- **Captioned, aligned media.** Inserted media is a `<figure>`: align it left, centre or right, and add a caption under it (Enter in the caption goes on in a new paragraph, Backspace in an empty one removes it, pasting into it gives one line of plain text). Media without a figure (from earlier versions) gets one when you align or caption it.
+- **Select it** by clicking, or with the keyboard: an arrow key at the edge of the paragraph beside it steps onto it, the next one carries on past it. Escape lets go.
+- **The toolbar** over a selected image or video: align, **Size** (small, medium, large, full width, original size; relative to the width of the text), caption, alt text, link, replace, remove. From the keyboard, Alt+F10 moves into it; the arrow keys go along it, Enter or Space uses a button, Escape or Tab goes back to the text.
+- **Drag a corner** to resize (mouse, touch or pen); the size shows while you drag.
+- **Slash menu.** `SlashCommandsPlugin({ items: mediaSlashItems })` adds `/image` and `/video`.
+- The toolbar, the handles and the upload placeholders are drawn outside the editor, so none of them end up in the document.
+
+What is saved is plain, and needs none of the editor's CSS:
+
+```html
+<figure class="rte-media" data-align="center" style="display: table; max-width: 100%; margin: 1em auto;">
+  <img src="…" alt="…" width="480" height="300" style="max-width: 100%; height: auto; display: block;">
+  <figcaption style="display: table-caption; caption-side: bottom; …">A caption</figcaption>
+</figure>
+```
+
+(`display: table` makes the figure as wide as the picture, so the caption wraps at the picture's width.) While editing, the figure is `contenteditable="false"` with only the caption editable; the editor leaves that out of the HTML it hands to you, along with captions nobody wrote in. `wrapInFigure: false` inserts the bare `<img>` / `<video>` of earlier versions.
 
 ## Where files go
 
@@ -86,6 +103,8 @@ const plugins = [MediaManagerPlugin({ uploadHandler })];
 | `apiUrl`, `apiEndpoints`, `headers` | none | REST backend; the endpoints are merged key by key |
 | `withCredentials`, `uploadFieldName` | `false`, `file` | Cookies on a cross-origin upload; multipart field name |
 | `fallbackToBase64` | `false` | Insert a data URL when the upload fails, instead of showing the error |
+| `wrapInFigure` | `true` | Insert `<figure>` media that can be aligned and captioned; `false` for a bare `<img>` / `<video>` |
+| `uploadOnPaste` | `true` | Upload images and videos that are pasted or dropped into the editor |
 | `maxFileSize` | 10 MB | Checked before sending; the dialog states it |
 | `allowedTypes` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg video | `image/*` wildcards work |
 

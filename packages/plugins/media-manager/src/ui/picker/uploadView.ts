@@ -3,7 +3,7 @@ import { acceptFor, describeLimit } from '../../uploadService';
 import { resolveMediaManagerConfig } from '../../constants';
 import { makeDropzoneKeyboardAccessible } from '../dialogKit';
 import { icons } from './icons';
-import { UploadQueue, type QueueEntry } from './uploadQueue';
+import { UploadQueue, type QueueEntry } from '../../uploadQueue';
 import { checkBadge, el, kindBadge, nameOverlay, thumbnail } from './tile';
 import type { PickerContext } from './types';
 

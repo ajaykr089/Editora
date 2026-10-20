@@ -245,8 +245,12 @@ describe('inserting the media', () => {
   it('inserts at the end of the editor when it was opened with no selection', () => {
     window.getSelection()!.removeAllRanges();
     insertFromUrl('https://example.com/a.png');
-    expect(editor.lastElementChild!.tagName).toBe('IMG');
-    expect(editor.querySelector('p')!.textContent).toBe('Alpha beta gamma');
+    // A captionable figure, with an empty paragraph after it to type in.
+    const [first, figure, tail] = [...editor.children];
+    expect(first.textContent).toBe('Alpha beta gamma');
+    expect(figure.tagName).toBe('FIGURE');
+    expect(figure.querySelector('img')).not.toBeNull();
+    expect(tail.tagName).toBe('P');
   });
 
   it('puts a video in the same way, with controls', () => {

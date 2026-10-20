@@ -1,6 +1,6 @@
-import type { MediaItem, MediaManagerConfig } from '../../types/media';
-import { MediaUploadError, isAbort } from '../../providers';
-import { uploadMedia } from '../../uploadService';
+import type { MediaItem, MediaManagerConfig } from './types/media';
+import { MediaUploadError, isAbort } from './providers';
+import { uploadMedia } from './uploadService';
 
 export interface QueueEntry {
   id: string;

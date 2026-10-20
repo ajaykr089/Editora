@@ -1,13 +1,17 @@
+import { injectMediaDialogStyles } from './styles';
+
 type Corner = 'nw' | 'ne' | 'sw' | 'se';
 const CORNERS: Corner[] = ['nw', 'ne', 'sw', 'se'];
 const MIN_SIZE = 50;
 
 /**
  * The four corner handles drawn around the selected image or video. They live on `document.body`, not in the
- * editor, so they never end up in the document. One set exists, however many editors are on the page.
+ * editor, so they never end up in the document. One set exists, however many editors are on the page. They are
+ * dragged with pointer events (mouse, touch and pen alike); the keyboard resizes through the toolbar's Size menu.
  */
 export class ResizeHandles {
   private readonly handles = new Map<Corner, HTMLDivElement>();
+  private readonly label = document.createElement('div');
   private media: HTMLElement | null = null;
   private drag: { corner: Corner; x: number; y: number; width: number; height: number; before: string } | null = null;
 
@@ -17,27 +21,26 @@ export class ResizeHandles {
     /** Something moved or changed size under the handles (the toolbar follows). */
     private readonly onMoved: () => void,
   ) {
+    injectMediaDialogStyles();
     CORNERS.forEach((corner) => {
       const handle = document.createElement('div');
-      handle.className = `media-resize-handle-${corner}`;
+      handle.className = `media-resize-handle-${corner} media-resize-handle`;
       handle.setAttribute('data-position', corner);
       handle.setAttribute('aria-hidden', 'true');
-      handle.style.cssText = `
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background: #007bff;
-        border: 2px solid white;
-        border-radius: 50%;
-        cursor: ${corner}-resize;
-        z-index: 10001;
-        display: none;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      `;
-      handle.addEventListener('mousedown', (event) => this.start(event, corner));
+      handle.style.display = 'none';
+      handle.style.cursor = `${corner}-resize`;
+      handle.addEventListener('pointerdown', (event) => this.start(event, corner, handle));
+      handle.addEventListener('pointermove', (event) => this.move(event));
+      handle.addEventListener('pointerup', (event) => this.end(event, handle));
+      handle.addEventListener('pointercancel', (event) => this.end(event, handle));
       document.body.appendChild(handle);
       this.handles.set(corner, handle);
     });
+
+    this.label.className = 'media-resize-label';
+    this.label.setAttribute('aria-hidden', 'true');
+    this.label.style.display = 'none';
+    document.body.appendChild(this.label);
   }
 
   /** Put the handles around `media`, or take them away with `null`. */
@@ -53,12 +56,13 @@ export class ResizeHandles {
     }
     const rect = this.media.getBoundingClientRect();
     const at: Record<Corner, [number, number]> = {
-      nw: [rect.left - 5, rect.top - 5],
-      ne: [rect.right - 5, rect.top - 5],
-      sw: [rect.left - 5, rect.bottom - 5],
-      se: [rect.right - 5, rect.bottom - 5],
+      nw: [rect.left, rect.top],
+      ne: [rect.right, rect.top],
+      sw: [rect.left, rect.bottom],
+      se: [rect.right, rect.bottom],
     };
     this.handles.forEach((handle, corner) => {
+      // The handle is centred on its corner (its CSS translates it by half its own size).
       handle.style.left = `${at[corner][0]}px`;
       handle.style.top = `${at[corner][1]}px`;
       handle.style.display = 'block';
@@ -70,16 +74,19 @@ export class ResizeHandles {
   }
 
   destroy(): void {
-    this.stop();
+    this.drag = null;
+    document.body.style.userSelect = '';
     this.handles.forEach((handle) => handle.remove());
     this.handles.clear();
+    this.label.remove();
     this.media = null;
   }
 
-  private start(event: MouseEvent, corner: Corner): void {
-    if (!this.media) return;
+  private start(event: PointerEvent, corner: Corner, handle: HTMLElement): void {
+    if (!this.media || (event.pointerType === 'mouse' && event.button !== 0)) return;
     event.preventDefault();
     event.stopPropagation();
+    handle.setPointerCapture?.(event.pointerId);
 
     const rect = this.media.getBoundingClientRect();
     const host = this.media.closest<HTMLElement>('[contenteditable="true"]');
@@ -92,12 +99,9 @@ export class ResizeHandles {
       before: host?.innerHTML ?? '',
     };
     document.body.style.userSelect = 'none';
-    document.body.style.cursor = `${corner}-resize`;
-    document.addEventListener('mousemove', this.move);
-    document.addEventListener('mouseup', this.end);
   }
 
-  private readonly move = (event: MouseEvent): void => {
+  private move(event: PointerEvent): void {
     const { drag, media } = this;
     if (!drag || !media) return;
 
@@ -123,19 +127,19 @@ export class ResizeHandles {
 
     this.update();
     this.onMoved();
-  };
 
-  private readonly end = (): void => {
+    this.label.textContent = `${Math.round(width)} × ${Math.round(height)}`;
+    this.label.style.left = `${event.clientX + 14}px`;
+    this.label.style.top = `${event.clientY + 14}px`;
+    this.label.style.display = 'block';
+  }
+
+  private end(event: PointerEvent, handle: HTMLElement): void {
     const { drag, media } = this;
-    this.stop();
-    if (drag && media) this.onResized(media, drag.before);
-  };
-
-  private stop(): void {
     this.drag = null;
     document.body.style.userSelect = '';
-    document.body.style.cursor = '';
-    document.removeEventListener('mousemove', this.move);
-    document.removeEventListener('mouseup', this.end);
+    this.label.style.display = 'none';
+    if (handle.hasPointerCapture?.(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+    if (drag && media) this.onResized(media, drag.before);
   }
 }

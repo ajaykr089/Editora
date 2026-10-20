@@ -9,6 +9,9 @@ let second: HTMLElement;
 const handles = () => document.querySelectorAll('[class^="media-resize-handle-"]');
 const toolbar = () => document.querySelector('.media-floating-toolbar') as HTMLElement | null;
 const imageIn = (editor: HTMLElement) => editor.querySelector('img') as HTMLImageElement;
+/** jsdom has no PointerEvent; the type is what the handles listen for. */
+const pointer = (type: string, clientX: number, clientY: number) =>
+  Object.assign(new MouseEvent(type, { bubbles: true, cancelable: true, clientX, clientY }), { pointerId: 1, pointerType: 'mouse' });
 const click = (el: Element) => el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
 beforeEach(() => {
@@ -117,13 +120,16 @@ describe('changing selected media', () => {
     click(imageIn(first));
     press('.btn-align-right');
 
-    expect(imageIn(first).style.marginLeft).toBe('auto');
-    expect(imageIn(first).style.marginRight).toBe('0px');
+    // Aligning wraps the image in a figure, which carries the alignment.
+    const figure = imageIn(first).closest('figure')!;
+    expect(figure.getAttribute('data-align')).toBe('right');
+    expect(figure.style.marginLeft).toBe('auto');
+    expect(figure.style.marginRight).toBe('0px');
     expect(onInput).toHaveBeenCalledTimes(1);
     expect(recorded).toHaveBeenCalledTimes(1);
     expect(recorded.mock.calls[0][0]).toBe(first);
     expect(recorded.mock.calls[0][1]).toBe(before);
-    expect(recorded.mock.calls[0][2]).toContain('margin-right');
+    expect(recorded.mock.calls[0][2]).toContain('data-align="right"');
   });
 
   it('removes it after confirmation, taking an empty link with it', async () => {
@@ -184,19 +190,19 @@ describe('resizing', () => {
     click(img);
 
     const handle = document.querySelector('.media-resize-handle-se') as HTMLElement;
-    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 210, clientY: 110 }));
-    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 310, clientY: 115 }));
-    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 410, clientY: 120 }));
+    handle.dispatchEvent(pointer('pointerdown', 210, 110));
+    handle.dispatchEvent(pointer('pointermove', 310, 115));
+    handle.dispatchEvent(pointer('pointermove', 410, 120));
     expect(img.style.width).toBe('400px');
     expect(img.style.height).toBe('200px');
     expect(recorded).not.toHaveBeenCalled();
 
-    document.dispatchEvent(new MouseEvent('mouseup'));
+    handle.dispatchEvent(pointer('pointerup', 410, 120));
     expect(recorded).toHaveBeenCalledTimes(1);
     expect(img.getAttribute('width')).toBe('400');
 
-    // Nothing is listening once the drag is over.
-    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 900, clientY: 900 }));
+    // Nothing follows the pointer once the drag is over.
+    handle.dispatchEvent(pointer('pointermove', 900, 900));
     expect(img.style.width).toBe('400px');
   });
 
@@ -205,10 +211,11 @@ describe('resizing', () => {
     const img = imageIn(first);
     img.getBoundingClientRect = () => ({ left: 0, top: 0, right: 200, bottom: 100, width: 200, height: 100, x: 0, y: 0, toJSON() {} }) as DOMRect;
     click(img);
-    document.querySelector('.media-resize-handle-se')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 200, clientY: 100 }));
-    document.dispatchEvent(new MouseEvent('mousemove', { clientX: -500, clientY: 100 }));
+    const handle = document.querySelector('.media-resize-handle-se')!;
+    handle.dispatchEvent(pointer('pointerdown', 200, 100));
+    handle.dispatchEvent(pointer('pointermove', -500, 100));
     expect(parseInt(img.style.width, 10)).toBeGreaterThanOrEqual(50);
-    document.dispatchEvent(new MouseEvent('mouseup'));
+    handle.dispatchEvent(pointer('pointerup', -500, 100));
   });
 });
 

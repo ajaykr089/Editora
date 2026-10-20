@@ -150,6 +150,14 @@ export interface MediaManagerConfig {
    */
   fallbackToBase64?: boolean;
 
+  /**
+   * Insert media as `<figure><img><figcaption>`, which can be aligned and captioned (default). `false` inserts the
+   * bare `<img>` / `<video>` of earlier versions.
+   */
+  wrapInFigure?: boolean;
+  /** Upload images and videos that are pasted or dropped into the editor (default `true`). */
+  uploadOnPaste?: boolean;
+
   /** Maximum file size in bytes. */
   maxFileSize?: number;
   /** Allowed MIME types; `image/*` style wildcards work. */
