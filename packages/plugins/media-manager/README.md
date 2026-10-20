@@ -49,7 +49,7 @@ One dialog for Insert Image, Insert Video and Replace Image, with a **Library**,
 
 ## In the editor
 
-- **Paste and drop.** Paste an image (a screenshot, a copied picture) or drop image and video files onto the editor and each one gets a placeholder where it will go, with its own progress and a cancel button, then becomes the real media when it is stored. It is one undo step. Several files at once are fine. What is pasted along with text (a spreadsheet's cells, a copied page) is left as text. Turn it off with `uploadOnPaste: false`.
+- **Paste and drop.** (This is page-wide: once the media manager is loaded, pasting or dropping a picture into *any* editor on the page uploads it, whether or not that editor lists the plugin.) Paste an image (a screenshot, a copied picture) or drop image and video files onto the editor and each one gets a placeholder where it will go, with its own progress and a cancel button, then becomes the real media when it is stored. It is one undo step. Several files at once are fine. What is pasted along with text (a spreadsheet's cells, a copied page) is left as text. Turn it off with `uploadOnPaste: false`.
 - **Captioned, aligned media.** Inserted media is a `<figure>`: align it left, centre or right, and add a caption under it (Enter in the caption goes on in a new paragraph, Backspace in an empty one removes it, pasting into it gives one line of plain text). Media without a figure (from earlier versions) gets one when you align or caption it.
 - **Select it** by clicking, or with the keyboard: an arrow key at the edge of the paragraph beside it steps onto it, the next one carries on past it. Escape lets go.
 - **The toolbar** over a selected image or video: align, **Size** (small, medium, large, full width, original size; relative to the width of the text), caption, alt text, link, replace, remove. From the keyboard, Alt+F10 moves into it; the arrow keys go along it, Enter or Space uses a button, Escape or Tab goes back to the text.
@@ -153,3 +153,5 @@ The library appears when the provider has a `list(query, { signal })` that answe
 ## Notes
 
 - The selection toolbar and resize handles are drawn outside the editor, so they never end up in the saved document. Every field has a label, the Upload and URL tabs say which is selected, and Escape closes the dialog and gives the focus and the caret back.
+
+For how it is built, and what is easy to break, see [ARCHITECTURE.md](./ARCHITECTURE.md).
