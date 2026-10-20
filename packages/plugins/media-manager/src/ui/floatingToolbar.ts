@@ -397,7 +397,11 @@ export class FloatingToolbar {
     const host = media.closest('[contenteditable="true"]');
     const hostTop = host ? host.getBoundingClientRect().top : 0;
     const above = rect.top - height - 8;
-    const top = above < Math.max(hostTop, 0) ? rect.bottom + 8 : above;
+    let top = above < Math.max(hostTop, 0) ? rect.bottom + 8 : above;
+    // A tall picture can reach past the top or the bottom of the window. While any of it shows, keep the bar in
+    // view, over the picture if need be, where it can still be reached.
+    const showing = rect.bottom > 0 && rect.top < window.innerHeight;
+    if (showing) top = Math.min(Math.max(top, 8), Math.max(window.innerHeight - height - 8, 8));
     const left = Math.min(Math.max(rect.left + rect.width / 2 - width / 2, 8), Math.max(window.innerWidth - width - 8, 8));
 
     element.style.top = `${Math.round(top)}px`;

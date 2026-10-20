@@ -117,6 +117,8 @@ export class MediaController {
   private handles: ResizeHandles | null = null;
   private uploads = new PendingUploads();
   private attached = false;
+  /** When media was last selected, so that the browser's own selection changes just after are not read as leaving it. */
+  private selectedAt = 0;
   private config: () => Partial<MediaManagerConfig> | undefined = () => undefined;
 
   /** The settings of the plugin instance that most recently asked for the controller. */
@@ -177,6 +179,7 @@ export class MediaController {
     }
     this.deselect();
     this.selected = media;
+    this.selectedAt = performance.now();
     const host = hostOf(media);
     if (host) adoptFigures(host);
     this.toolbar = new FloatingToolbar(media, {
@@ -216,6 +219,21 @@ export class MediaController {
     this.select(media);
     // `select` has made the new toolbar (TypeScript cannot see that through the call).
     if (button) (this.toolbar as FloatingToolbar | null)?.focusButton(button);
+  }
+
+  /**
+   * Make the media the browser's selection too (a node selection), so that what the browser does next agrees with
+   * it. A click on media in an editor that has no focus is followed by the browser focusing the editor and putting
+   * a caret at the start of its text; without this that looked like the end of the selection.
+   */
+  private placeNodeSelection(media: Media): void {
+    const root = figureOf(media) ?? mediaRootOf(media);
+    const selection = window.getSelection();
+    if (!selection || !root.isConnected) return;
+    const range = document.createRange();
+    range.selectNode(root);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   /** Give the editor back the focus, with the media still selected as a node (so Delete removes it). */
@@ -266,6 +284,7 @@ export class MediaController {
       event.preventDefault();
       event.stopPropagation();
       this.select(embedded);
+      this.placeNodeSelection(embedded);
       return;
     }
 
@@ -285,6 +304,7 @@ export class MediaController {
         event.preventDefault();
         event.stopPropagation();
         this.select(target);
+        this.placeNodeSelection(target);
         return;
       }
     }
@@ -308,7 +328,10 @@ export class MediaController {
   /** Figures that were loaded (not inserted here) become atomic as soon as the editor is entered. */
   private readonly onFocusIn = (event: FocusEvent): void => {
     const host = hostOf(event.target as Node);
-    if (host) adoptFigures(host);
+    if (!host) return;
+    adoptFigures(host);
+    // A document that was saved mid-upload holds an empty placeholder nothing is working on.
+    if (this.uploads.sweep(host)) host.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
   private readonly onSelectionChange = (): void => {
@@ -334,6 +357,8 @@ export class MediaController {
     const inside = range.commonAncestorContainer;
     if (!host || !host.contains(inside)) return;
     if (figureOf(this.selected)?.contains(inside)) return;
+    // Just after selecting, what the browser does with the selection is its own business (see placeNodeSelection).
+    if (performance.now() - this.selectedAt < 150) return;
     this.deselect();
   };
 

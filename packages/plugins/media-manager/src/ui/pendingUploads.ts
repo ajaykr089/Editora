@@ -24,6 +24,8 @@ interface Pending {
 
 const PENDING_ATTRIBUTE = 'data-rte-media-pending';
 let counter = 0;
+/** Unique across page loads too: a placeholder saved in a document must never look like a live one. */
+const newPendingId = (): string => `pending-${Date.now().toString(36)}-${++counter}`;
 
 const withoutPending = (html: string): string => {
   if (!html.includes(PENDING_ATTRIBUTE)) return html;
@@ -89,6 +91,20 @@ export class PendingUploads {
     this.ensureTimer();
   }
 
+  /**
+   * Remove placeholders in an editor that no upload is working on: what a document that was saved (or a tab that
+   * was closed) in the middle of an upload still holds. Returns whether any went.
+   */
+  sweep(host: HTMLElement): boolean {
+    let removed = false;
+    host.querySelectorAll<HTMLElement>(`[${PENDING_ATTRIBUTE}]`).forEach((node) => {
+      if (this.pending.has(node.getAttribute(PENDING_ATTRIBUTE) ?? '')) return;
+      node.remove();
+      removed = true;
+    });
+    return removed;
+  }
+
   dispose(): void {
     this.queues.forEach((queue) => queue.dispose());
     this.queues.length = 0;
@@ -101,7 +117,7 @@ export class PendingUploads {
   private readonly entryIds = new Map<string, { pending: Pending; queue: UploadQueue }>();
 
   private createPending(file: File, host: HTMLElement, config?: Partial<MediaManagerConfig>): Pending {
-    const id = `pending-${++counter}`;
+    const id = newPendingId();
 
     const placeholder = document.createElement('figure');
     placeholder.className = 'rte-media';

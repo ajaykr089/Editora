@@ -33,6 +33,11 @@ const caretIn = (node: Node, offset: number) => {
   document.dispatchEvent(new Event('selectionchange'));
 };
 const make = (config?: Partial<MediaManagerConfig>) => MediaManagerPlugin(config);
+/** Move the clock on, past the moment just after selecting during which the browser's own selection changes are ignored. */
+const later = (ms: number) => {
+  const now = performance.now();
+  vi.spyOn(performance, 'now').mockReturnValue(now + ms);
+};
 
 beforeEach(() => {
   document.body.innerHTML = `<div class="rte-content" contenteditable="true"><p>Alpha beta</p><p><img src="${PIXEL}" alt="a"></p></div>`;
@@ -41,11 +46,42 @@ beforeEach(() => {
   notifyMock.mockClear();
 });
 afterEach(() => {
+  vi.restoreAllMocks();
   getMediaController().detach();
   document.querySelectorAll('.rte-media-overlay').forEach((n) => n.remove());
   document.body.innerHTML = '';
   delete (window as any).execEditorCommand;
   delete (document as any).execCommand;
+});
+
+describe('selecting media with a click', () => {
+  it('also makes the browser select it, so that the two agree', () => {
+    make();
+    const img = editor.querySelector('img')!;
+    click(img);
+    const range = window.getSelection()!.getRangeAt(0);
+    expect(range.startContainer.childNodes[range.startOffset]).toBe(img.closest('p')!.querySelector('img'));
+    expect(range.endOffset - range.startOffset).toBe(1);
+  });
+
+  it('is not undone by the browser focusing an editor that had no focus: it puts a caret at the start of the text just after the click', () => {
+    make();
+    click(editor.querySelector('img')!);
+    caretIn(editor.querySelector('p')!.firstChild!, 0);
+    expect(getMediaController().selection).not.toBeNull();
+    expect(toolbar()).not.toBeNull();
+    later(300);
+    caretIn(editor.querySelector('p')!.firstChild!, 1);
+    expect(getMediaController().selection).toBeNull();
+  });
+
+  it('puts a node selection on a figure, whole, so that Delete removes the figure', () => {
+    make();
+    editor.insertAdjacentHTML('beforeend', `<figure class="rte-media"><img id="f" src="${PIXEL}"></figure>`);
+    click(document.getElementById('f')!);
+    const range = window.getSelection()!.getRangeAt(0);
+    expect(range.startContainer.childNodes[range.startOffset]).toBe(editor.querySelector('figure'));
+  });
 });
 
 describe('selecting media from the keyboard', () => {
@@ -68,6 +104,7 @@ describe('selecting media from the keyboard', () => {
     selectNode(editor.querySelector('img')!);
     caretIn(document.body, 0); // outside the editor: the toolbar or a dialog has the focus
     expect(getMediaController().selection).not.toBeNull();
+    later(300);
     caretIn(editor.querySelector('p')!.firstChild!, 2);
     expect(getMediaController().selection).toBeNull();
     expect(toolbar()).toBeNull();
@@ -139,6 +176,26 @@ describe('selecting media from the keyboard', () => {
     Object.defineProperty(onPicture, 'offsetY', { value: 20 });
     video.dispatchEvent(onPicture);
     expect(getMediaController().selection).toBe(video);
+  });
+
+  it('removes a placeholder that a saved document was left with, but not one that is being uploaded', () => {
+    make({ uploadHandler: () => new Promise(() => {}) });
+    editor.insertAdjacentHTML('beforeend', '<figure class="rte-media" data-rte-media-pending="pending-old-1"></figure>');
+    const onInput = vi.fn();
+    editor.addEventListener('input', onInput);
+    editor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(editor.querySelector('[data-rte-media-pending]')).toBeNull();
+    expect(onInput).toHaveBeenCalledTimes(1);
+
+    // One that is live stays.
+    caretIn(editor.querySelector('p')!.firstChild!, 2);
+    const paste = Object.assign(new Event('paste', { bubbles: true, cancelable: true }), {
+      clipboardData: { files: [new File(['x'], 'a.png', { type: 'image/png' })], types: ['Files'], getData: () => '' },
+    });
+    editor.querySelector('p')!.dispatchEvent(paste);
+    expect(editor.querySelectorAll('[data-rte-media-pending]')).toHaveLength(1);
+    editor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(editor.querySelectorAll('[data-rte-media-pending]')).toHaveLength(1);
   });
 
   it('makes a loaded figure atomic once the editor is entered', () => {
@@ -347,6 +404,29 @@ describe('the size menu', () => {
     keydown(document.activeElement!, 'Escape');
     expect(document.querySelector('.media-size-menu')).toBeNull();
     expect(document.activeElement).toBe(toolbar()!.querySelector('.btn-size'));
+  });
+});
+
+describe('the toolbar and the window', () => {
+  const place = (top: number, bottom: number) => {
+    make();
+    const img = editor.querySelector('img')!;
+    img.getBoundingClientRect = () => ({ left: 100, top, right: 500, bottom, width: 400, height: bottom - top, x: 100, y: top, toJSON() {} }) as DOMRect;
+    click(img);
+    return parseInt(toolbar()!.style.top, 10);
+  };
+
+  it('stays in view over a tall picture whose top is above the window', () => {
+    expect(place(-300, 500)).toBeGreaterThanOrEqual(8);
+  });
+
+  it('stays in view over a tall picture whose bottom is below the window', () => {
+    const innerHeight = window.innerHeight;
+    expect(place(innerHeight - 100, innerHeight + 900)).toBeLessThanOrEqual(innerHeight - 8);
+  });
+
+  it('is left where the picture is when the picture is not in the window at all', () => {
+    expect(place(-900, -500)).toBeLessThan(0);
   });
 });
 

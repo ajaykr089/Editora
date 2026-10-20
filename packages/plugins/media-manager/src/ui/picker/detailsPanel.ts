@@ -31,6 +31,12 @@ export class DetailsPanel {
     this.element.hidden = true;
   }
 
+  /** The dialog is closing: stop a suggestion that is still being waited for. */
+  dispose(): void {
+    this.suggest?.abort();
+    this.suggest = null;
+  }
+
   /** The alt attribute for an item: `''` when marked decorative, the text, or nothing. */
   altFor(item: MediaItem): string | undefined {
     if (item.type !== 'image') return undefined;

@@ -422,6 +422,16 @@ describe('suggesting alt text', () => {
     expect(q<HTMLTextAreaElement>('#detail-alt').value).toBe('');
   });
 
+  it('is stopped when the dialog is closed', async () => {
+    let signal!: AbortSignal;
+    open({ provider: library(), generateAltText: generate((_i, ctx) => ((signal = ctx.signal!), new Promise(() => {}))) });
+    await loaded();
+    click(tiles()[0]);
+    q<HTMLButtonElement>('.rte-mp-suggest').click();
+    q<HTMLButtonElement>('.cancel-btn').click();
+    expect(signal.aborted).toBe(true);
+  });
+
   it('is in the alt text dialog of an image in the document too', async () => {
     const img = document.createElement('img');
     img.src = 'https://cdn.test/x.jpg';

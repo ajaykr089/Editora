@@ -286,6 +286,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
     stockView?.dispose();
     upload.dispose();
     url.dispose();
+    details.dispose();
     overlay.remove();
   }
   cleanupEscape = attachEscapeCloseHandler(overlay, close);
