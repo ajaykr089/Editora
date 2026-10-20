@@ -9,6 +9,7 @@ interface CommentReply {
   author: string;
   text: string;
   createdAt: string;
+  editedAt?: string;
 }
 
 interface Comment {
@@ -18,6 +19,7 @@ interface Comment {
   author: string;
   text: string;
   createdAt: string;
+  editedAt?: string;
   resolved: boolean;
   resolvedAt?: string;
   resolvedBy?: string;
@@ -33,6 +35,18 @@ interface ComposerState {
   error: string;
 }
 
+/** Which text is being edited: a thread's own comment, or one of its replies. */
+interface EditingState {
+  commentId: string;
+  replyId: string | null;
+}
+
+/** What the "Undo" in the panel puts back. Returns false when the document has changed too much to do it. */
+interface UndoEntry {
+  message: string;
+  undo: () => boolean;
+}
+
 interface CommentsEditorState {
   root: HTMLElement;
   uid: string;
@@ -42,6 +56,11 @@ interface CommentsEditorState {
   filter: CommentsFilter;
   composer: ComposerState | null;
   activeId: string | null;
+  hoverId: string | null;
+  editing: EditingState | null;
+  editDraft: string;
+  undoEntry: UndoEntry | null;
+  undoTimer: number | null;
   expandedReplies: Set<string>;
   replyTexts: Record<string, string>;
   savedSelection: Range | null;
@@ -139,6 +158,11 @@ function getOrCreateState(root: HTMLElement): CommentsEditorState {
     filter: 'open',
     composer: null,
     activeId: null,
+    hoverId: null,
+    editing: null,
+    editDraft: '',
+    undoEntry: null,
+    undoTimer: null,
     expandedReplies: new Set<string>(),
     replyTexts: {},
     savedSelection: null,
@@ -228,13 +252,61 @@ function updateAnchorVisualState(state: CommentsEditorState, comment: Comment): 
   anchor.classList.toggle('rte-comment-anchor-resolved', comment.resolved);
 }
 
-function highlightAnchor(state: CommentsEditorState, commentId: string, highlight: boolean): void {
-  const comment = state.comments.get(commentId);
-  if (!comment) return;
+/**
+ * The thread you point at, and the one you are working on, are lit in the text. That is done with a stylesheet rule
+ * for the anchor's id, not a class on the anchor: a class is part of the document, so it would be saved with it and
+ * be in undo history, and an emphasis that was on when the document was saved would stay on for good.
+ */
+const emphasisStates = new Set<CommentsEditorState>();
+const EMPHASIS_STYLE_ID = 'rte-comments-emphasis';
 
-  const anchor = findAnchor(state, comment);
-  if (!anchor) return;
-  anchor.classList.toggle('highlighted', highlight);
+function updateEmphasis(state: CommentsEditorState): void {
+  if (state.activeId || state.hoverId) emphasisStates.add(state);
+  else emphasisStates.delete(state);
+
+  // An editor that has left the page cannot say goodbye either.
+  emphasisStates.forEach((item) => {
+    if (!item.root.isConnected) emphasisStates.delete(item);
+  });
+
+  const rules: string[] = [];
+  const anchorIdOf = (state_: CommentsEditorState, commentId: string | null) => {
+    const comment = commentId ? state_.comments.get(commentId) : null;
+    return comment?.anchorId ? comment.anchorId.replace(/["\\]/g, '') : '';
+  };
+  emphasisStates.forEach((item) => {
+    const hover = anchorIdOf(item, item.hoverId);
+    const active = anchorIdOf(item, item.activeId);
+    if (hover) rules.push(`.rte-comment-anchor[id="${hover}"] { outline: 2px solid color-mix(in srgb, var(--rte-color-primary, #2563eb) 55%, transparent); outline-offset: 2px; }`);
+    if (active) rules.push(`.rte-comment-anchor[id="${active}"] { outline: 2px solid var(--rte-color-primary, #2563eb); outline-offset: 2px; background: rgba(250, 204, 21, 0.55); }`);
+  });
+
+  let style = document.getElementById(EMPHASIS_STYLE_ID);
+  if (rules.length === 0) {
+    style?.remove();
+    return;
+  }
+  if (!style) {
+    style = document.createElement('style');
+    style.id = EMPHASIS_STYLE_ID;
+    document.head.appendChild(style);
+  }
+  style.textContent = rules.join('\n');
+}
+
+function highlightAnchor(state: CommentsEditorState, commentId: string, highlight: boolean): void {
+  if (highlight) state.hoverId = commentId;
+  else if (state.hoverId === commentId) state.hoverId = null;
+  updateEmphasis(state);
+}
+
+/** Marks one thread as the one being worked on: its card in the panel and its text in the document. */
+function setActiveThread(state: CommentsEditorState, commentId: string | null): void {
+  state.activeId = commentId;
+  state.panelElement?.querySelectorAll<HTMLElement>('.rte-comment-item').forEach((card) => {
+    card.classList.toggle('is-active', card.dataset.commentId === commentId);
+  });
+  updateEmphasis(state);
 }
 
 function unwrapNode(node: HTMLElement): void {
@@ -273,7 +345,11 @@ function setPanelVisibility(state: CommentsEditorState, visible: boolean): void 
   state.root.removeAttribute('data-rte-comments-open');
   stopTimeTimer(state);
   state.closeMenu?.(false);
-  state.activeId = null;
+  state.editing = null;
+  state.editDraft = '';
+  dismissUndo(state);
+  state.hoverId = null;
+  setActiveThread(state, null);
   if (state.panelElement) {
     // The panel goes with the focus that is in it: hand that back to the text instead of dropping it on the page.
     const hadFocus = panelHasFocus(state.panelElement);
@@ -297,6 +373,8 @@ const ICONS = {
   more: '<circle cx="8" cy="3.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="1.1" fill="currentColor" stroke="none"/><circle cx="8" cy="12.5" r="1.1" fill="currentColor" stroke="none"/>',
   plus: '<path d="M8 3v10M3 8h10"/>',
   close: '<path d="M4 4l8 8M12 4l-8 8"/>',
+  addComment: '<path d="M2.5 3.5h11v7.5H8.5l-3 2.5V11h-3zM8 5.2v3.6M6.2 7h3.6"/>',
+  edit: '<path d="M10.5 3.5l2 2-7 7-2.8.8.8-2.8z"/>',
   trash: '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.5 8.5h6l.5-8.5M7 7v4M9 7v4"/>',
   bubble: '<path d="M2.5 3.5h11v7.5H8.5l-3 2.5V11h-3z"/>',
 } as const;
@@ -355,6 +433,7 @@ function ensurePanel(state: CommentsEditorState): void {
         .join('')}
     </div>
     <div class="rte-comments-body" id="${state.uid}-body" role="tabpanel"></div>
+    <div class="rte-comments-toast" role="status" aria-live="polite" hidden></div>
   `;
 
   panel.querySelector('.rte-comments-close')?.addEventListener('click', () => closePanelAndRestoreFocus(state));
@@ -464,13 +543,28 @@ function autosize(textarea: HTMLTextAreaElement): void {
   textarea.style.height = `${Math.min(textarea.scrollHeight + border, 160)}px`;
 }
 
-function scrollToAnchor(state: CommentsEditorState, comment: Comment): void {
+function prefersReducedMotion(): boolean {
+  return !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Scrolls the commented text into view. On a phone the panel is a sheet over the bottom of the screen, and text
+ * centred in the window would sit under it: keep it above the sheet.
+ */
+function scrollToAnchor(state: CommentsEditorState, comment: Comment, flash = true): void {
   const anchor = findAnchor(state, comment);
   if (!anchor) return;
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  anchor.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center', inline: 'nearest' });
-  highlightAnchor(state, comment.id, true);
-  window.setTimeout(() => highlightAnchor(state, comment.id, false), 1200);
+  const sheet = !!state.panelElement && window.getComputedStyle(state.panelElement).position === 'fixed';
+  anchor.scrollIntoView({ behavior: sheet || prefersReducedMotion() ? 'auto' : 'smooth', block: 'center', inline: 'nearest' });
+  if (sheet && state.panelElement) {
+    const sheetTop = state.panelElement.getBoundingClientRect().top;
+    const bottom = anchor.getBoundingClientRect().bottom;
+    if (bottom > sheetTop - 16) window.scrollBy(0, bottom - sheetTop + 32);
+  }
+  if (flash) {
+    highlightAnchor(state, comment.id, true);
+    window.setTimeout(() => highlightAnchor(state, comment.id, false), 1200);
+  }
 }
 
 /** Shows a thread in the panel: switches to the tab it is on, marks it, scrolls it into view. */
@@ -478,44 +572,58 @@ function activateThread(state: CommentsEditorState, commentId: string): void {
   const comment = state.comments.get(commentId);
   if (!comment) return;
   if (state.filter !== 'all') state.filter = comment.resolved ? 'resolved' : 'open';
-  state.activeId = commentId;
+  setActiveThread(state, commentId);
   renderPanel(state);
 
   const card = Array.from(state.panelElement?.querySelectorAll<HTMLElement>('.rte-comment-item') ?? []).find(
     (item) => item.dataset.commentId === commentId,
   );
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  card?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  card?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
 }
 
-function createMenu(state: CommentsEditorState, comment: Comment): HTMLElement {
+interface MenuItem {
+  label: string;
+  icon: keyof typeof ICONS;
+  danger?: boolean;
+  run: () => void;
+}
+
+/** A "more actions" button and the menu it opens. Arrow keys move, Escape closes, a click outside closes. */
+function createMenu(state: CommentsEditorState, items: MenuItem[], ids: { commentId: string; replyId?: string }, label: string): HTMLElement {
   const wrapper = document.createElement('div');
   wrapper.className = 'rte-comment-more';
 
-  const trigger = createButton('rte-comment-icon-btn', 'More actions', 'more');
+  const trigger = createButton('rte-comment-icon-btn', label, 'more');
   trigger.setAttribute('aria-haspopup', 'menu');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.dataset.action = 'more';
-  trigger.dataset.commentId = comment.id;
+  trigger.dataset.commentId = ids.commentId;
+  if (ids.replyId) trigger.dataset.id = ids.replyId;
 
   const menu = document.createElement('div');
   menu.className = 'rte-comment-menu';
   menu.setAttribute('role', 'menu');
-  menu.setAttribute('aria-label', 'Comment actions');
+  menu.setAttribute('aria-label', label);
   menu.hidden = true;
 
-  const deleteItem = document.createElement('button');
-  deleteItem.type = 'button';
-  deleteItem.className = 'rte-comment-menu-item danger';
-  deleteItem.setAttribute('role', 'menuitem');
-  deleteItem.innerHTML = `${svg('trash')}<span>Delete</span>`;
-  deleteItem.addEventListener('click', () => {
-    state.closeMenu?.(false);
-    deleteComment(comment.id);
+  items.forEach((item) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `rte-comment-menu-item${item.danger ? ' danger' : ''}`;
+    button.setAttribute('role', 'menuitem');
+    button.dataset.action = item.label.toLowerCase();
+    button.innerHTML = svg(item.icon);
+    const text = document.createElement('span');
+    text.textContent = item.label;
+    button.appendChild(text);
+    button.addEventListener('click', () => {
+      state.closeMenu?.(false);
+      item.run();
+    });
+    menu.appendChild(button);
   });
-  menu.appendChild(deleteItem);
 
-  const items = () => Array.from(menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+  const menuItems = () => Array.from(menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
 
   const close = (returnFocus: boolean) => {
     if (menu.hidden) return;
@@ -539,7 +647,7 @@ function createMenu(state: CommentsEditorState, comment: Comment): HTMLElement {
     state.closeMenu = close;
     document.addEventListener('pointerdown', onOutside, true);
     document.addEventListener('focusin', onOutside, true);
-    items()[0]?.focus({ preventScroll: true });
+    menuItems()[0]?.focus({ preventScroll: true });
   };
 
   trigger.addEventListener('click', () => (menu.hidden ? open() : close(true)));
@@ -550,7 +658,7 @@ function createMenu(state: CommentsEditorState, comment: Comment): HTMLElement {
     }
   });
   menu.addEventListener('keydown', (event) => {
-    const list = items();
+    const list = menuItems();
     const current = list.indexOf(document.activeElement as HTMLButtonElement);
     let next = -1;
     if (event.key === 'ArrowDown') next = (current + 1) % list.length;
@@ -565,6 +673,149 @@ function createMenu(state: CommentsEditorState, comment: Comment): HTMLElement {
 
   wrapper.append(trigger, menu);
   return wrapper;
+}
+
+function createWhen(createdAt: string, editedAt?: string): HTMLElement {
+  const when = document.createElement('div');
+  when.className = 'rte-comment-when';
+  when.appendChild(createTimeElement(createdAt));
+  if (editedAt) {
+    const edited = document.createElement('span');
+    edited.className = 'rte-comment-edited';
+    edited.textContent = '· edited';
+    edited.title = `Edited ${formatFullDate(editedAt)}`;
+    when.appendChild(edited);
+  }
+  return when;
+}
+
+/** Edit a comment or a reply in place. Enter saves, Shift+Enter starts a line, Escape (or Cancel) puts it back. */
+function createEditForm(state: CommentsEditorState, editing: EditingState): HTMLElement {
+  const form = document.createElement('form');
+  form.className = 'rte-comment-edit';
+  form.noValidate = true;
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'rte-comment-edit-textarea';
+  textarea.rows = 2;
+  textarea.setAttribute('aria-label', editing.replyId ? 'Edit reply' : 'Edit comment');
+  textarea.dataset.commentId = editing.commentId;
+  if (editing.replyId) textarea.dataset.id = editing.replyId;
+  textarea.value = state.editDraft;
+
+  const actions = document.createElement('div');
+  actions.className = 'rte-comment-form-actions';
+  const cancel = createButton('rte-comment-btn ghost', 'Cancel');
+  const save = createButton('rte-comment-btn primary', 'Save');
+  save.type = 'submit';
+  actions.append(cancel, save);
+
+  const sync = () => {
+    save.disabled = !textarea.value.trim();
+    autosize(textarea);
+  };
+  sync();
+
+  textarea.addEventListener('input', () => {
+    state.editDraft = textarea.value;
+    sync();
+  });
+  textarea.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+  cancel.addEventListener('click', () => cancelEdit(state));
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    saveEdit(state, textarea.value);
+  });
+
+  form.append(textarea, actions);
+  return form;
+}
+
+function startEdit(state: CommentsEditorState, commentId: string, replyId: string | null): void {
+  const comment = state.comments.get(commentId);
+  if (!comment) return;
+  const reply = replyId ? comment.replies.find((item) => item.id === replyId) : null;
+  if (replyId && !reply) return;
+
+  state.editing = { commentId, replyId };
+  state.editDraft = reply ? reply.text : comment.text;
+  if (replyId) state.expandedReplies.add(commentId);
+  renderPanel(state);
+
+  const field = state.panelElement?.querySelector<HTMLTextAreaElement>('.rte-comment-edit-textarea');
+  if (field) {
+    field.focus({ preventScroll: true });
+    field.setSelectionRange(field.value.length, field.value.length);
+  }
+}
+
+function cancelEdit(state: CommentsEditorState): void {
+  const editing = state.editing;
+  state.editing = null;
+  state.editDraft = '';
+  renderPanel(state);
+  if (!editing) return;
+  // Hand the focus back to the button that opened the edit.
+  const selector = editing.replyId
+    ? `[data-action="more"][data-id="${editing.replyId}"]`
+    : `.rte-comment-item[data-comment-id="${editing.commentId}"] > .rte-comment-header [data-action="more"]`;
+  state.panelElement?.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
+}
+
+function saveEdit(state: CommentsEditorState, value: string): void {
+  const editing = state.editing;
+  const text = value.trim();
+  if (!editing || !text) return;
+  const comment = state.comments.get(editing.commentId);
+  if (!comment) return;
+
+  const target = editing.replyId ? comment.replies.find((item) => item.id === editing.replyId) : comment;
+  if (target && target.text !== text) {
+    target.text = text;
+    target.editedAt = new Date().toISOString();
+  }
+  cancelEdit(state);
+}
+
+function dismissUndo(state: CommentsEditorState): void {
+  if (state.undoTimer !== null) window.clearTimeout(state.undoTimer);
+  state.undoTimer = null;
+  state.undoEntry = null;
+  const toast = state.panelElement?.querySelector<HTMLElement>('.rte-comments-toast');
+  if (toast) {
+    toast.hidden = true;
+    toast.replaceChildren();
+  }
+}
+
+/** "Comment deleted · Undo" at the foot of the panel; it goes by itself after a few seconds. */
+function showUndo(state: CommentsEditorState, entry: UndoEntry): void {
+  const toast = state.panelElement?.querySelector<HTMLElement>('.rte-comments-toast');
+  if (!toast) return;
+  dismissUndo(state);
+  state.undoEntry = entry;
+
+  const message = document.createElement('span');
+  message.textContent = entry.message;
+  const undo = createButton('rte-comments-toast-action', 'Undo');
+  undo.addEventListener('click', () => {
+    const restored = entry.undo();
+    dismissUndo(state);
+    if (!restored) {
+      message.textContent = 'This could not be restored here. Use Undo in the document.';
+      toast.replaceChildren(message);
+      toast.hidden = false;
+      state.undoTimer = window.setTimeout(() => dismissUndo(state), 6000);
+    }
+  });
+  toast.replaceChildren(message, undo);
+  toast.hidden = false;
+  state.undoTimer = window.setTimeout(() => dismissUndo(state), 8000);
 }
 
 function createReplyBox(state: CommentsEditorState, comment: Comment): HTMLElement {
@@ -605,10 +856,7 @@ function createReplyBox(state: CommentsEditorState, comment: Comment): HTMLEleme
     state.replyTexts[comment.id] = textarea.value;
     sync();
   });
-  textarea.addEventListener('focus', () => {
-    state.activeId = comment.id;
-    box.closest('.rte-comment-item')?.classList.add('is-active');
-  });
+  textarea.addEventListener('focus', () => setActiveThread(state, comment.id));
   textarea.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
@@ -640,7 +888,7 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
   const author = document.createElement('strong');
   author.className = 'rte-comment-author';
   author.textContent = comment.author;
-  meta.append(author, createTimeElement(comment.createdAt));
+  meta.append(author, createWhen(comment.createdAt, comment.editedAt));
 
   const actions = document.createElement('div');
   actions.className = 'rte-comment-header-actions';
@@ -655,7 +903,18 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
     if (comment.resolved) reopenComment(comment.id);
     else resolveComment(comment.id, COMMENT_AUTHOR);
   });
-  actions.append(resolveBtn, createMenu(state, comment));
+  actions.append(
+    resolveBtn,
+    createMenu(
+      state,
+      [
+        { label: 'Edit', icon: 'edit', run: () => startEdit(state, comment.id, null) },
+        { label: 'Delete', icon: 'trash', danger: true, run: () => deleteWithUndo(state, comment.id) },
+      ],
+      { commentId: comment.id },
+      'More actions',
+    ),
+  );
   header.append(createAvatar(comment.author), meta, actions);
   card.appendChild(header);
 
@@ -668,17 +927,20 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
     quote.title = 'Go to this text';
     quote.setAttribute('aria-label', `Go to the commented text: ${comment.selectedText}`);
     quote.addEventListener('click', () => {
-      state.activeId = comment.id;
-      card.classList.add('is-active');
+      setActiveThread(state, comment.id);
       scrollToAnchor(state, comment);
     });
     card.appendChild(quote);
   }
 
-  const text = document.createElement('div');
-  text.className = 'rte-comment-text';
-  text.textContent = comment.text;
-  card.appendChild(text);
+  if (state.editing && state.editing.commentId === comment.id && !state.editing.replyId) {
+    card.appendChild(createEditForm(state, state.editing));
+  } else {
+    const text = document.createElement('div');
+    text.className = 'rte-comment-text';
+    text.textContent = comment.text;
+    card.appendChild(text);
+  }
 
   if (comment.resolved) {
     const status = document.createElement('div');
@@ -714,6 +976,7 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
     comment.replies.slice(hidden).forEach((reply) => {
       const item = document.createElement('div');
       item.className = 'rte-comment-reply';
+      item.dataset.replyId = reply.id;
       const replyHeader = document.createElement('div');
       replyHeader.className = 'rte-comment-reply-header';
       const replyMeta = document.createElement('div');
@@ -721,12 +984,30 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
       const replyAuthor = document.createElement('strong');
       replyAuthor.className = 'rte-comment-author';
       replyAuthor.textContent = reply.author;
-      replyMeta.append(replyAuthor, createTimeElement(reply.createdAt));
-      replyHeader.append(createAvatar(reply.author, true), replyMeta);
-      const replyText = document.createElement('div');
-      replyText.className = 'rte-comment-reply-text';
-      replyText.textContent = reply.text;
-      item.append(replyHeader, replyText);
+      replyMeta.append(replyAuthor, createWhen(reply.createdAt, reply.editedAt));
+      replyHeader.append(
+        createAvatar(reply.author, true),
+        replyMeta,
+        createMenu(
+          state,
+          [
+            { label: 'Edit', icon: 'edit', run: () => startEdit(state, comment.id, reply.id) },
+            { label: 'Delete', icon: 'trash', danger: true, run: () => deleteReplyWithUndo(state, comment.id, reply.id) },
+          ],
+          { commentId: comment.id, replyId: reply.id },
+          'More reply actions',
+        ),
+      );
+      item.appendChild(replyHeader);
+
+      if (state.editing && state.editing.commentId === comment.id && state.editing.replyId === reply.id) {
+        item.appendChild(createEditForm(state, state.editing));
+      } else {
+        const replyText = document.createElement('div');
+        replyText.className = 'rte-comment-reply-text';
+        replyText.textContent = reply.text;
+        item.appendChild(replyText);
+      }
       replies.appendChild(item);
     });
 
@@ -735,6 +1016,14 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
 
   if (!comment.resolved) card.appendChild(createReplyBox(state, comment));
 
+  // Pointing at a card lights its text; clicking the card itself takes you to the text.
+  card.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || target.closest('button, textarea, form, [role="menu"]')) return;
+    if (window.getSelection()?.toString()) return; // dragging over the text to copy it is not a click
+    setActiveThread(state, comment.id);
+    scrollToAnchor(state, comment, false);
+  });
   card.addEventListener('mouseenter', () => highlightAnchor(state, comment.id, true));
   card.addEventListener('mouseleave', () => highlightAnchor(state, comment.id, false));
   card.addEventListener('focusin', () => highlightAnchor(state, comment.id, true));
@@ -914,9 +1203,10 @@ function renderPanel(state?: CommentsEditorState): void {
   });
 
   // A card that is rebuilt while it has the pointer or the focus never says goodbye, which would leave its text lit.
-  getContentElement(targetState.root)
-    ?.querySelectorAll('.rte-comment-anchor.highlighted')
-    .forEach((anchor) => anchor.classList.remove('highlighted'));
+  if (targetState.hoverId) {
+    targetState.hoverId = null;
+    updateEmphasis(targetState);
+  }
 
   const scrollTop = body.scrollTop;
   keepPanelFocus(panel, () => {
@@ -944,6 +1234,99 @@ function scheduleCommentsRefresh(state: CommentsEditorState): void {
       if (state.panelVisible) renderPanel(state);
     }, 120),
   );
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Starting a comment: the toolbar button, the bubble over a selection, the shortcut
+ * ---------------------------------------------------------------------------------------------- */
+
+/** An editor takes comments if its toolbar has the button, or if the plugin has been used in it. */
+function isCommentingEnabled(root: HTMLElement): boolean {
+  return stateByEditor.has(root) || !!root.querySelector('[data-command="addComment"]');
+}
+
+function beginComment(root: HTMLElement): void {
+  activeEditorRoot = root;
+  const state = getOrCreateState(root);
+  const range = cloneActiveSelection(root) || (state.savedSelection ? state.savedSelection.cloneRange() : null);
+  // Avoid layout jitter while opening panel: the form keeps the range, so clear the visible
+  // DOM selection before the panel width transition starts.
+  if (range) window.getSelection()?.removeAllRanges();
+  state.savedSelection = null;
+
+  hideBubble();
+  setPanelVisibility(state, true);
+  openComposer(state, range);
+}
+
+let bubble: HTMLButtonElement | null = null;
+let bubbleRoot: HTMLElement | null = null;
+let bubbleTimer: number | null = null;
+let pointerIsDown = false;
+
+function shortcutLabel(): string {
+  return /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘⌥M' : 'Ctrl+Alt+M';
+}
+
+function hideBubble(): void {
+  if (bubble) bubble.hidden = true;
+  bubbleRoot = null;
+}
+
+function ensureBubble(): HTMLButtonElement {
+  if (bubble && bubble.isConnected) return bubble;
+  ensurePanelStyles();
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'rte-comments-bubble';
+  button.hidden = true;
+  button.title = `Add a comment (${shortcutLabel()})`;
+  button.innerHTML = `${svg('addComment')}<span>Comment</span>`;
+  // Pressing it must not take the selection away from the text it is about.
+  button.addEventListener('mousedown', (event) => event.preventDefault());
+  button.addEventListener('click', () => {
+    const root = bubbleRoot;
+    hideBubble();
+    if (root) beginComment(root);
+  });
+  document.body.appendChild(button);
+  bubble = button;
+  return button;
+}
+
+function updateBubble(): void {
+  bubbleTimer = null;
+  if (pointerIsDown) return hideBubble();
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return hideBubble();
+  const range = selection.getRangeAt(0);
+  const root = getEditorRootFromNode(range.commonAncestorContainer);
+  if (!root || !isRangeInsideContent(range, root) || !isCommentingEnabled(root)) return hideBubble();
+  // A read-only document cannot take the highlight a comment puts in it.
+  if (getContentElement(root)?.closest('[contenteditable="false"]')) return hideBubble();
+  if (!range.toString().trim()) return hideBubble();
+
+  const rects = range.getClientRects?.();
+  const last = rects && rects.length ? rects[rects.length - 1] : range.getBoundingClientRect?.();
+  if (!last || (!last.width && !last.height)) return hideBubble();
+
+  const element = ensureBubble();
+  element.hidden = false;
+  bubbleRoot = root;
+  const width = element.offsetWidth || 96;
+  const height = element.offsetHeight || 32;
+  let top = last.bottom + 8;
+  if (top + height > window.innerHeight - 8) top = Math.max(8, (rects && rects.length ? rects[0] : last).top - height - 8);
+  const left = Math.min(Math.max(8, last.right - width), Math.max(8, window.innerWidth - width - 8));
+  element.style.top = `${top}px`;
+  element.style.left = `${left}px`;
+}
+
+function scheduleBubbleUpdate(): void {
+  if (bubbleTimer !== null) return;
+  bubbleTimer = window.setTimeout(updateBubble, 40);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1004,6 +1387,41 @@ function ensureGlobalTracking(): void {
     state.savedSelection = selection.isCollapsed ? null : range.cloneRange();
   });
 
+  // The bubble that offers "Comment" over a selection. It waits for the pointer to come up, so it does not chase
+  // a drag, and follows the text when the page scrolls.
+  document.addEventListener('selectionchange', scheduleBubbleUpdate);
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (event.target instanceof Node && bubble?.contains(event.target)) return;
+      pointerIsDown = true;
+      hideBubble();
+    },
+    true,
+  );
+  const pointerUp = () => {
+    pointerIsDown = false;
+    scheduleBubbleUpdate();
+  };
+  document.addEventListener('pointerup', pointerUp, true);
+  document.addEventListener('pointercancel', pointerUp, true);
+  document.addEventListener('scroll', () => bubbleRoot && scheduleBubbleUpdate(), true);
+  window.addEventListener('resize', () => bubbleRoot && scheduleBubbleUpdate());
+
+  // Cmd/Ctrl+Alt+M, as in Google Docs. By key code: with Alt held the key produces another character on a Mac.
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.code !== 'KeyM' || !event.altKey || event.shiftKey || !(event.metaKey || event.ctrlKey)) return;
+      const root = event.target instanceof Node ? getEditorRootFromNode(event.target) : null;
+      if (!root || !isCommentingEnabled(root)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      beginComment(root);
+    },
+    true,
+  );
+
   document.addEventListener(
     'keydown',
     (event) => {
@@ -1023,6 +1441,12 @@ function ensureGlobalTracking(): void {
         event.preventDefault();
         event.stopPropagation();
         closeComposer(state);
+        return;
+      }
+      if (field?.classList.contains('rte-comment-edit-textarea')) {
+        event.preventDefault();
+        event.stopPropagation();
+        cancelEdit(state);
         return;
       }
       if (field?.classList.contains('rte-comment-reply-textarea') && field.value) {
@@ -1163,24 +1587,105 @@ export function reopenComment(commentId: string): void {
   renderPanel(state);
 }
 
-export function deleteComment(commentId: string): void {
-  const state = getActiveState();
-  if (!state) return;
-
+/**
+ * Take a thread out. An anchored one has its highlight removed from the text (one undoable document step) and
+ * keeps its data, so the document's own Undo brings it back; a note is dropped from memory. Returns what puts it
+ * back, for the panel's own Undo.
+ */
+function deleteThread(state: CommentsEditorState, commentId: string): UndoEntry | null {
   const comment = state.comments.get(commentId);
-  if (!comment) return;
+  if (!comment) return null;
+  if (state.activeId === commentId) setActiveThread(state, null);
+  if (state.hoverId === commentId) state.hoverId = null;
+  if (state.editing?.commentId === commentId) {
+    state.editing = null;
+    state.editDraft = '';
+  }
 
+  let entry: UndoEntry | null = null;
   if (comment.anchorId) {
-    // Keep the data (it is hidden once the anchor is gone) so Undo, which brings the
-    // anchor back, brings the thread back with it.
     const anchor = findAnchor(state, comment);
-    if (anchor) withDocumentEdit(state, () => unwrapNode(anchor));
+    if (anchor) {
+      const nodes = Array.from(anchor.childNodes);
+      const attributes = Array.from(anchor.attributes).map((attribute) => [attribute.name, attribute.value]);
+      withDocumentEdit(state, () => unwrapNode(anchor));
+      entry = {
+        message: 'Comment deleted',
+        undo: () => {
+          if (findAnchor(state, comment)) return true; // the document's Undo got there first
+          const first = nodes[0];
+          const parent = first?.parentNode;
+          const intact =
+            !!first && first.isConnected && !!parent && nodes.every((node, i) => node.parentNode === parent && (i === 0 || nodes[i - 1].nextSibling === node));
+          if (!intact || !first || !parent) return false;
+          const restored = document.createElement('span');
+          attributes.forEach(([name, value]) => restored.setAttribute(name, value));
+          withDocumentEdit(state, () => {
+            parent.insertBefore(restored, first);
+            nodes.forEach((node) => restored.appendChild(node));
+          });
+          renderPanel(state);
+          return true;
+        },
+      };
+    }
   } else {
     state.comments.delete(commentId);
     state.expandedReplies.delete(commentId);
+    const draft = state.replyTexts[commentId];
     delete state.replyTexts[commentId];
+    entry = {
+      message: 'Note deleted',
+      undo: () => {
+        state.comments.set(commentId, comment);
+        if (draft) state.replyTexts[commentId] = draft;
+        renderPanel(state);
+        return true;
+      },
+    };
   }
-  if (state.activeId === commentId) state.activeId = null;
+  renderPanel(state);
+  return entry;
+}
+
+function deleteWithUndo(state: CommentsEditorState, commentId: string): void {
+  const entry = deleteThread(state, commentId);
+  if (entry) showUndo(state, entry);
+}
+
+function deleteReplyWithUndo(state: CommentsEditorState, commentId: string, replyId: string): void {
+  const comment = state.comments.get(commentId);
+  const index = comment ? comment.replies.findIndex((reply) => reply.id === replyId) : -1;
+  if (!comment || index === -1) return;
+  const [reply] = comment.replies.splice(index, 1);
+  if (state.editing?.replyId === replyId) {
+    state.editing = null;
+    state.editDraft = '';
+  }
+  renderPanel(state);
+  showUndo(state, {
+    message: 'Reply deleted',
+    undo: () => {
+      comment.replies.splice(Math.min(index, comment.replies.length), 0, reply);
+      renderPanel(state);
+      return true;
+    },
+  });
+}
+
+export function deleteComment(commentId: string): void {
+  const state = getActiveState();
+  if (!state) return;
+  deleteThread(state, commentId);
+}
+
+export function editComment(commentId: string, text: string): void {
+  const state = getActiveState();
+  const comment = state?.comments.get(commentId);
+  const trimmed = text.trim();
+  if (!state || !comment || !trimmed || comment.text === trimmed) return;
+  comment.text = trimmed;
+  comment.editedAt = new Date().toISOString();
   renderPanel(state);
 }
 
@@ -1219,7 +1724,13 @@ function ensurePanelStyles(): void {
   document.head.appendChild(style);
 }
 
-export const CommentsPlugin = (): Plugin => ({
+export const CommentsPlugin = (): Plugin => {
+  // The bubble over a selection and the shortcut work before the first command has run.
+  if (typeof document !== 'undefined') ensureGlobalTracking();
+  return buildPlugin();
+};
+
+const buildPlugin = (): Plugin => ({
   name: 'comments',
 
   toolbar: [
@@ -1251,15 +1762,7 @@ export const CommentsPlugin = (): Plugin => ({
       ensureGlobalTracking();
       const state = getActiveState();
       if (!state) return false;
-
-      const range = cloneActiveSelection(state.root);
-      // Avoid layout jitter while opening panel: the form keeps the range, so clear the visible
-      // DOM selection before the panel width transition starts.
-      if (range) window.getSelection()?.removeAllRanges();
-      state.savedSelection = null;
-
-      setPanelVisibility(state, true);
-      openComposer(state, range);
+      beginComment(state.root);
       return true;
     },
 

@@ -48,7 +48,10 @@ const plugins = [CommentsPlugin()];
 ## Behavior Notes
 
 - `addComment` opens a new-comment form in the panel. With text selected the form quotes it and the comment is anchored there; with nothing selected it is a note for the whole document. Enter posts, Shift+Enter adds a line, Escape cancels.
-- Clicking highlighted text opens its thread. Threads are listed in document order, notes last.
+- Select text and a **Comment** bubble appears under it; **Cmd/Ctrl+Alt+M** starts a comment from the keyboard.
+- Clicking highlighted text opens its thread, and clicking a thread's card scrolls to its text. Threads are listed in document order, notes last.
+- Comments and replies can be edited (Edit in the more menu); deleting one offers Undo for a few seconds.
+- Under 640px wide the panel becomes a bottom sheet.
 - `toggleComments` opens/closes the panel without losing editor context.
 - Panel mounting is editor-root scoped for multiple editors on the same page.
 

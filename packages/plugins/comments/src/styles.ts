@@ -184,8 +184,10 @@ export const COMMENTS_CSS = `
     color: var(--rte-color-text-primary, #0f172a);
   }
 
+  /* Not the grey hover of the other buttons: the primary colour on that grey is below 4.5:1 in the dark theme. */
   .rte-comments-new:hover {
-    color: var(--rte-color-primary-hover, #1d4ed8);
+    background: color-mix(in srgb, var(--rte-color-primary, #2563eb) 12%, transparent);
+    color: var(--rte-color-primary, #2563eb);
   }
 
   .rte-comment-icon-btn[data-action="resolve"]:hover {
@@ -311,6 +313,15 @@ export const COMMENTS_CSS = `
     font-weight: 600;
     line-height: 1.3;
     color: var(--rte-color-text-primary, #0f172a);
+  }
+
+  .rte-comment-when {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--rte-color-text-muted, #64748b);
   }
 
   .rte-comment-date {
@@ -443,6 +454,16 @@ export const COMMENTS_CSS = `
     border-top: 1px solid var(--rte-color-border-light, #e5e7eb);
   }
 
+  .rte-comment-reply-header .rte-comment-icon-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .rte-comment-reply-header .rte-comment-icon-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
   .rte-comment-reply-text {
     margin: 4px 0 0 30px;
     font-size: 13px;
@@ -474,8 +495,17 @@ export const COMMENTS_CSS = `
     margin-top: 12px;
   }
 
+  .rte-comment-reply .rte-comment-edit {
+    margin: 6px 0 0 30px;
+  }
+
+  .rte-comment-edit {
+    margin-top: 10px;
+  }
+
   .new-comment-textarea,
-  .rte-comment-reply-textarea {
+  .rte-comment-reply-textarea,
+  .rte-comment-edit-textarea {
     display: block;
     width: 100%;
     resize: none;
@@ -497,12 +527,14 @@ export const COMMENTS_CSS = `
   }
 
   .new-comment-textarea::placeholder,
-  .rte-comment-reply-textarea::placeholder {
+  .rte-comment-reply-textarea::placeholder,
+  .rte-comment-edit-textarea::placeholder {
     color: var(--rte-color-text-muted, #64748b);
   }
 
   .new-comment-textarea:focus,
-  .rte-comment-reply-textarea:focus {
+  .rte-comment-reply-textarea:focus,
+  .rte-comment-edit-textarea:focus {
     border-color: var(--rte-color-border-focus, #2563eb);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--rte-color-border-focus, #2563eb) 20%, transparent);
   }
@@ -583,6 +615,84 @@ export const COMMENTS_CSS = `
     font-size: 12px;
   }
 
+  /* ---- "Comment deleted - Undo" ---- */
+
+  .rte-comments-toast {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: #1f2937;
+    color: #ffffff;
+    font-size: 13px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .rte-comments-toast[hidden] {
+    display: none;
+  }
+
+  .rte-comments-toast-action {
+    flex: none;
+    border: 0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    background: transparent;
+    color: #93c5fd;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .rte-comments-toast-action:hover {
+    text-decoration: underline;
+  }
+
+  /* ---- The button that appears over selected text ---- */
+
+  .rte-comments-bubble {
+    position: fixed;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: #1f2937;
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
+  }
+
+  .rte-comments-bubble[hidden] {
+    display: none;
+  }
+
+  .rte-comments-bubble:hover {
+    background: #111827;
+  }
+
+  .rte-comments-bubble:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+  }
+
+  .rte-comments-bubble svg {
+    width: 16px;
+    height: 16px;
+  }
+
   /* ---- The highlighted text in the document ---- */
 
   .rte-comment-anchor {
@@ -596,11 +706,6 @@ export const COMMENTS_CSS = `
   .rte-comment-anchor.rte-comment-anchor-resolved {
     background: rgba(148, 163, 184, 0.2);
     border-bottom-color: rgba(100, 116, 139, 0.6);
-  }
-
-  .rte-comment-anchor.highlighted {
-    outline: 2px solid var(--rte-color-primary, #2563eb);
-    outline-offset: 2px;
   }
 
   :is([theme="dark"], [data-theme="dark"], .dark, .editora-theme-dark) .rte-comments-panel {
@@ -619,6 +724,73 @@ export const COMMENTS_CSS = `
 
     [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
       margin-right: 0;
+    }
+  }
+
+  /* A phone: the panel is a sheet that rises from the bottom, over the page, with the text still above it. */
+  @media (max-width: 640px) {
+    .rte-comments-panel {
+      --rte-comments-panel-width: 100%;
+      position: fixed;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: min(72vh, 560px);
+      border-left: 0;
+      border-top: 1px solid var(--rte-color-border, #d1d5db);
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.22);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      transform: translateY(100%);
+      z-index: 1000;
+    }
+
+    .rte-comments-panel.is-open {
+      transform: translateY(0);
+    }
+
+    /* The grip that says "this is a sheet". */
+    .rte-comments-header::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      width: 36px;
+      height: 4px;
+      margin-left: -18px;
+      border-radius: 2px;
+      background: var(--rte-color-border, #d1d5db);
+    }
+
+    .rte-comments-header {
+      position: relative;
+      padding-top: 18px;
+    }
+
+    .rte-comment-icon-btn,
+    .rte-comments-close {
+      width: 36px;
+      height: 36px;
+    }
+
+    .rte-comments-new {
+      height: 36px;
+    }
+
+    .rte-comments-tab {
+      padding: 8px;
+    }
+
+    .rte-comment-menu-item {
+      padding: 10px;
+    }
+
+    .new-comment-textarea,
+    .rte-comment-reply-textarea,
+    .rte-comment-edit-textarea {
+      font-size: 16px; /* below 16px iOS zooms the page when a field is focused */
     }
   }
 

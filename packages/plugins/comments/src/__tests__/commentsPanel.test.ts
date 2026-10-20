@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommentsPlugin, getAllComments } from '../CommentsPlugin.native';
 
 let root: HTMLElement;
@@ -232,12 +232,15 @@ describe('the more menu', () => {
   const trigger = () => cards()[0].querySelector<HTMLButtonElement>('[data-action="more"]')!;
   const menu = () => cards()[0].querySelector<HTMLElement>('.rte-comment-menu')!;
 
+  const item = (name: string) => menu().querySelector<HTMLButtonElement>(`[data-action="${name}"]`)!;
+
   it('opens on click with the focus on its first item, and Escape closes just the menu', () => {
     comment('Alpha', 'one');
     trigger().click();
     expect(menu().hidden).toBe(false);
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
-    expect(document.activeElement).toBe(menu().querySelector('[role="menuitem"]'));
+    expect(Array.from(menu().querySelectorAll('[role="menuitem"]')).map((el) => el.textContent)).toEqual(['Edit', 'Delete']);
+    expect(document.activeElement).toBe(item('edit'));
 
     document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
     expect(menu().hidden).toBe(true);
@@ -248,7 +251,7 @@ describe('the more menu', () => {
   it('Delete removes the thread and the highlight in the text', () => {
     comment('Alpha', 'one');
     trigger().click();
-    (menu().querySelector('[role="menuitem"]') as HTMLButtonElement).click();
+    item('delete').click();
     expect(cards()).toHaveLength(0);
     expect(content.querySelector('.rte-comment-anchor')).toBeNull();
     expect(content.textContent).toContain('Alpha beta');
@@ -257,7 +260,7 @@ describe('the more menu', () => {
   it('Delete removes a note for good', () => {
     comment(null, 'note');
     trigger().click();
-    (menu().querySelector('[role="menuitem"]') as HTMLButtonElement).click();
+    item('delete').click();
     expect(cards()).toHaveLength(0);
     expect(getAllComments()).toHaveLength(0);
   });
@@ -279,15 +282,306 @@ describe('clicking the highlighted text', () => {
 });
 
 describe('the highlight in the text', () => {
+  const emphasis = () => document.getElementById('rte-comments-emphasis')?.textContent ?? '';
+  const anchors = () => Array.from(content.querySelectorAll<HTMLElement>('.rte-comment-anchor'));
+
+  it('is a stylesheet rule, so the document itself is never changed or saved with a highlight', () => {
+    comment('Alpha', 'one');
+    comment('Epsilon', 'two');
+    const before = content.innerHTML;
+
+    cards()[0].dispatchEvent(new MouseEvent('mouseenter'));
+    expect(emphasis()).toContain(`[id="${anchors()[0].id}"]`);
+    expect(content.innerHTML).toBe(before);
+    expect(anchors()[0].classList.contains('highlighted')).toBe(false);
+  });
+
   it('goes out with the card that lit it, even if the card is rebuilt under the pointer', () => {
     comment('Alpha', 'one');
     comment('Epsilon', 'two');
-    const anchors = () => Array.from(content.querySelectorAll<HTMLElement>('.rte-comment-anchor'));
-
+    setActive(cards()[1]);
     cards()[0].dispatchEvent(new MouseEvent('mouseenter'));
-    expect(anchors()[0].classList.contains('highlighted')).toBe(true);
+    const hoverRule = `[id="${anchors()[0].id}"]`;
+    expect(emphasis()).toContain(hoverRule);
 
     (cards()[1].querySelector('[data-action="resolve"]') as HTMLButtonElement).click();
-    expect(anchors().some((anchor) => anchor.classList.contains('highlighted'))).toBe(false);
+    expect(emphasis()).not.toContain(hoverRule);
+  });
+});
+
+function setActive(card: HTMLElement): void {
+  card.querySelector('.rte-comment-text')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
+describe('the active thread', () => {
+  const emphasis = () => document.getElementById('rte-comments-emphasis')?.textContent ?? '';
+  const anchors = () => Array.from(content.querySelectorAll<HTMLElement>('.rte-comment-anchor'));
+
+  it('is the one whose card you click, and its text is marked in the document', () => {
+    comment('Alpha', 'one');
+    comment('Epsilon', 'two');
+    setActive(cards()[0]);
+    expect(cards()[0].classList.contains('is-active')).toBe(true);
+    expect(cards()[1].classList.contains('is-active')).toBe(false);
+    expect(emphasis()).toContain(`[id="${anchors()[0].id}"]`);
+
+    setActive(cards()[1]);
+    expect(cards()[0].classList.contains('is-active')).toBe(false);
+    expect(emphasis()).toContain(`[id="${anchors()[1].id}"]`);
+    expect(emphasis()).not.toContain(`[id="${anchors()[0].id}"]`);
+  });
+
+  it('scrolls the text into view when its card is clicked', () => {
+    comment('Alpha', 'one');
+    const calls: HTMLElement[] = [];
+    HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) {
+      calls.push(this);
+    };
+    setActive(cards()[0]);
+    expect(calls).toContain(anchors()[0]);
+  });
+
+  it('does not act when the click is on a button, or when text in the card is being selected', () => {
+    comment('Alpha', 'one');
+    const calls: HTMLElement[] = [];
+    HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) {
+      calls.push(this);
+    };
+    cards()[0].querySelector('[data-action="resolve"]')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(calls).toHaveLength(0);
+  });
+
+  it('is cleared when the panel is closed, with its emphasis', () => {
+    comment('Alpha', 'one');
+    setActive(cards()[0]);
+    expect(emphasis()).not.toBe('');
+    (panel().querySelector('.rte-comments-close') as HTMLButtonElement).click();
+    expect(emphasis()).toBe('');
+  });
+});
+
+describe('editing', () => {
+  const openMenu = (card: HTMLElement) => card.querySelector<HTMLButtonElement>('[data-action="more"]')!.click();
+  const choose = (card: HTMLElement, name: string) => card.querySelector<HTMLButtonElement>(`.rte-comment-menu-item[data-action="${name}"]`)!.click();
+  const field = () => panel().querySelector<HTMLTextAreaElement>('.rte-comment-edit-textarea')!;
+  const press = (el: HTMLElement, key: string) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+
+  it('turns the comment into a field with its text, Enter saves it and marks it edited', () => {
+    comment('Alpha', 'first draft');
+    openMenu(cards()[0]);
+    choose(cards()[0], 'edit');
+    expect(field().value).toBe('first draft');
+    expect(document.activeElement).toBe(field());
+
+    type(field(), 'second draft');
+    press(field(), 'Enter');
+    expect(panel().querySelector('.rte-comment-edit')).toBeNull();
+    expect(cards()[0].querySelector('.rte-comment-text')!.textContent).toBe('second draft');
+    expect(cards()[0].querySelector('.rte-comment-edited')!.textContent).toContain('edited');
+    expect(getAllComments()[0].text).toBe('second draft');
+  });
+
+  it('puts everything back on Escape, and the panel stays open', () => {
+    comment('Alpha', 'keep me');
+    openMenu(cards()[0]);
+    choose(cards()[0], 'edit');
+    type(field(), 'changed my mind');
+    press(field(), 'Escape');
+    expect(panel().querySelector('.rte-comment-edit')).toBeNull();
+    expect(cards()[0].querySelector('.rte-comment-text')!.textContent).toBe('keep me');
+    expect(cards()[0].querySelector('.rte-comment-edited')).toBeNull();
+    expect(panel().classList.contains('is-open')).toBe(true);
+    expect((document.activeElement as HTMLElement).dataset.action).toBe('more');
+  });
+
+  it('cannot be saved empty, and saving the same text does not mark it edited', () => {
+    comment('Alpha', 'same');
+    openMenu(cards()[0]);
+    choose(cards()[0], 'edit');
+    type(field(), '  ');
+    expect(panel().querySelector<HTMLButtonElement>('.rte-comment-edit .primary')!.disabled).toBe(true);
+    type(field(), 'same');
+    press(field(), 'Enter');
+    expect(cards()[0].querySelector('.rte-comment-edited')).toBeNull();
+  });
+
+  it('edits a reply the same way', () => {
+    comment('Alpha', 'question');
+    const reply = cards()[0].querySelector<HTMLTextAreaElement>('.rte-comment-reply-textarea')!;
+    type(reply, 'answer');
+    press(reply, 'Enter');
+
+    const replyEl = () => cards()[0].querySelector<HTMLElement>('.rte-comment-reply')!;
+    openMenu(replyEl());
+    choose(replyEl(), 'edit');
+    expect(field().value).toBe('answer');
+    expect(cards()[0].querySelector('.rte-comment-text')!.textContent).toBe('question');
+    type(field(), 'better answer');
+    press(field(), 'Enter');
+    expect(replyEl().querySelector('.rte-comment-reply-text')!.textContent).toBe('better answer');
+    expect(replyEl().querySelector('.rte-comment-edited')).not.toBeNull();
+  });
+});
+
+describe('deleting, and taking it back', () => {
+  const del = (card: HTMLElement) => {
+    card.querySelector<HTMLButtonElement>('[data-action="more"]')!.click();
+    card.querySelector<HTMLButtonElement>('.rte-comment-menu-item[data-action="delete"]')!.click();
+  };
+  const toast = () => panel().querySelector<HTMLElement>('.rte-comments-toast')!;
+  const undo = () => toast().querySelector<HTMLButtonElement>('.rte-comments-toast-action')!.click();
+
+  it('offers Undo for a thread, and Undo puts the highlight and the thread back', () => {
+    comment('beta gamma', 'one');
+    del(cards()[0]);
+    expect(toast().hidden).toBe(false);
+    expect(toast().textContent).toContain('Comment deleted');
+    expect(content.querySelector('.rte-comment-anchor')).toBeNull();
+
+    undo();
+    expect(toast().hidden).toBe(true);
+    expect(content.querySelector('.rte-comment-anchor')!.textContent).toBe('beta gamma');
+    expect(cards()).toHaveLength(1);
+    expect(cards()[0].querySelector('.rte-comment-text')!.textContent).toBe('one');
+  });
+
+  it('offers Undo for a note, and for a reply', () => {
+    comment(null, 'a note');
+    const reply = cards()[0].querySelector<HTMLTextAreaElement>('.rte-comment-reply-textarea')!;
+    type(reply, 'r1');
+    reply.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+    del(cards()[0].querySelector<HTMLElement>('.rte-comment-reply')!);
+    expect(toast().textContent).toContain('Reply deleted');
+    expect(cards()[0].querySelectorAll('.rte-comment-reply')).toHaveLength(0);
+    undo();
+    expect(cards()[0].querySelectorAll('.rte-comment-reply')).toHaveLength(1);
+
+    del(cards()[0]);
+    expect(toast().textContent).toContain('Note deleted');
+    expect(cards()).toHaveLength(0);
+    undo();
+    expect(cards()).toHaveLength(1);
+    expect(cards()[0].querySelector('.rte-comment-reply-text')!.textContent).toBe('r1');
+  });
+
+  it('says so, instead of failing silently, when the document has changed too much to put the highlight back', () => {
+    comment('beta gamma', 'one');
+    del(cards()[0]);
+    content.innerHTML = '<p>Something else entirely</p>';
+    undo();
+    expect(toast().textContent).toContain('Use Undo in the document');
+    expect(content.querySelector('.rte-comment-anchor')).toBeNull();
+  });
+
+  it('does nothing harmful when the document got the highlight back first', () => {
+    comment('beta gamma', 'one');
+    const html = content.innerHTML;
+    del(cards()[0]);
+    content.innerHTML = html; // what the editor's own Undo does
+    panel().dispatchEvent(new Event('x'));
+    undo();
+    expect(content.querySelectorAll('.rte-comment-anchor')).toHaveLength(1);
+  });
+
+  it('goes away by itself', () => {
+    vi.useFakeTimers();
+    try {
+      comment(null, 'a note');
+      del(cards()[0]);
+      expect(toast().hidden).toBe(false);
+      vi.advanceTimersByTime(8100);
+      expect(toast().hidden).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('the bubble over a selection', () => {
+  const bubble = () => document.querySelector<HTMLElement>('.rte-comments-bubble');
+  const visible = () => !!bubble() && !bubble()!.hidden;
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 80));
+
+  beforeEach(() => {
+    // jsdom has no layout: give a selection somewhere to be.
+    Range.prototype.getBoundingClientRect = () => ({ top: 100, bottom: 120, left: 40, right: 120, width: 80, height: 20, x: 40, y: 100, toJSON: () => ({}) }) as DOMRect;
+    Range.prototype.getClientRects = () => [Range.prototype.getBoundingClientRect.call(null)] as unknown as DOMRectList;
+  });
+
+  it('appears when text is selected and goes when it is not', async () => {
+    select('gamma');
+    document.dispatchEvent(new Event('selectionchange'));
+    await settle();
+    expect(visible()).toBe(true);
+
+    window.getSelection()!.removeAllRanges();
+    document.dispatchEvent(new Event('selectionchange'));
+    await settle();
+    expect(visible()).toBe(false);
+  });
+
+  it('starts a comment on that text when clicked', async () => {
+    select('gamma');
+    document.dispatchEvent(new Event('selectionchange'));
+    await settle();
+    bubble()!.click();
+    expect(panel().querySelector('.rte-comment-composer .rte-comment-selection')!.textContent).toBe('gamma');
+    expect(visible()).toBe(false);
+  });
+
+  it('waits for the pointer to come up, so it does not chase a drag', async () => {
+    document.dispatchEvent(new Event('pointerdown'));
+    select('gamma');
+    document.dispatchEvent(new Event('selectionchange'));
+    await settle();
+    expect(visible()).toBe(false);
+    document.dispatchEvent(new Event('pointerup'));
+    await settle();
+    expect(visible()).toBe(true);
+  });
+
+  it('is not offered in a read-only document', async () => {
+    content.setAttribute('contenteditable', 'false');
+    select('gamma');
+    document.dispatchEvent(new Event('selectionchange'));
+    await settle();
+    expect(visible()).toBe(false);
+  });
+
+  it('is not offered in an editor that does not have comments', async () => {
+    document.body.insertAdjacentHTML('beforeend', '<div class="rte-editor" id="other"><div class="rte-content" contenteditable="true"><p>Plain editor text</p></div></div>');
+    const text = document.querySelector('#other p')!.firstChild!;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 5);
+    window.getSelection()!.removeAllRanges();
+    window.getSelection()!.addRange(range);
+    document.dispatchEvent(new Event('selectionchange'));
+    await settle();
+    expect(visible()).toBe(false);
+  });
+});
+
+describe('the shortcut', () => {
+  const chord = (init: KeyboardEventInit) =>
+    content.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM', key: 'µ', altKey: true, bubbles: true, cancelable: true, ...init }));
+
+  it('Ctrl+Alt+M starts a comment on the selection (by key code, since Alt changes the key on a Mac)', () => {
+    select('Epsilon');
+    expect(chord({ ctrlKey: true })).toBe(false); // prevented
+    expect(panel().querySelector('.rte-comment-composer .rte-comment-selection')!.textContent).toBe('Epsilon');
+    expect(document.activeElement).toBe(composerField());
+  });
+
+  it('Cmd+Alt+M does the same, and with nothing selected it starts a note', () => {
+    expect(chord({ metaKey: true })).toBe(false);
+    expect(panel().querySelector('.rte-comment-composer-hint')).not.toBeNull();
+  });
+
+  it('ignores the chord without Alt, or with Shift', () => {
+    expect(chord({ ctrlKey: true, altKey: false })).toBe(true);
+    expect(chord({ ctrlKey: true, shiftKey: true })).toBe(true);
+    expect(panel().querySelector('.rte-comment-composer')).toBeNull();
   });
 });
