@@ -54,3 +54,28 @@ describe('getCleanEditorHTML', () => {
     expect(getCleanEditorHTML(null)).toBe('');
   });
 });
+
+describe('stripEditorUiArtifacts and the media manager', () => {
+  it('drops an upload that has not finished', () => {
+    const html = '<p>a</p><figure class="rte-media" data-rte-media-pending="upload-1"></figure><p>b</p>';
+    expect(stripEditorUiArtifacts(html)).toBe('<p>a</p><p>b</p>');
+  });
+
+  it('removes the editing-only contenteditable from captioned media, keeping everything else', () => {
+    const html =
+      '<figure class="rte-media" contenteditable="false" data-align="center" style="display: table;"><img src="a.png" alt="A"><figcaption contenteditable="true">Caption</figcaption></figure>';
+    expect(stripEditorUiArtifacts(html)).toBe(
+      '<figure class="rte-media" data-align="center" style="display: table;"><img src="a.png" alt="A"><figcaption>Caption</figcaption></figure>',
+    );
+  });
+
+  it('drops a caption that nobody wrote in', () => {
+    const html = '<figure class="rte-media" contenteditable="false"><img src="a.png"><figcaption contenteditable="true"><br></figcaption></figure>';
+    expect(stripEditorUiArtifacts(html)).toBe('<figure class="rte-media"><img src="a.png"></figure>');
+  });
+
+  it('leaves other figures alone', () => {
+    const html = '<figure contenteditable="false"><img src="a.png"><figcaption></figcaption></figure>';
+    expect(stripEditorUiArtifacts(html)).toBe(html);
+  });
+});
