@@ -12,3 +12,4 @@ Media manager: TypeScript types that match the plugin, and fixes found by testin
 - A suggestion for alt text that is still being waited for is stopped when the dialog is closed.
 - `youtube` and `vimeo` are no longer exported (they were never declared or documented; `parseEmbedUrl` is the API).
 - The Storybook story for the media manager described `offline` options that never existed; it now shows what does (an upload handler, a library, stock photos and suggested alt text, audio, embeds and the slash menu, optimized uploads). The stale `IMPLEMENTATION.md` is replaced by `ARCHITECTURE.md`.
+- Pasting or dropping a picture into an Editora editor whose toolbar has no Image, Video or Audio button is left to that editor; the resize handles are 24px on touch screens.

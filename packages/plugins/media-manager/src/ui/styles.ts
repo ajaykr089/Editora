@@ -1194,9 +1194,9 @@ export const injectMediaDialogStyles = (): void => {
     /* A finger needs more to hold on to than a mouse does. */
     @media (pointer: coarse) {
       .media-resize-handle {
-        width: 22px;
-        height: 22px;
-        margin: -11px 0 0 -11px;
+        width: 24px;
+        height: 24px;
+        margin: -12px 0 0 -12px;
       }
     }
 
