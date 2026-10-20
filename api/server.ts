@@ -29,7 +29,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm'];
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/webm'];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -54,7 +54,7 @@ app.post('/api/media/upload', upload.single('file'), async (req, res) => {
 
   const id = uuidv4();
   const url = `http://localhost:${PORT}/uploads/${req.file.filename}`;
-  const type = req.file.mimetype.startsWith('image') ? 'image' : 'video';
+  const type = req.file.mimetype.startsWith('image') ? 'image' : req.file.mimetype.startsWith('audio') ? 'audio' : 'video';
   const storagePath = `/uploads/${req.file.filename}`;
 
   try {
@@ -93,7 +93,7 @@ app.get('/api/media/library', async (req, res) => {
     where.push('(original_filename LIKE ? OR alt_text LIKE ?)');
     params.push(pattern, pattern);
   }
-  if (req.query.type === 'image' || req.query.type === 'video') {
+  if (req.query.type === 'image' || req.query.type === 'video' || req.query.type === 'audio') {
     where.push('type = ?');
     params.push(req.query.type);
   }

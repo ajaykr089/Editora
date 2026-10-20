@@ -153,6 +153,7 @@ export class ToolbarRenderer {
       exportPdf: "exportPdf",
       insertImage: "insertImage",
       insertVideo: "insertVideo",
+      insertAudio: "insertAudio",
       codeBlock: "insertCodeBlock",
     };
 
