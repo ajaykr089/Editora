@@ -150,7 +150,22 @@ export {
 
 // Regular plugins (with React components - 13 total)
 export { MediaManagerPlugin, setMediaManagerConfig, getMediaManagerConfig } from '../media-manager/src/index';
-export type { MediaManagerConfig } from '../media-manager/src/index';
+export {
+  createBase64Provider,
+  createCallbackProvider,
+  createRestProvider,
+  MediaUploadError,
+} from '../media-manager/src/index';
+export type {
+  MediaManagerConfig,
+  MediaItem,
+  MediaPage,
+  MediaProvider,
+  MediaQuery,
+  MediaUploadHandler,
+  UploadContext,
+  UploadProgress,
+} from '../media-manager/src/index';
 export { DocumentManagerPlugin, setDocumentManagerConfig, getDocumentManagerConfig } from '../document-manager/src/index';
 export type { DocumentManagerConfig } from '../document-manager/src/index';
 export { PreviewPlugin } from "../preview/src/index";

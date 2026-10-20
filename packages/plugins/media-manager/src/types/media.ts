@@ -5,6 +5,7 @@ export interface MediaItem {
   id: string;
   name: string;
   type: 'image' | 'video' | 'audio' | 'file';
+  /** The address the document will point at: an https URL from a server, or a data URL when nothing is configured. */
   src: string;
   size: number;
   width?: number;
@@ -68,94 +69,81 @@ export interface MediaLibraryItem {
   folder_id?: string | null;
 }
 
-/**
- * Storage provider interface
- */
-export interface StorageProvider {
-  upload(file: File): Promise<MediaItem>;
-  list(filter?: { type?: string; limit?: number }): Promise<MediaItem[]>;
-  delete(id: string): Promise<void>;
-  get(id: string): Promise<MediaItem | null>;
-  update(id: string, updates: Partial<MediaItem>): Promise<MediaItem>;
+/** How far an upload has got. `fraction` is 0..1, and stays 0 when the transport cannot say how big the whole is. */
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  fraction: number;
+}
+
+export interface UploadContext {
+  /** Aborted when the person cancels or closes the dialog; a provider has to stop and reject with an AbortError. */
+  signal?: AbortSignal;
+  onProgress?: (progress: UploadProgress) => void;
+}
+
+export interface MediaQuery {
+  page?: number;
+  limit?: number;
+  /** Free-text search over names and alt text. */
+  search?: string;
+  type?: MediaItem['type'];
+  folderId?: string | null;
+}
+
+export interface MediaPage {
+  items: MediaItem[];
+  total: number;
 }
 
 /**
- * Complete MediaManagerConfig with professional features
+ * Where media goes and where the library comes from. Only `upload` is required: a provider that cannot list
+ * (a plain "put this file somewhere" endpoint) still works for inserting.
  */
+export interface MediaProvider {
+  readonly name?: string;
+  upload(file: File, context: UploadContext): Promise<MediaItem>;
+  list?(query?: MediaQuery, context?: { signal?: AbortSignal }): Promise<MediaPage>;
+  update?(id: string, updates: Partial<Pick<MediaItem, 'name' | 'metadata'>>): Promise<MediaItem>;
+  delete?(id: string): Promise<void>;
+}
+
+/**
+ * The shortest way to plug in a backend: receive the file, report progress, resolve with the URL (or with
+ * `{ url, width, height, ... }`). The same shape as the upload callbacks of other editors.
+ */
+export type MediaUploadHandler = (
+  file: File,
+  context: UploadContext,
+) => Promise<string | { url: string; thumbnailUrl?: string; width?: number; height?: number; id?: string; name?: string }>;
+
 export interface MediaManagerConfig {
-  mode?: 'local' | 'api' | 'hybrid';
+  /** A complete provider. Wins over everything below. */
+  provider?: MediaProvider;
+  /** Upload callback; wrapped into a provider. Wins over `apiUrl`. */
+  uploadHandler?: MediaUploadHandler;
 
-  upload?: {
-    enabled: boolean;
-    maxFileSize?: number;
-    allowedTypes?: string[];
-    autoOptimize?: boolean;
-    autoGenerateThumbnails?: boolean;
-  };
-
-  storage?: {
-    type: 'memory' | 'indexeddb' | 'filesystem' | 'api';
-    key?: string;
-    apiUrl?: string;
-    headers?: Record<string, string>;
-  };
-
-  /** Offline mode and custom server configuration */
-  offline?: {
-    enabled?: boolean; // If true, fallback to base64 when upload fails
-    fallbackToBase64?: boolean; // Default true - insert as base64 if upload unavailable
-    customUploadUrl?: string; // Custom server upload endpoint (e.g., "https://myserver.com/api/upload")
-    customUploadHeaders?: Record<string, string>; // Custom headers for upload request
-    useBase64Permanently?: boolean; // If true, always use base64 instead of uploading
-  };
-
-  library?: {
-    enabled: boolean;
-    searchable?: boolean;
-    sortable?: boolean;
-    pagination?: boolean;
-    gridSize?: 'sm' | 'md' | 'lg';
-    previewOnHover?: boolean;
-  };
-
-  manipulation?: {
-    crop?: boolean;
-    resize?: boolean;
-    rotate?: boolean;
-    flip?: boolean;
-    compress?: boolean;
-    formatConvert?: boolean;
-    metadataEdit?: boolean;
-  };
-
-  metadata?: {
-    altText?: boolean;
-    title?: boolean;
-    caption?: boolean;
-    copyright?: boolean;
-  };
-
-  security?: {
-    sanitizeFilenames?: boolean;
-    validateMimeType?: boolean;
-  };
-
-  ui?: {
-    darkMode?: boolean;
-    doubleClickToEdit?: boolean;
-    dragReorder?: boolean;
-  };
-
-  /** API endpoints (legacy support) */
+  /** Base URL of a REST backend (see `apiEndpoints`). Without it, and without a provider, files become data URLs. */
+  apiUrl?: string;
   apiEndpoints?: {
     upload: string;
     library: string;
     delete: string;
   };
+  /** Extra request headers (authentication). Added to the global API headers. */
+  headers?: Record<string, string>;
+  /** Send cookies with the upload request (cross-origin session auth). */
+  withCredentials?: boolean;
+  /** Name of the multipart field that carries the file. Default `file`. */
+  uploadFieldName?: string;
+  /**
+   * When the upload fails, insert the file as a data URL instead of showing the error. Off by default: a
+   * failed upload that silently turns into a megabyte of base64 in the document is worse than a message.
+   */
+  fallbackToBase64?: boolean;
 
-  /** Maximum file size in bytes (legacy support) */
+  /** Maximum file size in bytes. */
   maxFileSize?: number;
-
-  /** Allowed MIME types (legacy support) */
+  /** Allowed MIME types; `image/*` style wildcards work. */
   allowedTypes?: string[];
 }
