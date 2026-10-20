@@ -15,10 +15,10 @@
   },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
@@ -26,8 +26,7 @@
   },
   "files": [
     "dist",
-    "src",
-    "index.d.ts"
+    "src"
   ],
   "scripts": {
     "build": "vite build"

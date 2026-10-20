@@ -192,6 +192,23 @@ describe('a gallery', () => {
     expect(handlesShown()).toBe(false);
   });
 
+  it('puts the toolbar over the picture it is for, not over the whole gallery', () => {
+    const figure = buildGallery(images(3));
+    editor.append(figure);
+    const [first, second] = pictures(figure);
+    const rect = (left: number) => ({ left, top: 300, right: left + 100, bottom: 360, width: 100, height: 60, x: left, y: 300, toJSON() {} }) as DOMRect;
+    figure.getBoundingClientRect = () => rect(0);
+    first.getBoundingClientRect = () => rect(20);
+    second.getBoundingClientRect = () => rect(620);
+    click(second);
+    const bar = toolbar()!;
+    Object.defineProperty(bar, 'offsetWidth', { value: 200, configurable: true });
+    getMediaController().refresh();
+    const left = parseInt(toolbar()!.style.left, 10);
+    // centred on the second picture (670), not on the gallery (50)
+    expect(left).toBeGreaterThan(400);
+  });
+
   it('sets the columns from the toolbar, as one undoable step', () => {
     const recorded = vi.fn();
     (window as any).execEditorCommand = (c: string, ...a: any[]) => c === 'recordDomTransaction' && recorded(...a);

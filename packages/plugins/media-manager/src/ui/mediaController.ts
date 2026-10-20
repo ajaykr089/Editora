@@ -9,6 +9,7 @@ import {
   styleCaption,
   toggleCaption,
   isEmbed,
+  isGalleryItem,
   isResizable,
   type MediaElement,
 } from '../model/figure';
@@ -227,7 +228,8 @@ export class MediaController {
    * a caret at the start of its text; without this that looked like the end of the selection.
    */
   private placeNodeSelection(media: Media): void {
-    const root = figureOf(media) ?? mediaRootOf(media);
+    // A picture of a gallery is selected by itself; the figure around it would read back as its first picture.
+    const root = isGalleryItem(media) ? mediaRootOf(media) : figureOf(media) ?? mediaRootOf(media);
     const selection = window.getSelection();
     if (!selection || !root.isConnected) return;
     const range = document.createRange();

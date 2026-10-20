@@ -388,7 +388,8 @@ export class FloatingToolbar {
     const { element, media } = this;
     if (!media.isConnected) return;
 
-    const target = figureOf(media) ?? media;
+    // The bar goes over the figure (caption and all), except in a gallery, where it goes over the picture it is for.
+    const target = isGalleryItem(media) ? media : figureOf(media) ?? media;
     const rect = target.getBoundingClientRect();
     const height = element.offsetHeight || 40;
     const width = element.offsetWidth || 340;

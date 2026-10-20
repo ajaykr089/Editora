@@ -75,6 +75,22 @@ describe('selecting media with a click', () => {
     expect(getMediaController().selection).toBeNull();
   });
 
+  it('keeps to the picture that was clicked in a gallery, not the first one', () => {
+    make();
+    editor.insertAdjacentHTML(
+      'beforeend',
+      `<figure class="rte-media rte-gallery" data-columns="2"><img id="g1" src="${PIXEL}"><img id="g2" src="${PIXEL}"><img id="g3" src="${PIXEL}"></figure>`,
+    );
+    click(document.getElementById('g2')!);
+    expect(getMediaController().selection!.id).toBe('g2');
+    const range = window.getSelection()!.getRangeAt(0);
+    expect(range.startContainer.childNodes[range.startOffset]).toBe(document.getElementById('g2'));
+    // The browser reports the selection it was given; it is still the second picture.
+    document.dispatchEvent(new Event('selectionchange'));
+    expect(getMediaController().selection!.id).toBe('g2');
+    expect(document.querySelectorAll('.media-floating-toolbar')).toHaveLength(1);
+  });
+
   it('puts a node selection on a figure, whole, so that Delete removes the figure', () => {
     make();
     editor.insertAdjacentHTML('beforeend', `<figure class="rte-media"><img id="f" src="${PIXEL}"></figure>`);
