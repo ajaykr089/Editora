@@ -10,6 +10,7 @@ import {
 } from '../model/figure';
 import type { MediaManagerConfig } from '../types/media';
 import { showAltTextDialog } from './altTextDialog';
+import { editImage } from './imageEditor/editImage';
 import { isDarkThemeContext } from './dialogKit';
 import { showLinkDialogForMedia } from './linkDialog';
 import { showReplaceImageDialog } from './replaceDialog';
@@ -44,6 +45,7 @@ const ICONS = {
   right: icon('<line x1="21" y1="10" x2="7" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line>'),
   size: icon('<polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>'),
   caption: icon('<rect x="3" y="4" width="18" height="11" rx="2"></rect><line x1="7" y1="19" x2="17" y2="19"></line>'),
+  edit: icon('<path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path>'),
   alt: icon('<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>'),
   link: icon('<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>'),
   replace: icon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline>'),
@@ -122,6 +124,7 @@ export class FloatingToolbar {
       button('btn-size', 'Size', ICONS.size, undefined, true),
       button('btn-caption', hasCaption ? 'Remove caption' : 'Add caption', ICONS.caption, hasCaption),
       sep,
+      isImage ? button('btn-edit', 'Edit image: crop, rotate, resize', ICONS.edit) : '',
       isImage ? button('btn-alt', 'Edit alt text', ICONS.alt) : '',
       button('btn-link', existingLink ? 'Edit or remove link' : 'Add link', ICONS.link),
       isImage ? button('btn-replace', 'Replace image', ICONS.replace) : '',
@@ -161,6 +164,7 @@ export class FloatingToolbar {
       if (caption) hooks.focusCaption(caption);
     });
 
+    on('.btn-edit', () => this.viaDialog((changed) => editImage(media as HTMLImageElement, hooks.config?.(), changed)));
     on('.btn-alt', () => this.viaDialog((changed) => showAltTextDialog(media as HTMLImageElement, changed)));
     on('.btn-link', () => this.viaDialog((changed) => showLinkDialogForMedia(media, changed)));
     on('.btn-replace', () =>
