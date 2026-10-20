@@ -69,6 +69,38 @@ What is saved is plain, and needs none of the editor's CSS:
 
 (`display: table` makes the figure as wide as the picture, so the caption wraps at the picture's width.) While editing, the figure is `contenteditable="false"` with only the caption editable; the editor leaves that out of the HTML it hands to you, along with captions nobody wrote in. `wrapInFigure: false` inserts the bare `<img>` / `<video>` of earlier versions.
 
+## Audio, embedded videos, galleries
+
+- **Audio.** `insertAudio` opens the same picker for audio files (MP3, WAV, Ogg, M4A, AAC); the result is a `<figure>` with an `<audio controls>` player that can be aligned and captioned. The toolbar's Audio button is off by default so that existing toolbars do not change: `audio: true` adds it (`audio` is also a name for `toolbar` item lists), and `mediaSlashItems` has `/audio`.
+- **Embedded videos.** The Insert Video dialog has an **Embed** tab: paste a YouTube or Vimeo link (watch, short, `youtu.be`, shorts, playlists, a start time, Vimeo private links) or the iframe snippet the site gives you. The player is a block figure that keeps its shape (16:9, or upright for Shorts), loads lazily, uses YouTube's privacy-enhanced host and Vimeo's do-not-track setting, and can be aligned, captioned and sized from the toolbar. Only the video's **id** is read from what you paste; the iframe's address is built from it, so a link cannot bring in another host, script or parameters. Add more services with `embedProviders: [{ id, label, parse(url) }]` (what `parse` returns must be an https address). While editing, a player takes no mouse (click it to select its figure); it plays normally in the saved page. The iframe carries `data-editora-embed="true"`, which is what keeps the editor's sanitizer from removing it.
+- **Galleries.** Choose two or more pictures in the Library, Stock or Upload tab and **Insert as gallery** puts them in one `<figure class="rte-media rte-gallery">`: a grid of equal-shaped pictures in 2 to 5 columns (the toolbar's Columns menu), with one caption for the whole gallery. Click a picture for its own alt text, link, edit and replace, or to remove just that picture (or the gallery).
+
+## Stock photos and suggested alt text
+
+Neither calls any service by itself: you write the function (which can call your own backend, where the API key lives) and the dialog does the rest.
+
+```ts
+setMediaManagerConfig({
+  // A Stock tab in the Insert Image dialog, named for the service
+  stockProvider: {
+    name: "Unsplash",
+    search: async ({ search, page, limit }, { signal }) => {
+      const res = await fetch(`/api/stock?q=${encodeURIComponent(search)}&page=${page}&per=${limit}`, { signal });
+      const { results, total } = await res.json();
+      return {
+        total,
+        items: results.map((p) => ({ id: p.id, thumbnailUrl: p.urls.small, url: p.urls.regular, width: p.width, height: p.height, description: p.alt_description, author: p.user.name, sourceUrl: p.links.html })),
+      };
+    },
+    // caption: false | (photo) => string | null   (default: "Photo by <author> on <name>")
+  },
+  // A Suggest button next to the alt text field, in the picker and in the Edit alt text dialog
+  generateAltText: async ({ src, name }, { signal }) => (await describeWithMyService(src, signal)).text,
+});
+```
+
+An empty `search` means "show something" (popular, curated). Stock photos are inserted by address (not copied to your storage), with the description as alt text and the credit as the caption. Suggested alt text is only ever put in the field for the person to read and change, never inserted on its own; what comes back is tidied (one paragraph, no wrapping quotes, at most 500 characters).
+
 ## Where files go
 
 Decided in this order: a `provider`, an `uploadHandler`, a REST backend (`apiUrl`), or, with none of those, the document itself (data URLs).
@@ -104,6 +136,10 @@ const plugins = [MediaManagerPlugin({ uploadHandler })];
 | `apiUrl`, `apiEndpoints`, `headers` | none | REST backend; the endpoints are merged key by key |
 | `withCredentials`, `uploadFieldName` | `false`, `file` | Cookies on a cross-origin upload; multipart field name |
 | `fallbackToBase64` | `false` | Insert a data URL when the upload fails, instead of showing the error |
+| `audio` | `false` | Put an Audio button in the toolbar |
+| `embedProviders` | none | More services that can be embedded (YouTube and Vimeo are built in) |
+| `stockProvider` | none | A Stock tab in the Insert Image dialog; see above |
+| `generateAltText` | none | A Suggest button for alt text; see above |
 | `wrapInFigure` | `true` | Insert `<figure>` media that can be aligned and captioned; `false` for a bare `<img>` / `<video>` |
 | `uploadOnPaste` | `true` | Upload images and videos that are pasted or dropped into the editor |
 | `optimizeImages` | off | Scale down and re-encode large JPEG, PNG and WebP files before they are stored: `true` (wider than 2048px is scaled to 2048, quality 0.85) or `{ maxWidth, quality, format: 'keep' \| 'webp' \| 'jpeg' }`. The size limit is checked on the result, so a 12 MB photo can pass when it comes out at 600 KB; a file that cannot be made smaller is left as it is |

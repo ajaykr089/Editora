@@ -5,7 +5,7 @@ import { attachEscapeCloseHandler, createDialogOverlay, createDialogShell } from
 // Show Link dialog for media
 /** `onChanged` runs after the link was added, edited or removed, so the caller can refresh what shows its state. */
 export const showLinkDialogForMedia = (
-  media: HTMLImageElement | HTMLVideoElement,
+  media: HTMLElement,
   onChanged?: () => void,
 ) => {
   const existingLink = (media as HTMLElement).closest('a');

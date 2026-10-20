@@ -1,3 +1,5 @@
+import type { EmbedProvider } from '../embeds/providers';
+
 /**
  * Core media item interface
  */
@@ -125,6 +127,48 @@ export type MediaUploadHandler = (
   context: UploadContext,
 ) => Promise<string | { url: string; thumbnailUrl?: string; width?: number; height?: number; id?: string; name?: string }>;
 
+/** A photo from a stock service, as the picker shows it. */
+export interface StockPhoto {
+  id: string;
+  /** A small picture for the grid. */
+  thumbnailUrl: string;
+  /** The picture to insert. */
+  url: string;
+  width?: number;
+  height?: number;
+  /** What it shows, offered as the alt text. */
+  description?: string;
+  author?: string;
+  authorUrl?: string;
+  /** The page of the photo at the service. */
+  sourceUrl?: string;
+}
+
+/**
+ * Photos from a service such as Unsplash or Pexels. The editor makes no request to any service itself: you write
+ * `search` (calling your own backend, which holds the API key) and the picker shows a Stock tab.
+ */
+export interface StockProvider {
+  /** The service's name, shown on the tab and in credits: "Unsplash". */
+  name: string;
+  /** An empty `search` means "show something" (popular, curated); a service that cannot may return nothing. */
+  search(
+    query: { search: string; page: number; limit: number },
+    context: { signal?: AbortSignal },
+  ): Promise<{ items: StockPhoto[]; total?: number }>;
+  /**
+   * The credit put under an inserted photo as its caption. By default "Photo by <author> on <name>" when the photo
+   * has an author; return `null` for none, or pass `false` to never add one.
+   */
+  caption?: false | ((photo: StockPhoto) => string | null);
+}
+
+/** Describe a picture for people who cannot see it: your function calls whatever service you use. */
+export type AltTextGenerator = (
+  image: { src: string; name?: string },
+  context: { signal?: AbortSignal },
+) => Promise<string>;
+
 export interface MediaManagerConfig {
   /** A complete provider. Wins over everything below. */
   provider?: MediaProvider;
@@ -155,7 +199,22 @@ export interface MediaManagerConfig {
    * bare `<img>` / `<video>` of earlier versions.
    */
   wrapInFigure?: boolean;
-  /** Upload images and videos that are pasted or dropped into the editor (default `true`). */
+  /**
+   * Put an Audio button in the toolbar next to Image and Video. Off by default so that existing toolbars do not
+   * change; the `insertAudio` command (and `mediaSlashItems`) work either way.
+   */
+  audio?: boolean;
+  /** More links that can be embedded as a player (YouTube and Vimeo are built in); see `EmbedProvider`. */
+  embedProviders?: EmbedProvider[];
+  /** Photos from a stock service: adds a Stock tab to the image picker. */
+  stockProvider?: StockProvider;
+  /**
+   * Suggest alt text for an image: adds a Suggest button next to the alt text field. What it returns is put in
+   * the field for the person to read and change, never inserted on its own.
+   */
+  generateAltText?: AltTextGenerator;
+
+  /** Upload images, videos and audio that are pasted or dropped into the editor (default `true`). */
   uploadOnPaste?: boolean;
 
   /**

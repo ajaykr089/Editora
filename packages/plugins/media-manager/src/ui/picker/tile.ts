@@ -36,13 +36,13 @@ export const thumbnail = (item: Pick<MediaItem, 'type' | 'src' | 'thumbnailUrl'>
     return video;
   }
   const holder = el('span', 'rte-mp-tile-icon');
-  holder.innerHTML = icons.photo;
+  holder.innerHTML = item.type === 'audio' ? icons.audio : icons.photo;
   return holder;
 };
 
-export const kindBadge = (): HTMLElement => {
+export const kindBadge = (type: 'video' | 'audio' = 'video'): HTMLElement => {
   const badge = el('span', 'rte-mp-tile-kind');
-  badge.innerHTML = icons.play;
+  badge.innerHTML = type === 'audio' ? icons.note : icons.play;
   return badge;
 };
 
@@ -63,11 +63,11 @@ export const createLibraryTile = (item: MediaItem): HTMLElement => {
   const tile = el('div', 'rte-mp-tile');
   tile.setAttribute('role', 'option');
   tile.setAttribute('aria-selected', 'false');
-  tile.setAttribute('aria-label', item.type === 'video' ? `${item.name}, video` : item.name);
+  tile.setAttribute('aria-label', item.type === 'video' || item.type === 'audio' ? `${item.name}, ${item.type}` : item.name);
   tile.tabIndex = -1;
   tile.dataset.id = item.id;
   tile.append(thumbnail(item));
-  if (item.type === 'video') tile.append(kindBadge());
+  if (item.type === 'video' || item.type === 'audio') tile.append(kindBadge(item.type));
   tile.append(nameOverlay(item.name), checkBadge());
   return tile;
 };

@@ -13,5 +13,11 @@ export const icons = {
   alert: svg('<circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16.5v.01"></path>', 20),
   retry: svg('<path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path>', 16),
   video: svg('<rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m10 9.5 4.5 2.5-4.5 2.5z" fill="currentColor"></path>', 28),
+  audio: svg('<path d="M9 18V6l10-2v12"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="16.5" cy="16" r="2.5"></circle>', 28),
+  note: svg('<path d="M9 18V6l10-2v12"></path><circle cx="6.5" cy="18" r="2.5" fill="currentColor"></circle><circle cx="16.5" cy="16" r="2.5" fill="currentColor"></circle>', 14),
+  embed: svg('<rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m10 9.5 4.5 2.5-4.5 2.5z" fill="currentColor"></path>'),
+  stock: svg('<rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M3 15 8 10l5 5 3-3 5 5"></path><circle cx="15.5" cy="8.5" r="1.5"></circle>'),
+  gallery: svg('<rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="8" rx="1.5"></rect><rect x="3" y="13" width="8" height="8" rx="1.5"></rect><rect x="13" y="13" width="8" height="8" rx="1.5"></rect>', 16),
+  sparkle: svg('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"></path>', 16),
   photo: svg('<rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="9" cy="9" r="1.6"></circle><path d="m21 15-4.5-4.5L6 21"></path>', 28),
 };

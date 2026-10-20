@@ -3,11 +3,16 @@ import {
   captionOf,
   figureOf,
   getAlign,
+  isEmbed,
+  isGalleryItem,
+  kindOfFigure,
   setAlign,
   setWidth,
   toggleCaption,
   type Align,
+  type MediaElement,
 } from '../model/figure';
+import { GALLERY_COLUMNS, getColumns, removeFromGallery, setColumns } from '../model/gallery';
 import type { MediaManagerConfig } from '../types/media';
 import { showAltTextDialog } from './altTextDialog';
 import { editImage } from './imageEditor/editImage';
@@ -16,7 +21,7 @@ import { showLinkDialogForMedia } from './linkDialog';
 import { showReplaceImageDialog } from './replaceDialog';
 import { injectMediaDialogStyles } from './styles';
 
-type Media = HTMLImageElement | HTMLVideoElement;
+type Media = MediaElement;
 
 export interface ToolbarHooks {
   /** The settings the plugin was created with (the replace dialog uploads with them). */
@@ -46,6 +51,8 @@ const ICONS = {
   size: icon('<polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>'),
   caption: icon('<rect x="3" y="4" width="18" height="11" rx="2"></rect><line x1="7" y1="19" x2="17" y2="19"></line>'),
   edit: icon('<path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path>'),
+  columns: icon('<rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="9" y1="4" x2="9" y2="20"></line><line x1="15" y1="4" x2="15" y2="20"></line>'),
+  removeAll: icon('<rect x="3" y="3" width="8" height="8" rx="1"></rect><rect x="13" y="3" width="8" height="8" rx="1"></rect><rect x="3" y="13" width="8" height="8" rx="1"></rect><line x1="14" y1="14" x2="21" y2="21"></line><line x1="21" y1="14" x2="14" y2="21"></line>'),
   alt: icon('<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>'),
   link: icon('<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>'),
   replace: icon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline>'),
@@ -94,6 +101,7 @@ export const visibleContentWidth = (host: HTMLElement): number => {
 export class FloatingToolbar {
   readonly element: HTMLDivElement;
   private menu: HTMLElement | null = null;
+  private menuTrigger: HTMLButtonElement | null = null;
 
   constructor(
     private readonly media: Media,
@@ -101,15 +109,21 @@ export class FloatingToolbar {
   ) {
     injectMediaDialogStyles();
     const isImage = media.tagName === 'IMG';
+    const isAudio = media.tagName === 'AUDIO';
+    const embed = isEmbed(media);
+    const inGallery = isGalleryItem(media);
+    // Links go on pictures and videos; an embedded player, audio and a gallery have none to give.
+    const canLink = !isAudio && !embed;
     const existingLink = media.closest('a');
     const figure = figureOf(media);
     const align = getAlign(media);
     const hasCaption = Boolean(figure && captionOf(figure));
+    const noun = embed ? 'Embedded video' : inGallery ? 'Gallery' : isImage ? 'Image' : isAudio ? 'Audio' : 'Video';
 
     const el = document.createElement('div');
     el.className = 'media-floating-toolbar';
     el.setAttribute('role', 'toolbar');
-    el.setAttribute('aria-label', isImage ? 'Image options' : 'Video options');
+    el.setAttribute('aria-label', `${noun} options`);
     if (isDarkThemeContext(media)) el.classList.add('rte-ui-theme-dark');
 
     const button = (cls: string, label: string, svg: string, pressed?: boolean, popup = false) =>
@@ -118,18 +132,23 @@ export class FloatingToolbar {
       }${popup ? ' aria-haspopup="menu" aria-expanded="false"' : ''}>${svg}</button>`;
     const sep = '<div class="media-floating-toolbar-separator" aria-hidden="true"></div>';
     el.innerHTML = [
-      button('btn-align-left', 'Align left', ICONS.left, align === 'left'),
-      button('btn-align-center', 'Align center', ICONS.center, align === 'center'),
-      button('btn-align-right', 'Align right', ICONS.right, align === 'right'),
-      button('btn-size', 'Size', ICONS.size, undefined, true),
+      inGallery ? '' : button('btn-align-left', 'Align left', ICONS.left, align === 'left'),
+      inGallery ? '' : button('btn-align-center', 'Align center', ICONS.center, align === 'center'),
+      inGallery ? '' : button('btn-align-right', 'Align right', ICONS.right, align === 'right'),
+      inGallery
+        ? button('btn-columns', 'Columns', ICONS.columns, undefined, true)
+        : isAudio
+          ? ''
+          : button('btn-size', 'Size', ICONS.size, undefined, true),
       button('btn-caption', hasCaption ? 'Remove caption' : 'Add caption', ICONS.caption, hasCaption),
       sep,
       isImage ? button('btn-edit', 'Edit image: crop, rotate, resize', ICONS.edit) : '',
       isImage ? button('btn-alt', 'Edit alt text', ICONS.alt) : '',
-      button('btn-link', existingLink ? 'Edit or remove link' : 'Add link', ICONS.link),
+      canLink ? button('btn-link', existingLink ? 'Edit or remove link' : 'Add link', ICONS.link) : '',
       isImage ? button('btn-replace', 'Replace image', ICONS.replace) : '',
       sep,
-      button('btn-remove', 'Remove', ICONS.remove),
+      button('btn-remove', inGallery ? 'Remove picture' : 'Remove', ICONS.remove),
+      inGallery ? button('btn-remove-gallery', 'Remove gallery', ICONS.removeAll) : '',
     ].join('');
 
     // Pressing a button must not pull the caret out of the editor.
@@ -153,7 +172,8 @@ export class FloatingToolbar {
     on('.btn-align-center', alignTo('center'));
     on('.btn-align-right', alignTo('right'));
 
-    on('.btn-size', () => (this.menu ? this.closeMenu(true) : this.openMenu()));
+    on('.btn-size', () => (this.menu ? this.closeMenu(true) : this.openSizeMenu()));
+    on('.btn-columns', () => (this.menu ? this.closeMenu(true) : this.openColumnsMenu()));
 
     on('.btn-caption', () => {
       let caption: HTMLElement | null = null;
@@ -165,27 +185,35 @@ export class FloatingToolbar {
     });
 
     on('.btn-edit', () => this.viaDialog((changed) => editImage(media as HTMLImageElement, hooks.config?.(), changed)));
-    on('.btn-alt', () => this.viaDialog((changed) => showAltTextDialog(media as HTMLImageElement, changed)));
+    on('.btn-alt', () => this.viaDialog((changed) => showAltTextDialog(media as HTMLImageElement, changed, hooks.config?.())));
     on('.btn-link', () => this.viaDialog((changed) => showLinkDialogForMedia(media, changed)));
     on('.btn-replace', () =>
       this.viaDialog((changed) => showReplaceImageDialog(media as HTMLImageElement, hooks.config?.(), changed)),
     );
 
-    on('.btn-remove', async () => {
-      const confirmed = await confirmAction('Remove this media?', {
-        title: 'Remove media',
+    const remove = async (whole: boolean) => {
+      const confirmed = await confirmAction(whole ? 'Remove this whole gallery?' : 'Remove this media?', {
+        title: whole ? 'Remove gallery' : 'Remove media',
         confirmText: 'Remove',
         danger: true,
         context: media,
       });
       if (!confirmed || !media.isConnected) return;
+      if (inGallery && !whole) {
+        // One picture of a gallery: the gallery stays (unless that was its last).
+        hooks.commit(media, () => removeFromGallery(media));
+        hooks.removed();
+        return;
+      }
       // What goes with the media: its figure (caption and all), or a link that wraps only this media.
       const link = media.closest('a');
       const wrapper =
         figureOf(media) ?? (link && link.children.length === 1 && !link.textContent?.trim() ? link : media);
       hooks.commit(media, () => wrapper.remove());
       hooks.removed();
-    });
+    };
+    on('.btn-remove', () => void remove(false));
+    on('.btn-remove-gallery', () => void remove(true));
 
     this.reposition();
   }
@@ -229,29 +257,58 @@ export class FloatingToolbar {
     });
   }
 
-  private openMenu(): void {
+  private openSizeMenu(): void {
     const { media } = this;
-    const trigger = this.element.querySelector<HTMLButtonElement>('.btn-size')!;
     const host = media.closest<HTMLElement>('[contenteditable="true"]');
     const available = host ? visibleContentWidth(host) : 0;
+    this.openMenu(
+      '.btn-size',
+      'Size',
+      SIZE_PRESETS.map((preset) => ({
+        label: preset.label,
+        apply: () => {
+          const width =
+            preset.share === 'original'
+              ? null
+              : Math.max(50, Math.round(Math.min(available || Infinity, (available || 800) * preset.share)));
+          this.hooks.commit(media, () => setWidth(media, width));
+        },
+      })),
+    );
+  }
+
+  private openColumnsMenu(): void {
+    const { media } = this;
+    const figure = figureOf(media);
+    if (!figure || kindOfFigure(figure) !== 'gallery') return;
+    const current = getColumns(figure);
+    this.openMenu(
+      '.btn-columns',
+      'Columns',
+      GALLERY_COLUMNS.map((count) => ({
+        label: `${count} columns${count === current ? ' (current)' : ''}`,
+        apply: () => this.hooks.commit(media, () => setColumns(figure, count)),
+      })),
+    );
+  }
+
+  /** A menu of choices under a toolbar button: arrows move, Enter or Space chooses, Escape closes. */
+  private openMenu(buttonSelector: string, label: string, entries: Array<{ label: string; apply: () => void }>): void {
+    const trigger = this.element.querySelector<HTMLButtonElement>(buttonSelector)!;
 
     const menu = document.createElement('div');
     menu.className = 'media-size-menu';
     menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', 'Size');
-    for (const preset of SIZE_PRESETS) {
+    menu.setAttribute('aria-label', label);
+    for (const entry of entries) {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'media-size-menu-item';
       item.setAttribute('role', 'menuitem');
-      item.textContent = preset.label;
+      item.textContent = entry.label;
       item.tabIndex = -1;
       item.addEventListener('click', () => {
-        const width =
-          preset.share === 'original'
-            ? null
-            : Math.max(50, Math.round(Math.min(available || Infinity, (available || 800) * preset.share)));
-        this.hooks.commit(media, () => setWidth(media, width));
+        entry.apply();
         this.closeMenu(true);
         this.hooks.refresh();
       });
@@ -272,6 +329,7 @@ export class FloatingToolbar {
     this.element.append(menu);
     menu.style.left = `${trigger.offsetLeft}px`;
     this.menu = menu;
+    this.menuTrigger = trigger;
     trigger.setAttribute('aria-expanded', 'true');
     menu.querySelector<HTMLButtonElement>('button')!.focus();
   }
@@ -280,7 +338,8 @@ export class FloatingToolbar {
     if (!this.menu) return;
     this.menu.remove();
     this.menu = null;
-    const trigger = this.element.querySelector<HTMLButtonElement>('.btn-size');
+    const trigger = this.menuTrigger;
+    this.menuTrigger = null;
     trigger?.setAttribute('aria-expanded', 'false');
     if (refocus) trigger?.focus();
   }
@@ -306,7 +365,11 @@ export class FloatingToolbar {
     else if (event.key === 'End') next = buttons.length - 1;
     else if (event.key === 'ArrowDown' && buttons[index].classList.contains('btn-size')) {
       event.preventDefault();
-      this.openMenu();
+      this.openSizeMenu();
+      return;
+    } else if (event.key === 'ArrowDown' && buttons[index].classList.contains('btn-columns')) {
+      event.preventDefault();
+      this.openColumnsMenu();
       return;
     } else if (event.key === 'Tab') {
       // The toolbar is one stop; Tab leaves it for the text.

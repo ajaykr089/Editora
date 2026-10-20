@@ -221,6 +221,13 @@ describe('reading a server answer', () => {
     expect(item).toMatchObject({ thumbnailUrl: 't', type: 'video', name: 'v.mp4' });
   });
 
+  it('goes by the file that was sent for an upload, and by the server for a listing', () => {
+    const sent = new File(['x'], 'tone.wav', { type: 'audio/wav' });
+    expect(mediaItemFromResponse({ url: 'https://cdn.test/t.svg', type: 'image', mimeType: 'image/svg+xml' }, sent).type).toBe('audio');
+    expect(mediaItemFromResponse({ url: 'https://cdn.test/t.svg', type: 'image' }).type).toBe('image');
+    expect(mediaItemFromResponse({ url: 'https://cdn.test/t.mp3', type: 'audio' }).type).toBe('audio');
+  });
+
   it('ignores a zero width or height, which the repository API sends when it did not measure', () => {
     expect(mediaItemFromResponse({ url: 'c', width: 0, height: 0 })).toMatchObject({ width: undefined, height: undefined });
   });

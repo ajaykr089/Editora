@@ -28,6 +28,12 @@ export const DEFAULT_ALLOWED_TYPES = [
   "video/mp4",
   "video/webm",
   "video/ogg",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/aac",
+  "audio/webm",
 ];
 
 export const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

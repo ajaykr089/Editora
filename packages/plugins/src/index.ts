@@ -149,7 +149,7 @@ export {
 } from '../slash-commands/src/index';
 
 // Regular plugins (with React components - 13 total)
-export { MediaManagerPlugin, setMediaManagerConfig, getMediaManagerConfig, mediaSlashItems } from '../media-manager/src/index';
+export { MediaManagerPlugin, setMediaManagerConfig, getMediaManagerConfig, mediaSlashItems, parseEmbedUrl } from '../media-manager/src/index';
 export {
   createBase64Provider,
   createCallbackProvider,
@@ -158,6 +158,11 @@ export {
 } from '../media-manager/src/index';
 export type {
   MediaManagerConfig,
+  AltTextGenerator,
+  EmbedProvider,
+  EmbedSpec,
+  StockPhoto,
+  StockProvider,
   MediaItem,
   MediaPage,
   MediaProvider,

@@ -1,4 +1,5 @@
-import type { MediaItem } from '../../types/media';
+import type { MediaItem, MediaManagerConfig } from '../../types/media';
+import { canSuggestAlt, createSuggestControl } from '../suggestAlt';
 import { icons } from './icons';
 import { el, formatBytes, thumbnail } from './tile';
 import type { SelectionModel } from './selection';
@@ -13,12 +14,15 @@ export class DetailsPanel {
   readonly element = el('aside', 'rte-mp-details');
   private readonly alts = new Map<string, AltState>();
   private shown: MediaItem | null = null;
+  private suggest: { abort: () => void } | null = null;
 
   constructor(
     private readonly selection: SelectionModel<MediaItem>,
     private readonly options: {
       /** Alt text of the image being replaced, offered when the new file has none of its own. */
       defaultAlt?: string;
+      /** The settings, for the Suggest button (shown when `generateAltText` is configured). */
+      config?: Partial<MediaManagerConfig>;
       canDelete: (item: MediaItem) => boolean;
       onDelete: (item: MediaItem) => void;
     },
@@ -39,6 +43,8 @@ export class DetailsPanel {
     // Someone typing in the alt field must not have it rebuilt under them by an upload that just finished.
     if (item && this.shown?.id === item.id && this.element.contains(document.activeElement)) return;
     this.shown = item;
+    this.suggest?.abort();
+    this.suggest = null;
     this.element.replaceChildren();
     if (!item) {
       this.element.hidden = true;
@@ -76,6 +82,14 @@ export class DetailsPanel {
   }
 
   private previewMedia(item: MediaItem): HTMLElement {
+    if (item.type === 'audio') {
+      const audio = el('audio');
+      audio.src = item.src;
+      audio.controls = true;
+      audio.preload = 'none';
+      audio.style.width = '100%';
+      return audio;
+    }
     if (item.type === 'video') {
       const video = el('video');
       video.src = item.src;
@@ -110,9 +124,11 @@ export class DetailsPanel {
     };
 
     const wrap = el('div', 'rte-media-field');
+    const labelRow = el('div', 'rte-mp-label-row');
     const label = el('label', 'rte-media-label');
     label.htmlFor = 'detail-alt';
     label.textContent = 'Alt text';
+    labelRow.append(label);
     const input = el('textarea', 'rte-media-textarea');
     input.id = 'detail-alt';
     input.rows = 3;
@@ -146,7 +162,23 @@ export class DetailsPanel {
     decorative.addEventListener('change', save);
     refreshHint();
 
-    wrap.append(label, input, hint, decorativeLabel);
+    wrap.append(labelRow, input, hint, decorativeLabel);
+
+    if (canSuggestAlt(this.options.config)) {
+      const control = createSuggestControl({
+        config: this.options.config,
+        image: () => ({ src: item.src, name: item.name }),
+        input,
+        // A description fills the field, so the picture is no longer decorative.
+        onFilled: () => {
+          decorative.checked = false;
+          save();
+        },
+      });
+      this.suggest = control;
+      labelRow.append(control.button);
+      hint.after(control.status);
+    }
     return wrap;
   }
 }

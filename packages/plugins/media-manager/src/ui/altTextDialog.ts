@@ -1,8 +1,10 @@
 import { escapeHtml } from '../../../shared/escapeHtml';
+import type { MediaManagerConfig } from '../types/media';
 import { attachEscapeCloseHandler, createDialogOverlay, createDialogShell } from './dialogKit';
+import { canSuggestAlt, createSuggestControl } from './suggestAlt';
 
 // Show Alt Text dialog
-export const showAltTextDialog = (img: HTMLImageElement, onChanged?: () => void) => {
+export const showAltTextDialog = (img: HTMLImageElement, onChanged?: () => void, config?: Partial<MediaManagerConfig>) => {
   const overlay = createDialogOverlay(img);
   const dialog = createDialogShell(true);
 
@@ -26,12 +28,24 @@ export const showAltTextDialog = (img: HTMLImageElement, onChanged?: () => void)
   document.body.appendChild(overlay);
 
   const input = dialog.querySelector('#alt-text-input') as HTMLTextAreaElement;
+  let abortSuggestion = () => {};
+  if (canSuggestAlt(config)) {
+    const control = createSuggestControl({ config, image: () => ({ src: img.currentSrc || img.src }), input });
+    abortSuggestion = control.abort;
+    const label = dialog.querySelector('.rte-media-label')!;
+    const row = document.createElement('div');
+    row.className = 'rte-mp-label-row';
+    label.replaceWith(row);
+    row.append(label, control.button);
+    input.after(control.status);
+  }
   const closeBtn = dialog.querySelector('.close-btn') as HTMLButtonElement;
   const cancelBtn = dialog.querySelector('.cancel-btn') as HTMLButtonElement;
   const saveBtn = dialog.querySelector('.save-btn') as HTMLButtonElement;
 
   let cleanupEscape = () => {};
   const closeDialog = () => {
+    abortSuggestion();
     cleanupEscape();
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   };

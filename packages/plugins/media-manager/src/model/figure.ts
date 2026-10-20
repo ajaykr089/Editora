@@ -11,10 +11,15 @@
  * While editing, the figure is `contenteditable="false"` with only the caption editable; core strips that
  * from emitted HTML (see `stripEditorUiArtifacts`) and `adoptFigure` puts it back on content that was loaded.
  */
-export type MediaElement = HTMLImageElement | HTMLVideoElement;
+export type MediaElement = HTMLImageElement | HTMLVideoElement | HTMLAudioElement | HTMLIFrameElement;
+/** Pictures and videos have a size that can be dragged; audio, embedded players and gallery pictures do not. */
+export type ResizableMedia = HTMLImageElement | HTMLVideoElement;
 export type Align = 'left' | 'center' | 'right';
+export type FigureKind = 'media' | 'embed' | 'gallery';
 
 export const FIGURE_CLASS = 'rte-media';
+export const EMBED_CLASS = 'rte-embed';
+export const GALLERY_CLASS = 'rte-gallery';
 export const FIGURE_SELECTOR = `figure.${FIGURE_CLASS}`;
 
 const MARGINS: Record<Align, string> = {
@@ -23,11 +28,27 @@ const MARGINS: Record<Align, string> = {
   right: '1em 0 1em auto',
 };
 
+/** The widest an embedded player is drawn until it is resized. */
+export const EMBED_MAX_WIDTH = '720px';
+
 const CAPTION_STYLE =
   'display: table-caption; caption-side: bottom; padding-top: 0.5em; text-align: center; font-size: 0.875em; opacity: 0.75;';
+/** In a gallery the caption is a row of the grid, under all the pictures. */
+const GALLERY_CAPTION_STYLE = 'grid-column: 1 / -1; padding-top: 0.25em; text-align: center; font-size: 0.875em; opacity: 0.75;';
+
+export const isEmbed = (node: Node | null | undefined): node is HTMLIFrameElement =>
+  node instanceof HTMLElement && node.tagName === 'IFRAME' && Boolean(node.closest(`figure.${EMBED_CLASS}`));
 
 export const isMedia = (node: Node | null | undefined): node is MediaElement =>
-  node instanceof HTMLElement && (node.tagName === 'IMG' || node.tagName === 'VIDEO');
+  node instanceof HTMLElement && (node.tagName === 'IMG' || node.tagName === 'VIDEO' || node.tagName === 'AUDIO' || isEmbed(node));
+
+export const isGalleryItem = (media: HTMLElement): boolean => Boolean(media.closest(`figure.${GALLERY_CLASS}`));
+
+export const isResizable = (media: MediaElement): media is ResizableMedia =>
+  (media.tagName === 'IMG' || media.tagName === 'VIDEO') && !isGalleryItem(media);
+
+export const kindOfFigure = (figure: HTMLElement): FigureKind =>
+  figure.classList.contains(EMBED_CLASS) ? 'embed' : figure.classList.contains(GALLERY_CLASS) ? 'gallery' : 'media';
 
 /** The element that is the media's whole presence in the block: its link when the link holds nothing else. */
 export const mediaRootOf = (media: MediaElement): HTMLElement => {
@@ -51,20 +72,32 @@ export const getAlign = (media: MediaElement): Align => {
   return 'left';
 };
 
-/** The figure's own look: shrink-wrapped to the picture, aligned with margins. */
+/**
+ * The figure's own look, by kind. Media shrinks to the picture and is aligned with margins; an embedded player
+ * is a block as wide as it is allowed to be (`max-width`, which the Size menu changes); a gallery is a grid and
+ * has no alignment (see `buildGallery`).
+ */
 export const styleFigure = (figure: HTMLElement, align: Align): void => {
-  figure.className = FIGURE_CLASS;
+  figure.classList.add(FIGURE_CLASS);
   figure.setAttribute('data-align', align);
+  const kind = kindOfFigure(figure);
+  if (kind === 'gallery') return;
+  if (kind === 'embed') {
+    const maxWidth = figure.style.maxWidth || EMBED_MAX_WIDTH;
+    figure.style.cssText = `display: block; width: 100%; max-width: ${maxWidth}; margin: ${MARGINS[align]};`;
+    return;
+  }
   figure.style.cssText = `display: table; max-width: 100%; margin: ${MARGINS[align]};`;
 };
 
-/** Inside a figure the picture sits flush: the figure carries the margins. */
+/** Inside a figure a picture or video sits flush: the figure carries the margins. */
 const flushMedia = (media: MediaElement): void => {
+  if (media.tagName === 'IFRAME') return;
   media.style.removeProperty('margin');
   media.style.removeProperty('margin-left');
   media.style.removeProperty('margin-right');
   media.style.display = 'block';
-  if (!media.style.maxWidth) media.style.maxWidth = '100%';
+  if (media.tagName !== 'AUDIO' && !media.style.maxWidth) media.style.maxWidth = '100%';
 };
 
 /** Make a figure atomic for editing: only its caption takes the caret. Idempotent. */
@@ -108,9 +141,15 @@ export const ensureFigure = (media: MediaElement): HTMLElement => {
   return figure;
 };
 
+/** Align a figure. A gallery fills the width of the text, so there is nothing to align. */
 export const setAlign = (media: MediaElement, align: Align): void => {
-  styleFigure(ensureFigure(media), align);
+  const figure = ensureFigure(media);
+  if (kindOfFigure(figure) !== 'gallery') styleFigure(figure, align);
 };
+
+/** The look of a caption in this figure. */
+export const captionStyleFor = (figure: HTMLElement): string =>
+  kindOfFigure(figure) === 'gallery' ? GALLERY_CAPTION_STYLE : CAPTION_STYLE;
 
 /** Add a caption (returned, to be focused) or take it away (`null`). */
 export const toggleCaption = (media: MediaElement): HTMLElement | null => {
@@ -121,7 +160,7 @@ export const toggleCaption = (media: MediaElement): HTMLElement | null => {
     return null;
   }
   const caption = document.createElement('figcaption');
-  caption.style.cssText = CAPTION_STYLE;
+  caption.style.cssText = captionStyleFor(figure);
   caption.append(document.createElement('br'));
   figure.append(caption);
   adoptFigure(figure);
@@ -130,11 +169,21 @@ export const toggleCaption = (media: MediaElement): HTMLElement | null => {
 
 /** Give an existing caption its look (media that was loaded without the inline style). */
 export const styleCaption = (caption: HTMLElement): void => {
-  if (!caption.style.cssText) caption.style.cssText = CAPTION_STYLE;
+  const figure = caption.parentElement;
+  if (!caption.style.cssText) caption.style.cssText = figure ? captionStyleFor(figure) : CAPTION_STYLE;
 };
 
-/** Set the displayed width, keeping the proportions. */
+/**
+ * Set the displayed width, keeping the proportions. An embedded player has its figure's `max-width` set (its
+ * height follows from its shape); audio and gallery pictures have no size to set.
+ */
 export const setWidth = (media: MediaElement, width: number | null): void => {
+  if (isEmbed(media)) {
+    const figure = figureOf(media);
+    if (figure) figure.style.maxWidth = width === null ? EMBED_MAX_WIDTH : `${Math.max(1, Math.round(width))}px`;
+    return;
+  }
+  if (!isResizable(media)) return;
   if (width === null) {
     media.removeAttribute('width');
     media.removeAttribute('height');

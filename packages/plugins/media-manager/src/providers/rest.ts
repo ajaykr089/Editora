@@ -37,7 +37,13 @@ export const mediaItemFromResponse = (raw: any, file?: File): MediaItem => {
   return {
     id: String(raw.id ?? newMediaId()),
     name: raw.name ?? raw.originalName ?? raw.original_filename ?? raw.filename ?? file?.name ?? '',
-    type: raw.type === 'image' || raw.type === 'video' || raw.type === 'audio' || raw.type === 'file' ? raw.type : mediaTypeOf(mime),
+    // What was sent is known better than what a server says it stored (a server that knows only images and
+    // videos files audio under one of them); a listing has no file, and goes by the server.
+    type: file?.type
+      ? mediaTypeOf(file.type)
+      : raw.type === 'image' || raw.type === 'video' || raw.type === 'audio' || raw.type === 'file'
+        ? raw.type
+        : mediaTypeOf(mime),
     src: url,
     size: asNumber(raw.size) ?? file?.size ?? 0,
     width: asNumber(raw.width),

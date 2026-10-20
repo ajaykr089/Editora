@@ -15,6 +15,13 @@ export const mediaSlashItems = [
     keywords: ['picture', 'photo', 'img', 'upload'],
   },
   {
+    id: 'audio',
+    label: 'Audio',
+    description: 'Upload or choose an audio file',
+    command: 'insertAudio',
+    keywords: ['sound', 'music', 'podcast', 'mp3'],
+  },
+  {
     id: 'video',
     label: 'Video',
     description: 'Upload or choose a video',

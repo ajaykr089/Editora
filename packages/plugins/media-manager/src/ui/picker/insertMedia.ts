@@ -1,6 +1,8 @@
 import { recordDomHistory } from '../../../../shared/historyHelpers';
 import type { MediaItem } from '../../types/media';
-import { buildFigure, type Align, type MediaElement } from '../../model/figure';
+import type { EmbedSpec } from '../../embeds/providers';
+import { buildEmbedFigure } from '../../model/embed';
+import { adoptFigure, buildFigure, captionStyleFor, type Align, type MediaElement } from '../../model/figure';
 import { resolveDialogContext } from '../dialogKit';
 
 export interface MediaSpec {
@@ -10,12 +12,29 @@ export interface MediaSpec {
   alt?: string;
   width?: string;
   height?: string;
+  /** An embedded player instead of a file (YouTube, Vimeo): `src` is then its address. */
+  embed?: EmbedSpec;
+  /** What to call the embedded player, for people who cannot see it. */
+  title?: string;
+  /** A caption to put under the media (a photo credit). Only in a figure. */
+  caption?: string;
 }
 
 /** What goes into the document for a chosen file. Only images and videos can be inserted. */
-export const buildMediaElement = (spec: MediaSpec): HTMLImageElement | HTMLVideoElement | null => {
-  if (spec.type !== 'image' && spec.type !== 'video') return null;
+export const buildMediaElement = (spec: MediaSpec): HTMLImageElement | HTMLVideoElement | HTMLAudioElement | null => {
+  if (spec.type !== 'image' && spec.type !== 'video' && spec.type !== 'audio') return null;
   const isImage = spec.type === 'image';
+
+  if (spec.type === 'audio') {
+    const audio = document.createElement('audio');
+    audio.src = spec.src;
+    audio.controls = true;
+    audio.preload = 'metadata';
+    audio.setAttribute('data-media-type', 'audio');
+    audio.style.cssText = 'display: block; width: 320px; max-width: 100%;';
+    return audio;
+  }
+
   const element = document.createElement(isImage ? 'img' : 'video');
   element.src = spec.src;
   element.setAttribute('data-media-type', spec.type);
@@ -35,9 +54,22 @@ export const buildMediaElement = (spec: MediaSpec): HTMLImageElement | HTMLVideo
 
 /** What goes into the document for a chosen file: a figure around it by default, or the bare element. */
 export const buildMediaNode = (spec: MediaSpec, options: { figure: boolean; align?: Align }): HTMLElement | null => {
+  // An embedded player is always a figure: there is no bare form of it.
+  if (spec.embed) return buildEmbedFigure(spec.embed, { align: options.align ?? 'center', title: spec.title });
+
   const element = buildMediaElement(spec);
   if (!element) return null;
-  return options.figure ? buildFigure(element as MediaElement, options.align) : element;
+  if (!options.figure) return element;
+
+  const figure = buildFigure(element as MediaElement, options.align);
+  if (spec.caption) {
+    const caption = document.createElement('figcaption');
+    caption.style.cssText = captionStyleFor(figure);
+    caption.textContent = spec.caption;
+    figure.append(caption);
+    adoptFigure(figure);
+  }
+  return figure;
 };
 
 const TEXT_BLOCKS = new Set(['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
@@ -140,7 +172,14 @@ export const insertAtSelection = (
     selection.addRange(after);
   }
   recordDomHistory(host, beforeHTML);
-  host.dispatchEvent(new Event('input', { bubbles: true }));
+  // An iframe is kept by the editor's sanitizer only when the input that adds it says it is trusted (see
+  // core's sanitizeInputHTML); after that the iframe's own `data-editora-embed` is what keeps it.
+  const hasPlayer = elements.some((element) => element.tagName === 'IFRAME' || element.querySelector('iframe'));
+  host.dispatchEvent(
+    hasPlayer
+      ? new CustomEvent('input', { bubbles: true, detail: { allowedTags: ['iframe'] } })
+      : new Event('input', { bubbles: true }),
+  );
   return true;
 };
 

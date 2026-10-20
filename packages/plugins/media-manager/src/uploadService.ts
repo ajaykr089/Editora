@@ -28,7 +28,7 @@ export const isTypeAllowed = (mime: string, allowed: string[] | undefined): bool
 };
 
 /** The value for an `<input type="file" accept>`: what the settings allow, narrowed to images or videos. */
-export const acceptFor = (kind: 'image' | 'video', config?: Partial<MediaManagerConfig>): string => {
+export const acceptFor = (kind: 'image' | 'video' | 'audio', config?: Partial<MediaManagerConfig>): string => {
   const allowed = resolveMediaManagerConfig(config).allowedTypes ?? [];
   const matching = allowed.filter((type) => type.startsWith(`${kind}/`) || type === '*/*');
   return matching.length ? matching.join(',') : `${kind}/*`;

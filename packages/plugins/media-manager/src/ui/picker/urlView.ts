@@ -3,10 +3,17 @@ import type { PickerKind } from './types';
 import type { MediaSpec } from './insertMedia';
 
 const VIDEO_EXTENSION = /\.(mp4|webm|ogv|ogg|mov|m4v)(\?|#|$)/i;
+const AUDIO_EXTENSION = /\.(mp3|wav|m4a|aac|oga|opus|flac)(\?|#|$)/i;
 
 /** From an address: a video when it ends like one, else an image; the dialog's own kind decides when it is unclear. */
 export const guessType = (url: string, fallback: PickerKind): PickerKind =>
-  VIDEO_EXTENSION.test(url) ? 'video' : /\.(jpe?g|png|gif|webp|avif|svg|bmp)(\?|#|$)/i.test(url) || url.startsWith('data:image/') ? 'image' : fallback;
+  AUDIO_EXTENSION.test(url) || url.startsWith('data:audio/')
+    ? 'audio'
+    : VIDEO_EXTENSION.test(url)
+      ? 'video'
+      : /\.(jpe?g|png|gif|webp|avif|svg|bmp)(\?|#|$)/i.test(url) || url.startsWith('data:image/')
+        ? 'image'
+        : fallback;
 
 /** "Insert from an address": the URL, a preview, alt text and a size. */
 export class UrlView {
@@ -30,7 +37,7 @@ export class UrlView {
     this.element.hidden = true;
 
     const form = el('div', 'rte-mp-form');
-    const noun = kinds.length === 1 ? kinds[0] : 'image';
+    const noun = kinds.length === 1 ? (kinds[0] === 'audio' ? 'clip' : kinds[0]) : 'image';
     const field = (labelText: string, input: HTMLInputElement, id: string, extra: Partial<HTMLInputElement> = {}) => {
       const wrap = el('div', 'rte-media-field');
       const label = el('label', 'rte-media-label');
@@ -42,7 +49,7 @@ export class UrlView {
       return wrap;
     };
 
-    const ext = kinds.length === 1 && kinds[0] === 'video' ? 'mp4' : 'jpg';
+    const ext = kinds.length === 1 && kinds[0] === 'video' ? 'mp4' : kinds.length === 1 && kinds[0] === 'audio' ? 'mp3' : 'jpg';
     form.append(
       field('URL', this.urlInput, 'url-input', { type: 'text', placeholder: `https://example.com/${noun}.${ext}`, value: initialUrl }),
       ...(kinds.includes('image')
@@ -104,15 +111,16 @@ export class UrlView {
       this.previewBox.replaceChildren();
       return;
     }
-    const existing = this.previewBox.querySelector<HTMLElement>('img, video');
+    const existing = this.previewBox.querySelector<HTMLElement>('img, video, audio');
     const type = guessType(url, this.kinds[0]);
-    if (existing && existing.tagName.toLowerCase() === (type === 'image' ? 'img' : 'video')) {
+    const tag = type === 'image' ? 'img' : type === 'video' ? 'video' : 'audio';
+    if (existing && existing.tagName.toLowerCase() === tag) {
       existing.setAttribute('src', url);
     } else {
       const label = el('span', 'rte-media-label');
       label.textContent = 'Preview';
       const frame = el('div', 'rte-media-preview');
-      const media = type === 'image' ? el('img') : el('video');
+      const media = type === 'image' ? el('img') : type === 'video' ? el('video') : el('audio');
       media.setAttribute('src', url);
       if (media instanceof HTMLImageElement) media.alt = 'Preview';
       else media.controls = true;

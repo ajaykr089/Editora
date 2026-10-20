@@ -926,6 +926,61 @@ export const injectMediaDialogStyles = (): void => {
       color: var(--rte-media-danger-text);
     }
 
+    .rte-mp-embed-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      min-height: 22px;
+      font-size: 13px;
+    }
+
+    .rte-mp-embed-status.is-ok {
+      color: var(--rte-media-text);
+    }
+
+    .rte-mp-embed-status.is-ok svg {
+      color: var(--rte-media-accent);
+    }
+
+    .rte-mp-embed-status.is-error {
+      color: var(--rte-media-danger-text);
+    }
+
+    .rte-mp-suggest {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      padding: 2px 8px;
+      border: 1px solid var(--rte-media-border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--rte-media-text);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .rte-mp-suggest:hover {
+      background: var(--rte-media-surface-hover);
+    }
+
+    .rte-mp-suggest:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+
+    .rte-mp-suggest:focus-visible {
+      outline: 2px solid var(--rte-media-accent);
+      outline-offset: 2px;
+    }
+
+    .rte-mp-label-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .rte-mp-footer {
       display: flex;
       align-items: center;
@@ -1115,6 +1170,11 @@ export const injectMediaDialogStyles = (): void => {
     .media-floating-toolbar-btn.btn-remove:hover {
       background: var(--rte-media-toolbar-danger-hover-bg);
       color: var(--rte-media-toolbar-danger-hover-text);
+    }
+
+    /* While editing, an embedded player does not take the mouse: a click on it selects its figure instead. */
+    [contenteditable="true"] figure.rte-embed iframe {
+      pointer-events: none;
     }
 
     .media-resize-handle {

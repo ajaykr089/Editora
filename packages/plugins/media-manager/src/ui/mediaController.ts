@@ -8,17 +8,22 @@ import {
   mediaRootOf,
   styleCaption,
   toggleCaption,
+  isEmbed,
+  isResizable,
   type MediaElement,
 } from '../model/figure';
 import { isTypeAllowed } from '../uploadService';
 import type { MediaManagerConfig } from '../types/media';
 import { FloatingToolbar } from './floatingToolbar';
+import { injectMediaDialogStyles } from './styles';
 import { PendingUploads } from './pendingUploads';
 import { ResizeHandles } from './resizeHandles';
 
 type Media = MediaElement;
 
 const EDITABLE = '[contenteditable="true"]';
+/** What a figure's media is, in the order of how likely. */
+const MEDIA_SELECTOR = 'img, video, audio, iframe';
 
 /** An event's target as an element: the document, and text, can be targets too. */
 const elementOf = (target: EventTarget | null): HTMLElement | null =>
@@ -30,7 +35,7 @@ const hostOf = (node: Node | null): HTMLElement | null =>
 /** The files on a clipboard or a drag that are images or videos. */
 const mediaFilesOf = (transfer: DataTransfer | null, allowed: string[] | undefined): File[] =>
   Array.from(transfer?.files ?? []).filter(
-    (file) => /^(image|video)\//.test(file.type) && isTypeAllowed(file.type, allowed),
+    (file) => /^(image|video|audio)\//.test(file.type) && isTypeAllowed(file.type, allowed),
   );
 
 /**
@@ -122,6 +127,8 @@ export class MediaController {
   attach(): void {
     if (this.attached || typeof document === 'undefined') return;
     this.attached = true;
+    // Embedded players must not take the clicks meant for selecting them; that is a rule of this stylesheet.
+    injectMediaDialogStyles();
     this.handles = new ResizeHandles(
       (media, before) => this.commit(media, () => {}, before),
       () => this.toolbar?.reposition(),
@@ -180,7 +187,7 @@ export class MediaController {
       returnFocus: () => this.returnFocus(),
       focusCaption: (caption) => this.focusCaption(caption),
     });
-    this.handles?.show(media);
+    this.handles?.show(isResizable(media) ? media : null);
   }
 
   deselect(): void {
@@ -252,7 +259,22 @@ export class MediaController {
     const target = elementOf(event.target);
     if (!target) return;
 
+    // An embedded player is a page of its own: it takes no clicks (see the stylesheet), so the figure gets them.
+    const embedFigure = target.closest<HTMLElement>('figure.rte-embed');
+    const embedded = embedFigure?.querySelector<MediaElement>('iframe') ?? null;
+    if (embedded && embedFigure!.closest(EDITABLE) && !target.closest('figcaption')) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.select(embedded);
+      return;
+    }
+
     if (isMedia(target) && target.closest(EDITABLE)) {
+      // Audio is all controls, so a click on it is for them: it selects the audio and carries on to play it.
+      if (target.tagName === 'AUDIO') {
+        this.select(target);
+        return;
+      }
       // The bar of a video's own controls plays and pauses it; every other click on a video, and any on an image,
       // selects it, which is all they do: not following a link, not placing a caret in it.
       const onVideoControls =
@@ -321,7 +343,7 @@ export class MediaController {
     if (!(node instanceof HTMLElement) || !hostOf(node)) return null;
     if (isMedia(node)) return node;
     if (node.matches(FIGURE_SELECTOR) && !node.hasAttribute('data-rte-media-pending')) {
-      return node.querySelector<Media>('img, video');
+      return node.querySelector<Media>(MEDIA_SELECTOR);
     }
     if (node.tagName === 'A' && node.children.length === 1 && isMedia(node.firstElementChild)) return node.firstElementChild;
     return null;
@@ -371,7 +393,7 @@ export class MediaController {
       // Backspace in an empty caption takes the caption away and goes back to the media.
       event.preventDefault();
       event.stopPropagation();
-      const media = figure.querySelector<Media>('img, video');
+      const media = figure.querySelector<Media>(MEDIA_SELECTOR);
       if (!media) return;
       this.commit(media, () => toggleCaption(media));
       this.select(media);
@@ -403,7 +425,7 @@ export class MediaController {
       selection.removeAllRanges();
       selection.addRange(next);
       // Browsers say so with a `selectionchange` of their own; do not wait for it.
-      const media = (node as HTMLElement).querySelector<Media>('img, video');
+      const media = (node as HTMLElement).querySelector<Media>(MEDIA_SELECTOR);
       if (media) this.select(media);
     };
 

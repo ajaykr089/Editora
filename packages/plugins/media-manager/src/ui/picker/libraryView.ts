@@ -1,5 +1,5 @@
 import { confirmAction } from '../../../../shared/confirmDialog';
-import type { MediaItem, MediaPage } from '../../types/media';
+import type { MediaItem, MediaPage, MediaProvider } from '../../types/media';
 import { isAbort } from '../../providers';
 import { icons } from './icons';
 import { createLibraryTile, el } from './tile';
@@ -29,9 +29,18 @@ export class LibraryView {
   constructor(
     private readonly ctx: PickerContext,
     private readonly onUpload: () => void,
+    /** The same grid over another source (a stock service): what lists, the words, and what the id of the panel is. */
+    private readonly options: {
+      id?: string;
+      source?: Pick<MediaProvider, 'list'>;
+      emptyTitle?: string;
+      emptyHint?: string;
+      /** Offer the Upload tab from the empty state (a library can be filled by uploading; a stock service cannot). */
+      offerUpload?: boolean;
+    } = {},
   ) {
     this.element.setAttribute('role', 'tabpanel');
-    this.element.id = 'rte-mp-panel-library';
+    this.element.id = `rte-mp-panel-${options.id ?? 'library'}`;
     this.element.hidden = true;
     this.scroll.append(this.content);
     this.element.append(this.scroll);
@@ -114,7 +123,7 @@ export class LibraryView {
   }
 
   private async loadPage(): Promise<void> {
-    const { provider } = this.ctx;
+    const provider = this.options.source ?? this.ctx.provider;
     if (!provider.list) return;
     const controller = new AbortController();
     this.controller = controller;
@@ -223,11 +232,11 @@ export class LibraryView {
     const searching = Boolean(this.search);
     box.innerHTML = `<span aria-hidden="true">${icons.photo}</span>`;
     const title = el('strong');
-    title.textContent = searching ? `No results for “${this.search}”` : 'Nothing in your library yet';
+    title.textContent = searching ? `No results for “${this.search}”` : this.options.emptyTitle ?? 'Nothing in your library yet';
     const hint = el('span');
-    hint.textContent = searching ? 'Try a different word.' : 'Upload files and they will show up here.';
+    hint.textContent = searching ? 'Try a different word.' : this.options.emptyHint ?? 'Upload files and they will show up here.';
     box.append(title, hint);
-    if (!searching) {
+    if (!searching && this.options.offerUpload !== false) {
       const button = el('button', 'rte-media-btn rte-media-btn-primary');
       button.type = 'button';
       button.textContent = 'Upload files';

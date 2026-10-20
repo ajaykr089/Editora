@@ -5,7 +5,7 @@ import { makeDropzoneKeyboardAccessible } from '../dialogKit';
 import { icons } from './icons';
 import { UploadQueue, type QueueEntry } from '../../uploadQueue';
 import { checkBadge, el, kindBadge, nameOverlay, thumbnail } from './tile';
-import type { PickerContext } from './types';
+import { kindNoun, type PickerContext } from './types';
 
 /** Drop zone and the list of uploads under way: several files at once, each with progress, cancel and retry. */
 export class UploadView {
@@ -29,14 +29,14 @@ export class UploadView {
     this.element.hidden = true;
 
     const limit = resolveMediaManagerConfig(ctx.config).maxFileSize;
-    const noun = ctx.kinds.length === 1 ? ctx.kinds[0] : 'file';
+    const noun = ctx.kinds.length === 1 ? kindNoun(ctx.kinds) : 'file';
     const limitText = limit ? ` Max file size: ${describeLimit(limit)}` : '';
     this.dropzone.setAttribute('role', 'button');
     this.dropzone.tabIndex = 0;
-    this.dropzone.setAttribute('aria-label', `Drag and drop your ${noun}s here or click to browse.${limitText}`);
+    this.dropzone.setAttribute('aria-label', `Drag and drop your ${kindNoun(ctx.kinds, true)} here or click to browse.${limitText}`);
     this.dropzone.innerHTML = `
       <span class="rte-mp-dropzone-icon" aria-hidden="true">${icons.upload.replace('width="18" height="18"', 'width="30" height="30"')}</span>
-      <strong>Drag and drop your ${noun}${ctx.selection.multiple ? 's' : ''} here</strong>
+      <strong>Drag and drop your ${ctx.selection.multiple ? kindNoun(ctx.kinds, true) : noun} here</strong>
       <span>or click to browse</span>
       ${limit ? `<span class="rte-media-hint">${limitText.trim()}</span>` : ''}`;
 
@@ -45,7 +45,7 @@ export class UploadView {
     this.input.multiple = ctx.selection.multiple;
     this.input.style.display = 'none';
     this.input.accept = [...new Set(ctx.kinds.flatMap((kind) => acceptFor(kind, ctx.config).split(',')))].join(',');
-    this.input.setAttribute('aria-label', ctx.kinds.length === 1 ? `Choose ${ctx.kinds[0] === 'image' ? 'an image' : 'a video'} file` : 'Choose files');
+    this.input.setAttribute('aria-label', ctx.kinds.length === 1 ? `Choose ${ctx.kinds[0] === 'image' ? 'an image' : ctx.kinds[0] === 'video' ? 'a video' : 'an audio'} file` : 'Choose files');
 
     this.dropzone.addEventListener('click', () => this.input.click());
     makeDropzoneKeyboardAccessible(this.dropzone, this.input);
@@ -118,9 +118,9 @@ export class UploadView {
   private createTile(entry: QueueEntry): HTMLElement {
     const tile = el('li', 'rte-mp-tile');
     tile.dataset.upload = entry.id;
-    const kind = entry.file.type.startsWith('video/') ? 'video' : 'image';
+    const kind = entry.file.type.startsWith('video/') ? 'video' : entry.file.type.startsWith('audio/') ? 'audio' : 'image';
     tile.append(thumbnail({ type: kind, src: '', thumbnailUrl: undefined }, entry.previewUrl));
-    if (kind === 'video') tile.append(kindBadge());
+    if (kind === 'video' || kind === 'audio') tile.append(kindBadge(kind));
     return tile;
   }
 

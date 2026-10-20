@@ -3,16 +3,18 @@ import { resolveProvider } from '../../providers';
 import type { MediaItem, MediaManagerConfig } from '../../types/media';
 import { attachEscapeCloseHandler, createDialogOverlay, createDialogShell } from '../dialogKit';
 import { DetailsPanel } from './detailsPanel';
+import { EmbedView } from './embedView';
 import { icons } from './icons';
 import type { MediaSpec } from './insertMedia';
 import { LibraryView } from './libraryView';
 import { SelectionModel } from './selection';
+import { stockAsList } from './stock';
 import { el } from './tile';
-import type { PickerContext, PickerKind } from './types';
+import { kindNoun, type PickerContext, type PickerKind } from './types';
 import { UploadView } from './uploadView';
 import { UrlView } from './urlView';
 
-type View = 'library' | 'upload' | 'url';
+type View = 'library' | 'stock' | 'upload' | 'url' | 'embed';
 
 export interface PickerOptions {
   /** `insert` can take several files; `replace` takes one. */
@@ -24,26 +26,36 @@ export interface PickerOptions {
   /** The address and alt text the URL tab starts with (replacing an image shows the current one). */
   initialUrl?: string;
   initialAlt?: string;
-  /** Called once the dialog is closed, with what was chosen. */
-  onPick: (specs: MediaSpec[]) => void;
+  /** Called once the dialog is closed, with what was chosen. `gallery`: the person asked for them as one gallery. */
+  onPick: (specs: MediaSpec[], extra?: { gallery?: boolean }) => void;
 }
 
 const NAV: Record<View, { label: string; icon: string; className: string }> = {
   library: { label: 'Library', icon: icons.library, className: 'tab-library' },
+  stock: { label: 'Stock', icon: icons.stock, className: 'tab-stock' },
   upload: { label: 'Upload', icon: icons.upload, className: 'tab-upload' },
   url: { label: 'URL', icon: icons.link, className: 'tab-url' },
+  embed: { label: 'Embed', icon: icons.embed, className: 'tab-embed' },
 };
 
 /**
- * The media picker: a library to browse, an upload queue, and an address field, with a details panel for what
- * is chosen. Built once and updated in place, never rebuilt, so the focus stays where it is.
+ * The media picker: a library to browse, stock photos, an upload queue, an address field and an embed field, with a
+ * details panel for what is chosen. Built once and updated in place, never rebuilt, so the focus stays where it is.
  */
 export const openMediaPicker = (options: PickerOptions): void => {
   const { mode, kinds } = options;
   const config = resolveMediaManagerConfig(options.config);
   const provider = resolveProvider(config);
+  const stock = kinds.length === 1 && kinds[0] === 'image' && mode === 'insert' ? config.stockProvider : undefined;
+  const canEmbed = mode === 'insert' && kinds.length === 1 && kinds[0] === 'video';
   const hasLibrary = typeof provider.list === 'function';
-  const views: View[] = hasLibrary ? ['library', 'upload', 'url'] : ['upload', 'url'];
+  const views: View[] = [
+    ...(hasLibrary ? (['library'] as const) : []),
+    ...(stock ? (['stock'] as const) : []),
+    'upload',
+    'url',
+    ...(canEmbed ? (['embed'] as const) : []),
+  ];
   // Replacing an image starts from the address it has now; inserting starts from what can be browsed or dropped.
   let view: View = mode === 'replace' && !hasLibrary ? 'url' : views[0];
 
@@ -77,11 +89,24 @@ export const openMediaPicker = (options: PickerOptions): void => {
   };
 
   const library = hasLibrary ? new LibraryView(ctx, () => showView('upload')) : null;
+  const stockView = stock
+    ? new LibraryView(ctx, () => {}, {
+        id: 'stock',
+        source: stockAsList(stock),
+        emptyTitle: `Search ${stock.name}`,
+        emptyHint: `Photos from ${stock.name} will show up here.`,
+        offerUpload: false,
+      })
+    : null;
+  const searchable: Partial<Record<View, LibraryView | null>> = { library, stock: stockView };
   const upload = new UploadView(ctx, () => library?.markStale());
   const url = new UrlView(kinds, options.initialUrl ?? '', options.initialAlt, () => updateChrome(), () => commit());
+  const embed = canEmbed ? new EmbedView(config.embedProviders ?? [], () => updateChrome(), () => commit()) : null;
   const details = new DetailsPanel(selection, {
     defaultAlt: options.initialAlt,
-    canDelete: () => Boolean(library && provider.delete),
+    config: options.config,
+    // Only what is in the library can be deleted from it: not a stock photo, not a loose address.
+    canDelete: (item) => Boolean(library && provider.delete && !item.metadata?.stock),
     onDelete: (item) =>
       void library?.deleteItem(item).then((deleted) => {
         if (!deleted) return;
@@ -104,7 +129,8 @@ export const openMediaPicker = (options: PickerOptions): void => {
   searchInput.setAttribute('aria-label', 'Search the library');
   searchBox.insertAdjacentHTML('afterbegin', icons.search);
   searchBox.append(searchInput);
-  searchBox.hidden = !hasLibrary;
+  searchBox.hidden = !(hasLibrary || stock);
+  const searches: Partial<Record<View, string>> = {};
 
   const closeButton = el('button', 'close-btn rte-media-close-btn');
   closeButton.type = 'button';
@@ -122,7 +148,8 @@ export const openMediaPicker = (options: PickerOptions): void => {
     button.type = 'button';
     button.setAttribute('role', 'tab');
     button.setAttribute('aria-controls', `rte-mp-panel-${name}`);
-    button.innerHTML = `${NAV[name].icon}<span>${NAV[name].label}</span>`;
+    button.innerHTML = `${NAV[name].icon}<span></span>`;
+    button.querySelector('span')!.textContent = name === 'stock' && stock ? stock.name : NAV[name].label;
     button.addEventListener('click', () => {
       showView(name);
       // Safari does not focus a button when it is clicked; the keyboard has to be left where the person chose.
@@ -141,7 +168,13 @@ export const openMediaPicker = (options: PickerOptions): void => {
   });
 
   const main = el('div', 'rte-mp-main');
-  const panels: Record<View, HTMLElement | undefined> = { library: library?.element, upload: upload.element, url: url.element };
+  const panels: Record<View, HTMLElement | undefined> = {
+    library: library?.element,
+    stock: stockView?.element,
+    upload: upload.element,
+    url: url.element,
+    embed: embed?.element,
+  };
   main.append(...views.map((name) => panels[name]!));
 
   const body = el('div', 'rte-mp-body');
@@ -152,10 +185,14 @@ export const openMediaPicker = (options: PickerOptions): void => {
   const cancelButton = el('button', 'cancel-btn rte-media-btn rte-media-btn-secondary');
   cancelButton.type = 'button';
   cancelButton.textContent = 'Cancel';
+  const galleryButton = el('button', 'gallery-btn rte-media-btn rte-media-btn-secondary');
+  galleryButton.type = 'button';
+  galleryButton.innerHTML = `${icons.gallery}<span style="margin-left:6px">Insert as gallery</span>`;
+  galleryButton.hidden = true;
   const insertButton = el('button', 'rte-media-btn rte-media-btn-primary');
   insertButton.type = 'button';
   insertButton.id = 'insert-btn';
-  footer.append(count, cancelButton, insertButton);
+  footer.append(count, cancelButton, galleryButton, insertButton);
 
   const veil = el('div', 'rte-mp-drop-veil');
   veil.setAttribute('aria-hidden', 'true');
@@ -166,7 +203,10 @@ export const openMediaPicker = (options: PickerOptions): void => {
   document.body.append(overlay);
 
   // ── behaviour ───────────────────────────────────────────────────────────────────────────────
+  const isBrowse = () => view === 'library' || view === 'stock' || view === 'upload';
+
   function showView(next: View): void {
+    searches[view] = searchInput.value;
     view = next;
     for (const name of views) {
       const on = name === next;
@@ -175,33 +215,55 @@ export const openMediaPicker = (options: PickerOptions): void => {
       button.setAttribute('aria-selected', String(on));
       button.tabIndex = on ? 0 : -1;
     }
-    searchBox.hidden = !(hasLibrary && next === 'library');
-    if (next === 'library') library?.activate();
+    const searchable_ = searchable[next];
+    searchBox.hidden = !searchable_;
+    if (searchable_) {
+      searchInput.value = searches[next] ?? '';
+      searchInput.setAttribute('aria-label', next === 'stock' ? `Search ${stock!.name}` : 'Search the library');
+      searchInput.placeholder = next === 'stock' ? `Search ${stock!.name}` : 'Search by name';
+      searchable_.activate();
+    }
     updateChrome();
   }
 
   function specsFor(items: MediaItem[]): MediaSpec[] {
-    return items.map((item) => ({ src: item.src, type: item.type, alt: details.altFor(item) }));
+    return items.map((item) => ({
+      src: item.src,
+      type: item.type,
+      alt: details.altFor(item),
+      caption: typeof item.metadata?.caption === 'string' ? item.metadata.caption : undefined,
+    }));
   }
 
-  function commit(items?: MediaItem[]): void {
-    const specs = view === 'url' && !items ? [url.spec()].filter((s): s is MediaSpec => Boolean(s)) : specsFor(items ?? selection.items);
+  function embedSpec(): MediaSpec | null {
+    const found = embed?.spec;
+    return found ? { src: found.src, type: 'video', embed: found, title: embed!.title || undefined } : null;
+  }
+
+  function commit(items?: MediaItem[], extra?: { gallery?: boolean }): void {
+    let specs: MediaSpec[];
+    if (view === 'url' && !items) specs = [url.spec()].filter((s): s is MediaSpec => Boolean(s));
+    else if (view === 'embed' && !items) specs = [embedSpec()].filter((s): s is MediaSpec => Boolean(s));
+    else specs = specsFor(items ?? selection.items);
     if (specs.length === 0) return;
     close();
-    options.onPick(specs);
+    options.onPick(specs, extra);
   }
 
   function updateChrome(): void {
-    const pickCount = view === 'url' ? (url.url ? 1 : 0) : selection.size;
-    const noun = kinds.length === 1 ? kinds[0] : 'item';
+    const pickCount = view === 'url' ? (url.url ? 1 : 0) : view === 'embed' ? (embed?.spec ? 1 : 0) : selection.size;
+    const noun = view === 'embed' ? 'video' : kindNoun(kinds);
     if (mode === 'replace') insertButton.textContent = 'Replace';
-    else insertButton.textContent = pickCount > 1 ? `Insert ${pickCount} ${noun}s` : pickCount === 1 ? `Insert ${noun}` : 'Insert';
+    else insertButton.textContent = pickCount > 1 ? `Insert ${pickCount} ${kindNoun(kinds, true)}` : pickCount === 1 ? `Insert ${noun}` : 'Insert';
     insertButton.disabled = pickCount === 0;
 
-    if (view === 'url') count.textContent = '';
-    else count.textContent = selection.size ? `${selection.size} selected` : mode === 'insert' ? `Select ${kinds.length === 1 ? kinds[0] + 's' : 'media'} to insert` : 'Select an image';
+    // Several pictures can go in as one gallery.
+    galleryButton.hidden = !(mode === 'insert' && kinds.length === 1 && kinds[0] === 'image' && isBrowse() && selection.size >= 2);
 
-    const showDetails = view !== 'url' && active !== null && selection.size > 0;
+    if (view === 'url' || view === 'embed') count.textContent = '';
+    else count.textContent = selection.size ? `${selection.size} selected` : mode === 'insert' ? `Select ${kinds.length === 1 ? kindNoun(kinds, true) : 'media'} to insert` : 'Select an image';
+
+    const showDetails = isBrowse() && active !== null && selection.size > 0;
     dialog.classList.toggle('no-details', !showDetails);
     details.element.hidden = !showDetails;
   }
@@ -212,6 +274,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
       details.show(null);
     }
     library?.syncSelection();
+    stockView?.syncSelection();
     upload.syncSelection();
     updateChrome();
   }
@@ -220,6 +283,7 @@ export const openMediaPicker = (options: PickerOptions): void => {
   function close(): void {
     cleanupEscape();
     library?.dispose();
+    stockView?.dispose();
     upload.dispose();
     url.dispose();
     overlay.remove();
@@ -229,10 +293,11 @@ export const openMediaPicker = (options: PickerOptions): void => {
   closeButton.addEventListener('click', close);
   cancelButton.addEventListener('click', close);
   insertButton.addEventListener('click', () => commit());
+  galleryButton.addEventListener('click', () => commit(undefined, { gallery: true }));
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) close();
   });
-  searchInput.addEventListener('input', () => library?.setSearch(searchInput.value.trim()));
+  searchInput.addEventListener('input', () => searchable[view]?.setSearch(searchInput.value.trim()));
 
   // Files dropped anywhere on the dialog, or pasted into it, are uploads.
   let dragDepth = 0;
@@ -268,7 +333,8 @@ export const openMediaPicker = (options: PickerOptions): void => {
   });
 
   showView(view);
-  if (view === 'library') searchInput.focus({ preventScroll: true });
+  if (searchable[view]) searchInput.focus({ preventScroll: true });
   else if (view === 'upload') upload.focusDropzone();
+  else if (view === 'embed') embed?.focus();
   else url.focus();
 };

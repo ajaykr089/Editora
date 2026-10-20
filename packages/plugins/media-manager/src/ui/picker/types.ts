@@ -1,7 +1,17 @@
 import type { MediaItem, MediaManagerConfig, MediaProvider } from '../../types/media';
 import type { SelectionModel } from './selection';
 
-export type PickerKind = 'image' | 'video';
+export type PickerKind = 'image' | 'video' | 'audio';
+
+const LABELS: Record<PickerKind, { one: string; many: string }> = {
+  image: { one: 'image', many: 'images' },
+  video: { one: 'video', many: 'videos' },
+  audio: { one: 'audio file', many: 'audio files' },
+};
+
+/** What to call one or several of what the dialog is for: "image", "audio files". A mix is just "item". */
+export const kindNoun = (kinds: PickerKind[], plural = false): string =>
+  kinds.length === 1 ? LABELS[kinds[0]][plural ? 'many' : 'one'] : plural ? 'items' : 'item';
 
 /** What every view of the picker can see and ask for. */
 export interface PickerContext {
@@ -17,4 +27,4 @@ export interface PickerContext {
 }
 
 export const isPickable = (item: MediaItem, kinds: PickerKind[]): boolean =>
-  (item.type === 'image' || item.type === 'video') && kinds.includes(item.type);
+  (item.type === 'image' || item.type === 'video' || item.type === 'audio') && kinds.includes(item.type);
