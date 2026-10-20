@@ -3,10 +3,21 @@ import { focusPanel, keepPanelFocus, panelHasFocus } from '../../shared/dialogHe
 import { recordDomHistory } from '../../shared/historyHelpers';
 import { formatFullDate, formatRelativeTime, getAvatarColor, getInitials } from './format';
 import { COMMENTS_CSS, COMMENTS_STYLE_ID } from './styles';
+import {
+  DEFAULT_USER,
+  isSafeId,
+  normalizeThreads,
+  normalizeUser,
+  type CommentReplyData,
+  type CommentThread,
+  type CommentUser,
+  type CommentsChangeReason,
+  type CommentsOptions,
+} from './types';
 
 interface CommentReply {
   id: string;
-  author: string;
+  author: CommentUser;
   text: string;
   createdAt: string;
   editedAt?: string;
@@ -16,14 +27,24 @@ interface Comment {
   id: string;
   anchorId: string;
   selectedText: string;
-  author: string;
+  author: CommentUser;
   text: string;
   createdAt: string;
   editedAt?: string;
   resolved: boolean;
   resolvedAt?: string;
-  resolvedBy?: string;
+  resolvedBy?: CommentUser;
   replies: CommentReply[];
+  /** Deleted in the panel. Kept so that Undo (the panel's or the document's) can bring it back; never given to the host. */
+  deleted?: boolean;
+  /** The highlight in the document has been made to show this thread's resolved state (threads from the host start without). */
+  aligned?: boolean;
+}
+
+/** One `CommentsPlugin(...)` call: its options, and whether its saved threads have been given to an editor yet. */
+interface PluginInstance {
+  options: CommentsOptions;
+  initialApplied: boolean;
 }
 
 type CommentsFilter = 'open' | 'resolved' | 'all';
@@ -49,6 +70,13 @@ interface UndoEntry {
 
 interface CommentsEditorState {
   root: HTMLElement;
+  instance: PluginInstance | null;
+  /** The instance was picked because it was the next one waiting, not because one of its commands ran here. */
+  instanceAssumed: boolean;
+  orphanIds: string[];
+  watchedContent: HTMLElement | null;
+  contentObserver: MutationObserver | null;
+  syncTimer: number | null;
   uid: string;
   comments: Map<string, Comment>;
   panelVisible: boolean;
@@ -74,7 +102,6 @@ const stateByEditor = new WeakMap<HTMLElement, CommentsEditorState>();
 let activeEditorRoot: HTMLElement | null = null;
 let globalTrackingInitialized = false;
 let idSeed = 0;
-const COMMENT_AUTHOR = 'User';
 /** A thread shows its latest replies; the earlier ones are one click away. */
 const VISIBLE_REPLIES = 2;
 
@@ -145,12 +172,165 @@ function getCurrentEditorRoot(): HTMLElement | null {
   return activeEditorRoot;
 }
 
-function getOrCreateState(root: HTMLElement): CommentsEditorState {
+/* ------------------------------------------------------------------------------------------------
+ * Plugin instances, their options, and the host's data
+ * ---------------------------------------------------------------------------------------------- */
+
+/** `CommentsPlugin(...)` calls whose editor has not been found yet, oldest first. */
+const waitingInstances: PluginInstance[] = [];
+const MAX_WAITING_INSTANCES = 20;
+let latestUser: CommentUser | null = null;
+let latestUserOwner: PluginInstance | null = null;
+
+function rememberUser(instance: PluginInstance): void {
+  const user = normalizeUser(instance.options.currentUser);
+  if (!user) return;
+  latestUser = user;
+  latestUserOwner = instance;
+}
+
+function registerInstance(instance: PluginInstance): void {
+  waitingInstances.push(instance);
+  if (waitingInstances.length > MAX_WAITING_INSTANCES) waitingInstances.shift();
+  rememberUser(instance);
+}
+
+/**
+ * Who is commenting. The editor's own plugin options, else the latest ones that named a user (a page has one
+ * logged-in person, whichever editor they are in), else a generic "User".
+ */
+function currentUserOf(state: CommentsEditorState): CommentUser {
+  return normalizeUser(state.instance?.options.currentUser) ?? latestUser ?? DEFAULT_USER;
+}
+
+/** Whether the current user may edit or delete something `author` wrote. */
+function canModify(state: CommentsEditorState, author: CommentUser): boolean {
+  const user = currentUserOf(state);
+  const custom = state.instance?.options.canModify;
+  if (custom) {
+    try {
+      return !!custom(author, user);
+    } catch {
+      return false;
+    }
+  }
+  if (user.id && author.id) return user.id === author.id;
+  return true;
+}
+
+function toInternal(thread: CommentThread): Comment {
+  return {
+    id: thread.id,
+    anchorId: thread.anchorId ?? '',
+    selectedText: thread.quote ?? '',
+    author: thread.author,
+    text: thread.text,
+    createdAt: thread.createdAt,
+    editedAt: thread.editedAt,
+    resolved: thread.resolved,
+    resolvedAt: thread.resolvedAt,
+    resolvedBy: thread.resolvedBy,
+    replies: thread.replies.map((reply) => ({ ...reply })),
+    aligned: false,
+  };
+}
+
+function toPublic(comment: Comment): CommentThread {
+  const thread: CommentThread = {
+    id: comment.id,
+    author: { ...comment.author },
+    text: comment.text,
+    createdAt: comment.createdAt,
+    resolved: comment.resolved,
+    replies: comment.replies.map((reply): CommentReplyData => {
+      const data: CommentReplyData = { id: reply.id, author: { ...reply.author }, text: reply.text, createdAt: reply.createdAt };
+      if (reply.editedAt) data.editedAt = reply.editedAt;
+      return data;
+    }),
+  };
+  if (comment.anchorId) thread.anchorId = comment.anchorId;
+  if (comment.selectedText) thread.quote = comment.selectedText;
+  if (comment.editedAt) thread.editedAt = comment.editedAt;
+  if (comment.resolved && comment.resolvedAt) thread.resolvedAt = comment.resolvedAt;
+  if (comment.resolved && comment.resolvedBy) thread.resolvedBy = { ...comment.resolvedBy };
+  return thread;
+}
+
+/** Every thread the user has not deleted, as plain data for the host. */
+function snapshotThreads(state: CommentsEditorState): CommentThread[] {
+  syncAnchoredComments(state);
+  return Array.from(state.comments.values())
+    .filter((comment) => !comment.deleted)
+    .map(toPublic);
+}
+
+/** Tell the host: a DOM event on the editor, and the `onChange` option. A throwing handler must not break commenting. */
+function emitChange(state: CommentsEditorState, reason: CommentsChangeReason, threadId?: string): void {
+  const threads = snapshotThreads(state);
+  const change = threadId ? { reason, threadId } : { reason };
+  try {
+    state.root.dispatchEvent(new CustomEvent('editora:comments-change', { bubbles: true, detail: { threads, ...change } }));
+  } catch (error) {
+    console.error('[comments] a change listener threw', error);
+  }
+  try {
+    state.instance?.options.onChange?.(threads, change);
+  } catch (error) {
+    console.error('[comments] onChange threw', error);
+  }
+}
+
+/** Replace everything with threads from the host (not reported back through `onChange`: the host just supplied them). */
+function replaceThreads(state: CommentsEditorState, input: unknown): void {
+  state.comments.clear();
+  normalizeThreads(input).forEach((thread) => state.comments.set(thread.id, toInternal(thread)));
+  state.expandedReplies.clear();
+  state.replyTexts = {};
+  state.editing = null;
+  state.editDraft = '';
+  state.hoverId = null;
+  state.activeId = null;
+  dismissUndo(state);
+  updateEmphasis(state);
+  syncDocument(state);
+}
+
+function attachInstance(state: CommentsEditorState, instance: PluginInstance, assumed: boolean): void {
+  if (state.instance === instance) {
+    if (!assumed) state.instanceAssumed = false;
+    return;
+  }
+  const replacedGuess = state.instanceAssumed && state.instance;
+  if (replacedGuess && state.instance?.options.initialThreads) state.comments.clear();
+
+  state.instance = instance;
+  state.instanceAssumed = assumed;
+  const waiting = waitingInstances.indexOf(instance);
+  if (waiting !== -1) waitingInstances.splice(waiting, 1);
+
+  if (!instance.initialApplied && instance.options.initialThreads) {
+    instance.initialApplied = true;
+    replaceThreads(state, instance.options.initialThreads);
+  }
+}
+
+function getOrCreateState(root: HTMLElement, instance?: PluginInstance): CommentsEditorState {
   const existing = stateByEditor.get(root);
-  if (existing) return existing;
+  if (existing) {
+    if (instance && existing.instance !== instance && (existing.instanceAssumed || !existing.instance)) {
+      attachInstance(existing, instance, false);
+    }
+    return existing;
+  }
 
   const state: CommentsEditorState = {
     root,
+    instance: null,
+    instanceAssumed: false,
+    orphanIds: [],
+    watchedContent: null,
+    contentObserver: null,
+    syncTimer: null,
     uid: nextId('rte-comments'),
     comments: new Map<string, Comment>(),
     panelVisible: false,
@@ -172,7 +352,102 @@ function getOrCreateState(root: HTMLElement): CommentsEditorState {
   };
 
   stateByEditor.set(root, state);
+
+  // An editor with comments gets the oldest plugin call that is still waiting for one (they are made in the order
+  // the editors are), unless a command or the host has said which one it belongs to.
+  const chosen = instance ?? waitingInstances[0] ?? null;
+  if (chosen) attachInstance(state, chosen, !instance);
+  watchContent(state);
+  scheduleSync(state);
   return state;
+}
+
+/* ---- Keeping the panel and the host in step with the document ---- */
+
+function scheduleSync(state: CommentsEditorState): void {
+  if (state.syncTimer !== null) return;
+  state.syncTimer = window.setTimeout(() => syncDocument(state), 150);
+}
+
+/** The text of the document is the other half of the comments: watch it, since undo, redo and loading change it. */
+function watchContent(state: CommentsEditorState): void {
+  const content = getContentElement(state.root);
+  if (content === state.watchedContent) return;
+  state.contentObserver?.disconnect();
+  state.watchedContent = content;
+  state.contentObserver = null;
+  if (!content || typeof MutationObserver === 'undefined') return;
+  state.contentObserver = new MutationObserver(() => scheduleSync(state));
+  state.contentObserver.observe(content, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'id'] });
+}
+
+const ORPHAN_STYLE_ID = 'rte-comments-orphans';
+const orphanStates = new Set<CommentsEditorState>();
+
+/**
+ * A highlight with no thread behind it (the document was saved with its comments but they were not loaded, or were
+ * deleted elsewhere) does nothing when clicked, so it should not look like it does. Like the emphasis, this is a
+ * stylesheet rule and not a change to the document.
+ */
+function updateOrphans(state: CommentsEditorState): void {
+  const content = getContentElement(state.root);
+  const known = new Set<string>();
+  state.comments.forEach((comment) => comment.anchorId && known.add(comment.anchorId));
+  state.orphanIds = content
+    ? Array.from(content.querySelectorAll<HTMLElement>('.rte-comment-anchor'))
+        .filter((anchor) => !known.has(anchor.id) && isSafeId(anchor.id))
+        .map((anchor) => anchor.id)
+    : [];
+
+  if (state.orphanIds.length) orphanStates.add(state);
+  else orphanStates.delete(state);
+
+  const selectors: string[] = [];
+  orphanStates.forEach((item) => {
+    if (!item.root.isConnected) {
+      orphanStates.delete(item);
+      return;
+    }
+    item.orphanIds.forEach((id) => selectors.push(`.rte-comment-anchor[id="${id}"]`));
+  });
+
+  let style = document.getElementById(ORPHAN_STYLE_ID);
+  if (selectors.length === 0) {
+    style?.remove();
+    return;
+  }
+  if (!style) {
+    style = document.createElement('style');
+    style.id = ORPHAN_STYLE_ID;
+    document.head.appendChild(style);
+  }
+  style.textContent = `${selectors.join(',\n')} { background: none; border-bottom: 0; cursor: inherit; }`;
+}
+
+/**
+ * After the document or the threads changed: threads follow their highlights (a Resolve that was undone, a deleted
+ * thread that came back), orphans are re-found, an open panel redraws, and a change that came from the document
+ * rather than from the panel is reported.
+ */
+function syncDocument(state: CommentsEditorState): void {
+  if (state.syncTimer !== null) {
+    window.clearTimeout(state.syncTimer);
+    state.syncTimer = null;
+  }
+  if (!state.root.isConnected) return;
+  watchContent(state);
+
+  const before = new Map<string, string>();
+  state.comments.forEach((comment) => before.set(comment.id, `${comment.resolved}|${!!comment.deleted}`));
+  syncAnchoredComments(state);
+  let changed: string | undefined;
+  state.comments.forEach((comment) => {
+    if (before.has(comment.id) && before.get(comment.id) !== `${comment.resolved}|${!!comment.deleted}`) changed = comment.id;
+  });
+
+  updateOrphans(state);
+  if (state.panelVisible) renderPanel(state);
+  if (changed) emitChange(state, 'document', changed);
 }
 
 function getActiveState(): CommentsEditorState | null {
@@ -223,7 +498,16 @@ function syncAnchoredComments(state: CommentsEditorState): Comment[] {
     if (comment.anchorId) {
       const anchor = findAnchor(state, comment);
       if (!anchor) return;
-      comment.resolved = anchor.classList.contains('rte-comment-anchor-resolved');
+      comment.deleted = false; // its highlight is back (the document's Undo): so is the thread
+      if (comment.aligned === false) {
+        // Data from the host says whether it is resolved; the document has to agree before it can be the truth.
+        anchor.classList.toggle('rte-comment-anchor-resolved', comment.resolved);
+        comment.aligned = true;
+      } else {
+        comment.resolved = anchor.classList.contains('rte-comment-anchor-resolved');
+      }
+    } else if (comment.deleted) {
+      return;
     }
     visible.push(comment);
   });
@@ -498,12 +782,23 @@ function getCommentsInDisplayOrder(state: CommentsEditorState): Comment[] {
   return [...anchored.map((item) => item.comment), ...general];
 }
 
-function createAvatar(name: string, small = false): HTMLElement {
+/** The person's picture over their initials: if the picture is slow, missing or fails, the initials are what shows. */
+function createAvatar(user: CommentUser, small = false): HTMLElement {
   const avatar = document.createElement('span');
   avatar.className = `rte-comment-avatar${small ? ' small' : ''}`;
   avatar.setAttribute('aria-hidden', 'true');
-  avatar.style.background = getAvatarColor(name);
-  avatar.textContent = getInitials(name);
+  avatar.style.background = getAvatarColor(user.id || user.name);
+  avatar.textContent = getInitials(user.name);
+  if (user.avatar) {
+    const image = document.createElement('img');
+    image.alt = '';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    image.referrerPolicy = 'no-referrer'; // a picture's host does not need to learn where it is being read
+    image.addEventListener('error', () => image.remove());
+    image.src = user.avatar;
+    avatar.appendChild(image);
+  }
   return avatar;
 }
 
@@ -775,11 +1070,13 @@ function saveEdit(state: CommentsEditorState, value: string): void {
   if (!comment) return;
 
   const target = editing.replyId ? comment.replies.find((item) => item.id === editing.replyId) : comment;
-  if (target && target.text !== text) {
+  const changed = !!target && target.text !== text;
+  if (target && changed) {
     target.text = text;
     target.editedAt = new Date().toISOString();
   }
   cancelEdit(state);
+  if (changed) emitChange(state, 'edit', comment.id);
 }
 
 function dismissUndo(state: CommentsEditorState): void {
@@ -847,7 +1144,7 @@ function createReplyBox(state: CommentsEditorState, comment: Comment): HTMLEleme
   const submit = () => {
     const text = textarea.value.trim();
     if (!text) return;
-    replyToComment(comment.id, COMMENT_AUTHOR, text);
+    replyToComment(comment.id, currentUserOf(state), text);
     delete state.replyTexts[comment.id];
     renderPanel(state);
   };
@@ -887,7 +1184,7 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
   meta.className = 'rte-comment-meta';
   const author = document.createElement('strong');
   author.className = 'rte-comment-author';
-  author.textContent = comment.author;
+  author.textContent = comment.author.name;
   meta.append(author, createWhen(comment.createdAt, comment.editedAt));
 
   const actions = document.createElement('div');
@@ -901,20 +1198,23 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
   resolveBtn.dataset.commentId = comment.id;
   resolveBtn.addEventListener('click', () => {
     if (comment.resolved) reopenComment(comment.id);
-    else resolveComment(comment.id, COMMENT_AUTHOR);
+    else resolveComment(comment.id, currentUserOf(state));
   });
-  actions.append(
-    resolveBtn,
-    createMenu(
-      state,
-      [
-        { label: 'Edit', icon: 'edit', run: () => startEdit(state, comment.id, null) },
-        { label: 'Delete', icon: 'trash', danger: true, run: () => deleteWithUndo(state, comment.id) },
-      ],
-      { commentId: comment.id },
-      'More actions',
-    ),
-  );
+  actions.append(resolveBtn);
+  // Someone else's comment cannot be edited or deleted by this user: nothing to put in the menu.
+  if (canModify(state, comment.author)) {
+    actions.append(
+      createMenu(
+        state,
+        [
+          { label: 'Edit', icon: 'edit', run: () => startEdit(state, comment.id, null) },
+          { label: 'Delete', icon: 'trash', danger: true, run: () => deleteWithUndo(state, comment.id) },
+        ],
+        { commentId: comment.id },
+        'More actions',
+      ),
+    );
+  }
   header.append(createAvatar(comment.author), meta, actions);
   card.appendChild(header);
 
@@ -947,7 +1247,7 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
     status.className = 'rte-comment-status';
     status.innerHTML = svg('check');
     const label = document.createElement('span');
-    const by = comment.resolvedBy ? ` by ${comment.resolvedBy}` : '';
+    const by = comment.resolvedBy ? ` by ${comment.resolvedBy.name}` : '';
     const when = comment.resolvedAt ? ` · ${formatRelativeTime(comment.resolvedAt)}` : '';
     label.textContent = `Resolved${by}${when}`;
     status.appendChild(label);
@@ -983,21 +1283,22 @@ function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLEle
       replyMeta.className = 'rte-comment-meta';
       const replyAuthor = document.createElement('strong');
       replyAuthor.className = 'rte-comment-author';
-      replyAuthor.textContent = reply.author;
+      replyAuthor.textContent = reply.author.name;
       replyMeta.append(replyAuthor, createWhen(reply.createdAt, reply.editedAt));
-      replyHeader.append(
-        createAvatar(reply.author, true),
-        replyMeta,
-        createMenu(
-          state,
-          [
-            { label: 'Edit', icon: 'edit', run: () => startEdit(state, comment.id, reply.id) },
-            { label: 'Delete', icon: 'trash', danger: true, run: () => deleteReplyWithUndo(state, comment.id, reply.id) },
-          ],
-          { commentId: comment.id, replyId: reply.id },
-          'More reply actions',
-        ),
-      );
+      replyHeader.append(createAvatar(reply.author, true), replyMeta);
+      if (canModify(state, reply.author)) {
+        replyHeader.append(
+          createMenu(
+            state,
+            [
+              { label: 'Edit', icon: 'edit', run: () => startEdit(state, comment.id, reply.id) },
+              { label: 'Delete', icon: 'trash', danger: true, run: () => deleteReplyWithUndo(state, comment.id, reply.id) },
+            ],
+            { commentId: comment.id, replyId: reply.id },
+            'More reply actions',
+          ),
+        );
+      }
       item.appendChild(replyHeader);
 
       if (state.editing && state.editing.commentId === comment.id && state.editing.replyId === reply.id) {
@@ -1108,7 +1409,7 @@ function createComposer(state: CommentsEditorState, composer: ComposerState): HT
     event.preventDefault();
     const text = textarea.value.trim();
     if (!text) return;
-    const id = createComment(state, COMMENT_AUTHOR, text, composer.range);
+    const id = createComment(state, currentUserOf(state), text, composer.range);
     if (!id) {
       composer.error = 'That text could not be commented on. Select it again and click New.';
       composer.range = null;
@@ -1222,20 +1523,6 @@ function renderPanel(state?: CommentsEditorState): void {
   body.querySelectorAll('textarea').forEach((textarea) => autosize(textarea));
 }
 
-const pendingRefresh = new WeakMap<CommentsEditorState, number>();
-
-/** Coalesce refreshes triggered by typing so a busy panel isn't rebuilt per keystroke. */
-function scheduleCommentsRefresh(state: CommentsEditorState): void {
-  if (pendingRefresh.has(state)) return;
-  pendingRefresh.set(
-    state,
-    window.setTimeout(() => {
-      pendingRefresh.delete(state);
-      if (state.panelVisible) renderPanel(state);
-    }, 120),
-  );
-}
-
 /* ------------------------------------------------------------------------------------------------
  * Starting a comment: the toolbar button, the bubble over a selection, the shortcut
  * ---------------------------------------------------------------------------------------------- */
@@ -1333,6 +1620,31 @@ function scheduleBubbleUpdate(): void {
  * Page-wide listeners (one set, shared by every editor)
  * ---------------------------------------------------------------------------------------------- */
 
+function scanForEditors(): void {
+  document.querySelectorAll<HTMLElement>('[data-editora-editor], .rte-editor, .editora-editor').forEach((candidate) => {
+    const root = getEditorRootFromNode(candidate);
+    if (!root) return;
+    const known = stateByEditor.get(root);
+    if (known) {
+      watchContent(known);
+      // A plugin call made after the editor appeared: this editor is the one that was waiting for it.
+      if (!known.instance && waitingInstances.length) attachInstance(known, waitingInstances[0], true);
+      return;
+    }
+    if (root.querySelector('[data-command="addComment"]')) getOrCreateState(root);
+  });
+}
+
+let scanTimer: number | null = null;
+
+function scheduleScan(): void {
+  if (scanTimer !== null) return;
+  scanTimer = window.setTimeout(() => {
+    scanTimer = null;
+    scanForEditors();
+  }, 50);
+}
+
 function ensureGlobalTracking(): void {
   if (globalTrackingInitialized) return;
   globalTrackingInitialized = true;
@@ -1361,15 +1673,32 @@ function ensureGlobalTracking(): void {
     activateThread(state, commentId);
   });
 
-  // Undo/redo and edits change which anchors exist; keep an open panel in step.
+  // Undo/redo and edits change which highlights exist; keep the threads, the panel and the host in step. (The
+  // document is also watched for changes that do not come with an input event, such as loading saved HTML.)
   document.addEventListener('input', (event) => {
     const target = event.target instanceof Element ? event.target : null;
     if (!target || target.closest('.rte-comments-panel')) return;
 
     const root = getEditorRootFromNode(target);
     const state = root ? stateByEditor.get(root) : null;
-    if (state?.panelVisible) scheduleCommentsRefresh(state);
+    if (state) scheduleSync(state);
   });
+
+  // Find the editors that have comments as they appear, so that saved threads can be loaded into them and
+  // highlights without a thread can be told apart before anyone uses the panel.
+  scanForEditors();
+  if (typeof MutationObserver !== 'undefined') {
+    new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of Array.from(mutation.addedNodes)) {
+          if (node.nodeType === 1) {
+            scheduleScan();
+            return;
+          }
+        }
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
 
   // Remember what is selected in the text, so the panel's New button knows what to comment on even though
   // clicking the panel moves the focus out of the text. Clicking back into the text drops the memory.
@@ -1426,7 +1755,8 @@ function ensureGlobalTracking(): void {
     'keydown',
     (event) => {
       if (event.key !== 'Escape') return;
-      const state = getActiveState();
+      const root = event.target instanceof Node ? getEditorRootFromNode(event.target) : null;
+      const state = root ? stateByEditor.get(root) : null;
       if (!state || !state.panelVisible) return;
 
       // Escape peels off one layer at a time: an open menu, then a draft, then the panel.
@@ -1483,7 +1813,7 @@ export function getAllComments(): Comment[] {
  * Create a comment on `range` (wrapping it in an anchor, one undoable step) or, with no range, a note about the
  * whole document. Returns the new id, or '' when there was nothing to comment on.
  */
-function createComment(state: CommentsEditorState, author: string, text: string, range: Range | null): string {
+function createComment(state: CommentsEditorState, author: CommentUser, text: string, range: Range | null): string {
   const trimmedText = text.trim();
   if (!trimmedText) return '';
 
@@ -1498,8 +1828,10 @@ function createComment(state: CommentsEditorState, author: string, text: string,
       createdAt: new Date().toISOString(),
       resolved: false,
       replies: [],
+      aligned: true,
     });
     renderPanel(state);
+    emitChange(state, 'create', commentId);
     return commentId;
   }
 
@@ -1539,27 +1871,29 @@ function createComment(state: CommentsEditorState, author: string, text: string,
     createdAt: new Date().toISOString(),
     resolved: false,
     replies: [],
+    aligned: true,
   });
 
   state.savedSelection = null;
   window.getSelection()?.removeAllRanges();
 
   renderPanel(state);
+  emitChange(state, 'create', commentId);
   return commentId;
 }
 
 /**
  * Add comment (selection-based or general).
  */
-export function addCommentCommand(author: string, text: string, general = false): string {
+export function addCommentCommand(author: string | CommentUser, text: string, general = false): string {
   const state = getActiveState();
   if (!state) return '';
   const range = general ? null : state.savedSelection || cloneActiveSelection(state.root);
   if (!general && !range) return '';
-  return createComment(state, author, text, range);
+  return createComment(state, normalizeUser(author) ?? currentUserOf(state), text, range);
 }
 
-export function resolveComment(commentId: string, author: string): void {
+export function resolveComment(commentId: string, author: string | CommentUser): void {
   const state = getActiveState();
   if (!state) return;
 
@@ -1567,10 +1901,11 @@ export function resolveComment(commentId: string, author: string): void {
   if (!comment) return;
 
   comment.resolved = true;
-  comment.resolvedBy = author;
+  comment.resolvedBy = normalizeUser(author) ?? currentUserOf(state);
   comment.resolvedAt = new Date().toISOString();
   withDocumentEdit(state, () => updateAnchorVisualState(state, comment));
   renderPanel(state);
+  emitChange(state, 'resolve', commentId);
 }
 
 export function reopenComment(commentId: string): void {
@@ -1585,6 +1920,7 @@ export function reopenComment(commentId: string): void {
   comment.resolvedAt = undefined;
   withDocumentEdit(state, () => updateAnchorVisualState(state, comment));
   renderPanel(state);
+  emitChange(state, 'reopen', commentId);
 }
 
 /**
@@ -1609,6 +1945,7 @@ function deleteThread(state: CommentsEditorState, commentId: string): UndoEntry 
       const nodes = Array.from(anchor.childNodes);
       const attributes = Array.from(anchor.attributes).map((attribute) => [attribute.name, attribute.value]);
       withDocumentEdit(state, () => unwrapNode(anchor));
+      comment.deleted = true;
       entry = {
         message: 'Comment deleted',
         undo: () => {
@@ -1624,7 +1961,9 @@ function deleteThread(state: CommentsEditorState, commentId: string): UndoEntry 
             parent.insertBefore(restored, first);
             nodes.forEach((node) => restored.appendChild(node));
           });
+          comment.deleted = false;
           renderPanel(state);
+          emitChange(state, 'create', comment.id);
           return true;
         },
       };
@@ -1640,11 +1979,13 @@ function deleteThread(state: CommentsEditorState, commentId: string): UndoEntry 
         state.comments.set(commentId, comment);
         if (draft) state.replyTexts[commentId] = draft;
         renderPanel(state);
+        emitChange(state, 'create', commentId);
         return true;
       },
     };
   }
   renderPanel(state);
+  emitChange(state, 'delete', commentId);
   return entry;
 }
 
@@ -1663,11 +2004,13 @@ function deleteReplyWithUndo(state: CommentsEditorState, commentId: string, repl
     state.editDraft = '';
   }
   renderPanel(state);
+  emitChange(state, 'delete', commentId);
   showUndo(state, {
     message: 'Reply deleted',
     undo: () => {
       comment.replies.splice(Math.min(index, comment.replies.length), 0, reply);
       renderPanel(state);
+      emitChange(state, 'reply', commentId);
       return true;
     },
   });
@@ -1687,9 +2030,10 @@ export function editComment(commentId: string, text: string): void {
   comment.text = trimmed;
   comment.editedAt = new Date().toISOString();
   renderPanel(state);
+  emitChange(state, 'edit', commentId);
 }
 
-export function replyToComment(commentId: string, author: string, text: string): void {
+export function replyToComment(commentId: string, author: string | CommentUser, text: string): void {
   const state = getActiveState();
   if (!state) return;
 
@@ -1701,12 +2045,13 @@ export function replyToComment(commentId: string, author: string, text: string):
 
   comment.replies.push({
     id: nextId('reply'),
-    author,
+    author: normalizeUser(author) ?? currentUserOf(state),
     text: replyText,
     createdAt: new Date().toISOString(),
   });
 
   renderPanel(state);
+  emitChange(state, 'reply', commentId);
 }
 
 export function highlightComment(commentId: string, highlight: boolean): void {
@@ -1724,13 +2069,71 @@ function ensurePanelStyles(): void {
   document.head.appendChild(style);
 }
 
-export const CommentsPlugin = (): Plugin => {
-  // The bubble over a selection and the shortcut work before the first command has run.
-  if (typeof document !== 'undefined') ensureGlobalTracking();
-  return buildPlugin();
+/* ------------------------------------------------------------------------------------------------
+ * For the host application: read and set an editor's threads, tell it who is commenting
+ * ---------------------------------------------------------------------------------------------- */
+
+const COMMAND_ROOT_SELECTOR = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
+
+/** The editor that an element is, or is inside. */
+function editorRootOf(target: unknown): HTMLElement | null {
+  return target instanceof Element ? (target.closest(COMMAND_ROOT_SELECTOR) as HTMLElement | null) : null;
+}
+
+/**
+ * The comments of one editor, as plain data to store: every thread that has not been deleted, in the order they
+ * were made. `target` is the editor element or anything inside it.
+ */
+export function getCommentThreads(target: Element): CommentThread[] {
+  const root = editorRootOf(target);
+  const state = root ? stateByEditor.get(root) : null;
+  return state ? snapshotThreads(state) : [];
+}
+
+/**
+ * Show these threads in an editor, in place of the ones it has (for example the ones you saved with its document,
+ * or what another person's browser sent). Their highlights are in the document's HTML by id; a thread whose
+ * highlight is not in the document is kept but not shown. This does not call `onChange`.
+ */
+export function setCommentThreads(target: Element, threads: CommentThread[]): void {
+  const root = editorRootOf(target);
+  if (!root) return;
+  ensureGlobalTracking();
+  replaceThreads(getOrCreateState(root), threads);
+}
+
+/** Give an editor the options that `CommentsPlugin(options)` takes, when the plugin cannot know which editor is its own. */
+export function configureComments(target: Element, options: CommentsOptions): void {
+  const root = editorRootOf(target);
+  if (!root) return;
+  ensureGlobalTracking();
+  const instance: PluginInstance = { options, initialApplied: false };
+  rememberUser(instance);
+  const state = getOrCreateState(root, instance);
+  if (state.instance !== instance) attachInstance(state, instance, false);
+}
+
+/** Which editor a command ran in decides which `CommentsPlugin(...)` call it belongs to. */
+function stateForCommand(instance: PluginInstance, context: any): CommentsEditorState | null {
+  setActiveEditorRootFromCommandContext(context);
+  const root = getCurrentEditorRoot();
+  if (!root) return null;
+  activeEditorRoot = root;
+  return getOrCreateState(root, instance);
+}
+
+export const CommentsPlugin = (options: CommentsOptions = {}): Plugin => {
+  const instance: PluginInstance = { options: options || {}, initialApplied: false };
+  if (typeof document !== 'undefined') {
+    registerInstance(instance);
+    // The bubble over a selection and the shortcut work before the first command has run.
+    ensureGlobalTracking();
+    scanForEditors();
+  }
+  return buildPlugin(instance);
 };
 
-const buildPlugin = (): Plugin => ({
+const buildPlugin = (instance: PluginInstance): Plugin => ({
   name: 'comments',
 
   toolbar: [
@@ -1758,23 +2161,38 @@ const buildPlugin = (): Plugin => ({
 
   commands: {
     addComment: (_args: unknown, context: any) => {
-      setActiveEditorRootFromCommandContext(context);
       ensureGlobalTracking();
-      const state = getActiveState();
+      const state = stateForCommand(instance, context);
       if (!state) return false;
       beginComment(state.root);
       return true;
     },
 
     toggleComments: (_args: unknown, context: any) => {
-      setActiveEditorRootFromCommandContext(context);
       ensureGlobalTracking();
-      const state = getActiveState();
+      const state = stateForCommand(instance, context);
       if (!state) return false;
 
       setPanelVisibility(state, !state.panelVisible);
       return true;
     },
+  },
+
+  // The web component calls this with the editor that owns the plugin, which is the one sure way to tell.
+  init(context?: { editorElement?: HTMLElement }) {
+    const root = editorRootOf(context?.editorElement);
+    if (!root) return;
+    ensureGlobalTracking();
+    getOrCreateState(root, instance);
+  },
+
+  destroy() {
+    const waiting = waitingInstances.indexOf(instance);
+    if (waiting !== -1) waitingInstances.splice(waiting, 1);
+    if (latestUserOwner === instance) {
+      latestUser = null;
+      latestUserOwner = null;
+    }
   },
 
   keymap: {},

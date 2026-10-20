@@ -121,7 +121,18 @@ export {
 } from '../slash-commands/src/index';
 export { SpellCheckPlugin } from '../spell-check/src/index';
 export { A11yCheckerPlugin } from '../a11y-checker/src/index';
-export { CommentsPlugin } from '../comments/src/index';
+export {
+  CommentsPlugin,
+  getCommentThreads,
+  setCommentThreads,
+  configureComments,
+  type CommentReplyData,
+  type CommentThread,
+  type CommentUser,
+  type CommentsChange,
+  type CommentsChangeReason,
+  type CommentsOptions,
+} from '../comments/src/index';
 export {
   MergeTagPlugin,
   type MergeTagItem,

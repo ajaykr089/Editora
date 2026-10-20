@@ -55,6 +55,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  plugin.destroy?.();
   window.getSelection()?.removeAllRanges();
   document.body.innerHTML = '';
 });

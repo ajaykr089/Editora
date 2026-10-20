@@ -291,6 +291,21 @@ export const COMMENTS_CSS = `
     user-select: none;
   }
 
+  .rte-comment-avatar {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* The picture covers the initials; if it fails to load it is removed and the initials show. */
+  .rte-comment-avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
   .rte-comment-avatar.small {
     width: 22px;
     height: 22px;

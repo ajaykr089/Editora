@@ -935,7 +935,58 @@ export function getTemplateCategories(): string[];
 export function searchTemplates(query: string): Template[];
 export function sanitizeTemplate(html: string): string;
 export function validateTemplate(template: Template): boolean;
-export function CommentsPlugin(): Plugin;
+export interface CommentUser {
+  /** Your own id for the person. When it is set on both the user and a comment's author, only that person can edit or delete the comment. */
+  id?: string;
+  name: string;
+  /** URL of a picture (http, https, a data:image URL or a path on the page). Without one, or if it fails to load, the initials are shown. */
+  avatar?: string;
+}
+export interface CommentReplyData {
+  id: string;
+  author: CommentUser;
+  text: string;
+  createdAt: string;
+  editedAt?: string;
+}
+/** One discussion. Store it as it is and give it back with `setCommentThreads` or `initialThreads`. */
+export interface CommentThread {
+  id: string;
+  /** The `id` of the highlighted span in the document. Missing for a note about the whole document. */
+  anchorId?: string;
+  /** The text that was selected when the thread was started. */
+  quote?: string;
+  author: CommentUser;
+  text: string;
+  createdAt: string;
+  editedAt?: string;
+  resolved: boolean;
+  resolvedAt?: string;
+  resolvedBy?: CommentUser;
+  replies: CommentReplyData[];
+}
+export type CommentsChangeReason = 'create' | 'reply' | 'edit' | 'resolve' | 'reopen' | 'delete' | 'document';
+export interface CommentsChange {
+  reason: CommentsChangeReason;
+  threadId?: string;
+}
+export interface CommentsOptions {
+  /** Who is commenting. New comments, replies and resolutions are signed with this. Default: `{ name: 'User' }`. */
+  currentUser?: CommentUser | string;
+  /** Threads to show when the editor starts, for example the ones you saved with the document. */
+  initialThreads?: CommentThread[];
+  /** Called after every change to the comments, with all of them. Store them here. */
+  onChange?: (threads: CommentThread[], change: CommentsChange) => void;
+  /** Whether `user` may edit or delete something `author` wrote. By default people can change their own comments when both have an id, and anyone can change anything when there are no ids. */
+  canModify?: (author: CommentUser, user: CommentUser) => boolean;
+}
+export function CommentsPlugin(options?: CommentsOptions): Plugin;
+/** The comments of one editor as plain data to store. `target` is the editor element or anything inside it. */
+export function getCommentThreads(target: Element): CommentThread[];
+/** Show these threads in an editor in place of the ones it has. Does not call `onChange`. */
+export function setCommentThreads(target: Element, threads: CommentThread[]): void;
+/** Give an editor the options `CommentsPlugin(options)` takes, when the plugin cannot know which editor is its own. */
+export function configureComments(target: Element, options: CommentsOptions): void;
 export function SpellCheckPlugin(): Plugin;
 export function A11yCheckerPlugin(): Plugin;
 

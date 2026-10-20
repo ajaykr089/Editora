@@ -40,6 +40,37 @@ import { CommentsPlugin } from "@editora/comments";
 const plugins = [CommentsPlugin()];
 ```
 
+## Saving comments and naming the user
+
+Comments are plain data. Give the plugin who is commenting, the threads you saved, and a place to save them:
+
+```ts
+CommentsPlugin({
+  currentUser: { id: "u42", name: "Ada Lovelace", avatar: "https://example.com/ada.png" },
+  initialThreads: savedThreads, // CommentThread[] from your database
+  onChange: (threads, { reason, threadId }) => saveThreads(threads),
+});
+```
+
+The highlight that anchors a comment is part of the document's HTML, so save the HTML and the threads together. Create one `CommentsPlugin(...)` per editor.
+
+| Option | Description |
+| --- | --- |
+| `currentUser` | `{ id?, name, avatar? }` or a name. Signs new comments, replies and resolutions. Default `{ name: "User" }`. |
+| `initialThreads` | Threads to show when the editor starts. |
+| `onChange(threads, change)` | After every change, with all threads. `change.reason` is `create`, `reply`, `edit`, `resolve`, `reopen`, `delete` or `document`. |
+| `canModify(author, user)` | Who may edit or delete a comment. Default: your own, when both have an `id`; anyone, when there are no ids. |
+
+```ts
+import { getCommentThreads, setCommentThreads, configureComments } from "@editora/comments";
+
+getCommentThreads(editorElement); // all threads that were not deleted
+setCommentThreads(editorElement, threads); // replace them (does not call onChange)
+configureComments(editorElement, options); // the options above, given explicitly
+```
+
+`editorElement` is the editor or anything inside it. Every change is also dispatched as an `editora:comments-change` event on the editor (`detail`: `{ threads, reason, threadId }`). A thread whose highlight is not in the document is kept but not shown; a highlight with no thread loses its colour.
+
 ## Toolbar Commands
 
 - `addComment` (toolbar label: `Add Comment`)
