@@ -496,6 +496,21 @@ describe('pasting and dropping files', () => {
     expect(editor.querySelector('figure')!.getAttribute('data-align')).toBe('left');
   });
 
+  it('leaves an Editora editor without media buttons to its own paste handling', () => {
+    make({ uploadHandler: async () => 'https://cdn.test/shot.png' });
+    const root = document.createElement('div');
+    root.className = 'rte-editor';
+    root.innerHTML = '<div class="rte-toolbar"><button data-command="bold"></button></div>';
+    editor.before(root);
+    root.append(editor);
+    caret();
+    expect(pasteOf([file()]).defaultPrevented).toBe(false);
+    expect(pending()).toHaveLength(0);
+
+    root.querySelector('.rte-toolbar')!.insertAdjacentHTML('beforeend', '<button data-command="insertImage"></button>');
+    expect(pasteOf([file()]).defaultPrevented).toBe(true);
+  });
+
   it('records the finished upload as one undoable step that does not include the placeholder', async () => {
     const recorded = vi.fn();
     (window as any).execEditorCommand = (c: string, ...a: any[]) => c === 'recordDomTransaction' && recorded(...a);

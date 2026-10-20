@@ -33,6 +33,21 @@ const elementOf = (target: EventTarget | null): HTMLElement | null =>
 const hostOf = (node: Node | null): HTMLElement | null =>
   (node instanceof HTMLElement ? node : node?.parentElement)?.closest<HTMLElement>(EDITABLE) ?? null;
 
+const EDITORA_ROOT = '[data-editora-editor], editora-editor, .rte-editor, .editora-editor';
+const TOOLBAR = '.rte-toolbar, .editora-toolbar';
+const MEDIA_COMMANDS = '[data-command="insertImage"], [data-command="insertVideo"], [data-command="insertAudio"]';
+
+/**
+ * Whether a paste or drop into `host` is this plugin's to take. The controller listens on the whole page, so an
+ * Editora editor that was built without the media plugin (its toolbar has no Image, Video or Audio button) must be
+ * left to its own paste handling. Anything else, a bare contenteditable or an editor with no toolbar, is taken.
+ */
+const takesUploads = (host: HTMLElement): boolean => {
+  const root = host.closest<HTMLElement>(EDITORA_ROOT);
+  const toolbar = root?.querySelector(TOOLBAR);
+  return !toolbar || Boolean(toolbar.querySelector(MEDIA_COMMANDS));
+};
+
 /** The files on a clipboard or a drag that are images or videos. */
 const mediaFilesOf = (transfer: DataTransfer | null, allowed: string[] | undefined): File[] =>
   Array.from(transfer?.files ?? []).filter(
@@ -489,7 +504,7 @@ export class MediaController {
     const target = elementOf(event.target);
     const host = target ? hostOf(target) : null;
     const clipboard = event.clipboardData;
-    if (!host || !clipboard) return;
+    if (!host || !clipboard || !takesUploads(host)) return;
 
     // A caption is plain text on one line, whatever was copied.
     if (target?.closest('figure.rte-media > figcaption')) {
@@ -539,7 +554,9 @@ export class MediaController {
 
   private wantsDrop(event: DragEvent): boolean {
     const target = elementOf(event.target);
-    if (!target || target.closest('.rte-media-overlay') || !hostOf(target)) return false;
+    if (!target || target.closest('.rte-media-overlay')) return false;
+    const host = hostOf(target);
+    if (!host || !takesUploads(host)) return false;
     if (resolveMediaManagerConfig(this.config()).uploadOnPaste === false) return false;
     const transfer = event.dataTransfer;
     if (!transfer || !Array.from(transfer.types ?? []).includes('Files')) return false;
