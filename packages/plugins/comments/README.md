@@ -14,9 +14,9 @@ Comments plugin for Editora rich text editor.
 
 ## What It Does
 
-- Adds inline comment anchors to selected text.
-- Opens an editor-scoped comments side panel.
-- Supports threaded replies and resolve/reopen actions.
+- Adds inline comment anchors to selected text, or a note about the whole document.
+- Opens an editor-scoped comments side panel with Open / Resolved / All tabs.
+- Threads show the author, a relative time, the quoted text, replies, and resolve/reopen and delete actions.
 - Supports showing/hiding comments per editor instance.
 - Integrates with editor theming and multi-instance behavior.
 
@@ -47,7 +47,8 @@ const plugins = [CommentsPlugin()];
 
 ## Behavior Notes
 
-- `addComment` captures current selection and opens the panel composer.
+- `addComment` opens a new-comment form in the panel. With text selected the form quotes it and the comment is anchored there; with nothing selected it is a note for the whole document. Enter posts, Shift+Enter adds a line, Escape cancels.
+- Clicking highlighted text opens its thread. Threads are listed in document order, notes last.
 - `toggleComments` opens/closes the panel without losing editor context.
 - Panel mounting is editor-root scoped for multiple editors on the same page.
 

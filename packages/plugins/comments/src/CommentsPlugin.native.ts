@@ -1,6 +1,8 @@
 import { Plugin } from '@editora/core';
 import { focusPanel, keepPanelFocus, panelHasFocus } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
+import { formatFullDate, formatRelativeTime, getAvatarColor, getInitials } from './format';
+import { COMMENTS_CSS, COMMENTS_STYLE_ID } from './styles';
 
 interface CommentReply {
   id: string;
@@ -22,16 +24,30 @@ interface Comment {
   replies: CommentReply[];
 }
 
+type CommentsFilter = 'open' | 'resolved' | 'all';
+
+/** The form for a new comment: what it is about (nothing = the whole document) and what went wrong, if anything. */
+interface ComposerState {
+  range: Range | null;
+  quote: string;
+  error: string;
+}
+
 interface CommentsEditorState {
   root: HTMLElement;
+  uid: string;
   comments: Map<string, Comment>;
   panelVisible: boolean;
   panelElement: HTMLElement | null;
-  expandedComments: Set<string>;
+  filter: CommentsFilter;
+  composer: ComposerState | null;
+  activeId: string | null;
+  expandedReplies: Set<string>;
   replyTexts: Record<string, string>;
   savedSelection: Range | null;
   newCommentText: string;
-  selectionChangeListener: (() => void) | null;
+  closeMenu: ((returnFocus: boolean) => void) | null;
+  timeTimer: number | null;
 }
 
 const stateByEditor = new WeakMap<HTMLElement, CommentsEditorState>();
@@ -40,6 +56,8 @@ let activeEditorRoot: HTMLElement | null = null;
 let globalTrackingInitialized = false;
 let idSeed = 0;
 const COMMENT_AUTHOR = 'User';
+/** A thread shows its latest replies; the earlier ones are one click away. */
+const VISIBLE_REPLIES = 2;
 
 function nextId(prefix: string): string {
   idSeed += 1;
@@ -72,10 +90,6 @@ function setActiveEditorRootFromCommandContext(context: any): void {
   if (root) {
     activeEditorRoot = root;
   }
-}
-
-function isRangeInsideEditor(range: Range, root: HTMLElement): boolean {
-  return root.contains(range.commonAncestorContainer);
 }
 
 function getCurrentEditorRoot(): HTMLElement | null {
@@ -118,14 +132,19 @@ function getOrCreateState(root: HTMLElement): CommentsEditorState {
 
   const state: CommentsEditorState = {
     root,
+    uid: nextId('rte-comments'),
     comments: new Map<string, Comment>(),
     panelVisible: false,
     panelElement: null,
-    expandedComments: new Set<string>(),
+    filter: 'open',
+    composer: null,
+    activeId: null,
+    expandedReplies: new Set<string>(),
     replyTexts: {},
     savedSelection: null,
     newCommentText: '',
-    selectionChangeListener: null,
+    closeMenu: null,
+    timeTimer: null,
   };
 
   stateByEditor.set(root, state);
@@ -139,21 +158,27 @@ function getActiveState(): CommentsEditorState | null {
   return getOrCreateState(root);
 }
 
+function getContentElement(root: HTMLElement): HTMLElement | null {
+  return (
+    (root.querySelector('.rte-content') as HTMLElement | null) ||
+    (root.querySelector('[contenteditable]') as HTMLElement | null)
+  );
+}
+
+/** The document's text, not the comments panel that is mounted inside the same editor element. */
+function isRangeInsideContent(range: Range, root: HTMLElement): boolean {
+  const content = getContentElement(root);
+  return !!content && content.contains(range.commonAncestorContainer);
+}
+
 function cloneActiveSelection(root: HTMLElement): Range | null {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
 
   const range = selection.getRangeAt(0);
-  if (!isRangeInsideEditor(range, root)) return null;
+  if (!isRangeInsideContent(range, root)) return null;
 
   return range.cloneRange();
-}
-
-function getContentElement(state: CommentsEditorState): HTMLElement | null {
-  return (
-    (state.root.querySelector('.rte-content') as HTMLElement | null) ||
-    (state.root.querySelector('[contenteditable]') as HTMLElement | null)
-  );
 }
 
 function findAnchor(state: CommentsEditorState, comment: Comment): HTMLElement | null {
@@ -186,7 +211,7 @@ function syncAnchoredComments(state: CommentsEditorState): Comment[] {
  * its resolved class) as one undoable step and tell the host the content changed.
  */
 function withDocumentEdit<T>(state: CommentsEditorState, edit: () => T): T {
-  const content = getContentElement(state);
+  const content = getContentElement(state.root);
   const beforeHTML = content ? content.innerHTML : '';
   const result = edit();
   if (content && content.innerHTML !== beforeHTML) {
@@ -221,6 +246,14 @@ function unwrapNode(node: HTMLElement): void {
   node.remove();
 }
 
+function focusEditorText(state: CommentsEditorState): void {
+  state.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Panel: open / close
+ * ---------------------------------------------------------------------------------------------- */
+
 function setPanelVisibility(state: CommentsEditorState, visible: boolean): void {
   state.panelVisible = visible;
   if (visible) {
@@ -231,20 +264,60 @@ function setPanelVisibility(state: CommentsEditorState, visible: boolean): void 
       state.panelElement.classList.add('is-open');
       state.panelElement.setAttribute('aria-hidden', 'false');
     }
-    startSelectionTracking(state);
+    renderPanel(state);
+    startTimeTimer(state);
     focusPanel(state.panelElement);
     return;
   }
 
   state.root.removeAttribute('data-rte-comments-open');
-  stopSelectionTracking(state);
+  stopTimeTimer(state);
+  state.closeMenu?.(false);
+  state.activeId = null;
   if (state.panelElement) {
     // The panel goes with the focus that is in it: hand that back to the text instead of dropping it on the page.
     const hadFocus = panelHasFocus(state.panelElement);
     state.panelElement.remove();
     state.panelElement = null;
-    if (hadFocus) state.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
+    if (hadFocus) focusEditorText(state);
   }
+}
+
+function closePanelAndRestoreFocus(state: CommentsEditorState): void {
+  setPanelVisibility(state, false);
+  // A click does not focus a button in every browser, so the panel may not have held the focus: give it to the text.
+  if (!state.root.contains(document.activeElement) || document.activeElement === document.body) {
+    focusEditorText(state);
+  }
+}
+
+const ICONS = {
+  check: '<path d="M3.5 8.5l3 3 6-7"/>',
+  reopen: '<path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.8v3.2h3.2"/>',
+  more: '<circle cx="8" cy="3.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="1.1" fill="currentColor" stroke="none"/><circle cx="8" cy="12.5" r="1.1" fill="currentColor" stroke="none"/>',
+  plus: '<path d="M8 3v10M3 8h10"/>',
+  close: '<path d="M4 4l8 8M12 4l-8 8"/>',
+  trash: '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.5 8.5h6l.5-8.5M7 7v4M9 7v4"/>',
+  bubble: '<path d="M2.5 3.5h11v7.5H8.5l-3 2.5V11h-3z"/>',
+} as const;
+
+/** Static, trusted markup only: never put user text through this. */
+function svg(name: keyof typeof ICONS): string {
+  return `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[name]}</svg>`;
+}
+
+function createButton(className: string, label: string, icon?: keyof typeof ICONS): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  if (icon) {
+    button.innerHTML = svg(icon);
+    button.setAttribute('aria-label', label);
+    button.title = label;
+  } else {
+    button.textContent = label;
+  }
+  return button;
 }
 
 function ensurePanel(state: CommentsEditorState): void {
@@ -256,6 +329,64 @@ function ensurePanel(state: CommentsEditorState): void {
   panel.setAttribute('aria-label', 'Comments');
   panel.setAttribute('aria-hidden', 'true');
 
+  const tabs: Array<[CommentsFilter, string]> = [
+    ['open', 'Open'],
+    ['resolved', 'Resolved'],
+    ['all', 'All'],
+  ];
+
+  panel.innerHTML = `
+    <div class="rte-comments-header">
+      <div class="rte-comments-title">
+        <h3>Comments</h3>
+        <span class="rte-comments-count" aria-hidden="true"></span>
+      </div>
+      <div class="rte-comments-header-actions">
+        <button class="rte-comments-new" type="button" aria-label="New comment">${svg('plus')}<span>New</span></button>
+        <button class="rte-comments-close" type="button" aria-label="Close comments panel" title="Close">${svg('close')}</button>
+      </div>
+    </div>
+    <div class="rte-comments-tabs" role="tablist" aria-label="Show comments">
+      ${tabs
+        .map(
+          ([key, label]) =>
+            `<button class="rte-comments-tab" type="button" role="tab" id="${state.uid}-tab-${key}" data-filter="${key}" aria-controls="${state.uid}-body"><span>${label}</span><span class="rte-comments-tab-count"></span></button>`,
+        )
+        .join('')}
+    </div>
+    <div class="rte-comments-body" id="${state.uid}-body" role="tabpanel"></div>
+  `;
+
+  panel.querySelector('.rte-comments-close')?.addEventListener('click', () => closePanelAndRestoreFocus(state));
+
+  panel.querySelector('.rte-comments-new')?.addEventListener('click', () => {
+    openComposer(state, state.savedSelection ? state.savedSelection.cloneRange() : null);
+  });
+
+  const tabList = panel.querySelector('.rte-comments-tabs') as HTMLElement;
+  const tabButtons = Array.from(tabList.querySelectorAll<HTMLButtonElement>('.rte-comments-tab'));
+  tabButtons.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      state.filter = tab.dataset.filter as CommentsFilter;
+      renderPanel(state);
+    });
+  });
+  tabList.addEventListener('keydown', (event) => {
+    const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+    const current = tabButtons.findIndex((tab) => tab === document.activeElement);
+    if (current === -1) return;
+    event.preventDefault();
+    let next = current;
+    if (event.key === 'ArrowRight') next = (current + 1) % tabButtons.length;
+    if (event.key === 'ArrowLeft') next = (current - 1 + tabButtons.length) % tabButtons.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = tabButtons.length - 1;
+    state.filter = tabButtons[next].dataset.filter as CommentsFilter;
+    renderPanel(state);
+    tabButtons[next].focus();
+  });
+
   const computed = window.getComputedStyle(state.root);
   if (computed.position === 'static') {
     state.root.style.position = 'relative';
@@ -265,274 +396,540 @@ function ensurePanel(state: CommentsEditorState): void {
   state.panelElement = panel;
 }
 
-function startSelectionTracking(state: CommentsEditorState): void {
-  if (state.selectionChangeListener) return;
+/* ------------------------------------------------------------------------------------------------
+ * Panel: contents
+ * ---------------------------------------------------------------------------------------------- */
 
-  state.selectionChangeListener = () => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
-    const range = selection.getRangeAt(0);
-    if (!isRangeInsideEditor(range, state.root)) return;
-    state.savedSelection = range.cloneRange();
-    activeEditorRoot = state.root;
-  };
-
-  document.addEventListener('selectionchange', state.selectionChangeListener);
-}
-
-function stopSelectionTracking(state: CommentsEditorState): void {
-  if (!state.selectionChangeListener) return;
-  document.removeEventListener('selectionchange', state.selectionChangeListener);
-  state.selectionChangeListener = null;
-}
-
+/** Threads in the order of the document, then the notes about the whole document, oldest first. */
 function getCommentsInDisplayOrder(state: CommentsEditorState): Comment[] {
-  return syncAnchoredComments(state).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
+  const visible = syncAnchoredComments(state);
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate).toLocaleString();
-}
-
-function createCommentCard(state: CommentsEditorState, comment: Comment): HTMLElement {
-  const isExpanded = state.expandedComments.has(comment.id);
-  const card = document.createElement('article');
-  card.className = `rte-comment-item${comment.resolved ? ' resolved' : ''}`;
-
-  card.innerHTML = `
-    <header class="rte-comment-header">
-      <div class="rte-comment-meta">
-        <strong class="rte-comment-author"></strong>
-        <time class="rte-comment-date">${formatDate(comment.createdAt)}</time>
-      </div>
-      <button class="rte-comment-expand" type="button" aria-label="Toggle details">
-        ${isExpanded ? '▾' : '▸'}
-      </button>
-    </header>
-    <div class="rte-comment-text"></div>
-    ${comment.selectedText ? '<blockquote class="rte-comment-selection"></blockquote>' : ''}
-    <section class="rte-comment-expanded${isExpanded ? ' show' : ''}"></section>
-  `;
-
-  // Author, text and the quoted selection come from the user / the document. The
-  // selection in particular is document *text* that may read like markup
-  // ("<img src=x onerror=...>"), so none of it may go through innerHTML.
-  const authorEl = card.querySelector('.rte-comment-author');
-  if (authorEl) authorEl.textContent = comment.author;
-  const textEl = card.querySelector('.rte-comment-text');
-  if (textEl) textEl.textContent = comment.text;
-  const selectionEl = card.querySelector('.rte-comment-selection');
-  if (selectionEl) selectionEl.textContent = comment.selectedText;
-
-  const expandBtn = card.querySelector('.rte-comment-expand') as HTMLButtonElement | null;
-  expandBtn?.addEventListener('click', () => {
-    if (state.expandedComments.has(comment.id)) {
-      state.expandedComments.delete(comment.id);
-    } else {
-      state.expandedComments.add(comment.id);
-    }
-    refreshCommentsPanel(state);
+  const anchored = visible
+    .filter((comment) => comment.anchorId)
+    .map((comment) => ({ comment, anchor: findAnchor(state, comment) as HTMLElement }));
+  anchored.sort((a, b) => {
+    if (a.anchor === b.anchor) return 0;
+    return a.anchor.compareDocumentPosition(b.anchor) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
   });
 
-  const expanded = card.querySelector('.rte-comment-expanded') as HTMLElement | null;
-  if (expanded && isExpanded) {
-    if (comment.replies.length > 0) {
-      const replies = document.createElement('div');
-      replies.className = 'rte-comment-replies';
+  const general = visible
+    .filter((comment) => !comment.anchorId)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
-      comment.replies.forEach((reply) => {
-        const replyEl = document.createElement('div');
-        replyEl.className = 'rte-comment-reply';
-        replyEl.innerHTML = `
-          <div class="rte-comment-reply-header">
-            <strong class="rte-comment-reply-author"></strong>
-            <time>${formatDate(reply.createdAt)}</time>
-          </div>
-          <div class="rte-comment-reply-text"></div>
-        `;
-        const replyAuthorEl = replyEl.querySelector('.rte-comment-reply-author');
-        if (replyAuthorEl) replyAuthorEl.textContent = reply.author;
-        const replyTextEl = replyEl.querySelector('.rte-comment-reply-text');
-        if (replyTextEl) replyTextEl.textContent = reply.text;
-        replies.appendChild(replyEl);
-      });
+  return [...anchored.map((item) => item.comment), ...general];
+}
 
-      expanded.appendChild(replies);
-    }
+function createAvatar(name: string, small = false): HTMLElement {
+  const avatar = document.createElement('span');
+  avatar.className = `rte-comment-avatar${small ? ' small' : ''}`;
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.style.background = getAvatarColor(name);
+  avatar.textContent = getInitials(name);
+  return avatar;
+}
 
-    if (!comment.resolved) {
-      const replyComposer = document.createElement('div');
-      replyComposer.className = 'rte-comment-reply-composer';
-      replyComposer.innerHTML = `
-        <textarea class="rte-comment-reply-textarea" rows="2" placeholder="Reply..."></textarea>
-        <button type="button" class="rte-comment-btn primary">Reply</button>
-      `;
-      const replyTextarea = replyComposer.querySelector(
-        '.rte-comment-reply-textarea',
-      ) as HTMLTextAreaElement | null;
-      const replyBtn = replyComposer.querySelector(
-        '.rte-comment-btn.primary',
-      ) as HTMLButtonElement | null;
+function createTimeElement(isoDate: string): HTMLTimeElement {
+  const time = document.createElement('time');
+  time.className = 'rte-comment-date';
+  time.dateTime = isoDate;
+  time.dataset.created = isoDate;
+  time.title = formatFullDate(isoDate);
+  time.textContent = formatRelativeTime(isoDate);
+  return time;
+}
 
-      if (replyTextarea && replyBtn) {
-        replyTextarea.value = state.replyTexts[comment.id] || '';
-        const updateReplyButtonState = () => {
-          const canReply = !!replyTextarea.value.trim();
-          replyBtn.disabled = !canReply;
-        };
-        updateReplyButtonState();
+/** The labels say "5 min. ago": keep them true while the panel stays open. */
+function refreshTimes(state: CommentsEditorState): void {
+  state.panelElement?.querySelectorAll<HTMLTimeElement>('time[data-created]').forEach((time) => {
+    time.textContent = formatRelativeTime(time.dataset.created || '');
+  });
+}
 
-        replyTextarea.addEventListener('input', () => {
-          state.replyTexts[comment.id] = replyTextarea.value;
-          updateReplyButtonState();
-        });
+function startTimeTimer(state: CommentsEditorState): void {
+  if (state.timeTimer !== null) return;
+  state.timeTimer = window.setInterval(() => refreshTimes(state), 60_000);
+}
 
-        replyBtn.addEventListener('click', () => {
-          const replyText = replyTextarea.value.trim();
-          if (!replyText) return;
-          replyToComment(comment.id, COMMENT_AUTHOR, replyText);
-          state.replyTexts[comment.id] = '';
-          refreshCommentsPanel(state);
-        });
-      }
+function stopTimeTimer(state: CommentsEditorState): void {
+  if (state.timeTimer === null) return;
+  window.clearInterval(state.timeTimer);
+  state.timeTimer = null;
+}
 
-      expanded.appendChild(replyComposer);
-    }
+function autosize(textarea: HTMLTextAreaElement): void {
+  textarea.style.height = 'auto';
+  if (!textarea.scrollHeight) return; // not laid out (hidden, or no layout engine): leave it to the CSS
+  // The box is border-box: scrollHeight leaves the border out, and a box short by it grows a scrollbar.
+  const border = textarea.offsetHeight - textarea.clientHeight;
+  textarea.style.height = `${Math.min(textarea.scrollHeight + border, 160)}px`;
+}
 
-    const actions = document.createElement('div');
-    actions.className = 'rte-comment-actions';
+function scrollToAnchor(state: CommentsEditorState, comment: Comment): void {
+  const anchor = findAnchor(state, comment);
+  if (!anchor) return;
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  anchor.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center', inline: 'nearest' });
+  highlightAnchor(state, comment.id, true);
+  window.setTimeout(() => highlightAnchor(state, comment.id, false), 1200);
+}
 
-    if (comment.anchorId) {
-      const jumpBtn = document.createElement('button');
-      jumpBtn.type = 'button';
-      jumpBtn.className = 'rte-comment-btn ghost';
-      jumpBtn.textContent = 'Jump to text';
-      jumpBtn.onclick = () => {
-        const anchor = findAnchor(state, comment);
-        if (!anchor) return;
-        anchor.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-        highlightAnchor(state, comment.id, true);
-        window.setTimeout(() => highlightAnchor(state, comment.id, false), 1200);
-      };
-      actions.appendChild(jumpBtn);
-    }
+/** Shows a thread in the panel: switches to the tab it is on, marks it, scrolls it into view. */
+function activateThread(state: CommentsEditorState, commentId: string): void {
+  const comment = state.comments.get(commentId);
+  if (!comment) return;
+  if (state.filter !== 'all') state.filter = comment.resolved ? 'resolved' : 'open';
+  state.activeId = commentId;
+  renderPanel(state);
 
-    if (!comment.resolved) {
-      const resolveBtn = document.createElement('button');
-      resolveBtn.type = 'button';
-      resolveBtn.className = 'rte-comment-btn success';
-      resolveBtn.textContent = 'Resolve';
-      resolveBtn.onclick = () => resolveComment(comment.id, COMMENT_AUTHOR);
-      actions.appendChild(resolveBtn);
-    } else {
-      const reopenBtn = document.createElement('button');
-      reopenBtn.type = 'button';
-      reopenBtn.className = 'rte-comment-btn ghost';
-      reopenBtn.textContent = 'Reopen';
-      reopenBtn.onclick = () => reopenComment(comment.id);
-      actions.appendChild(reopenBtn);
-    }
+  const card = Array.from(state.panelElement?.querySelectorAll<HTMLElement>('.rte-comment-item') ?? []).find(
+    (item) => item.dataset.commentId === commentId,
+  );
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  card?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+}
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'rte-comment-btn danger';
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.onclick = () => deleteComment(comment.id);
-    actions.appendChild(deleteBtn);
+function createMenu(state: CommentsEditorState, comment: Comment): HTMLElement {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'rte-comment-more';
 
-    expanded.appendChild(actions);
+  const trigger = createButton('rte-comment-icon-btn', 'More actions', 'more');
+  trigger.setAttribute('aria-haspopup', 'menu');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.dataset.action = 'more';
+  trigger.dataset.commentId = comment.id;
+
+  const menu = document.createElement('div');
+  menu.className = 'rte-comment-menu';
+  menu.setAttribute('role', 'menu');
+  menu.setAttribute('aria-label', 'Comment actions');
+  menu.hidden = true;
+
+  const deleteItem = document.createElement('button');
+  deleteItem.type = 'button';
+  deleteItem.className = 'rte-comment-menu-item danger';
+  deleteItem.setAttribute('role', 'menuitem');
+  deleteItem.innerHTML = `${svg('trash')}<span>Delete</span>`;
+  deleteItem.addEventListener('click', () => {
+    state.closeMenu?.(false);
+    deleteComment(comment.id);
+  });
+  menu.appendChild(deleteItem);
+
+  const items = () => Array.from(menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+
+  const close = (returnFocus: boolean) => {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('pointerdown', onOutside, true);
+    document.removeEventListener('focusin', onOutside, true);
+    if (state.closeMenu === close) state.closeMenu = null;
+    if (returnFocus && trigger.isConnected) trigger.focus({ preventScroll: true });
+  };
+
+  function onOutside(event: Event) {
+    if (event.target instanceof Node && wrapper.contains(event.target)) return;
+    close(false);
   }
+
+  const open = () => {
+    state.closeMenu?.(false);
+    menu.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    state.closeMenu = close;
+    document.addEventListener('pointerdown', onOutside, true);
+    document.addEventListener('focusin', onOutside, true);
+    items()[0]?.focus({ preventScroll: true });
+  };
+
+  trigger.addEventListener('click', () => (menu.hidden ? open() : close(true)));
+  trigger.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown' && menu.hidden) {
+      event.preventDefault();
+      open();
+    }
+  });
+  menu.addEventListener('keydown', (event) => {
+    const list = items();
+    const current = list.indexOf(document.activeElement as HTMLButtonElement);
+    let next = -1;
+    if (event.key === 'ArrowDown') next = (current + 1) % list.length;
+    else if (event.key === 'ArrowUp') next = (current - 1 + list.length) % list.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = list.length - 1;
+    else if (event.key === 'Tab') close(false);
+    if (next === -1) return;
+    event.preventDefault();
+    list[next].focus({ preventScroll: true });
+  });
+
+  wrapper.append(trigger, menu);
+  return wrapper;
+}
+
+function createReplyBox(state: CommentsEditorState, comment: Comment): HTMLElement {
+  const box = document.createElement('div');
+  box.className = 'rte-comment-reply-box';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'rte-comment-reply-textarea';
+  textarea.rows = 1;
+  textarea.placeholder = 'Reply…';
+  textarea.setAttribute('aria-label', 'Reply');
+  textarea.dataset.commentId = comment.id;
+  textarea.value = state.replyTexts[comment.id] || '';
+
+  const actions = document.createElement('div');
+  actions.className = 'rte-comment-form-actions';
+  const cancel = createButton('rte-comment-btn ghost', 'Cancel');
+  const send = createButton('rte-comment-btn primary', 'Reply');
+  actions.append(cancel, send);
+
+  const sync = () => {
+    const hasText = !!textarea.value.trim();
+    send.disabled = !hasText;
+    box.classList.toggle('has-text', !!textarea.value);
+    autosize(textarea);
+  };
+  sync();
+
+  const submit = () => {
+    const text = textarea.value.trim();
+    if (!text) return;
+    replyToComment(comment.id, COMMENT_AUTHOR, text);
+    delete state.replyTexts[comment.id];
+    renderPanel(state);
+  };
+
+  textarea.addEventListener('input', () => {
+    state.replyTexts[comment.id] = textarea.value;
+    sync();
+  });
+  textarea.addEventListener('focus', () => {
+    state.activeId = comment.id;
+    box.closest('.rte-comment-item')?.classList.add('is-active');
+  });
+  textarea.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+      event.preventDefault();
+      submit();
+    }
+  });
+  send.addEventListener('click', submit);
+  cancel.addEventListener('click', () => {
+    delete state.replyTexts[comment.id];
+    textarea.value = '';
+    sync();
+    textarea.blur();
+  });
+
+  box.append(textarea, actions);
+  return box;
+}
+
+function createThreadCard(state: CommentsEditorState, comment: Comment): HTMLElement {
+  const card = document.createElement('article');
+  card.className = `rte-comment-item${comment.resolved ? ' resolved' : ''}${state.activeId === comment.id ? ' is-active' : ''}`;
+  card.dataset.commentId = comment.id;
+
+  // Header: who, when, and the two things you do to a thread.
+  const header = document.createElement('header');
+  header.className = 'rte-comment-header';
+  const meta = document.createElement('div');
+  meta.className = 'rte-comment-meta';
+  const author = document.createElement('strong');
+  author.className = 'rte-comment-author';
+  author.textContent = comment.author;
+  meta.append(author, createTimeElement(comment.createdAt));
+
+  const actions = document.createElement('div');
+  actions.className = 'rte-comment-header-actions';
+  const resolveBtn = createButton(
+    'rte-comment-icon-btn',
+    comment.resolved ? 'Reopen thread' : 'Resolve thread',
+    comment.resolved ? 'reopen' : 'check',
+  );
+  resolveBtn.dataset.action = 'resolve';
+  resolveBtn.dataset.commentId = comment.id;
+  resolveBtn.addEventListener('click', () => {
+    if (comment.resolved) reopenComment(comment.id);
+    else resolveComment(comment.id, COMMENT_AUTHOR);
+  });
+  actions.append(resolveBtn, createMenu(state, comment));
+  header.append(createAvatar(comment.author), meta, actions);
+  card.appendChild(header);
+
+  // The text this is about. A button: it takes you there.
+  if (comment.anchorId && comment.selectedText) {
+    const quote = document.createElement('button');
+    quote.type = 'button';
+    quote.className = 'rte-comment-selection';
+    quote.textContent = comment.selectedText;
+    quote.title = 'Go to this text';
+    quote.setAttribute('aria-label', `Go to the commented text: ${comment.selectedText}`);
+    quote.addEventListener('click', () => {
+      state.activeId = comment.id;
+      card.classList.add('is-active');
+      scrollToAnchor(state, comment);
+    });
+    card.appendChild(quote);
+  }
+
+  const text = document.createElement('div');
+  text.className = 'rte-comment-text';
+  text.textContent = comment.text;
+  card.appendChild(text);
+
+  if (comment.resolved) {
+    const status = document.createElement('div');
+    status.className = 'rte-comment-status';
+    status.innerHTML = svg('check');
+    const label = document.createElement('span');
+    const by = comment.resolvedBy ? ` by ${comment.resolvedBy}` : '';
+    const when = comment.resolvedAt ? ` · ${formatRelativeTime(comment.resolvedAt)}` : '';
+    label.textContent = `Resolved${by}${when}`;
+    status.appendChild(label);
+    card.appendChild(status);
+  }
+
+  // Replies are part of the thread, not behind a toggle.
+  if (comment.replies.length > 0) {
+    const replies = document.createElement('div');
+    replies.className = 'rte-comment-replies';
+
+    const expanded = state.expandedReplies.has(comment.id);
+    const hidden = expanded ? 0 : Math.max(0, comment.replies.length - VISIBLE_REPLIES);
+    if (hidden > 0) {
+      const more = createButton(
+        'rte-comment-more-replies',
+        `Show ${hidden} earlier ${hidden === 1 ? 'reply' : 'replies'}`,
+      );
+      more.addEventListener('click', () => {
+        state.expandedReplies.add(comment.id);
+        renderPanel(state);
+      });
+      replies.appendChild(more);
+    }
+
+    comment.replies.slice(hidden).forEach((reply) => {
+      const item = document.createElement('div');
+      item.className = 'rte-comment-reply';
+      const replyHeader = document.createElement('div');
+      replyHeader.className = 'rte-comment-reply-header';
+      const replyMeta = document.createElement('div');
+      replyMeta.className = 'rte-comment-meta';
+      const replyAuthor = document.createElement('strong');
+      replyAuthor.className = 'rte-comment-author';
+      replyAuthor.textContent = reply.author;
+      replyMeta.append(replyAuthor, createTimeElement(reply.createdAt));
+      replyHeader.append(createAvatar(reply.author, true), replyMeta);
+      const replyText = document.createElement('div');
+      replyText.className = 'rte-comment-reply-text';
+      replyText.textContent = reply.text;
+      item.append(replyHeader, replyText);
+      replies.appendChild(item);
+    });
+
+    card.appendChild(replies);
+  }
+
+  if (!comment.resolved) card.appendChild(createReplyBox(state, comment));
 
   card.addEventListener('mouseenter', () => highlightAnchor(state, comment.id, true));
   card.addEventListener('mouseleave', () => highlightAnchor(state, comment.id, false));
+  card.addEventListener('focusin', () => highlightAnchor(state, comment.id, true));
+  card.addEventListener('focusout', () => highlightAnchor(state, comment.id, false));
 
   return card;
 }
 
-function refreshCommentsPanel(state?: CommentsEditorState): void {
+function createComposer(state: CommentsEditorState, composer: ComposerState): HTMLElement {
+  const form = document.createElement('form');
+  form.className = 'rte-comment-composer';
+  form.noValidate = true;
+  form.setAttribute('aria-label', composer.range ? 'New comment on the selected text' : 'New note for the whole document');
+
+  if (composer.range) {
+    const quote = document.createElement('div');
+    quote.className = 'rte-comment-selection';
+    const quoteText = document.createElement('span');
+    quoteText.textContent = composer.quote;
+    quoteText.title = composer.quote;
+    const detach = createButton('rte-comment-icon-btn', 'Comment on the whole document instead', 'close');
+    detach.addEventListener('click', () => {
+      composer.range = null;
+      composer.quote = '';
+      renderPanel(state);
+      focusComposer(state);
+    });
+    quote.append(quoteText, detach);
+    form.appendChild(quote);
+  } else {
+    const hint = document.createElement('p');
+    hint.className = 'rte-comment-composer-hint';
+    hint.textContent = 'A note for the whole document. To comment on a passage, select it first, then click New.';
+    form.appendChild(hint);
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'new-comment-textarea';
+  textarea.rows = 3;
+  textarea.placeholder = composer.range ? 'Add a comment…' : 'Add a note…';
+  textarea.setAttribute('aria-label', composer.range ? 'Comment' : 'Note');
+  textarea.value = state.newCommentText;
+  form.appendChild(textarea);
+
+  if (composer.error) {
+    const error = document.createElement('p');
+    error.className = 'rte-comment-error';
+    error.setAttribute('role', 'alert');
+    error.textContent = composer.error;
+    form.appendChild(error);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'rte-comment-form-actions';
+  const cancel = createButton('rte-comment-btn ghost', 'Cancel');
+  const submitBtn = createButton('rte-comment-btn primary', 'Comment');
+  submitBtn.type = 'submit';
+  actions.append(cancel, submitBtn);
+  form.appendChild(actions);
+
+  const sync = () => {
+    submitBtn.disabled = !textarea.value.trim();
+  };
+  sync();
+
+  textarea.addEventListener('input', () => {
+    state.newCommentText = textarea.value;
+    if (composer.error) {
+      composer.error = '';
+      form.querySelector('.rte-comment-error')?.remove();
+    }
+    sync();
+  });
+  textarea.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+  cancel.addEventListener('click', () => closeComposer(state));
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const text = textarea.value.trim();
+    if (!text) return;
+    const id = createComment(state, COMMENT_AUTHOR, text, composer.range);
+    if (!id) {
+      composer.error = 'That text could not be commented on. Select it again and click New.';
+      composer.range = null;
+      composer.quote = '';
+      renderPanel(state);
+      return;
+    }
+    state.newCommentText = '';
+    state.composer = null;
+    if (state.filter === 'resolved') state.filter = 'open';
+    activateThread(state, id);
+  });
+
+  return form;
+}
+
+function focusComposer(state: CommentsEditorState): void {
+  state.panelElement?.querySelector<HTMLTextAreaElement>('.new-comment-textarea')?.focus({ preventScroll: true });
+}
+
+function openComposer(state: CommentsEditorState, range: Range | null): void {
+  const quote = range ? range.toString().replace(/\s+/g, ' ').trim() : '';
+  state.composer = { range: range && quote ? range.cloneRange() : null, quote, error: '' };
+  if (state.filter === 'resolved') state.filter = 'open';
+  renderPanel(state);
+  focusComposer(state);
+}
+
+function closeComposer(state: CommentsEditorState): void {
+  state.composer = null;
+  state.newCommentText = '';
+  renderPanel(state);
+}
+
+function createEmptyState(filter: CommentsFilter, total: number): HTMLElement {
+  const empty = document.createElement('div');
+  empty.className = 'rte-comments-empty';
+
+  let title = 'No comments yet';
+  let hint = 'Select text in the document and click New to start a discussion.';
+  if (total > 0 && filter === 'open') {
+    title = 'No open comments';
+    hint = 'Every thread has been resolved.';
+  } else if (total > 0 && filter === 'resolved') {
+    title = 'Nothing resolved yet';
+    hint = 'Threads you resolve show up here.';
+  }
+
+  empty.innerHTML = svg('bubble');
+  const strong = document.createElement('strong');
+  strong.textContent = title;
+  const paragraph = document.createElement('p');
+  paragraph.textContent = hint;
+  empty.append(strong, paragraph);
+  return empty;
+}
+
+function renderPanel(state?: CommentsEditorState): void {
   const targetState = state || getActiveState();
-  if (!targetState?.panelElement) return;
+  const panel = targetState?.panelElement;
+  if (!targetState || !panel) return;
 
-  const comments = getCommentsInDisplayOrder(targetState);
-  const panelElement = targetState.panelElement;
+  const all = getCommentsInDisplayOrder(targetState);
+  const counts: Record<CommentsFilter, number> = {
+    open: all.filter((comment) => !comment.resolved).length,
+    resolved: all.filter((comment) => comment.resolved).length,
+    all: all.length,
+  };
 
-  keepPanelFocus(panelElement, () => {
-    panelElement.innerHTML = `
-    <div class="rte-comments-header">
-      <div>
-        <h3>Comments (${comments.length})</h3>
-        <p>Select text and add comments, or add a general note.</p>
-      </div>
-      <button class="rte-comments-close" type="button" aria-label="Close comments panel">✕</button>
-    </div>
-    <div class="rte-comments-composer">
-      <textarea class="new-comment-textarea" rows="3" placeholder="Add a comment..."></textarea>
-      <div class="rte-comments-composer-actions">
-        <button class="rte-comment-btn primary add-comment-btn" type="button">Add Comment</button>
-      </div>
-    </div>
-    ${
-      comments.length === 0
-        ? '<div class="rte-comments-empty">No comments yet.</div>'
-        : '<div class="rte-comments-list"></div>'
-    }
-  `;
+  const count = panel.querySelector('.rte-comments-count');
+  if (count) {
+    count.textContent = String(counts.open);
+    (count as HTMLElement).hidden = counts.open === 0;
+  }
+  panel.querySelectorAll<HTMLButtonElement>('.rte-comments-tab').forEach((tab) => {
+    const key = tab.dataset.filter as CommentsFilter;
+    const selected = key === targetState.filter;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    const tabCount = tab.querySelector('.rte-comments-tab-count');
+    if (tabCount) tabCount.textContent = String(counts[key]);
   });
 
-  const closeBtn = targetState.panelElement.querySelector('.rte-comments-close');
-  closeBtn?.addEventListener('click', () => {
-    setPanelVisibility(targetState, false);
-    // A click does not focus a button in every browser, so the panel may not have held the focus: give it to the text.
-    if (!targetState.root.contains(document.activeElement) || document.activeElement === document.body) {
-      targetState.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
-    }
+  const body = panel.querySelector('.rte-comments-body') as HTMLElement | null;
+  if (!body) return;
+  body.setAttribute('aria-labelledby', `${targetState.uid}-tab-${targetState.filter}`);
+
+  const shown = all.filter((comment) => {
+    if (targetState.filter === 'open') return !comment.resolved;
+    if (targetState.filter === 'resolved') return comment.resolved;
+    return true;
   });
 
-  const textarea = targetState.panelElement.querySelector(
-    '.new-comment-textarea',
-  ) as HTMLTextAreaElement | null;
-  const addBtn = targetState.panelElement.querySelector(
-    '.add-comment-btn',
-  ) as HTMLButtonElement | null;
+  // A card that is rebuilt while it has the pointer or the focus never says goodbye, which would leave its text lit.
+  getContentElement(targetState.root)
+    ?.querySelectorAll('.rte-comment-anchor.highlighted')
+    .forEach((anchor) => anchor.classList.remove('highlighted'));
 
-  if (textarea && addBtn) {
-    textarea.value = targetState.newCommentText;
-
-    const syncAddButton = () => {
-      const enabled = !!textarea.value.trim();
-      addBtn.disabled = !enabled;
-    };
-
-    syncAddButton();
-
-    textarea.addEventListener('input', () => {
-      targetState.newCommentText = textarea.value;
-      syncAddButton();
-    });
-
-    textarea.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-        event.preventDefault();
-        addBtn.click();
-      }
-    });
-
-    addBtn.addEventListener('click', () => {
-      const text = textarea.value.trim();
-      if (!text) return;
-      const hasSelection = !!targetState.savedSelection;
-      addCommentCommand(COMMENT_AUTHOR, text, !hasSelection);
-      targetState.newCommentText = '';
-      refreshCommentsPanel(targetState);
-    });
-  }
-
-  const list = targetState.panelElement.querySelector('.rte-comments-list');
-  if (list) {
-    comments.forEach((comment) => {
-      list.appendChild(createCommentCard(targetState, comment));
-    });
-  }
+  const scrollTop = body.scrollTop;
+  keepPanelFocus(panel, () => {
+    const nodes: HTMLElement[] = [];
+    if (targetState.composer) nodes.push(createComposer(targetState, targetState.composer));
+    shown.forEach((comment) => nodes.push(createThreadCard(targetState, comment)));
+    if (shown.length === 0 && !targetState.composer) {
+      nodes.push(createEmptyState(targetState.filter, counts.all));
+    }
+    body.replaceChildren(...nodes);
+  });
+  body.scrollTop = scrollTop;
+  body.querySelectorAll('textarea').forEach((textarea) => autosize(textarea));
 }
 
 const pendingRefresh = new WeakMap<CommentsEditorState, number>();
@@ -544,10 +941,14 @@ function scheduleCommentsRefresh(state: CommentsEditorState): void {
     state,
     window.setTimeout(() => {
       pendingRefresh.delete(state);
-      if (state.panelVisible) refreshCommentsPanel(state);
+      if (state.panelVisible) renderPanel(state);
     }, 120),
   );
 }
+
+/* ------------------------------------------------------------------------------------------------
+ * Page-wide listeners (one set, shared by every editor)
+ * ---------------------------------------------------------------------------------------------- */
 
 function ensureGlobalTracking(): void {
   if (globalTrackingInitialized) return;
@@ -573,9 +974,8 @@ function ensureGlobalTracking(): void {
     event.preventDefault();
     event.stopPropagation();
     activeEditorRoot = state.root;
-    state.expandedComments.add(commentId);
     setPanelVisibility(state, true);
-    refreshCommentsPanel(state);
+    activateThread(state, commentId);
   });
 
   // Undo/redo and edits change which anchors exist; keep an open panel in step.
@@ -588,6 +988,8 @@ function ensureGlobalTracking(): void {
     if (state?.panelVisible) scheduleCommentsRefresh(state);
   });
 
+  // Remember what is selected in the text, so the panel's New button knows what to comment on even though
+  // clicking the panel moves the focus out of the text. Clicking back into the text drops the memory.
   document.addEventListener('selectionchange', () => {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
@@ -598,9 +1000,8 @@ function ensureGlobalTracking(): void {
 
     activeEditorRoot = root;
     const state = stateByEditor.get(root);
-    if (!state || selection.isCollapsed) return;
-    if (!isRangeInsideEditor(range, root)) return;
-    state.savedSelection = range.cloneRange();
+    if (!state || !isRangeInsideContent(range, root)) return;
+    state.savedSelection = selection.isCollapsed ? null : range.cloneRange();
   });
 
   document.addEventListener(
@@ -609,16 +1010,44 @@ function ensureGlobalTracking(): void {
       if (event.key !== 'Escape') return;
       const state = getActiveState();
       if (!state || !state.panelVisible) return;
+
+      // Escape peels off one layer at a time: an open menu, then a draft, then the panel.
+      if (state.closeMenu) {
+        event.preventDefault();
+        event.stopPropagation();
+        state.closeMenu(true);
+        return;
+      }
+      const field = event.target instanceof HTMLTextAreaElement && state.panelElement?.contains(event.target) ? event.target : null;
+      if (field?.classList.contains('new-comment-textarea')) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeComposer(state);
+        return;
+      }
+      if (field?.classList.contains('rte-comment-reply-textarea') && field.value) {
+        event.preventDefault();
+        event.stopPropagation();
+        delete state.replyTexts[field.dataset.commentId || ''];
+        field.value = '';
+        field.dispatchEvent(new Event('input'));
+        return;
+      }
+
       event.preventDefault();
       event.stopPropagation();
-      setPanelVisibility(state, false);
+      closePanelAndRestoreFocus(state);
     },
     true,
   );
 }
 
+/* ------------------------------------------------------------------------------------------------
+ * Public API
+ * ---------------------------------------------------------------------------------------------- */
+
 /**
- * Get all comments for active editor.
+ * Get all comments for active editor, in document order (notes about the whole document last).
  */
 export function getAllComments(): Comment[] {
   const state = getActiveState();
@@ -627,16 +1056,14 @@ export function getAllComments(): Comment[] {
 }
 
 /**
- * Add comment (selection-based or general).
+ * Create a comment on `range` (wrapping it in an anchor, one undoable step) or, with no range, a note about the
+ * whole document. Returns the new id, or '' when there was nothing to comment on.
  */
-export function addCommentCommand(author: string, text: string, general = false): string {
-  const state = getActiveState();
-  if (!state) return '';
-
+function createComment(state: CommentsEditorState, author: string, text: string, range: Range | null): string {
   const trimmedText = text.trim();
   if (!trimmedText) return '';
 
-  if (general) {
+  if (!range) {
     const commentId = nextId('comment');
     state.comments.set(commentId, {
       id: commentId,
@@ -648,12 +1075,11 @@ export function addCommentCommand(author: string, text: string, general = false)
       resolved: false,
       replies: [],
     });
-    refreshCommentsPanel(state);
+    renderPanel(state);
     return commentId;
   }
 
-  const range = state.savedSelection || cloneActiveSelection(state.root);
-  if (!range || !isRangeInsideEditor(range, state.root)) return '';
+  if (!isRangeInsideContent(range, state.root)) return '';
 
   const selectedText = range.toString().trim();
   if (!selectedText) return '';
@@ -692,11 +1118,21 @@ export function addCommentCommand(author: string, text: string, general = false)
   });
 
   state.savedSelection = null;
-  const selection = window.getSelection();
-  selection?.removeAllRanges();
+  window.getSelection()?.removeAllRanges();
 
-  refreshCommentsPanel(state);
+  renderPanel(state);
   return commentId;
+}
+
+/**
+ * Add comment (selection-based or general).
+ */
+export function addCommentCommand(author: string, text: string, general = false): string {
+  const state = getActiveState();
+  if (!state) return '';
+  const range = general ? null : state.savedSelection || cloneActiveSelection(state.root);
+  if (!general && !range) return '';
+  return createComment(state, author, text, range);
 }
 
 export function resolveComment(commentId: string, author: string): void {
@@ -710,7 +1146,7 @@ export function resolveComment(commentId: string, author: string): void {
   comment.resolvedBy = author;
   comment.resolvedAt = new Date().toISOString();
   withDocumentEdit(state, () => updateAnchorVisualState(state, comment));
-  refreshCommentsPanel(state);
+  renderPanel(state);
 }
 
 export function reopenComment(commentId: string): void {
@@ -724,7 +1160,7 @@ export function reopenComment(commentId: string): void {
   comment.resolvedBy = undefined;
   comment.resolvedAt = undefined;
   withDocumentEdit(state, () => updateAnchorVisualState(state, comment));
-  refreshCommentsPanel(state);
+  renderPanel(state);
 }
 
 export function deleteComment(commentId: string): void {
@@ -741,10 +1177,11 @@ export function deleteComment(commentId: string): void {
     if (anchor) withDocumentEdit(state, () => unwrapNode(anchor));
   } else {
     state.comments.delete(commentId);
-    state.expandedComments.delete(commentId);
+    state.expandedReplies.delete(commentId);
     delete state.replyTexts[commentId];
   }
-  refreshCommentsPanel(state);
+  if (state.activeId === commentId) state.activeId = null;
+  renderPanel(state);
 }
 
 export function replyToComment(commentId: string, author: string, text: string): void {
@@ -764,7 +1201,7 @@ export function replyToComment(commentId: string, author: string, text: string):
     createdAt: new Date().toISOString(),
   });
 
-  refreshCommentsPanel(state);
+  renderPanel(state);
 }
 
 export function highlightComment(commentId: string, highlight: boolean): void {
@@ -774,340 +1211,11 @@ export function highlightComment(commentId: string, highlight: boolean): void {
 }
 
 function ensurePanelStyles(): void {
-  if (document.getElementById('rte-comments-panel-styles')) return;
+  if (document.getElementById(COMMENTS_STYLE_ID)) return;
 
   const style = document.createElement('style');
-  style.id = 'rte-comments-panel-styles';
-  style.textContent = `
-    .rte-comments-panel {
-      --rte-comments-panel-width: min(360px, 42vw);
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: var(--rte-comments-panel-width);
-      display: flex;
-      flex-direction: column;
-      background: var(--rte-color-bg-primary, #ffffff);
-      color: var(--rte-color-text-primary, #111827);
-      border-left: 1px solid var(--rte-color-border, #d1d5db);
-      box-shadow: -12px 0 28px rgba(15, 23, 42, 0.2);
-      transform: translateX(100%);
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 180ms ease, opacity 180ms ease;
-      /* Above the editor's sticky toolbar (z-index 100): on a narrow screen the panel lies over the editor, and
-         under the toolbar its header, and the button that closes it, could not be clicked. */
-      z-index: 110;
-    }
-
-    .rte-comments-panel.is-open {
-      transform: translateX(0);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* The panel's width is set on the editor itself, not only on the panel: the toolbar and the text make room for the
-       panel with a margin of that width, and a variable set on the panel is not visible to them (the margin was
-       silently 0, so the panel lay over the toolbar and the text and its header could not be reached). */
-    [data-rte-comments-open="true"] {
-      --rte-comments-panel-width: min(360px, 42vw);
-    }
-
-    /* The toolbar's wrapper is the element that is as wide as the editor, and it sits above the panel (it is sticky,
-       z-index 100): it has to give up the panel's width too, or its empty right-hand end covers the panel's header. */
-    [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
-      margin-right: var(--rte-comments-panel-width);
-      transition: margin-right 180ms ease;
-    }
-
-    .rte-comments-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px 14px 12px;
-      border-bottom: 1px solid var(--rte-color-border-light, #e5e7eb);
-      background: var(--rte-color-bg-secondary, #f8fafc);
-    }
-
-    .rte-comments-header h3 {
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.2;
-    }
-
-    .rte-comments-header p {
-      margin: 6px 0 0;
-      font-size: 12px;
-      color: var(--rte-color-text-muted, #64748b);
-    }
-
-    .rte-comments-close {
-      border: 1px solid var(--rte-color-border, #d1d5db);
-      background: transparent;
-      color: var(--rte-color-text-secondary, #475569);
-      border-radius: 6px;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 1;
-    }
-
-    .rte-comments-close:hover {
-      background: var(--rte-color-bg-hover, #f1f5f9);
-      color: var(--rte-color-text-primary, #0f172a);
-    }
-
-    .rte-comments-composer {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--rte-color-border-light, #e5e7eb);
-      background: var(--rte-color-bg-secondary, #f8fafc);
-    }
-
-    .new-comment-textarea,
-    .rte-comment-reply-textarea {
-      width: 100%;
-      resize: vertical;
-      min-height: 62px;
-      font-family: inherit;
-      font-size: 13px;
-      line-height: 1.35;
-      border: 1px solid var(--rte-color-border, #d1d5db);
-      border-radius: 8px;
-      background: var(--rte-color-bg-primary, #ffffff);
-      color: var(--rte-color-text-primary, #0f172a);
-      padding: 8px 10px;
-      outline: none;
-    }
-
-    .new-comment-textarea:focus,
-    .rte-comment-reply-textarea:focus {
-      border-color: var(--rte-color-border-focus, #2563eb);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--rte-color-border-focus, #2563eb) 20%, transparent);
-    }
-
-    .rte-comments-composer-actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .rte-comments-list {
-      flex: 1;
-      overflow: auto;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .rte-comments-empty {
-      padding: 18px 14px;
-      color: var(--rte-color-text-muted, #64748b);
-      font-size: 13px;
-    }
-
-    .rte-comment-item {
-      border: 1px solid var(--rte-color-border-light, #e5e7eb);
-      border-radius: 10px;
-      background: var(--rte-color-bg-primary, #ffffff);
-      padding: 10px;
-    }
-
-    .rte-comment-item.resolved {
-      opacity: 0.74;
-    }
-
-    .rte-comment-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .rte-comment-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .rte-comment-author {
-      font-size: 13px;
-      color: var(--rte-color-text-primary, #0f172a);
-    }
-
-    .rte-comment-date {
-      font-size: 11px;
-      color: var(--rte-color-text-muted, #64748b);
-    }
-
-    .rte-comment-expand {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      color: var(--rte-color-text-secondary, #475569);
-      font-size: 16px;
-      line-height: 1;
-      padding: 0;
-    }
-
-    .rte-comment-text {
-      margin-top: 8px;
-      font-size: 13px;
-      line-height: 1.45;
-      color: var(--rte-color-text-primary, #0f172a);
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .rte-comment-selection {
-      margin: 8px 0 0;
-      border-left: 3px solid var(--rte-color-primary, #2563eb);
-      background: var(--rte-color-bg-secondary, #f8fafc);
-      color: var(--rte-color-text-secondary, #475569);
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-style: italic;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .rte-comment-expanded {
-      display: none;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--rte-color-border-light, #e5e7eb);
-    }
-
-    .rte-comment-expanded.show {
-      display: block;
-    }
-
-    .rte-comment-replies {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .rte-comment-reply {
-      border: 1px solid var(--rte-color-border-light, #e5e7eb);
-      border-radius: 8px;
-      padding: 8px;
-      background: var(--rte-color-bg-secondary, #f8fafc);
-    }
-
-    .rte-comment-reply-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 4px;
-      font-size: 11px;
-      color: var(--rte-color-text-muted, #64748b);
-    }
-
-    .rte-comment-reply-text {
-      font-size: 12px;
-      color: var(--rte-color-text-secondary, #334155);
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .rte-comment-reply-composer {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .rte-comment-actions {
-      display: flex;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .rte-comment-btn {
-      border: 1px solid var(--rte-color-border, #d1d5db);
-      border-radius: 7px;
-      padding: 5px 9px;
-      font-size: 12px;
-      cursor: pointer;
-      background: var(--rte-color-bg-primary, #ffffff);
-      color: var(--rte-color-text-secondary, #334155);
-    }
-
-    .rte-comment-btn:hover {
-      background: var(--rte-color-bg-hover, #f1f5f9);
-      color: var(--rte-color-text-primary, #0f172a);
-    }
-
-    .rte-comment-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .rte-comment-btn.primary {
-      border-color: var(--rte-color-primary, #2563eb);
-      background: var(--rte-color-primary, #2563eb);
-      color: var(--rte-color-text-inverse, #ffffff);
-    }
-
-    .rte-comment-btn.primary:hover {
-      background: var(--rte-color-primary-hover, #1d4ed8);
-      border-color: var(--rte-color-primary-hover, #1d4ed8);
-      color: var(--rte-color-text-inverse, #ffffff);
-    }
-
-    .rte-comment-btn.success {
-      border-color: color-mix(in srgb, var(--rte-color-success, #15803d) 60%, transparent);
-      color: var(--rte-color-success, #15803d);
-    }
-
-    .rte-comment-btn.danger {
-      border-color: color-mix(in srgb, var(--rte-color-danger, #b91c1c) 60%, transparent);
-      color: var(--rte-color-danger, #b91c1c);
-    }
-
-    .rte-comment-anchor {
-      background: rgba(250, 204, 21, 0.34);
-      border-bottom: 2px solid rgba(217, 119, 6, 0.75);
-      border-radius: 2px;
-      cursor: pointer;
-      transition: outline-color 120ms ease, box-shadow 120ms ease;
-    }
-
-    .rte-comment-anchor.rte-comment-anchor-resolved {
-      background: rgba(148, 163, 184, 0.2);
-      border-bottom-color: rgba(100, 116, 139, 0.6);
-    }
-
-    .rte-comment-anchor.highlighted {
-      outline: 2px solid var(--rte-color-primary, #2563eb);
-      outline-offset: 2px;
-    }
-
-    :is([theme="dark"], [data-theme="dark"], .dark, .editora-theme-dark) .rte-comments-panel {
-      box-shadow: -14px 0 30px rgba(0, 0, 0, 0.45);
-    }
-
-    @media (max-width: 900px) {
-      [data-rte-comments-open="true"],
-      .rte-comments-panel {
-        --rte-comments-panel-width: min(420px, 100%);
-      }
-
-      [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
-        margin-right: 0;
-      }
-    }
-  `;
-
+  style.id = COMMENTS_STYLE_ID;
+  style.textContent = COMMENTS_CSS;
   document.head.appendChild(style);
 }
 
@@ -1144,20 +1252,14 @@ export const CommentsPlugin = (): Plugin => ({
       const state = getActiveState();
       if (!state) return false;
 
-      state.savedSelection = cloneActiveSelection(state.root);
-      // Avoid layout jitter while opening panel: keep logical selection cached,
-      // but clear visible DOM selection before panel width transition starts.
-      if (state.savedSelection) {
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-      }
-      setPanelVisibility(state, true);
-      refreshCommentsPanel(state);
+      const range = cloneActiveSelection(state.root);
+      // Avoid layout jitter while opening panel: the form keeps the range, so clear the visible
+      // DOM selection before the panel width transition starts.
+      if (range) window.getSelection()?.removeAllRanges();
+      state.savedSelection = null;
 
-      const textarea = state.panelElement?.querySelector(
-        '.new-comment-textarea',
-      ) as HTMLTextAreaElement | null;
-      textarea?.focus({ preventScroll: true });
+      setPanelVisibility(state, true);
+      openComposer(state, range);
       return true;
     },
 
@@ -1168,9 +1270,6 @@ export const CommentsPlugin = (): Plugin => ({
       if (!state) return false;
 
       setPanelVisibility(state, !state.panelVisible);
-      if (state.panelVisible) {
-        refreshCommentsPanel(state);
-      }
       return true;
     },
   },
