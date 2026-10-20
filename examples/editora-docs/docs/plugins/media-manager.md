@@ -58,6 +58,8 @@ With no configuration, uploaded files are embedded in the document as data URLs.
 | `withCredentials` | `boolean` | `false` | Send cookies on a cross-origin upload |
 | `uploadFieldName` | `string` | `file` | Multipart field name |
 | `fallbackToBase64` | `boolean` | `false` | Insert a data URL when the upload fails |
+| `wrapInFigure` | `boolean` | `true` | Insert `<figure>` media that can be aligned and captioned; `false` for a bare `<img>` / `<video>` |
+| `uploadOnPaste` | `boolean` | `true` | Upload images and videos pasted or dropped into the editor |
 | `maxFileSize` | `number` | `10MB` | Checked before sending |
 | `allowedTypes` | `string[]` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg | `image/*` wildcards work |
 
@@ -70,6 +72,14 @@ Insert Image, Insert Video and Replace Image share one picker with three tabs:
 - **URL**: address, alt text and size, with a preview
 
 Provider contract for the library: `list({ page, limit, search, type }, { signal }) => Promise<{ items, total }>`; for the REST backend, `GET <library>?page=&limit=&q=&type=` answering `{ items, total }`.
+
+## In the editor
+
+- Pasted images and dropped image or video files become uploads: a placeholder with progress and a cancel button where they will go, replaced by the media when stored (one undo step). Text pasted with a picture (spreadsheet cells, a copied page) stays text.
+- Media is a `<figure class="rte-media" data-align>` with an optional `<figcaption>`: align it, caption it, size it (Size menu: small, medium, large, full width, original, relative to the text width) or drag a corner (mouse, touch, pen).
+- Keyboard: an arrow key at the edge of the paragraph beside the media selects it, Alt+F10 moves into its toolbar (arrows, Enter or Space, Escape or Tab back), Enter in a caption goes on below, Backspace in an empty caption removes it.
+- `SlashCommandsPlugin({ items: mediaSlashItems })` adds `/image` and `/video`.
+- The toolbar, handles and placeholders are drawn outside the editor; the editor strips the editing-only `contenteditable` and empty captions from the HTML it emits.
 
 ## Behavior
 
