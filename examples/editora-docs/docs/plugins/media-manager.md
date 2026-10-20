@@ -23,18 +23,21 @@ import {
 
 ```ts
 setMediaManagerConfig({
+  // A REST backend...
   apiUrl: "https://api.example.com",
-  apiEndpoints: {
-    upload: "/media/upload",
-    library: "/media/library",
-    delete: "/media/library",
-  },
+  apiEndpoints: { upload: "/media/upload" },
+  headers: { Authorization: "Bearer ..." },
   maxFileSize: 10 * 1024 * 1024,
   allowedTypes: ["image/jpeg", "image/png", "video/mp4"],
+  // ...or just a function instead:
+  // uploadHandler: async (file, { onProgress, signal }) => url,
 });
 
 const plugins = [MediaManagerPlugin()];
+// Settings can also be given to one instance: MediaManagerPlugin({ uploadHandler })
 ```
+
+With no configuration, uploaded files are embedded in the document as data URLs.
 
 ## Command Matrix
 
@@ -47,18 +50,22 @@ const plugins = [MediaManagerPlugin()];
 
 | Option | Type | Default | Notes |
 | --- | --- | --- | --- |
-| `apiUrl` | `string` | Empty/local | Base API URL |
-| `apiEndpoints.upload` | `string` | Plugin default | Upload endpoint |
-| `apiEndpoints.library` | `string` | Plugin default | Media list endpoint |
-| `apiEndpoints.delete` | `string` | Plugin default | Delete endpoint |
-| `maxFileSize` | `number` | `10MB` | Per-file limit |
-| `allowedTypes` | `string[]` | Common image/video MIME types | Upload type guard |
-| `headers` | `Record<string,string>` | `{}` | Auth/custom headers |
+| `provider` | `MediaProvider` | none | Complete provider (`upload`, optional `list`/`update`/`delete`); wins over everything |
+| `uploadHandler` | `(file, { onProgress, signal }) => Promise<string \| { url, width?, height?, thumbnailUrl? }>` | none | Upload function |
+| `apiUrl` | `string` | Empty | Base API URL; empty means no API (data URLs) |
+| `apiEndpoints.upload` / `.library` / `.delete` | `string` | `/media/upload`, `/media/library`, `/media/library` | Merged key by key |
+| `headers` | `Record<string,string>` | `{}` | Auth/custom headers, added to the global API headers |
+| `withCredentials` | `boolean` | `false` | Send cookies on a cross-origin upload |
+| `uploadFieldName` | `string` | `file` | Multipart field name |
+| `fallbackToBase64` | `boolean` | `false` | Insert a data URL when the upload fails |
+| `maxFileSize` | `number` | `10MB` | Checked before sending |
+| `allowedTypes` | `string[]` | JPEG, PNG, GIF, WebP, AVIF, MP4, WebM, Ogg | `image/*` wildcards work |
 
 ## Behavior
 
 - Resolves active editor context before opening dialog
-- Supports API-backed upload/list/delete workflows
+- Uploads show true progress, can be cancelled, and report failures; files are checked against `maxFileSize` and `allowedTypes` before anything is sent
+- The selection toolbar and resize handles are drawn outside the editor (never in the saved content); one selection at a time across all editors
 - Inserts selected media into current editor selection flow
 
 ## Validation Checklist
