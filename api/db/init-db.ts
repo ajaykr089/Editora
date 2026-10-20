@@ -5,7 +5,8 @@ import path from 'path';
 async function initDatabase() {
   try {
     const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-    const statements = schema.split(';').filter(s => s.trim());
+    // Comments are dropped first: a ';' inside one must not end a statement.
+    const statements = schema.replace(/^\s*--.*$/gm, '').split(';').filter(s => s.trim());
 
     for (const statement of statements) {
       if (statement.trim()) {

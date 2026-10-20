@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS media (
   thumbnail_url TEXT,
   cdn_url TEXT,
   storage_path TEXT NOT NULL,
-  -- Databases made before audio was supported need: ALTER TABLE media MODIFY type ENUM('image', 'video', 'audio') NOT NULL;
+  -- Databases made before audio was supported need the type column widened to include 'audio' (ALTER TABLE media MODIFY type ...).
   type ENUM('image', 'video', 'audio') NOT NULL,
   status ENUM('processing', 'ready', 'failed') DEFAULT 'ready',
   alt_text TEXT,
