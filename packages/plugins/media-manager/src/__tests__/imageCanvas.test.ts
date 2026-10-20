@@ -94,7 +94,9 @@ describe('opening a picture', () => {
     );
     return made;
   };
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 
   it('asks a server for permission to read it, but not for a data or blob address', async () => {
     const made = stubImage('load');

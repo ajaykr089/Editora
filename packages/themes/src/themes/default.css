@@ -67,6 +67,9 @@
   padding: 6px 12px;
   border: 1px solid #ccc;
   background: white;
+  /* Icons are drawn with currentColor: without an explicit colour the button takes the UA's, which turns white
+     under `color-scheme: dark` (set by ui-core hosts) and leaves white icons on this white background. */
+  color: #334155;
   cursor: pointer;
   border-radius: 3px;
   font-weight: 600;
