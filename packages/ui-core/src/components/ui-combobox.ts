@@ -43,7 +43,7 @@ const style = `
     --ui-combobox-height: var(--ui-control-height-2, 32px);
     --ui-combobox-padding-x: var(--ui-control-padding-inline-2, 12px);
     --ui-combobox-font-size: var(--ui-control-font-size-2, 14px);
-    --ui-combobox-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-combobox-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-combobox-text: var(--ui-color-text, #0f172a);
     --ui-combobox-muted: var(--ui-color-muted, #526175);
@@ -398,7 +398,7 @@ const style = `
     --ui-combobox-height: var(--ui-control-height-1, 24px);
     --ui-combobox-padding-x: var(--ui-control-padding-inline-1, 8px);
     --ui-combobox-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-combobox-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-combobox-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
   }
 
   :host([size="lg"]),
@@ -407,7 +407,7 @@ const style = `
     --ui-combobox-height: var(--ui-control-height-3, 40px);
     --ui-combobox-padding-x: var(--ui-control-padding-inline-3, 16px);
     --ui-combobox-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-combobox-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-combobox-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
   }
 
   :host([variant="surface"]) .control {

@@ -5,7 +5,7 @@ const style = `
   :host {
     display: block;
     color-scheme: light dark;
-    --ui-alert-radius: var(--base-alert-dialog-radius, var(--ui-radius, 4px));
+    --ui-alert-radius: var(--base-alert-dialog-radius, var(--ui-radius, 6px));
     --ui-alert-bg-base: var(--base-alert-dialog-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-alert-bg: var(--ui-alert-bg-base);
     --ui-alert-text: var(--ui-color-text, var(--ui-text, #202020));
@@ -39,7 +39,7 @@ const style = `
     --ui-alert-description-line-height: 20px;
     --ui-alert-icon-size: 28px;
     --ui-alert-button-height: var(--base-button-height-md, var(--ui-control-height-2, 32px));
-    --ui-alert-button-radius: var(--ui-radius, 4px);
+    --ui-alert-button-radius: var(--ui-radius, 6px);
   }
 
   :host([tone='info']) {
@@ -308,7 +308,7 @@ const style = `
 
   .input {
     width: 100%;
-    border-radius: var(--ui-radius, 4px);
+    border-radius: var(--ui-radius, 6px);
     border: var(--base-input-border, 1px solid color-mix(in srgb, var(--ui-alert-border-color) 88%, transparent));
     background: var(--base-input-bg, color-mix(in srgb, var(--ui-alert-bg-base) 94%, #ffffff 6%));
     color: inherit;
@@ -610,7 +610,7 @@ function normalizeIndicator(raw: string | null): UIAlertDialogIndicator {
   return raw === 'none' ? 'none' : 'line';
 }
 
-function normalizeRadius(value: string | null, fallback = 'var(--base-alert-dialog-radius, var(--ui-radius, 4px))'): string {
+function normalizeRadius(value: string | null, fallback = 'var(--base-alert-dialog-radius, var(--ui-radius, 6px))'): string {
   if (value == null) return fallback;
   const normalized = value.trim().toLowerCase();
   if (!normalized) return fallback;

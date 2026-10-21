@@ -11,7 +11,7 @@ const style = `
     --ui-number-field-border-style: solid;
     --ui-number-field-border:
       var(--ui-number-field-border-width) var(--ui-number-field-border-style) var(--ui-number-field-border-color);
-    --ui-number-field-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-number-field-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-number-field-min-height: var(--ui-min-height, var(--base-input-height-md, var(--ui-control-height-2, 32px)));
     --ui-number-field-width: 100%;
     --ui-number-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
@@ -268,7 +268,7 @@ const style = `
     --ui-number-field-min-height: var(--ui-min-height, var(--base-input-height-sm, var(--ui-control-height-1, 24px)));
     --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
     --ui-number-field-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-number-field-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-number-field-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-number-field-shell-gap: 6px;
   }
 
@@ -285,7 +285,7 @@ const style = `
     --ui-number-field-min-height: var(--ui-min-height, var(--base-input-height-lg, var(--ui-control-height-3, 40px)));
     --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
     --ui-number-field-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-number-field-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-number-field-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-number-field-shell-gap: 10px;
   }
 

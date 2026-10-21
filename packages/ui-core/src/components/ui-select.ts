@@ -9,7 +9,7 @@ const style = `
   :host {
     --ui-select-width: var(--ui-width, min(340px, 100%));
     --ui-select-min-height: var(--base-select-height-md, var(--ui-control-height-2, 32px));
-    --ui-select-radius: var(--base-select-radius, var(--ui-control-radius-2, var(--ui-radius, 4px)));
+    --ui-select-radius: var(--base-select-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
     --ui-select-padding-x: var(--base-select-padding-x, var(--ui-control-padding-inline-2, 12px));
     --ui-select-font-size: var(--ui-control-font-size-2, 14px);
 
@@ -492,7 +492,7 @@ const style = `
     --ui-select-min-height: var(--base-select-height-sm, var(--ui-control-height-1, 24px));
     --ui-select-padding-x: var(--ui-control-padding-inline-1, 8px);
     --ui-select-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-select-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-select-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-select-menu-gap: 6px;
     --ui-select-menu-item-height: 34px;
   }
@@ -508,7 +508,7 @@ const style = `
     --ui-select-min-height: var(--base-select-height-lg, var(--ui-control-height-3, 40px));
     --ui-select-padding-x: var(--ui-control-padding-inline-3, 16px);
     --ui-select-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-select-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-select-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-select-menu-gap: 10px;
     --ui-select-menu-item-height: 42px;
   }

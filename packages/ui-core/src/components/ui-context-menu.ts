@@ -113,7 +113,7 @@ const shadowStyle = `
     --ui-context-menu-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-context-menu-border-color: color-mix(in srgb, var(--ui-color-border, var(--ui-border, #cbd5e1)) 86%, transparent);
     --ui-context-menu-border: 1px solid var(--ui-context-menu-border-color);
-    --ui-context-menu-radius: var(--base-context-menu-radius, var(--ui-radius, 4px));
+    --ui-context-menu-radius: var(--base-context-menu-radius, var(--ui-radius, 6px));
     --ui-context-menu-shadow: var(--base-context-menu-shadow, var(--shadow-5));
     --ui-context-menu-min-width: var(--base-context-menu-min-width, 240px);
     --ui-context-menu-padding: var(--base-context-menu-padding, 6px);

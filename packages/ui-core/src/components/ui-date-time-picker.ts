@@ -74,7 +74,7 @@ const style = `
     --ui-dtp-accent: var(--ui-color-primary, #2563eb);
     --ui-dtp-success: var(--ui-color-success, #15803d);
     --ui-dtp-error: var(--ui-color-danger, #dc2626);
-    --ui-dtp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-dtp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dtp-panel-radius: 14px;
     --ui-dtp-z: 1600;
     --ui-dtp-shadow: none;

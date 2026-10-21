@@ -76,7 +76,7 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
     vars[`--ui-control-padding-inline-${size}`] = CONTROL_PADDING_INLINE[size];
     // Built on the theme's single `radius`, so `radius: '10px'` still reshapes every control.
     const extra = CONTROL_RADIUS_EXTRA[size];
-    const radius = tokens.radius || radiusScale['2'] || '4px';
+    const radius = tokens.radius || radiusScale['2'] || '6px';
     vars[`--ui-control-radius-${size}`] = extra ? `calc(${radius} + ${extra}px)` : radius;
   }
 

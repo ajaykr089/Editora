@@ -4,7 +4,7 @@ const style = `
   :host {
     display: block;
     --ui-breadcrumb-gap: var(--base-breadcrumb-gap, 8px);
-    --ui-breadcrumb-radius: var(--base-breadcrumb-radius, var(--ui-radius, 4px));
+    --ui-breadcrumb-radius: var(--base-breadcrumb-radius, var(--ui-radius, 6px));
     --ui-breadcrumb-font-size: var(--base-breadcrumb-font-size, 14px);
     --ui-breadcrumb-item-padding-block: var(--base-breadcrumb-item-padding-block, 4px);
     --ui-breadcrumb-item-padding-inline: var(--base-breadcrumb-item-padding-inline, 9px);

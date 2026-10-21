@@ -238,7 +238,7 @@ const style = `
     --ui-tabs-shell-gap: 4px;
     --ui-tabs-nav-padding: 0px;
     --ui-tabs-nav-gap: 4px;
-    --ui-tabs-tab-radius: var(--ui-radius, 4px);
+    --ui-tabs-tab-radius: var(--ui-radius, 6px);
     --ui-tabs-tab-min-h: 36px;
     --ui-tabs-tab-pad-x: 12px;
     --ui-tabs-tab-font-size: 14px;

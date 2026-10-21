@@ -100,7 +100,7 @@ const hostStyle = `
     --ui-menu-border-color: color-mix(in srgb, var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14))) 86%, transparent);
     --ui-menu-border: var(--base-menu-border, 1px solid var(--ui-menu-border-color));
     --ui-menu-shadow: var(--base-menu-shadow, var(--shadow-5, none));
-    --ui-menu-radius: var(--base-menu-radius, var(--ui-radius, 4px));
+    --ui-menu-radius: var(--base-menu-radius, var(--ui-radius, 6px));
     --ui-menu-padding: var(--base-menu-content-padding, 8px);
     --ui-menu-min-width: var(--base-menu-min-width, 232px);
     --ui-menu-ring: var(--ui-color-primary, var(--ui-primary, #2563eb));

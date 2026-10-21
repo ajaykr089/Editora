@@ -6,7 +6,7 @@ const style = `
     --ui-tags-input-padding: 10px 12px;
     --ui-tags-input-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-tags-input-border: 1px solid var(--ui-tags-input-border-color);
-    --ui-tags-input-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-tags-input-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-tags-input-bg: var(--ui-color-surface, #ffffff);
     --ui-tags-input-text: var(--ui-color-text, #0f172a);
     --ui-tags-input-muted: var(--ui-color-muted, #526175);
@@ -30,7 +30,7 @@ const style = `
   :host([size="1"]) {
     --ui-tags-input-min-height: var(--ui-control-height-1, 24px);
     --ui-tags-input-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-tags-input-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-tags-input-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-tags-input-pad-y: 0px;
     --ui-tags-input-pad-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
     --ui-tags-input-chip-pad-y: 0px;
@@ -40,7 +40,7 @@ const style = `
   :host([size="3"]) {
     --ui-tags-input-min-height: var(--ui-control-height-3, 40px);
     --ui-tags-input-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-tags-input-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-tags-input-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-tags-input-pad-y: 5px;
     --ui-tags-input-pad-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
     --ui-tags-input-chip-pad-y: 4px;

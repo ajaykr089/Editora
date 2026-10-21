@@ -45,7 +45,7 @@ const style = `
     );
     --ui-dropdown-border: var(--ui-dropdown-menu-border, var(--base-dropdown-border, 1px solid var(--ui-dropdown-border-color)));
     --ui-dropdown-shadow: var(--ui-dropdown-menu-shadow, var(--base-dropdown-shadow, 0 10px 24px rgba(15, 23, 42, 0.14)));
-    --ui-dropdown-radius: var(--ui-dropdown-menu-radius, var(--base-dropdown-radius, var(--ui-radius, 4px)));
+    --ui-dropdown-radius: var(--ui-dropdown-menu-radius, var(--base-dropdown-radius, var(--ui-radius, 6px)));
     --ui-dropdown-padding: var(--ui-dropdown-menu-padding, var(--base-dropdown-content-padding, 0px));
     --ui-dropdown-min-width: var(--ui-dropdown-menu-min-width, var(--base-dropdown-min-width, 224px));
     --ui-dropdown-gap: 8px;

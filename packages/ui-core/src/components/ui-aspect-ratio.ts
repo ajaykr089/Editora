@@ -4,7 +4,7 @@ const style = `
   :host {
     display: block;
     width: 100%;
-    --ui-aspect-radius: var(--base-aspect-ratio-radius, var(--ui-radius, 4px));
+    --ui-aspect-radius: var(--base-aspect-ratio-radius, var(--ui-radius, 6px));
     --ui-aspect-border: var(--base-aspect-ratio-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.14)) 84%, transparent));
     --ui-aspect-bg-base: var(--base-aspect-ratio-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-aspect-bg: var(--ui-aspect-bg-base);
@@ -25,7 +25,7 @@ const style = `
 
   :host([size='1']),
   :host([size='sm']) {
-    --ui-aspect-radius: max(0px, calc(var(--base-aspect-ratio-radius, var(--ui-radius, 4px)) - 1px));
+    --ui-aspect-radius: max(0px, calc(var(--base-aspect-ratio-radius, var(--ui-radius, 6px)) - 1px));
     --ui-aspect-title-size: 13px;
     --ui-aspect-title-line-height: 18px;
     --ui-aspect-empty-icon-size: 28px;
@@ -38,7 +38,7 @@ const style = `
 
   :host([size='3']),
   :host([size='lg']) {
-    --ui-aspect-radius: max(0px, calc(var(--base-aspect-ratio-radius, var(--ui-radius, 4px)) + 4px));
+    --ui-aspect-radius: max(0px, calc(var(--base-aspect-ratio-radius, var(--ui-radius, 6px)) + 4px));
     --ui-aspect-title-size: 15px;
     --ui-aspect-title-line-height: 22px;
     --ui-aspect-empty-icon-size: 36px;
@@ -350,9 +350,9 @@ export class UIAspectRatio extends ElementBase {
   }
 
   private _normalizeRadius(value: string | null): string {
-    if (value == null) return 'var(--base-aspect-ratio-radius, var(--ui-radius, 4px))';
+    if (value == null) return 'var(--base-aspect-ratio-radius, var(--ui-radius, 6px))';
     const normalized = value.trim().toLowerCase();
-    if (!normalized) return 'var(--base-aspect-ratio-radius, var(--ui-radius, 4px))';
+    if (!normalized) return 'var(--base-aspect-ratio-radius, var(--ui-radius, 6px))';
     if (normalized === 'full' || normalized === 'pill') return '999px';
     if (/^-?\d+(\.\d+)?$/.test(normalized)) return `${normalized}px`;
     return value;

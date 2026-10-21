@@ -77,7 +77,7 @@ const style = `
     --ui-drtp-accent: var(--ui-color-primary, #2563eb);
     --ui-drtp-success: var(--ui-color-success, #15803d);
     --ui-drtp-error: var(--ui-color-danger, #dc2626);
-    --ui-drtp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-drtp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-drtp-panel-radius: 14px;
     --ui-drtp-z: 1600;
     --ui-drtp-shadow: none;

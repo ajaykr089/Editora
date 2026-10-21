@@ -9,7 +9,7 @@ const style = `
 
     --ui-nav-gap: var(--base-navigation-menu-gap, 6px);
     --ui-nav-padding: var(--base-navigation-menu-padding, 6px);
-    --ui-nav-radius: var(--base-navigation-menu-radius, var(--ui-radius, 4px));
+    --ui-nav-radius: var(--base-navigation-menu-radius, var(--ui-radius, 6px));
     --ui-nav-bg: var(--base-navigation-menu-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-nav-border: var(--base-navigation-menu-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent));
     --ui-nav-shadow: var(--base-navigation-menu-shadow, var(--shadow-2, none));

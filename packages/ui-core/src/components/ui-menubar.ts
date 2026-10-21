@@ -90,7 +90,7 @@ const hostStyle = `
   :host {
     --ui-menubar-gap: var(--base-menubar-gap, 6px);
     --ui-menubar-padding: var(--base-menubar-padding, 6px);
-    --ui-menubar-radius: var(--base-menubar-radius, var(--ui-radius, 4px));
+    --ui-menubar-radius: var(--base-menubar-radius, var(--ui-radius, 6px));
     --ui-menubar-bg: var(--base-menubar-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-menubar-border: var(--base-menubar-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 86%, transparent));
     --ui-menubar-shadow: var(--base-menubar-shadow, var(--shadow-2, none));

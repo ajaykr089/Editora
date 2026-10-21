@@ -7,7 +7,7 @@ const style = `
     --ui-badge-font-weight: var(--base-badge-font-weight, 500);
     --ui-badge-line-height: 1.2;
     --ui-badge-gap: var(--base-badge-gap, 4px);
-    --ui-badge-radius: var(--base-badge-radius, calc(var(--ui-radius, 4px) - 2px));
+    --ui-badge-radius: var(--base-badge-radius, calc(var(--ui-radius, 6px) - 2px));
     --ui-badge-padding-block: var(--base-badge-padding-block, 2px);
     --ui-badge-padding-inline: var(--base-badge-padding-inline, 8px);
     --ui-badge-border-width: var(--base-badge-border-width, 1px);

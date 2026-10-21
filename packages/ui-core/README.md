@@ -571,9 +571,32 @@ stay on theme.
 | `--ui-color-accent-subtle`, `-accent-fill`, `-accent-fill-hover`, `-accent-fill-active` | tinted accent backgrounds |
 | `--ui-color-accent-line`, `-accent-solid`, `-accent-solid-hover`, `-accent-text` | accent border, solid fill, solid hover and accent text |
 | `--ui-color-surface-elevated`, `--ui-color-info` | raised surface (menus, popovers) and the informational colour |
+| `--ui-color-placeholder` | placeholder text (62% of the text colour, 4.5:1 or better on the field) |
+| `--ui-color-foreground-on-warning` | text on a solid warning fill: dark when the warning colour is light (amber) |
 | `--ui-ring-color`, `--ui-ring-width`, `--ui-ring-offset` | the focus ring |
 | `--ui-control-height-{1..4}`, `--ui-control-font-size-{1..4}`, `--ui-control-padding-inline-{1..4}`, `--ui-control-radius-{1..4}` | the control scale: 24, 32, 40 and 48px (see below) |
 | `--ui-motion-enter-easing`, `--ui-motion-exit-easing` | easing for things that appear and disappear |
+
+### The default look
+
+Light and dark, with the default amber accent (`radius` is 6px):
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/look-light.png" alt="Buttons, fields, checkboxes, switches, badges, tabs and a card in the light theme" width="49%">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/look-dark.png" alt="The same components in the dark theme" width="49%">
+</p>
+
+- **Buttons** are flat fills with no shadow. `variant` picks the colour (`primary`, `danger`, `success`, `warning`,
+  neutral `secondary`, `ghost`) and `recipe` the style: `solid` (default), `soft`, `surface`, `outline`, `ghost` or
+  `classic`. Status fills are a shade deeper than the status colour so white text reads at 4.5:1.
+- **Fields** (input, select, textarea, combobox, pickers) share a hairline border that darkens on hover, and a 2px
+  focus ring drawn inside it.
+- **`ui-field`** is flat: label, control and message with no box. `variant="surface"`, `outline`, `soft`, `contrast` or
+  `elevated` draw the box.
+- **Tabs** are a line: a hairline under the tabs and a 2px accent line under the selected one. The boxed pill look is
+  `variant="segmented"`; `soft`, `outline`, `solid`, `cards` and `indicator` keep working.
+- **Cards** have a single hairline border and no shadow. **Badges** are soft tinted labels without a border
+  (`variant="solid"` for a filled one).
 
 ### Control sizes
 

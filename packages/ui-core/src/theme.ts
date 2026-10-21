@@ -1168,7 +1168,7 @@ export const baselineLightTokens: ThemeTokens = {
     overlay: 'rgba(2, 6, 23, 0.52)',
     transparent: 'transparent'
   },
-  radius: '4px',
+  radius: '6px',
   radiusScale: {
     '1': '3px',
     '2': '4px',
@@ -1571,7 +1571,7 @@ function resolvedThemeVariables(next: ThemeTokens): VariableMap {
   setOn(target, '--ui-error', next.colors.danger || '#e5484d');
   setOn(target, '--ui-warning', next.colors.warning || next.colors.primary);
 
-  setOn(target, '--ui-radius', next.radius || '4px');
+  setOn(target, '--ui-radius', next.radius || '6px');
   setOn(target, '--ui-space-xs', next.spacing?.xs || '4px');
   setOn(target, '--ui-space-sm', next.spacing?.sm || '8px');
   setOn(target, '--ui-space-md', next.spacing?.md || '12px');

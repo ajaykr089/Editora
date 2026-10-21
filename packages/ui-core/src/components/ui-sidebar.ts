@@ -78,7 +78,7 @@ const template = (body: string) => `
       --ui-sidebar-color: var(--ui-color-text, var(--ui-text, #202020));
       --ui-sidebar-muted: color-mix(in srgb, var(--ui-sidebar-color) 72%, transparent);
       --ui-sidebar-border: var(--base-sidebar-border, 1px solid color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 82%, transparent));
-      --ui-sidebar-radius: var(--base-sidebar-radius, var(--ui-radius, 4px));
+      --ui-sidebar-radius: var(--base-sidebar-radius, var(--ui-radius, 6px));
       --ui-sidebar-shadow: var(--base-sidebar-shadow, var(--shadow-5, none));
       --ui-sidebar-padding: var(--base-sidebar-padding, 12px);
       --ui-sidebar-gap: var(--base-sidebar-gap, 14px);

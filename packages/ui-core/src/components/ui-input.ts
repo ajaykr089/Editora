@@ -17,7 +17,7 @@ const style = `
     --ui-input-border-width: 1px;
     --ui-input-border-style: solid;
     --ui-input-border: var(--base-input-border, var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color));
-    --ui-input-border-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-input-border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-input-min-height: var(--ui-min-height, var(--base-input-height-md, var(--ui-control-height-2, 32px)));
     --ui-input-width: 100%;
     --ui-input-bg: var(--base-input-bg, var(--ui-color-surface, var(--ui-surface, #ffffff)));
@@ -214,7 +214,7 @@ const style = `
     inline-size: var(--ui-input-action-size);
     block-size: var(--ui-input-action-size);
     margin-block: var(--ui-input-action-bleed, 0px);
-    border-radius: var(--ui-radius, 4px);
+    border-radius: var(--ui-radius, 6px);
     display: inline-grid;
     place-items: center;
     background: color-mix(in srgb, var(--ui-input-color) 8%, transparent);
@@ -287,7 +287,7 @@ const style = `
     --ui-input-min-height: var(--ui-min-height, var(--base-input-height-sm, var(--ui-control-height-1, 24px)));
     --ui-input-pad-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
     --ui-input-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-input-border-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-input-border-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-input-action-size: 24px;
     --ui-input-action-bleed: -1px;
     --ui-input-shell-gap: 6px;
@@ -298,7 +298,7 @@ const style = `
     --ui-input-min-height: var(--ui-min-height, var(--base-input-height-lg, var(--ui-control-height-3, 40px)));
     --ui-input-pad-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
     --ui-input-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-input-border-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-input-border-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-input-action-size: 28px;
     --ui-input-shell-gap: 10px;
   }

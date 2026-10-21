@@ -9,7 +9,7 @@ type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 const style = `
   :host {
     --ui-hover-card-z: 1700;
-    --ui-hover-card-radius: var(--base-card-radius, var(--ui-radius, 4px));
+    --ui-hover-card-radius: var(--base-card-radius, var(--ui-radius, 6px));
     --ui-hover-card-bg: var(--base-card-bg, var(--color-panel, var(--ui-color-surface, var(--ui-surface, #ffffff))));
     --ui-hover-card-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-hover-card-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);

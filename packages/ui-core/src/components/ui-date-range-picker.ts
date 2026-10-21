@@ -64,7 +64,7 @@ const style = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
@@ -377,7 +377,7 @@ const overlayStyle = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);

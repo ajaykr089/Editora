@@ -4,7 +4,7 @@ const style = `
   :host {
     --ui-checkbox-size: 16px;
     --ui-checkbox-hit-area: 24px;
-    --ui-checkbox-radius: calc(var(--ui-radius, 4px) - 2px);
+    --ui-checkbox-radius: calc(var(--ui-radius, 6px) - 2px);
     --ui-checkbox-border: 1px solid var(--ui-color-line-strong, var(--ui-color-border, #cbd5e1));
     --ui-checkbox-background: var(--ui-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-checkbox-check-color: var(--ui-color-foreground-on-primary, #ffffff);

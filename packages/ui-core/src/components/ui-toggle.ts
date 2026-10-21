@@ -2,7 +2,7 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-toggle-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-toggle-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-toggle-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-toggle-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-toggle-color: var(--ui-color-text, #0f172a);
@@ -113,14 +113,14 @@ const style = `
     --ui-toggle-padding-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
     --ui-toggle-height: var(--ui-control-height-1, 24px);
     --ui-toggle-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-toggle-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-toggle-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
   }
 
   :host([size="lg"]) {
     --ui-toggle-padding-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
     --ui-toggle-height: var(--ui-control-height-3, 40px);
     --ui-toggle-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-toggle-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-toggle-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
   }
 
   :host([shape="square"]) {

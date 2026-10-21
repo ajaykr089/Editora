@@ -2,7 +2,7 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-card-radius: var(--base-card-radius, calc(var(--ui-radius, 4px) + 2px));
+    --ui-card-radius: var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px));
     --ui-card-bg: var(--base-card-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-card-color: var(--ui-color-text, var(--ui-text, #202020));
     --ui-card-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent));
@@ -289,7 +289,7 @@ const style = `
 `;
 
 function normalizeRadius(value: string | null): string {
-  if (!value || !value.trim()) return 'var(--base-card-radius, var(--ui-radius, 4px))';
+  if (!value || !value.trim()) return 'var(--base-card-radius, var(--ui-radius, 6px))';
   const trimmed = value.trim().toLowerCase();
   if (trimmed === 'full') return '999px';
   if (/^-?\d+(\.\d+)?$/.test(trimmed)) return `${trimmed}px`;

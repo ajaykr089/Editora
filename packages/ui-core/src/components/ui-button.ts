@@ -13,7 +13,7 @@ type ButtonScale = '1' | '2' | '3' | '4';
 
 const style = `
   :host {
-    --ui-btn-radius: var(--ui-control-radius, var(--ui-control-radius-2, var(--ui-radius, 4px)));
+    --ui-btn-radius: var(--ui-control-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
     --ui-btn-min-height: var(--ui-control-min-height, var(--base-button-height-md, var(--ui-control-height-2, 32px)));
     --ui-btn-padding-inline: var(--ui-control-padding-inline, var(--ui-control-padding-inline-2, 12px));
     --ui-btn-gap: var(--ui-control-gap, var(--ui-default-gap, 8px));
@@ -157,7 +157,7 @@ const style = `
     --ui-btn-min-height: var(--base-button-height-sm, var(--ui-control-height-1, 24px));
     --ui-btn-padding-inline: var(--ui-control-padding-inline-1, 8px);
     --ui-btn-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-btn-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-btn-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-btn-gap: 6px;
   }
 
@@ -165,7 +165,7 @@ const style = `
     --ui-btn-min-height: var(--base-button-height-md, var(--ui-control-height-2, 32px));
     --ui-btn-padding-inline: var(--ui-control-padding-inline-2, 12px);
     --ui-btn-font-size: var(--ui-control-font-size-2, 14px);
-    --ui-btn-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-btn-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-btn-gap: 8px;
   }
 
@@ -173,7 +173,7 @@ const style = `
     --ui-btn-min-height: var(--base-button-height-lg, var(--ui-control-height-3, 40px));
     --ui-btn-padding-inline: var(--ui-control-padding-inline-3, 16px);
     --ui-btn-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-btn-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-btn-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-btn-gap: 8px;
   }
 
@@ -181,7 +181,7 @@ const style = `
     --ui-btn-min-height: var(--ui-control-height-4, 48px);
     --ui-btn-padding-inline: var(--ui-control-padding-inline-4, 20px);
     --ui-btn-font-size: var(--ui-control-font-size-4, 18px);
-    --ui-btn-radius: var(--ui-control-radius-4, var(--ui-radius, 4px));
+    --ui-btn-radius: var(--ui-control-radius-4, var(--ui-radius, 6px));
     --ui-btn-gap: 10px;
   }
 
@@ -307,7 +307,7 @@ const style = `
     --ui-btn-font-size: var(--ui-control-font-size-1, 12px);
     --ui-btn-min-height: var(--base-button-height-sm, var(--ui-control-height-1, 24px));
     --ui-btn-padding-inline: var(--ui-control-padding-inline-1, 8px);
-    --ui-btn-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-btn-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-btn-gap: 6px;
   }
 
@@ -315,7 +315,7 @@ const style = `
     --ui-btn-font-size: var(--ui-control-font-size-3, 16px);
     --ui-btn-min-height: var(--base-button-height-lg, var(--ui-control-height-3, 40px));
     --ui-btn-padding-inline: var(--ui-control-padding-inline-3, 16px);
-    --ui-btn-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-btn-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-btn-gap: 10px;
   }
 

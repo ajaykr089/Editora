@@ -4,7 +4,7 @@ const style = `
   :host {
     --ui-field-gap: 8px;
     --ui-field-label-width: 192px;
-    --ui-field-radius: calc(var(--ui-radius, 4px) + 4px);
+    --ui-field-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-field-bg: transparent;
     --ui-field-frame-padding: 0px;
     --ui-field-density: 1;

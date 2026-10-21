@@ -20,7 +20,7 @@ const style = `
   :host {
     --ui-multi-select-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
-    --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-control-radius-2, var(--ui-radius, 4px)));
+    --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
     --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-text: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #526175));
@@ -381,7 +381,7 @@ const style = `
     --ui-multi-select-padding-y: 0px;
     --ui-multi-select-chip-padding-y: 0px;
     --ui-multi-select-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-multi-select-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-multi-select-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-multi-select-option-padding-x: 8px;
     --ui-multi-select-option-padding-y: 8px;
   }
@@ -399,7 +399,7 @@ const style = `
     --ui-multi-select-padding-y: 5px;
     --ui-multi-select-chip-padding-y: 4px;
     --ui-multi-select-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-multi-select-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-multi-select-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-multi-select-option-padding-x: 12px;
     --ui-multi-select-option-padding-y: 12px;
   }

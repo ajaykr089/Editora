@@ -17,7 +17,7 @@ const style = `
     --ui-textarea-accent: var(--ui-color-primary, #2563eb);
     --ui-textarea-danger: var(--ui-color-danger, #dc2626);
     --ui-textarea-success: var(--ui-color-success, #15803d);
-    --ui-textarea-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-textarea-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-textarea-padding-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
     --ui-textarea-padding-y: 6px;
     --ui-textarea-font-size: var(--ui-control-font-size-2, 14px);
@@ -182,7 +182,7 @@ const style = `
     --ui-textarea-padding-y: 4px;
     --ui-textarea-min-height: 84px;
     --ui-textarea-font-size: var(--ui-control-font-size-1, 12px);
-    --ui-textarea-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
+    --ui-textarea-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
   }
 
   :host([size="lg"]),
@@ -191,7 +191,7 @@ const style = `
     --ui-textarea-padding-y: 8px;
     --ui-textarea-min-height: 140px;
     --ui-textarea-font-size: var(--ui-control-font-size-3, 16px);
-    --ui-textarea-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
+    --ui-textarea-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
   }
 
   :host([density="compact"]) {
