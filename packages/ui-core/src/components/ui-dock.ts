@@ -148,7 +148,7 @@ const style = `
   :host {
     --ui-dock-gap: ${DEFAULT_GAP};
     --ui-dock-padding: ${DEFAULT_PADDING};
-    --ui-dock-radius: calc(var(--ui-radius, 6px) + 6px);
+    --ui-dock-radius: var(--ui-control-radius-4, calc(var(--ui-radius, 6px) + 6px));
     --ui-dock-item-size: ${DEFAULT_ITEM_SIZE};
     --ui-dock-icon-size: 24px;
     --ui-dock-item-radius: calc(var(--ui-radius, 6px) + 2px);
@@ -160,9 +160,9 @@ const style = `
     --ui-dock-shadow: var(--shadow-3, none);
     --ui-dock-backdrop: blur(16px) saturate(1.08);
     --ui-dock-item-bg: transparent;
-    --ui-dock-item-border: color-mix(in srgb, var(--ui-dock-accent) 16%, rgba(255, 255, 255, 0.72));
+    --ui-dock-item-border: transparent;
     --ui-dock-item-shadow: none;
-    --ui-dock-item-backdrop: blur(10px) saturate(1.02);
+    --ui-dock-item-backdrop: none;
     --ui-dock-label-bg: rgba(15, 23, 42, 0.92);
     --ui-dock-label-color: #f8fafc;
     --ui-dock-label-border: rgba(255, 255, 255, 0.14);
@@ -170,7 +170,7 @@ const style = `
     --ui-dock-label-padding: 6px 10px;
     --ui-dock-label-font-size: 12px;
     --ui-dock-label-font-weight: 600;
-    --ui-dock-label-radius: 999px;
+    --ui-dock-label-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dock-label-offset: 12px;
     --ui-dock-label-backdrop: blur(10px) saturate(1.04);
     --ui-dock-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
@@ -1186,7 +1186,7 @@ export class UIDock extends ElementBase {
         item.iconEl.style.setProperty(
           'border-color',
           item.sticky || index === this._focusedIndex
-            ? 'color-mix(in srgb, var(--ui-dock-accent) 30%, var(--ui-dock-item-border))'
+            ? 'color-mix(in srgb, var(--ui-dock-accent) 55%, transparent)'
             : 'var(--ui-dock-item-border)'
         );
       }

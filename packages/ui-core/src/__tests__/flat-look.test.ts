@@ -179,5 +179,29 @@ describe('flat look across every component', () => {
     expect(read('ui-color-picker.ts')).toMatch(/\.tab:hover/);
     expect(read('ui-color-picker.ts')).toMatch(/\.actions \.btn:hover/);
   });
+
+  it('rating, inline edit, file upload, dock, command and colour picker follow the flat look', () => {
+    const read = (f: string) => readFileSync(resolve(dir, f), 'utf8');
+    // empty stars are a light neutral, never the dark muted text colour
+    expect(read('ui-rating.ts')).toMatch(/--ui-rating-color-empty: var\(--ui-color-line-strong/);
+    // inline edit: buttons and field use the control radius, no 10-12px pills
+    const inline = read('ui-inline-edit.ts');
+    expect(inline).not.toMatch(/border-radius: 1[02]px/);
+    expect(inline).toMatch(/\.save-btn \{[^}]*--ui-color-primary/);
+    // file upload: items use the shared radius, the remove button is a 24px control, drag is a 2px ring
+    const upload = read('ui-file-upload.ts');
+    expect(upload).not.toMatch(/border-radius: 1[24]px/);
+    expect(upload).toMatch(/\.surface\[data-dragging="true"\] \{[^}]*outline: var\(--ui-ring-width, 2px\)/);
+    // dock: tiles have no border until active, no blurred backdrop smear behind a magnified icon
+    const dock = read('ui-dock.ts');
+    expect(dock).toMatch(/--ui-dock-item-border: transparent;/);
+    expect(dock).toMatch(/--ui-dock-item-backdrop: none;/);
+    // command: slotted native buttons are reset, not drawn with the UA border
+    expect(read('ui-command.ts')).toMatch(/::slotted\(\[slot="command"\]\) \{[^}]*border: 0;/);
+    // colour picker: a solid primary action and no hover drop shadow on swatches
+    const picker = read('ui-color-picker.ts');
+    expect(picker).toMatch(/\.actions \.btn\[data-tone="primary"\] \{[^}]*--ui-color-primary/);
+    expect(picker).not.toMatch(/\.swatch:hover \{[^}]*box-shadow/);
+  });
 });
 

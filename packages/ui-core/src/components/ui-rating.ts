@@ -12,10 +12,10 @@ const style = `
     --ui-rating-size: var(--ui-control-size, var(--ui-font-size-lg, 20px));
     --ui-rating-gap: var(--ui-control-gap, 6px);
     --ui-rating-color: var(--ui-color-warning, #f59e0b);
-    --ui-rating-color-empty: var(--ui-color-muted, #cbd5e1);
+    --ui-rating-color-empty: var(--ui-color-line-strong, #cbd5e1);
     --ui-rating-color-hover: color-mix(in srgb, var(--ui-rating-color) 86%, #ffffff);
     --ui-rating-color-active: color-mix(in srgb, var(--ui-rating-color) 92%, #ffffff);
-    --ui-rating-color-disabled: color-mix(in srgb, var(--ui-color-muted, #cbd5e1) 60%, transparent);
+    --ui-rating-color-disabled: color-mix(in srgb, var(--ui-color-line-strong, #cbd5e1) 70%, transparent);
     --ui-rating-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
     --ui-rating-duration: var(--ui-motion-base, 160ms);
     --ui-rating-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
@@ -87,7 +87,7 @@ const style = `
   :host([variant="minimal"]) {
     --ui-rating-shadow: none;
     --ui-rating-color: color-mix(in srgb, var(--ui-rating-color) 70%, #ffffff);
-    --ui-rating-color-empty: color-mix(in srgb, var(--ui-color-muted, #cbd5e1) 50%, transparent);
+    --ui-rating-color-empty: color-mix(in srgb, var(--ui-color-line-strong, #cbd5e1) 60%, transparent);
     --ui-rating-color-hover: color-mix(in srgb, var(--ui-rating-color) 80%, #ffffff);
     --ui-rating-color-active: color-mix(in srgb, var(--ui-rating-color) 85%, #ffffff);
   }

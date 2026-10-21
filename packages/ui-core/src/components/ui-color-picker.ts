@@ -119,7 +119,7 @@ const style = `
     --ui-cp-success: var(--ui-color-success, #15803d);
     --ui-cp-warning: var(--ui-color-warning, #b45309);
     --ui-cp-danger: var(--ui-color-danger, #dc2626);
-    --ui-cp-radius: calc(var(--ui-radius, 6px) + 4px);
+    --ui-cp-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-cp-shadow: none;
     --ui-cp-padding: 10px;
     --ui-cp-duration: 160ms;
@@ -374,7 +374,7 @@ const style = `
     color: var(--ui-cp-text);
     min-inline-size: 32px;
     block-size: 30px;
-    border-radius: 9px;
+    border-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     padding: 0 8px;
     display: inline-grid;
     place-items: center;
@@ -587,7 +587,7 @@ const style = `
     min-inline-size: 0;
     inline-size: 100%;
     min-block-size: 28px;
-    border-radius: 8px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 86%, transparent);
     background: color-mix(in srgb, var(--ui-cp-bg) 95%, transparent);
     color: var(--ui-cp-text);
@@ -636,8 +636,7 @@ const style = `
   }
 
   .swatch:hover {
-    border-color: color-mix(in srgb, var(--ui-cp-accent) 40%, var(--ui-cp-border));
-    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.18);
+    border-color: color-mix(in srgb, var(--ui-cp-accent) 55%, var(--ui-cp-border));
   }
 
   .swatch[data-selected="true"] {
@@ -668,7 +667,7 @@ const style = `
 
   .actions .btn {
     min-block-size: 28px;
-    border-radius: 9px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 84%, transparent);
     background: color-mix(in srgb, var(--ui-cp-bg) 95%, transparent);
     color: var(--ui-cp-text);
@@ -687,7 +686,8 @@ const style = `
   }
 
   .actions .btn[data-tone="primary"]:hover {
-    background: color-mix(in srgb, var(--ui-cp-accent) 28%, transparent);
+    border-color: transparent;
+    background: color-mix(in srgb, var(--ui-color-primary, var(--ui-cp-accent)) 88%, #000);
   }
 
   .actions .btn:focus-visible {
@@ -696,8 +696,9 @@ const style = `
   }
 
   .actions .btn[data-tone="primary"] {
-    border-color: color-mix(in srgb, var(--ui-cp-accent) 62%, transparent);
-    background: color-mix(in srgb, var(--ui-cp-accent) 18%, transparent);
+    border-color: transparent;
+    background: var(--ui-color-primary, var(--ui-cp-accent));
+    color: var(--ui-color-foreground-on-primary, #ffffff);
   }
 
   .actions .btn[hidden] {

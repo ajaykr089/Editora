@@ -15,7 +15,7 @@ const style = `
     --ui-command-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent));
     --ui-command-accent: var(--ui-color-primary, #2563eb);
     --ui-command-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-command-radius: calc(var(--ui-radius, 6px) + 6px);
+    --ui-command-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-command-shadow: none;
     border: var(--ui-command-border);
     border-radius: var(--ui-command-radius);
@@ -52,6 +52,13 @@ const style = `
 
   ::slotted([slot="command"]) {
     display: block;
+    box-sizing: border-box;
+    inline-size: 100%;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    text-align: start;
     border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     padding: 6px 10px;
     font-size: var(--ui-control-font-size-2, 14px);
@@ -67,6 +74,17 @@ const style = `
   ::slotted([slot="command"]:focus-visible),
   ::slotted([slot="command"][data-active="true"]) {
     background: var(--ui-color-fill, color-mix(in srgb, var(--ui-command-accent) 14%, transparent));
+  }
+
+  ::slotted([slot="command"][disabled]),
+  ::slotted([slot="command"][aria-disabled="true"]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  ::slotted([slot="command"][disabled]:hover),
+  ::slotted([slot="command"][aria-disabled="true"]:hover) {
+    background: transparent;
   }
 
   ::slotted([slot="command"][hidden]) {

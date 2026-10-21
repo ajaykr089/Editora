@@ -37,8 +37,8 @@ const style = `
   }
 
   .display:hover {
-    border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
-    background: color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, transparent);
+    border-color: transparent;
+    background: var(--ui-color-fill-hover, color-mix(in srgb, currentColor 6%, transparent));
   }
 
   .value {
@@ -57,14 +57,37 @@ const style = `
   .save-btn,
   .cancel-btn {
     appearance: none;
-    border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    border: 1px solid var(--ui-color-line, #cbd5e1);
     background: var(--ui-inline-edit-surface);
     color: var(--ui-inline-edit-text);
-    border-radius: 10px;
-    min-height: 34px;
-    padding: 0 12px;
+    border-radius: var(--ui-inline-edit-radius);
+    min-height: var(--ui-control-height-1, 24px);
+    padding: 0 10px;
     cursor: pointer;
-    font: 600 12px/1.2 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 13px/1.2 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+
+  .edit-btn:hover:not(:disabled),
+  .cancel-btn:hover:not(:disabled) {
+    background: var(--ui-color-fill-hover, color-mix(in srgb, currentColor 6%, transparent));
+  }
+
+  .save-btn {
+    border-color: transparent;
+    background: var(--ui-color-primary, #2563eb);
+    color: var(--ui-color-foreground-on-primary, #ffffff);
+  }
+
+  .save-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 88%, #000);
+  }
+
+  .edit-btn:focus-visible,
+  .save-btn:focus-visible,
+  .cancel-btn:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-inline-edit-focus));
+    outline-offset: var(--ui-ring-offset, 1px);
   }
 
   .edit-btn:disabled,
@@ -83,18 +106,23 @@ const style = `
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
-    border-radius: 12px;
+    border: 1px solid var(--ui-color-line, #cbd5e1);
+    border-radius: var(--ui-inline-edit-radius);
     background: var(--ui-inline-edit-surface);
     color: var(--ui-inline-edit-text);
-    padding: 10px 12px;
-    font: 500 14px/1.45 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 6px 10px;
+    font: 400 14px/1.45 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     outline: none;
   }
 
+  .field:hover:not(:focus-visible) {
+    border-color: var(--ui-color-line-strong, #94a3b8);
+  }
+
   .field:focus-visible {
-    border-color: color-mix(in srgb, var(--ui-inline-edit-focus) 62%, transparent);
-    box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-inline-edit-focus));
+    border-color: var(--ui-ring-color, var(--ui-inline-edit-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-inline-edit-focus));
+    outline-offset: -1px;
   }
 
   .actions {

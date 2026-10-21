@@ -101,9 +101,16 @@ const style = `
     box-sizing: border-box;
   }
 
+  :host(:not([disabled])) .surface:hover:not([data-dragging="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-file-upload-border-color));
+    background: color-mix(in srgb, currentColor 2%, var(--ui-file-upload-bg));
+  }
+
   .surface[data-dragging="true"] {
-    border-color: color-mix(in srgb, var(--ui-file-upload-focus) 62%, transparent);
-    box-shadow: 0 0 0 1px var(--ui-file-upload-focus);
+    border-color: var(--ui-file-upload-focus);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-file-upload-focus);
+    outline-offset: -1px;
+    background: color-mix(in srgb, var(--ui-file-upload-focus) 6%, var(--ui-file-upload-bg));
   }
 
   :host([surface="dropzone"]) .surface {
@@ -111,12 +118,6 @@ const style = `
     justify-items: center;
     text-align: center;
     min-block-size: 168px;
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-file-upload-bg) 94%, #ffffff 6%),
-        var(--ui-file-upload-bg)
-      );
   }
 
   .headline {
@@ -166,9 +167,9 @@ const style = `
     justify-content: space-between;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-file-upload-border-color) 70%, transparent);
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--ui-file-upload-bg) 97%, transparent);
+    border: 1px solid var(--ui-file-upload-border-color);
+    border-radius: var(--ui-file-upload-radius);
+    background: transparent;
   }
 
   .actions[hidden] {
@@ -203,15 +204,15 @@ const style = `
     gap: 10px;
     align-items: center;
     padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-file-upload-border-color) 76%, transparent);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--ui-file-upload-bg) 94%, transparent);
+    border: 1px solid var(--ui-file-upload-border-color);
+    border-radius: var(--ui-file-upload-radius);
+    background: transparent;
   }
 
   .preview {
     inline-size: 38px;
     block-size: 38px;
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     background: color-mix(in srgb, var(--ui-file-upload-text) 8%, transparent);
     overflow: hidden;
     display: inline-grid;
@@ -318,13 +319,24 @@ const style = `
   }
 
   .file-remove {
-    border: none;
-    border-radius: 999px;
-    padding: 6px 9px;
-    background: color-mix(in srgb, currentColor 8%, transparent);
+    border: 1px solid var(--ui-file-upload-border-color);
+    border-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
+    min-block-size: var(--ui-control-height-1, 24px);
+    padding: 0 8px;
+    background: transparent;
     color: inherit;
     cursor: pointer;
-    font: 600 11px/1 "Inter", sans-serif;
+    font: 500 12px/1 "Inter", sans-serif;
+    transition: background-color 120ms ease;
+  }
+
+  .file-remove:hover {
+    background: var(--ui-color-fill-hover, color-mix(in srgb, currentColor 8%, transparent));
+  }
+
+  .file-remove:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-file-upload-focus));
+    outline-offset: var(--ui-ring-offset, 1px);
   }
 
   .file-remove[data-tone="danger"] {
@@ -332,6 +344,7 @@ const style = `
   }
 
   .file-remove[data-variant="primary"] {
+    border-color: transparent;
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
     color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%));
   }
