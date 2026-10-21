@@ -142,6 +142,16 @@ const style = `
     color: var(--ui-color-foreground-on-primary, #ffffff);
     font: 500 14px/1 "Inter", "IBM Plex Sans", sans-serif;
     cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+
+  .cta:hover {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 88%, #000);
+  }
+
+  .cta:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-color-primary, #2563eb));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .list {

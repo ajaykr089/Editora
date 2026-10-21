@@ -157,5 +157,27 @@ describe('flat look across every component', () => {
     const aspect = readFileSync(resolve(dir, 'ui-aspect-ratio.ts'), 'utf8');
     expect(aspect).toMatch(/\.surface::before \{[^}]*background: none;/);
   });
+
+  it('resize handles, radio options, beam nodes and the dock follow the flat look', () => {
+    const read = (f: string) => readFileSync(resolve(dir, f), 'utf8');
+    // splitter: a hairline across the gap plus a grip, both turn accent on hover/focus/drag
+    const splitter = read('ui-splitter.ts');
+    expect(splitter).toMatch(/\.splitter::before \{/);
+    expect(splitter).toMatch(/:host\(:hover\) \.splitter::before/);
+    // radio group: plain rows by default, the box only for the card and segmented variants
+    const radio = read('ui-radio-group.ts');
+    expect(radio).toMatch(/--ui-radio-border: transparent;/);
+    expect(radio).toMatch(/:host\(\[variant="card"\]\) \.option \{\s*--ui-radio-bg:/);
+    expect(radio).not.toMatch(/0 10px 24px/);
+    // beam: nodes and hub carry no drop shadow by default
+    const beam = read('ui-animated-beam.ts');
+    expect(beam.match(/--ui-animated-beam-node-shadow:\s*([^;]*);/)?.[1].trim()).toBe('none');
+    expect(beam.match(/--ui-animated-beam-hub-shadow:\s*([^;]*);/)?.[1].trim()).toBe('none');
+    // controls that used to have no hover state
+    expect(read('ui-pin-input.ts')).toMatch(/\.slot:hover/);
+    expect(read('ui-file-upload.ts')).toMatch(/\.cta:hover/);
+    expect(read('ui-color-picker.ts')).toMatch(/\.tab:hover/);
+    expect(read('ui-color-picker.ts')).toMatch(/\.actions \.btn:hover/);
+  });
 });
 

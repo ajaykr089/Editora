@@ -26,21 +26,22 @@ const style = `
     color-scheme: light dark;
 
     --ui-radio-gap: 8px;
-    --ui-radio-pad-y: 10px;
-    --ui-radio-pad-x: 12px;
-    --ui-radio-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-radio-pad-y: 6px;
+    --ui-radio-pad-x: 8px;
+    --ui-radio-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-radio-dot-size: 10px;
     --ui-radio-control-size: 18px;
 
-    --ui-radio-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent);
-    --ui-radio-bg-hover: color-mix(in srgb, var(--ui-color-surface, #ffffff) 80%, #f8fafc 20%);
-    --ui-radio-bg-selected: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-color-surface, #ffffff));
-    --ui-radio-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-radio-bg: transparent;
+    --ui-radio-bg-hover: var(--ui-color-fill-hover, color-mix(in srgb, currentColor 6%, transparent));
+    --ui-radio-bg-selected: transparent;
+    --ui-radio-border: transparent;
+    --ui-radio-line: var(--ui-color-line, #cbd5e1);
     --ui-radio-border-selected: var(--ui-color-primary, #2563eb);
     --ui-radio-text: var(--ui-color-text, #0f172a);
-    --ui-radio-muted: #526175;
+    --ui-radio-muted: var(--ui-color-text-secondary, #526175);
     --ui-radio-shadow: none;
-    --ui-radio-ring: color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent);
+    --ui-radio-ring: var(--ui-ring-color, var(--ui-color-primary, #2563eb));
   }
 
   .root {
@@ -80,13 +81,17 @@ const style = `
   }
 
   .option:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--ui-radio-ring), var(--ui-radio-shadow);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-radio-ring);
+    outline-offset: var(--ui-ring-offset, 1px);
   }
 
   .option[data-checked="true"] {
-    border-color: var(--ui-radio-border-selected);
     background: var(--ui-radio-bg-selected);
+  }
+
+  :host([variant="card"]) .option[data-checked="true"],
+  :host([variant="segmented"]) .option[data-checked="true"] {
+    border-color: var(--ui-radio-border-selected);
   }
 
   .option[data-disabled="true"] {
@@ -100,8 +105,8 @@ const style = `
     inline-size: var(--ui-radio-control-size);
     block-size: var(--ui-radio-control-size);
     border-radius: 999px;
-    border: 1.5px solid color-mix(in srgb, var(--ui-radio-border-selected) 44%, var(--ui-radio-border));
-    background: color-mix(in srgb, var(--ui-radio-bg) 88%, white 12%);
+    border: 1px solid var(--ui-color-line-strong, var(--ui-radio-line));
+    background: var(--ui-color-surface, #ffffff);
     display: grid;
     place-items: center;
     transition: border-color 140ms ease, background-color 140ms ease;
@@ -122,6 +127,14 @@ const style = `
     transform: scale(1);
   }
 
+  .option[data-checked="true"] .control {
+    border-color: var(--ui-radio-border-selected);
+  }
+
+  .option:hover .control {
+    border-color: var(--ui-radio-border-selected);
+  }
+
   .text {
     display: grid;
     gap: 2px;
@@ -129,7 +142,7 @@ const style = `
   }
 
   .label {
-    font: 600 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    font: 500 14px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
     letter-spacing: 0.01em;
     white-space: nowrap;
     overflow: hidden;
@@ -137,7 +150,7 @@ const style = `
   }
 
   .description {
-    font: 500 12px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    font: 400 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ui-radio-muted);
     white-space: nowrap;
     overflow: hidden;
@@ -145,13 +158,26 @@ const style = `
   }
 
   :host([variant="card"]) .option {
-    border-radius: 14px;
-    box-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.06),
-      0 10px 24px rgba(2, 6, 23, 0.08);
+    --ui-radio-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-radio-border: var(--ui-color-line-subtle, var(--ui-radio-line));
+    --ui-radio-bg-selected: color-mix(in srgb, var(--ui-color-primary, #2563eb) 8%, var(--ui-color-surface, #ffffff));
+    --ui-radio-pad-y: 10px;
+    --ui-radio-pad-x: 12px;
+    border-radius: calc(var(--ui-radio-radius) + 2px);
+  }
+
+  :host([variant="segmented"]) .option:focus-visible {
+    outline-offset: -2px;
+  }
+
+  :host([variant="segmented"]) .option {
+    --ui-radio-bg-selected: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-color-surface, #ffffff));
+    --ui-radio-pad-y: 8px;
+    --ui-radio-pad-x: 12px;
   }
 
   :host([variant="segmented"]) .root {
+    --ui-radio-border: var(--ui-color-line-subtle, var(--ui-radio-line));
     gap: 0;
     border: 1px solid var(--ui-radio-border);
     border-radius: calc(var(--ui-radio-radius) + 2px);
@@ -180,21 +206,19 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-radio-pad-y: 8px;
-    --ui-radio-pad-x: 10px;
+    --ui-radio-pad-y: 4px;
+    --ui-radio-pad-x: 6px;
     --ui-radio-control-size: 16px;
     --ui-radio-dot-size: 8px;
     --ui-radio-gap: 6px;
-    --ui-radio-radius: 10px;
   }
 
   :host([size="lg"]) {
-    --ui-radio-pad-y: 12px;
-    --ui-radio-pad-x: 14px;
+    --ui-radio-pad-y: 8px;
+    --ui-radio-pad-x: 10px;
     --ui-radio-control-size: 20px;
     --ui-radio-dot-size: 11px;
     --ui-radio-gap: 10px;
-    --ui-radio-radius: 14px;
   }
 
   :host([tone="neutral"]) { --ui-radio-border-selected: #64748b; }

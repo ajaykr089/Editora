@@ -255,22 +255,14 @@ const style = `
     --ui-animated-beam-border: 1px solid transparent;
     --ui-animated-beam-shadow: none;
     --ui-animated-beam-backdrop: none;
-    --ui-animated-beam-node-bg:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    --ui-animated-beam-node-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-animated-beam-node-color: inherit;
-    --ui-animated-beam-node-border:
-      1px solid color-mix(in srgb, var(--ui-animated-beam-accent) 12%, rgba(15, 23, 42, 0.1));
-    --ui-animated-beam-node-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.06),
-      0 14px 28px rgba(15, 23, 42, 0.1);
+    --ui-animated-beam-node-border: 1px solid var(--ui-color-line, rgba(15, 23, 42, 0.14));
+    --ui-animated-beam-node-shadow: none;
     --ui-animated-beam-node-backdrop: none;
-    --ui-animated-beam-hub-bg:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96));
-    --ui-animated-beam-hub-border:
-      1px solid color-mix(in srgb, var(--ui-animated-beam-accent) 14%, rgba(15, 23, 42, 0.1));
-    --ui-animated-beam-hub-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.08),
-      0 18px 34px rgba(15, 23, 42, 0.12);
+    --ui-animated-beam-hub-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-animated-beam-hub-border: 1px solid color-mix(in srgb, var(--ui-animated-beam-accent) 40%, var(--ui-color-line, rgba(15, 23, 42, 0.14)));
+    --ui-animated-beam-hub-shadow: none;
     --ui-animated-beam-glow-opacity: ${MOTION_PRESETS.smooth.glowOpacity};
     --ui-animated-beam-glow-blur: ${MOTION_PRESETS.smooth.glowBlur}px;
     --ui-animated-beam-core-opacity: 0.96;

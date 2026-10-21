@@ -110,6 +110,10 @@ const style = `
     letter-spacing: 0;
   }
 
+  .slot:hover:not(:disabled):not(:focus-visible) {
+    border-color: var(--ui-color-line-strong, var(--ui-pin-border-color));
+  }
+
   .slot:focus-visible {
     border-color: var(--ui-ring-color, var(--ui-pin-focus));
     outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-pin-focus));

@@ -535,6 +535,11 @@ const style = `
       color var(--ui-cp-duration) var(--ui-cp-ease);
   }
 
+  .tab:hover:not([data-active="true"]) {
+    background: color-mix(in srgb, var(--ui-cp-accent) 8%, transparent);
+    color: var(--ui-cp-text);
+  }
+
   .tab[data-active="true"] {
     background: color-mix(in srgb, var(--ui-cp-accent) 15%, transparent);
     color: var(--ui-cp-text);
@@ -674,6 +679,20 @@ const style = `
       border-color var(--ui-cp-duration) var(--ui-cp-ease),
       background-color var(--ui-cp-duration) var(--ui-cp-ease),
       color var(--ui-cp-duration) var(--ui-cp-ease);
+  }
+
+  .actions .btn:hover {
+    background: color-mix(in srgb, var(--ui-cp-accent) 10%, var(--ui-cp-bg));
+    border-color: color-mix(in srgb, var(--ui-cp-accent) 34%, var(--ui-cp-border));
+  }
+
+  .actions .btn[data-tone="primary"]:hover {
+    background: color-mix(in srgb, var(--ui-cp-accent) 28%, transparent);
+  }
+
+  .actions .btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-cp-accent) 64%, transparent);
+    outline-offset: 2px;
   }
 
   .actions .btn[data-tone="primary"] {

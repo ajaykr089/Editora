@@ -166,7 +166,7 @@ const style = `
     --ui-dock-label-bg: rgba(15, 23, 42, 0.92);
     --ui-dock-label-color: #f8fafc;
     --ui-dock-label-border: rgba(255, 255, 255, 0.14);
-    --ui-dock-label-shadow: 0 14px 28px rgba(2, 6, 23, 0.28);
+    --ui-dock-label-shadow: var(--shadow-3, 0 8px 16px rgba(2, 6, 23, 0.2));
     --ui-dock-label-padding: 6px 10px;
     --ui-dock-label-font-size: 12px;
     --ui-dock-label-font-weight: 600;
@@ -1042,7 +1042,7 @@ export class UIDock extends ElementBase {
         badgeEl.style.setProperty('color', '#ffffff');
         badgeEl.style.setProperty('font-size', '11px');
         badgeEl.style.setProperty('font-weight', '700');
-        badgeEl.style.setProperty('box-shadow', '0 8px 18px color-mix(in srgb, var(--ui-dock-accent) 32%, rgba(15, 23, 42, 0.18))');
+        badgeEl.style.setProperty('box-shadow', 'none');
         badgeEl.style.setProperty('z-index', '4');
       }
     });
