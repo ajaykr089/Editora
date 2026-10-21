@@ -134,7 +134,7 @@ describe('flat look across every component', () => {
     const theme = readFileSync(resolve(__dirname, '../theme.ts'), 'utf8');
     for (const name of ['sidebar', 'navigationMenu', 'appHeader', 'alert', 'avatar', 'badge', 'card']) {
       const block = theme.match(new RegExp(`\\n  ${name}: \\{[\\s\\S]*?\\n  \\}`))?.[0] || '';
-      expect(block, name).not.toMatch(/\n    (border|shadow): (?!'none')/);
+      expect(block, name).not.toMatch(/\n {4}(border|shadow): (?!'none')/);
     }
   });
 
