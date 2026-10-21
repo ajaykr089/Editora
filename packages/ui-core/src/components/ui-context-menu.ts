@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { createPortalContainer } from '../portal';
+import { openOverlay } from '../primitives/overlay-motion';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import {
   createPositioner,
@@ -1192,6 +1193,8 @@ export class UIContextMenu extends ElementBase {
     this._portalEl = portal;
     this._portalSurfaceEl = portal.querySelector('.surface') as HTMLElement | null;
     this._portalContentHostEl = portal.querySelector('ui-listbox.content-host') as UIListbox | null;
+    // The surface keeps its own fade; it only gets the state hooks and the top layer.
+    if (this._portalSurfaceEl) openOverlay(this._portalSurfaceEl, { animate: false });
     this._moveContentIntoPortal();
     this._portalContentHostEl?.refresh();
     this._syncPortalVisualState();

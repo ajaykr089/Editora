@@ -2,25 +2,21 @@ import { ElementBase } from '../ElementBase';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
+import { OVERLAY_MOTION_CSS, openOverlay, removeOverlay, retireOverlay } from '../primitives/overlay-motion';
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   .popover-shell {
     --ui-popover-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-popover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
-        color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
-      );
+    --ui-popover-bg: var(--color-panel-solid, var(--ui-color-surface-elevated, var(--ui-color-surface, #ffffff)));
     --ui-popover-text: var(--ui-color-text, #0f172a);
     --ui-popover-muted: var(--ui-color-muted, #526175);
-    --ui-popover-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-popover-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent));
     --ui-popover-border: 1px solid var(--ui-popover-border-color);
-    --ui-popover-shadow:
-      0 14px 34px rgba(15, 23, 42, 0.12),
-      0 28px 64px rgba(15, 23, 42, 0.08);
-    --ui-popover-radius: 14px;
-    --ui-popover-padding: 14px;
+    --ui-popover-shadow: var(--shadow-5, 0 8px 24px rgba(15, 23, 42, 0.12));
+    --ui-popover-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-popover-padding: 16px;
     --ui-popover-backdrop: none;
     --ui-popover-font-size: var(--ui-default-font-size, var(--font-size-2, var(--ui-font-size-md, 14px)));
     --ui-popover-line-height: var(--ui-default-line-height, var(--line-height-2, 20px));
@@ -29,22 +25,22 @@ const style = `
 
   .popover-shell[data-size="sm"],
   .popover-shell[data-size="1"] {
-    --ui-popover-radius: 12px;
-    --ui-popover-padding: 10px;
+    --ui-popover-radius: var(--ui-radius, 6px);
+    --ui-popover-padding: 12px;
     --ui-popover-font-size: 13px;
     --ui-popover-line-height: 18px;
   }
 
   .popover-shell[data-size="md"],
   .popover-shell[data-size="2"] {
-    --ui-popover-radius: 14px;
-    --ui-popover-padding: 14px;
+    --ui-popover-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-popover-padding: 16px;
   }
 
   .popover-shell[data-size="lg"],
   .popover-shell[data-size="3"] {
-    --ui-popover-radius: 18px;
-    --ui-popover-padding: 18px;
+    --ui-popover-radius: calc(var(--ui-radius, 6px) + 4px);
+    --ui-popover-padding: 20px;
     --ui-popover-font-size: 15px;
     --ui-popover-line-height: 22px;
   }
@@ -151,16 +147,12 @@ const style = `
     padding: var(--ui-popover-padding);
     box-shadow: var(--ui-popover-shadow);
     backdrop-filter: var(--ui-popover-backdrop);
-    font: 500 var(--ui-popover-font-size)/var(--ui-popover-line-height) var(--ui-font-family, system-ui, sans-serif);
+    font: 400 var(--ui-popover-font-size)/var(--ui-popover-line-height) var(--ui-font-family, system-ui, sans-serif);
     letter-spacing: var(--ui-popover-letter-spacing);
-    opacity: 0;
-    transform: translateY(6px) scale(0.99);
-    transition: opacity var(--ui-motion-base, 200ms) var(--ui-motion-easing, ease), transform var(--ui-motion-base, 200ms) var(--ui-motion-easing, ease);
     position: relative;
     min-inline-size: min(180px, calc(100vw - 24px));
     max-inline-size: min(360px, calc(100vw - 24px));
   }
-  .panel.show { opacity: 1; transform: translateY(0) scale(1); }
 
   .content {
     display: grid;
@@ -254,9 +246,6 @@ const style = `
     transform: rotate(-90deg);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .panel { transition: none !important; transform: none !important; }
-  }
 
   @media (prefers-contrast: more) {
     .panel {
@@ -456,7 +445,7 @@ export class UIPopover extends ElementBase {
     });
   }
 
-  private _teardownPortal(): void {
+  private _teardownPortal(animate = false): void {
     this._contentObserver?.disconnect();
     this._contentObserver = null;
     this._layer?.destroy();
@@ -464,13 +453,9 @@ export class UIPopover extends ElementBase {
     this._positioner?.destroy();
     this._positioner = null;
     this._panelEl = null;
-    if (this._portalEl?.parentElement) {
-      try {
-        this._portalEl.parentElement.removeChild(this._portalEl);
-      } catch {
-        // no-op
-      }
-    }
+    // Closing plays the exit and removes the surface afterwards; a remount or removing the host does not wait.
+    if (animate) retireOverlay(this._portalEl);
+    else removeOverlay(this._portalEl);
     this._portalEl = null;
   }
 
@@ -529,6 +514,7 @@ export class UIPopover extends ElementBase {
       flip: this.getAttribute('flip') !== 'false',
       arrow: this._portalEl.querySelector('.arrow') as HTMLElement | null
     });
+    openOverlay(this._portalEl);
 
     this._syncDismissableLayer();
   }
@@ -554,7 +540,7 @@ export class UIPopover extends ElementBase {
       this.dispatchEvent(new CustomEvent('open-change', { detail: { open: true }, bubbles: true, composed: true }));
       return;
     }
-    this._teardownPortal();
+    this._teardownPortal(true);
     this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
     this.dispatchEvent(new CustomEvent('open-change', { detail: { open: false }, bubbles: true, composed: true }));
 

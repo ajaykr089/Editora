@@ -10,6 +10,7 @@ import {
   syncRovingTabStops
 } from '../primitives/roving-focus-group';
 import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
+import { OVERLAY_MOTION_CSS, openOverlay, removeOverlay, retireOverlay } from '../primitives/overlay-motion';
 import './ui-listbox';
 import { UIListbox } from './ui-listbox';
 import { createSharedMenuItemCss } from './menu-item-styles';
@@ -295,6 +296,8 @@ const hostStyle = `
 `;
 
 const panelStyle = `
+  ${OVERLAY_MOTION_CSS}
+
   .ui-menubar-portal {
     position: absolute;
     pointer-events: auto;
@@ -317,12 +320,7 @@ const panelStyle = `
     background: var(--ui-menubar-panel-bg, #fff);
     color: var(--ui-menubar-panel-color, #0f172a);
     box-shadow: var(--ui-menubar-panel-shadow);
-    opacity: 0;
-    transform: translateY(5px) scale(0.984);
-    transform-origin: top left;
-    animation: ui-menubar-panel-enter 160ms cubic-bezier(0.2, 0.9, 0.24, 1) forwards;
     outline: none;
-    will-change: transform, opacity;
   }
 
   .ui-menubar-portal .surface[data-placement="top"] {
@@ -516,25 +514,6 @@ const panelStyle = `
     font: 500 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
     letter-spacing: 0.01em;
     opacity: 0.72;
-  }
-
-  @keyframes ui-menubar-panel-enter {
-    from {
-      opacity: 0;
-      transform: translateY(5px) scale(0.984);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ui-menubar-portal .surface {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
   }
 
   @media (prefers-contrast: more) {
@@ -875,7 +854,7 @@ export class UIMenubar extends ElementBase {
       } else {
         this._unbindGlobalListeners();
         const previous = this._panelForIndex >= 0 ? this._panelForIndex : this._selectedIndex();
-        this._teardownPanel();
+        this._teardownPanel(true);
         this.dispatchEvent(new CustomEvent('close', { detail: { previous }, bubbles: true }));
       }
       return;
@@ -887,7 +866,7 @@ export class UIMenubar extends ElementBase {
       if (selected !== this._panelForIndex || !this._portalEl) this._rebuildPanel();
     } else {
       this._unbindGlobalListeners();
-      this._teardownPanel();
+      this._teardownPanel(true);
     }
   }
 
@@ -1332,21 +1311,18 @@ export class UIMenubar extends ElementBase {
       closeOnPointerOutside: true,
       onDismiss: () => this.close()
     });
+    openOverlay(this._panelSurface() || panel);
   }
 
-  private _teardownPanel(): void {
+  private _teardownPanel(animate = false): void {
     this._dismissableLayer?.destroy();
     this._dismissableLayer = null;
     this._positioner?.destroy();
     this._positioner = null;
 
-    if (this._portalEl?.parentElement) {
-      try {
-        this._portalEl.parentElement.removeChild(this._portalEl);
-      } catch {
-        // no-op
-      }
-    }
+    // Closing the menubar plays the exit; moving from one menu to the next does not wait.
+    if (animate) retireOverlay(this._portalEl);
+    else removeOverlay(this._portalEl);
 
     this._portalEl = null;
     this._portalSurfaceEl = null;

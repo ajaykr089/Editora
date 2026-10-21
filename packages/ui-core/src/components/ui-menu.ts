@@ -3,6 +3,7 @@ import { resolveTriggerControl } from '../primitives/trigger';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle } from '../primitives/positioner';
+import { OVERLAY_MOTION_CSS, openOverlay, removeOverlay, retireOverlay } from '../primitives/overlay-motion';
 import { createSharedMenuItemCss } from './menu-item-styles';
 
 type MenuPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -138,6 +139,8 @@ const hostStyle = `
 `;
 
 const menuStyle = `
+  ${OVERLAY_MOTION_CSS}
+
   .menu {
     position: absolute;
     display: flex;
@@ -155,12 +158,7 @@ const menuStyle = `
     background: var(--ui-menu-bg, #fff);
     color: var(--ui-menu-color, #0f172a);
     box-shadow: var(--ui-menu-shadow);
-    opacity: 0;
-    transform: translateY(4px) scale(0.985);
-    transform-origin: top center;
-    animation: ui-menu-enter 150ms cubic-bezier(0.2, 0.9, 0.24, 1) forwards;
     outline: none;
-    will-change: transform, opacity;
     z-index: var(--ui-menu-z, 1560);
   }
 
@@ -312,19 +310,6 @@ const menuStyle = `
     font: 500 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
     letter-spacing: 0.01em;
     opacity: 0.72;
-  }
-
-  @keyframes ui-menu-enter {
-    from { opacity: 0; transform: translateY(4px) scale(0.985); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .menu {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
   }
 
   @media (prefers-contrast: more) {
@@ -542,7 +527,7 @@ export class UIMenu extends ElementBase {
     }
 
     this._unbindGlobalListeners();
-    this._teardownPortal();
+    this._teardownPortal(true);
     this.dispatchEvent(new CustomEvent('close', { bubbles: true }));
     this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { open: false } }));
 
@@ -837,6 +822,7 @@ export class UIMenu extends ElementBase {
     parent.replaceChild(replacement, current);
     this._portalEl = replacement;
     this._rebuildPositioner();
+    openOverlay(replacement, { animate: false });
   }
 
   private _rebuildPositioner(): void {
@@ -858,6 +844,7 @@ export class UIMenu extends ElementBase {
   private _mountPortal(): void {
     const trigger = this._getTrigger();
     if (!trigger) return;
+    let fresh = false;
     if (!this._portalEl) {
       this._portalEl = this._buildPortalElement();
       const root = createPortalContainer();
@@ -866,10 +853,12 @@ export class UIMenu extends ElementBase {
         return;
       }
       root.appendChild(this._portalEl);
+      fresh = true;
     } else {
       this._syncPortalVisualState();
     }
     this._rebuildPositioner();
+    if (fresh && this._portalEl) openOverlay(this._portalEl);
     this._dismissableLayer?.destroy();
     this._dismissableLayer = createDismissableLayer({
       node: this._portalEl,
@@ -880,18 +869,13 @@ export class UIMenu extends ElementBase {
     });
   }
 
-  private _teardownPortal(): void {
+  private _teardownPortal(animate = false): void {
     this._dismissableLayer?.destroy();
     this._dismissableLayer = null;
     this._positioner?.destroy();
     this._positioner = null;
-    if (this._portalEl?.parentElement) {
-      try {
-        this._portalEl.parentElement.removeChild(this._portalEl);
-      } catch {
-        // no-op
-      }
-    }
+    if (animate) retireOverlay(this._portalEl);
+    else removeOverlay(this._portalEl);
     this._portalEl = null;
     this._menuClickHandler = null;
     this._resetTypeahead();
