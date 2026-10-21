@@ -597,6 +597,17 @@ Light and dark, with the default amber accent (`radius` is 6px):
   `variant="segmented"`; `soft`, `outline`, `solid`, `cards` and `indicator` keep working.
 - **Cards** have a single hairline border and no shadow. **Badges** are soft tinted labels without a border
   (`variant="solid"` for a filled one).
+- **Alerts** are a tinted fill with a hairline in the tone colour and a plain icon; the coloured bar on the leading edge
+  is opt-in (`indicator="line"`). **Slider**, **progress** and **meter** are flat tracks (4–6px) with a solid fill; the
+  slider thumb is a white circle.
+- **Avatars** are a soft tint with initials. **Breadcrumbs** show the current page in bold, with no pill.
+  **Pagination** is a row of 32px buttons with a solid accent for the current page, no bar around them.
+- **Calendar** days are plain cells; the selected day is solid accent, the range a soft tint.
+- **Accordion** and **collapsible** are one hairline box with dividers; the accent bar on an open item is opt-in
+  (`indicator="line"` on the accordion). **Stepper** steps have no card: the current one is a solid circle.
+- **Toggle** and **toggle group** are outlined buttons that turn a soft accent when pressed (no dot glyph unless you pass
+  `icon-on` / `icon-off`). **Toolbar**, **hover card** and **drawer** take the same flat surface as popovers.
+- **Pin input** slots are 40px (one control tall), **empty state** and **file upload** use a primary button.
 
 ### Control sizes
 
