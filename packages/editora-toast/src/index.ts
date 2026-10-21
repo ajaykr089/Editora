@@ -31,8 +31,17 @@ export interface ToastOptionsLegacy extends ToastOptions {
   message: string;
 }
 
-function showLegacy(options: ToastOptions) {
-  if (typeof document === "undefined") return { dismiss: () => {} };
+// What a call returns on the server, where there is no page to show a toast on: it has the shape of a toast and does nothing.
+const inertToast = (options: ToastOptions): ToastInstance => ({
+  id: options.id || "",
+  options,
+  createdAt: 0,
+  dismiss: () => {},
+  update: () => {},
+});
+
+function showLegacy(options: ToastOptions): ToastInstance {
+  if (typeof document === "undefined") return inertToast(options);
   return getManager().show(options);
 }
 
@@ -76,9 +85,10 @@ function normalizeLegacyArgs(
   return result as ToastOptions;
 }
 
-// Legacy exports
-export const toast = {
-  info: (
+// The simple API. `toast('Copied')` shows a plain toast (no level, no icon); the level methods add an icon and a
+// colour. Everything the advanced API does for a single toast is here too, so one import is enough.
+function makeLevel(level: ToastLevel) {
+  return (
     msg: string,
     optionsOrDuration?: Partial<ToastOptions> | number,
     theme?: ToastTheme,
@@ -86,49 +96,55 @@ export const toast = {
   ) =>
     showLegacy({
       ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position),
-      level: "info",
-    }),
-  success: (
-    msg: string,
-    optionsOrDuration?: Partial<ToastOptions> | number,
-    theme?: ToastTheme,
-    position?: ToastPosition,
-  ) =>
-    showLegacy({
-      ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position),
-      level: "success",
-    }),
-  error: (
-    msg: string,
-    optionsOrDuration?: Partial<ToastOptions> | number,
-    theme?: ToastTheme,
-    position?: ToastPosition,
-  ) =>
-    showLegacy({
-      ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position),
-      level: "error",
-    }),
-  warning: (
-    msg: string,
-    optionsOrDuration?: Partial<ToastOptions> | number,
-    theme?: ToastTheme,
-    position?: ToastPosition,
-  ) =>
-    showLegacy({
-      ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position),
-      level: "warning",
-    }),
-  loading: (
-    msg: string,
-    optionsOrDuration?: Partial<ToastOptions> | number,
-    theme?: ToastTheme,
-    position?: ToastPosition,
-  ) =>
-    showLegacy({
-      ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position),
-      level: "loading",
-    }),
-};
+      level,
+    });
+}
+
+const isBrowser = () => typeof document !== "undefined";
+
+function toastBase(
+  msg: string,
+  optionsOrDuration?: Partial<ToastOptions> | number,
+  theme?: ToastTheme,
+  position?: ToastPosition,
+) {
+  const options = normalizeLegacyArgs(msg, optionsOrDuration, theme, position);
+  return showLegacy({ ...options, level: options.level || "custom" });
+}
+
+export const toast = Object.assign(toastBase, {
+  info: makeLevel("info"),
+  success: makeLevel("success"),
+  error: makeLevel("error"),
+  warning: makeLevel("warning"),
+  loading: makeLevel("loading"),
+
+  // Full options (title, description, actions, progress, ...). Returns the toast.
+  show: (options: ToastOptions) => showLegacy(options),
+
+  // One toast that follows a promise from loading to success or error. Resolves with the promise's value.
+  promise: <T>(promise: Promise<T>, options: ToastPromiseOptions<T>): Promise<T> =>
+    isBrowser() ? getManager().promise(promise, options) : promise,
+
+  update: (id: string, options: Partial<ToastOptions>) =>
+    isBrowser() ? getManager().update(id, options) : false,
+
+  // With an id: that toast. Without: all of them.
+  dismiss: (id?: string) => {
+    if (!isBrowser()) return false;
+    if (id === undefined) {
+      getManager().clear();
+      return true;
+    }
+    return getManager().dismiss(id);
+  },
+  clear: () => {
+    if (isBrowser()) getManager().clear();
+  },
+  configure: (config: Partial<ToastConfig>) => {
+    if (isBrowser()) getManager().configure(config);
+  },
+});
 
 export default toast;
 

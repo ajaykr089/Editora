@@ -1,4 +1,4 @@
-import { toastAdvanced as toast } from '@editora/toast';
+import { toast } from '@editora/toast';
 import '@editora/toast/toast.css';
 
 const saveDocument = new Promise<{ name: string }>((resolve) => {

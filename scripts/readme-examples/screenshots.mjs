@@ -282,6 +282,7 @@ const shots = [
   },
 
   // ---- @editora/toast
+  // Toasts fold into a deck by default; the pictures that show several toasts hover the stack to open it.
   {
     out: 'packages/editora-toast/docs/images/levels.png',
     example: 'toast-quick-start',
@@ -290,6 +291,8 @@ const shots = [
     clip: { x: 568, y: 160, width: 440, height: 200 },
     async act(page) {
       await page.waitForTimeout(500);
+      await page.locator('.editora-toast[data-front="true"]').hover();
+      await page.waitForTimeout(700);
     },
   },
   {
@@ -297,9 +300,11 @@ const shots = [
     example: 'toast-advanced',
     viewport: { width: 1008, height: 360 },
     page: true,
-    clip: { x: 568, y: 160, width: 440, height: 200 },
+    clip: { x: 568, y: 120, width: 440, height: 240 },
     async act(page) {
       await page.waitForTimeout(500);
+      await page.locator('.editora-toast[data-front="true"]').hover();
+      await page.waitForTimeout(700);
     },
   },
   {
@@ -308,6 +313,10 @@ const shots = [
     viewport: { width: 1008, height: 360 },
     page: true,
     clip: { x: 568, y: 220, width: 440, height: 140 },
+    async act(page) {
+      await page.locator('.editora-toast[data-front="true"]').hover();
+      await page.waitForTimeout(300);
+    },
   },
   {
     out: 'packages/editora-toast/docs/images/promise-success.png',
@@ -316,15 +325,48 @@ const shots = [
     page: true,
     clip: { x: 568, y: 220, width: 440, height: 140 },
     async act(page) {
+      await page.locator('.editora-toast[data-front="true"]').hover();
       await page.waitForTimeout(1400);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/deck-closed.png',
+    example: 'toast-stack',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 230, width: 440, height: 130 },
+    async act(page) {
+      await page.waitForTimeout(600);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/deck-open.png',
+    example: 'toast-stack',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 160, width: 440, height: 200 },
+    async act(page) {
+      await page.waitForTimeout(500);
+      await page.locator('.editora-toast[data-front="true"]').hover();
+      await page.waitForTimeout(700);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/icons.png',
+    example: 'toast-icons',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 100, width: 440, height: 260 },
+    async act(page) {
+      await page.waitForTimeout(600);
     },
   },
   {
     out: 'packages/editora-toast/docs/images/themes.png',
     example: 'toast-themes',
-    viewport: { width: 1008, height: 700 },
+    viewport: { width: 1008, height: 760 },
     page: true,
-    clip: { x: 568, y: 0, width: 440, height: 680 },
+    clip: { x: 568, y: 0, width: 440, height: 740 },
     async act(page) {
       await page.waitForTimeout(600);
     },

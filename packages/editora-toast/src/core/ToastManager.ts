@@ -12,13 +12,13 @@ const DEFAULT_CONFIG: ToastConfig = {
   queueStrategy: 'fifo',
   theme: 'system',
   richColors: false,
-  expand: true,
-  stack: false,
+  expand: false,
+  stack: true,
   offset: 16,
   mobileOffset: 16,
   gap: 8,
   pauseOnHover: true,
-  pauseOnFocus: false,
+  pauseOnFocus: true,
   pauseOnWindowBlur: false, // Don't pause by default
   swipeDismiss: true,
   swipeDirection: 'any', // Allow any direction by default
@@ -26,6 +26,8 @@ const DEFAULT_CONFIG: ToastConfig = {
   rtl: false, // LTR by default
   enableAccessibility: true,
   closeButton: false,
+  icons: true,
+  hotkey: 'alt+t',
   preventDuplicate: false,
   dedupeScope: 'all',
   animation: { type: 'css' } // Default to CSS animations
@@ -38,7 +40,6 @@ export class ToastManager implements IToastManager {
   private lifecycle: ToastLifecycle;
   private config: ToastConfig;
   private idCounter = 0;
-  private pausedToasts = new Set<string>();
   // show() registers a toast asynchronously (lifecycle hooks run first). Until then update()/dismiss() cannot
   // find it, so they used to return false and drop the change: a promise that settled quickly left its toast on
   // "loading" forever, and `const t = toast.info('x'); t.dismiss();` dismissed nothing.
@@ -158,7 +159,7 @@ export class ToastManager implements IToastManager {
       const result = await promise;
 
       // Update to success
-      const successOptions = this.normalizeOptions(
+      const successOptions = this.normalizeResult(
         typeof options.success === 'function' ? options.success(result) : options.success,
         'success'
       );
@@ -172,7 +173,7 @@ export class ToastManager implements IToastManager {
 
     } catch (error) {
       // Update to error
-      const errorOptions = this.normalizeOptions(
+      const errorOptions = this.normalizeResult(
         typeof options.error === 'function' ? options.error(error) : options.error,
         'error'
       );
@@ -273,6 +274,13 @@ export class ToastManager implements IToastManager {
       return { message: input, level: defaultLevel };
     }
     return { ...input, level: input.level || defaultLevel };
+  }
+
+  // The result of a promise replaces the loading toast's text. update() merges, so a result given as options
+  // without a message (a title and a description, say) would otherwise keep showing the loading message.
+  private normalizeResult(input: string | ToastOptions, defaultLevel: ToastOptions['level']): ToastOptions {
+    const options = this.normalizeOptions(input, defaultLevel);
+    return 'message' in options ? options : { ...options, message: undefined };
   }
 
   private normalizeConfig(config: ToastConfig): ToastConfig {
@@ -388,27 +396,11 @@ export class ToastManager implements IToastManager {
   }
 
   private pauseAllToasts(): void {
-    const toasts = this.store.getAllToasts();
-    toasts.forEach(toast => {
-      if (toast.timeoutId && !this.pausedToasts.has(toast.id)) {
-        clearTimeout(toast.timeoutId);
-        toast.timeoutId = undefined;
-        this.pausedToasts.add(toast.id);
-      }
-    });
+    this.store.getAllToasts().forEach(toast => this.renderer.pauseToast(toast, 'window'));
   }
 
   private resumeAllToasts(): void {
-    const toasts = this.store.getAllToasts();
-    toasts.forEach(toast => {
-      if (this.pausedToasts.has(toast.id) && !toast.options.persistent && toast.options.duration !== 0) {
-        const remainingTime = toast.options.duration || this.config.duration;
-        toast.timeoutId = window.setTimeout(() => {
-          this.dismiss(toast.id);
-        }, remainingTime);
-        this.pausedToasts.delete(toast.id);
-      }
-    });
+    this.store.getAllToasts().forEach(toast => this.renderer.resumeToast(toast, 'window'));
   }
 
   // Cleanup

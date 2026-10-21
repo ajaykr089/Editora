@@ -1,10 +1,11 @@
-import { toastAdvanced as toast } from '@editora/toast';
+import { toast } from '@editora/toast';
 import '@editora/toast/toast.css';
 
-toast.configure({ position: 'top-right', maxVisible: 10, gap: 8 });
+// A deck would fold these into one; stack: false keeps them in a list.
+toast.configure({ position: 'top-right', maxVisible: 12, stack: false, gap: 8 });
 
 const themes = [
-  'light', 'colored', 'minimal', 'glass', 'neon', 'retro', 'ocean', 'forest', 'sunset', 'midnight'
+  'light', 'dark', 'colored', 'minimal', 'glass', 'neon', 'retro', 'ocean', 'forest', 'sunset', 'midnight'
 ] as const;
 
 for (const theme of themes) {
