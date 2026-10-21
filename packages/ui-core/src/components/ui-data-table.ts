@@ -46,6 +46,11 @@ const style = `
     transition: border-color var(--ui-data-table-duration) var(--ui-data-table-ease), box-shadow var(--ui-data-table-duration) var(--ui-data-table-ease);
   }
 
+  .frame[data-scroll-region]:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-data-table-focus-ring, #2563eb));
+    outline-offset: -2px;
+  }
+
   .frame::before {
     content: '';
     position: absolute;
@@ -550,12 +555,12 @@ const lightDomStyle = `
   }
 
   ui-data-table[loading]:not([headless]) > table tbody {
-    opacity: 0.55;
+    opacity: 0.7;
     pointer-events: none;
   }
 
   ui-data-table[state="loading"]:not([headless]) > table tbody {
-    opacity: 0.55;
+    opacity: 0.7;
     pointer-events: none;
   }
 
@@ -773,6 +778,7 @@ export class UIDataTable extends ElementBase {
   private _resizeState: { columnIndex: number; startX: number; startWidth: number } | null = null;
   private _columnWidths = new Map<number, number>();
   private _frameEl: HTMLElement | null = null;
+  private _scrollObserver: ResizeObserver | null = null;
   private _virtualRaf = 0;
   private _virtualTopSpacer: HTMLTableRowElement | null = null;
   private _virtualBottomSpacer: HTMLTableRowElement | null = null;
@@ -862,6 +868,8 @@ export class UIDataTable extends ElementBase {
       this._observer = null;
     }
     this._detachPaginationListener();
+    this._scrollObserver?.disconnect();
+    this._scrollObserver = null;
     super.disconnectedCallback();
   }
 
@@ -1438,6 +1446,38 @@ export class UIDataTable extends ElementBase {
     return shortcuts.join(' ');
   }
 
+  /**
+   * A frame that scrolls but holds nothing focusable (a loading or read-only table in a narrow
+   * container) cannot be scrolled from the keyboard. Make it a focusable, named region while that is true.
+   */
+  private _syncScrollRegion() {
+    const frame = this._frameEl;
+    if (!frame) return;
+    const scrolls = frame.scrollWidth > frame.clientWidth + 1 || frame.scrollHeight > frame.clientHeight + 1;
+    const hasFocusable = !!this._table?.querySelector('[tabindex="0"], a[href], button, input, select, textarea');
+    if (scrolls && !hasFocusable) {
+      frame.setAttribute('tabindex', '0');
+      frame.setAttribute('role', 'region');
+      frame.setAttribute('data-scroll-region', '');
+      const name = (this.getAttribute('aria-label') || '').trim();
+      frame.setAttribute('aria-label', name ? `${name}, scrollable` : 'Scrollable table');
+    } else if (frame.hasAttribute('data-scroll-region')) {
+      frame.removeAttribute('tabindex');
+      frame.removeAttribute('role');
+      frame.removeAttribute('aria-label');
+      frame.removeAttribute('data-scroll-region');
+    }
+  }
+
+  private _watchScrollRegion() {
+    this._scrollObserver?.disconnect();
+    this._scrollObserver = null;
+    if (!this._frameEl || typeof ResizeObserver === 'undefined') return;
+    this._scrollObserver = new ResizeObserver(() => this._syncScrollRegion());
+    this._scrollObserver.observe(this._frameEl);
+    if (this._table) this._scrollObserver.observe(this._table);
+  }
+
   private _syncStructure() {
     if (this._isSyncing) return;
     this._isSyncing = true;
@@ -1448,6 +1488,7 @@ export class UIDataTable extends ElementBase {
         if (this._frameEl) this._frameEl.removeEventListener('scroll', this._onFrameScroll as EventListener);
         this._frameEl = frameEl;
         if (this._frameEl) this._frameEl.addEventListener('scroll', this._onFrameScroll as EventListener, { passive: true });
+        this._watchScrollRegion();
       }
       const emptyEl = this.root.querySelector('.empty') as HTMLElement | null;
       const summaryEl = this.root.querySelector('.summary') as HTMLElement | null;

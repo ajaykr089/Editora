@@ -85,10 +85,20 @@ export function eventOriginatesWithin(
   return false;
 }
 
+/** True when the tag is one the browser's Intl accepts (a typo, or an environment that reports "undefined", is not). */
+function isUsableLocale(tag: string): boolean {
+  try {
+    new Intl.DateTimeFormat(tag);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function normalizeLocale(raw: string | null): string {
   const value = (raw || '').trim();
-  if (value) return value;
-  if (typeof navigator !== 'undefined' && navigator.language) {
+  if (value && isUsableLocale(value)) return value;
+  if (typeof navigator !== 'undefined' && navigator.language && isUsableLocale(navigator.language)) {
     return navigator.language;
   }
   return 'en-US';

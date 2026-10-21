@@ -1571,7 +1571,8 @@ export class UIAlertDialog extends ElementBase {
       </div>
     `);
     const backdrop = this.root.querySelector('.backdrop') as HTMLElement | null;
-    if (backdrop) liftToTopLayer(backdrop, { resetBox: false });
+    // A headless dialog is embedded in the page flow, so it stays where it is instead of going to the top layer.
+    if (backdrop && !this.headless) liftToTopLayer(backdrop, { resetBox: false });
     this._presented = true;
   }
 }
