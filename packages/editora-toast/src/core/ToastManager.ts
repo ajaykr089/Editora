@@ -159,7 +159,7 @@ export class ToastManager implements IToastManager {
       const result = await promise;
 
       // Update to success
-      const successOptions = this.normalizeOptions(
+      const successOptions = this.normalizeResult(
         typeof options.success === 'function' ? options.success(result) : options.success,
         'success'
       );
@@ -173,7 +173,7 @@ export class ToastManager implements IToastManager {
 
     } catch (error) {
       // Update to error
-      const errorOptions = this.normalizeOptions(
+      const errorOptions = this.normalizeResult(
         typeof options.error === 'function' ? options.error(error) : options.error,
         'error'
       );
@@ -274,6 +274,13 @@ export class ToastManager implements IToastManager {
       return { message: input, level: defaultLevel };
     }
     return { ...input, level: input.level || defaultLevel };
+  }
+
+  // The result of a promise replaces the loading toast's text. update() merges, so a result given as options
+  // without a message (a title and a description, say) would otherwise keep showing the loading message.
+  private normalizeResult(input: string | ToastOptions, defaultLevel: ToastOptions['level']): ToastOptions {
+    const options = this.normalizeOptions(input, defaultLevel);
+    return 'message' in options ? options : { ...options, message: undefined };
   }
 
   private normalizeConfig(config: ToastConfig): ToastConfig {

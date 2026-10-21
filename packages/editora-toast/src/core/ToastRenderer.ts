@@ -237,30 +237,6 @@ export class ToastRenderer {
 
     const content = this.createContent(toast);
 
-    // Progress bar
-    if (options.progress) {
-      const progress = document.createElement('div');
-      progress.className = 'editora-toast-progress-track';
-      progress.setAttribute('role', 'progressbar');
-      progress.setAttribute('aria-valuemin', '0');
-      progress.setAttribute('aria-valuemax', '100');
-      progress.setAttribute('aria-valuenow', String(Math.min(100, Math.max(0, options.progress.value))));
-
-      const bar = document.createElement('div');
-      bar.className = 'editora-toast-progress-bar';
-      bar.style.width = `${Math.min(100, Math.max(0, options.progress.value))}%`;
-
-      if (options.progress.showPercentage) {
-        const percentage = document.createElement('span');
-        percentage.className = 'editora-toast-progress-text';
-        percentage.textContent = `${Math.round(options.progress.value)}%`;
-        progress.appendChild(percentage);
-      }
-
-      progress.appendChild(bar);
-      content.appendChild(progress);
-    }
-
     element.appendChild(content);
 
     // Actions
@@ -401,47 +377,17 @@ export class ToastRenderer {
       else if (!nextClosable && existing) existing.remove();
     }
 
-    // Update progress bar
+    // Update progress bar. The bar is part of the content, so a content rebuild above has already drawn it
+    // from the merged options; here it is replaced when the progress option itself changed.
     if (updates.progress !== undefined) {
-      let progressElement = toast.element.querySelector('.editora-toast-progress-track');
-      if (updates.progress) {
-        if (!progressElement) {
-          // Create progress element if it doesn't exist
-          progressElement = document.createElement('div');
-          progressElement.className = 'editora-toast-progress-track';
-          progressElement.setAttribute('role', 'progressbar');
-          progressElement.setAttribute('aria-valuemin', '0');
-          progressElement.setAttribute('aria-valuemax', '100');
-          const contentElement = toast.element.querySelector('.editora-toast-content');
-          if (contentElement) {
-            contentElement.appendChild(progressElement);
-          }
-        }
-
-        progressElement.setAttribute('aria-valuenow', String(Math.min(100, Math.max(0, updates.progress.value))));
-
-        const bar = progressElement.querySelector('.editora-toast-progress-bar') as HTMLElement;
-        if (bar) {
-          bar.style.width = `${Math.min(100, Math.max(0, updates.progress.value))}%`;
-        }
-
-        if (updates.progress.showPercentage) {
-          let percentage = progressElement.querySelector('.editora-toast-progress-text');
-          if (!percentage) {
-            percentage = document.createElement('span');
-            percentage.className = 'editora-toast-progress-text';
-            progressElement.insertBefore(percentage, progressElement.firstChild);
-          }
-          percentage.textContent = `${Math.round(updates.progress.value)}%`;
-        } else {
-          const percentage = progressElement.querySelector('.editora-toast-progress-text');
-          if (percentage) {
-            percentage.remove();
-          }
-        }
-      } else if (progressElement) {
-        // Remove progress element if progress is disabled
-        progressElement.remove();
+      const body = toast.element.querySelector('.editora-toast-body');
+      const existing = toast.element.querySelector('.editora-toast-progress-track');
+      if (updates.progress && body) {
+        const next = this.createProgress(updates.progress);
+        if (existing) existing.replaceWith(next);
+        else body.appendChild(next);
+      } else if (existing) {
+        existing.remove();
       }
     }
 
@@ -519,8 +465,34 @@ export class ToastRenderer {
       }
     }
 
+    if (options.progress) body.appendChild(this.createProgress(options.progress));
+
     content.appendChild(body);
     return content;
+  }
+
+  private createProgress(progress: NonNullable<ToastInstance['options']['progress']>): HTMLElement {
+    const value = Math.min(100, Math.max(0, progress.value));
+    const track = document.createElement('div');
+    track.className = 'editora-toast-progress-track';
+    track.setAttribute('role', 'progressbar');
+    track.setAttribute('aria-valuemin', '0');
+    track.setAttribute('aria-valuemax', '100');
+    track.setAttribute('aria-valuenow', String(value));
+
+    const bar = document.createElement('div');
+    bar.className = 'editora-toast-progress-bar';
+    bar.style.width = `${value}%`;
+
+    if (progress.showPercentage) {
+      const percentage = document.createElement('span');
+      percentage.className = 'editora-toast-progress-text';
+      percentage.textContent = `${Math.round(progress.value)}%`;
+      track.appendChild(percentage);
+    }
+
+    track.appendChild(bar);
+    return track;
   }
 
   private createCloseButton(toast: ToastInstance): HTMLButtonElement {

@@ -80,6 +80,46 @@ describe('status icons', () => {
   });
 });
 
+describe('progress bar', () => {
+  const trackOf = (el: HTMLElement) => el.querySelector<HTMLElement>('.editora-toast-progress-track');
+
+  it('sits in the text column, not beside it, with the value as its width', async () => {
+    manager.show({ message: 'Uploading', progress: { value: 64, showPercentage: true }, duration: 0 });
+    await waitForToasts(1);
+    const track = trackOf(toasts()[0])!;
+    expect(track.parentElement!.classList.contains('editora-toast-body')).toBe(true);
+    expect(track.getAttribute('aria-valuenow')).toBe('64');
+    expect((track.querySelector('.editora-toast-progress-bar') as HTMLElement).style.width).toBe('64%');
+    expect(track.querySelector('.editora-toast-progress-text')!.textContent).toBe('64%');
+  });
+
+  it('survives an update of the message and follows an update of the value', async () => {
+    const toast = manager.show({ message: 'Uploading', progress: { value: 10 }, duration: 0 });
+    await waitForToasts(1);
+    manager.update(toast.id, { message: 'Uploading 2 of 3' });
+    await vi.waitFor(() => expect(toasts()[0].textContent).toContain('Uploading 2 of 3'));
+    expect(trackOf(toasts()[0])).not.toBeNull();
+    manager.update(toast.id, { progress: { value: 80, showPercentage: true } });
+    await vi.waitFor(() => expect(trackOf(toasts()[0])!.getAttribute('aria-valuenow')).toBe('80'));
+    expect(toasts()[0].querySelectorAll('.editora-toast-progress-track').length).toBe(1);
+    manager.update(toast.id, { progress: undefined as any, message: 'Done' });
+    await vi.waitFor(() => expect(toasts()[0].textContent).toContain('Done'));
+  });
+});
+
+describe('promise results', () => {
+  it('replaces the loading text when the result is given as a title and a description', async () => {
+    await manager.promise(Promise.resolve(1), {
+      loading: 'Uploading',
+      success: { title: 'Upload complete', description: 'Three files' },
+      error: 'Nope'
+    });
+    await vi.waitFor(() => expect(toasts()[0].textContent).toContain('Upload complete'));
+    expect(toasts()[0].textContent).not.toContain('Uploading');
+    expect(toasts()[0].dataset.level).toBe('success');
+  });
+});
+
 describe('stack layout', () => {
   // jsdom has no layout; give every toast a height so the offsets can be checked.
   beforeEach(() => {

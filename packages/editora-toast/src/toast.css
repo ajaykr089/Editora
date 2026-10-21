@@ -40,10 +40,8 @@
   --et-promise-tint: var(--et-loading-tint);
   --et-promise-ring: var(--et-loading-ring);
 
-  /* Primary action button: filled with the text colour, lettered in the surface colour */
-  --et-action-bg:  var(--et-text);
-  --et-action-ink: var(--et-bg);
-  --et-focus:      var(--et-info);
+  /* Optional: --et-action-bg and --et-action-ink colour the primary action button (by default it is filled
+     with the toast's text colour and lettered in its surface colour); --et-focus is the focus ring. */
 
   /* Shape */
   --et-radius:    12px;
@@ -296,24 +294,24 @@
 .editora-toast-promise { --et-accent: var(--et-loading); }
 
 /* richColors: the surface takes a light tint of the level's colour (still opaque). */
-.editora-toast[data-rich-colors="true"].editora-toast-info {
+.editora-toast[data-rich-colors="true"]:not([data-theme="colored"]).editora-toast-info {
   background: linear-gradient(var(--et-info-tint), var(--et-info-tint)), var(--et-bg);
   border-color: var(--et-info-ring);
 }
-.editora-toast[data-rich-colors="true"].editora-toast-success {
+.editora-toast[data-rich-colors="true"]:not([data-theme="colored"]).editora-toast-success {
   background: linear-gradient(var(--et-success-tint), var(--et-success-tint)), var(--et-bg);
   border-color: var(--et-success-ring);
 }
-.editora-toast[data-rich-colors="true"].editora-toast-error {
+.editora-toast[data-rich-colors="true"]:not([data-theme="colored"]).editora-toast-error {
   background: linear-gradient(var(--et-error-tint), var(--et-error-tint)), var(--et-bg);
   border-color: var(--et-error-ring);
 }
-.editora-toast[data-rich-colors="true"].editora-toast-warning {
+.editora-toast[data-rich-colors="true"]:not([data-theme="colored"]).editora-toast-warning {
   background: linear-gradient(var(--et-warning-tint), var(--et-warning-tint)), var(--et-bg);
   border-color: var(--et-warning-ring);
 }
-.editora-toast[data-rich-colors="true"].editora-toast-loading,
-.editora-toast[data-rich-colors="true"].editora-toast-promise {
+.editora-toast[data-rich-colors="true"]:not([data-theme="colored"]).editora-toast-loading,
+.editora-toast[data-rich-colors="true"]:not([data-theme="colored"]).editora-toast-promise {
   background: linear-gradient(var(--et-loading-tint), var(--et-loading-tint)), var(--et-bg);
   border-color: var(--et-loading-ring);
 }
@@ -403,11 +401,11 @@
 .editora-toast-action:active { transform: scale(.97); }
 
 .editora-toast-action.primary {
-  background: var(--et-action-bg);
-  border-color: var(--et-action-bg);
-  color: var(--et-action-ink);
+  background: var(--et-action-bg, var(--et-text));
+  border-color: var(--et-action-bg, var(--et-text));
+  color: var(--et-action-ink, var(--et-bg));
 }
-.editora-toast-action.primary:hover { background: var(--et-action-bg); opacity: .88; }
+.editora-toast-action.primary:hover { background: var(--et-action-bg, var(--et-text)); opacity: .88; }
 
 /* ── Close button ───────────────────────────────────────────── */
 .editora-toast-close {
@@ -560,11 +558,11 @@
 .editora-toast[data-theme="colored"] {
   --et-info:    #2563eb;
   --et-success: #15803d;
-  --et-error:   #dc2626;
+  --et-error:   #c81e1e;
   --et-warning: #b45309;
   --et-loading: #4f46e5;
   --et-text:          #ffffff;
-  --et-text-muted:    rgba(255,255,255,.86);
+  --et-text-muted:    rgba(255,255,255,.95);
   --et-bg-subtle:     rgba(255,255,255,.16);
   --et-border:        rgba(255,255,255,.22);
   --et-border-strong: rgba(255,255,255,.38);
@@ -579,10 +577,10 @@
 
 /* ── GLASS: frosted dark glass, readable on any page ────────── */
 .editora-toast[data-theme="glass"] {
-  --et-bg:            rgba(24,24,27,.62);
+  --et-bg:            rgba(24,24,27,.72);
   --et-bg-subtle:     rgba(255,255,255,.10);
   --et-text:          #ffffff;
-  --et-text-muted:    rgba(255,255,255,.78);
+  --et-text-muted:    rgba(255,255,255,.86);
   --et-border:        rgba(255,255,255,.16);
   --et-border-strong: rgba(255,255,255,.30);
   --et-info:    #7dd3fc;
@@ -698,7 +696,7 @@
 .editora-toast:focus-visible,
 .editora-toast-action:focus-visible,
 .editora-toast-close:focus-visible {
-  outline: 2px solid var(--et-focus);
+  outline: 2px solid var(--et-focus, var(--et-info));
   outline-offset: 2px;
 }
 
