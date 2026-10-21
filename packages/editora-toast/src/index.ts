@@ -31,8 +31,17 @@ export interface ToastOptionsLegacy extends ToastOptions {
   message: string;
 }
 
-function showLegacy(options: ToastOptions) {
-  if (typeof document === "undefined") return { dismiss: () => {} };
+// What a call returns on the server, where there is no page to show a toast on: it has the shape of a toast and does nothing.
+const inertToast = (options: ToastOptions): ToastInstance => ({
+  id: options.id || "",
+  options,
+  createdAt: 0,
+  dismiss: () => {},
+  update: () => {},
+});
+
+function showLegacy(options: ToastOptions): ToastInstance {
+  if (typeof document === "undefined") return inertToast(options);
   return getManager().show(options);
 }
 
