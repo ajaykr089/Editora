@@ -458,6 +458,7 @@ The classes and types are exported too: `ToastManager`, and `ToastOptions`, `Toa
   held on its own and started again from the full duration.
 - **Keyboard.** Toasts are Tab stops, Alt+T and Escape work, and `pauseOnFocus` is on. `configure({ hotkey: false })` turns the shortcut off.
 - **The simple API** gained `toast(message)`, `promise`, `update`, `dismiss`, `clear`, `configure` and `show`.
+- **Browsers.** The layout uses the individual `translate` and `scale` properties: Chrome 104, Safari 14.1, Firefox 72 or later.
 - If you styled toasts with CSS, the accent stripe (`::before`) and the tinted `background` of the level classes are gone: set
   `--et-*` variables or `--et-accent`, or restyle `.editora-toast`.
 
