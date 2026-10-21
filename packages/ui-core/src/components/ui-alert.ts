@@ -265,6 +265,26 @@ const style = `
     --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-color-danger, #dc2626) 30%, var(--ui-color-border, rgba(15, 23, 42, 0.2)));
   }
 
+  /* The tone rules above set a tinted fill; a solid alert must win over them, so these come last. */
+  :host([variant="solid"]) .alert {
+    --ui-alert-bg: color-mix(in srgb, var(--ui-alert-accent) 84%, #000000);
+    --ui-alert-border: 1px solid color-mix(in srgb, #000000 18%, transparent);
+  }
+
+  :host([variant="solid"][tone="info"]) .alert {
+    --ui-alert-bg: var(--ui-color-primary, #2563eb);
+    --ui-alert-color: var(--ui-color-foreground-on-primary, #ffffff);
+    --ui-alert-muted: color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 82%, transparent);
+    --ui-alert-icon-color: var(--ui-color-foreground-on-primary, #ffffff);
+  }
+
+  :host([variant="solid"][tone="warning"]) .alert {
+    --ui-alert-bg: var(--ui-color-warning, #f59e0b);
+    --ui-alert-color: var(--ui-color-foreground-on-warning, #1f1300);
+    --ui-alert-muted: color-mix(in srgb, var(--ui-color-foreground-on-warning, #1f1300) 82%, transparent);
+    --ui-alert-icon-color: var(--ui-color-foreground-on-warning, #1f1300);
+  }
+
   :host([layout="banner"][variant="solid"]) .alert {
     border-top: 0;
   }

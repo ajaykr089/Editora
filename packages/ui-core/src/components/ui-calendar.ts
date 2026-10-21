@@ -536,6 +536,14 @@ const style = `
     text-overflow: ellipsis;
   }
 
+  /* Events are drawn over the day button: on a selected (solid) day they follow its text colour. */
+  .day-cell[data-selected="true"] .event-badge,
+  .day-cell[data-selected="true"] .event-count {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-calendar-selected-color) 60%, transparent);
+    color: var(--ui-calendar-selected-color);
+  }
+
   .event-count {
     inline-size: 16px;
     block-size: 16px;
@@ -2041,7 +2049,7 @@ export class UICalendar extends ElementBase {
           const part = inRange || isRangeStart || isRangeEnd ? 'day range' : 'day';
 
           return `
-            <div class="day-cell" part="day-cell"${eventsMarkup ? ` data-events="${eventsDisplay}"` : ''}>
+            <div class="day-cell" part="day-cell"${eventsMarkup ? ` data-events="${eventsDisplay}"` : ''}${ariaSelected ? ' data-selected="true"' : ''}>
             <button
               type="button"
               class="day"

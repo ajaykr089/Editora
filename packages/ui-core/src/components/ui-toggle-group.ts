@@ -327,6 +327,18 @@ export class UIToggleGroup extends ElementBase {
     this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true, composed: true }));
   }
 
+  /** A contrast group is a dark surface: its toggles that set no variant of their own follow it. */
+  private _inheritVariant(toggle: HTMLElement): void {
+    const contrast = this.getAttribute('variant') === 'contrast';
+    if (contrast && !toggle.hasAttribute('variant')) {
+      toggle.setAttribute('variant', 'contrast');
+      toggle.setAttribute('data-inherited-variant', '');
+    } else if (!contrast && toggle.hasAttribute('data-inherited-variant')) {
+      toggle.removeAttribute('variant');
+      toggle.removeAttribute('data-inherited-variant');
+    }
+  }
+
   private _syncChildren(): void {
     const toggles = this._toggles();
     const disabledGroup = this.hasAttribute('disabled');
@@ -351,6 +363,7 @@ export class UIToggleGroup extends ElementBase {
         const userDisabled = toggle.hasAttribute('data-disabled') || toggle.getAttribute('aria-disabled') === 'true';
         const shouldDisable = disabledGroup || userDisabled;
         setFlag(toggle, 'data-group-item', true);
+        this._inheritVariant(toggle);
 
         if (shouldDisable) {
           setFlag(toggle, 'disabled', true);

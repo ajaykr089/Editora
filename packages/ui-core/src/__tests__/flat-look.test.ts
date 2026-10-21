@@ -213,5 +213,28 @@ describe('flat look across every component', () => {
     expect(upload).toMatch(/\.progress-bar\[data-state="success"\]/);
     expect(upload).toMatch(/bar\.dataset\.state = uploadEntry\.state/);
   });
+
+  it('QA regressions: solid alert, contrast toggle and wizard, chart tone text, selected-day events, scroll region', () => {
+    const read = (f: string) => readFileSync(resolve(dir, f), 'utf8');
+    // a solid alert is declared after the tone rules, otherwise the tinted tone fill wins
+    const alert = read('ui-alert.ts');
+    expect(alert.lastIndexOf(':host([variant="solid"]) .alert {')).toBeGreaterThan(alert.indexOf(':host([tone="danger"]) .alert {'));
+    // toggle: tones tint the pressed state, the contrast variant uses a solid light fill under dark text
+    const toggle = read('ui-toggle.ts');
+    expect(toggle).toMatch(/:host\(\[variant="contrast"\]\) \{\s*--ui-toggle-pressed-bg: var\(--ui-toggle-active-bg\);/);
+    expect(toggle).toMatch(/:host\(\[tone="danger"\]\) \{\s*--ui-toggle-pressed-bg: color-mix|:host\(\[tone="danger"\]\) \{\s*--ui-toggle-pressed-bg/);
+    // wizard: dark text on the light contrast accent
+    expect(read('ui-wizard.ts')).toMatch(/:host\(\[variant="contrast"\]\) \.btn\.primary \{\s*color: #0f172a;/);
+    // chart: tone text mixes toward the chart's own text colour, never a global dark text token
+    expect(read('ui-chart.ts')).not.toMatch(/ui-color-text-strong/);
+    // calendar: events on a selected day follow the day's text colour
+    expect(read('ui-calendar.ts')).toMatch(/\.day-cell\[data-selected="true"\] \.event-badge/);
+    // data table: a scrolling frame with nothing focusable becomes a named, focusable region
+    const table = read('ui-data-table.ts');
+    expect(table).toMatch(/_syncScrollRegion\(\)/);
+    expect(table).toMatch(/data-scroll-region/);
+    // sortable helper text is not dimmed below 4.5:1
+    expect(read('ui-sortable.ts')).not.toMatch(/\.list-helper \{[^}]*opacity/);
+  });
 });
 

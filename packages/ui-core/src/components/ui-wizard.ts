@@ -513,6 +513,15 @@ const style = `
     --ui-wizard-danger: #f87171;
   }
 
+  /* The contrast accent is a light blue: the primary button needs dark text and a lighter hover. */
+  :host([variant="contrast"]) .btn.primary {
+    color: #0f172a;
+  }
+
+  :host([variant="contrast"]) .btn.primary:hover {
+    background: color-mix(in srgb, var(--ui-wizard-accent) 86%, #ffffff);
+  }
+
   :host([headless]) .frame {
     display: none;
   }

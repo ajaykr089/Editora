@@ -162,6 +162,14 @@ const style = `
     background: transparent;
   }
 
+  /* A tone tints the pressed state in its own colour (the default soft fill is the theme accent). */
+  :host([tone="success"]),
+  :host([tone="warning"]),
+  :host([tone="danger"]) {
+    --ui-toggle-pressed-bg: color-mix(in srgb, var(--ui-toggle-active-bg) 16%, transparent);
+    --ui-toggle-active-border: color-mix(in srgb, var(--ui-toggle-active-bg) 44%, transparent);
+  }
+
   :host([tone="success"]) {
     --ui-toggle-active-bg: var(--ui-color-success, #15803d);
   }
@@ -174,7 +182,16 @@ const style = `
     --ui-toggle-active-bg: var(--ui-color-danger, #dc2626);
   }
 
-  /* The contrast variant draws dark text on its pressed fill, so the tones need light fills there. */
+  /* The contrast variant draws dark text on a solid light pressed fill (not the soft theme tint). */
+  :host([variant="contrast"]) {
+    --ui-toggle-pressed-bg: var(--ui-toggle-active-bg);
+    --ui-toggle-active-border: var(--ui-toggle-active-bg);
+  }
+
+  :host([variant="contrast"][pressed]) .control:hover {
+    background: color-mix(in srgb, var(--ui-toggle-active-bg) 86%, #ffffff);
+  }
+
   :host([variant="contrast"][tone="success"]) { --ui-toggle-active-bg: #86efac; }
   :host([variant="contrast"][tone="warning"]) { --ui-toggle-active-bg: #fcd34d; }
   :host([variant="contrast"][tone="danger"]) { --ui-toggle-active-bg: #fca5a5; }

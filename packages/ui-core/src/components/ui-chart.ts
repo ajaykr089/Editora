@@ -217,19 +217,19 @@ const style = `
   }
 
   .status-pill[data-state="success"] {
-    color: var(--ui-chart-success);
+    color: color-mix(in srgb, var(--ui-chart-success) 74%, var(--ui-chart-text));
     border-color: color-mix(in srgb, var(--ui-chart-success) 35%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-success) 13%, transparent);
   }
 
   .status-pill[data-state="error"] {
-    color: var(--ui-chart-danger);
+    color: color-mix(in srgb, var(--ui-chart-danger) 74%, var(--ui-chart-text));
     border-color: color-mix(in srgb, var(--ui-chart-danger) 35%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-danger) 12%, transparent);
   }
 
   .status-pill[data-state="loading"] {
-    color: var(--ui-chart-warning);
+    color: color-mix(in srgb, var(--ui-chart-warning) 74%, var(--ui-chart-text));
     border-color: color-mix(in srgb, var(--ui-chart-warning) 32%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-warning) 10%, transparent);
   }
@@ -268,11 +268,11 @@ const style = `
   }
 
   .metric-value[data-tone="up"] {
-    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-color-text-strong, #0f172a));
+    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-chart-text));
   }
 
   .metric-value[data-tone="down"] {
-    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-color-text-strong, #0f172a));
+    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-chart-text));
   }
 
   .plot-shell {
@@ -557,13 +557,13 @@ const style = `
   }
 
   .message[data-tone="error"] {
-    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-color-text-strong, #0f172a));
+    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-chart-text));
     border-color: color-mix(in srgb, var(--ui-chart-danger) 30%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-danger) 10%, transparent);
   }
 
   .message[data-tone="success"] {
-    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-color-text-strong, #0f172a));
+    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-chart-text));
     border-color: color-mix(in srgb, var(--ui-chart-success) 30%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-success) 10%, transparent);
   }

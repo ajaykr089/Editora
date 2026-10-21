@@ -547,7 +547,6 @@ const style = `
 
   .list-helper {
     font-size: 11.5px;
-    opacity: 0.85;
   }
 
   .empty {

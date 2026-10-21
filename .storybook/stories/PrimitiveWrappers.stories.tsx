@@ -223,7 +223,8 @@ export const RovingFocusToolbar = () => {
                   padding: '0 14px',
                   borderRadius: 10,
                   border: '1px solid #dbe4f0',
-                  background: index === 0 ? '#eff6ff' : '#ffffff'
+                  background: index === 0 ? '#eff6ff' : '#ffffff',
+                  color: '#0f172a'
                 }}
                 onClick={(event) => (ref.current as any)?.setActiveItem?.(event.currentTarget, { focus: true })}
               >
