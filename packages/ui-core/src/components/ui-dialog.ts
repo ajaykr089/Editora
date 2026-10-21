@@ -2,6 +2,7 @@ import { ElementBase } from '../ElementBase';
 import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createFocusScope, type FocusScopeHandle } from '../primitives/focus-scope';
+import { closeOverlay, liftToTopLayer } from '../primitives/overlay-motion';
 
 const style = `
   :host {
@@ -14,17 +15,13 @@ const style = `
     color-scheme: light dark;
     --ui-dialog-backdrop: color-mix(in srgb, #020617 58%, transparent);
     --ui-dialog-backdrop-filter: none;
-    --ui-dialog-bg: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
-      color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
-    );
+    --ui-dialog-bg: var(--color-panel-solid, var(--ui-color-surface-elevated, var(--ui-color-surface, #ffffff)));
     --ui-dialog-color: var(--ui-color-text, #0f172a);
     --ui-dialog-muted: var(--ui-color-muted, #526175);
-    --ui-dialog-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-dialog-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent));
     --ui-dialog-border: 1px solid var(--ui-dialog-border-color);
-    --ui-dialog-shadow: none;
-    --ui-dialog-radius: 16px;
+    --ui-dialog-shadow: var(--shadow-6, 0 24px 60px rgba(2, 6, 23, 0.28));
+    --ui-dialog-radius: calc(var(--ui-radius, 6px) * 2);
     --ui-dialog-padding-x: 24px;
     --ui-dialog-padding-y: 20px;
     --ui-dialog-width: min(560px, calc(100vw - 24px));
@@ -73,16 +70,19 @@ const style = `
     background: var(--ui-dialog-backdrop);
     -webkit-backdrop-filter: var(--ui-dialog-backdrop-filter);
     backdrop-filter: var(--ui-dialog-backdrop-filter);
-    opacity: 0;
-    transition: opacity var(--ui-dialog-duration) var(--ui-dialog-easing);
+    /* The overlay goes to the top layer (popover); undo the popover user-agent box. */
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+    max-block-size: none;
+    margin: 0;
+    border: 0;
+    overflow: visible;
+    color: inherit;
   }
 
   .overlay[hidden] {
     display: none;
-  }
-
-  .overlay[data-open='true'] {
-    opacity: 1;
   }
 
   .panel {
@@ -98,20 +98,39 @@ const style = `
     color: var(--ui-dialog-color);
     box-shadow: var(--ui-dialog-shadow);
     padding: var(--ui-dialog-padding-y) var(--ui-dialog-padding-x);
-    transform: translate3d(0, 12px, 0) scale(0.985);
-    opacity: 0;
     transition:
-      transform var(--ui-dialog-duration) var(--ui-dialog-easing),
-      opacity var(--ui-dialog-duration) var(--ui-dialog-easing),
       border-color var(--ui-dialog-duration) var(--ui-dialog-easing),
       box-shadow var(--ui-dialog-duration) var(--ui-dialog-easing);
-    will-change: transform, opacity;
     backface-visibility: hidden;
   }
 
-  .overlay[data-open='true'] .panel {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 1;
+  /* Open and close are animations on data-state: a transition cannot run out of display: none. */
+  .overlay[data-state='open']:not([data-instant]) {
+    animation: ui-dialog-backdrop-in var(--ui-dialog-in-duration, 150ms) ease-out backwards;
+  }
+
+  .overlay[data-state='open']:not([data-instant]) .panel {
+    animation: ui-dialog-panel-in var(--ui-dialog-in-duration, 150ms) var(--ui-motion-enter-easing, cubic-bezier(0.16, 1, 0.3, 1)) backwards;
+  }
+
+  .overlay[data-state='closed'] {
+    animation: ui-dialog-backdrop-out var(--ui-dialog-out-duration, 100ms) ease-in both;
+    pointer-events: none;
+  }
+
+  .overlay[data-state='closed'] .panel {
+    animation: ui-dialog-panel-out var(--ui-dialog-out-duration, 100ms) var(--ui-motion-exit-easing, cubic-bezier(0.4, 0, 1, 1)) both;
+  }
+
+  @keyframes ui-dialog-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ui-dialog-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes ui-dialog-panel-in {
+    from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.96); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+  @keyframes ui-dialog-panel-out {
+    from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    to { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.96); }
   }
 
   :host([state='error']) .panel {
@@ -200,8 +219,6 @@ const style = `
 
   .footer {
     margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid color-mix(in srgb, var(--ui-dialog-border-color) 82%, transparent);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -281,7 +298,7 @@ const style = `
   }
 
   .error[data-empty='true'] {
-    visibility: hidden;
+    display: none;
   }
 
   :host([state='loading']) .btn,
@@ -916,16 +933,52 @@ export class UIDialog extends ElementBase {
     this._focusScope = null;
   }
 
+  private _presented = false;
+  private _finishClose: (() => void) | null = null;
+
   private _syncOpenUi() {
     const overlay = this.root.querySelector('.overlay') as HTMLElement | null;
     const panel = this._queryPanel();
     const open = this.open;
     if (!overlay || !panel) return;
 
-    overlay.hidden = !open;
-    overlay.setAttribute('data-open', String(open));
     overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    overlay.setAttribute('data-open', String(open));
+
+    if (open) {
+      // Reopened while the exit still plays: finish it, then show again.
+      this._finishClose?.();
+      this._finishClose = null;
+      overlay.hidden = false;
+      overlay.setAttribute('data-state', 'open');
+      // A render while open creates a fresh overlay marked data-instant, so it does not replay the enter.
+      if (!this._presented) overlay.removeAttribute('data-instant');
+      this._presented = true;
+      liftToTopLayer(overlay, { resetBox: false });
+      return;
+    }
+
+    if (this._presented && !overlay.hidden) {
+      this._presented = false;
+      overlay.removeAttribute('data-instant');
+      this._finishClose = closeOverlay(overlay, () => {
+        this._finishClose = null;
+        overlay.hidden = true;
+        try {
+          if (overlay.matches(':popover-open')) (overlay as HTMLElement & { hidePopover(): void }).hidePopover();
+        } catch {
+          // not in the top layer
+        }
+      });
+      return;
+    }
+
+    // An exit that is already playing finishes by itself (a second sync must not cut it short).
+    if (this._finishClose) return;
+    this._presented = false;
+    overlay.setAttribute('data-state', 'closed');
+    overlay.hidden = true;
   }
 
   private _syncRuntimeControllers() {
@@ -1153,7 +1206,7 @@ export class UIDialog extends ElementBase {
     this._destroyRuntimeControllers();
     this.setContent(`
       ${this.hasAttribute('headless') ? '' : `<style>${style}</style>`}
-      <div class="overlay" part="overlay" data-open="${String(this.open)}" ${this.open ? '' : 'hidden'} aria-hidden="${this.open ? 'false' : 'true'}">
+      <div class="overlay" part="overlay" data-open="${String(this.open)}" data-state="${this.open ? 'open' : 'closed'}" ${this.open ? 'data-instant' : 'hidden'} aria-hidden="${this.open ? 'false' : 'true'}">
         <section
           class="panel"
           part="panel"
