@@ -16,7 +16,7 @@ const style = `
     --ui-rating-color-hover: color-mix(in srgb, var(--ui-rating-color) 86%, #ffffff);
     --ui-rating-color-active: color-mix(in srgb, var(--ui-rating-color) 92%, #ffffff);
     --ui-rating-color-disabled: color-mix(in srgb, var(--ui-color-line-strong, #cbd5e1) 70%, transparent);
-    --ui-rating-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
+    --ui-rating-shadow: none;
     --ui-rating-duration: var(--ui-motion-base, 160ms);
     --ui-rating-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
     --ui-rating-radius: var(--ui-control-radius, var(--ui-radius, 6px));
@@ -253,12 +253,8 @@ const style = `
     transition: opacity 140ms var(--ui-rating-easing);
   }
 
-  .star:hover::after {
-    opacity: 0.08;
-  }
-
   .star:active::after {
-    opacity: 0.12;
+    opacity: 0.08;
   }
 
   .label {
@@ -474,6 +470,7 @@ export class UIRating extends ElementBase {
     this.root.addEventListener('focusin', this._onRootFocusIn, true);
     this.root.addEventListener('focusout', this._onRootFocusOut, true);
     this.root.addEventListener('keydown', this._onRootKeyDown, true);
+    this.addEventListener('keydown', this._onHostKeyDown);
   }
 
   disconnectedCallback() {
@@ -483,6 +480,7 @@ export class UIRating extends ElementBase {
     this.root.removeEventListener('focusin', this._onRootFocusIn, true);
     this.root.removeEventListener('focusout', this._onRootFocusOut, true);
     this.root.removeEventListener('keydown', this._onRootKeyDown, true);
+    this.removeEventListener('keydown', this._onHostKeyDown);
     super.disconnectedCallback();
   }
 
@@ -680,11 +678,19 @@ export class UIRating extends ElementBase {
     this._syncStars();
   }
 
-  private _onRootKeyDown(event: Event): void {
+  // The host is the role="slider" and the Tab stop, so a key pressed while it has focus targets the
+  // host itself and never reaches the shadow-root listener. Keys that started on a star are handled
+  // there already (they also bubble here, but their original target is the star).
+  private _onHostKeyDown = (event: Event): void => {
+    if (event.composedPath()[0] !== this) return;
+    this._onRootKeyDown(event, true);
+  };
+
+  private _onRootKeyDown(event: Event, fromHost = false): void {
     if (this._disabled || this._readonly) return;
     const keyboardEvent = event as KeyboardEvent;
     const star = this._getStarFromEventTarget(keyboardEvent.target);
-    const starIndex = this._getStarIndex(star);
+    const starIndex = fromHost ? Math.max(0, Math.ceil(this._value) - 1) : this._getStarIndex(star);
     if (starIndex === -1) return;
 
     let newValue = this._value;

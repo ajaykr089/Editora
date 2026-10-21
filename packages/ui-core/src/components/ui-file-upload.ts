@@ -309,7 +309,16 @@ const style = `
   .progress-bar {
     block-size: 100%;
     border-radius: inherit;
-    background: color-mix(in srgb, var(--ui-file-upload-success) 74%, transparent);
+    background: var(--ui-color-primary, #2563eb);
+    transition: inline-size 200ms ease;
+  }
+
+  .progress-bar[data-state="success"] {
+    background: var(--ui-file-upload-success);
+  }
+
+  .progress-bar[data-state="error"] {
+    background: var(--ui-file-upload-danger);
   }
 
   .progress-text {
@@ -370,6 +379,15 @@ const style = `
   .meta[hidden],
   .list[hidden] {
     display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surface,
+    .cta,
+    .file-remove,
+    .progress-bar {
+      transition: none !important;
+    }
   }
 
   :host([disabled]) .surface,
@@ -989,6 +1007,7 @@ export class UIFileUpload extends ElementBase {
         track.className = 'progress-track';
         const bar = document.createElement('div');
         bar.className = 'progress-bar';
+        bar.dataset.state = uploadEntry.state;
         bar.style.inlineSize = `${progressValue}%`;
         track.append(bar);
 

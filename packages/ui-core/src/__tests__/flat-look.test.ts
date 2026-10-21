@@ -203,5 +203,15 @@ describe('flat look across every component', () => {
     expect(picker).toMatch(/\.actions \.btn\[data-tone="primary"\] \{[^}]*--ui-color-primary/);
     expect(picker).not.toMatch(/\.swatch:hover \{[^}]*box-shadow/);
   });
+
+  it('rating stars have no glow and an upload bar is accent while uploading, green only when done', () => {
+    const rating = readFileSync(resolve(dir, 'ui-rating.ts'), 'utf8');
+    expect(rating.match(/--ui-rating-shadow:\s*([^;]*);/)?.[1].trim()).toBe('none');
+    expect(rating).not.toMatch(/\.star:hover::after/);
+    const upload = readFileSync(resolve(dir, 'ui-file-upload.ts'), 'utf8');
+    expect(upload).toMatch(/\.progress-bar \{[^}]*background: var\(--ui-color-primary/);
+    expect(upload).toMatch(/\.progress-bar\[data-state="success"\]/);
+    expect(upload).toMatch(/bar\.dataset\.state = uploadEntry\.state/);
+  });
 });
 
