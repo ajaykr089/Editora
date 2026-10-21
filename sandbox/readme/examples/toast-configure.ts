@@ -1,4 +1,4 @@
-import { toastAdvanced as toast } from '@editora/toast';
+import { toast } from '@editora/toast';
 import '@editora/toast/toast.css';
 
 // Settings for every toast from now on. A toast can still override them.

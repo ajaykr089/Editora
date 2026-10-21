@@ -1,4 +1,4 @@
-import { toastAdvanced as toast } from '@editora/toast';
+import { toast } from '@editora/toast';
 import '@editora/toast/toast.css';
 
 // A toast with a title, a description, actions and progress. duration: 0 keeps it until it is dismissed.

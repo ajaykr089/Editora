@@ -22,6 +22,8 @@ export default async function checks({ run }) {
     for (const text of ['Report ready', 'Q3-summary.pdf is 2.4 MB', 'Uploading photos', '64%']) {
       if (!(await has(page, text))) return `"${text}" is not shown`;
     }
+    // The two toasts are folded into a deck: the older one (with the Dismiss button) opens when the stack is hovered.
+    await page.locator('.editora-toast-container').hover();
     await page.getByRole('button', { name: 'Dismiss' }).click();
     await page.waitForTimeout(1000);
     return (await has(page, 'Report ready')) ? 'the Dismiss action did not dismiss the toast' : true;
@@ -39,8 +41,53 @@ export default async function checks({ run }) {
   await run('toast-themes', async (page) => {
     await page.waitForTimeout(700);
     const themes = await page.$$eval('.editora-toast', (els) => els.map((el) => el.getAttribute('data-theme')));
-    const expected = ['light', 'colored', 'minimal', 'glass', 'neon', 'retro', 'ocean', 'forest', 'sunset', 'midnight'];
+    const expected = ['light', 'dark', 'colored', 'minimal', 'glass', 'neon', 'retro', 'ocean', 'forest', 'sunset', 'midnight'];
     return expected.every((theme) => themes.includes(theme)) ? true : `the toasts have these themes: ${themes.join(', ')}`;
+  });
+
+  await run('toast-stack', async (page) => {
+    await page.waitForTimeout(600);
+    const deck = () =>
+      page.$$eval('.editora-toast', (els) => ({
+        expanded: els[0].parentElement.dataset.expanded,
+        text: els.map((el) => el.textContent.trim()),
+        front: els.find((el) => el.dataset.front === 'true')?.textContent.trim(),
+        collapsed: els.map((el) => el.dataset.collapsed),
+      }));
+    const folded = await deck();
+    if (folded.text.length !== 3) return `expected 3 toasts, found ${folded.text.length}`;
+    if (folded.expanded !== 'false' || folded.front !== 'Storage is almost full') return `the toasts are not folded into a deck with the newest in front: ${JSON.stringify(folded)}`;
+    if (folded.collapsed.filter((c) => c === 'true').length !== 2) return 'the two older toasts should be folded behind the newest';
+    // Hover opens the deck, and the timers wait for as long as it is open (the toasts last four seconds).
+    await page.locator('.editora-toast[data-front="true"]').hover();
+    await page.waitForTimeout(500);
+    if ((await deck()).expanded !== 'true') return 'hovering the deck did not open it';
+    await page.waitForTimeout(4600);
+    if ((await page.locator('.editora-toast').count()) !== 3) return 'the toasts went away while the deck was open';
+    await page.mouse.move(2, 2);
+    await page.waitForTimeout(500);
+    if ((await deck()).expanded !== 'false') return 'the deck did not close when the pointer left';
+    await page.waitForFunction(() => document.querySelectorAll('.editora-toast').length === 0, null, { timeout: 8000 }).catch(() => {});
+    return (await page.locator('.editora-toast').count()) === 0 ? true : 'the toasts did not go away after the deck was closed';
+  });
+
+  await run('toast-icons', async (page) => {
+    await page.waitForTimeout(700);
+    const state = await page.$$eval('.editora-toast', (els) =>
+      els.map((el) => ({
+        text: el.textContent.trim(),
+        svg: !!el.querySelector('.editora-toast-icon svg'),
+        icon: el.querySelector('.editora-toast-icon')?.textContent.trim() || '',
+        hidden: el.querySelector('.editora-toast-icon')?.getAttribute('aria-hidden'),
+      })),
+    );
+    const of = (text) => state.find((entry) => entry.text.includes(text));
+    if (state.length !== 4) return `expected 4 toasts, found ${state.length}`;
+    if (!of('Saved')?.svg || of('Saved').hidden !== 'true') return 'the success toast has no built-in icon (or it is not hidden from screen readers)';
+    if (of('Copied to clipboard')?.svg !== false || of('Copied to clipboard')?.icon !== '') return 'a plain toast should have no icon';
+    if (of('Invite sent')?.icon !== '✉️') return `the own icon was not used (${of('Invite sent')?.icon})`;
+    if (of('Payment failed')?.svg !== false || of('Payment failed')?.icon !== '') return 'icon: false should leave the icon out';
+    return true;
   });
 
   await run('toast-positions', async (page) => {
