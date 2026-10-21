@@ -2,11 +2,23 @@
 import { ToastInstance, ToastPosition, ToastConfig, AnimationConfig } from './types';
 import { setSafeHtml } from './safeHtml';
 import { animationManager } from './AnimationUtils';
+import { createCloseIcon, createLevelIcon } from './icons';
+import { invalidateHeight, layoutStack } from './ToastStack';
+
+type Timing = { remaining: number; startedAt: number };
 
 export class ToastRenderer {
   private containers = new Map<ToastPosition, HTMLElement>();
   private config: ToastConfig;
   private cssInjected = false;
+  private toastOf = new WeakMap<HTMLElement, ToastInstance>();
+  // A toast's timer only runs while nothing holds it: hover, keyboard focus and a hidden window are separate
+  // reasons, so leaving one of them does not restart a toast that another is still holding.
+  private holds = new Map<string, Set<string>>();
+  private timing = new Map<string, Timing>();
+  private resizeTimer?: number;
+  private returnFocusTo: HTMLElement | null = null;
+  private globalListeners: Array<[EventTarget, string, EventListener]> = [];
 
   constructor(config: ToastConfig) {
     this.config = config;
@@ -16,7 +28,7 @@ export class ToastRenderer {
     this.config = config;
     this.containers.forEach((container, position) => {
       this.applyContainerStyles(container, position);
-      this.applyStackState(container);
+      this.layout(container, true);
     });
   }
 
@@ -34,13 +46,155 @@ export class ToastRenderer {
     container.dataset.expand = String(this.config.expand);
     container.dataset.stack = String(this.config.stack);
     this.applyContainerStyles(container, position);
+    this.attachContainerListeners(container);
     document.body.appendChild(container);
     this.containers.set(position, container);
+    this.attachGlobalListeners();
 
     // Inject CSS if not already done
     this.injectCSS();
 
     return container;
+  }
+
+  // Hovering or focusing the stack opens it and holds the timers; leaving closes it and lets them run on.
+  private attachContainerListeners(container: HTMLElement): void {
+    container.addEventListener('mouseenter', () => {
+      container.dataset.hover = 'true';
+      this.holdAll(container, 'pointer');
+      this.syncOpen(container);
+    });
+    container.addEventListener('mouseleave', () => {
+      delete container.dataset.hover;
+      this.releaseAll(container, 'pointer');
+      this.syncOpen(container);
+    });
+    container.addEventListener('focusin', (event) => {
+      // A mouse click focuses the toast too; only keyboard focus should hold it open.
+      if (!this.isKeyboardFocus(event.target)) return;
+      container.dataset.focus = 'true';
+      this.holdAll(container, 'focus');
+      this.syncOpen(container);
+    });
+    container.addEventListener('focusout', (event) => {
+      const next = (event as FocusEvent).relatedTarget as Node | null;
+      if (next && container.contains(next)) return;
+      delete container.dataset.focus;
+      this.releaseAll(container, 'focus');
+      this.syncOpen(container);
+    });
+    container.addEventListener('keydown', (event) => this.onContainerKey(container, event));
+  }
+
+  private syncOpen(container: HTMLElement): void {
+    const open = container.dataset.hover === 'true' || container.dataset.focus === 'true';
+    container.dataset.open = String(open);
+    this.layout(container);
+  }
+
+  private isKeyboardFocus(target: EventTarget | null): boolean {
+    if (!(target instanceof Element)) return false;
+    try {
+      return target.matches(':focus-visible');
+    } catch {
+      return true; // an engine without :focus-visible: treat focus as keyboard focus
+    }
+  }
+
+  private onContainerKey(container: HTMLElement, event: KeyboardEvent): void {
+    if (event.key !== 'Escape') return;
+    const target = event.target instanceof Element ? event.target.closest<HTMLElement>('.editora-toast') : null;
+    const toast = target ? this.toastOf.get(target) : undefined;
+    if (!target || !toast) return;
+    event.preventDefault();
+    const siblings = Array.from(container.querySelectorAll<HTMLElement>('.editora-toast:not(.hiding)'));
+    const next = siblings[siblings.indexOf(target) + 1] || siblings[siblings.indexOf(target) - 1];
+    toast.dismiss();
+    if (next && next !== target) next.focus();
+    else this.restoreFocus();
+  }
+
+  private restoreFocus(): void {
+    const target = this.returnFocusTo;
+    this.returnFocusTo = null;
+    if (target && target.isConnected) target.focus();
+  }
+
+  // Document level behaviour: the hotkey that jumps to the toasts, a tap outside that closes an open stack, and
+  // a resize that can change how much the text of a toast wraps.
+  private attachGlobalListeners(): void {
+    if (this.globalListeners.length > 0 || typeof window === 'undefined') return;
+    const add = (target: EventTarget, type: string, handler: EventListener) => {
+      target.addEventListener(type, handler);
+      this.globalListeners.push([target, type, handler]);
+    };
+
+    add(document, 'keydown', ((event: KeyboardEvent) => {
+      if (!this.matchesHotkey(event)) return;
+      const container = Array.from(this.containers.values()).find((c) => c.querySelector('.editora-toast:not(.hiding)'));
+      if (!container) return;
+      const front = container.querySelector<HTMLElement>('.editora-toast[data-front="true"]');
+      if (!front) return;
+      event.preventDefault();
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && !container.contains(active)) this.returnFocusTo = active;
+      front.focus();
+    }) as EventListener);
+
+    add(document, 'pointerdown', ((event: PointerEvent) => {
+      this.containers.forEach((container) => {
+        if (container.dataset.hover === 'true' && !container.contains(event.target as Node)) {
+          delete container.dataset.hover;
+          this.releaseAll(container, 'pointer');
+          this.syncOpen(container);
+        }
+      });
+    }) as EventListener);
+
+    add(window, 'resize', (() => {
+      window.clearTimeout(this.resizeTimer);
+      this.resizeTimer = window.setTimeout(() => this.containers.forEach((container) => this.layout(container, true)), 120);
+    }) as EventListener);
+  }
+
+  private matchesHotkey(event: KeyboardEvent): boolean {
+    const hotkey = this.config.hotkey;
+    if (!hotkey) return false;
+    const parts = hotkey.toLowerCase().split('+').map((part) => part.trim()).filter(Boolean);
+    const key = parts.pop();
+    if (!key) return false;
+    const want = (name: string) => parts.includes(name);
+    if (event.altKey !== want('alt') || event.shiftKey !== want('shift')) return false;
+    if (event.ctrlKey !== want('ctrl') || event.metaKey !== (want('meta') || want('cmd'))) return false;
+    // `code` first: on a Mac, Alt+T types a symbol, so `key` is no use.
+    return event.code.toLowerCase() === `key${key}` || event.code.toLowerCase() === key || event.key.toLowerCase() === key;
+  }
+
+  private layout(container: HTMLElement, remeasure = false): void {
+    layoutStack(container, { stack: this.config.stack, expand: this.config.expand, gap: this.toPx(this.config.gap) }, remeasure);
+  }
+
+  private toPx(value: number | string | undefined): number {
+    if (typeof value === 'number') return value;
+    const parsed = parseFloat(value || '');
+    return Number.isFinite(parsed) ? parsed : 8;
+  }
+
+  // Timer holds
+  holdAll(container: HTMLElement, reason: string): void {
+    container.querySelectorAll<HTMLElement>('.editora-toast').forEach((element) => {
+      const toast = this.toastOf.get(element);
+      if (!toast) return;
+      const wants = reason === 'focus' ? toast.options.pauseOnFocus : toast.options.pauseOnHover;
+      if (wants !== false) this.pauseToast(toast, reason);
+    });
+  }
+
+  releaseAll(container: HTMLElement, reason: string): void {
+    container.querySelectorAll<HTMLElement>('.editora-toast').forEach((element) => {
+      const toast = this.toastOf.get(element);
+      if (toast) this.resumeToast(toast, reason);
+    });
   }
 
   // Create toast element
@@ -56,6 +210,10 @@ export class ToastRenderer {
 
     element.setAttribute('role', options.role || (options.level === 'error' ? 'alert' : 'status'));
     element.setAttribute('aria-atomic', 'true');
+    // Focusable so the keyboard can reach a toast (and its buttons) before it goes away.
+    element.tabIndex = 0;
+    if (options.closable || options.closeButton) element.dataset.closable = 'true';
+    this.toastOf.set(element, toast);
     if (options.ariaLive && options.ariaLive !== 'off') {
       element.setAttribute('aria-live', options.ariaLive);
     }
@@ -120,16 +278,7 @@ export class ToastRenderer {
       element.appendChild(this.createCloseButton(toast));
     }
 
-    // Interactive features
-    if (options.pauseOnHover) {
-      element.addEventListener('mouseenter', () => this.pauseToast(toast));
-      element.addEventListener('mouseleave', () => this.resumeToast(toast));
-    }
-
-    if (options.pauseOnFocus) {
-      element.addEventListener('focusin', () => this.pauseToast(toast));
-      element.addEventListener('focusout', () => this.resumeToast(toast));
-    }
+    // Hover and focus are handled by the container (the whole stack holds together); see attachContainerListeners.
 
     if (options.swipeDismiss) {
       this.addSwipeDismiss(element, toast);
@@ -149,7 +298,10 @@ export class ToastRenderer {
 
     toast.element = element;
     container.appendChild(element);
-    this.applyStackState(container);
+    // A toast that arrives while the stack is held open is held with it.
+    if (container.dataset.hover === 'true' && toast.options.pauseOnHover !== false) this.pauseToast(toast, 'pointer');
+    if (container.dataset.focus === 'true' && toast.options.pauseOnFocus !== false) this.pauseToast(toast, 'focus');
+    this.layout(container);
 
     // Get animation config (toast-specific or global default)
     const animation = toast.options.animation || this.config.animation || { type: 'css' };
@@ -166,36 +318,40 @@ export class ToastRenderer {
     toast.options.onShow?.();
 
     // Auto-dismiss if not persistent
-    if (!toast.options.persistent && toast.options.duration !== 0) {
-      const duration = toast.options.duration || this.config.duration;
-      toast.timeoutId = window.setTimeout(() => {
-        toast.dismiss();
-      }, duration);
-    }
+    this.startTimer(toast);
   }
 
   // Hide toast with animation
   async hideToast(toast: ToastInstance): Promise<void> {
     if (!toast.element) return;
 
-    // Clear timeout
-    if (toast.timeoutId) {
-      clearTimeout(toast.timeoutId);
-      toast.timeoutId = undefined;
-    }
+    this.stopTimer(toast);
+    this.holds.delete(toast.id);
+
+    // Leave the layout now so the other toasts close the gap while this one animates out.
+    const leaving = toast.element;
+    leaving.dataset.leaving = 'true';
+    if (leaving.parentElement) this.layout(leaving.parentElement);
 
     // Get animation config
     const animation = toast.options.animation || this.config.animation || { type: 'css' };
 
     // Use animation manager for hiding
-    await animationManager.hideToast(toast.element, toast, animation);
+    await animationManager.hideToast(leaving, toast, animation);
 
     // Remove element after animation
     if (toast.element && toast.element.parentNode) {
       const parent = toast.element.parentElement;
       toast.element.parentNode.removeChild(toast.element);
       toast.element = undefined;
-      if (parent) this.applyStackState(parent);
+      if (parent) {
+        if (!parent.querySelector('.editora-toast')) {
+          delete parent.dataset.hover;
+          delete parent.dataset.focus;
+          parent.dataset.open = 'false';
+        }
+        this.layout(parent);
+      }
     }
 
     // Call onHide callback
@@ -227,7 +383,7 @@ export class ToastRenderer {
       toast.element.dataset.level = updates.level;
     }
 
-    if (updates.title !== undefined || updates.description !== undefined || updates.message !== undefined || updates.icon !== undefined || updates.render) {
+    if (updates.title !== undefined || updates.description !== undefined || updates.message !== undefined || updates.icon !== undefined || updates.level !== undefined || updates.render) {
       const contentElement = toast.element.querySelector('.editora-toast-content');
       const nextContent = this.createContent(toast);
       contentElement?.replaceWith(nextContent);
@@ -238,6 +394,8 @@ export class ToastRenderer {
     if (nextClosable !== undefined) {
       toast.options.closable = nextClosable;
       toast.options.closeButton = nextClosable;
+      if (nextClosable) toast.element.dataset.closable = 'true';
+      else delete toast.element.dataset.closable;
       const existing = toast.element.querySelector('.editora-toast-close');
       if (nextClosable && !existing) toast.element.appendChild(this.createCloseButton(toast));
       else if (!nextClosable && existing) existing.remove();
@@ -309,17 +467,13 @@ export class ToastRenderer {
     }
 
     if (updates.duration !== undefined || updates.persistent !== undefined || updates.level !== undefined) {
-      if (toast.timeoutId) {
-        clearTimeout(toast.timeoutId);
-        toast.timeoutId = undefined;
-      }
-      if (!toast.options.persistent && toast.options.duration !== 0) {
-        const duration = toast.options.duration || this.config.duration;
-        toast.timeoutId = window.setTimeout(() => {
-          toast.dismiss();
-        }, duration);
-      }
+      this.startTimer(toast);
     }
+
+    // The content may be taller or shorter now.
+    toast.element.style.height = '';
+    invalidateHeight(toast.element);
+    if (toast.element.parentElement) this.layout(toast.element.parentElement);
 
     // Call onUpdate callback
     toast.options.onUpdate?.(updates);
@@ -330,13 +484,8 @@ export class ToastRenderer {
     const content = document.createElement('div');
     content.className = 'editora-toast-content';
 
-    if (options.icon) {
-      const icon = document.createElement('span');
-      icon.className = 'editora-toast-icon';
-      icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = options.icon;
-      content.appendChild(icon);
-    }
+    const icon = this.createIcon(toast);
+    if (icon) content.appendChild(icon);
 
     const body = document.createElement('div');
     body.className = 'editora-toast-body';
@@ -379,9 +528,36 @@ export class ToastRenderer {
     close.className = 'editora-toast-close';
     close.setAttribute('type', 'button');
     close.setAttribute('aria-label', 'Close notification');
-    close.textContent = '×';
+    close.appendChild(createCloseIcon());
     close.onclick = () => toast.dismiss();
     return close;
+  }
+
+  // The icon is the caller's own (text, emoji or a node), false for none, or else the built-in one of the level.
+  private createIcon(toast: ToastInstance): HTMLElement | null {
+    const options = toast.options;
+    if (options.icon === false) return null;
+
+    const wrapper = document.createElement('span');
+    wrapper.className = 'editora-toast-icon';
+    wrapper.setAttribute('aria-hidden', 'true');
+
+    if (typeof options.icon === 'string' && options.icon) {
+      wrapper.textContent = options.icon;
+      return wrapper;
+    }
+    if (options.icon && typeof options.icon === 'object') {
+      wrapper.appendChild(options.icon);
+      return wrapper;
+    }
+
+    if (this.config.icons === false) return null;
+    const level = options.level || 'info';
+    const svg = createLevelIcon(level);
+    if (!svg) return null;
+    if (level === 'loading' || level === 'promise') wrapper.dataset.spin = 'true';
+    wrapper.appendChild(svg);
+    return wrapper;
   }
 
   private createActionButton(action: NonNullable<ToastInstance['options']['actions']>[number], toast: ToastInstance): HTMLButtonElement {
@@ -407,27 +583,27 @@ export class ToastRenderer {
     const gap = this.toCssLength(this.config.gap);
 
     container.dataset.position = position;
+    container.dataset.edge = position.startsWith('bottom') ? 'bottom' : 'top';
     container.dataset.expand = String(this.config.expand);
     container.dataset.stack = String(this.config.stack);
     container.style.setProperty('--editora-toast-offset', offset);
     container.style.setProperty('--editora-toast-mobile-offset', mobileOffset);
     container.style.setProperty('--editora-toast-gap', gap);
+    container.style.setProperty('--et-edge', position.startsWith('bottom') ? '1' : '-1');
 
+    // The toasts are placed inside the container (see ToastStack), which only needs its corner and width.
     const styles: Partial<CSSStyleDeclaration> = {
       position: 'fixed',
       zIndex: (this.config.zIndex || 2147483647).toString(),
-      display: 'flex',
-      flexDirection: position.startsWith('top') ? 'column' : 'column-reverse',
-      gap,
-      pointerEvents: 'none',
-      maxWidth: '100%',
+      display: 'block',
+      width: 'var(--et-width, 360px)',
+      maxWidth: `calc(100vw - 2 * ${offset})`,
       boxSizing: 'border-box',
       top: '',
       right: '',
       bottom: '',
       left: '',
-      transform: '',
-      alignItems: position.includes('center') ? 'center' : 'stretch'
+      transform: ''
     };
 
     switch (position) {
@@ -461,7 +637,6 @@ export class ToastRenderer {
         styles.top = '50%';
         styles.left = '50%';
         styles.transform = 'translate(-50%, -50%)';
-        styles.alignItems = 'center';
         break;
     }
 
@@ -469,36 +644,56 @@ export class ToastRenderer {
     container.style.setProperty('--editora-toast-mobile-left', mobileOffset);
   }
 
-  private applyStackState(container: HTMLElement): void {
-    const toasts = Array.from(container.querySelectorAll<HTMLElement>('.editora-toast'));
-    toasts.forEach((element, index) => {
-      const visualIndex = toasts.length - index - 1;
-      element.dataset.index = String(index);
-      element.dataset.front = String(visualIndex === 0);
-      element.style.setProperty('--editora-toast-index', String(index));
-      element.style.setProperty('--editora-toast-before', String(visualIndex));
-    });
-  }
-
   private toCssLength(value: number | string | undefined): string {
     if (typeof value === 'number') return `${value}px`;
     return value || '16px';
   }
 
-  // Pause/resume auto-dismiss
-  private pauseToast(toast: ToastInstance): void {
+  // Auto-dismiss timer. It keeps the time that is left, so pausing a toast and letting go does not give it a
+  // fresh full duration.
+  private startTimer(toast: ToastInstance): void {
+    this.stopTimer(toast);
+    if (toast.options.persistent || toast.options.duration === 0) {
+      this.timing.delete(toast.id);
+      return;
+    }
+    this.arm(toast, toast.options.duration || this.config.duration);
+  }
+
+  private arm(toast: ToastInstance, ms: number): void {
+    this.timing.set(toast.id, { remaining: ms, startedAt: Date.now() });
+    if ((this.holds.get(toast.id)?.size || 0) > 0) return; // held: it starts when the last hold is released
+    toast.timeoutId = window.setTimeout(() => {
+      toast.timeoutId = undefined;
+      toast.dismiss();
+    }, ms);
+  }
+
+  private stopTimer(toast: ToastInstance): void {
     if (toast.timeoutId) {
       clearTimeout(toast.timeoutId);
       toast.timeoutId = undefined;
     }
   }
 
-  private resumeToast(toast: ToastInstance): void {
-    if (!toast.options.persistent && toast.options.duration !== 0) {
-      const duration = toast.options.duration || this.config.duration;
-      toast.timeoutId = window.setTimeout(() => {
-        toast.dismiss();
-      }, duration);
+  pauseToast(toast: ToastInstance, reason = 'hover'): void {
+    const reasons = this.holds.get(toast.id) || new Set<string>();
+    this.holds.set(toast.id, reasons);
+    if (reasons.size === 0 && toast.timeoutId) {
+      const timing = this.timing.get(toast.id);
+      this.stopTimer(toast);
+      if (timing) timing.remaining = Math.max(0, timing.remaining - (Date.now() - timing.startedAt));
+    }
+    reasons.add(reason);
+  }
+
+  resumeToast(toast: ToastInstance, reason = 'hover'): void {
+    const reasons = this.holds.get(toast.id);
+    if (!reasons || !reasons.delete(reason) || reasons.size > 0) return;
+    this.holds.delete(toast.id);
+    const timing = this.timing.get(toast.id);
+    if (timing && !toast.timeoutId && !toast.options.persistent && toast.options.duration !== 0) {
+      this.arm(toast, timing.remaining);
     }
   }
 
@@ -696,7 +891,8 @@ export class ToastRenderer {
     if (!existing) {
       const style = document.createElement('style');
       style.setAttribute('data-editora-toast-fallback', 'true');
-      style.textContent = '.editora-toast{box-sizing:border-box;pointer-events:auto}.editora-toast-container{box-sizing:border-box;pointer-events:none}.editora-toast.show{opacity:1;transform:translateY(0) scale(1)}.editora-toast.hiding{opacity:0}';
+      // Enough to lay the toasts out and show them when toast.css was not loaded; the real look is in toast.css.
+      style.textContent = '.editora-toast-container{position:fixed;width:360px;max-width:100vw;box-sizing:border-box}.editora-toast{position:absolute;left:0;width:100%;box-sizing:border-box;padding:12px 14px;background:#fff;color:#111;border:1px solid #ddd;border-radius:12px;font:13px/1.45 system-ui,sans-serif;overflow:hidden;pointer-events:auto;opacity:0;translate:0 var(--et-y,0px);scale:var(--et-s,1);transition:opacity .2s,translate .3s,scale .3s,height .3s}.editora-toast-container[data-edge=bottom] .editora-toast{bottom:0}.editora-toast-container[data-edge=top] .editora-toast{top:0}.editora-toast.show{opacity:1}.editora-toast.hiding,.editora-toast[data-hidden=true]{opacity:0}';
       document.head.appendChild(style);
     }
 
@@ -705,6 +901,9 @@ export class ToastRenderer {
 
   // Cleanup
   destroy(): void {
+    this.globalListeners.forEach(([target, type, handler]) => target.removeEventListener(type, handler));
+    this.globalListeners = [];
+    window.clearTimeout(this.resizeTimer);
     this.containers.forEach(container => {
       if (container.parentNode) {
         container.parentNode.removeChild(container);

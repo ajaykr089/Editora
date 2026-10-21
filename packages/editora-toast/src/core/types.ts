@@ -114,7 +114,7 @@ export interface ToastContent {
   message?: string;
   title?: string;
   description?: string;
-  icon?: string;
+  icon?: string | false | Node; // text or emoji, a DOM node, or false for no icon. Left out: the built-in icon of the level
   actions?: ToastAction[];
   action?: ToastAction;
   cancel?: ToastAction;
@@ -200,6 +200,8 @@ export interface ToastConfig {
   rtl: boolean; // RTL support
   enableAccessibility: boolean;
   closeButton: boolean;
+  icons: boolean; // show the built-in status icons
+  hotkey: string | false; // moves focus to the toasts, e.g. 'alt+t'; false turns it off
   preventDuplicate: boolean;
   dedupeScope: 'visible' | 'queue' | 'all';
   container?: HTMLElement;
