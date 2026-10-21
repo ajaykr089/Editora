@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { resolveTriggerControl } from '../primitives/trigger';
 import { createSharedMenuItemCss } from './menu-item-styles';
 
@@ -32,6 +33,8 @@ const ITEM_SELECTOR = [
 ].join(', ');
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   :host {
     --ui-dropdown-bg: var(
       --ui-dropdown-menu-bg,
@@ -45,7 +48,7 @@ const style = `
     );
     --ui-dropdown-border: var(--ui-dropdown-menu-border, var(--base-dropdown-border, 1px solid var(--ui-dropdown-border-color)));
     --ui-dropdown-shadow: var(--ui-dropdown-menu-shadow, var(--base-dropdown-shadow, 0 10px 24px rgba(15, 23, 42, 0.14)));
-    --ui-dropdown-radius: var(--ui-dropdown-menu-radius, var(--base-dropdown-radius, var(--ui-radius, 4px)));
+    --ui-dropdown-radius: var(--ui-dropdown-menu-radius, var(--base-dropdown-radius, var(--ui-radius, 6px)));
     --ui-dropdown-padding: var(--ui-dropdown-menu-padding, var(--base-dropdown-content-padding, 0px));
     --ui-dropdown-min-width: var(--ui-dropdown-menu-min-width, var(--base-dropdown-min-width, 224px));
     --ui-dropdown-gap: 8px;
@@ -1120,8 +1123,8 @@ export class UIDropdown extends ElementBase {
     const menu = this._getMenu();
     if (!panel || !menu) return;
 
-    panel.hidden = !this._isOpen;
     panel.setAttribute('data-placement', this._placement);
+    setPanelOpen(panel, this._isOpen, String(this._placement).split('-')[0]);
   }
 
   private _schedulePanelSync(focusBoundary?: 'first' | 'last'): void {

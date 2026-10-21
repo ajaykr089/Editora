@@ -41,7 +41,7 @@ const style = `
     --ui-box-border-width: 1px;
     --ui-box-border-style: solid;
     --ui-box-shadow: none;
-    --ui-box-radius: var(--base-box-radius, var(--ui-radius, 4px));
+    --ui-box-radius: var(--base-box-radius, var(--ui-radius, 6px));
     --ui-box-backdrop: none;
     --ui-box-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-box-outline: color-mix(in srgb, var(--ui-box-accent) 30%, transparent);

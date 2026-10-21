@@ -1158,6 +1158,9 @@ function applyState(
   }
 
   floating.setAttribute('data-placement', state.placement);
+  const [side, align] = String(state.placement).split('-');
+  floating.setAttribute('data-side', side || 'bottom');
+  floating.setAttribute('data-align', align || 'center');
   if (typeof state.referenceHidden === 'boolean' || typeof state.escaped === 'boolean') {
     floating.setAttribute('data-reference-hidden', state.referenceHidden ? 'true' : 'false');
     floating.setAttribute('data-escaped', state.escaped ? 'true' : 'false');

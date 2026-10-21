@@ -13,18 +13,18 @@ type ButtonScale = '1' | '2' | '3' | '4';
 
 const style = `
   :host {
-    --ui-btn-radius: var(--ui-control-radius, var(--ui-radius, 4px));
-    --ui-btn-min-height: var(--ui-control-min-height, var(--base-button-height-md, 40px));
-    --ui-btn-padding-inline: var(--ui-control-padding-inline, 14px);
+    --ui-btn-radius: var(--ui-control-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
+    --ui-btn-min-height: var(--ui-control-min-height, var(--base-button-height-md, var(--ui-control-height-2, 32px)));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline, var(--ui-control-padding-inline-2, 12px));
     --ui-btn-gap: var(--ui-control-gap, var(--ui-default-gap, 8px));
-    --ui-btn-font-size: var(--ui-control-font-size, var(--ui-default-font-size, var(--ui-font-size-md, var(--font-size-2, 14px))));
-    --ui-btn-font-weight: 400;
+    --ui-btn-font-size: var(--ui-control-font-size, var(--ui-control-font-size-2, 14px));
+    --ui-btn-font-weight: 500;
     --ui-btn-letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
     --ui-btn-duration: var(--ui-motion-base, 160ms);
     --ui-btn-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
 
     --ui-btn-accent: var(--ui-color-primary, #2563eb);
-    --ui-btn-accent-strong: color-mix(in srgb, var(--ui-btn-accent) 82%, #0f172a 18%);
+    --ui-btn-accent-text: color-mix(in srgb, var(--ui-btn-accent) 45%, var(--ui-color-text-strong, var(--ui-btn-text)));
     --ui-btn-accent-soft: color-mix(in srgb, var(--ui-btn-accent) 10%, var(--ui-color-surface, #ffffff));
 
     --ui-btn-surface: var(--ui-color-surface, #ffffff);
@@ -84,54 +84,53 @@ const style = `
     --ui-btn-accent: color-mix(in srgb, var(--ui-color-primary, #2563eb) 78%, #0ea5e9 22%);
   }
 
-  :host([recipe="classic"]) .btn:not([disabled]) {
+  /* Recipes restyle the coloured variants (primary, danger, success, warning); secondary and ghost stay neutral. */
+  :host([recipe="classic"]) .btn--solid:not([disabled]) {
     background-image: linear-gradient(180deg, color-mix(in srgb, white 18%, transparent), color-mix(in srgb, black 10%, transparent));
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, white 52%, transparent),
       inset 0 -1px 0 color-mix(in srgb, black 22%, transparent),
-      0 1px 2px rgba(15, 23, 42, 0.08),
-      0 8px 18px color-mix(in srgb, var(--ui-btn-accent) 22%, transparent);
+      0 1px 2px rgba(15, 23, 42, 0.12);
   }
 
-  :host([recipe="solid"]) .btn {
-    background-image: none;
-  }
-
-  :host([recipe="soft"]) {
-    --ui-btn-surface: color-mix(in srgb, var(--ui-btn-accent) 10%, var(--ui-color-surface, #ffffff));
-    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 14%, var(--ui-color-surface, #ffffff));
-  }
-
-  :host([recipe="soft"]) .btn--secondary {
+  :host([recipe="soft"]) .btn--solid {
+    background: color-mix(in srgb, var(--ui-btn-accent) 16%, var(--ui-btn-surface));
+    color: var(--ui-btn-accent-text);
     border-color: transparent;
-    box-shadow: none;
   }
 
-  :host([recipe="surface"]) {
-    --ui-btn-surface: var(--color-panel-solid, var(--ui-color-surface));
-    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 5%, var(--color-panel-solid, var(--ui-color-surface)));
+  :host([recipe="soft"]) .btn--solid:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--ui-btn-accent) 24%, var(--ui-btn-surface));
   }
 
-  :host([recipe="surface"]) .btn--secondary {
-    border-color: color-mix(in srgb, var(--ui-btn-accent) 28%, var(--ui-color-border));
-    box-shadow: var(--shadow-1);
+  :host([recipe="surface"]) .btn--solid {
+    background: color-mix(in srgb, var(--ui-btn-accent) 7%, var(--ui-btn-surface));
+    color: var(--ui-btn-accent-text);
+    border-color: color-mix(in srgb, var(--ui-btn-accent) 40%, transparent);
   }
 
-  :host([recipe="outline"]) {
-    --ui-btn-surface: transparent;
-    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 6%, transparent);
+  :host([recipe="surface"]) .btn--solid:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--ui-btn-accent) 13%, var(--ui-btn-surface));
   }
 
-  :host([recipe="outline"]) .btn--secondary {
-    border-width: 1px;
-    border-style: solid;
-    border-color: color-mix(in srgb, var(--ui-btn-accent) 42%, var(--ui-color-border));
-    box-shadow: none;
+  :host([recipe="outline"]) .btn--solid {
+    background: transparent;
+    color: var(--ui-btn-accent-text);
+    border-color: color-mix(in srgb, var(--ui-btn-accent) 55%, transparent);
   }
 
-  :host([recipe="ghost"]) {
-    --ui-btn-surface: transparent;
-    --ui-btn-surface-alt: transparent;
+  :host([recipe="outline"]) .btn--solid:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--ui-btn-accent) 10%, transparent);
+  }
+
+  :host([recipe="ghost"]) .btn--solid {
+    background: transparent;
+    color: var(--ui-btn-accent-text);
+    border-color: transparent;
+  }
+
+  :host([recipe="ghost"]) .btn--solid:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--ui-btn-accent) 14%, transparent);
   }
 
   :host([shape="none"]) {
@@ -154,31 +153,35 @@ const style = `
     --ui-btn-radius: 999px;
   }
 
-  :host([scale="1"]) {
-    --ui-btn-min-height: 30px;
-    --ui-btn-padding-inline: 10px;
-    --ui-btn-font-size: 14px;
+    :host([scale="1"]) {
+    --ui-btn-min-height: var(--base-button-height-sm, var(--ui-control-height-1, 24px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline-1, 8px);
+    --ui-btn-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-btn-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-btn-gap: 6px;
   }
 
   :host([scale="2"]) {
-    --ui-btn-min-height: 36px;
-    --ui-btn-padding-inline: 14px;
-    --ui-btn-font-size: 14px;
+    --ui-btn-min-height: var(--base-button-height-md, var(--ui-control-height-2, 32px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline-2, 12px);
+    --ui-btn-font-size: var(--ui-control-font-size-2, 14px);
+    --ui-btn-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-btn-gap: 8px;
   }
 
   :host([scale="3"]) {
-    --ui-btn-min-height: 44px;
-    --ui-btn-padding-inline: 18px;
-    --ui-btn-font-size: 16px;
+    --ui-btn-min-height: var(--base-button-height-lg, var(--ui-control-height-3, 40px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline-3, 16px);
+    --ui-btn-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-btn-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-btn-gap: 8px;
   }
 
   :host([scale="4"]) {
-    --ui-btn-min-height: 56px;
-    --ui-btn-padding-inline: 24px;
-    --ui-btn-font-size: 18px;
+    --ui-btn-min-height: var(--ui-control-height-4, 48px);
+    --ui-btn-padding-inline: var(--ui-control-padding-inline-4, 20px);
+    --ui-btn-font-size: var(--ui-control-font-size-4, 18px);
+    --ui-btn-radius: var(--ui-control-radius-4, var(--ui-radius, 6px));
     --ui-btn-gap: 10px;
   }
 
@@ -221,8 +224,8 @@ const style = `
   }
 
   .btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--ui-btn-ring) 70%, transparent);
-    outline-offset: 2px;
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-btn-ring));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .btn::after {
@@ -240,84 +243,79 @@ const style = `
     opacity: 0.08;
   }
 
+  /* Solid: a flat fill, no shadow. Hover goes slightly darker in light themes and lighter in dark ones. */
+  .btn--solid {
+    background: var(--ui-btn-fill, var(--ui-btn-accent));
+    color: var(--ui-btn-on-accent, #ffffff);
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .btn--solid:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--ui-btn-fill, var(--ui-btn-accent)) 88%, var(--ui-color-text-strong, #0f172a));
+  }
+
   .btn--primary {
-    background: var(--ui-btn-accent);
     /* The theme's text colour for a primary fill: the default theme's amber needs dark text. */
-    color: var(--ui-color-foreground-on-primary, #ffffff);
-    border-color: color-mix(in srgb, var(--ui-btn-accent) 74%, #0f172a 26%);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-btn-accent) 22%, transparent);
+    --ui-btn-on-accent: var(--ui-color-foreground-on-primary, #ffffff);
   }
 
-  .btn--primary:hover:not([disabled]) {
-    background: var(--ui-btn-accent-strong);
+  /* Status fills are a shade deeper than the status colour so white text reads at 4.5:1 or better. */
+  .btn--danger {
+    --ui-btn-accent: var(--ui-color-danger, #dc2626);
+    --ui-btn-fill: color-mix(in srgb, var(--ui-btn-accent) 80%, #000000);
+    --ui-btn-on-accent: #ffffff;
   }
 
+  .btn--success {
+    --ui-btn-accent: var(--ui-color-success, #15803d);
+    --ui-btn-fill: color-mix(in srgb, var(--ui-btn-accent) 76%, #000000);
+    --ui-btn-on-accent: #ffffff;
+  }
+
+  /* The warning colour is often amber, which needs dark text. */
+  .btn--warning {
+    --ui-btn-accent: var(--ui-color-warning, #b45309);
+    --ui-btn-on-accent: var(--ui-color-foreground-on-warning, #ffffff);
+  }
+
+  /* Secondary: a neutral surface with a hairline border. */
   .btn--secondary {
     background: var(--ui-btn-surface);
-    color: color-mix(in srgb, var(--ui-btn-accent) 50%, var(--ui-btn-text) 50%);
-    border-color: color-mix(in srgb, var(--ui-btn-accent) 22%, var(--ui-btn-muted));
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.06);
+    color: var(--ui-color-text-strong, var(--ui-btn-text));
+    border-color: var(--ui-color-line, color-mix(in srgb, var(--ui-btn-muted) 40%, transparent));
+    box-shadow: none;
   }
 
   .btn--secondary:hover:not([disabled]) {
-    background: color-mix(in srgb, var(--ui-btn-accent) 8%, var(--ui-btn-surface-alt));
+    background: var(--ui-color-fill, var(--ui-btn-surface-alt));
+    border-color: var(--ui-color-line-strong, var(--ui-color-line, var(--ui-btn-muted)));
   }
 
   .btn--ghost {
     background: transparent;
-    color: color-mix(in srgb, var(--ui-btn-accent) 50%, var(--ui-btn-text) 50%);
+    color: var(--ui-btn-accent-text);
     border-color: transparent;
     box-shadow: none;
   }
 
   .btn--ghost:hover:not([disabled]) {
-    background: var(--ui-btn-accent-soft);
-  }
-
-  .btn--danger {
-    background: var(--ui-color-danger, #dc2626);
-    color: #ffffff;
-    border-color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 72%, #0f172a 28%);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-danger, #dc2626) 22%, transparent);
-  }
-
-  .btn--danger:hover:not([disabled]) {
-    background: color-mix(in srgb, var(--ui-color-danger, #dc2626) 86%, #0f172a 14%);
-  }
-
-  .btn--success {
-    background: var(--ui-color-success, #15803d);
-    color: #ffffff;
-    border-color: color-mix(in srgb, var(--ui-color-success, #15803d) 70%, #0f172a 30%);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-success, #15803d) 20%, transparent);
-  }
-
-  .btn--success:hover:not([disabled]) {
-    background: color-mix(in srgb, var(--ui-color-success, #15803d) 86%, #0f172a 14%);
-  }
-
-  .btn--warning {
-    background: var(--ui-color-warning, #b45309);
-    color: #ffffff;
-    border-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 70%, #0f172a 30%);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-warning, #b45309) 18%, transparent);
-  }
-
-  .btn--warning:hover:not([disabled]) {
-    background: color-mix(in srgb, var(--ui-color-warning, #b45309) 86%, #0f172a 14%);
+    background: color-mix(in srgb, var(--ui-btn-accent) 12%, transparent);
   }
 
   :host([size="sm"]) {
-    --ui-btn-font-size: var(--ui-font-size-sm, var(--font-size-1, 12px));
-    --ui-btn-min-height: var(--base-button-height-sm, 32px);
-    --ui-btn-padding-inline: 10px;
+    --ui-btn-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-btn-min-height: var(--base-button-height-sm, var(--ui-control-height-1, 24px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline-1, 8px);
+    --ui-btn-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-btn-gap: 6px;
   }
 
   :host([size="lg"]) {
-    --ui-btn-font-size: var(--ui-font-size-lg, var(--font-size-3, 16px));
-    --ui-btn-min-height: var(--base-button-height-lg, 44px);
-    --ui-btn-padding-inline: 18px;
+    --ui-btn-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-btn-min-height: var(--base-button-height-lg, var(--ui-control-height-3, 40px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline-3, 16px);
+    --ui-btn-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-btn-gap: 10px;
   }
 
@@ -328,11 +326,11 @@ const style = `
   }
 
   :host([state="error"]) .btn:not([disabled]) {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-danger, #dc2626) 38%, transparent), 0 8px 18px rgba(127, 29, 29, 0.14);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-danger, #dc2626) 50%, transparent);
   }
 
   :host([state="success"]) .btn:not([disabled]) {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #15803d) 30%, transparent), 0 8px 18px rgba(22, 163, 74, 0.14);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #15803d) 45%, transparent);
   }
 
   :host([data-animation]) .btn:not([disabled]):hover {
@@ -849,7 +847,7 @@ export class UIButton extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       <button
-        class="btn btn--${variant}"
+        class="btn btn--${variant}${variant === 'secondary' || variant === 'ghost' ? '' : ' btn--solid'}"
         part="button"
         type="button"
         data-ui-button="true"

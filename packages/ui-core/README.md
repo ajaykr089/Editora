@@ -541,6 +541,110 @@ argument:
 Apply the theme early, before the first render. To theme one part of the page, call
 `applyTheme(tokens, element)`.
 
+### Follow the system light/dark setting
+
+```js
+import { applySystemTheme } from '@editora/ui-core';
+
+const stop = applySystemTheme({ accentPalette: 'blue' }); // stop() ends following the system
+```
+
+It applies the light or dark theme to match the operating system and switches live when the person changes it. The
+mode is also written as `data-ui-mode="light|dark"` and `color-scheme` on the page, so your own CSS can follow it.
+`light` and `dark` take token overrides for each mode.
+
+### As a stylesheet (server rendering)
+
+`themeToCss(tokens, ':root')` returns the same variables as CSS text, to put in a `<style>` tag or a `.css` file so the
+first paint is themed without JavaScript. `themeToVariables(tokens)` returns them as a `{ name: value }` object.
+
+### Tokens to build on
+
+Every value below follows the accent palette, the gray scale and light/dark mode, so custom components that read them
+stay on theme.
+
+| Tokens | Meaning |
+| --- | --- |
+| `--ui-color-fill`, `-fill-hover`, `-fill-active` | resting, hover and pressed fill of a neutral control |
+| `--ui-color-line-subtle`, `-line`, `-line-strong` | borders and separators, from quiet to strong |
+| `--ui-color-text-secondary`, `-text-strong` | secondary and primary text |
+| `--ui-color-accent-subtle`, `-accent-fill`, `-accent-fill-hover`, `-accent-fill-active` | tinted accent backgrounds |
+| `--ui-color-accent-line`, `-accent-solid`, `-accent-solid-hover`, `-accent-text` | accent border, solid fill, solid hover and accent text |
+| `--ui-color-surface-elevated`, `--ui-color-info` | raised surface (menus, popovers) and the informational colour |
+| `--ui-color-placeholder` | placeholder text (62% of the text colour, 4.5:1 or better on the field) |
+| `--ui-color-foreground-on-warning` | text on a solid warning fill: dark when the warning colour is light (amber) |
+| `--ui-ring-color`, `--ui-ring-width`, `--ui-ring-offset` | the focus ring |
+| `--ui-control-height-{1..4}`, `--ui-control-font-size-{1..4}`, `--ui-control-padding-inline-{1..4}`, `--ui-control-radius-{1..4}` | the control scale: 24, 32, 40 and 48px (see below) |
+| `--ui-motion-enter-easing`, `--ui-motion-exit-easing` | easing for things that appear and disappear |
+
+### The default look
+
+Light and dark, with the default amber accent (`radius` is 6px):
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/look-light.png" alt="Buttons, fields, checkboxes, switches, badges, tabs and a card in the light theme" width="49%">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/look-dark.png" alt="The same components in the dark theme" width="49%">
+</p>
+
+- **Buttons** are flat fills with no shadow. `variant` picks the colour (`primary`, `danger`, `success`, `warning`,
+  neutral `secondary`, `ghost`) and `recipe` the style: `solid` (default), `soft`, `surface`, `outline`, `ghost` or
+  `classic`. Status fills are a shade deeper than the status colour so white text reads at 4.5:1.
+- **Fields** (input, select, textarea, combobox, pickers) share a hairline border that darkens on hover, and a 2px
+  focus ring drawn inside it.
+- **`ui-field`** is flat: label, control and message with no box. `variant="surface"`, `outline`, `soft`, `contrast` or
+  `elevated` draw the box.
+- **Tabs** are a line: a hairline under the tabs and a 2px accent line under the selected one. The boxed pill look is
+  `variant="segmented"`; `soft`, `outline`, `solid`, `cards` and `indicator` keep working.
+- **Cards** have a single hairline border and no shadow. **Badges** are soft tinted labels without a border
+  (`variant="solid"` for a filled one).
+
+### Control sizes
+
+Buttons and form controls share one scale, so a row of mixed controls lines up:
+
+| `size` | Height | Text |
+| --- | --- | --- |
+| `sm` (or `1`) | 24px | 12px |
+| default (`md`, `2`) | 32px | 14px |
+| `lg` (or `3`) | 40px | 16px |
+
+This covers `ui-button`, `ui-input`, `ui-password-field`, `ui-number-field`, `ui-select`, `ui-combobox`,
+`ui-multi-select`, `ui-tags-input`, `ui-toggle`, `ui-textarea` and the date and time pickers. `ui-button` also takes
+`scale="4"` for 48px. The control radius follows the theme's `radius`.
+
+To change a size for the whole page, set the tokens, for example `:root { --ui-control-height-2: 36px; }`. To
+change one control, use `--ui-control-min-height` (buttons) or `--ui-min-height` (inputs) on it. The older
+`components.button['height-md']`-style theme values still work if you set them.
+
+The 24px size is small for touch. Buttons inside a small field (clear, show password, the dropdown arrow) stay 24px
+tall so they still meet the WCAG 2.2 minimum target size, but prefer the default size on touch screens.
+
+## Overlays
+
+Popovers, menus, dropdowns, selects, comboboxes, tooltips and dialogs share one set of behaviours.
+
+**They animate in and out.** A surface fades and scales in from the side it opens on, and plays a quicker exit before it
+is removed, so it no longer disappears with a pop. With `prefers-reduced-motion: reduce` there is no animation. Tune it
+with CSS variables on the page: `--ui-overlay-in-duration` (150ms), `--ui-overlay-out-duration` (100ms) and
+`--ui-overlay-shift` (4px), plus `--ui-motion-enter-easing` and `--ui-motion-exit-easing`.
+
+**They expose their state for CSS.** The open surface carries `data-state="open"` or `"closed"`, and positioned ones
+also `data-side` (`top`, `right`, `bottom`, `left`) and `data-align` (`start`, `center`, `end`), as Radix does:
+
+```css
+.ui-menu-surface[data-side="top"][data-state="open"] {
+  /* your own rule */
+}
+```
+
+**Popovers, menus, tooltips, dropdown-style menus and dialogs sit in the browser's top layer**, above every `z-index` on
+the page, so a sticky header with `z-index: 9999` can no longer cover them. This uses `popover="manual"` (Chrome 114,
+Safari 17, Firefox 125); older browsers keep the previous `z-index` stacking. Dismissal (Escape, click outside) is still
+handled by the components.
+
+Not in the top layer: the panels of `ui-select`, `ui-dropdown`, `ui-combobox` and `ui-multi-select`, which open inside
+their own field and are clipped like it; `ui-hover-card` and `ui-drawer`. They do have the state attributes and the motion.
+
 ## Floating positioning
 
 The positioning engine behind the menus, popovers and tooltips is available on its own, from

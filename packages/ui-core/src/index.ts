@@ -130,6 +130,8 @@ export * from './alert-dialog-manager';
 export * from './dialog-manager';
 
 export * from './theme';
+export { deriveSemanticTokens } from './semantic-tokens';
+export type { SemanticTokenMap } from './semantic-tokens';
 export * from './portal';
 export * from './focusManager';
 export * from './overlayManager';

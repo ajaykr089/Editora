@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { showPortalFor } from '../portal';
+import { liftToTopLayer } from '../primitives/overlay-motion';
 
 type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
 
@@ -439,6 +440,8 @@ export class UITooltip extends ElementBase {
       shift: true,
       flip: true
     }) as (() => void) | null;
+    // The surface was re-attached to the portal root, which takes it out of the top layer.
+    if (this._portalEl.getAttribute('data-state') === 'open') liftToTopLayer(this._portalEl);
   }
 
   private _syncOpenAttr(next: boolean): void {
@@ -467,6 +470,8 @@ export class UITooltip extends ElementBase {
     if (this._portalEl) {
       this._portalEl.classList.remove('closing');
       this._portalEl.classList.add('show');
+      this._portalEl.setAttribute('data-state', 'open');
+      liftToTopLayer(this._portalEl);
       this.setAttribute('aria-describedby', this._id);
     }
 
@@ -487,7 +492,8 @@ export class UITooltip extends ElementBase {
     this._unbindDocumentDismiss();
 
     if (this._cleanup) {
-      this._cleanup();
+      // Keep the surface in the document: it fades out first and is removed below.
+      (this._cleanup as (options?: { remove?: boolean }) => void)({ remove: false });
       this._cleanup = null;
     }
 
@@ -495,8 +501,10 @@ export class UITooltip extends ElementBase {
     if (portal) {
       portal.classList.remove('show');
       portal.classList.add('closing');
+      portal.setAttribute('data-state', 'closed');
 
-      if (immediate) {
+      const exitMs = typeof getComputedStyle === 'function' ? parseFloat(getComputedStyle(portal).transitionDuration || '0') : 0;
+      if (immediate || !(exitMs > 0)) {
         this._removePortal();
       } else {
         this._exitTimer = setTimeout(() => {

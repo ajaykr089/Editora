@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { externalDescriptionMarkup } from '../primitives/control-name';
 import { findFirstEnabledIndex, findIndexByValue, findLastEnabledIndex } from '../primitives/collection';
 import { resolveListboxActiveIndex } from '../primitives/listbox';
@@ -6,18 +7,21 @@ import './ui-listbox';
 import { UIListbox } from './ui-listbox';
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   :host {
     --ui-select-width: var(--ui-width, min(340px, 100%));
-    --ui-select-min-height: var(--base-select-height-md, 42px);
-    --ui-select-radius: var(--base-select-radius, var(--ui-radius, 4px));
-    --ui-select-padding-x: var(--base-select-padding-x, 12px);
+    --ui-select-min-height: var(--base-select-height-md, var(--ui-control-height-2, 32px));
+    --ui-select-radius: var(--base-select-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
+    --ui-select-padding-x: var(--base-select-padding-x, var(--ui-control-padding-inline-2, 12px));
+    --ui-select-font-size: var(--ui-control-font-size-2, 14px);
 
     --ui-select-bg: var(--base-select-bg, var(--ui-color-surface, #ffffff));
-    --ui-select-border: var(--base-select-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
+    --ui-select-border: var(--base-select-border, 1px solid var(--ui-color-line, var(--ui-color-border, #cbd5e1)));
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-border) 100%, transparent);
     --ui-select-text: var(--ui-color-text, #0f172a);
     --ui-select-muted: var(--ui-color-muted, #526175);
-    --ui-select-placeholder: color-mix(in srgb, var(--ui-select-text) 44%, transparent);
+    --ui-select-placeholder: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-select-text) 62%, transparent));
     --ui-select-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-select-accent: var(--ui-color-primary, #2563eb);
     --ui-select-success: var(--ui-color-success, #15803d);
@@ -26,14 +30,12 @@ const style = `
 
     --ui-select-shadow: var(--base-select-shadow, none);
     --ui-select-elevation: var(--ui-select-shadow);
-    --ui-select-menu-bg: var(--base-select-menu-bg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent));
+    --ui-select-menu-bg: var(--base-select-menu-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-select-menu-color: var(--base-select-menu-color, var(--ui-select-text));
-    --ui-select-menu-border-color: color-mix(in srgb, var(--ui-select-border-color) 82%, transparent);
+    --ui-select-menu-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-select-border-color) 82%, transparent));
     --ui-select-menu-border: 1px solid var(--ui-select-menu-border-color);
-    --ui-select-menu-radius: var(--base-select-menu-radius, var(--ui-select-radius));
-    --ui-select-menu-shadow:
-      0 14px 34px rgba(15, 23, 42, 0.16),
-      0 3px 10px rgba(15, 23, 42, 0.08);
+    --ui-select-menu-radius: var(--base-select-menu-radius, calc(var(--ui-radius, 6px) + 2px));
+    --ui-select-menu-shadow: var(--shadow-5, 0 14px 34px rgba(15, 23, 42, 0.16));
     --ui-select-menu-padding: 0px;
     --ui-select-menu-gap: 8px;
     --ui-select-menu-max-height: min(320px, var(--ui-select-available-height, 320px));
@@ -105,6 +107,7 @@ const style = `
   }
 
   .control {
+    box-sizing: border-box;
     min-inline-size: 0;
     position: relative;
     display: block;
@@ -124,10 +127,14 @@ const style = `
 
   .control[data-open="true"],
   .control:focus-within {
-    border-color: color-mix(in srgb, var(--ui-select-focus) 62%, var(--ui-select-border-color));
-    box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--ui-select-focus) 18%, transparent),
-      var(--ui-select-elevation);
+    border-color: var(--ui-ring-color, var(--ui-select-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-select-focus));
+    outline-offset: -1px;
+    box-shadow: var(--ui-select-elevation);
+  }
+
+  .control:hover:not(:focus-within):not([data-open="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-select-border-color));
   }
 
   .leading,
@@ -166,6 +173,7 @@ const style = `
   }
 
   .trigger {
+    display: block;
     inline-size: 100%;
     min-inline-size: 0;
     block-size: calc(var(--ui-select-min-height) - 2px);
@@ -174,8 +182,8 @@ const style = `
     outline: none;
     background: transparent;
     color: var(--ui-select-text);
-    font: 500 14px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    padding: 8px calc(var(--ui-select-padding-x) + 24px) 8px var(--ui-select-padding-x);
+    font: 500 var(--ui-select-font-size)/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 0 calc(var(--ui-select-padding-x) + 24px) 0 var(--ui-select-padding-x);
     margin: 0;
     cursor: pointer;
     text-align: left;
@@ -277,9 +285,7 @@ const style = `
     overflow-x: hidden;
     border: var(--ui-select-menu-border);
     border-radius: var(--ui-select-menu-radius);
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-select-accent) 3%, transparent) 0%, transparent 100%),
-      var(--ui-select-menu-bg);
+    background: var(--ui-select-menu-bg);
     color: var(--ui-select-menu-color);
     box-shadow: var(--ui-select-menu-shadow);
     padding: var(--ui-select-menu-padding);
@@ -306,16 +312,6 @@ const style = `
   .menu:hover::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, var(--ui-select-accent) 28%, var(--ui-select-menu-border-color));
     background-clip: padding-box;
-  }
-
-  .panel[data-placement="top"] .menu {
-    transform-origin: bottom center;
-    animation: ui-select-menu-enter-top 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .panel[data-placement="bottom"] .menu {
-    transform-origin: top center;
-    animation: ui-select-menu-enter-bottom 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .menu-group {
@@ -482,15 +478,12 @@ const style = `
 
   :host([size="sm"]),
   :host([size="1"]) {
-    --ui-select-min-height: 34px;
-    --ui-select-padding-x: 10px;
+    --ui-select-min-height: var(--base-select-height-sm, var(--ui-control-height-1, 24px));
+    --ui-select-padding-x: var(--ui-control-padding-inline-1, 8px);
+    --ui-select-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-select-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     --ui-select-menu-gap: 6px;
     --ui-select-menu-item-height: 34px;
-  }
-
-  :host([size="sm"]) .trigger,
-  :host([size="1"]) .trigger {
-    font-size: 12px;
   }
 
   :host([size="sm"]) .menu-item,
@@ -501,15 +494,12 @@ const style = `
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-select-min-height: 46px;
-    --ui-select-padding-x: 13px;
+    --ui-select-min-height: var(--base-select-height-lg, var(--ui-control-height-3, 40px));
+    --ui-select-padding-x: var(--ui-control-padding-inline-3, 16px);
+    --ui-select-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-select-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     --ui-select-menu-gap: 10px;
     --ui-select-menu-item-height: 42px;
-  }
-
-  :host([size="lg"]) .trigger,
-  :host([size="3"]) .trigger {
-    font-size: 15px;
   }
 
   :host([size="lg"]) .menu-item,
@@ -662,7 +652,7 @@ const style = `
   :host([invalid]) .control,
   :host([data-invalid="true"]) .control {
     box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--ui-select-error) 18%, transparent),
+      0 0 0 1px var(--ui-select-error),
       var(--ui-select-elevation);
   }
 
@@ -673,28 +663,6 @@ const style = `
   @keyframes ui-select-spin {
     to {
       transform: rotate(360deg);
-    }
-  }
-
-  @keyframes ui-select-menu-enter-bottom {
-    from {
-      opacity: 0;
-      transform: translateY(-4px) scale(0.985);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes ui-select-menu-enter-top {
-    from {
-      opacity: 0;
-      transform: translateY(4px) scale(0.985);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
     }
   }
 
@@ -1620,8 +1588,8 @@ export class UISelect extends ElementBase {
     else if (!this.disabled) trigger.setAttribute('tabindex', '0');
     else trigger.setAttribute('tabindex', '-1');
 
-    panel.hidden = !this._open;
     panel.setAttribute('data-placement', this._placement);
+    setPanelOpen(panel, this._open, String(this._placement).split('-')[0]);
     if (this._open) trigger.setAttribute('aria-controls', `${this._uid}-listbox`);
     else trigger.removeAttribute('aria-controls');
 

@@ -11,7 +11,7 @@ const style = `
     --ui-plugin-panel-height: min(280px, 44vh);
     --ui-plugin-panel-bg: var(--base-panel-bg, var(--color-panel, color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent)));
     --ui-plugin-panel-border: var(--base-panel-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent));
-    --ui-plugin-panel-radius: var(--base-panel-radius, var(--ui-radius, 4px));
+    --ui-plugin-panel-radius: var(--base-panel-radius, var(--ui-radius, 6px));
     --ui-plugin-panel-shadow: var(--base-panel-shadow, var(--shadow-4, none));
     --ui-plugin-panel-color: var(--ui-color-text, #0f172a);
   }

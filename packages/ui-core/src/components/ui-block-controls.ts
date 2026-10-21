@@ -6,14 +6,14 @@ const style = `
     min-inline-size: 0;
     --ui-block-controls-gap: var(--base-block-controls-gap, 6px);
     --ui-block-controls-padding: var(--base-block-controls-padding, 8px);
-    --ui-block-controls-radius: var(--base-block-controls-radius, var(--ui-radius, 4px));
+    --ui-block-controls-radius: var(--base-block-controls-radius, var(--ui-radius, 6px));
     --ui-block-controls-border: var(--base-block-controls-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 88%, transparent));
     --ui-block-controls-bg: var(--base-block-controls-bg, var(--color-panel, var(--ui-color-surface, #ffffff)));
     --ui-block-controls-shadow: var(--base-block-controls-shadow, var(--shadow-2, none));
     --ui-block-controls-accent: var(--ui-color-primary, #2563eb);
     --ui-block-controls-focus-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-block-controls-duration: 170ms;
-    --ui-block-controls-item-radius: var(--base-block-controls-item-radius, var(--ui-radius, 4px));
+    --ui-block-controls-item-radius: var(--base-block-controls-item-radius, var(--ui-radius, 6px));
     --ui-control-radius: var(--ui-block-controls-item-radius);
     --ui-control-min-height: 32px;
     --ui-control-padding-inline: 10px;
@@ -99,13 +99,13 @@ const style = `
   :host([density="compact"]) {
     --ui-block-controls-gap: 4px;
     --ui-block-controls-padding: 6px;
-    --ui-block-controls-radius: calc(var(--ui-radius, 4px) + 2px);
+    --ui-block-controls-radius: calc(var(--ui-radius, 6px) + 2px);
   }
 
   :host([density="comfortable"]) {
     --ui-block-controls-gap: 8px;
     --ui-block-controls-padding: 10px;
-    --ui-block-controls-radius: calc(var(--ui-radius, 4px) + 6px);
+    --ui-block-controls-radius: calc(var(--ui-radius, 6px) + 6px);
   }
 
   :host([variant="surface"]) {
@@ -165,7 +165,7 @@ const style = `
   :host([size="1"]) {
     --ui-block-controls-gap: 4px;
     --ui-block-controls-padding: 6px;
-    --ui-block-controls-item-radius: calc(var(--ui-radius, 4px) + 2px);
+    --ui-block-controls-item-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-control-min-height: 28px;
     --ui-control-padding-inline: 8px;
     --ui-control-gap: 5px;
@@ -176,7 +176,7 @@ const style = `
   :host([size="3"]) {
     --ui-block-controls-gap: 8px;
     --ui-block-controls-padding: 10px;
-    --ui-block-controls-item-radius: calc(var(--ui-radius, 4px) + 4px);
+    --ui-block-controls-item-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-control-min-height: 36px;
     --ui-control-padding-inline: 12px;
     --ui-control-gap: 7px;

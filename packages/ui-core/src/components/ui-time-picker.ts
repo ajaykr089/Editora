@@ -40,11 +40,11 @@ const CHEVRON_ICON = `
 const style = `
   :host {
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
-    --ui-dp-radius: 12px;
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-z: 1600;
     color-scheme: light dark;
@@ -61,11 +61,12 @@ const style = `
   .required { color: var(--ui-dp-field-error); font-size: 11px; }
 
   .field {
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 8px;
-    min-block-size: 38px;
+    min-block-size: var(--ui-control-height-2, 32px);
     border: 1px solid var(--ui-dp-border);
     border-radius: var(--ui-dp-radius);
     background: var(--ui-dp-bg);
@@ -74,8 +75,10 @@ const style = `
   }
 
   .field:focus-within {
-    border-color: color-mix(in srgb, var(--ui-dp-accent) 70%, var(--ui-dp-border));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-accent) 22%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-dp-accent));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-dp-accent));
+    outline-offset: -1px;
+    box-shadow: none;
   }
 
   .input {
@@ -85,7 +88,7 @@ const style = `
     color: var(--ui-dp-text);
     inline-size: 100%;
     min-inline-size: 0;
-    padding: 8px 0;
+    padding: 0;
     font: 500 14px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
@@ -106,8 +109,8 @@ const style = `
   .btn {
     border: 0;
     background: transparent;
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-dp-action-size, 24px);
+    block-size: var(--ui-dp-action-size, 24px);
     border-radius: 8px;
     color: color-mix(in srgb, var(--ui-dp-text) 72%, transparent);
     cursor: pointer;
@@ -171,11 +174,11 @@ const style = `
 const overlayStyle = `
   .ui-time-picker-overlay-host {
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
-    --ui-dp-radius: 12px;
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
   }
   .overlay { position: fixed; z-index: var(--ui-dp-z, 1600); pointer-events: none; }
   .panel {

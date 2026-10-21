@@ -40,7 +40,9 @@ describe('theme.applyTheme', () => {
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-menu-bg').trim()).toBe(defaultTokens.components?.menu?.bg);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-panel-shadow').trim()).toBe(defaultTokens.components?.panel?.shadow);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-avatar-radius').trim()).toBe(defaultTokens.components?.avatar?.radius);
-    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-badge-radius').trim()).toBe(defaultTokens.components?.badge?.radius);
+    // The badge look (radius, padding, weight) is the component's own default, not pinned by the theme.
+    expect(defaultTokens.components?.badge?.radius).toBeUndefined();
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-badge-radius').trim()).toBe('');
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-breadcrumb-radius').trim()).toBe(defaultTokens.components?.breadcrumb?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-navigation-menu-radius').trim()).toBe(defaultTokens.components?.navigationMenu?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-context-menu-radius').trim()).toBe(defaultTokens.components?.contextMenu?.radius);

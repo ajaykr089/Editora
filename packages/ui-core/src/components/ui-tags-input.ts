@@ -4,9 +4,9 @@ import { syncControlName, syncControlDescription } from '../primitives/control-n
 const style = `
   :host {
     --ui-tags-input-padding: 10px 12px;
-    --ui-tags-input-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-tags-input-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-tags-input-border: 1px solid var(--ui-tags-input-border-color);
-    --ui-tags-input-radius: var(--ui-radius, 12px);
+    --ui-tags-input-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-tags-input-bg: var(--ui-color-surface, #ffffff);
     --ui-tags-input-text: var(--ui-color-text, #0f172a);
     --ui-tags-input-muted: var(--ui-color-muted, #526175);
@@ -15,7 +15,8 @@ const style = `
     --ui-tags-input-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
     --ui-tags-input-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
     --ui-tags-input-chip-remove-bg: color-mix(in srgb, currentColor 8%, transparent);
-    --ui-tags-input-min-height: 44px;
+    --ui-tags-input-min-height: var(--ui-control-height-2, 32px);
+    --ui-tags-input-font-size: var(--ui-control-font-size-2, 14px);
     display: block;
     inline-size: 100%;
     max-inline-size: 100%;
@@ -23,6 +24,26 @@ const style = `
     color: var(--ui-tags-input-text);
     font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color-scheme: light dark;
+  }
+
+  :host([size="sm"]),
+  :host([size="1"]) {
+    --ui-tags-input-min-height: var(--ui-control-height-1, 24px);
+    --ui-tags-input-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-tags-input-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
+    --ui-tags-input-pad-y: 0px;
+    --ui-tags-input-pad-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
+    --ui-tags-input-chip-pad-y: 0px;
+  }
+
+  :host([size="lg"]),
+  :host([size="3"]) {
+    --ui-tags-input-min-height: var(--ui-control-height-3, 40px);
+    --ui-tags-input-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-tags-input-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
+    --ui-tags-input-pad-y: 5px;
+    --ui-tags-input-pad-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
+    --ui-tags-input-chip-pad-y: 4px;
   }
 
   .root {
@@ -78,7 +99,7 @@ const style = `
     gap: 8px;
     min-block-size: var(--ui-tags-input-min-height);
     box-sizing: border-box;
-    padding: 8px 10px;
+    padding: var(--ui-tags-input-pad-y, 3px) var(--ui-tags-input-pad-x, calc(var(--ui-control-padding-inline-2, 12px) - 1px));
     border: var(--ui-tags-input-border);
     border-radius: var(--ui-tags-input-radius);
     background: var(--ui-tags-input-bg);
@@ -86,13 +107,18 @@ const style = `
   }
 
   .shell[data-focused="true"] {
-    border-color: color-mix(in srgb, var(--ui-tags-input-focus) 58%, var(--ui-tags-input-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-tags-input-focus) 22%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-tags-input-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-tags-input-focus));
+    outline-offset: -1px;
+  }
+
+  .shell:hover:not([data-focused="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-tags-input-border-color));
   }
 
   .shell[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-tags-input-danger) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-tags-input-danger) 16%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-tags-input-danger);
   }
 
   .chips {
@@ -105,7 +131,7 @@ const style = `
     gap: 6px;
     min-inline-size: 0;
     max-inline-size: 100%;
-    padding: 6px 8px 6px 10px;
+    padding: var(--ui-tags-input-chip-pad-y, 2px) 4px var(--ui-tags-input-chip-pad-y, 2px) 10px;
     border-radius: 999px;
     background: var(--ui-tags-input-chip-bg);
     color: var(--ui-tags-input-chip-text);
@@ -145,13 +171,13 @@ const style = `
     background: transparent;
     color: inherit;
     outline: none;
-    font: 500 14px/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    padding: 4px 2px;
+    font: 500 var(--ui-tags-input-font-size)/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 2px 2px;
     margin: 0;
   }
 
   .input::placeholder {
-    color: color-mix(in srgb, var(--ui-tags-input-text) 42%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-tags-input-text) 62%, transparent));
   }
 
   .assist {

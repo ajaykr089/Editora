@@ -2,6 +2,7 @@ import { ElementBase } from '../ElementBase';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle } from '../primitives/positioner';
+import { liftToTopLayer } from '../primitives/overlay-motion';
 import './ui-listbox';
 import type { UIListbox } from './ui-listbox';
 
@@ -737,6 +738,7 @@ export class UISplitButton extends ElementBase {
       offset: 6,
       fitViewport: true
     });
+    liftToTopLayer(menu);
     this._layer = createDismissableLayer({
       node: menu,
       trigger: this._toggleButton,

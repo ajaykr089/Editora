@@ -9,17 +9,18 @@ const CLEAR_ICON = `
 
 const style = `
   :host {
-    --ui-textarea-bg: var(--ui-color-surface, #ffffff);
+    --ui-textarea-bg: var(--base-input-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-textarea-text: var(--ui-color-text, #0f172a);
     --ui-textarea-muted: var(--ui-color-muted, #526175);
-    --ui-textarea-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-textarea-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-textarea-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-textarea-accent: var(--ui-color-primary, #2563eb);
     --ui-textarea-danger: var(--ui-color-danger, #dc2626);
     --ui-textarea-success: var(--ui-color-success, #15803d);
-    --ui-textarea-radius: 12px;
-    --ui-textarea-padding-x: 12px;
-    --ui-textarea-padding-y: 10px;
+    --ui-textarea-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-textarea-padding-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
+    --ui-textarea-padding-y: 6px;
+    --ui-textarea-font-size: var(--ui-control-font-size-2, 14px);
     --ui-textarea-min-height: 110px;
     --ui-textarea-shadow: none;
 
@@ -74,10 +75,14 @@ const style = `
   }
 
   .field:focus-within {
-    border-color: color-mix(in srgb, var(--ui-textarea-focus) 72%, transparent);
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-textarea-focus) 22%, transparent),
-      var(--ui-textarea-shadow);
+    border-color: var(--ui-ring-color, var(--ui-textarea-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-textarea-focus));
+    outline-offset: -1px;
+    box-shadow: var(--ui-textarea-shadow);
+  }
+
+  .field:hover:not(:focus-within) {
+    border-color: var(--ui-color-line-strong, var(--ui-textarea-border));
   }
 
   textarea {
@@ -90,13 +95,13 @@ const style = `
     color: var(--ui-textarea-text);
     resize: vertical;
     outline: none;
-    font: 500 14px/1.45 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 var(--ui-textarea-font-size)/1.45 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     padding: var(--ui-textarea-padding-y) var(--ui-textarea-padding-x);
     border-radius: inherit;
   }
 
   textarea::placeholder {
-    color: color-mix(in srgb, var(--ui-textarea-muted) 76%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-textarea-muted) 90%, transparent));
   }
 
   textarea[readonly] {
@@ -173,26 +178,20 @@ const style = `
 
   :host([size="sm"]),
   :host([size="1"]) {
-    --ui-textarea-padding-x: 10px;
-    --ui-textarea-padding-y: 8px;
+    --ui-textarea-padding-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
+    --ui-textarea-padding-y: 4px;
     --ui-textarea-min-height: 84px;
-  }
-
-  :host([size="sm"]) textarea,
-  :host([size="1"]) textarea {
-    font-size: 13px;
+    --ui-textarea-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-textarea-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
   }
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-textarea-padding-x: 14px;
-    --ui-textarea-padding-y: 12px;
+    --ui-textarea-padding-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
+    --ui-textarea-padding-y: 8px;
     --ui-textarea-min-height: 140px;
-  }
-
-  :host([size="lg"]) textarea,
-  :host([size="3"]) textarea {
-    font-size: 15px;
+    --ui-textarea-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-textarea-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
   }
 
   :host([density="compact"]) {
@@ -247,7 +246,7 @@ const style = `
 
   :host([validation="error"]) .field {
     border-color: color-mix(in srgb, var(--ui-textarea-danger) 74%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-textarea-danger) 22%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-textarea-danger);
   }
 
   :host([validation="success"]) .field {

@@ -10,7 +10,7 @@ type AlertIndicator = 'line' | 'none';
 const style = `
   :host {
     display: block;
-    --ui-alert-radius: var(--base-alert-radius, var(--ui-radius, 4px));
+    --ui-alert-radius: var(--base-alert-radius, var(--ui-radius, 6px));
     --ui-alert-padding-y: var(--base-alert-padding-y, 14px);
     --ui-alert-padding-x: var(--base-alert-padding-x, 16px);
     --ui-alert-gap: var(--base-alert-gap, var(--ui-default-gap, 8px));
@@ -377,7 +377,7 @@ function normalizeIndicator(value: string | null): AlertIndicator {
   return 'line';
 }
 
-function normalizeRadius(value: string | null, fallback = 'var(--base-alert-radius, var(--ui-radius, 4px))'): string {
+function normalizeRadius(value: string | null, fallback = 'var(--base-alert-radius, var(--ui-radius, 6px))'): string {
   if (!value || !value.trim()) return fallback;
   const normalized = value.trim().toLowerCase();
   if (normalized === 'full' || normalized === 'pill') return '999px';

@@ -22,7 +22,7 @@ const style = `
     --ui-app-header-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-app-header-gap: var(--base-app-header-gap, var(--ui-default-gap, 8px));
     --ui-app-header-padding-x: var(--base-app-header-padding, 16px);
-    --ui-app-header-radius: var(--base-app-header-radius, var(--ui-radius, 4px));
+    --ui-app-header-radius: var(--base-app-header-radius, var(--ui-radius, 6px));
     --ui-app-header-z: 60;
     --ui-app-header-shadow: var(--base-app-header-shadow, none);
     --ui-app-header-title-size: var(--ui-default-font-size, 14px);
@@ -31,7 +31,7 @@ const style = `
     --ui-app-header-subtitle-size: 12px;
     --ui-app-header-subtitle-line-height: 16px;
     --ui-app-header-subtitle-weight: 500;
-    --ui-app-header-control-radius: var(--base-app-header-control-radius, var(--ui-radius, 4px));
+    --ui-app-header-control-radius: var(--base-app-header-control-radius, var(--ui-radius, 6px));
     --ui-app-header-duration: var(--ui-motion-base, 170ms);
     --ui-app-header-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
     color-scheme: light dark;
@@ -358,9 +358,9 @@ export class UIAppHeader extends ElementBase {
   }
 
   private _normalizeRadius(value: string | null): string {
-    if (value == null) return 'var(--base-app-header-radius, var(--ui-radius, 4px))';
+    if (value == null) return 'var(--base-app-header-radius, var(--ui-radius, 6px))';
     const normalized = value.trim().toLowerCase();
-    if (!normalized) return 'var(--base-app-header-radius, var(--ui-radius, 4px))';
+    if (!normalized) return 'var(--base-app-header-radius, var(--ui-radius, 6px))';
     if (normalized === 'full' || normalized === 'pill') return '999px';
     if (/^-?\d+(\.\d+)?$/.test(normalized)) return `${normalized}px`;
     return value;

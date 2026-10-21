@@ -24,13 +24,16 @@ const EYE_OFF_ICON = `
 
 const style = `
   :host {
-    --ui-input-padding: var(--ui-padding, 10px 12px);
-    --ui-input-border-color: var(--ui-color-border, var(--ui-border-color, #cbd5e1));
+    --ui-input-action-size: 24px;
+    --ui-input-padding: var(--ui-padding, 0);
+    --ui-input-pad-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
+    --ui-input-font-size: var(--ui-control-font-size-2, 14px);
+    --ui-input-border-color: var(--ui-color-line, var(--ui-color-border, var(--ui-border-color, #cbd5e1)));
     --ui-input-border-width: 1px;
     --ui-input-border-style: solid;
     --ui-input-border: var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color);
-    --ui-input-border-radius: var(--ui-radius, 10px);
-    --ui-input-min-height: var(--ui-min-height, 40px);
+    --ui-input-border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-input-min-height: var(--ui-min-height, var(--base-input-height-md, var(--ui-control-height-2, 32px)));
     --ui-input-width: 100%;
     --ui-input-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-input-color: var(--ui-color-text, var(--ui-text, #0f172a));
@@ -45,7 +48,7 @@ const style = `
     --ui-input-gap: 8px;
     --ui-input-meta-gap: 4px;
     --ui-input-shell-gap: 8px;
-    --ui-input-placeholder: color-mix(in srgb, var(--ui-input-color) 40%, transparent);
+    --ui-input-placeholder: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-input-color) 62%, transparent));
     --ui-password-field-strength-gap: 8px;
     --ui-password-field-track-bg: color-mix(in srgb, var(--ui-color-text, #0f172a) 10%, transparent);
     --ui-password-field-strength-weak: var(--ui-color-danger, #dc2626);
@@ -124,7 +127,7 @@ const style = `
     gap: var(--ui-input-shell-gap);
     box-sizing: border-box;
     min-block-size: var(--ui-input-min-height);
-    padding-inline: 10px;
+    padding-inline: var(--ui-input-pad-x);
     border: var(--ui-input-border);
     border-radius: var(--ui-input-border-radius);
     background: var(--ui-input-bg);
@@ -133,8 +136,13 @@ const style = `
   }
 
   .shell:focus-within {
-    border-color: color-mix(in srgb, var(--ui-input-focus-ring) 56%, var(--ui-input-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-input-focus-ring) 24%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-input-focus-ring));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-input-focus-ring));
+    outline-offset: -1px;
+  }
+
+  .shell:hover:not(:focus-within) {
+    border-color: var(--ui-color-line-strong, var(--ui-input-border-color));
   }
 
   .prefix,
@@ -198,7 +206,7 @@ const style = `
     border: none;
     background: transparent;
     color: inherit;
-    font: 500 14px/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 var(--ui-input-font-size)/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     padding: var(--ui-input-padding);
     min-block-size: calc(var(--ui-input-min-height) - 2px);
     margin: 0;
@@ -222,8 +230,9 @@ const style = `
     border: none;
     outline: none;
     cursor: pointer;
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-input-action-size);
+    block-size: var(--ui-input-action-size);
+    margin-block: var(--ui-input-action-bleed, 0px);
     border-radius: 8px;
     display: inline-grid;
     place-items: center;
@@ -375,28 +384,25 @@ const style = `
     pointer-events: none;
   }
 
-  :host([size="sm"]),
+    :host([size="sm"]),
   :host([size="1"]) {
-    --ui-input-min-height: 34px;
-    --ui-input-padding: 7px 8px;
+    --ui-input-min-height: var(--ui-min-height, var(--base-input-height-sm, var(--ui-control-height-1, 24px)));
+    --ui-input-pad-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
+    --ui-input-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-input-border-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
+    --ui-input-action-size: 24px;
+    --ui-input-action-bleed: -1px;
     --ui-input-shell-gap: 6px;
-  }
-
-  :host([size="sm"]) input,
-  :host([size="1"]) input {
-    font-size: 12px;
   }
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-input-min-height: 46px;
-    --ui-input-padding: 11px 14px;
+    --ui-input-min-height: var(--ui-min-height, var(--base-input-height-lg, var(--ui-control-height-3, 40px)));
+    --ui-input-pad-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
+    --ui-input-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-input-border-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
+    --ui-input-action-size: 28px;
     --ui-input-shell-gap: 10px;
-  }
-
-  :host([size="lg"]) input,
-  :host([size="3"]) input {
-    font-size: 16px;
   }
 
   :host([variant="classic"]),
@@ -500,7 +506,7 @@ const style = `
   }
 
   :host([validation="error"]) .shell {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-input-error) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-input-error);
   }
 
   :host([radius="none"]) {

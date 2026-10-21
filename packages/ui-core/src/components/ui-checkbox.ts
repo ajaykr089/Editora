@@ -2,23 +2,23 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-checkbox-size: 18px;
+    --ui-checkbox-size: 16px;
     --ui-checkbox-hit-area: 24px;
-    --ui-checkbox-radius: 4px;
-    --ui-checkbox-border: 1.5px solid color-mix(in srgb, var(--ui-primary, var(--ui-color-primary, #2563eb)) 44%, var(--ui-color-border, #cbd5e1) 56%);
-    --ui-checkbox-background: var(--ui-bg, var(--ui-color-surface, #ffffff));
-    --ui-checkbox-check-color: #ffffff;
+    --ui-checkbox-radius: calc(var(--ui-radius, 6px) - 2px);
+    --ui-checkbox-border: 1px solid var(--ui-color-line-strong, var(--ui-color-border, #cbd5e1));
+    --ui-checkbox-background: var(--ui-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
+    --ui-checkbox-check-color: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-checkbox-checked-background: var(--ui-primary, var(--ui-color-primary, #2563eb));
-    --ui-checkbox-checked-border: var(--ui-checkbox-border);
-    --ui-checkbox-indeterminate-bg: #d97706;
-    --ui-checkbox-indeterminate-border: 1.5px solid color-mix(in srgb, #d97706 72%, #78350f 28%);
-    --ui-checkbox-invalid-border: 1.5px solid var(--ui-color-danger, #dc2626);
-    --ui-checkbox-invalid-focus: 0 0 0 4px color-mix(in srgb, var(--ui-color-danger, #dc2626) 24%, transparent);
-    --ui-checkbox-focus: 0 0 0 4px color-mix(in srgb, var(--ui-color-focus-ring, #2563eb) 26%, transparent);
+    --ui-checkbox-checked-border: 1px solid var(--ui-checkbox-checked-background);
+    --ui-checkbox-indeterminate-bg: var(--ui-checkbox-checked-background);
+    --ui-checkbox-indeterminate-border: 1px solid var(--ui-checkbox-checked-background);
+    --ui-checkbox-invalid-border: 1px solid var(--ui-color-danger, #dc2626);
+    --ui-checkbox-invalid-focus: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-color-danger, #dc2626);
+    --ui-checkbox-focus: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
     --ui-checkbox-shadow: none;
     --ui-checkbox-shadow-checked: none;
     --ui-checkbox-disabled-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f1f5f9) 88%, #ffffff 12%);
-    --ui-checkbox-disabled-border: 1.5px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-checkbox-disabled-border: 1px solid var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-checkbox-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-checkbox-muted: var(--ui-color-muted, #526175);
     --ui-checkbox-duration: 170ms;
@@ -210,9 +210,13 @@ const style = `
     box-shadow: var(--ui-checkbox-focus);
   }
 
-  :host(:not([disabled]):not([loading]):hover) .control {
-    transform: translateY(-0.5px);
-    border-color: color-mix(in srgb, var(--ui-primary, var(--ui-color-primary, #2563eb)) 80%, #0f172a 20%);
+  :host(:not([disabled]):not([loading]):not([checked]):not([indeterminate]):hover) .control {
+    border-color: var(--ui-color-text-secondary, #64748b);
+  }
+
+  :host(:not([disabled]):not([loading])[checked]:hover) .control,
+  :host(:not([disabled]):not([loading])[indeterminate]:hover) .control {
+    background: color-mix(in srgb, var(--ui-checkbox-checked-background) 88%, var(--ui-color-text-strong, #0f172a));
   }
 
   :host(:not([disabled]):not([loading]):active) .control {

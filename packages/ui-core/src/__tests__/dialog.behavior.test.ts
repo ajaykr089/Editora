@@ -67,8 +67,12 @@ describe('ui-dialog disconnect behavior', () => {
     document.body.appendChild(el);
     await Promise.resolve();
 
-    expect(styleText(el)).toContain(".overlay[data-open='true'] .panel");
-    expect(styleText(el)).toContain('transform: translate3d(0, 0, 0) scale(1);');
+    const css = styleText(el);
+    // Open and close are animations on data-state. The enter fills backwards, so nothing animated
+    // (a transform makes a containing block and blurs text) is left on the panel once it ends.
+    expect(css).toContain(".overlay[data-state='open']:not([data-instant]) .panel");
+    expect(css).toMatch(/ui-dialog-panel-in[^;]*backwards;/);
+    expect(css).not.toMatch(/\.panel \{[^}]*\n\s+transform:/);
   });
 
   it('keeps the overlay node stable across open toggles', async () => {

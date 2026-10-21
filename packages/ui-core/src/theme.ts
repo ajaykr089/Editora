@@ -1,3 +1,5 @@
+import { deriveSemanticTokens } from './semantic-tokens';
+
 type ThemeScale = Record<string, string>;
 export type ThemeMode = 'light' | 'dark';
 
@@ -27,6 +29,7 @@ export interface ThemeTokens {
     success?: string;
     danger?: string;
     warning?: string;
+    info?: string;
   };
   palette?: {
     gray?: ThemeScale;
@@ -99,7 +102,7 @@ export interface ThemeTokens {
     input?: ThemeScale;
   };
   zIndex?: { modal?: number; overlay?: number; toast?: number };
-  breakpoints?: { sm?: string; md?: string; lg?: string };
+  breakpoints?: { sm?: string; md?: string; lg?: string; xl?: string };
 }
 
 const blackAlphaScale: ThemeScale = {
@@ -487,9 +490,6 @@ export const baselineAccentPalettes: Record<AccentPaletteName, Record<ThemeMode,
 
 const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   button: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
     'classic-after-inset': '2px',
     'classic-box-shadow-top': 'inset 0 0 0 1px var(--gray-a5), inset 0 1px 1px var(--white-a10)',
     'classic-box-shadow-bottom': 'inset 0 4px 2px -2px var(--white-a9), inset 0 2px 1px -1px var(--white-a9)',
@@ -498,14 +498,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'solid-active-filter': 'brightness(0.96) saturate(1.02)'
   },
   badge: {
-    radius: '999px',
-    shadow: 'none',
-    'font-size': '12px',
-    'font-weight': '600',
-    gap: '6px',
-    'padding-block': '5px',
-    'padding-inline': '10px',
-    'border-width': '1px'
+    shadow: 'none'
   },
   blockControls: {
     bg: 'var(--color-panel)',
@@ -550,12 +543,8 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   select: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '34px',
-    'height-md': '42px',
-    'height-lg': '46px',
     'padding-x': '12px',
     gap: '8px',
     'label-color': 'var(--ui-color-text)',
@@ -600,9 +589,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   card: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
-    radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'hover-shadow': 'var(--shadow-3)',
     'active-shadow': 'var(--shadow-2)',
     'classic-shadow': 'var(--shadow-2)',
@@ -611,14 +597,9 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   multiSelect: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '38px',
-    'height-md': '44px',
-    'height-lg': '48px',
     'padding-x': '10px',
-    'padding-y': '8px',
     'panel-bg': 'var(--color-panel-solid)',
     'panel-border': '1px solid color-mix(in srgb, var(--gray-a5) 84%, transparent)',
     'panel-radius': 'calc(var(--ui-radius) + 2px)',
@@ -626,7 +607,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'chip-radius': '999px',
     'chip-gap': '6px',
     'chip-padding-x': '10px',
-    'chip-padding-y': '6px',
     'option-radius': '10px',
     'option-gap': '10px',
     'option-padding-x': '10px',
@@ -777,20 +757,12 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     padding: 'var(--ui-default-gap)'
   },
   input: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 84%, transparent)',
-    'focus-ring': '0 0 0 3px color-mix(in srgb, var(--accent-a5) 48%, transparent)'
+    bg: 'var(--color-panel-solid)'
   }
 };
 
 const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   button: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
     'classic-after-inset': '1px',
     'classic-box-shadow-top': 'inset 0 0 0 1px var(--white-a2), inset 0 4px 2px -2px var(--white-a3), inset 0 1px 1px var(--white-a6), inset 0 -1px 1px var(--black-a6)',
     'classic-box-shadow-bottom': 'inset 0 0 0 1px var(--black-a4), inset 0 -1px 1px var(--black-a8)',
@@ -799,14 +771,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'solid-active-filter': 'brightness(0.92) saturate(1.04)'
   },
   badge: {
-    radius: '999px',
-    shadow: 'none',
-    'font-size': '12px',
-    'font-weight': '600',
-    gap: '6px',
-    'padding-block': '5px',
-    'padding-inline': '10px',
-    'border-width': '1px'
+    shadow: 'none'
   },
   blockControls: {
     bg: 'var(--color-panel)',
@@ -851,12 +816,8 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   select: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '34px',
-    'height-md': '42px',
-    'height-lg': '46px',
     'padding-x': '12px',
     gap: '8px',
     'label-color': 'var(--ui-color-text)',
@@ -901,9 +862,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   card: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
-    radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'hover-shadow': 'var(--shadow-3)',
     'active-shadow': 'var(--shadow-2)',
     'classic-shadow': 'var(--shadow-2)',
@@ -912,14 +870,9 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   multiSelect: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '38px',
-    'height-md': '44px',
-    'height-lg': '48px',
     'padding-x': '10px',
-    'padding-y': '8px',
     'panel-bg': 'var(--color-panel-solid)',
     'panel-border': '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     'panel-radius': 'calc(var(--ui-radius) + 2px)',
@@ -927,7 +880,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'chip-radius': '999px',
     'chip-gap': '6px',
     'chip-padding-x': '10px',
-    'chip-padding-y': '6px',
     'option-radius': '10px',
     'option-gap': '10px',
     'option-padding-x': '10px',
@@ -1078,12 +1030,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     padding: 'var(--ui-default-gap)'
   },
   input: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
-    'focus-ring': '0 0 0 3px color-mix(in srgb, var(--accent-a6) 42%, transparent)'
+    bg: 'var(--color-panel-solid)'
   }
 };
 
@@ -1167,7 +1114,8 @@ export const baselineLightTokens: ThemeTokens = {
     focusRing: '#e2a336',
     success: '#30a46c',
     danger: '#e5484d',
-    warning: '#ffc53d'
+    warning: '#ffc53d',
+    info: '#0e7490'
   },
   palette: {
     gray: {
@@ -1220,7 +1168,7 @@ export const baselineLightTokens: ThemeTokens = {
     overlay: 'rgba(2, 6, 23, 0.52)',
     transparent: 'transparent'
   },
-  radius: '4px',
+  radius: '6px',
   radiusScale: {
     '1': '3px',
     '2': '4px',
@@ -1330,7 +1278,8 @@ export const baselineDarkTokens: ThemeTokens = {
     focusRing: '#ffc53d',
     success: '#30a46c',
     danger: '#e5484d',
-    warning: '#ffc53d'
+    warning: '#ffc53d',
+    info: '#4cc3d6'
   },
   palette: {
     ...baselineLightTokens.palette,
@@ -1564,19 +1513,17 @@ export function withAccentPalette(tokens: ThemeTokens | Partial<ThemeTokens>, pa
   );
 }
 
-function setOn(target: HTMLElement, name: string, value: string) {
-  try {
-    target.style.setProperty(name, value);
-  } catch {
-    // no-op
-  }
+type VariableMap = Record<string, string>;
+
+function setOn(vars: VariableMap, name: string, value: string) {
+  vars[name] = value;
 }
 
-function addScaleVariables(target: HTMLElement, prefix: string, scale?: ThemeScale | null) {
+function addScaleVariables(vars: VariableMap, prefix: string, scale?: ThemeScale | null) {
   if (!scale) return;
   Object.entries(scale).forEach(([key, value]) => {
     if (typeof value === 'string' && value) {
-      target.style.setProperty(`${prefix}${key}`, value);
+      vars[`${prefix}${key}`] = value;
     }
   });
 }
@@ -1586,7 +1533,16 @@ export function registerThemeHost(el: HTMLElement) {
   registeredHosts.add(el);
 }
 
-function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
+/**
+ * Every CSS custom property a theme defines, as a name -> value map: the single source for
+ * `applyTheme` (inline style), `themeToCss` (a stylesheet, e.g. for SSR) and the tests.
+ */
+export function themeToVariables(tokens: ThemeTokens): Record<string, string> {
+  return resolvedThemeVariables(createThemeTokens(tokens));
+}
+
+function resolvedThemeVariables(next: ThemeTokens): VariableMap {
+  const target: VariableMap = {};
   setOn(target, '--ui-color-primary', next.colors.primary);
   setOn(target, '--ui-color-primary-hover', next.colors.primaryHover || next.colors.primary);
   setOn(target, '--ui-color-foreground-on-primary', next.colors.foregroundOnPrimary || '#ffffff');
@@ -1615,7 +1571,7 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   setOn(target, '--ui-error', next.colors.danger || '#e5484d');
   setOn(target, '--ui-warning', next.colors.warning || next.colors.primary);
 
-  setOn(target, '--ui-radius', next.radius || '4px');
+  setOn(target, '--ui-radius', next.radius || '6px');
   setOn(target, '--ui-space-xs', next.spacing?.xs || '4px');
   setOn(target, '--ui-space-sm', next.spacing?.sm || '8px');
   setOn(target, '--ui-space-md', next.spacing?.md || '12px');
@@ -1697,34 +1653,100 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--base-menu-', next.components?.menu);
   addScaleVariables(target, '--base-panel-', next.components?.panel);
   addScaleVariables(target, '--base-input-', next.components?.input);
+
+  Object.assign(target, deriveSemanticTokens(next));
+  // Text on a solid warning fill: white when it reads, dark when the warning colour is light (amber).
+  setOn(target, '--ui-color-foreground-on-warning', readableForeground(next.colors.warning || next.colors.primary, '#ffffff'));
+  return target;
+}
+
+function applyThemeToTarget(target: HTMLElement, vars: VariableMap) {
+  Object.entries(vars).forEach(([name, value]) => {
+    try {
+      target.style.setProperty(name, value);
+    } catch {
+      // no-op
+    }
+  });
+}
+
+/** The theme as CSS text, e.g. `themeToCss(tokens, ':root')`, for a static or server-rendered stylesheet. */
+export function themeToCss(tokens: ThemeTokens, selector = ':root'): string {
+  const body = Object.entries(themeToVariables(tokens))
+    .map(([name, value]) => `  ${name}: ${value};`)
+    .join('\n');
+  return `${selector} {\n${body}\n}\n`;
+}
+
+type ThemeRoot = ShadowRoot | Document | HTMLElement | null;
+
+function resolveStyleRoot(root: ThemeRoot): HTMLElement {
+  if (root === document) return document.documentElement;
+  if (root instanceof ShadowRoot) return root.host as HTMLElement;
+  return root as HTMLElement;
 }
 
 export function applyTheme(
   tokens: ThemeTokens,
-  root: ShadowRoot | Document | HTMLElement | null = typeof document !== 'undefined' ? document : null
+  root: ThemeRoot = typeof document !== 'undefined' ? document : null
 ) {
   if (!root) return;
-  const next = createThemeTokens(tokens);
+  const vars = resolvedThemeVariables(createThemeTokens(tokens));
   const isGlobalRoot = root === document || root instanceof ShadowRoot;
+  const styleRoot = resolveStyleRoot(root);
 
-  let styleRoot: HTMLElement;
-  if (root === document) {
-    styleRoot = document.documentElement;
-  } else if (root instanceof ShadowRoot) {
-    styleRoot = root.host as HTMLElement;
-  } else {
-    styleRoot = root as HTMLElement;
-  }
-
-  applyThemeToTarget(styleRoot, next);
+  applyThemeToTarget(styleRoot, vars);
 
   if (isGlobalRoot) {
     for (const host of registeredHosts) {
       try {
-        applyThemeToTarget(host, next);
+        applyThemeToTarget(host, vars);
       } catch {
         // no-op
       }
     }
   }
+}
+
+export interface SystemThemeOptions {
+  /** Token overrides applied on top of the light baseline. */
+  light?: Partial<ThemeTokens>;
+  /** Token overrides applied on top of the dark baseline. */
+  dark?: Partial<ThemeTokens>;
+  accentPalette?: AccentPaletteName;
+  root?: ThemeRoot;
+}
+
+/**
+ * Apply the light or the dark theme to match the operating system, and keep following it
+ * while the user changes it. The resolved mode is mirrored as `data-ui-mode` and `color-scheme`
+ * on the target, so page CSS can follow it too. Returns a function that stops following.
+ */
+export function applySystemTheme(options: SystemThemeOptions = {}): () => void {
+  const root = options.root === undefined ? (typeof document !== 'undefined' ? document : null) : options.root;
+  if (!root) return () => {};
+
+  const media =
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-color-scheme: dark)')
+      : null;
+
+  const apply = (dark: boolean) => {
+    const mode: ThemeMode = dark ? 'dark' : 'light';
+    applyTheme(createThemeTokens(dark ? options.dark : options.light, { accentPalette: options.accentPalette, mode }), root);
+    const target = resolveStyleRoot(root);
+    target.setAttribute('data-ui-mode', mode);
+    target.style.setProperty('color-scheme', mode);
+  };
+
+  apply(!!media?.matches);
+  if (!media) return () => {};
+
+  const onChange = (event: MediaQueryListEvent) => apply(event.matches);
+  if (typeof media.addEventListener === 'function') {
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }
+  media.addListener(onChange);
+  return () => media.removeListener(onChange);
 }

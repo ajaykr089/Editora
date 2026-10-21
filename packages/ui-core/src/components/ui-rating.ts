@@ -19,7 +19,7 @@ const style = `
     --ui-rating-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
     --ui-rating-duration: var(--ui-motion-base, 160ms);
     --ui-rating-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
-    --ui-rating-radius: var(--ui-control-radius, var(--ui-radius, 4px));
+    --ui-rating-radius: var(--ui-control-radius, var(--ui-radius, 6px));
     display: inline-flex;
     flex-wrap: wrap;
     max-inline-size: 100%;

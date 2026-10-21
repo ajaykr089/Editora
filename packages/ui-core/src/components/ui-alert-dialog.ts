@@ -1,11 +1,12 @@
 import { ElementBase } from '../ElementBase';
+import { closeOverlay, liftToTopLayer } from '../primitives/overlay-motion';
 import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
 
 const style = `
   :host {
     display: block;
     color-scheme: light dark;
-    --ui-alert-radius: var(--base-alert-dialog-radius, var(--ui-radius, 4px));
+    --ui-alert-radius: var(--base-alert-dialog-radius, var(--ui-radius, 6px));
     --ui-alert-bg-base: var(--base-alert-dialog-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-alert-bg: var(--ui-alert-bg-base);
     --ui-alert-text: var(--ui-color-text, var(--ui-text, #202020));
@@ -26,7 +27,8 @@ const style = `
     --ui-alert-btn-bg: color-mix(in srgb, var(--ui-alert-bg-base) 90%, var(--ui-color-background, #ffffff) 10%);
     --ui-alert-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-alert-btn-hover: color-mix(in srgb, var(--ui-alert-btn-bg) 76%, var(--ui-color-border, #cbd5e1) 24%);
-    --ui-alert-confirm-bg: var(--ui-alert-accent);
+    /* Default confirm is the primary fill. A tone sets its own fill and text below, so the text always reads. */
+    --ui-alert-confirm-bg: var(--ui-color-primary, #2563eb);
     --ui-alert-confirm-color: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-accent) 14%, transparent);
     --ui-alert-icon-color: var(--ui-alert-accent);
@@ -38,8 +40,8 @@ const style = `
     --ui-alert-description-size: 13px;
     --ui-alert-description-line-height: 20px;
     --ui-alert-icon-size: 28px;
-    --ui-alert-button-height: var(--base-button-height-md, 36px);
-    --ui-alert-button-radius: var(--ui-radius, 4px);
+    --ui-alert-button-height: var(--base-button-height-md, var(--ui-control-height-2, 32px));
+    --ui-alert-button-radius: var(--ui-radius, 6px);
   }
 
   :host([tone='info']) {
@@ -48,14 +50,20 @@ const style = `
 
   :host([tone='success']) {
     --ui-alert-accent: var(--ui-color-success, #15803d);
+    --ui-alert-confirm-bg: color-mix(in srgb, var(--ui-alert-accent) 76%, #000000);
+    --ui-alert-confirm-color: #ffffff;
   }
 
   :host([tone='warning']) {
     --ui-alert-accent: var(--ui-color-warning, #b45309);
+    --ui-alert-confirm-bg: var(--ui-alert-accent);
+    --ui-alert-confirm-color: var(--ui-color-foreground-on-warning, #ffffff);
   }
 
   :host([tone='danger']) {
     --ui-alert-accent: var(--ui-color-danger, #dc2626);
+    --ui-alert-confirm-bg: color-mix(in srgb, var(--ui-alert-accent) 80%, #000000);
+    --ui-alert-confirm-color: #ffffff;
   }
 
   :host([size='sm']),
@@ -69,7 +77,7 @@ const style = `
     --ui-alert-description-size: 12px;
     --ui-alert-description-line-height: 18px;
     --ui-alert-icon-size: 24px;
-    --ui-alert-button-height: var(--base-button-height-sm, 32px);
+    --ui-alert-button-height: var(--base-button-height-sm, var(--ui-control-height-1, 24px));
   }
 
   :host([size='md']),
@@ -89,7 +97,7 @@ const style = `
     --ui-alert-description-size: 14px;
     --ui-alert-description-line-height: 22px;
     --ui-alert-icon-size: 32px;
-    --ui-alert-button-height: var(--base-button-height-lg, 44px);
+    --ui-alert-button-height: var(--base-button-height-lg, var(--ui-control-height-3, 40px));
   }
 
   :host([variant='outline']) {
@@ -137,8 +145,16 @@ const style = `
     place-items: center;
     background: var(--ui-alert-backdrop);
     backdrop-filter: saturate(1.04) blur(3px);
-    opacity: 0;
-    transition: opacity var(--ui-alert-duration) var(--ui-alert-easing);
+    /* The backdrop goes to the top layer (popover); undo the popover user-agent box. */
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+    max-block-size: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    color: inherit;
   }
 
   .dialog {
@@ -155,13 +171,9 @@ const style = `
     padding: var(--ui-alert-padding);
     outline: none;
     overflow: clip;
-    opacity: 0;
-    transform: translateY(12px) scale(0.985);
     transition:
       border-color var(--ui-alert-duration) var(--ui-alert-easing),
-      box-shadow var(--ui-alert-duration) var(--ui-alert-easing),
-      transform var(--ui-alert-duration) var(--ui-alert-easing),
-      opacity var(--ui-alert-duration) var(--ui-alert-easing);
+      box-shadow var(--ui-alert-duration) var(--ui-alert-easing);
   }
 
   .dialog::before {
@@ -182,13 +194,33 @@ const style = `
     display: none;
   }
 
-  .backdrop[data-open='true'] {
-    opacity: 1;
+  /* Open and close are animations on data-state; the surface is created and removed, which a transition cannot play. */
+  .backdrop[data-state='open']:not([data-instant]) {
+    animation: ui-alert-backdrop-in 150ms ease-out backwards;
   }
 
-  .backdrop[data-open='true'] .dialog {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  .backdrop[data-state='open']:not([data-instant]) .dialog {
+    animation: ui-alert-dialog-in 150ms var(--ui-motion-enter-easing, cubic-bezier(0.16, 1, 0.3, 1)) backwards;
+  }
+
+  .backdrop[data-state='closed'] {
+    animation: ui-alert-backdrop-out 100ms ease-in both;
+    pointer-events: none;
+  }
+
+  .backdrop[data-state='closed'] .dialog {
+    animation: ui-alert-dialog-out 100ms var(--ui-motion-exit-easing, cubic-bezier(0.4, 0, 1, 1)) both;
+  }
+
+  @keyframes ui-alert-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ui-alert-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes ui-alert-dialog-in {
+    from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.96); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+  @keyframes ui-alert-dialog-out {
+    from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    to { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.96); }
   }
 
   .dialog:focus-visible {
@@ -308,12 +340,12 @@ const style = `
 
   .input {
     width: 100%;
-    border-radius: var(--ui-radius, 4px);
+    border-radius: var(--ui-radius, 6px);
     border: var(--base-input-border, 1px solid color-mix(in srgb, var(--ui-alert-border-color) 88%, transparent));
     background: var(--base-input-bg, color-mix(in srgb, var(--ui-alert-bg-base) 94%, #ffffff 6%));
     color: inherit;
     box-sizing: border-box;
-    min-height: var(--base-input-height-md, 36px);
+    min-height: var(--base-input-height-md, var(--ui-control-height-2, 32px));
     padding: 9px 12px;
     font: inherit;
     line-height: 1.35;
@@ -610,7 +642,7 @@ function normalizeIndicator(raw: string | null): UIAlertDialogIndicator {
   return raw === 'none' ? 'none' : 'line';
 }
 
-function normalizeRadius(value: string | null, fallback = 'var(--base-alert-dialog-radius, var(--ui-radius, 4px))'): string {
+function normalizeRadius(value: string | null, fallback = 'var(--base-alert-dialog-radius, var(--ui-radius, 6px))'): string {
   if (value == null) return fallback;
   const normalized = value.trim().toLowerCase();
   if (!normalized) return fallback;
@@ -1372,12 +1404,31 @@ export class UIAlertDialog extends ElementBase {
     if (!this.hasAttribute(AUTO_NAME_ATTR)) this.setAttribute(AUTO_NAME_ATTR, '');
   }
 
+  private _presented = false;
+  private _finishClose: (() => void) | null = null;
+
   protected render() {
     if (!this.open) {
       this._syncHostSemantics(false);
+      const closing = this.root.querySelector('.backdrop') as HTMLElement | null;
+      if (this._presented && closing) {
+        // Play the exit, then drop the content.
+        this._presented = false;
+        closing.removeAttribute('data-instant');
+        this._finishClose = closeOverlay(closing, () => {
+          this._finishClose = null;
+          this.setContent('');
+        });
+        return;
+      }
+      // An exit that is already playing finishes by itself (a second render must not cut it short).
+      if (this._finishClose) return;
       this.setContent('');
       return;
     }
+    // Reopened while the exit still plays: finish it first.
+    this._finishClose?.();
+    this._finishClose = null;
 
     const titleFallback = this._config.title ?? this.getAttribute('title') ?? '';
     const descriptionFallback = this._config.description ?? this.getAttribute('description') ?? '';
@@ -1439,7 +1490,7 @@ export class UIAlertDialog extends ElementBase {
 
     this.setContent(`
       <style>${style}</style>
-      <div class="backdrop" part="backdrop" role="presentation" data-open="${String(this.open)}">
+      <div class="backdrop" part="backdrop" role="presentation" data-open="${String(this.open)}" data-state="open" ${this._presented ? 'data-instant' : ''}>
         <section
           class="dialog"
           part="dialog"
@@ -1519,6 +1570,9 @@ export class UIAlertDialog extends ElementBase {
         </section>
       </div>
     `);
+    const backdrop = this.root.querySelector('.backdrop') as HTMLElement | null;
+    if (backdrop) liftToTopLayer(backdrop, { resetBox: false });
+    this._presented = true;
   }
 }
 

@@ -14,7 +14,7 @@ const LIGHT_DOM_STYLE = `
   ui-accordion[data-ui-accordion-root="true"] {
     display: block;
     overflow-anchor: none;
-    --ui-accordion-radius: var(--base-card-radius, var(--ui-radius, 4px));
+    --ui-accordion-radius: var(--base-card-radius, var(--ui-radius, 6px));
     --ui-accordion-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-accordion-border-color: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent);
     --ui-accordion-border: 1px solid var(--ui-accordion-border-color);
@@ -398,7 +398,7 @@ function serializeOpen(value: number[], multiple: boolean): string {
   return multiple ? JSON.stringify(value) : String(value[0] ?? -1);
 }
 
-function normalizeRadius(value: string | null, fallback = 'var(--base-card-radius, var(--ui-radius, 4px))'): string {
+function normalizeRadius(value: string | null, fallback = 'var(--base-card-radius, var(--ui-radius, 6px))'): string {
   if (!value || !value.trim()) return fallback;
   const normalized = value.trim().toLowerCase();
   if (normalized === 'full' || normalized === 'pill') return '999px';
