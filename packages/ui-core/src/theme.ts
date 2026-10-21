@@ -490,9 +490,6 @@ export const baselineAccentPalettes: Record<AccentPaletteName, Record<ThemeMode,
 
 const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   button: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
     'classic-after-inset': '2px',
     'classic-box-shadow-top': 'inset 0 0 0 1px var(--gray-a5), inset 0 1px 1px var(--white-a10)',
     'classic-box-shadow-bottom': 'inset 0 4px 2px -2px var(--white-a9), inset 0 2px 1px -1px var(--white-a9)',
@@ -556,9 +553,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '34px',
-    'height-md': '42px',
-    'height-lg': '46px',
     'padding-x': '12px',
     gap: '8px',
     'label-color': 'var(--ui-color-text)',
@@ -617,11 +611,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '38px',
-    'height-md': '44px',
-    'height-lg': '48px',
     'padding-x': '10px',
-    'padding-y': '8px',
     'panel-bg': 'var(--color-panel-solid)',
     'panel-border': '1px solid color-mix(in srgb, var(--gray-a5) 84%, transparent)',
     'panel-radius': 'calc(var(--ui-radius) + 2px)',
@@ -629,7 +619,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'chip-radius': '999px',
     'chip-gap': '6px',
     'chip-padding-x': '10px',
-    'chip-padding-y': '6px',
     'option-radius': '10px',
     'option-gap': '10px',
     'option-padding-x': '10px',
@@ -780,9 +769,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     padding: 'var(--ui-default-gap)'
   },
   input: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 84%, transparent)',
     'focus-ring': '0 0 0 3px color-mix(in srgb, var(--accent-a5) 48%, transparent)'
@@ -791,9 +777,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
 
 const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   button: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
     'classic-after-inset': '1px',
     'classic-box-shadow-top': 'inset 0 0 0 1px var(--white-a2), inset 0 4px 2px -2px var(--white-a3), inset 0 1px 1px var(--white-a6), inset 0 -1px 1px var(--black-a6)',
     'classic-box-shadow-bottom': 'inset 0 0 0 1px var(--black-a4), inset 0 -1px 1px var(--black-a8)',
@@ -857,9 +840,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '34px',
-    'height-md': '42px',
-    'height-lg': '46px',
     'padding-x': '12px',
     gap: '8px',
     'label-color': 'var(--ui-color-text)',
@@ -918,11 +898,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
-    'height-sm': '38px',
-    'height-md': '44px',
-    'height-lg': '48px',
     'padding-x': '10px',
-    'padding-y': '8px',
     'panel-bg': 'var(--color-panel-solid)',
     'panel-border': '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     'panel-radius': 'calc(var(--ui-radius) + 2px)',
@@ -930,7 +906,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'chip-radius': '999px',
     'chip-gap': '6px',
     'chip-padding-x': '10px',
-    'chip-padding-y': '6px',
     'option-radius': '10px',
     'option-gap': '10px',
     'option-padding-x': '10px',
@@ -1081,9 +1056,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     padding: 'var(--ui-default-gap)'
   },
   input: {
-    'height-sm': '32px',
-    'height-md': '36px',
-    'height-lg': '44px',
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     'focus-ring': '0 0 0 3px color-mix(in srgb, var(--accent-a6) 42%, transparent)'

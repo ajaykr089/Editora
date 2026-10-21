@@ -8,9 +8,10 @@ import { UIListbox } from './ui-listbox';
 const style = `
   :host {
     --ui-select-width: var(--ui-width, min(340px, 100%));
-    --ui-select-min-height: var(--base-select-height-md, 42px);
-    --ui-select-radius: var(--base-select-radius, var(--ui-radius, 4px));
-    --ui-select-padding-x: var(--base-select-padding-x, 12px);
+    --ui-select-min-height: var(--base-select-height-md, var(--ui-control-height-2, 32px));
+    --ui-select-radius: var(--base-select-radius, var(--ui-control-radius-2, var(--ui-radius, 4px)));
+    --ui-select-padding-x: var(--base-select-padding-x, var(--ui-control-padding-inline-2, 12px));
+    --ui-select-font-size: var(--ui-control-font-size-2, 14px);
 
     --ui-select-bg: var(--base-select-bg, var(--ui-color-surface, #ffffff));
     --ui-select-border: var(--base-select-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
@@ -105,6 +106,7 @@ const style = `
   }
 
   .control {
+    box-sizing: border-box;
     min-inline-size: 0;
     position: relative;
     display: block;
@@ -166,6 +168,7 @@ const style = `
   }
 
   .trigger {
+    display: block;
     inline-size: 100%;
     min-inline-size: 0;
     block-size: calc(var(--ui-select-min-height) - 2px);
@@ -174,8 +177,8 @@ const style = `
     outline: none;
     background: transparent;
     color: var(--ui-select-text);
-    font: 500 14px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    padding: 8px calc(var(--ui-select-padding-x) + 24px) 8px var(--ui-select-padding-x);
+    font: 500 var(--ui-select-font-size)/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 0 calc(var(--ui-select-padding-x) + 24px) 0 var(--ui-select-padding-x);
     margin: 0;
     cursor: pointer;
     text-align: left;
@@ -482,15 +485,12 @@ const style = `
 
   :host([size="sm"]),
   :host([size="1"]) {
-    --ui-select-min-height: 34px;
-    --ui-select-padding-x: 10px;
+    --ui-select-min-height: var(--base-select-height-sm, var(--ui-control-height-1, 24px));
+    --ui-select-padding-x: var(--ui-control-padding-inline-1, 8px);
+    --ui-select-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-select-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
     --ui-select-menu-gap: 6px;
     --ui-select-menu-item-height: 34px;
-  }
-
-  :host([size="sm"]) .trigger,
-  :host([size="1"]) .trigger {
-    font-size: 12px;
   }
 
   :host([size="sm"]) .menu-item,
@@ -501,15 +501,12 @@ const style = `
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-select-min-height: 46px;
-    --ui-select-padding-x: 13px;
+    --ui-select-min-height: var(--base-select-height-lg, var(--ui-control-height-3, 40px));
+    --ui-select-padding-x: var(--ui-control-padding-inline-3, 16px);
+    --ui-select-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-select-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
     --ui-select-menu-gap: 10px;
     --ui-select-menu-item-height: 42px;
-  }
-
-  :host([size="lg"]) .trigger,
-  :host([size="3"]) .trigger {
-    font-size: 15px;
   }
 
   :host([size="lg"]) .menu-item,

@@ -72,12 +72,12 @@ const style = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: 12px;
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-shadow: none;
     --ui-dp-z: 1600;
     --ui-dp-gap: 12px;
-    --ui-dp-hit: 42px;
+    --ui-dp-hit: var(--ui-control-height-2, 32px);
     --ui-dp-field-bg: var(--ui-dp-bg);
     --ui-dp-field-border: var(--ui-dp-border);
     --ui-dp-field-focus: color-mix(in srgb, var(--ui-dp-accent) 72%, transparent);
@@ -104,11 +104,14 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-dp-hit: 38px;
+    --ui-dp-action-size: 24px;
+    --ui-dp-action-bleed: -1px;
+    --ui-dp-hit: var(--ui-control-height-1, 24px);
   }
 
   :host([size="lg"]) {
-    --ui-dp-hit: 48px;
+    --ui-dp-action-size: 28px;
+    --ui-dp-hit: var(--ui-control-height-3, 40px);
   }
 
   .root {
@@ -132,6 +135,7 @@ const style = `
   }
 
   .field {
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
@@ -190,7 +194,7 @@ const style = `
     border: 0;
     background: transparent;
     color: var(--ui-dp-text);
-    padding: 8px 0;
+    padding: 0;
     outline: none;
     font: 500 14px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.005em;
@@ -204,8 +208,9 @@ const style = `
     border: 0;
     background: transparent;
     color: color-mix(in srgb, var(--ui-dp-text) 74%, transparent);
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-dp-action-size, 24px);
+    block-size: var(--ui-dp-action-size, 24px);
+    margin-block: var(--ui-dp-action-bleed, 0px);
     border-radius: 8px;
     display: inline-grid;
     place-items: center;
@@ -445,7 +450,7 @@ const overlayStyle = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: 12px;
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);

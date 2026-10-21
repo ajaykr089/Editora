@@ -39,9 +39,11 @@ const style = `
   :host {
     --ui-combobox-width: var(--ui-width, 100%);
     --ui-combobox-min-width: 248px;
-    --ui-combobox-height: 42px;
-    --ui-combobox-padding-x: 12px;
-    --ui-combobox-radius: var(--ui-radius, 12px);
+    --ui-combobox-action-size: 24px;
+    --ui-combobox-height: var(--ui-control-height-2, 32px);
+    --ui-combobox-padding-x: var(--ui-control-padding-inline-2, 12px);
+    --ui-combobox-font-size: var(--ui-control-font-size-2, 14px);
+    --ui-combobox-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
     --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-combobox-text: var(--ui-color-text, #0f172a);
     --ui-combobox-muted: var(--ui-color-muted, #526175);
@@ -100,6 +102,7 @@ const style = `
   }
 
   .control {
+    box-sizing: border-box;
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -136,11 +139,11 @@ const style = `
     outline: none;
     background: transparent;
     color: var(--ui-combobox-text);
-    padding: 9px var(--ui-combobox-padding-x);
-    font-size: 14px;
+    padding: 0 var(--ui-combobox-padding-x);
+    font-size: var(--ui-combobox-font-size);
     line-height: 1.4;
     font-family: inherit;
-    min-height: var(--ui-combobox-height);
+    min-height: calc(var(--ui-combobox-height) - 2px);
   }
 
   input::placeholder {
@@ -160,8 +163,9 @@ const style = `
     border: none;
     background: transparent;
     color: var(--ui-combobox-muted);
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-combobox-action-size);
+    block-size: var(--ui-combobox-action-size);
+    margin-block: var(--ui-combobox-action-bleed, 0px);
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
@@ -390,14 +394,21 @@ const style = `
 
   :host([size="sm"]),
   :host([size="1"]) {
-    --ui-combobox-height: 36px;
-    --ui-combobox-padding-x: 10px;
+    --ui-combobox-action-size: 24px;
+    --ui-combobox-action-bleed: -1px;
+    --ui-combobox-height: var(--ui-control-height-1, 24px);
+    --ui-combobox-padding-x: var(--ui-control-padding-inline-1, 8px);
+    --ui-combobox-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-combobox-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
   }
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-combobox-height: 48px;
-    --ui-combobox-padding-x: 13px;
+    --ui-combobox-action-size: 28px;
+    --ui-combobox-height: var(--ui-control-height-3, 40px);
+    --ui-combobox-padding-x: var(--ui-control-padding-inline-3, 16px);
+    --ui-combobox-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-combobox-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
   }
 
   :host([variant="surface"]) .control {

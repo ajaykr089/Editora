@@ -15,14 +15,14 @@ import type { ThemeTokens } from './theme';
  */
 export type SemanticTokenMap = Record<string, string>;
 
-const CONTROL_SIZES = ['1', '2', '3'] as const;
+const CONTROL_SIZES = ['1', '2', '3', '4'] as const;
 
-/** Radix Themes control metrics: size 1 = 24px, 2 = 32px, 3 = 40px. */
-const CONTROL_HEIGHT: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '24px', '2': '32px', '3': '40px' };
-const CONTROL_FONT_SIZE: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '12px', '2': '14px', '3': '16px' };
-const CONTROL_PADDING_INLINE: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '8px', '2': '12px', '3': '16px' };
-/** Which entry of the radius scale a control of each size uses. */
-const CONTROL_RADIUS_STEP: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '2', '2': '2', '3': '3' };
+/** Radix Themes control metrics: size 1 = 24px, 2 = 32px (the default), 3 = 40px, 4 = 48px. */
+const CONTROL_HEIGHT: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '24px', '2': '32px', '3': '40px', '4': '48px' };
+const CONTROL_FONT_SIZE: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '12px', '2': '14px', '3': '16px', '4': '18px' };
+const CONTROL_PADDING_INLINE: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '8px', '2': '12px', '3': '16px', '4': '20px' };
+/** Extra radius, on top of the theme radius, for the larger control sizes (Radix: radius-2, radius-2, radius-3, radius-4). */
+const CONTROL_RADIUS_EXTRA: Record<(typeof CONTROL_SIZES)[number], number> = { '1': 0, '2': 0, '3': 2, '4': 4 };
 
 export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
   const gray = tokens.palette?.gray || {};
@@ -72,7 +72,10 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
     vars[`--ui-control-height-${size}`] = CONTROL_HEIGHT[size];
     vars[`--ui-control-font-size-${size}`] = CONTROL_FONT_SIZE[size];
     vars[`--ui-control-padding-inline-${size}`] = CONTROL_PADDING_INLINE[size];
-    put(`--ui-control-radius-${size}`, radiusScale[CONTROL_RADIUS_STEP[size]] || tokens.radius);
+    // Built on the theme's single `radius`, so `radius: '10px'` still reshapes every control.
+    const extra = CONTROL_RADIUS_EXTRA[size];
+    const radius = tokens.radius || radiusScale['2'] || '4px';
+    vars[`--ui-control-radius-${size}`] = extra ? `calc(${radius} + ${extra}px)` : radius;
   }
 
   // Overlay motion: a decelerating enter and a quicker, plainer exit.

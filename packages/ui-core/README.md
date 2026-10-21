@@ -572,8 +572,29 @@ stay on theme.
 | `--ui-color-accent-line`, `-accent-solid`, `-accent-solid-hover`, `-accent-text` | accent border, solid fill, solid hover and accent text |
 | `--ui-color-surface-elevated`, `--ui-color-info` | raised surface (menus, popovers) and the informational colour |
 | `--ui-ring-color`, `--ui-ring-width`, `--ui-ring-offset` | the focus ring |
-| `--ui-control-height-{1,2,3}`, `--ui-control-font-size-{1,2,3}`, `--ui-control-padding-inline-{1,2,3}`, `--ui-control-radius-{1,2,3}` | the control scale: 24, 32 and 40px |
+| `--ui-control-height-{1..4}`, `--ui-control-font-size-{1..4}`, `--ui-control-padding-inline-{1..4}`, `--ui-control-radius-{1..4}` | the control scale: 24, 32, 40 and 48px (see below) |
 | `--ui-motion-enter-easing`, `--ui-motion-exit-easing` | easing for things that appear and disappear |
+
+### Control sizes
+
+Buttons and form controls share one scale, so a row of mixed controls lines up:
+
+| `size` | Height | Text |
+| --- | --- | --- |
+| `sm` (or `1`) | 24px | 12px |
+| default (`md`, `2`) | 32px | 14px |
+| `lg` (or `3`) | 40px | 16px |
+
+This covers `ui-button`, `ui-input`, `ui-password-field`, `ui-number-field`, `ui-select`, `ui-combobox`,
+`ui-multi-select`, `ui-tags-input`, `ui-toggle`, `ui-textarea` and the date and time pickers. `ui-button` also takes
+`scale="4"` for 48px. The control radius follows the theme's `radius`.
+
+To change a size for the whole page, set the tokens, for example `:root { --ui-control-height-2: 36px; }`. To
+change one control, use `--ui-control-min-height` (buttons) or `--ui-min-height` (inputs) on it. The older
+`components.button['height-md']`-style theme values still work if you set them.
+
+The 24px size is small for touch. Buttons inside a small field (clear, show password, the dropdown arrow) stay 24px
+tall so they still meet the WCAG 2.2 minimum target size, but prefer the default size on touch screens.
 
 ## Floating positioning
 

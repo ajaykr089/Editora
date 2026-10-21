@@ -20,7 +20,7 @@ const style = `
   :host {
     --ui-multi-select-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 82%, transparent);
     --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
-    --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-radius, 4px));
+    --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-control-radius-2, var(--ui-radius, 4px)));
     --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-text: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #526175));
@@ -32,13 +32,15 @@ const style = `
     --ui-multi-select-panel-bg: var(--base-multi-select-panel-bg, color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent));
     --ui-multi-select-panel-border: var(--base-multi-select-panel-border, 1px solid color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent));
     --ui-multi-select-panel-shadow: var(--base-multi-select-panel-shadow, var(--shadow-4, 0 20px 34px rgba(2, 6, 23, 0.16)));
-    --ui-multi-select-height: var(--base-multi-select-height-md, 44px);
-    --ui-multi-select-padding-x: var(--base-multi-select-padding-x, 10px);
-    --ui-multi-select-padding-y: var(--base-multi-select-padding-y, 8px);
+    --ui-multi-select-action-size: 24px;
+    --ui-multi-select-height: var(--base-multi-select-height-md, var(--ui-control-height-2, 32px));
+    --ui-multi-select-padding-x: var(--base-multi-select-padding-x, calc(var(--ui-control-padding-inline-2, 12px) - 1px));
+    --ui-multi-select-padding-y: var(--base-multi-select-padding-y, 3px);
+    --ui-multi-select-font-size: var(--ui-control-font-size-2, 14px);
     --ui-multi-select-chip-radius: var(--base-multi-select-chip-radius, 999px);
     --ui-multi-select-chip-gap: var(--base-multi-select-chip-gap, 6px);
     --ui-multi-select-chip-padding-x: var(--base-multi-select-chip-padding-x, 10px);
-    --ui-multi-select-chip-padding-y: var(--base-multi-select-chip-padding-y, 6px);
+    --ui-multi-select-chip-padding-y: var(--base-multi-select-chip-padding-y, 2px);
     --ui-multi-select-option-radius: var(--base-multi-select-option-radius, 10px);
     --ui-multi-select-option-gap: var(--base-multi-select-option-gap, 10px);
     --ui-multi-select-option-padding-x: var(--base-multi-select-option-padding-x, 10px);
@@ -113,7 +115,8 @@ const style = `
     align-items: center;
     align-self: center;
     gap: 4px;
-    min-block-size: 28px;
+    min-block-size: var(--ui-multi-select-action-size);
+    margin-block: var(--ui-multi-select-action-bleed, 0px);
   }
 
   .shell[data-open="true"],
@@ -167,8 +170,8 @@ const style = `
     background: transparent;
     color: inherit;
     outline: none;
-    font: 500 14px/1.4 var(--ui-font-family, "Inter", sans-serif);
-    padding: 4px 2px;
+    font: 500 var(--ui-multi-select-font-size)/1.4 var(--ui-font-family, "Inter", sans-serif);
+    padding: 2px 2px;
     margin: 0;
   }
 
@@ -180,8 +183,9 @@ const style = `
     border: none;
     background: transparent;
     color: color-mix(in srgb, var(--ui-multi-select-text) 64%, transparent);
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-multi-select-action-size);
+    block-size: var(--ui-multi-select-action-size);
+    margin-block: var(--ui-multi-select-action-bleed, 0px);
     border-radius: 8px;
     display: inline-grid;
     place-items: center;
@@ -206,8 +210,9 @@ const style = `
     border: none;
     background: transparent;
     color: color-mix(in srgb, var(--ui-multi-select-text) 64%, transparent);
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-multi-select-action-size);
+    block-size: var(--ui-multi-select-action-size);
+    margin-block: var(--ui-multi-select-action-bleed, 0px);
     border-radius: 8px;
     display: inline-grid;
     place-items: center;
@@ -362,38 +367,39 @@ const style = `
     opacity: 0.6;
   }
 
-  :host([size="sm"]) {
-    --ui-multi-select-height: var(--base-multi-select-height-sm, 38px);
-  }
-
   :host([size="sm"]),
   :host([size="1"]) {
-    --ui-multi-select-height: var(--base-multi-select-height-sm, 38px);
-    --ui-multi-select-padding-x: 8px;
-    --ui-multi-select-padding-y: 6px;
+    --ui-multi-select-action-size: 24px;
+    --ui-multi-select-action-bleed: -1px;
+    --ui-multi-select-height: var(--base-multi-select-height-sm, var(--ui-control-height-1, 24px));
+    --ui-multi-select-padding-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
+    --ui-multi-select-padding-y: 0px;
+    --ui-multi-select-chip-padding-y: 0px;
+    --ui-multi-select-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-multi-select-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
     --ui-multi-select-option-padding-x: 8px;
     --ui-multi-select-option-padding-y: 8px;
   }
 
-  :host([size="sm"]) .input,
   :host([size="sm"]) .option-label,
-  :host([size="1"]) .input,
   :host([size="1"]) .option-label {
     font-size: 12px;
   }
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-multi-select-height: var(--base-multi-select-height-lg, 48px);
-    --ui-multi-select-padding-x: 12px;
-    --ui-multi-select-padding-y: 10px;
+    --ui-multi-select-action-size: 28px;
+    --ui-multi-select-height: var(--base-multi-select-height-lg, var(--ui-control-height-3, 40px));
+    --ui-multi-select-padding-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
+    --ui-multi-select-padding-y: 5px;
+    --ui-multi-select-chip-padding-y: 4px;
+    --ui-multi-select-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-multi-select-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
     --ui-multi-select-option-padding-x: 12px;
     --ui-multi-select-option-padding-y: 12px;
   }
 
-  :host([size="lg"]) .input,
   :host([size="lg"]) .option-label,
-  :host([size="3"]) .input,
   :host([size="3"]) .option-label {
     font-size: 15px;
   }

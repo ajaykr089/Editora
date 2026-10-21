@@ -64,7 +64,7 @@ const style = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: 12px;
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
@@ -105,11 +105,12 @@ const style = `
   .required { color: var(--ui-dp-field-error); font-size: 11px; }
 
   .fields {
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 8px;
-    min-block-size: 42px;
+    min-block-size: var(--ui-control-height-2, 32px);
     border: 1px solid var(--ui-dp-border);
     border-radius: var(--ui-dp-radius);
     padding: 0 10px 0 11px;
@@ -167,7 +168,7 @@ const style = `
     color: var(--ui-dp-text);
     min-inline-size: 0;
     inline-size: 100%;
-    padding: 8px 0;
+    padding: 0;
     font: 500 14px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.005em;
     outline: none;
@@ -186,8 +187,8 @@ const style = `
   .btn {
     border: 0;
     background: transparent;
-    inline-size: 28px;
-    block-size: 28px;
+    inline-size: var(--ui-dp-action-size, 24px);
+    block-size: var(--ui-dp-action-size, 24px);
     border-radius: 8px;
     color: color-mix(in srgb, var(--ui-dp-text) 72%, transparent);
     cursor: pointer;
@@ -372,7 +373,7 @@ const overlayStyle = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: 12px;
+    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);

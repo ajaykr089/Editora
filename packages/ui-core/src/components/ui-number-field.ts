@@ -3,14 +3,16 @@ import { syncControlName, syncControlDescription } from '../primitives/control-n
 
 const style = `
   :host {
-    --ui-number-field-padding: var(--ui-padding, 10px 12px);
+    --ui-number-field-padding: var(--ui-padding, 0);
+    --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
+    --ui-number-field-font-size: var(--ui-control-font-size-2, 14px);
     --ui-number-field-border-color: var(--ui-color-border, var(--ui-border-color, #cbd5e1));
     --ui-number-field-border-width: 1px;
     --ui-number-field-border-style: solid;
     --ui-number-field-border:
       var(--ui-number-field-border-width) var(--ui-number-field-border-style) var(--ui-number-field-border-color);
-    --ui-number-field-radius: var(--ui-radius, 10px);
-    --ui-number-field-min-height: var(--ui-min-height, 40px);
+    --ui-number-field-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
+    --ui-number-field-min-height: var(--ui-min-height, var(--base-input-height-md, var(--ui-control-height-2, 32px)));
     --ui-number-field-width: 100%;
     --ui-number-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-number-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
@@ -97,7 +99,7 @@ const style = `
     gap: var(--ui-number-field-shell-gap);
     box-sizing: border-box;
     min-block-size: var(--ui-number-field-min-height);
-    padding-inline: 10px;
+    padding-inline: var(--ui-number-field-pad-x);
     border: var(--ui-number-field-border);
     border-radius: var(--ui-number-field-radius);
     background: var(--ui-number-field-bg);
@@ -139,7 +141,7 @@ const style = `
     border: none;
     background: transparent;
     color: inherit;
-    font: 500 14px/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 var(--ui-number-field-font-size)/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     padding: var(--ui-number-field-padding);
     min-block-size: calc(var(--ui-number-field-min-height) - 2px);
     margin: 0;
@@ -258,8 +260,10 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-number-field-min-height: 34px;
-    --ui-number-field-padding: 7px 8px;
+    --ui-number-field-min-height: var(--ui-min-height, var(--base-input-height-sm, var(--ui-control-height-1, 24px)));
+    --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-1, 8px) - 1px);
+    --ui-number-field-font-size: var(--ui-control-font-size-1, 12px);
+    --ui-number-field-radius: var(--ui-control-radius-1, var(--ui-radius, 4px));
     --ui-number-field-shell-gap: 6px;
   }
 
@@ -273,8 +277,10 @@ const style = `
   }
 
   :host([size="lg"]) {
-    --ui-number-field-min-height: 46px;
-    --ui-number-field-padding: 11px 14px;
+    --ui-number-field-min-height: var(--ui-min-height, var(--base-input-height-lg, var(--ui-control-height-3, 40px)));
+    --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-3, 16px) - 1px);
+    --ui-number-field-font-size: var(--ui-control-font-size-3, 16px);
+    --ui-number-field-radius: var(--ui-control-radius-3, var(--ui-radius, 4px));
     --ui-number-field-shell-gap: 10px;
   }
 

@@ -58,17 +58,19 @@ describe('semantic design tokens', () => {
     const vars = themeToVariables(baselineLightTokens);
     expect([vars['--ui-control-height-1'], vars['--ui-control-height-2'], vars['--ui-control-height-3']]).toEqual(['24px', '32px', '40px']);
     expect([vars['--ui-control-font-size-1'], vars['--ui-control-font-size-2'], vars['--ui-control-font-size-3']]).toEqual(['12px', '14px', '16px']);
-    expect(vars['--ui-control-radius-2']).toBe(baselineLightTokens.radiusScale!['2']);
-    expect(vars['--ui-control-radius-3']).toBe(baselineLightTokens.radiusScale!['3']);
+    expect(vars['--ui-control-radius-2']).toBe(baselineLightTokens.radius);
+    expect(vars['--ui-control-radius-3']).toBe(`calc(${baselineLightTokens.radius} + 2px)`);
+    expect(vars['--ui-control-height-4']).toBe('48px');
     expect(vars['--ui-ring-color']).toBe(baselineLightTokens.colors.focusRing);
     expect(vars['--ui-ring-width']).toBe('2px');
     expect(vars['--ui-ring-offset']).toBe('2px');
   });
 
-  it('keeps a custom radius scale in control radii', () => {
-    const vars = themeToVariables(createThemeTokens({ radiusScale: { '2': '10px', '3': '14px' } }));
+  it('builds control radii on the theme radius, so `radius` still reshapes every control', () => {
+    const vars = themeToVariables(createThemeTokens({ radius: '10px' }));
+    expect(vars['--ui-control-radius-1']).toBe('10px');
     expect(vars['--ui-control-radius-2']).toBe('10px');
-    expect(vars['--ui-control-radius-3']).toBe('14px');
+    expect(vars['--ui-control-radius-3']).toBe('calc(10px + 2px)');
   });
 });
 

@@ -38,7 +38,7 @@ const style = `
     --ui-alert-description-size: 13px;
     --ui-alert-description-line-height: 20px;
     --ui-alert-icon-size: 28px;
-    --ui-alert-button-height: var(--base-button-height-md, 36px);
+    --ui-alert-button-height: var(--base-button-height-md, var(--ui-control-height-2, 32px));
     --ui-alert-button-radius: var(--ui-radius, 4px);
   }
 
@@ -69,7 +69,7 @@ const style = `
     --ui-alert-description-size: 12px;
     --ui-alert-description-line-height: 18px;
     --ui-alert-icon-size: 24px;
-    --ui-alert-button-height: var(--base-button-height-sm, 32px);
+    --ui-alert-button-height: var(--base-button-height-sm, var(--ui-control-height-1, 24px));
   }
 
   :host([size='md']),
@@ -89,7 +89,7 @@ const style = `
     --ui-alert-description-size: 14px;
     --ui-alert-description-line-height: 22px;
     --ui-alert-icon-size: 32px;
-    --ui-alert-button-height: var(--base-button-height-lg, 44px);
+    --ui-alert-button-height: var(--base-button-height-lg, var(--ui-control-height-3, 40px));
   }
 
   :host([variant='outline']) {
@@ -313,7 +313,7 @@ const style = `
     background: var(--base-input-bg, color-mix(in srgb, var(--ui-alert-bg-base) 94%, #ffffff 6%));
     color: inherit;
     box-sizing: border-box;
-    min-height: var(--base-input-height-md, 36px);
+    min-height: var(--base-input-height-md, var(--ui-control-height-2, 32px));
     padding: 9px 12px;
     font: inherit;
     line-height: 1.35;
