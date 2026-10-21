@@ -363,12 +363,12 @@ const style = `
 
   :host([state="error"]) .control {
     border-color: var(--ui-combobox-error);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-error) 19%, transparent), var(--ui-combobox-shadow);
+    box-shadow: 0 0 0 1px var(--ui-combobox-error), var(--ui-combobox-shadow);
   }
 
   :host([state="success"]) .control {
     border-color: color-mix(in srgb, var(--ui-combobox-success) 72%, var(--ui-combobox-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-combobox-success) 13%, transparent), var(--ui-combobox-shadow);
+    box-shadow: 0 0 0 1px var(--ui-combobox-success), var(--ui-combobox-shadow);
   }
 
   :host([disabled]) .control {
@@ -431,7 +431,7 @@ const style = `
 
   :host([validation="error"]) .control {
     border-color: var(--ui-combobox-error);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-error) 20%, transparent), var(--ui-combobox-shadow);
+    box-shadow: 0 0 0 1px var(--ui-combobox-error), var(--ui-combobox-shadow);
   }
 
   :host([validation="success"]) .control {

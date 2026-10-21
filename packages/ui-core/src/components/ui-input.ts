@@ -402,7 +402,7 @@ const style = `
   }
 
   :host([validation="error"]) .shell {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-input-error) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-input-error);
   }
 
   :host([radius="none"]) {

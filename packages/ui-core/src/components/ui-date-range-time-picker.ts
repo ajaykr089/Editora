@@ -160,12 +160,12 @@ const style = `
 
   .field[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-drtp-error) 72%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-drtp-error) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-drtp-error);
   }
 
   .field[data-state="success"]:not([data-invalid="true"]) {
     border-color: color-mix(in srgb, var(--ui-drtp-success) 56%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-drtp-success) 18%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-drtp-success);
   }
 
   .input {

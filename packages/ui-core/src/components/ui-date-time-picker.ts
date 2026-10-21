@@ -158,12 +158,12 @@ const style = `
 
   .field[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-dtp-error) 72%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dtp-error) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-dtp-error);
   }
 
   .field[data-state="success"]:not([data-invalid="true"]) {
     border-color: color-mix(in srgb, var(--ui-dtp-success) 56%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dtp-success) 18%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-dtp-success);
   }
 
   .input {

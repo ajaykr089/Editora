@@ -652,7 +652,7 @@ const style = `
   :host([invalid]) .control,
   :host([data-invalid="true"]) .control {
     box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--ui-select-error) 18%, transparent),
+      0 0 0 1px var(--ui-select-error),
       var(--ui-select-elevation);
   }
 

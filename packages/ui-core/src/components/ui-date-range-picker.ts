@@ -139,12 +139,12 @@ const style = `
 
   .fields[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-dp-field-error) 68%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-field-error) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-dp-field-error);
   }
 
   .fields[data-state="success"]:not([data-invalid="true"]) {
     border-color: color-mix(in srgb, var(--ui-dp-success) 56%, var(--ui-dp-border));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-success) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-dp-success);
   }
 
   .fields[data-state="loading"] {

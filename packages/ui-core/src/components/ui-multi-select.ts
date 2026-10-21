@@ -139,7 +139,7 @@ const style = `
 
   .shell[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-multi-select-danger) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-multi-select-danger) 18%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-multi-select-danger);
   }
 
   .chip {

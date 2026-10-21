@@ -261,7 +261,7 @@ const style = `
 
   :host([invalid]) .shell,
   :host([data-internal-invalid]) .shell {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-number-field-danger) 20%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-number-field-danger);
   }
 
   :host([size="sm"]) {

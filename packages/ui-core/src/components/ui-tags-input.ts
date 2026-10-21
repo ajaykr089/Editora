@@ -118,7 +118,7 @@ const style = `
 
   .shell[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-tags-input-danger) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-tags-input-danger) 16%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-tags-input-danger);
   }
 
   .chips {

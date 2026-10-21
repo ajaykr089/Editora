@@ -246,7 +246,7 @@ const style = `
 
   :host([validation="error"]) .field {
     border-color: color-mix(in srgb, var(--ui-textarea-danger) 74%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-textarea-danger) 22%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-textarea-danger);
   }
 
   :host([validation="success"]) .field {
