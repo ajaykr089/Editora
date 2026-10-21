@@ -11,11 +11,11 @@ type GroupValue = string | string[];
 
 const style = `
   :host {
-    --ui-toggle-group-gap: 8px;
-    --ui-toggle-group-padding: 6px;
-    --ui-toggle-group-radius: 12px;
-    --ui-toggle-group-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-toggle-group-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-toggle-group-gap: 4px;
+    --ui-toggle-group-padding: 0px;
+    --ui-toggle-group-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-toggle-group-bg: transparent;
+    --ui-toggle-group-border: transparent;
     --ui-toggle-group-shadow:
       none;
 
@@ -65,15 +65,15 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-toggle-group-gap: 6px;
-    --ui-toggle-group-padding: 4px;
-    --ui-toggle-group-radius: 10px;
+    --ui-toggle-group-gap: 4px;
+    --ui-toggle-group-padding: 0px;
+    --ui-toggle-group-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
   }
 
   :host([size="lg"]) {
-    --ui-toggle-group-gap: 10px;
-    --ui-toggle-group-padding: 8px;
-    --ui-toggle-group-radius: 14px;
+    --ui-toggle-group-gap: 4px;
+    --ui-toggle-group-padding: 0px;
+    --ui-toggle-group-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
   }
 
   :host([density="compact"]) {

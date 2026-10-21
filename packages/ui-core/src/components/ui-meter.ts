@@ -9,15 +9,10 @@ const style = `
     width: 100%;
     --ui-meter-bg: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 44%, transparent);
     --ui-meter-fill: var(--ui-color-primary, #2563eb);
-    --ui-meter-fill-soft:
-      linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--ui-meter-fill, #2563eb) 84%, white 16%),
-        var(--ui-meter-fill, #2563eb)
-      );
+    --ui-meter-fill-soft: var(--ui-meter-fill, #2563eb);
     --ui-meter-text: var(--ui-color-text, #0f172a);
     --ui-meter-muted: var(--ui-color-muted, #526175);
-    --ui-meter-height: 12px;
+    --ui-meter-height: 6px;
     --ui-meter-radius: 999px;
     --ui-meter-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-meter-circle-size: 76px;
@@ -82,7 +77,7 @@ const style = `
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 60%);
+    background: none;
     pointer-events: none;
   }
 

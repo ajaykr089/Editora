@@ -10,10 +10,10 @@ import {
 const style = `
   :host {
     --ui-toolbar-gap: 8px;
-    --ui-toolbar-padding: 8px;
-    --ui-toolbar-radius: 12px;
-    --ui-toolbar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-toolbar-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-toolbar-padding: 4px;
+    --ui-toolbar-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-toolbar-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-toolbar-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-toolbar-shadow:
       none;
 
@@ -82,15 +82,15 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-toolbar-gap: 6px;
-    --ui-toolbar-padding: 6px;
-    --ui-toolbar-radius: 10px;
+    --ui-toolbar-gap: 4px;
+    --ui-toolbar-padding: 2px;
+    --ui-toolbar-radius: var(--ui-radius, 6px);
   }
 
   :host([size="lg"]) {
-    --ui-toolbar-gap: 10px;
-    --ui-toolbar-padding: 10px;
-    --ui-toolbar-radius: 14px;
+    --ui-toolbar-gap: 6px;
+    --ui-toolbar-padding: 6px;
+    --ui-toolbar-radius: calc(var(--ui-radius, 6px) + 4px);
   }
 
   :host([density="compact"]) {

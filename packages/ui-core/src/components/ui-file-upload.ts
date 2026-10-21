@@ -27,9 +27,9 @@ type UploadEntry = {
 
 const style = `
   :host {
-    --ui-file-upload-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-file-upload-border-color: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent));
     --ui-file-upload-border: 1px solid var(--ui-file-upload-border-color);
-    --ui-file-upload-radius: var(--ui-radius, 12px);
+    --ui-file-upload-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-file-upload-bg: var(--ui-color-surface, #ffffff);
     --ui-file-upload-text: var(--ui-color-text, #0f172a);
     --ui-file-upload-muted: var(--ui-color-muted, #526175);
@@ -103,8 +103,7 @@ const style = `
 
   .surface[data-dragging="true"] {
     border-color: color-mix(in srgb, var(--ui-file-upload-focus) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-file-upload-focus) 18%, transparent);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px var(--ui-file-upload-focus);
   }
 
   :host([surface="dropzone"]) .surface {
@@ -121,7 +120,7 @@ const style = `
   }
 
   .headline {
-    font: 600 14px/1.35 "Inter", "IBM Plex Sans", sans-serif;
+    font: 500 14px/1.35 "Inter", "IBM Plex Sans", sans-serif;
   }
 
   .subline {
@@ -135,11 +134,13 @@ const style = `
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: 999px;
-    padding: 8px 12px;
-    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
-    font: 600 12px/1 "Inter", "IBM Plex Sans", sans-serif;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    min-height: var(--ui-control-height-2, 32px);
+    padding: 0 12px;
+    /* A primary button: the theme's text colour on its fill (the tinted version was unreadable on amber). */
+    background: var(--ui-color-primary, #2563eb);
+    color: var(--ui-color-foreground-on-primary, #ffffff);
+    font: 500 14px/1 "Inter", "IBM Plex Sans", sans-serif;
     cursor: pointer;
   }
 
@@ -257,12 +258,12 @@ const style = `
 
   .status[data-state="pending"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%));
   }
 
   .status[data-state="uploading"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%);
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%));
   }
 
   .status[data-state="success"] {
@@ -322,7 +323,7 @@ const style = `
 
   .file-remove[data-variant="primary"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%);
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%));
   }
 
   .file-error {

@@ -7,14 +7,14 @@ type PinInputSource = 'input' | 'paste' | 'keyboard' | 'api' | 'clear';
 
 const style = `
   :host {
-    --ui-pin-gap: 10px;
-    --ui-pin-slot-width: 48px;
-    --ui-pin-slot-height: 56px;
-    --ui-pin-radius: 14px;
+    --ui-pin-gap: 8px;
+    --ui-pin-slot-width: 40px;
+    --ui-pin-slot-height: var(--ui-control-height-3, 40px);
+    --ui-pin-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-pin-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-pin-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-pin-muted: var(--ui-color-muted, var(--ui-muted, #526175));
-    --ui-pin-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-pin-border-color: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent));
     --ui-pin-error: var(--ui-color-danger, var(--ui-error, #dc2626));
     --ui-pin-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-pin-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
@@ -99,25 +99,25 @@ const style = `
     background: var(--ui-pin-bg);
     color: var(--ui-pin-color);
     text-align: center;
-    font: 650 24px/1 "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 18px/1 "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.04em;
     outline: none;
     transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease, color 140ms ease;
   }
 
   .slot::placeholder {
-    color: color-mix(in srgb, var(--ui-pin-color) 26%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-pin-color) 62%, transparent));
     letter-spacing: 0;
   }
 
   .slot:focus-visible {
-    border-color: color-mix(in srgb, var(--ui-pin-focus) 64%, var(--ui-pin-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-pin-focus) 24%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-pin-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-pin-focus));
+    outline-offset: -1px;
   }
 
   .slot[data-filled="true"] {
-    border-color: color-mix(in srgb, var(--ui-pin-accent) 34%, var(--ui-pin-border-color));
-    background: color-mix(in srgb, var(--ui-pin-accent) 5%, var(--ui-pin-bg));
+    border-color: var(--ui-color-line-strong, var(--ui-pin-border-color));
   }
 
   :host([invalid]) .slot,

@@ -22,9 +22,9 @@ type StepItem = {
 const style = `
   :host {
     --ui-stepper-gap: 8px;
-    --ui-stepper-radius: 12px;
-    --ui-stepper-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
-    --ui-stepper-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-stepper-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-stepper-bg: transparent;
+    --ui-stepper-border: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-stepper-text: var(--ui-color-text, #0f172a);
     --ui-stepper-muted: var(--ui-color-muted, #526175);
     --ui-stepper-accent: var(--ui-color-primary, #2563eb);
@@ -38,11 +38,10 @@ const style = `
   }
 
   .frame {
-    border: 1px solid var(--ui-stepper-border);
+    border: 0;
     border-radius: var(--ui-stepper-radius);
     background: var(--ui-stepper-bg);
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
-    padding: 10px;
+    padding: 0;
   }
 
   .list {
@@ -69,9 +68,9 @@ const style = `
   .trigger {
     min-inline-size: 0;
     inline-size: 100%;
-    border: 1px solid color-mix(in srgb, var(--ui-stepper-border) 82%, transparent);
-    border-radius: 11px;
-    background: color-mix(in srgb, var(--ui-stepper-bg) 98%, transparent);
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    background: transparent;
     color: var(--ui-stepper-text);
     padding: 8px 10px;
     display: grid;
@@ -84,13 +83,12 @@ const style = `
   }
 
   .trigger:hover {
-    border-color: color-mix(in srgb, var(--ui-stepper-accent) 20%, var(--ui-stepper-border));
-    background: color-mix(in srgb, var(--ui-stepper-accent) 4%, transparent);
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-stepper-accent) 4%, transparent));
   }
 
   .trigger:focus-visible {
-    outline: 2px solid var(--ui-stepper-focus);
-    outline-offset: 1px;
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-stepper-focus));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .trigger[disabled] {
@@ -100,25 +98,15 @@ const style = `
 
   .index {
     position: relative;
-    inline-size: 20px;
-    block-size: 20px;
+    inline-size: 24px;
+    block-size: 24px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--ui-stepper-border) 82%, transparent);
+    border: 1px solid var(--ui-stepper-border);
     display: inline-grid;
     place-items: center;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 500;
     line-height: 1;
-  }
-
-  .item[data-state="current"] .index::after {
-    content: "";
-    position: absolute;
-    inset: -5px;
-    border-radius: inherit;
-    border: 1px solid color-mix(in srgb, var(--ui-stepper-accent) 34%, transparent);
-    opacity: 0.18;
-    pointer-events: none;
   }
 
   .meta {
@@ -136,8 +124,8 @@ const style = `
   }
 
   .label {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
   }
 
   .description {
@@ -150,7 +138,7 @@ const style = `
     inline-size: 100%;
     block-size: 2px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--ui-stepper-border) 82%, transparent);
+    background: var(--ui-stepper-border);
     overflow: hidden;
   }
 
@@ -160,43 +148,21 @@ const style = `
     margin-inline-start: 9px;
   }
 
-  .item[data-state="current"] .trigger {
-    border-color: color-mix(in srgb, var(--ui-stepper-accent) 28%, var(--ui-stepper-border));
-    background: color-mix(in srgb, var(--ui-stepper-accent) 7%, transparent);
+  /* Done is a soft accent fill; the current step is a solid one. */
+  .item[data-state="complete"] .index {
+    border-color: transparent;
+    background: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-stepper-accent) 14%, transparent));
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-stepper-accent) 68%, #0f172a 32%));
   }
 
-  .item[data-state="current"] .index,
-  .item[data-state="complete"] .index {
-    border-color: color-mix(in srgb, var(--ui-stepper-accent) 28%, var(--ui-stepper-border));
-    background: color-mix(in srgb, var(--ui-stepper-accent) 10%, transparent);
-    color: color-mix(in srgb, var(--ui-stepper-accent) 68%, #0f172a 32%);
+  .item[data-state="current"] .index {
+    border-color: transparent;
+    background: var(--ui-stepper-accent);
+    color: var(--ui-color-foreground-on-primary, #ffffff);
   }
 
   .item[data-state="complete"] .connector {
     background: color-mix(in srgb, var(--ui-stepper-accent) 32%, transparent);
-  }
-
-  .item[data-state="current"] .connector::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      color-mix(in srgb, var(--ui-stepper-accent) 24%, transparent) 50%,
-      transparent 100%
-    );
-    opacity: 0.45;
-    pointer-events: none;
-  }
-
-  :host([orientation="vertical"]) .item[data-state="current"] .connector::after {
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      color-mix(in srgb, var(--ui-stepper-accent) 24%, transparent) 50%,
-      transparent 100%
-    );
   }
 
   .item[data-state="error"] .trigger {

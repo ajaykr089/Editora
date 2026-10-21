@@ -4,18 +4,19 @@ const style = `
   :host {
     display: block;
     --ui-empty-bg: linear-gradient(180deg, var(--ui-color-surface, #ffffff), var(--ui-color-surface-alt, #f8fafc));
-    --ui-empty-border: 1px dashed color-mix(in srgb, var(--ui-color-border, rgba(51, 65, 85, 0.28)) 88%, transparent);
-    --ui-empty-radius: 16px;
+    --ui-empty-border: 1px dashed var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, rgba(51, 65, 85, 0.28)) 88%, transparent));
+    --ui-empty-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-empty-padding: 28px;
     --ui-empty-title: var(--ui-color-text, #0f172a);
-    --ui-empty-description: var(--ui-color-muted, #526175);
+    --ui-empty-description: var(--ui-color-text-secondary, var(--ui-color-muted, #526175));
     --ui-empty-icon-bg: color-mix(in srgb, var(--ui-color-muted, #526175) 18%, transparent);
     --ui-empty-icon-color: color-mix(in srgb, var(--ui-color-text, #334155) 82%, transparent);
     --ui-empty-shadow: none;
-    --ui-empty-action-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
-    --ui-empty-action-border: color-mix(in srgb, var(--ui-color-primary, #2563eb) 36%, transparent);
-    --ui-empty-action-color: var(--ui-color-primary, #1d4ed8);
-    --ui-empty-action-bg-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 22%, transparent);
+    /* The default action is a primary button: a solid fill with the theme's text colour on it. */
+    --ui-empty-action-bg: var(--ui-color-primary, #2563eb);
+    --ui-empty-action-border: transparent;
+    --ui-empty-action-color: var(--ui-color-foreground-on-primary, #ffffff);
+    --ui-empty-action-bg-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 88%, var(--ui-color-text-strong, #0f172a));
     color-scheme: light dark;
   }
 
@@ -73,10 +74,11 @@ const style = `
     border: 1px solid var(--ui-empty-action-border);
     background: var(--ui-empty-action-bg);
     color: var(--ui-empty-action-color);
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    min-height: var(--ui-control-height-2, 32px);
+    padding: 0 12px;
+    font-size: var(--ui-control-font-size-2, 14px);
+    font-weight: 500;
     cursor: pointer;
   }
 

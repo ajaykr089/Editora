@@ -14,13 +14,13 @@ function sanitizeCssValue(raw: string): string {
 const style = `
   :host {
     display: block;
-    --ui-skeleton-radius: 10px;
+    --ui-skeleton-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-skeleton-height: 16px;
     --ui-skeleton-width: 100%;
     --ui-skeleton-gap: 10px;
     --ui-skeleton-duration: 1.2s;
 
-    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-muted, #526175) 20%, transparent);
+    --ui-skeleton-base: var(--ui-color-fill-active, color-mix(in srgb, var(--ui-color-muted, #526175) 20%, transparent));
     --ui-skeleton-glow: color-mix(in srgb, var(--ui-color-surface, #ffffff) 80%, transparent);
     --ui-skeleton-wave: color-mix(in srgb, var(--ui-color-surface, #ffffff) 68%, transparent);
     --ui-skeleton-bg: linear-gradient(
