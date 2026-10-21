@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { externalDescriptionMarkup } from '../primitives/control-name';
 import { findFirstEnabledIndex, findIndexByValue, findLastEnabledIndex } from '../primitives/collection';
 import { resolveListboxActiveIndex } from '../primitives/listbox';
@@ -6,6 +7,8 @@ import './ui-listbox';
 import { UIListbox } from './ui-listbox';
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   :host {
     --ui-select-width: var(--ui-width, min(340px, 100%));
     --ui-select-min-height: var(--base-select-height-md, var(--ui-control-height-2, 32px));
@@ -27,14 +30,12 @@ const style = `
 
     --ui-select-shadow: var(--base-select-shadow, none);
     --ui-select-elevation: var(--ui-select-shadow);
-    --ui-select-menu-bg: var(--base-select-menu-bg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent));
+    --ui-select-menu-bg: var(--base-select-menu-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-select-menu-color: var(--base-select-menu-color, var(--ui-select-text));
-    --ui-select-menu-border-color: color-mix(in srgb, var(--ui-select-border-color) 82%, transparent);
+    --ui-select-menu-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-select-border-color) 82%, transparent));
     --ui-select-menu-border: 1px solid var(--ui-select-menu-border-color);
-    --ui-select-menu-radius: var(--base-select-menu-radius, var(--ui-select-radius));
-    --ui-select-menu-shadow:
-      0 14px 34px rgba(15, 23, 42, 0.16),
-      0 3px 10px rgba(15, 23, 42, 0.08);
+    --ui-select-menu-radius: var(--base-select-menu-radius, calc(var(--ui-radius, 6px) + 2px));
+    --ui-select-menu-shadow: var(--shadow-5, 0 14px 34px rgba(15, 23, 42, 0.16));
     --ui-select-menu-padding: 0px;
     --ui-select-menu-gap: 8px;
     --ui-select-menu-max-height: min(320px, var(--ui-select-available-height, 320px));
@@ -284,9 +285,7 @@ const style = `
     overflow-x: hidden;
     border: var(--ui-select-menu-border);
     border-radius: var(--ui-select-menu-radius);
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-select-accent) 3%, transparent) 0%, transparent 100%),
-      var(--ui-select-menu-bg);
+    background: var(--ui-select-menu-bg);
     color: var(--ui-select-menu-color);
     box-shadow: var(--ui-select-menu-shadow);
     padding: var(--ui-select-menu-padding);
@@ -313,16 +312,6 @@ const style = `
   .menu:hover::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, var(--ui-select-accent) 28%, var(--ui-select-menu-border-color));
     background-clip: padding-box;
-  }
-
-  .panel[data-placement="top"] .menu {
-    transform-origin: bottom center;
-    animation: ui-select-menu-enter-top 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .panel[data-placement="bottom"] .menu {
-    transform-origin: top center;
-    animation: ui-select-menu-enter-bottom 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .menu-group {
@@ -674,28 +663,6 @@ const style = `
   @keyframes ui-select-spin {
     to {
       transform: rotate(360deg);
-    }
-  }
-
-  @keyframes ui-select-menu-enter-bottom {
-    from {
-      opacity: 0;
-      transform: translateY(-4px) scale(0.985);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes ui-select-menu-enter-top {
-    from {
-      opacity: 0;
-      transform: translateY(4px) scale(0.985);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
     }
   }
 
@@ -1621,8 +1588,8 @@ export class UISelect extends ElementBase {
     else if (!this.disabled) trigger.setAttribute('tabindex', '0');
     else trigger.setAttribute('tabindex', '-1');
 
-    panel.hidden = !this._open;
     panel.setAttribute('data-placement', this._placement);
+    setPanelOpen(panel, this._open, String(this._placement).split('-')[0]);
     if (this._open) trigger.setAttribute('aria-controls', `${this._uid}-listbox`);
     else trigger.removeAttribute('aria-controls');
 

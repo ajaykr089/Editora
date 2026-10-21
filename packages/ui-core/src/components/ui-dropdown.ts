@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { resolveTriggerControl } from '../primitives/trigger';
 import { createSharedMenuItemCss } from './menu-item-styles';
 
@@ -32,6 +33,8 @@ const ITEM_SELECTOR = [
 ].join(', ');
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   :host {
     --ui-dropdown-bg: var(
       --ui-dropdown-menu-bg,
@@ -1120,8 +1123,8 @@ export class UIDropdown extends ElementBase {
     const menu = this._getMenu();
     if (!panel || !menu) return;
 
-    panel.hidden = !this._isOpen;
     panel.setAttribute('data-placement', this._placement);
+    setPanelOpen(panel, this._isOpen, String(this._placement).split('-')[0]);
   }
 
   private _schedulePanelSync(focusBoundary?: 'first' | 'last'): void {

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { syncControlDescription } from '../primitives/control-name';
 import { normalizeCollectionText } from '../primitives/collection';
 import './ui-listbox';
@@ -17,6 +18,8 @@ type MultiSelectSize = 'sm' | 'md' | 'lg';
 let multiSelectUid = 0;
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   :host {
     --ui-multi-select-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
@@ -1150,7 +1153,7 @@ export class UIMultiSelect extends ElementBase {
       const renderLimit = this._renderLimit();
       const visibleOptions = filtered.slice(0, renderLimit);
       const truncated = filtered.length > visibleOptions.length;
-      this._panelEl.hidden = !this.open;
+      setPanelOpen(this._panelEl, this.open, 'bottom');
       if (loading) {
         const status = document.createElement('div');
         status.className = 'status';

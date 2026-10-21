@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { externalDescriptionMarkup } from '../primitives/control-name';
 import { normalizeCollectionText } from '../primitives/collection';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
@@ -36,6 +37,8 @@ const CHEVRON_ICON = `
 `;
 
 const style = `
+  ${OVERLAY_MOTION_CSS}
+
   :host {
     --ui-combobox-width: var(--ui-width, 100%);
     --ui-combobox-min-width: 248px;
@@ -53,9 +56,9 @@ const style = `
     --ui-combobox-shadow-hover: none;
     --ui-combobox-shadow-focus: none;
     --ui-combobox-focus: var(--ui-color-primary, #2563eb);
-    --ui-combobox-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
-    --ui-combobox-panel-border: 1px solid color-mix(in srgb, var(--ui-combobox-border-color) 80%, transparent);
-    --ui-combobox-panel-shadow: none;
+    --ui-combobox-panel-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-combobox-panel-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-combobox-border-color) 80%, transparent));
+    --ui-combobox-panel-shadow: var(--shadow-5, 0 14px 34px rgba(15, 23, 42, 0.16));
     --ui-combobox-panel-z: 1600;
     --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 11%, transparent);
     --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, #2563eb) 18%, transparent);
@@ -212,26 +215,17 @@ const style = `
     left: 0;
     right: 0;
     border: var(--ui-combobox-panel-border);
-    border-radius: calc(var(--ui-combobox-radius) + 2px);
+    border-radius: calc(var(--ui-radius, 6px) + 2px);
     background: var(--ui-combobox-panel-bg);
     box-shadow: var(--ui-combobox-panel-shadow);
     max-height: min(360px, 52vh);
     overflow: auto;
     padding: 6px 6px 8px;
     z-index: var(--ui-combobox-panel-z, 1600);
-    display: none;
-    opacity: 0;
-    transform: translateY(-4px) scale(0.985);
-    transition:
-      opacity var(--ui-combobox-duration) var(--ui-combobox-ease),
-      transform var(--ui-combobox-duration) var(--ui-combobox-ease);
-    backdrop-filter: saturate(1.08) blur(8px);
   }
 
-  .panel[data-open="true"] {
-    display: block;
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  .panel[hidden] {
+    display: none;
   }
 
   .status-row {
@@ -1046,7 +1040,7 @@ export class UICombobox extends ElementBase {
     if (open) {
       this._bindGlobalListeners();
       this._panel.setAttribute('data-open', 'true');
-      this._panel.removeAttribute('hidden');
+      setPanelOpen(this._panel, true, 'bottom');
       this._panel.setAttribute('aria-hidden', 'false');
       this._input.setAttribute('aria-expanded', 'true');
       this._toggleBtn.setAttribute('data-open', 'true');
@@ -1057,7 +1051,7 @@ export class UICombobox extends ElementBase {
       this._unbindGlobalListeners();
       this._dismissableLayer?.destroy();
       this._dismissableLayer = null;
-      this._panel.setAttribute('hidden', '');
+      setPanelOpen(this._panel, false, 'bottom');
       this._panel.removeAttribute('data-open');
       this._panel.setAttribute('aria-hidden', 'true');
       this._input.setAttribute('aria-expanded', 'false');
