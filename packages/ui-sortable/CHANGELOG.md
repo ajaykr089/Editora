@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [c148036]
+- Updated dependencies [0453386]
+- Updated dependencies [0eafaf4]
+- Updated dependencies [fa93f3a]
+- Updated dependencies [8cd343c]
+- Updated dependencies [e6291c8]
+  - @editora/ui-core@0.2.0
+
 ## 0.1.8
 
 ### Patch Changes
