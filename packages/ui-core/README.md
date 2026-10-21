@@ -614,6 +614,9 @@ Light and dark, with the default amber accent (`radius` is 6px):
 - **Sidebar**, **app header** and **navigation menu** use the 32px control rhythm and a soft accent for the current
   item; **transfer list**, **chart**, **wizard** and **gantt** drop their nested boxes and heavy shadows.
 - **Command**, **selection popup**, **floating toolbar** and **quick actions** share the flat overlay surface.
+- **Marquee**, **animated list**, **spinning text**, **icon cloud**, **orbiter** and **dock** keep their motion but drop the
+  card chrome: a hairline frame, no shadow. **Layout**, **container** and **section** use the theme radius, and their
+  boxed variants use the theme shadows.
 
 ### Control sizes
 

@@ -137,5 +137,25 @@ describe('flat look across every component', () => {
       expect(block, name).not.toMatch(/\n    (border|shadow): (?!'none')/);
     }
   });
+
+  it('the decorative and layout components default to no shadow and a theme-radius frame', () => {
+    const prefixes: Record<string, string> = {
+      'ui-marquee.ts': 'marquee',
+      'ui-animated-list.ts': 'animated-list',
+      'ui-spinning-text.ts': 'spinning-text',
+      'ui-icon-cloud.ts': 'icon-cloud',
+      'ui-orbiter.ts': 'orbiter',
+      'ui-container.ts': 'container',
+      'ui-section.ts': 'section',
+      'ui-layout.ts': 'layout'
+    };
+    for (const [file, prefix] of Object.entries(prefixes)) {
+      const source = readFileSync(resolve(dir, file), 'utf8');
+      const first = source.match(new RegExp(`--ui-${prefix}-shadow:\\s*([^;]*);`))?.[1].trim();
+      expect(first, file).toBe('none');
+    }
+    const aspect = readFileSync(resolve(dir, 'ui-aspect-ratio.ts'), 'utf8');
+    expect(aspect).toMatch(/\.surface::before \{[^}]*background: none;/);
+  });
 });
 
