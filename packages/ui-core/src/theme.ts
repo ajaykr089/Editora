@@ -1,3 +1,5 @@
+import { deriveSemanticTokens } from './semantic-tokens';
+
 type ThemeScale = Record<string, string>;
 export type ThemeMode = 'light' | 'dark';
 
@@ -27,6 +29,7 @@ export interface ThemeTokens {
     success?: string;
     danger?: string;
     warning?: string;
+    info?: string;
   };
   palette?: {
     gray?: ThemeScale;
@@ -99,7 +102,7 @@ export interface ThemeTokens {
     input?: ThemeScale;
   };
   zIndex?: { modal?: number; overlay?: number; toast?: number };
-  breakpoints?: { sm?: string; md?: string; lg?: string };
+  breakpoints?: { sm?: string; md?: string; lg?: string; xl?: string };
 }
 
 const blackAlphaScale: ThemeScale = {
@@ -1167,7 +1170,8 @@ export const baselineLightTokens: ThemeTokens = {
     focusRing: '#e2a336',
     success: '#30a46c',
     danger: '#e5484d',
-    warning: '#ffc53d'
+    warning: '#ffc53d',
+    info: '#0e7490'
   },
   palette: {
     gray: {
@@ -1330,7 +1334,8 @@ export const baselineDarkTokens: ThemeTokens = {
     focusRing: '#ffc53d',
     success: '#30a46c',
     danger: '#e5484d',
-    warning: '#ffc53d'
+    warning: '#ffc53d',
+    info: '#4cc3d6'
   },
   palette: {
     ...baselineLightTokens.palette,
@@ -1564,19 +1569,17 @@ export function withAccentPalette(tokens: ThemeTokens | Partial<ThemeTokens>, pa
   );
 }
 
-function setOn(target: HTMLElement, name: string, value: string) {
-  try {
-    target.style.setProperty(name, value);
-  } catch {
-    // no-op
-  }
+type VariableMap = Record<string, string>;
+
+function setOn(vars: VariableMap, name: string, value: string) {
+  vars[name] = value;
 }
 
-function addScaleVariables(target: HTMLElement, prefix: string, scale?: ThemeScale | null) {
+function addScaleVariables(vars: VariableMap, prefix: string, scale?: ThemeScale | null) {
   if (!scale) return;
   Object.entries(scale).forEach(([key, value]) => {
     if (typeof value === 'string' && value) {
-      target.style.setProperty(`${prefix}${key}`, value);
+      vars[`${prefix}${key}`] = value;
     }
   });
 }
@@ -1586,7 +1589,16 @@ export function registerThemeHost(el: HTMLElement) {
   registeredHosts.add(el);
 }
 
-function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
+/**
+ * Every CSS custom property a theme defines, as a name -> value map: the single source for
+ * `applyTheme` (inline style), `themeToCss` (a stylesheet, e.g. for SSR) and the tests.
+ */
+export function themeToVariables(tokens: ThemeTokens): Record<string, string> {
+  return resolvedThemeVariables(createThemeTokens(tokens));
+}
+
+function resolvedThemeVariables(next: ThemeTokens): VariableMap {
+  const target: VariableMap = {};
   setOn(target, '--ui-color-primary', next.colors.primary);
   setOn(target, '--ui-color-primary-hover', next.colors.primaryHover || next.colors.primary);
   setOn(target, '--ui-color-foreground-on-primary', next.colors.foregroundOnPrimary || '#ffffff');
@@ -1697,34 +1709,98 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--base-menu-', next.components?.menu);
   addScaleVariables(target, '--base-panel-', next.components?.panel);
   addScaleVariables(target, '--base-input-', next.components?.input);
+
+  Object.assign(target, deriveSemanticTokens(next));
+  return target;
+}
+
+function applyThemeToTarget(target: HTMLElement, vars: VariableMap) {
+  Object.entries(vars).forEach(([name, value]) => {
+    try {
+      target.style.setProperty(name, value);
+    } catch {
+      // no-op
+    }
+  });
+}
+
+/** The theme as CSS text, e.g. `themeToCss(tokens, ':root')`, for a static or server-rendered stylesheet. */
+export function themeToCss(tokens: ThemeTokens, selector = ':root'): string {
+  const body = Object.entries(themeToVariables(tokens))
+    .map(([name, value]) => `  ${name}: ${value};`)
+    .join('\n');
+  return `${selector} {\n${body}\n}\n`;
+}
+
+type ThemeRoot = ShadowRoot | Document | HTMLElement | null;
+
+function resolveStyleRoot(root: ThemeRoot): HTMLElement {
+  if (root === document) return document.documentElement;
+  if (root instanceof ShadowRoot) return root.host as HTMLElement;
+  return root as HTMLElement;
 }
 
 export function applyTheme(
   tokens: ThemeTokens,
-  root: ShadowRoot | Document | HTMLElement | null = typeof document !== 'undefined' ? document : null
+  root: ThemeRoot = typeof document !== 'undefined' ? document : null
 ) {
   if (!root) return;
-  const next = createThemeTokens(tokens);
+  const vars = resolvedThemeVariables(createThemeTokens(tokens));
   const isGlobalRoot = root === document || root instanceof ShadowRoot;
+  const styleRoot = resolveStyleRoot(root);
 
-  let styleRoot: HTMLElement;
-  if (root === document) {
-    styleRoot = document.documentElement;
-  } else if (root instanceof ShadowRoot) {
-    styleRoot = root.host as HTMLElement;
-  } else {
-    styleRoot = root as HTMLElement;
-  }
-
-  applyThemeToTarget(styleRoot, next);
+  applyThemeToTarget(styleRoot, vars);
 
   if (isGlobalRoot) {
     for (const host of registeredHosts) {
       try {
-        applyThemeToTarget(host, next);
+        applyThemeToTarget(host, vars);
       } catch {
         // no-op
       }
     }
   }
+}
+
+export interface SystemThemeOptions {
+  /** Token overrides applied on top of the light baseline. */
+  light?: Partial<ThemeTokens>;
+  /** Token overrides applied on top of the dark baseline. */
+  dark?: Partial<ThemeTokens>;
+  accentPalette?: AccentPaletteName;
+  root?: ThemeRoot;
+}
+
+/**
+ * Apply the light or the dark theme to match the operating system, and keep following it
+ * while the user changes it. The resolved mode is mirrored as `data-ui-mode` and `color-scheme`
+ * on the target, so page CSS can follow it too. Returns a function that stops following.
+ */
+export function applySystemTheme(options: SystemThemeOptions = {}): () => void {
+  const root = options.root === undefined ? (typeof document !== 'undefined' ? document : null) : options.root;
+  if (!root) return () => {};
+
+  const media =
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-color-scheme: dark)')
+      : null;
+
+  const apply = (dark: boolean) => {
+    const mode: ThemeMode = dark ? 'dark' : 'light';
+    applyTheme(createThemeTokens(dark ? options.dark : options.light, { accentPalette: options.accentPalette, mode }), root);
+    const target = resolveStyleRoot(root);
+    target.setAttribute('data-ui-mode', mode);
+    target.style.setProperty('color-scheme', mode);
+  };
+
+  apply(!!media?.matches);
+  if (!media) return () => {};
+
+  const onChange = (event: MediaQueryListEvent) => apply(event.matches);
+  if (typeof media.addEventListener === 'function') {
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }
+  media.addListener(onChange);
+  return () => media.removeListener(onChange);
 }

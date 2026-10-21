@@ -541,6 +541,40 @@ argument:
 Apply the theme early, before the first render. To theme one part of the page, call
 `applyTheme(tokens, element)`.
 
+### Follow the system light/dark setting
+
+```js
+import { applySystemTheme } from '@editora/ui-core';
+
+const stop = applySystemTheme({ accentPalette: 'blue' }); // stop() ends following the system
+```
+
+It applies the light or dark theme to match the operating system and switches live when the person changes it. The
+mode is also written as `data-ui-mode="light|dark"` and `color-scheme` on the page, so your own CSS can follow it.
+`light` and `dark` take token overrides for each mode.
+
+### As a stylesheet (server rendering)
+
+`themeToCss(tokens, ':root')` returns the same variables as CSS text, to put in a `<style>` tag or a `.css` file so the
+first paint is themed without JavaScript. `themeToVariables(tokens)` returns them as a `{ name: value }` object.
+
+### Tokens to build on
+
+Every value below follows the accent palette, the gray scale and light/dark mode, so custom components that read them
+stay on theme.
+
+| Tokens | Meaning |
+| --- | --- |
+| `--ui-color-fill`, `-fill-hover`, `-fill-active` | resting, hover and pressed fill of a neutral control |
+| `--ui-color-line-subtle`, `-line`, `-line-strong` | borders and separators, from quiet to strong |
+| `--ui-color-text-secondary`, `-text-strong` | secondary and primary text |
+| `--ui-color-accent-subtle`, `-accent-fill`, `-accent-fill-hover`, `-accent-fill-active` | tinted accent backgrounds |
+| `--ui-color-accent-line`, `-accent-solid`, `-accent-solid-hover`, `-accent-text` | accent border, solid fill, solid hover and accent text |
+| `--ui-color-surface-elevated`, `--ui-color-info` | raised surface (menus, popovers) and the informational colour |
+| `--ui-ring-color`, `--ui-ring-width`, `--ui-ring-offset` | the focus ring |
+| `--ui-control-height-{1,2,3}`, `--ui-control-font-size-{1,2,3}`, `--ui-control-padding-inline-{1,2,3}`, `--ui-control-radius-{1,2,3}` | the control scale: 24, 32 and 40px |
+| `--ui-motion-enter-easing`, `--ui-motion-exit-easing` | easing for things that appear and disappear |
+
 ## Floating positioning
 
 The positioning engine behind the menus, popovers and tooltips is available on its own, from

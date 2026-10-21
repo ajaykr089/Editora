@@ -45,6 +45,9 @@ export type {
 
 export {
   applyTheme,
+  applySystemTheme,
+  themeToVariables,
+  themeToCss,
   defaultTokens,
   baselineLightTokens,
   baselineDarkTokens,
@@ -55,7 +58,8 @@ export {
   withAccentPalette,
   registerThemeHost,
 } from './theme';
-export type { ThemeTokens, ThemeMode, AccentPaletteName } from './theme';
+export type { ThemeTokens, ThemeMode, AccentPaletteName, SystemThemeOptions } from './theme';
+export { deriveSemanticTokens } from './semantic-tokens';
 
 export {
   DialogManager,
