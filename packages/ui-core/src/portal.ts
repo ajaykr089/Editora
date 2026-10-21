@@ -228,13 +228,19 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
 
     // add data-placement attribute for CSS hooks
     contentEl.setAttribute('data-placement', final.placement);
+    const [side, align] = String(final.placement).split('-');
+    contentEl.setAttribute('data-side', side || 'bottom');
+    contentEl.setAttribute('data-align', align || 'center');
   }
 
   reposition();
   cleanupObservers = autoUpdatePosition(anchor, contentEl, reposition);
 
-  return () => {
-    try { if (contentEl.parentElement) contentEl.parentElement.removeChild(contentEl); } catch (e) {}
+  // `remove: false` stops following the anchor but leaves the surface in place, so the caller can play an exit first.
+  return (options?: { remove?: boolean }) => {
+    if (options?.remove !== false) {
+      try { if (contentEl.parentElement) contentEl.parentElement.removeChild(contentEl); } catch (e) {}
+    }
     cleanupObservers();
   };
 }
