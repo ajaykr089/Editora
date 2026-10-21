@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import '../components/ui-alert';
 import '../components/ui-slider';
@@ -110,3 +112,30 @@ describe('flat look (step 5)', () => {
     expect(style).toContain('var(--ui-color-placeholder');
   });
 });
+
+describe('flat look across every component', () => {
+  const dir = resolve(__dirname, '../components');
+  const files = readdirSync(dir).filter((f) => /^ui-.*\.ts$/.test(f) && !f.endsWith('.d.ts'));
+
+  it('no component draws a blurred 3-4px focus or state glow (a 2px ring instead)', () => {
+    // color-picker: the thumb keeps a two-layer contrast ring; timeline: the dot halo is a decoration
+    const allowed = new Set(['ui-color-picker.ts', 'ui-timeline.ts']);
+    const offenders = files.filter((f) => !allowed.has(f) && /0 0 0 [34]px color-mix\(/.test(readFileSync(resolve(dir, f), 'utf8')));
+    expect(offenders).toEqual([]);
+  });
+
+  it('only the button animation attribute, the gantt and the navigation chevron still move on hover', () => {
+    const allowed = new Set(['ui-button.ts', 'ui-gantt.ts', 'ui-navigation-menu.ts']);
+    const offenders = files.filter((f) => !allowed.has(f) && /transform: translateY\(-[12]px\)/.test(readFileSync(resolve(dir, f), 'utf8')));
+    expect(offenders).toEqual([]);
+  });
+
+  it('the built-in themes do not pin the look of the components that own it', () => {
+    const theme = readFileSync(resolve(__dirname, '../theme.ts'), 'utf8');
+    for (const name of ['sidebar', 'navigationMenu', 'appHeader', 'alert', 'avatar', 'badge', 'card']) {
+      const block = theme.match(new RegExp(`\\n  ${name}: \\{[\\s\\S]*?\\n  \\}`))?.[0] || '';
+      expect(block, name).not.toMatch(/\n    (border|shadow): (?!'none')/);
+    }
+  });
+});
+

@@ -44,7 +44,9 @@ describe('theme.applyTheme', () => {
     expect(defaultTokens.components?.badge?.radius).toBeUndefined();
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-badge-radius').trim()).toBe('');
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-breadcrumb-radius').trim()).toBe(defaultTokens.components?.breadcrumb?.radius);
-    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-navigation-menu-radius').trim()).toBe(defaultTokens.components?.navigationMenu?.radius);
+    // The navigation menu look is the component's own default, not pinned by the theme.
+    expect(defaultTokens.components?.navigationMenu?.radius).toBeUndefined();
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-navigation-menu-radius').trim()).toBe('');
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-context-menu-radius').trim()).toBe(defaultTokens.components?.contextMenu?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-menubar-radius').trim()).toBe(defaultTokens.components?.menubar?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-multi-select-radius').trim()).toBe(defaultTokens.components?.multiSelect?.radius);

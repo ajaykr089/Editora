@@ -608,6 +608,12 @@ Light and dark, with the default amber accent (`radius` is 6px):
 - **Toggle** and **toggle group** are outlined buttons that turn a soft accent when pressed (no dot glyph unless you pass
   `icon-on` / `icon-off`). **Toolbar**, **hover card** and **drawer** take the same flat surface as popovers.
 - **Pin input** slots are 40px (one control tall), **empty state** and **file upload** use a primary button.
+- **Tables** (`ui-table`, `ui-data-table`) are a hairline frame with quiet dividers and a subtle header; **tree** rows are
+  32px with a soft accent for the selected one; **timeline**, **form**, **fieldset** and **stepper** have no box
+  (`variant="surface"`, `outline`, `soft`, `contrast` or `elevated` on `ui-form` and `ui-fieldset` draw it).
+- **Sidebar**, **app header** and **navigation menu** use the 32px control rhythm and a soft accent for the current
+  item; **transfer list**, **chart**, **wizard** and **gantt** drop their nested boxes and heavy shadows.
+- **Command**, **selection popup**, **floating toolbar** and **quick actions** share the flat overlay surface.
 
 ### Control sizes
 
