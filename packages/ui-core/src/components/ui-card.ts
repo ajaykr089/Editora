@@ -2,12 +2,12 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-card-radius: var(--base-card-radius, var(--ui-radius, 4px));
+    --ui-card-radius: var(--base-card-radius, calc(var(--ui-radius, 4px) + 2px));
     --ui-card-bg: var(--base-card-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-card-color: var(--ui-color-text, var(--ui-text, #202020));
-    --ui-card-border-color: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent);
+    --ui-card-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent));
     --ui-card-border: var(--base-card-border, 1px solid var(--ui-card-border-color));
-    --ui-card-shadow: var(--base-card-shadow, var(--shadow-2, none));
+    --ui-card-shadow: var(--base-card-shadow, none);
     --ui-card-padding: 16px;
     --ui-card-gap: var(--ui-default-gap, 8px);
     --ui-card-header-gap: 4px;

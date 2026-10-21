@@ -4,14 +4,16 @@ const style = `
   :host {
     --ui-field-gap: 8px;
     --ui-field-label-width: 192px;
-    --ui-field-radius: 12px;
-    --ui-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-field-radius: calc(var(--ui-radius, 4px) + 4px);
+    --ui-field-bg: transparent;
+    --ui-field-frame-padding: 0px;
+    --ui-field-density: 1;
     --ui-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-field-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-field-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-field-error-color: var(--ui-color-danger, var(--ui-error, #c81e1e));
     --ui-field-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
-    --ui-field-border: 1px solid var(--ui-field-border-color);
+    --ui-field-border: 0;
     --ui-field-shadow:
       none;
     --ui-field-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
@@ -40,7 +42,7 @@ const style = `
     border: var(--ui-field-border);
     border-radius: var(--ui-field-radius);
     box-shadow: var(--ui-field-shadow);
-    padding: 12px;
+    padding: calc(var(--ui-field-frame-padding) * var(--ui-field-density));
     box-sizing: border-box;
     transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
   }
@@ -158,6 +160,16 @@ const style = `
     --ui-field-shell-border-color: color-mix(in srgb, var(--ui-field-error-color) 56%, transparent);
   }
 
+  /* A plain field is flat: label, control and message with no box around them. These variants draw the box. */
+  :host([variant="surface"]),
+  :host([variant="outline"]),
+  :host([variant="soft"]),
+  :host([variant="contrast"]),
+  :host([variant="elevated"]) {
+    --ui-field-border: 1px solid var(--ui-field-border-color);
+    --ui-field-frame-padding: 12px;
+  }
+
   :host([variant="surface"]) {
     --ui-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-field-shadow:
@@ -195,10 +207,7 @@ const style = `
     --ui-field-bg: transparent;
     --ui-field-border: 0;
     --ui-field-shadow: none;
-  }
-
-  :host([variant="minimal"]) .frame {
-    padding: 0;
+    --ui-field-frame-padding: 0px;
   }
 
   :host([variant="elevated"]) {
@@ -225,8 +234,8 @@ const style = `
     --ui-field-gap: 6px;
   }
 
-  :host([density="compact"]) .frame {
-    padding: 9px;
+  :host([density="compact"]) {
+    --ui-field-density: 0.75;
   }
 
   :host([density="compact"]) .label {
@@ -242,8 +251,8 @@ const style = `
     --ui-field-gap: 10px;
   }
 
-  :host([density="comfortable"]) .frame {
-    padding: 15px;
+  :host([density="comfortable"]) {
+    --ui-field-density: 1.25;
   }
 
   :host([density="comfortable"]) .label {

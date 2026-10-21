@@ -61,6 +61,8 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
   // back to a hard-coded Tailwind-era colour (and stayed light in dark mode).
   put('--ui-color-surface-elevated', tokens.surfaces?.panelSolid || c.surfaceAlt || c.surface);
   put('--ui-color-info', c.info);
+  // Placeholder text: 62% of the text colour keeps it at 4.5:1 or better on the field background (light and dark).
+  put('--ui-color-placeholder', c.text ? `color-mix(in srgb, ${c.text} 62%, transparent)` : undefined);
 
   // Focus ring: one definition for every focusable surface.
   put('--ui-ring-color', c.focusRing || c.primary);

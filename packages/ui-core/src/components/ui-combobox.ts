@@ -47,7 +47,7 @@ const style = `
     --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-combobox-text: var(--ui-color-text, #0f172a);
     --ui-combobox-muted: var(--ui-color-muted, #526175);
-    --ui-combobox-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-combobox-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-combobox-border: 1px solid var(--ui-combobox-border-color);
     --ui-combobox-shadow: none;
     --ui-combobox-shadow-hover: none;
@@ -127,8 +127,8 @@ const style = `
   }
 
   .control:hover {
-    border-color: color-mix(in srgb, var(--ui-combobox-focus) 34%, var(--ui-combobox-border-color));
-    box-shadow: var(--ui-combobox-shadow-hover);
+    border-color: var(--ui-color-line-strong, var(--ui-combobox-border-color));
+    box-shadow: none;
   }
 
   input {
@@ -147,15 +147,14 @@ const style = `
   }
 
   input::placeholder {
-    color: var(--ui-combobox-muted);
+    color: var(--ui-color-placeholder, var(--ui-combobox-muted));
   }
 
   .control[data-focused="true"] {
-    border-color: color-mix(in srgb, var(--ui-combobox-focus) 72%, var(--ui-combobox-border-color));
-    box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--ui-combobox-focus) 16%, transparent),
-      var(--ui-combobox-shadow-focus);
-    transform: translateY(-1px);
+    border-color: var(--ui-ring-color, var(--ui-combobox-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-combobox-focus));
+    outline-offset: -1px;
+    box-shadow: none;
   }
 
   .icon-btn {

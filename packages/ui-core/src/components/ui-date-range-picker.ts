@@ -59,7 +59,7 @@ const style = `
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-surface-alt, #f8fafc))
     );
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
@@ -124,13 +124,17 @@ const style = `
   }
 
   .fields:focus-within {
-    border-color: color-mix(in srgb, var(--ui-dp-accent) 72%, transparent);
-    box-shadow: 0 0 0 3px var(--ui-dp-focus-ring), 0 4px 14px rgba(2, 6, 23, 0.09);
+    border-color: var(--ui-ring-color, var(--ui-dp-accent));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-dp-accent));
+    outline-offset: -1px;
+    box-shadow: none;
   }
 
   .fields[data-open="true"] {
-    border-color: color-mix(in srgb, var(--ui-dp-accent) 72%, transparent);
-    box-shadow: 0 0 0 3px var(--ui-dp-focus-ring), 0 10px 24px rgba(2, 6, 23, 0.12);
+    border-color: var(--ui-ring-color, var(--ui-dp-accent));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-dp-accent));
+    outline-offset: -1px;
+    box-shadow: none;
   }
 
   .fields[data-invalid="true"] {
@@ -175,7 +179,7 @@ const style = `
   }
 
   .input::placeholder {
-    color: color-mix(in srgb, var(--ui-dp-text) 44%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-dp-text) 62%, transparent));
   }
 
   .sep {
@@ -368,7 +372,7 @@ const overlayStyle = `
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-surface-alt, #f8fafc))
     );
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);

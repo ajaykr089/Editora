@@ -6,7 +6,7 @@ const style = `
     --ui-number-field-padding: var(--ui-padding, 0);
     --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
     --ui-number-field-font-size: var(--ui-control-font-size-2, 14px);
-    --ui-number-field-border-color: var(--ui-color-border, var(--ui-border-color, #cbd5e1));
+    --ui-number-field-border-color: var(--ui-color-line, var(--ui-color-border, var(--ui-border-color, #cbd5e1)));
     --ui-number-field-border-width: 1px;
     --ui-number-field-border-style: solid;
     --ui-number-field-border:
@@ -23,7 +23,7 @@ const style = `
     --ui-number-field-gap: 8px;
     --ui-number-field-shell-gap: 8px;
     --ui-number-field-meta-gap: 4px;
-    --ui-number-field-placeholder: color-mix(in srgb, var(--ui-number-field-color) 40%, transparent);
+    --ui-number-field-placeholder: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-number-field-color) 62%, transparent));
     color-scheme: light dark;
     display: block;
     inline-size: var(--ui-number-field-width);
@@ -112,8 +112,13 @@ const style = `
   }
 
   .shell:focus-within {
-    border-color: color-mix(in srgb, var(--ui-number-field-focus) 56%, var(--ui-number-field-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-number-field-focus) 24%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-number-field-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-number-field-focus));
+    outline-offset: -1px;
+  }
+
+  .shell:hover:not(:focus-within) {
+    border-color: var(--ui-color-line-strong, var(--ui-number-field-border-color));
   }
 
   .prefix,

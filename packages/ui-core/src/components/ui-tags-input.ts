@@ -4,7 +4,7 @@ import { syncControlName, syncControlDescription } from '../primitives/control-n
 const style = `
   :host {
     --ui-tags-input-padding: 10px 12px;
-    --ui-tags-input-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-tags-input-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-tags-input-border: 1px solid var(--ui-tags-input-border-color);
     --ui-tags-input-radius: var(--ui-control-radius-2, var(--ui-radius, 4px));
     --ui-tags-input-bg: var(--ui-color-surface, #ffffff);
@@ -107,8 +107,13 @@ const style = `
   }
 
   .shell[data-focused="true"] {
-    border-color: color-mix(in srgb, var(--ui-tags-input-focus) 58%, var(--ui-tags-input-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-tags-input-focus) 22%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-tags-input-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-tags-input-focus));
+    outline-offset: -1px;
+  }
+
+  .shell:hover:not([data-focused="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-tags-input-border-color));
   }
 
   .shell[data-invalid="true"] {
@@ -172,7 +177,7 @@ const style = `
   }
 
   .input::placeholder {
-    color: color-mix(in srgb, var(--ui-tags-input-text) 42%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-tags-input-text) 62%, transparent));
   }
 
   .assist {

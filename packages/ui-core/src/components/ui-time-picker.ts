@@ -40,7 +40,7 @@ const CHEVRON_ICON = `
 const style = `
   :host {
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
@@ -75,8 +75,10 @@ const style = `
   }
 
   .field:focus-within {
-    border-color: color-mix(in srgb, var(--ui-dp-accent) 70%, var(--ui-dp-border));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-accent) 22%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-dp-accent));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-dp-accent));
+    outline-offset: -1px;
+    box-shadow: none;
   }
 
   .input {
@@ -172,7 +174,7 @@ const style = `
 const overlayStyle = `
   .ui-time-picker-overlay-host {
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);

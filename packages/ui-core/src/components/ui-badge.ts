@@ -4,18 +4,19 @@ const style = `
   :host {
     display: inline-flex;
     --ui-badge-font-size: var(--base-badge-font-size, 12px);
-    --ui-badge-font-weight: var(--base-badge-font-weight, 600);
+    --ui-badge-font-weight: var(--base-badge-font-weight, 500);
     --ui-badge-line-height: 1.2;
-    --ui-badge-gap: var(--base-badge-gap, 6px);
-    --ui-badge-radius: var(--base-badge-radius, 999px);
-    --ui-badge-padding-block: var(--base-badge-padding-block, 5px);
-    --ui-badge-padding-inline: var(--base-badge-padding-inline, 10px);
+    --ui-badge-gap: var(--base-badge-gap, 4px);
+    --ui-badge-radius: var(--base-badge-radius, calc(var(--ui-radius, 4px) - 2px));
+    --ui-badge-padding-block: var(--base-badge-padding-block, 2px);
+    --ui-badge-padding-inline: var(--base-badge-padding-inline, 8px);
     --ui-badge-border-width: var(--base-badge-border-width, 1px);
     --ui-badge-accent: var(--ui-color-primary, #2563eb);
-    --ui-badge-bg-base: color-mix(in srgb, var(--ui-badge-accent) 10%, var(--ui-color-surface, #ffffff));
+    --ui-badge-on-accent: var(--ui-color-foreground-on-primary, #ffffff);
+    --ui-badge-bg-base: color-mix(in srgb, var(--ui-badge-accent) 14%, var(--ui-color-surface, #ffffff));
     --ui-badge-bg: var(--ui-badge-bg-base);
-    --ui-badge-color: color-mix(in srgb, var(--ui-badge-accent) 78%, var(--ui-color-text, #0f172a) 22%);
-    --ui-badge-border: color-mix(in srgb, var(--ui-badge-accent) 20%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
+    --ui-badge-color: color-mix(in srgb, var(--ui-badge-accent) 50%, var(--ui-color-text-strong, var(--ui-color-text, #0f172a)));
+    --ui-badge-border: transparent;
     --ui-badge-shadow: var(--base-badge-shadow, none);
     --ui-badge-dot-size: 7px;
     --ui-badge-dot-color: currentColor;
@@ -39,14 +40,19 @@ const style = `
 
   :host([tone="success"]) {
     --ui-badge-accent: var(--ui-color-success, #15803d);
+    --ui-badge-fill: color-mix(in srgb, var(--ui-badge-accent) 76%, #000000);
+    --ui-badge-on-accent: #ffffff;
   }
 
   :host([tone="warning"]) {
     --ui-badge-accent: var(--ui-color-warning, #b45309);
+    --ui-badge-on-accent: var(--ui-color-foreground-on-warning, #ffffff);
   }
 
   :host([tone="danger"]) {
     --ui-badge-accent: var(--ui-color-danger, #dc2626);
+    --ui-badge-fill: color-mix(in srgb, var(--ui-badge-accent) 80%, #000000);
+    --ui-badge-on-accent: #ffffff;
   }
 
   :host([tone="purple"]) {
@@ -95,11 +101,11 @@ const style = `
   }
 
   :host([variant="solid"]) {
-    --ui-badge-bg: var(--ui-badge-accent);
-    --ui-badge-color: #ffffff;
-    --ui-badge-border: color-mix(in srgb, var(--ui-badge-accent) 72%, #0f172a);
-    --ui-badge-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 10px 20px color-mix(in srgb, var(--ui-badge-accent) 28%, rgba(15, 23, 42, 0.22));
-    --ui-badge-dot-color: #ffffff;
+    --ui-badge-bg: var(--ui-badge-fill, var(--ui-badge-accent));
+    --ui-badge-color: var(--ui-badge-on-accent);
+    --ui-badge-border: transparent;
+    --ui-badge-shadow: none;
+    --ui-badge-dot-color: var(--ui-badge-on-accent);
   }
 
   :host([variant="outline"]) {

@@ -18,7 +18,7 @@ let multiSelectUid = 0;
 
 const style = `
   :host {
-    --ui-multi-select-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 82%, transparent);
+    --ui-multi-select-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
     --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-control-radius-2, var(--ui-radius, 4px)));
     --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
@@ -121,8 +121,13 @@ const style = `
 
   .shell[data-open="true"],
   .shell:focus-within {
-    border-color: color-mix(in srgb, var(--ui-multi-select-focus) 58%, var(--ui-multi-select-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-multi-select-focus) 22%, transparent);
+    border-color: var(--ui-ring-color, var(--ui-multi-select-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-multi-select-focus));
+    outline-offset: -1px;
+  }
+
+  .shell:hover:not(:focus-within):not([data-open="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-multi-select-border-color));
   }
 
   .shell[data-readonly="true"] {
@@ -176,7 +181,7 @@ const style = `
   }
 
   .input::placeholder {
-    color: color-mix(in srgb, var(--ui-multi-select-text) 42%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-multi-select-text) 62%, transparent));
   }
 
   .toggle {

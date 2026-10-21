@@ -498,14 +498,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'solid-active-filter': 'brightness(0.96) saturate(1.02)'
   },
   badge: {
-    radius: '999px',
-    shadow: 'none',
-    'font-size': '12px',
-    'font-weight': '600',
-    gap: '6px',
-    'padding-block': '5px',
-    'padding-inline': '10px',
-    'border-width': '1px'
+    shadow: 'none'
   },
   blockControls: {
     bg: 'var(--color-panel)',
@@ -550,7 +543,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   select: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
     'padding-x': '12px',
@@ -597,9 +589,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   card: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
-    radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'hover-shadow': 'var(--shadow-3)',
     'active-shadow': 'var(--shadow-2)',
     'classic-shadow': 'var(--shadow-2)',
@@ -608,7 +597,6 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   multiSelect: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
     'padding-x': '10px',
@@ -769,9 +757,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     padding: 'var(--ui-default-gap)'
   },
   input: {
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 84%, transparent)',
-    'focus-ring': '0 0 0 3px color-mix(in srgb, var(--accent-a5) 48%, transparent)'
+    bg: 'var(--color-panel-solid)'
   }
 };
 
@@ -785,14 +771,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'solid-active-filter': 'brightness(0.92) saturate(1.04)'
   },
   badge: {
-    radius: '999px',
-    shadow: 'none',
-    'font-size': '12px',
-    'font-weight': '600',
-    gap: '6px',
-    'padding-block': '5px',
-    'padding-inline': '10px',
-    'border-width': '1px'
+    shadow: 'none'
   },
   blockControls: {
     bg: 'var(--color-panel)',
@@ -837,7 +816,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   select: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
     'padding-x': '12px',
@@ -884,9 +862,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   card: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
-    radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'hover-shadow': 'var(--shadow-3)',
     'active-shadow': 'var(--shadow-2)',
     'classic-shadow': 'var(--shadow-2)',
@@ -895,7 +870,6 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   multiSelect: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
     shadow: 'none',
     'padding-x': '10px',
@@ -1056,9 +1030,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     padding: 'var(--ui-default-gap)'
   },
   input: {
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
-    'focus-ring': '0 0 0 3px color-mix(in srgb, var(--accent-a6) 42%, transparent)'
+    bg: 'var(--color-panel-solid)'
   }
 };
 
@@ -1683,6 +1655,8 @@ function resolvedThemeVariables(next: ThemeTokens): VariableMap {
   addScaleVariables(target, '--base-input-', next.components?.input);
 
   Object.assign(target, deriveSemanticTokens(next));
+  // Text on a solid warning fill: white when it reads, dark when the warning colour is light (amber).
+  setOn(target, '--ui-color-foreground-on-warning', readableForeground(next.colors.warning || next.colors.primary, '#ffffff'));
   return target;
 }
 

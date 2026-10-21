@@ -2,24 +2,24 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-switch-width: 44px;
-    --ui-switch-height: 24px;
+    --ui-switch-width: 36px;
+    --ui-switch-height: 20px;
     --ui-switch-padding: 2px;
     --ui-switch-radius: 999px;
     --ui-switch-gap: 12px;
-    --ui-switch-track-bg: var(--ui-color-surface-alt, #e2e8f0);
-    --ui-switch-track-hover: color-mix(in srgb, var(--ui-switch-track-bg) 84%, var(--ui-color-muted, #526175));
-    --ui-switch-track-border: var(--ui-color-border, #cbd5e1);
-    --ui-switch-thumb-bg: var(--ui-color-surface, #ffffff);
+    --ui-switch-track-bg: var(--ui-color-fill-active, #cbd5e1);
+    --ui-switch-track-hover: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-switch-track-bg) 84%, var(--ui-color-muted, #526175)));
+    --ui-switch-track-border: transparent;
+    --ui-switch-thumb-bg: #ffffff;
     --ui-switch-thumb-color: var(--ui-color-muted, #526175);
     --ui-switch-label: var(--ui-color-text, #0f172a);
     --ui-switch-description: var(--ui-color-muted, #526175);
     --ui-switch-accent: var(--ui-switch-checked-bg, var(--ui-color-primary, #2563eb));
-    --ui-switch-accent-hover: color-mix(in srgb, var(--ui-switch-accent) 86%, #0f172a);
+    --ui-switch-accent-hover: color-mix(in srgb, var(--ui-switch-accent) 88%, var(--ui-color-text-strong, #0f172a));
     --ui-switch-accent-contrast: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
     --ui-switch-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-switch-shadow: none;
-    --ui-switch-thumb-shadow: none;
+    --ui-switch-thumb-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.04);
     --ui-switch-elevation: none;
     --ui-switch-transition: 170ms cubic-bezier(0.22, 0.8, 0.2, 1);
     --ui-switch-thumb-shift: calc(var(--ui-switch-width) - var(--ui-switch-height));
@@ -109,8 +109,8 @@ const style = `
   }
 
   .icon-off {
-    opacity: 1;
-    transform: scale(1);
+    opacity: 0;
+    transform: scale(0.86);
   }
 
   .spinner {
@@ -138,9 +138,8 @@ const style = `
 
   .label {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.35;
-    letter-spacing: -0.005em;
   }
 
   .description {
@@ -157,12 +156,12 @@ const style = `
 
   :host([checked]) .control {
     background: var(--ui-switch-accent);
-    border-color: color-mix(in srgb, var(--ui-switch-accent) 76%, #0f172a);
+    border-color: transparent;
   }
 
   :host([checked]) .thumb {
     transform: translate(var(--ui-switch-thumb-shift), -50%);
-    color: var(--ui-switch-accent);
+    color: var(--ui-color-accent-text, var(--ui-switch-accent));
   }
 
   :host([checked]) .icon-on {
@@ -193,9 +192,8 @@ const style = `
 
   :host(:focus-visible) .control,
   .control:focus-visible {
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-switch-focus) 28%, transparent),
-      var(--ui-switch-elevation);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-switch-focus));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   :host([disabled]) .shell,
@@ -226,8 +224,8 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-switch-width: 36px;
-    --ui-switch-height: 20px;
+    --ui-switch-width: 28px;
+    --ui-switch-height: 16px;
     --ui-switch-padding: 2px;
     --ui-switch-gap: 10px;
   }
@@ -241,9 +239,9 @@ const style = `
   }
 
   :host([size="lg"]) {
-    --ui-switch-width: 52px;
-    --ui-switch-height: 28px;
-    --ui-switch-padding: 3px;
+    --ui-switch-width: 44px;
+    --ui-switch-height: 24px;
+    --ui-switch-padding: 2px;
     --ui-switch-gap: 12px;
   }
 

@@ -9,10 +9,10 @@ const CLEAR_ICON = `
 
 const style = `
   :host {
-    --ui-textarea-bg: var(--ui-color-surface, #ffffff);
+    --ui-textarea-bg: var(--base-input-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-textarea-text: var(--ui-color-text, #0f172a);
     --ui-textarea-muted: var(--ui-color-muted, #526175);
-    --ui-textarea-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-textarea-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-textarea-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-textarea-accent: var(--ui-color-primary, #2563eb);
     --ui-textarea-danger: var(--ui-color-danger, #dc2626);
@@ -75,10 +75,14 @@ const style = `
   }
 
   .field:focus-within {
-    border-color: color-mix(in srgb, var(--ui-textarea-focus) 72%, transparent);
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-textarea-focus) 22%, transparent),
-      var(--ui-textarea-shadow);
+    border-color: var(--ui-ring-color, var(--ui-textarea-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-textarea-focus));
+    outline-offset: -1px;
+    box-shadow: var(--ui-textarea-shadow);
+  }
+
+  .field:hover:not(:focus-within) {
+    border-color: var(--ui-color-line-strong, var(--ui-textarea-border));
   }
 
   textarea {
@@ -97,7 +101,7 @@ const style = `
   }
 
   textarea::placeholder {
-    color: color-mix(in srgb, var(--ui-textarea-muted) 76%, transparent);
+    color: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-textarea-muted) 90%, transparent));
   }
 
   textarea[readonly] {

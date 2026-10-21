@@ -13,7 +13,7 @@ const style = `
     --ui-input-padding: var(--ui-padding, 0);
     --ui-input-pad-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
     --ui-input-font-size: var(--ui-control-font-size-2, 14px);
-    --ui-input-border-color: var(--ui-color-border, var(--ui-border-color, #cbd5e1));
+    --ui-input-border-color: var(--ui-color-line, var(--ui-color-border, var(--ui-border-color, #cbd5e1)));
     --ui-input-border-width: 1px;
     --ui-input-border-style: solid;
     --ui-input-border: var(--base-input-border, var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color));
@@ -33,7 +33,7 @@ const style = `
     --ui-input-gap: var(--ui-default-gap, 8px);
     --ui-input-meta-gap: 4px;
     --ui-input-shell-gap: var(--ui-default-gap, 8px);
-    --ui-input-placeholder: color-mix(in srgb, var(--ui-input-color) 40%, transparent);
+    --ui-input-placeholder: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-input-color) 62%, transparent));
     color-scheme: light dark;
     display: block;
     inline-size: var(--ui-input-width);
@@ -111,8 +111,14 @@ const style = `
   }
 
   .shell:focus-within {
-    border-color: color-mix(in srgb, var(--ui-input-focus-ring) 56%, var(--ui-input-border-color));
-    box-shadow: var(--base-input-focus-ring, 0 0 0 3px color-mix(in srgb, var(--ui-input-focus-ring) 24%, transparent));
+    border-color: var(--ui-ring-color, var(--ui-input-focus-ring));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-input-focus-ring));
+    outline-offset: -1px;
+    box-shadow: var(--base-input-focus-ring, none);
+  }
+
+  .shell:hover:not(:focus-within) {
+    border-color: var(--ui-color-line-strong, var(--ui-input-border-color));
   }
 
   .prefix,

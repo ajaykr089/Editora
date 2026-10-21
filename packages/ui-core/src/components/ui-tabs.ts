@@ -231,6 +231,23 @@ const style = `
     flex: 1;
   }
 
+  :host(:not([variant])),
+  :host([variant="default"]),
+  :host([variant="underline"]),
+  :host([variant="line"]) {
+    --ui-tabs-shell-gap: 4px;
+    --ui-tabs-nav-padding: 0px;
+    --ui-tabs-nav-gap: 4px;
+    --ui-tabs-tab-radius: var(--ui-radius, 4px);
+    --ui-tabs-tab-min-h: 36px;
+    --ui-tabs-tab-pad-x: 12px;
+    --ui-tabs-tab-font-size: 14px;
+    --ui-tabs-panel-padding: 12px;
+    --ui-tabs-muted: var(--ui-color-text-secondary, var(--ui-color-muted, #526175));
+    --ui-tabs-active-text: var(--ui-color-text-strong, var(--ui-color-text, #0f172a));
+    --ui-tabs-line: var(--ui-color-accent-solid, var(--ui-tabs-accent));
+  }
+
   :host([size="sm"]) {
     --ui-tabs-nav-padding: 6px;
     --ui-tabs-nav-gap: 6px;
@@ -361,30 +378,83 @@ const style = `
     backdrop-filter: blur(10px);
   }
 
+  /* The default look is a line: a hairline under the tabs and a 2px accent line under the selected one. */
+  :host(:not([variant])) .nav,
+  :host([variant="default"]) .nav,
   :host([variant="underline"]) .nav,
   :host([variant="line"]) .nav {
+    border: 0;
     border-radius: 0;
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-    box-shadow: none;
-    padding-inline: 0;
+    padding: 0;
     background: transparent;
+    box-shadow: inset 0 -1px 0 var(--ui-color-line-subtle, var(--ui-tabs-border));
   }
 
+  :host(:not([variant])) .tab,
+  :host([variant="default"]) .tab,
   :host([variant="underline"]) .tab,
   :host([variant="line"]) .tab {
-    border-radius: 0;
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-    border-bottom: 2px solid transparent;
+    border: 0;
+    gap: 6px;
+    font-weight: 500;
   }
 
+  :host(:not([variant])) .tab::after,
+  :host([variant="default"]) .tab::after,
+  :host([variant="underline"]) .tab::after,
+  :host([variant="line"]) .tab::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 2px;
+    border-radius: 1px;
+    background: transparent;
+    transition: background-color var(--ui-tabs-transition);
+  }
+
+  :host(:not([variant])) .tab:hover,
+  :host([variant="default"]) .tab:hover,
+  :host([variant="underline"]) .tab:hover,
+  :host([variant="line"]) .tab:hover {
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-tabs-accent) 10%, transparent));
+    color: var(--ui-color-text-strong, var(--ui-tabs-active-text));
+  }
+
+  :host(:not([variant])) .tab[aria-selected="true"],
+  :host([variant="default"]) .tab[aria-selected="true"],
   :host([variant="underline"]) .tab[aria-selected="true"],
   :host([variant="line"]) .tab[aria-selected="true"] {
     background: transparent;
-    border-bottom-color: var(--ui-tabs-accent);
+    border: 0;
+    color: var(--ui-tabs-active-text);
+  }
+
+  :host(:not([variant])) .tab[aria-selected="true"]::after,
+  :host([variant="default"]) .tab[aria-selected="true"]::after,
+  :host([variant="underline"]) .tab[aria-selected="true"]::after,
+  :host([variant="line"]) .tab[aria-selected="true"]::after {
+    background: var(--ui-tabs-line);
+  }
+
+  :host(:not([variant])) .tab:focus-visible,
+  :host([variant="default"]) .tab:focus-visible,
+  :host([variant="underline"]) .tab:focus-visible,
+  :host([variant="line"]) .tab:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-tabs-focus));
+    outline-offset: -2px;
+    box-shadow: none;
+  }
+
+  :host(:not([variant])) .panel-wrap,
+  :host([variant="default"]) .panel-wrap,
+  :host([variant="underline"]) .panel-wrap,
+  :host([variant="line"]) .panel-wrap {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding-inline: 2px;
   }
 
   :host([variant="segmented"]) .nav {

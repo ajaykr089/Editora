@@ -11,18 +11,18 @@ type RadioChangeDetail = {
 
 const style = `
   :host {
-    --ui-radio-size: 18px;
+    --ui-radio-size: 16px;
     --ui-radio-hit-area: 24px;
-    --ui-radio-dot-size: 8px;
-    --ui-radio-border: 1.5px solid color-mix(in srgb, var(--ui-radio-accent, var(--ui-primary, var(--ui-color-primary, #2563eb))) 44%, var(--ui-color-border, #cbd5e1) 56%);
-    --ui-radio-background: var(--ui-bg, var(--ui-color-surface, #ffffff));
+    --ui-radio-dot-size: 6px;
+    --ui-radio-border: 1px solid var(--ui-color-line-strong, var(--ui-color-border, #cbd5e1));
+    --ui-radio-background: var(--ui-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-radio-accent: var(--ui-primary, var(--ui-color-primary, #2563eb));
-    --ui-radio-dot-color: var(--ui-radio-accent);
-    --ui-radio-focus: 0 0 0 4px color-mix(in srgb, var(--ui-radio-accent) 24%, transparent);
+    --ui-radio-dot-color: var(--ui-color-foreground-on-primary, #ffffff);
+    --ui-radio-focus: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
     --ui-radio-invalid: var(--ui-color-danger, #dc2626);
-    --ui-radio-invalid-focus: 0 0 0 4px color-mix(in srgb, var(--ui-radio-invalid) 24%, transparent);
+    --ui-radio-invalid-focus: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-radio-invalid);
     --ui-radio-disabled-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f1f5f9) 88%, #ffffff 12%);
-    --ui-radio-disabled-border: 1.5px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-radio-disabled-border: 1px solid var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-radio-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-radio-muted: var(--ui-color-muted, #526175);
     --ui-radio-duration: 170ms;
@@ -141,7 +141,7 @@ const style = `
 
   :host([checked]) .control {
     border-color: var(--ui-radio-accent);
-    background: color-mix(in srgb, var(--ui-radio-accent) 8%, var(--ui-radio-background));
+    background: var(--ui-radio-accent);
   }
 
   :host([checked]) .control::before {
@@ -157,9 +157,12 @@ const style = `
     box-shadow: var(--ui-radio-focus);
   }
 
-  :host(:not([disabled]):not([loading]):hover) .control {
-    transform: translateY(-0.5px);
-    border-color: color-mix(in srgb, var(--ui-radio-accent) 80%, #0f172a 20%);
+  :host(:not([disabled]):not([loading]):not([checked]):hover) .control {
+    border-color: var(--ui-color-text-secondary, #64748b);
+  }
+
+  :host(:not([disabled]):not([loading])[checked]:hover) .control {
+    background: color-mix(in srgb, var(--ui-radio-accent) 88%, var(--ui-color-text-strong, #0f172a));
   }
 
   :host(:not([disabled]):not([loading]):active) .control {

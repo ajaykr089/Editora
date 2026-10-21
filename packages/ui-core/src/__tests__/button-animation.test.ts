@@ -49,7 +49,7 @@ describe('UIButton animation CSS', () => {
     // generic hover rule should no longer include background-color
     expect(css).not.toMatch(/:host\(\[data-animation\]\)\s+\.btn:not\(\[disabled\]\):hover[\s\S]*background-color/);
     // variant-specific hover rule must exist (background is variant-scoped)
-    expect(css).toContain('.btn--primary:hover:not([disabled])');
+    expect(css).toContain('.btn--solid:hover:not([disabled])');
   });
 
   it('exposes CSS variables for sizing and uses them in the button CSS', async () => {

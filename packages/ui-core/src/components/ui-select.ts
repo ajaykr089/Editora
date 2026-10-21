@@ -14,11 +14,11 @@ const style = `
     --ui-select-font-size: var(--ui-control-font-size-2, 14px);
 
     --ui-select-bg: var(--base-select-bg, var(--ui-color-surface, #ffffff));
-    --ui-select-border: var(--base-select-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
+    --ui-select-border: var(--base-select-border, 1px solid var(--ui-color-line, var(--ui-color-border, #cbd5e1)));
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-border) 100%, transparent);
     --ui-select-text: var(--ui-color-text, #0f172a);
     --ui-select-muted: var(--ui-color-muted, #526175);
-    --ui-select-placeholder: color-mix(in srgb, var(--ui-select-text) 44%, transparent);
+    --ui-select-placeholder: var(--ui-color-placeholder, color-mix(in srgb, var(--ui-select-text) 62%, transparent));
     --ui-select-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-select-accent: var(--ui-color-primary, #2563eb);
     --ui-select-success: var(--ui-color-success, #15803d);
@@ -126,10 +126,14 @@ const style = `
 
   .control[data-open="true"],
   .control:focus-within {
-    border-color: color-mix(in srgb, var(--ui-select-focus) 62%, var(--ui-select-border-color));
-    box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--ui-select-focus) 18%, transparent),
-      var(--ui-select-elevation);
+    border-color: var(--ui-ring-color, var(--ui-select-focus));
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-select-focus));
+    outline-offset: -1px;
+    box-shadow: var(--ui-select-elevation);
+  }
+
+  .control:hover:not(:focus-within):not([data-open="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-select-border-color));
   }
 
   .leading,
