@@ -14,7 +14,7 @@ const style = `
 
     --ui-section-pad-y: 14px;
     --ui-section-pad-x: 0px;
-    --ui-section-radius: 14px;
+    --ui-section-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-section-bg: transparent;
     --ui-section-text: inherit;
     --ui-section-border: transparent;
@@ -99,9 +99,7 @@ const style = `
     --ui-section-bg: var(--ui-color-surface, #ffffff);
     --ui-section-text: var(--ui-color-text, #0f172a);
     --ui-section-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 58%, transparent);
-    --ui-section-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.08),
-      0 18px 40px rgba(2, 6, 23, 0.12);
+    --ui-section-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="gradient"]) {

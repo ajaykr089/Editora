@@ -105,40 +105,23 @@ const style = `
     --ui-orbiter-center-size: ${DEFAULT_CENTER_SIZE};
     --ui-orbiter-ring-gap: ${DEFAULT_RING_GAP};
     --ui-orbiter-padding: ${DEFAULT_PADDING};
-    --ui-orbiter-radius: 28px;
+    --ui-orbiter-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-orbiter-stage-size:
       calc((2 * var(--ui-orbiter-farthest-radius, ${DEFAULT_ORBIT_RADIUS})) + var(--ui-orbiter-item-size));
     --ui-orbiter-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-orbiter-bg:
-      radial-gradient(
-        circle at 50% 50%,
-        color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 92%, transparent) 0%,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 64%,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 84%, transparent) 100%
-      );
+    --ui-orbiter-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-orbiter-color: var(--ui-color-text, #0f172a);
-    --ui-orbiter-border-color:
-      color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 86%, transparent);
+    --ui-orbiter-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-orbiter-border: 1px solid var(--ui-orbiter-border-color);
-    --ui-orbiter-shadow:
-      0 1px 3px rgba(15, 23, 42, 0.06),
-      0 24px 44px rgba(15, 23, 42, 0.12);
+    --ui-orbiter-shadow: none;
     --ui-orbiter-backdrop: none;
     --ui-orbiter-path-color:
       color-mix(in srgb, var(--ui-orbiter-accent) 16%, var(--ui-orbiter-border-color));
     --ui-orbiter-path-opacity: 0.95;
-    --ui-orbiter-item-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ffffff 96%, transparent),
-        color-mix(in srgb, var(--ui-orbiter-accent) 8%, rgba(255, 255, 255, 0.9))
-      );
+    --ui-orbiter-item-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-orbiter-item-color: var(--ui-orbiter-color);
-    --ui-orbiter-item-border:
-      1px solid color-mix(in srgb, var(--ui-orbiter-accent) 12%, rgba(255, 255, 255, 0.82));
-    --ui-orbiter-item-shadow:
-      0 8px 14px rgba(15, 23, 42, 0.08),
-      0 1px 2px rgba(15, 23, 42, 0.05);
+    --ui-orbiter-item-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
+    --ui-orbiter-item-shadow: none;
     --ui-orbiter-item-backdrop: none;
     --ui-orbiter-center-bg:
       radial-gradient(

@@ -120,9 +120,7 @@ const style = `
   }
 
   :host([variant="surface"]) {
-    --ui-fieldset-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 12px 26px rgba(2, 6, 23, 0.08);
+    --ui-fieldset-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="outline"]) {

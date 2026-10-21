@@ -60,7 +60,7 @@ const style = `
     --ui-animated-text-gap-block: 0.18em;
     --ui-animated-text-padding-inline: 0px;
     --ui-animated-text-padding-block: 0px;
-    --ui-animated-text-radius: var(--base-animated-text-radius, 22px);
+    --ui-animated-text-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-animated-text-bg: transparent;
     --ui-animated-text-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-animated-text-border: 1px solid transparent;
@@ -71,7 +71,7 @@ const style = `
     --ui-animated-text-font-size: 1.375rem;
     --ui-animated-text-line-height: 1.08;
     --ui-animated-text-letter-spacing: -0.03em;
-    --ui-animated-text-font-weight: 700;
+    --ui-animated-text-font-weight: 600;
     --ui-animated-text-align: start;
     --ui-animated-text-max-inline-size: 100%;
     --ui-animated-text-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
@@ -102,7 +102,7 @@ const style = `
     --ui-animated-text-font-size: 1.375rem;
     --ui-animated-text-line-height: 1.08;
     --ui-animated-text-letter-spacing: -0.03em;
-    --ui-animated-text-font-weight: 700;
+    --ui-animated-text-font-weight: 600;
     --ui-animated-text-safe-inline-end: 0.08em;
     --ui-animated-text-safe-block-end: 0.12em;
   }

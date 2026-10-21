@@ -148,34 +148,20 @@ const style = `
   :host {
     --ui-dock-gap: ${DEFAULT_GAP};
     --ui-dock-padding: ${DEFAULT_PADDING};
-    --ui-dock-radius: 24px;
+    --ui-dock-radius: calc(var(--ui-radius, 6px) + 6px);
     --ui-dock-item-size: ${DEFAULT_ITEM_SIZE};
     --ui-dock-icon-size: 24px;
-    --ui-dock-item-radius: 18px;
+    --ui-dock-item-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-dock-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-dock-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 90%, #ffffff 10%),
-        color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 96%, transparent)
-      );
+    --ui-dock-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-dock-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-dock-border-color: color-mix(in srgb, #ffffff 24%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
+    --ui-dock-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-dock-border: 1px solid var(--ui-dock-border-color);
-    --ui-dock-shadow:
-      0 1px 3px rgba(15, 23, 42, 0.08),
-      0 24px 44px rgba(15, 23, 42, 0.14);
+    --ui-dock-shadow: var(--shadow-3, none);
     --ui-dock-backdrop: blur(16px) saturate(1.08);
-    --ui-dock-item-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ffffff 86%, transparent),
-        color-mix(in srgb, var(--ui-dock-accent) 10%, rgba(255, 255, 255, 0.72))
-      );
+    --ui-dock-item-bg: transparent;
     --ui-dock-item-border: color-mix(in srgb, var(--ui-dock-accent) 16%, rgba(255, 255, 255, 0.72));
-    --ui-dock-item-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.08),
-      0 10px 18px rgba(15, 23, 42, 0.12);
+    --ui-dock-item-shadow: none;
     --ui-dock-item-backdrop: blur(10px) saturate(1.02);
     --ui-dock-label-bg: rgba(15, 23, 42, 0.92);
     --ui-dock-label-color: #f8fafc;

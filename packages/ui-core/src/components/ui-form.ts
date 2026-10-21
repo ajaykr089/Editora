@@ -192,9 +192,7 @@ const style = `
   :host([variant="surface"]) {
     --ui-form-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-form-padding: 16px;
-    --ui-form-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 14px 28px rgba(2, 6, 23, 0.08);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="outline"]) {
@@ -207,9 +205,7 @@ const style = `
     --ui-form-bg: color-mix(in srgb, var(--ui-form-accent) 6%, var(--ui-color-surface, #ffffff));
     --ui-form-border-color: color-mix(in srgb, var(--ui-form-accent) 26%, var(--ui-color-border, #cbd5e1));
     --ui-form-padding: 16px;
-    --ui-form-shadow:
-      0 1px 4px rgba(2, 6, 23, 0.04),
-      0 12px 24px rgba(2, 6, 23, 0.06);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="contrast"]) {
@@ -219,9 +215,7 @@ const style = `
     --ui-form-border-color: #334155;
     --ui-form-padding: 16px;
     --ui-form-focus-ring: #93c5fd;
-    --ui-form-shadow:
-      0 2px 8px rgba(2, 6, 23, 0.24),
-      0 26px 52px rgba(2, 6, 23, 0.38);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="minimal"]) {
@@ -233,9 +227,7 @@ const style = `
 
   :host([variant="elevated"]) {
     --ui-form-bg: var(--ui-color-surface, #ffffff);
-    --ui-form-shadow:
-      0 2px 10px rgba(2, 6, 23, 0.1),
-      0 28px 56px rgba(2, 6, 23, 0.16);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([tone="success"]) {
@@ -273,15 +265,11 @@ const style = `
   }
 
   :host([elevation="low"]) {
-    --ui-form-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 10px 20px rgba(2, 6, 23, 0.08);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([elevation="high"]) {
-    --ui-form-shadow:
-      0 3px 14px rgba(2, 6, 23, 0.12),
-      0 32px 64px rgba(2, 6, 23, 0.2);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([loading]) .form {

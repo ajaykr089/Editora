@@ -54,39 +54,23 @@ const style = `
     --ui-animated-list-motion-rotate-scale: 1;
     --ui-animated-list-motion-overshoot-y: -2px;
     --ui-animated-list-motion-overshoot-scale: 1.02;
-    --ui-animated-list-radius: var(--base-animated-list-radius, 20px);
-    --ui-animated-list-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
-        color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
-      );
+    --ui-animated-list-radius: calc(var(--ui-radius, 6px) + 4px);
+    --ui-animated-list-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-animated-list-color: var(--ui-color-text, #0f172a);
-    --ui-animated-list-border-color:
-      color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 80%, transparent);
+    --ui-animated-list-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-animated-list-border: 1px solid var(--ui-animated-list-border-color);
-    --ui-animated-list-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 16px 30px rgba(15, 23, 42, 0.08);
+    --ui-animated-list-shadow: none;
     --ui-animated-list-backdrop: none;
     --ui-animated-list-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-animated-list-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
 
-    --ui-animated-list-item-radius: 16px;
+    --ui-animated-list-item-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-animated-list-item-padding: 14px 16px;
     --ui-animated-list-item-min-block-size: 56px;
     --ui-animated-list-item-gap: 6px;
-    --ui-animated-list-item-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, transparent),
-        color-mix(in srgb, var(--ui-animated-list-accent) 4%, var(--ui-color-surface, #ffffff))
-      );
-    --ui-animated-list-item-border:
-      1px solid color-mix(in srgb, var(--ui-animated-list-accent) 10%, var(--ui-animated-list-border-color));
-    --ui-animated-list-item-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.04),
-      0 10px 18px rgba(15, 23, 42, 0.06);
+    --ui-animated-list-item-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-animated-list-item-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
+    --ui-animated-list-item-shadow: none;
     --ui-animated-list-item-color: inherit;
     --ui-animated-list-item-muted: var(--ui-color-muted, #526175);
     --ui-animated-list-item-backdrop: none;
