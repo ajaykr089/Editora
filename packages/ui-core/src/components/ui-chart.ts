@@ -68,9 +68,9 @@ const MAX_POINTS = 180;
 
 const style = `
   :host {
-    --ui-chart-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent);
+    --ui-chart-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-chart-surface: color-mix(in srgb, var(--ui-color-surface, #ffffff) 97%, #ffffff 3%);
-    --ui-chart-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-chart-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-chart-text: var(--ui-color-text, #0f172a);
     --ui-chart-muted: var(--ui-color-muted, #526175);
     --ui-chart-grid: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 45%, transparent);
@@ -78,7 +78,7 @@ const style = `
     --ui-chart-success: var(--ui-color-success, #15803d);
     --ui-chart-warning: var(--ui-color-warning, #b45309);
     --ui-chart-danger: var(--ui-color-danger, #dc2626);
-    --ui-chart-radius: 16px;
+    --ui-chart-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-chart-shadow: none;
     --ui-chart-plot-height: 220px;
     --ui-chart-plot-min-height: 188px;
@@ -95,7 +95,7 @@ const style = `
     position: relative;
     border: 1px solid var(--ui-chart-border);
     border-radius: var(--ui-chart-radius);
-    background: linear-gradient(160deg, var(--ui-chart-surface), var(--ui-chart-bg));
+    background: var(--ui-chart-bg);
     color: var(--ui-chart-text);
     box-shadow: var(--ui-chart-shadow);
     padding: 16px;
@@ -144,8 +144,8 @@ const style = `
     display: grid;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 82%, transparent);
-    border-radius: 12px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     background: color-mix(in srgb, var(--ui-chart-surface) 96%, transparent);
   }
 
@@ -166,7 +166,7 @@ const style = `
   .title {
     font-size: 15px;
     line-height: 1.35;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.01em;
     margin: 0;
   }
@@ -187,7 +187,7 @@ const style = `
     margin: 0;
     font-size: 15px;
     line-height: 1.35;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.01em;
     color: var(--ui-chart-text);
   }
@@ -207,7 +207,7 @@ const style = `
     min-block-size: 24px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 88%, transparent);
+    border: 1px solid transparent;
     background: color-mix(in srgb, var(--ui-chart-surface) 92%, transparent);
     font-size: 11px;
     line-height: 1;
@@ -241,8 +241,8 @@ const style = `
   }
 
   .metric {
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 82%, transparent);
-    border-radius: 10px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     padding: 8px 10px;
     background: color-mix(in srgb, var(--ui-chart-surface) 95%, transparent);
     min-inline-size: 0;
@@ -261,26 +261,26 @@ const style = `
   .metric-value {
     font-size: 14px;
     line-height: 1.2;
-    font-weight: 700;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .metric-value[data-tone="up"] {
-    color: var(--ui-chart-success);
+    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-color-text-strong, #0f172a));
   }
 
   .metric-value[data-tone="down"] {
-    color: var(--ui-chart-danger);
+    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-color-text-strong, #0f172a));
   }
 
   .plot-shell {
     position: relative;
     inline-size: 100%;
     min-inline-size: 0;
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 80%, transparent);
-    border-radius: 12px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     background: color-mix(in srgb, var(--ui-chart-surface) 97%, transparent);
     min-block-size: var(--ui-chart-plot-min-height);
     block-size: var(--ui-chart-plot-height);
@@ -425,8 +425,8 @@ const style = `
     min-inline-size: 132px;
     max-inline-size: min(220px, calc(100% - 16px));
     padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 86%, transparent);
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    border: 1px solid transparent;
     background: color-mix(in srgb, var(--ui-chart-surface) 98%, transparent);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
     color: var(--ui-chart-text);
@@ -439,7 +439,7 @@ const style = `
   .tooltip-title {
     font-size: 12px;
     line-height: 1.2;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .tooltip-list {
@@ -472,7 +472,7 @@ const style = `
   }
 
   .tooltip-value {
-    font-weight: 700;
+    font-weight: 600;
     color: var(--ui-chart-text);
     white-space: nowrap;
   }
@@ -482,8 +482,8 @@ const style = `
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 78%, transparent);
-    border-radius: 10px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     padding: 8px 10px;
     font-size: 12px;
     line-height: 1.35;
@@ -493,7 +493,7 @@ const style = `
 
   .insight strong {
     color: var(--ui-chart-text);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .legend {
@@ -503,9 +503,9 @@ const style = `
   }
 
   .legend-item {
-    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 78%, transparent);
+    border: 1px solid transparent;
     background: color-mix(in srgb, var(--ui-chart-surface) 94%, transparent);
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     min-block-size: 30px;
     display: inline-flex;
     align-items: center;
@@ -548,7 +548,7 @@ const style = `
   .empty,
   .message {
     border: 1px dashed color-mix(in srgb, var(--ui-chart-border) 78%, transparent);
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     padding: 14px;
     text-align: center;
     font-size: 12px;
@@ -557,13 +557,13 @@ const style = `
   }
 
   .message[data-tone="error"] {
-    color: var(--ui-chart-danger);
+    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-color-text-strong, #0f172a));
     border-color: color-mix(in srgb, var(--ui-chart-danger) 30%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-danger) 10%, transparent);
   }
 
   .message[data-tone="success"] {
-    color: var(--ui-chart-success);
+    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-color-text-strong, #0f172a));
     border-color: color-mix(in srgb, var(--ui-chart-success) 30%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-success) 10%, transparent);
   }

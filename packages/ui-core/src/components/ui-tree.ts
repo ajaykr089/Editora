@@ -6,9 +6,9 @@ import { UITreeItem } from './ui-tree-item';
 const style = `
   :host {
     --ui-tree-indent: 16px;
-    --ui-tree-radius: 14px;
-    --ui-tree-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
-    --ui-tree-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-tree-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-tree-bg: transparent;
+    --ui-tree-border: transparent;
     --ui-tree-text: var(--ui-color-text, #0f172a);
     --ui-tree-muted: var(--ui-color-muted, #526175);
     display: block;
@@ -20,8 +20,9 @@ const style = `
   .tree {
     min-inline-size: 0;
     display: grid;
-    gap: 4px;
-    padding: 10px;
+    gap: 2px;
+    padding: 0;
+    font-size: var(--ui-control-font-size-2, 14px);
     border: 1px solid var(--ui-tree-border);
     border-radius: var(--ui-tree-radius);
     background: var(--ui-tree-bg);

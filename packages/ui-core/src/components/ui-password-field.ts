@@ -270,7 +270,6 @@ const style = `
   }
 
   .toggle-btn:hover {
-    transform: translateY(-1px);
   }
 
   .clear-btn:focus-visible,

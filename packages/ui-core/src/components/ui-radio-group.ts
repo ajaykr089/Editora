@@ -28,7 +28,7 @@ const style = `
     --ui-radio-gap: 8px;
     --ui-radio-pad-y: 10px;
     --ui-radio-pad-x: 12px;
-    --ui-radio-radius: 12px;
+    --ui-radio-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-radio-dot-size: 10px;
     --ui-radio-control-size: 18px;
 

@@ -33,14 +33,13 @@ const style = `
     display: none;
     color-scheme: light dark;
 
-    --ui-floating-toolbar-bg: var(--ui-color-surface, #ffffff);
+    --ui-floating-toolbar-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-floating-toolbar-color: var(--ui-color-text, #0f172a);
     --ui-floating-toolbar-muted: var(--ui-color-muted, #526175);
     --ui-floating-toolbar-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-floating-toolbar-border: 1px solid var(--ui-floating-toolbar-border-color);
-    --ui-floating-toolbar-radius: 12px;
-    --ui-floating-toolbar-shadow:
-      none;
+    --ui-floating-toolbar-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-floating-toolbar-shadow: var(--shadow-5, 0 8px 24px rgba(15, 23, 42, 0.12));
     --ui-floating-toolbar-padding: 6px;
     --ui-floating-toolbar-gap: 6px;
     --ui-floating-toolbar-focus-ring: var(--ui-color-focus-ring, #2563eb);

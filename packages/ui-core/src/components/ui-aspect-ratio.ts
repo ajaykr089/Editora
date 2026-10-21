@@ -231,8 +231,7 @@ const style = `
   }
 
   :host([interactive]):hover .frame {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(15, 23, 42, 0.08), 0 22px 42px rgba(15, 23, 42, 0.14);
+    box-shadow: var(--shadow-3, 0 4px 12px rgba(15, 23, 42, 0.12));
     border-color: color-mix(in srgb, var(--ui-aspect-accent) 34%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
   }
 

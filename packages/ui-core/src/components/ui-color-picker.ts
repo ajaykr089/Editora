@@ -111,15 +111,15 @@ const CHEVRON_ICON = `
 
 const style = `
   :host {
-    --ui-cp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-cp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-cp-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-cp-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-cp-text: var(--ui-color-text, #0f172a);
     --ui-cp-muted: var(--ui-color-muted, #526175);
     --ui-cp-accent: var(--ui-color-primary, #2563eb);
     --ui-cp-success: var(--ui-color-success, #15803d);
     --ui-cp-warning: var(--ui-color-warning, #b45309);
     --ui-cp-danger: var(--ui-color-danger, #dc2626);
-    --ui-cp-radius: 14px;
+    --ui-cp-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-cp-shadow: none;
     --ui-cp-padding: 10px;
     --ui-cp-duration: 160ms;
@@ -414,7 +414,7 @@ const style = `
     position: relative;
     inline-size: 100%;
     block-size: clamp(128px, 16vw, 156px);
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 82%, transparent);
     overflow: visible;
     cursor: crosshair;
@@ -519,7 +519,7 @@ const style = `
     display: inline-grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 84%, transparent);
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     overflow: hidden;
   }
 
@@ -631,7 +631,6 @@ const style = `
   }
 
   .swatch:hover {
-    transform: translateY(-1px);
     border-color: color-mix(in srgb, var(--ui-cp-accent) 40%, var(--ui-cp-border));
     box-shadow: 0 2px 8px rgba(2, 6, 23, 0.18);
   }

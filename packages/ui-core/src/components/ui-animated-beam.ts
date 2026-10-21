@@ -700,7 +700,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-animated-beam-focus-ring) 26%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-animated-beam-focus-ring) 18%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-animated-beam-focus-ring)),
       var(--ui-animated-beam-node-shadow);
   }
 

@@ -12,8 +12,8 @@ const style = `
   :host {
     --ui-date-field-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-date-field-border: 1px solid var(--ui-date-field-border-color);
-    --ui-date-field-radius: var(--ui-radius, 12px);
-    --ui-date-field-bg: var(--ui-color-surface, #ffffff);
+    --ui-date-field-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-date-field-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-date-field-text: var(--ui-color-text, #0f172a);
     --ui-date-field-muted: var(--ui-color-muted, #526175);
     --ui-date-field-focus: var(--ui-color-focus-ring, #2563eb);
@@ -73,7 +73,7 @@ const style = `
     align-items: center;
     flex-wrap: wrap;
     gap: 4px;
-    min-block-size: 44px;
+    min-block-size: var(--ui-control-height-2, 32px);
     padding: 0 10px;
     border: var(--ui-date-field-border);
     border-radius: var(--ui-date-field-radius);
@@ -84,12 +84,12 @@ const style = `
 
   .shell[data-focused="true"] {
     border-color: color-mix(in srgb, var(--ui-date-field-focus) 58%, var(--ui-date-field-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-date-field-focus) 22%, transparent);
+    box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-date-field-focus));
   }
 
   .shell[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-date-field-danger) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-date-field-danger) 18%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-date-field-danger) 45%, transparent);
   }
 
   .segment {

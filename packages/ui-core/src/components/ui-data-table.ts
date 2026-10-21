@@ -6,22 +6,22 @@ const style = `
     /* A wide table scrolls inside its own frame. Without this a grid or flex parent grows to the table's width. */
     min-inline-size: 0;
     max-inline-size: 100%;
-    --ui-data-table-radius: 16px;
-    --ui-data-table-border-color: var(--ui-color-border, rgba(15, 23, 42, 0.14));
+    --ui-data-table-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-data-table-border-color: var(--ui-color-line-subtle, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
     --ui-data-table-border: 1px solid var(--ui-data-table-border-color);
-    --ui-data-table-bg: var(--ui-color-surface, rgba(255, 255, 255, 0.96));
+    --ui-data-table-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-data-table-shadow: none;
     --ui-data-table-empty-color: var(--ui-color-muted, #526175);
     --ui-data-table-summary-color: var(--ui-color-muted, #475569);
     --ui-data-table-text: var(--ui-color-text, #0f172a);
     --ui-data-table-header-text: var(--ui-color-text, #1e293b);
-    --ui-data-table-header-bg: var(--ui-color-surface-alt, #f8fafc);
+    --ui-data-table-header-bg: var(--ui-color-surface-subtle, var(--ui-color-surface-alt, #f8fafc));
     --ui-data-table-footer-text: var(--ui-color-text, #0f172a);
-    --ui-data-table-footer-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, var(--ui-color-surface, #ffffff));
+    --ui-data-table-footer-bg: var(--ui-color-surface-subtle, color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, var(--ui-color-surface, #ffffff)));
     --ui-data-table-cell-border: color-mix(in srgb, var(--ui-data-table-border-color) 58%, transparent);
-    --ui-data-table-striped-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 82%, transparent);
-    --ui-data-table-hover-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
-    --ui-data-table-selected-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 20%, transparent);
+    --ui-data-table-striped-bg: var(--ui-color-surface-subtle, color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 82%, transparent));
+    --ui-data-table-hover-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent));
+    --ui-data-table-selected-bg: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 20%, transparent));
     --ui-data-table-sort-indicator: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 80%, transparent);
     --ui-data-table-sort-active: var(--ui-color-primary, #2563eb);
     --ui-data-table-resize-handle: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 70%, transparent);
@@ -41,9 +41,7 @@ const style = `
     overflow: auto;
     border: var(--ui-data-table-border);
     border-radius: var(--ui-data-table-radius);
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-data-table-bg) 96%, #ffffff 4%), var(--ui-data-table-bg)),
-      var(--ui-data-table-bg);
+    background: var(--ui-data-table-bg);
     box-shadow: var(--ui-data-table-shadow);
     transition: border-color var(--ui-data-table-duration) var(--ui-data-table-ease), box-shadow var(--ui-data-table-duration) var(--ui-data-table-ease);
   }

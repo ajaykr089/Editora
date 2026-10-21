@@ -689,7 +689,7 @@ const style = `
     border-color: var(--ui-sortable-accent);
     background: color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-card));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 20%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--ui-sortable-accent) 45%, transparent),
       var(--ui-sortable-card-shadow);
   }
 
@@ -776,7 +776,7 @@ const style = `
   .item.item-ghost[data-refused] {
     border-color: var(--ui-sortable-danger, #dc2626);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-sortable-danger, #dc2626) 22%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--ui-sortable-danger, #dc2626) 45%, transparent),
       var(--ui-sortable-lift-shadow);
   }
 
@@ -1009,7 +1009,7 @@ const style = `
     margin-block-start: -1px;
     border-radius: 999px;
     background: var(--ui-sortable-accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 20%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-sortable-accent) 45%, transparent);
     opacity: 0;
     transform: scaleX(0.35);
     transform-origin: center;
@@ -1043,7 +1043,7 @@ const style = `
 
   .root[data-drop-indicator-visibility="always"] .dropzone[data-active="true"]::before {
     background: var(--ui-sortable-accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 20%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-sortable-accent) 45%, transparent);
   }
 
   /* A card shows "drop inside" by highlighting itself, so its inside rail draws nothing. */

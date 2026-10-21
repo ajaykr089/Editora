@@ -6,17 +6,16 @@ const style = `
   :host {
     --ui-selection-popup-z: 1280;
     --ui-selection-popup-offset: 10px;
-    --ui-selection-popup-radius: 12px;
+    --ui-selection-popup-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-selection-popup-padding: 8px;
-    --ui-selection-popup-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-selection-popup-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-selection-popup-color: var(--ui-color-text, #0f172a);
     --ui-selection-popup-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-selection-popup-border: 1px solid var(--ui-selection-popup-border-color);
     --ui-selection-popup-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-selection-popup-accent: var(--ui-color-primary, #2563eb);
     --ui-selection-popup-enter-y: 6px;
-    --ui-selection-popup-shadow:
-      none;
+    --ui-selection-popup-shadow: var(--shadow-5, 0 8px 24px rgba(15, 23, 42, 0.12));
     color-scheme: light dark;
     position: fixed;
     inset: 0;

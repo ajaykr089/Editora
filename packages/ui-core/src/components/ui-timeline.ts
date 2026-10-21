@@ -11,7 +11,7 @@ type TimelineItem = {
 const style = `
   :host {
     --ui-timeline-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
-    --ui-timeline-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-timeline-border: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-timeline-text: var(--ui-color-text, #0f172a);
     --ui-timeline-muted: var(--ui-color-muted, #526175);
     --ui-timeline-accent: var(--ui-color-primary, #2563eb);
@@ -24,11 +24,11 @@ const style = `
   }
 
   .frame {
-    border: 1px solid var(--ui-timeline-border);
-    border-radius: 14px;
-    background: var(--ui-timeline-bg);
-    padding: 14px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
   }
 
   .list {
@@ -72,7 +72,7 @@ const style = `
     margin-top: 3px;
     border-radius: 999px;
     background: var(--dot, var(--ui-timeline-accent));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot, var(--ui-timeline-accent)) 20%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot, var(--ui-timeline-accent)) 18%, var(--ui-color-background, #ffffff));
   }
 
   .item[data-active="true"] .dot::after {

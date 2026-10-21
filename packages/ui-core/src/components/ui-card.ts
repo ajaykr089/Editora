@@ -161,7 +161,6 @@ const style = `
   }
 
   :host([interactive]:not([disabled])):hover .card {
-    transform: translateY(-1px);
     box-shadow:
       0 2px 8px rgba(15, 23, 42, 0.08),
       0 28px 56px rgba(15, 23, 42, 0.14);
@@ -175,7 +174,7 @@ const style = `
   :host([interactive]:not([disabled])):focus-visible .card {
     border-color: color-mix(in srgb, var(--ui-card-accent) 24%, var(--ui-card-border-color));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-card-accent) 20%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--ui-card-accent) 45%, transparent),
       var(--ui-card-shadow);
   }
 

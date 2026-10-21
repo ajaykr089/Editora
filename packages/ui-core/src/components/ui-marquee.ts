@@ -402,7 +402,7 @@ const style = `
   :host([pause-on-focus]:focus-within) .viewport {
     border-color: color-mix(in srgb, var(--ui-marquee-accent) 24%, var(--ui-marquee-border-color));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-marquee-focus-ring) 22%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-marquee-focus-ring)),
       var(--ui-marquee-shadow);
   }
 

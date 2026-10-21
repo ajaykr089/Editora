@@ -17,15 +17,15 @@ const CONTENT_ATTRS = new Set(['heading', 'title', 'description', 'state-text', 
 const style = `
   :host {
     --ui-form-gap: 12px;
-    --ui-form-radius: 14px;
-    --ui-form-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-form-radius: calc(var(--ui-radius, 6px) + 4px);
+    --ui-form-bg: transparent;
     --ui-form-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-form-muted: var(--ui-color-muted, var(--ui-muted, #526175));
-    --ui-form-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 66%, transparent);
-    --ui-form-border: 1px solid var(--ui-form-border-color);
+    --ui-form-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 66%, transparent));
+    --ui-form-border: 0;
     --ui-form-shadow:
       none;
-    --ui-form-padding: 16px;
+    --ui-form-padding: 0px;
     --ui-form-header-gap: 12px;
     --ui-form-header-border: color-mix(in srgb, var(--ui-form-border-color) 84%, transparent);
     --ui-form-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
@@ -178,6 +178,15 @@ const style = `
     gap: 8px;
     flex-wrap: wrap;
     padding-top: 2px;
+  }
+
+  /* A plain form is flat; these variants draw the box. */
+  :host([variant="surface"]),
+  :host([variant="outline"]),
+  :host([variant="soft"]),
+  :host([variant="contrast"]),
+  :host([variant="elevated"]) {
+    --ui-form-border: 1px solid var(--ui-form-border-color);
   }
 
   :host([variant="surface"]) {

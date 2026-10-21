@@ -3,15 +3,15 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     --ui-fieldset-gap: 10px;
-    --ui-fieldset-radius: 16px;
-    --ui-fieldset-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-fieldset-radius: calc(var(--ui-radius, 6px) + 4px);
+    --ui-fieldset-bg: transparent;
     --ui-fieldset-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-fieldset-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-fieldset-error: var(--ui-color-danger, var(--ui-error, #c81e1e));
-    --ui-fieldset-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
-    --ui-fieldset-border: 1px solid var(--ui-fieldset-border-color);
+    --ui-fieldset-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent));
+    --ui-fieldset-border: 0;
     --ui-fieldset-shadow: none;
-    --ui-fieldset-padding: 14px;
+    --ui-fieldset-padding: 0px;
     color-scheme: light dark;
     display: block;
     min-width: 0;
@@ -108,6 +108,15 @@ const style = `
   :host([orientation="horizontal"]) .body {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     align-items: start;
+  }
+
+  /* A plain fieldset is flat; these variants draw the box. */
+  :host([variant="surface"]),
+  :host([variant="outline"]),
+  :host([variant="soft"]),
+  :host([variant="contrast"]) {
+    --ui-fieldset-border: 1px solid var(--ui-fieldset-border-color);
+    --ui-fieldset-padding: 14px;
   }
 
   :host([variant="surface"]) {

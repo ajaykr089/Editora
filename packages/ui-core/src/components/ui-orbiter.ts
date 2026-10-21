@@ -464,7 +464,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-orbiter-focus-ring) 30%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-orbiter-focus-ring) 20%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-orbiter-focus-ring)),
       var(--ui-orbiter-item-shadow);
   }
 
@@ -532,7 +532,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-orbiter-focus-ring) 24%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-orbiter-focus-ring) 18%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-orbiter-focus-ring)),
       var(--ui-orbiter-shadow);
   }
 

@@ -15,13 +15,13 @@ const style = `
 
   .row {
     min-inline-size: 0;
-    min-block-size: 34px;
+    min-block-size: var(--ui-control-height-2, 32px);
     display: grid;
     grid-template-columns: auto auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px 6px calc(10px + (var(--ui-tree-level) - 1) * var(--ui-tree-indent));
-    border-radius: 10px;
+    padding: 4px 8px 4px calc(8px + (var(--ui-tree-level) - 1) * var(--ui-tree-indent));
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     cursor: default;
     outline: none;
     user-select: none;
@@ -30,17 +30,18 @@ const style = `
   }
 
   .row:hover {
-    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 8%, transparent);
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 8%, transparent));
   }
 
   .row:focus-visible {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-color-focus-ring, #2563eb) 28%, transparent);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
+    outline-offset: -2px;
   }
 
   :host([selected]) .row {
-    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
-    font-weight: 600;
+    background: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent));
+    color: var(--ui-color-text-strong, var(--ui-color-text, #0f172a));
+    font-weight: 500;
   }
 
   :host([disabled]) .row {

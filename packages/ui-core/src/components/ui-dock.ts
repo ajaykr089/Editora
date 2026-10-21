@@ -1192,7 +1192,7 @@ export class UIDock extends ElementBase {
       if (item.iconEl) {
         const ring =
           index === this._focusedIndex
-            ? `0 0 0 3px color-mix(in srgb, var(--ui-dock-focus-ring) 26%, transparent), `
+            ? `0 0 0 2px var(--ui-ring-color, var(--ui-dock-focus-ring)), `
             : item.sticky
               ? `0 0 0 2px color-mix(in srgb, var(--ui-dock-accent) 22%, transparent), `
               : '';

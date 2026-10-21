@@ -124,7 +124,7 @@ const style = `
   }
 
   :host([ring]) .avatar {
-    --ui-avatar-ring: 0 0 0 3px color-mix(in srgb, var(--ui-avatar-accent) 24%, transparent), 0 10px 24px color-mix(in srgb, var(--ui-avatar-accent) 20%, rgba(15, 23, 42, 0.2));
+    --ui-avatar-ring: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 45%, transparent), 0 10px 24px color-mix(in srgb, var(--ui-avatar-accent) 20%, rgba(15, 23, 42, 0.2));
   }
 
   :host([interactive]) .avatar {

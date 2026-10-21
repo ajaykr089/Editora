@@ -4,7 +4,7 @@ const style = `
   :host {
     --ui-inline-edit-bg: transparent;
     --ui-inline-edit-border: 1px dashed transparent;
-    --ui-inline-edit-radius: 12px;
+    --ui-inline-edit-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-inline-edit-text: var(--ui-color-text, #0f172a);
     --ui-inline-edit-muted: var(--ui-color-muted, #526175);
     --ui-inline-edit-focus: var(--ui-color-focus-ring, #2563eb);
@@ -94,7 +94,7 @@ const style = `
 
   .field:focus-visible {
     border-color: color-mix(in srgb, var(--ui-inline-edit-focus) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-inline-edit-focus) 22%, transparent);
+    box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-inline-edit-focus));
   }
 
   .actions {

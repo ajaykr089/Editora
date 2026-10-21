@@ -9,13 +9,13 @@ const style = `
     min-inline-size: 0;
     min-block-size: 0;
     color-scheme: light dark;
-    --ui-command-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-command-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-command-text: var(--ui-color-text, #0f172a);
     --ui-command-muted: var(--ui-color-muted, #526175);
-    --ui-command-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
+    --ui-command-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent));
     --ui-command-accent: var(--ui-color-primary, #2563eb);
     --ui-command-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-command-radius: 16px;
+    --ui-command-radius: calc(var(--ui-radius, 6px) + 6px);
     --ui-command-shadow: none;
     border: var(--ui-command-border);
     border-radius: var(--ui-command-radius);
@@ -31,15 +31,15 @@ const style = `
     background: transparent;
     width: 100%;
     box-sizing: border-box;
-    padding: 14px 16px;
-    font-size: 15px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+    padding: 12px 16px;
+    font-size: var(--ui-control-font-size-2, 14px);
+    border-bottom: 1px solid var(--ui-color-line-subtle, rgba(15, 23, 42, 0.1));
     color: inherit;
   }
 
   .search:focus-visible {
-    outline: 2px solid var(--ui-command-focus);
-    outline-offset: -2px;
+    outline: none;
+    box-shadow: inset 0 -2px 0 var(--ui-ring-color, var(--ui-command-focus));
   }
 
   .list {
@@ -52,9 +52,9 @@ const style = `
 
   ::slotted([slot="command"]) {
     display: block;
-    border-radius: 10px;
-    padding: 10px 10px;
-    font-size: 13px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    padding: 6px 10px;
+    font-size: var(--ui-control-font-size-2, 14px);
     color: var(--ui-command-text);
     line-height: 1.35;
     cursor: pointer;
@@ -66,7 +66,7 @@ const style = `
   ::slotted([slot="command"]:hover),
   ::slotted([slot="command"]:focus-visible),
   ::slotted([slot="command"][data-active="true"]) {
-    background: color-mix(in srgb, var(--ui-command-accent) 14%, transparent);
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-command-accent) 14%, transparent));
   }
 
   ::slotted([slot="command"][hidden]) {

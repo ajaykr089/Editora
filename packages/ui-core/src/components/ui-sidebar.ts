@@ -77,19 +77,19 @@ const template = (body: string) => `
       --ui-sidebar-bg: var(--base-sidebar-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
       --ui-sidebar-color: var(--ui-color-text, var(--ui-text, #202020));
       --ui-sidebar-muted: color-mix(in srgb, var(--ui-sidebar-color) 72%, transparent);
-      --ui-sidebar-border: var(--base-sidebar-border, 1px solid color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 82%, transparent));
-      --ui-sidebar-radius: var(--base-sidebar-radius, var(--ui-radius, 6px));
-      --ui-sidebar-shadow: var(--base-sidebar-shadow, var(--shadow-5, none));
+      --ui-sidebar-border: var(--base-sidebar-border, 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 82%, transparent)));
+      --ui-sidebar-radius: var(--base-sidebar-radius, calc(var(--ui-radius, 6px) + 2px));
+      --ui-sidebar-shadow: var(--base-sidebar-shadow, none);
       --ui-sidebar-padding: var(--base-sidebar-padding, 12px);
       --ui-sidebar-gap: var(--base-sidebar-gap, 14px);
       --ui-sidebar-header-padding: var(--base-sidebar-header-padding, 4px 4px 10px);
-      --ui-sidebar-item-radius: var(--base-sidebar-item-radius, 4px);
-      --ui-sidebar-item-height: var(--base-sidebar-item-height, 45px);
-      --ui-sidebar-item-padding-x: var(--base-sidebar-item-padding-x, 6px);
-      --ui-sidebar-item-padding-y: var(--base-sidebar-item-padding-y, 3px);
+      --ui-sidebar-item-radius: var(--base-sidebar-item-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
+      --ui-sidebar-item-height: var(--base-sidebar-item-height, var(--ui-control-height-2, 32px));
+      --ui-sidebar-item-padding-x: var(--base-sidebar-item-padding-x, 8px);
+      --ui-sidebar-item-padding-y: var(--base-sidebar-item-padding-y, 4px);
       --ui-sidebar-item-gap: var(--base-sidebar-item-gap, 8px);
-      --ui-sidebar-item-font-size: var(--base-sidebar-item-font-size, 12px);
-      --ui-sidebar-item-line-height: var(--base-sidebar-item-line-height, 22px);
+      --ui-sidebar-item-font-size: var(--base-sidebar-item-font-size, var(--ui-control-font-size-2, 14px));
+      --ui-sidebar-item-line-height: var(--base-sidebar-item-line-height, 20px);
       --ui-sidebar-section-gap: var(--base-sidebar-section-gap, 12px);
       --ui-sidebar-section-label-size: var(--base-sidebar-section-label-size, 12px);
       --ui-sidebar-section-label-spacing: var(--base-sidebar-section-label-spacing, 0.06em);
@@ -100,10 +100,10 @@ const template = (body: string) => `
       --ui-sidebar-promo-padding: var(--base-sidebar-promo-padding, 20px);
       --ui-sidebar-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
       --ui-sidebar-accent-contrast: var(--ui-color-foreground-on-primary, var(--ui-foreground, #ffffff));
-      --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 10%, transparent);
-      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 14%, var(--ui-sidebar-bg));
+      --ui-sidebar-item-hover: var(--ui-color-fill, color-mix(in srgb, var(--ui-sidebar-accent) 10%, transparent));
+      --ui-sidebar-item-active-bg: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-sidebar-accent) 14%, var(--ui-sidebar-bg)));
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
-      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-accent) 18%, transparent);
+      --ui-sidebar-item-border: transparent;
       --ui-sidebar-control-bg: color-mix(in srgb, var(--ui-sidebar-bg) 88%, transparent);
       --ui-sidebar-control-hover: color-mix(in srgb, var(--ui-sidebar-accent) 10%, var(--ui-sidebar-bg));
       --ui-sidebar-promo-bg: linear-gradient(140deg, color-mix(in srgb, var(--ui-sidebar-accent) 92%, #0f172a 8%), color-mix(in srgb, var(--ui-sidebar-accent) 36%, #ffffff 64%));
@@ -384,7 +384,7 @@ const template = (body: string) => `
       font-size: var(--ui-sidebar-section-label-size);
       letter-spacing: var(--ui-sidebar-section-label-spacing);
       line-height: 1.4;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: var(--ui-sidebar-section-label-transform);
       color: var(--ui-sidebar-section-label-color);
     }
@@ -419,7 +419,7 @@ const template = (body: string) => `
       font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
       font-size: var(--ui-sidebar-item-font-size);
       line-height: var(--ui-sidebar-item-line-height);
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: var(--ui-default-letter-spacing, 0em);
       transition:
         background-color 140ms ease,
@@ -435,7 +435,7 @@ const template = (body: string) => `
 
     .item-button:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-sidebar-focus-ring) 22%, transparent);
+      box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-sidebar-focus-ring));
     }
 
     .item-button[aria-current="page"],
@@ -518,7 +518,7 @@ const template = (body: string) => `
       font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
       font-size: var(--ui-sidebar-item-font-size);
       line-height: var(--ui-sidebar-item-line-height);
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: var(--ui-default-letter-spacing, 0em);
       color: inherit;
     }
@@ -542,7 +542,7 @@ const template = (body: string) => `
       font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
       font-size: var(--ui-sidebar-item-font-size);
       line-height: var(--ui-sidebar-item-line-height);
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: var(--ui-default-letter-spacing, 0em);
       color: inherit;
     }
@@ -562,7 +562,7 @@ const template = (body: string) => `
       min-inline-size: max-content;
       color: color-mix(in srgb, currentColor 66%, transparent);
       font-size: calc(var(--ui-sidebar-item-font-size) - 1px);
-      font-weight: 700;
+      font-weight: 600;
       line-height: var(--ui-sidebar-item-line-height);
     }
 
