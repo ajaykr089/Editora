@@ -619,6 +619,32 @@ change one control, use `--ui-control-min-height` (buttons) or `--ui-min-height`
 The 24px size is small for touch. Buttons inside a small field (clear, show password, the dropdown arrow) stay 24px
 tall so they still meet the WCAG 2.2 minimum target size, but prefer the default size on touch screens.
 
+## Overlays
+
+Popovers, menus, dropdowns, selects, comboboxes, tooltips and dialogs share one set of behaviours.
+
+**They animate in and out.** A surface fades and scales in from the side it opens on, and plays a quicker exit before it
+is removed, so it no longer disappears with a pop. With `prefers-reduced-motion: reduce` there is no animation. Tune it
+with CSS variables on the page: `--ui-overlay-in-duration` (150ms), `--ui-overlay-out-duration` (100ms) and
+`--ui-overlay-shift` (4px), plus `--ui-motion-enter-easing` and `--ui-motion-exit-easing`.
+
+**They expose their state for CSS.** The open surface carries `data-state="open"` or `"closed"`, and positioned ones
+also `data-side` (`top`, `right`, `bottom`, `left`) and `data-align` (`start`, `center`, `end`), as Radix does:
+
+```css
+.ui-menu-surface[data-side="top"][data-state="open"] {
+  /* your own rule */
+}
+```
+
+**Popovers, menus, tooltips, dropdown-style menus and dialogs sit in the browser's top layer**, above every `z-index` on
+the page, so a sticky header with `z-index: 9999` can no longer cover them. This uses `popover="manual"` (Chrome 114,
+Safari 17, Firefox 125); older browsers keep the previous `z-index` stacking. Dismissal (Escape, click outside) is still
+handled by the components.
+
+Not in the top layer: the panels of `ui-select`, `ui-dropdown`, `ui-combobox` and `ui-multi-select`, which open inside
+their own field and are clipped like it; `ui-hover-card` and `ui-drawer`. They do have the state attributes and the motion.
+
 ## Floating positioning
 
 The positioning engine behind the menus, popovers and tooltips is available on its own, from
