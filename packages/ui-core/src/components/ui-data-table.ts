@@ -6,22 +6,22 @@ const style = `
     /* A wide table scrolls inside its own frame. Without this a grid or flex parent grows to the table's width. */
     min-inline-size: 0;
     max-inline-size: 100%;
-    --ui-data-table-radius: 16px;
-    --ui-data-table-border-color: var(--ui-color-border, rgba(15, 23, 42, 0.14));
+    --ui-data-table-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-data-table-border-color: var(--ui-color-line-subtle, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
     --ui-data-table-border: 1px solid var(--ui-data-table-border-color);
-    --ui-data-table-bg: var(--ui-color-surface, rgba(255, 255, 255, 0.96));
+    --ui-data-table-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-data-table-shadow: none;
     --ui-data-table-empty-color: var(--ui-color-muted, #526175);
     --ui-data-table-summary-color: var(--ui-color-muted, #475569);
     --ui-data-table-text: var(--ui-color-text, #0f172a);
     --ui-data-table-header-text: var(--ui-color-text, #1e293b);
-    --ui-data-table-header-bg: var(--ui-color-surface-alt, #f8fafc);
+    --ui-data-table-header-bg: var(--ui-color-surface-subtle, var(--ui-color-surface-alt, #f8fafc));
     --ui-data-table-footer-text: var(--ui-color-text, #0f172a);
-    --ui-data-table-footer-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, var(--ui-color-surface, #ffffff));
+    --ui-data-table-footer-bg: var(--ui-color-surface-subtle, color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, var(--ui-color-surface, #ffffff)));
     --ui-data-table-cell-border: color-mix(in srgb, var(--ui-data-table-border-color) 58%, transparent);
-    --ui-data-table-striped-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 82%, transparent);
-    --ui-data-table-hover-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
-    --ui-data-table-selected-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 20%, transparent);
+    --ui-data-table-striped-bg: var(--ui-color-surface-subtle, color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 82%, transparent));
+    --ui-data-table-hover-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent));
+    --ui-data-table-selected-bg: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 20%, transparent));
     --ui-data-table-sort-indicator: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 80%, transparent);
     --ui-data-table-sort-active: var(--ui-color-primary, #2563eb);
     --ui-data-table-resize-handle: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 70%, transparent);
@@ -41,11 +41,14 @@ const style = `
     overflow: auto;
     border: var(--ui-data-table-border);
     border-radius: var(--ui-data-table-radius);
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-data-table-bg) 96%, #ffffff 4%), var(--ui-data-table-bg)),
-      var(--ui-data-table-bg);
+    background: var(--ui-data-table-bg);
     box-shadow: var(--ui-data-table-shadow);
     transition: border-color var(--ui-data-table-duration) var(--ui-data-table-ease), box-shadow var(--ui-data-table-duration) var(--ui-data-table-ease);
+  }
+
+  .frame[data-scroll-region]:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-data-table-focus-ring, #2563eb));
+    outline-offset: -2px;
   }
 
   .frame::before {
@@ -552,12 +555,12 @@ const lightDomStyle = `
   }
 
   ui-data-table[loading]:not([headless]) > table tbody {
-    opacity: 0.55;
+    opacity: 0.7;
     pointer-events: none;
   }
 
   ui-data-table[state="loading"]:not([headless]) > table tbody {
-    opacity: 0.55;
+    opacity: 0.7;
     pointer-events: none;
   }
 
@@ -775,6 +778,7 @@ export class UIDataTable extends ElementBase {
   private _resizeState: { columnIndex: number; startX: number; startWidth: number } | null = null;
   private _columnWidths = new Map<number, number>();
   private _frameEl: HTMLElement | null = null;
+  private _scrollObserver: ResizeObserver | null = null;
   private _virtualRaf = 0;
   private _virtualTopSpacer: HTMLTableRowElement | null = null;
   private _virtualBottomSpacer: HTMLTableRowElement | null = null;
@@ -864,6 +868,8 @@ export class UIDataTable extends ElementBase {
       this._observer = null;
     }
     this._detachPaginationListener();
+    this._scrollObserver?.disconnect();
+    this._scrollObserver = null;
     super.disconnectedCallback();
   }
 
@@ -1440,6 +1446,38 @@ export class UIDataTable extends ElementBase {
     return shortcuts.join(' ');
   }
 
+  /**
+   * A frame that scrolls but holds nothing focusable (a loading or read-only table in a narrow
+   * container) cannot be scrolled from the keyboard. Make it a focusable, named region while that is true.
+   */
+  private _syncScrollRegion() {
+    const frame = this._frameEl;
+    if (!frame) return;
+    const scrolls = frame.scrollWidth > frame.clientWidth + 1 || frame.scrollHeight > frame.clientHeight + 1;
+    const hasFocusable = !!this._table?.querySelector('[tabindex="0"], a[href], button, input, select, textarea');
+    if (scrolls && !hasFocusable) {
+      frame.setAttribute('tabindex', '0');
+      frame.setAttribute('role', 'region');
+      frame.setAttribute('data-scroll-region', '');
+      const name = (this.getAttribute('aria-label') || '').trim();
+      frame.setAttribute('aria-label', name ? `${name}, scrollable` : 'Scrollable table');
+    } else if (frame.hasAttribute('data-scroll-region')) {
+      frame.removeAttribute('tabindex');
+      frame.removeAttribute('role');
+      frame.removeAttribute('aria-label');
+      frame.removeAttribute('data-scroll-region');
+    }
+  }
+
+  private _watchScrollRegion() {
+    this._scrollObserver?.disconnect();
+    this._scrollObserver = null;
+    if (!this._frameEl || typeof ResizeObserver === 'undefined') return;
+    this._scrollObserver = new ResizeObserver(() => this._syncScrollRegion());
+    this._scrollObserver.observe(this._frameEl);
+    if (this._table) this._scrollObserver.observe(this._table);
+  }
+
   private _syncStructure() {
     if (this._isSyncing) return;
     this._isSyncing = true;
@@ -1450,6 +1488,7 @@ export class UIDataTable extends ElementBase {
         if (this._frameEl) this._frameEl.removeEventListener('scroll', this._onFrameScroll as EventListener);
         this._frameEl = frameEl;
         if (this._frameEl) this._frameEl.addEventListener('scroll', this._onFrameScroll as EventListener, { passive: true });
+        this._watchScrollRegion();
       }
       const emptyEl = this.root.querySelector('.empty') as HTMLElement | null;
       const summaryEl = this.root.querySelector('.summary') as HTMLElement | null;

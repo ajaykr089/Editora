@@ -7,9 +7,9 @@ const style = `
     min-inline-size: 0;
     max-inline-size: 100%;
     color-scheme: light dark;
-    --ui-table-radius: 14px;
-    --ui-table-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-table-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
+    --ui-table-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-table-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent));
+    --ui-table-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-table-text: var(--ui-color-text, #0f172a);
     --ui-table-muted: var(--ui-color-muted, #526175);
     --ui-table-accent: var(--ui-color-primary, #2563eb);

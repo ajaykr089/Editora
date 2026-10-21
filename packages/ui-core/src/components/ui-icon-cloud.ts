@@ -73,13 +73,13 @@ const SIZE_PRESETS: Record<'sm' | 'md' | 'lg' | 'xl', SizePreset> = {
 
 const style = `
   :host {
-    --ui-icon-cloud-radius: ${DEFAULT_RADIUS};
+    --ui-icon-cloud-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-icon-cloud-item-size: ${DEFAULT_ITEM_SIZE};
     --ui-icon-cloud-center-size: ${DEFAULT_CENTER_SIZE};
     --ui-icon-cloud-padding: ${DEFAULT_PADDING};
     --ui-icon-cloud-perspective: ${DEFAULT_PERSPECTIVE};
     --ui-icon-cloud-depth: ${DEFAULT_DEPTH};
-    --ui-icon-cloud-shell-radius: ${DEFAULT_SHELL_RADIUS};
+    --ui-icon-cloud-shell-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-icon-cloud-tilt-x: 0deg;
     --ui-icon-cloud-tilt-y: 0deg;
     --ui-icon-cloud-fit-scale: 1;
@@ -88,35 +88,18 @@ const style = `
     --ui-icon-cloud-stage-size:
       calc((var(--ui-icon-cloud-radius) * 2) + var(--ui-icon-cloud-item-size));
     --ui-icon-cloud-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-icon-cloud-bg:
-      radial-gradient(
-        circle at 50% 50%,
-        color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 92%, transparent) 0%,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 64%,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent) 100%
-      );
+    --ui-icon-cloud-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-icon-cloud-color: var(--ui-color-text, #0f172a);
-    --ui-icon-cloud-border-color:
-      color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 84%, transparent);
+    --ui-icon-cloud-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-icon-cloud-border: 1px solid var(--ui-icon-cloud-border-color);
-    --ui-icon-cloud-shadow:
-      0 1px 3px rgba(15, 23, 42, 0.06),
-      0 24px 44px rgba(15, 23, 42, 0.12);
+    --ui-icon-cloud-shadow: none;
     --ui-icon-cloud-backdrop: none;
     --ui-icon-cloud-grid-color:
       color-mix(in srgb, var(--ui-icon-cloud-accent) 16%, var(--ui-icon-cloud-border-color));
-    --ui-icon-cloud-item-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ffffff 96%, transparent),
-        color-mix(in srgb, var(--ui-icon-cloud-accent) 8%, rgba(255, 255, 255, 0.92))
-      );
-    --ui-icon-cloud-item-border:
-      1px solid color-mix(in srgb, var(--ui-icon-cloud-accent) 12%, rgba(255, 255, 255, 0.82));
+    --ui-icon-cloud-item-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-icon-cloud-item-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-icon-cloud-item-color: var(--ui-icon-cloud-color);
-    --ui-icon-cloud-item-shadow:
-      0 8px 16px rgba(15, 23, 42, 0.08),
-      0 1px 2px rgba(15, 23, 42, 0.05);
+    --ui-icon-cloud-item-shadow: none;
     --ui-icon-cloud-item-backdrop: none;
     --ui-icon-cloud-item-radius: 14px;
     --ui-icon-cloud-center-bg:
@@ -355,7 +338,7 @@ const style = `
     background:
       radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.22), rgba(15, 23, 42, 0.04) 62%, transparent 78%);
     filter: blur(18px);
-    opacity: 0.9;
+    opacity: 0.35;
     transform: translateZ(-120px) rotateX(78deg) scaleX(1.06);
     transform-origin: center;
     pointer-events: none;
@@ -408,7 +391,7 @@ const style = `
     background:
       radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--ui-icon-cloud-accent) 12%, transparent), transparent 64%);
     filter: blur(18px);
-    opacity: 0.82;
+    opacity: 0.3;
     transform:
       translateZ(-42px)
       rotateX(calc(64deg + (var(--ui-icon-cloud-tilt-x) * 0.5)))
@@ -495,7 +478,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-icon-cloud-focus-ring) 30%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-icon-cloud-focus-ring) 20%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-icon-cloud-focus-ring)),
       var(--ui-icon-cloud-item-shadow);
   }
 
@@ -503,7 +486,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-icon-cloud-focus-ring) 24%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-icon-cloud-focus-ring) 18%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-icon-cloud-focus-ring)),
       var(--ui-icon-cloud-shadow);
   }
 

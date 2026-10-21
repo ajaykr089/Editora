@@ -13,16 +13,15 @@ const style = `
     position: relative;
     color-scheme: light dark;
 
-    --ui-scroll-radius: 12px;
+    --ui-scroll-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-scroll-pad: 0px;
     --ui-scroll-track-size: 10px;
     --ui-scroll-track-bg: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 18%, transparent);
     --ui-scroll-thumb-bg: color-mix(in srgb, var(--ui-color-border, #94a3b8) 64%, transparent);
     --ui-scroll-thumb-hover: color-mix(in srgb, var(--ui-color-border, #64748b) 84%, transparent);
     --ui-scroll-bg: transparent;
-    --ui-scroll-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
-    --ui-scroll-shadow:
-      none;
+    --ui-scroll-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
+    --ui-scroll-shadow: none;
   }
 
   .shell {

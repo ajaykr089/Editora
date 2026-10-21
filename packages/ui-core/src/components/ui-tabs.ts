@@ -125,7 +125,7 @@ const style = `
 
   .tab:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-tabs-focus) 28%, transparent);
+    box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-tabs-focus));
   }
 
   .tab:active {

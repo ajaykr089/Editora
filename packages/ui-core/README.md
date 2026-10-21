@@ -597,6 +597,26 @@ Light and dark, with the default amber accent (`radius` is 6px):
   `variant="segmented"`; `soft`, `outline`, `solid`, `cards` and `indicator` keep working.
 - **Cards** have a single hairline border and no shadow. **Badges** are soft tinted labels without a border
   (`variant="solid"` for a filled one).
+- **Alerts** are a tinted fill with a hairline in the tone colour and a plain icon; the coloured bar on the leading edge
+  is opt-in (`indicator="line"`). **Slider**, **progress** and **meter** are flat tracks (4–6px) with a solid fill; the
+  slider thumb is a white circle.
+- **Avatars** are a soft tint with initials. **Breadcrumbs** show the current page in bold, with no pill.
+  **Pagination** is a row of 32px buttons with a solid accent for the current page, no bar around them.
+- **Calendar** days are plain cells; the selected day is solid accent, the range a soft tint.
+- **Accordion** and **collapsible** are one hairline box with dividers; the accent bar on an open item is opt-in
+  (`indicator="line"` on the accordion). **Stepper** steps have no card: the current one is a solid circle.
+- **Toggle** and **toggle group** are outlined buttons that turn a soft accent when pressed (no dot glyph unless you pass
+  `icon-on` / `icon-off`). **Toolbar**, **hover card** and **drawer** take the same flat surface as popovers.
+- **Pin input** slots are 40px (one control tall), **empty state** and **file upload** use a primary button.
+- **Tables** (`ui-table`, `ui-data-table`) are a hairline frame with quiet dividers and a subtle header; **tree** rows are
+  32px with a soft accent for the selected one; **timeline**, **form**, **fieldset** and **stepper** have no box
+  (`variant="surface"`, `outline`, `soft`, `contrast` or `elevated` on `ui-form` and `ui-fieldset` draw it).
+- **Sidebar**, **app header** and **navigation menu** use the 32px control rhythm and a soft accent for the current
+  item; **transfer list**, **chart**, **wizard** and **gantt** drop their nested boxes and heavy shadows.
+- **Command**, **selection popup**, **floating toolbar** and **quick actions** share the flat overlay surface.
+- **Marquee**, **animated list**, **spinning text**, **icon cloud**, **orbiter** and **dock** keep their motion but drop the
+  card chrome: a hairline frame, no shadow. **Layout**, **container** and **section** use the theme radius, and their
+  boxed variants use the theme shadows.
 
 ### Control sizes
 

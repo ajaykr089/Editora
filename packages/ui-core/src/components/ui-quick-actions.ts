@@ -2,8 +2,8 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-quick-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
-    --ui-quick-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-quick-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-quick-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-quick-text: var(--ui-color-text, #0f172a);
     --ui-quick-muted: var(--ui-color-muted, #526175);
     --ui-quick-accent: var(--ui-color-primary, #2563eb);
@@ -20,10 +20,10 @@ const style = `
     align-items: center;
     gap: 8px;
     border: 1px solid var(--ui-quick-border);
-    border-radius: 999px;
+    border-radius: calc(var(--ui-radius, 6px) + 4px);
     background: var(--ui-quick-bg);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
-    padding: 8px;
+    box-shadow: var(--shadow-5, 0 8px 24px rgba(15, 23, 42, 0.12));
+    padding: 4px;
     color: var(--ui-quick-text);
   }
 
@@ -82,13 +82,13 @@ const style = `
   }
 
   ::slotted([slot="action"]) {
-    border: 1px solid color-mix(in srgb, var(--ui-quick-border) 84%, transparent);
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--ui-quick-bg) 98%, transparent);
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    background: transparent;
     color: inherit;
-    font: 600 12px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.01em;
-    padding: 8px 10px;
+    font: 500 var(--ui-control-font-size-2, 14px)/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: var(--ui-control-height-2, 32px);
+    padding: 0 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

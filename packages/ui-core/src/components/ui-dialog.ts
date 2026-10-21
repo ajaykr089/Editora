@@ -955,7 +955,8 @@ export class UIDialog extends ElementBase {
       // A render while open creates a fresh overlay marked data-instant, so it does not replay the enter.
       if (!this._presented) overlay.removeAttribute('data-instant');
       this._presented = true;
-      liftToTopLayer(overlay, { resetBox: false });
+      // A headless dialog brings its own layout (no built-in styles), so it keeps its place instead of the top layer.
+      if (!this.hasAttribute('headless')) liftToTopLayer(overlay, { resetBox: false });
       return;
     }
 

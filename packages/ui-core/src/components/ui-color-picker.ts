@@ -111,15 +111,15 @@ const CHEVRON_ICON = `
 
 const style = `
   :host {
-    --ui-cp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-cp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-cp-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-cp-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-cp-text: var(--ui-color-text, #0f172a);
     --ui-cp-muted: var(--ui-color-muted, #526175);
     --ui-cp-accent: var(--ui-color-primary, #2563eb);
     --ui-cp-success: var(--ui-color-success, #15803d);
     --ui-cp-warning: var(--ui-color-warning, #b45309);
     --ui-cp-danger: var(--ui-color-danger, #dc2626);
-    --ui-cp-radius: 14px;
+    --ui-cp-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-cp-shadow: none;
     --ui-cp-padding: 10px;
     --ui-cp-duration: 160ms;
@@ -374,7 +374,7 @@ const style = `
     color: var(--ui-cp-text);
     min-inline-size: 32px;
     block-size: 30px;
-    border-radius: 9px;
+    border-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
     padding: 0 8px;
     display: inline-grid;
     place-items: center;
@@ -414,7 +414,7 @@ const style = `
     position: relative;
     inline-size: 100%;
     block-size: clamp(128px, 16vw, 156px);
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 82%, transparent);
     overflow: visible;
     cursor: crosshair;
@@ -519,7 +519,7 @@ const style = `
     display: inline-grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 84%, transparent);
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-3, var(--ui-radius, 6px));
     overflow: hidden;
   }
 
@@ -533,6 +533,11 @@ const style = `
     transition:
       background-color var(--ui-cp-duration) var(--ui-cp-ease),
       color var(--ui-cp-duration) var(--ui-cp-ease);
+  }
+
+  .tab:hover:not([data-active="true"]) {
+    background: color-mix(in srgb, var(--ui-cp-accent) 8%, transparent);
+    color: var(--ui-cp-text);
   }
 
   .tab[data-active="true"] {
@@ -582,7 +587,7 @@ const style = `
     min-inline-size: 0;
     inline-size: 100%;
     min-block-size: 28px;
-    border-radius: 8px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 86%, transparent);
     background: color-mix(in srgb, var(--ui-cp-bg) 95%, transparent);
     color: var(--ui-cp-text);
@@ -631,9 +636,7 @@ const style = `
   }
 
   .swatch:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--ui-cp-accent) 40%, var(--ui-cp-border));
-    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.18);
+    border-color: color-mix(in srgb, var(--ui-cp-accent) 55%, var(--ui-cp-border));
   }
 
   .swatch[data-selected="true"] {
@@ -664,7 +667,7 @@ const style = `
 
   .actions .btn {
     min-block-size: 28px;
-    border-radius: 9px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 84%, transparent);
     background: color-mix(in srgb, var(--ui-cp-bg) 95%, transparent);
     color: var(--ui-cp-text);
@@ -677,9 +680,25 @@ const style = `
       color var(--ui-cp-duration) var(--ui-cp-ease);
   }
 
+  .actions .btn:hover {
+    background: color-mix(in srgb, var(--ui-cp-accent) 10%, var(--ui-cp-bg));
+    border-color: color-mix(in srgb, var(--ui-cp-accent) 34%, var(--ui-cp-border));
+  }
+
+  .actions .btn[data-tone="primary"]:hover {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--ui-color-primary, var(--ui-cp-accent)) 88%, #000);
+  }
+
+  .actions .btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-cp-accent) 64%, transparent);
+    outline-offset: 2px;
+  }
+
   .actions .btn[data-tone="primary"] {
-    border-color: color-mix(in srgb, var(--ui-cp-accent) 62%, transparent);
-    background: color-mix(in srgb, var(--ui-cp-accent) 18%, transparent);
+    border-color: transparent;
+    background: var(--ui-color-primary, var(--ui-cp-accent));
+    color: var(--ui-color-foreground-on-primary, #ffffff);
   }
 
   .actions .btn[hidden] {

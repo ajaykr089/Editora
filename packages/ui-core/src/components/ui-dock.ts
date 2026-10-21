@@ -148,43 +148,29 @@ const style = `
   :host {
     --ui-dock-gap: ${DEFAULT_GAP};
     --ui-dock-padding: ${DEFAULT_PADDING};
-    --ui-dock-radius: 24px;
+    --ui-dock-radius: var(--ui-control-radius-4, calc(var(--ui-radius, 6px) + 6px));
     --ui-dock-item-size: ${DEFAULT_ITEM_SIZE};
     --ui-dock-icon-size: 24px;
-    --ui-dock-item-radius: 18px;
+    --ui-dock-item-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-dock-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-dock-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 90%, #ffffff 10%),
-        color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 96%, transparent)
-      );
+    --ui-dock-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-dock-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-dock-border-color: color-mix(in srgb, #ffffff 24%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
+    --ui-dock-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-dock-border: 1px solid var(--ui-dock-border-color);
-    --ui-dock-shadow:
-      0 1px 3px rgba(15, 23, 42, 0.08),
-      0 24px 44px rgba(15, 23, 42, 0.14);
+    --ui-dock-shadow: var(--shadow-3, none);
     --ui-dock-backdrop: blur(16px) saturate(1.08);
-    --ui-dock-item-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ffffff 86%, transparent),
-        color-mix(in srgb, var(--ui-dock-accent) 10%, rgba(255, 255, 255, 0.72))
-      );
-    --ui-dock-item-border: color-mix(in srgb, var(--ui-dock-accent) 16%, rgba(255, 255, 255, 0.72));
-    --ui-dock-item-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.08),
-      0 10px 18px rgba(15, 23, 42, 0.12);
-    --ui-dock-item-backdrop: blur(10px) saturate(1.02);
+    --ui-dock-item-bg: transparent;
+    --ui-dock-item-border: transparent;
+    --ui-dock-item-shadow: none;
+    --ui-dock-item-backdrop: none;
     --ui-dock-label-bg: rgba(15, 23, 42, 0.92);
     --ui-dock-label-color: #f8fafc;
     --ui-dock-label-border: rgba(255, 255, 255, 0.14);
-    --ui-dock-label-shadow: 0 14px 28px rgba(2, 6, 23, 0.28);
+    --ui-dock-label-shadow: var(--shadow-3, 0 8px 16px rgba(2, 6, 23, 0.2));
     --ui-dock-label-padding: 6px 10px;
     --ui-dock-label-font-size: 12px;
     --ui-dock-label-font-weight: 600;
-    --ui-dock-label-radius: 999px;
+    --ui-dock-label-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dock-label-offset: 12px;
     --ui-dock-label-backdrop: blur(10px) saturate(1.04);
     --ui-dock-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
@@ -1056,7 +1042,7 @@ export class UIDock extends ElementBase {
         badgeEl.style.setProperty('color', '#ffffff');
         badgeEl.style.setProperty('font-size', '11px');
         badgeEl.style.setProperty('font-weight', '700');
-        badgeEl.style.setProperty('box-shadow', '0 8px 18px color-mix(in srgb, var(--ui-dock-accent) 32%, rgba(15, 23, 42, 0.18))');
+        badgeEl.style.setProperty('box-shadow', 'none');
         badgeEl.style.setProperty('z-index', '4');
       }
     });
@@ -1192,7 +1178,7 @@ export class UIDock extends ElementBase {
       if (item.iconEl) {
         const ring =
           index === this._focusedIndex
-            ? `0 0 0 3px color-mix(in srgb, var(--ui-dock-focus-ring) 26%, transparent), `
+            ? `0 0 0 2px var(--ui-ring-color, var(--ui-dock-focus-ring)), `
             : item.sticky
               ? `0 0 0 2px color-mix(in srgb, var(--ui-dock-accent) 22%, transparent), `
               : '';
@@ -1200,7 +1186,7 @@ export class UIDock extends ElementBase {
         item.iconEl.style.setProperty(
           'border-color',
           item.sticky || index === this._focusedIndex
-            ? 'color-mix(in srgb, var(--ui-dock-accent) 30%, var(--ui-dock-item-border))'
+            ? 'color-mix(in srgb, var(--ui-dock-accent) 55%, transparent)'
             : 'var(--ui-dock-item-border)'
         );
       }

@@ -17,15 +17,15 @@ const CONTENT_ATTRS = new Set(['heading', 'title', 'description', 'state-text', 
 const style = `
   :host {
     --ui-form-gap: 12px;
-    --ui-form-radius: 14px;
-    --ui-form-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-form-radius: calc(var(--ui-radius, 6px) + 4px);
+    --ui-form-bg: transparent;
     --ui-form-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-form-muted: var(--ui-color-muted, var(--ui-muted, #526175));
-    --ui-form-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 66%, transparent);
-    --ui-form-border: 1px solid var(--ui-form-border-color);
+    --ui-form-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 66%, transparent));
+    --ui-form-border: 0;
     --ui-form-shadow:
       none;
-    --ui-form-padding: 16px;
+    --ui-form-padding: 0px;
     --ui-form-header-gap: 12px;
     --ui-form-header-border: color-mix(in srgb, var(--ui-form-border-color) 84%, transparent);
     --ui-form-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
@@ -180,12 +180,19 @@ const style = `
     padding-top: 2px;
   }
 
+  /* A plain form is flat; these variants draw the box. */
+  :host([variant="surface"]),
+  :host([variant="outline"]),
+  :host([variant="soft"]),
+  :host([variant="contrast"]),
+  :host([variant="elevated"]) {
+    --ui-form-border: 1px solid var(--ui-form-border-color);
+  }
+
   :host([variant="surface"]) {
     --ui-form-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-form-padding: 16px;
-    --ui-form-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 14px 28px rgba(2, 6, 23, 0.08);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="outline"]) {
@@ -198,9 +205,7 @@ const style = `
     --ui-form-bg: color-mix(in srgb, var(--ui-form-accent) 6%, var(--ui-color-surface, #ffffff));
     --ui-form-border-color: color-mix(in srgb, var(--ui-form-accent) 26%, var(--ui-color-border, #cbd5e1));
     --ui-form-padding: 16px;
-    --ui-form-shadow:
-      0 1px 4px rgba(2, 6, 23, 0.04),
-      0 12px 24px rgba(2, 6, 23, 0.06);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="contrast"]) {
@@ -210,9 +215,7 @@ const style = `
     --ui-form-border-color: #334155;
     --ui-form-padding: 16px;
     --ui-form-focus-ring: #93c5fd;
-    --ui-form-shadow:
-      0 2px 8px rgba(2, 6, 23, 0.24),
-      0 26px 52px rgba(2, 6, 23, 0.38);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([variant="minimal"]) {
@@ -224,9 +227,7 @@ const style = `
 
   :host([variant="elevated"]) {
     --ui-form-bg: var(--ui-color-surface, #ffffff);
-    --ui-form-shadow:
-      0 2px 10px rgba(2, 6, 23, 0.1),
-      0 28px 56px rgba(2, 6, 23, 0.16);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([tone="success"]) {
@@ -264,15 +265,11 @@ const style = `
   }
 
   :host([elevation="low"]) {
-    --ui-form-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 10px 20px rgba(2, 6, 23, 0.08);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([elevation="high"]) {
-    --ui-form-shadow:
-      0 3px 14px rgba(2, 6, 23, 0.12),
-      0 32px 64px rgba(2, 6, 23, 0.2);
+    --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 
   :host([loading]) .form {

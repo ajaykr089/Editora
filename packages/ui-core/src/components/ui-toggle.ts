@@ -3,12 +3,13 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     --ui-toggle-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
-    --ui-toggle-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
-    --ui-toggle-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-toggle-color: var(--ui-color-text, #0f172a);
+    --ui-toggle-border: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
+    --ui-toggle-bg: transparent;
+    --ui-toggle-color: var(--ui-color-text-strong, var(--ui-color-text, #0f172a));
     --ui-toggle-active-bg: var(--ui-color-primary, #2563eb);
-    --ui-toggle-active-color: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
-    --ui-toggle-active-border: color-mix(in srgb, var(--ui-toggle-active-bg) 72%, #0f172a 28%);
+    --ui-toggle-pressed-bg: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-toggle-active-bg) 16%, transparent));
+    --ui-toggle-active-color: var(--ui-color-text-strong, var(--ui-color-text, #0f172a));
+    --ui-toggle-active-border: var(--ui-color-accent-line, color-mix(in srgb, var(--ui-toggle-active-bg) 40%, transparent));
     --ui-toggle-muted: var(--ui-color-muted, #526175);
     --ui-toggle-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-toggle-shadow:
@@ -54,29 +55,27 @@ const style = `
   }
 
   .control:hover {
-    background: color-mix(in srgb, var(--ui-toggle-active-bg) 8%, var(--ui-toggle-bg));
-    border-color: color-mix(in srgb, var(--ui-toggle-active-bg) 30%, var(--ui-toggle-border));
-  }
-
-  .control:active {
-    transform: translateY(0.5px);
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-toggle-active-bg) 8%, var(--ui-toggle-bg)));
   }
 
   :host(:focus-visible) .control {
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-toggle-focus) 28%, transparent),
-      var(--ui-toggle-shadow);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-toggle-focus));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   :host([pressed]) .control,
   .control[aria-pressed="true"] {
-    background: var(--ui-toggle-active-bg);
+    background: var(--ui-toggle-pressed-bg);
     border-color: var(--ui-toggle-active-border);
     color: var(--ui-toggle-active-color);
   }
 
   :host([pressed]) .control:hover {
-    background: color-mix(in srgb, var(--ui-toggle-active-bg) 82%, #0f172a 18%);
+    background: var(--ui-color-accent-fill-hover, var(--ui-toggle-pressed-bg));
+  }
+
+  .icon:empty {
+    display: none !important;
   }
 
   .icon {
@@ -163,6 +162,14 @@ const style = `
     background: transparent;
   }
 
+  /* A tone tints the pressed state in its own colour (the default soft fill is the theme accent). */
+  :host([tone="success"]),
+  :host([tone="warning"]),
+  :host([tone="danger"]) {
+    --ui-toggle-pressed-bg: color-mix(in srgb, var(--ui-toggle-active-bg) 16%, transparent);
+    --ui-toggle-active-border: color-mix(in srgb, var(--ui-toggle-active-bg) 44%, transparent);
+  }
+
   :host([tone="success"]) {
     --ui-toggle-active-bg: var(--ui-color-success, #15803d);
   }
@@ -175,7 +182,16 @@ const style = `
     --ui-toggle-active-bg: var(--ui-color-danger, #dc2626);
   }
 
-  /* The contrast variant draws dark text on its pressed fill, so the tones need light fills there. */
+  /* The contrast variant draws dark text on a solid light pressed fill (not the soft theme tint). */
+  :host([variant="contrast"]) {
+    --ui-toggle-pressed-bg: var(--ui-toggle-active-bg);
+    --ui-toggle-active-border: var(--ui-toggle-active-bg);
+  }
+
+  :host([variant="contrast"][pressed]) .control:hover {
+    background: color-mix(in srgb, var(--ui-toggle-active-bg) 86%, #ffffff);
+  }
+
   :host([variant="contrast"][tone="success"]) { --ui-toggle-active-bg: #86efac; }
   :host([variant="contrast"][tone="warning"]) { --ui-toggle-active-bg: #fcd34d; }
   :host([variant="contrast"][tone="danger"]) { --ui-toggle-active-bg: #fca5a5; }
@@ -394,8 +410,9 @@ export class UIToggle extends ElementBase {
   protected override render(): void {
     const pressed = this.pressed;
     const disabled = this.disabled;
-    const iconOn = this.getAttribute('icon-on') || '●';
-    const iconOff = this.getAttribute('icon-off') || '○';
+    // No default glyph: a pressed toggle is shown by its fill. Pass icon-on / icon-off for one.
+    const iconOn = this.getAttribute('icon-on') || '';
+    const iconOff = this.getAttribute('icon-off') || '';
     const ariaLabel = this.getAttribute('aria-label') || 'Toggle';
 
     this.setContent(`

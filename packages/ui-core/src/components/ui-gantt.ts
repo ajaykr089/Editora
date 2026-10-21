@@ -144,9 +144,9 @@ const style = `
   .frame {
     container: ui-gantt / inline-size;
     border: 1px solid var(--ui-gantt-border);
-    border-radius: 12px;
+    border-radius: calc(var(--ui-radius, 6px) + 2px);
     background: var(--ui-gantt-bg);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    box-shadow: none;
     overflow: hidden;
   }
 
@@ -188,7 +188,7 @@ const style = `
     border: 1px solid var(--ui-gantt-border);
     background: var(--ui-gantt-panel);
     color: var(--ui-gantt-text);
-    border-radius: 7px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     min-block-size: 30px;
     font: inherit;
     font-size: 12px;
@@ -217,9 +217,9 @@ const style = `
   }
 
   .zoom-button[aria-pressed="true"] {
-    border-color: color-mix(in srgb, var(--ui-gantt-accent) 46%, var(--ui-gantt-border));
-    background: color-mix(in srgb, var(--ui-gantt-accent) 10%, var(--ui-gantt-panel));
-    color: color-mix(in srgb, var(--ui-gantt-accent) 82%, var(--ui-gantt-text));
+    border-color: transparent;
+    background: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-gantt-accent) 10%, var(--ui-gantt-panel)));
+    color: var(--ui-color-text-strong, var(--ui-gantt-text));
   }
 
   .viewport {

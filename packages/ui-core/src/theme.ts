@@ -567,24 +567,14 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   sidebar: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
-    radius: '4px',
-    shadow: 'var(--shadow-5)',
     padding: '12px',
     gap: '12px',
     'header-padding': '6px 8px 10px',
-    'item-radius': '4px',
-    'item-height': '45px',
-    'item-padding-x': '6px',
-    'item-padding-y': '3px',
     'item-gap': '8px',
-    'item-font-size': '12px',
-    'item-line-height': '22px',
     'section-gap': '10px',
     'section-label-size': '12px',
     'section-label-spacing': '0.06em',
     'submenu-indent': '18px',
-    'promo-radius': '4px',
     'promo-padding': '18px'
   },
   card: {
@@ -614,12 +604,8 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   navigationMenu: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
-    radius: 'var(--radius-4)',
-    shadow: 'var(--shadow-2)',
     padding: '6px',
     gap: '6px',
-    'item-radius': 'var(--radius-2)',
     'item-padding-x': '12px',
     'item-padding-y': '8px',
     'item-font-size': '14px',
@@ -679,13 +665,10 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   alert: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'padding-x': '16px',
     'padding-y': '14px',
     gap: 'var(--ui-default-gap)',
-    'icon-size': '26px',
     'dismiss-size': '28px'
   },
   alertDialog: {
@@ -703,9 +686,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   appHeader: {
     bg: 'var(--color-panel)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 78%, transparent)',
     radius: '0px',
-    shadow: 'none',
     padding: '16px',
     gap: '12px',
     height: '64px',
@@ -721,10 +702,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'badge-radius': '999px'
   },
   avatar: {
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: '999px',
-    shadow: '0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12)',
     'size-sm': '30px',
     'size-md': '40px',
     'size-lg': '52px',
@@ -840,24 +818,14 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   sidebar: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
-    radius: '4px',
-    shadow: 'var(--shadow-5)',
     padding: '12px',
     gap: '12px',
     'header-padding': '6px 8px 10px',
-    'item-radius': '4px',
-    'item-height': '45px',
-    'item-padding-x': '6px',
-    'item-padding-y': '3px',
     'item-gap': '8px',
-    'item-font-size': '12px',
-    'item-line-height': '22px',
     'section-gap': '10px',
     'section-label-size': '12px',
     'section-label-spacing': '0.06em',
     'submenu-indent': '18px',
-    'promo-radius': '4px',
     'promo-padding': '18px'
   },
   card: {
@@ -887,12 +855,8 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   navigationMenu: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
-    radius: 'var(--radius-4)',
-    shadow: 'var(--shadow-2)',
     padding: '6px',
     gap: '6px',
-    'item-radius': 'var(--radius-2)',
     'item-padding-x': '12px',
     'item-padding-y': '8px',
     'item-font-size': '14px',
@@ -952,13 +916,10 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   alert: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'padding-x': '16px',
     'padding-y': '14px',
     gap: 'var(--ui-default-gap)',
-    'icon-size': '26px',
     'dismiss-size': '28px'
   },
   alertDialog: {
@@ -976,9 +937,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   appHeader: {
     bg: 'var(--color-panel)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 82%, transparent)',
     radius: '0px',
-    shadow: 'none',
     padding: '16px',
     gap: '12px',
     height: '64px',
@@ -994,10 +953,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'badge-radius': '999px'
   },
   avatar: {
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: '999px',
-    shadow: '0 1px 2px rgba(2, 6, 23, 0.18), 0 12px 24px rgba(2, 6, 23, 0.28)',
     'size-sm': '30px',
     'size-md': '40px',
     'size-lg': '52px',
@@ -1541,7 +1497,60 @@ export function themeToVariables(tokens: ThemeTokens): Record<string, string> {
   return resolvedThemeVariables(createThemeTokens(tokens));
 }
 
-function resolvedThemeVariables(next: ThemeTokens): VariableMap {
+/**
+ * A theme that only sets raw colours (a dark background, a blue primary) still carries the light
+ * baseline's gray and amber 12-step scales, so the derived roles (fill, line, soft accent) would
+ * stay light and amber on it. When the scales disagree with the theme's own colours, rebuild the
+ * affected steps from those colours so a scoped dark or custom-accent theme stays coherent.
+ */
+function harmonizeScales(tokens: ThemeTokens): ThemeTokens {
+  const c = tokens.colors;
+  const palette = tokens.palette;
+  if (!palette || !c) return tokens;
+  const mix = (color: string, percent: number, base: string) => `color-mix(in srgb, ${color} ${percent}%, ${base})`;
+  const surface = c.surface || c.background;
+  const text = c.text;
+  let gray = palette.gray;
+  let accent = palette.accent;
+
+  const backgroundLuminance = c.background ? relativeLuminance(c.background) : null;
+  const grayBase = gray?.['1'] ? relativeLuminance(gray['1']) : null;
+  if (surface && text && backgroundLuminance !== null && grayBase !== null && backgroundLuminance < 0.4 !== grayBase < 0.4) {
+    gray = {
+      ...gray,
+      '2': mix(text, 4, surface),
+      '3': mix(text, 8, surface),
+      '4': mix(text, 12, surface),
+      '5': mix(text, 16, surface),
+      '6': mix(text, 20, surface),
+      '7': mix(text, 28, surface),
+      '8': mix(text, 40, surface),
+      '11': c.muted || text,
+      '12': text
+    };
+  }
+
+  const solid = accent?.['9'];
+  if (surface && text && c.primary && solid && solid.trim().toLowerCase() !== c.primary.trim().toLowerCase()) {
+    accent = {
+      ...accent,
+      '2': mix(c.primary, 6, surface),
+      '3': mix(c.primary, 14, surface),
+      '4': mix(c.primary, 20, surface),
+      '5': mix(c.primary, 26, surface),
+      '7': mix(c.primary, 42, surface),
+      '9': c.primary,
+      '10': c.primaryHover || c.primary,
+      '11': mix(c.primary, 60, text)
+    };
+  }
+
+  if (gray === palette.gray && accent === palette.accent) return tokens;
+  return { ...tokens, palette: { ...palette, gray, accent } };
+}
+
+function resolvedThemeVariables(raw: ThemeTokens): VariableMap {
+  const next = harmonizeScales(raw);
   const target: VariableMap = {};
   setOn(target, '--ui-color-primary', next.colors.primary);
   setOn(target, '--ui-color-primary-hover', next.colors.primaryHover || next.colors.primary);

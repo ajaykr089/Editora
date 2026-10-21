@@ -115,10 +115,9 @@ const style = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background:
-      radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--ui-aspect-highlight) 70%, transparent), transparent 58%),
-      linear-gradient(180deg, color-mix(in srgb, #ffffff 36%, transparent), transparent 28%);
-    opacity: 0.9;
+    /* No sheen: the surface is flat. */
+    background: none;
+    opacity: 0;
   }
 
   .surface::after {
@@ -201,11 +200,11 @@ const style = `
     border-radius: var(--ui-aspect-badge-radius);
     padding: 3px 8px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
     line-height: 1.2;
-    color: color-mix(in srgb, var(--ui-aspect-accent) 82%, var(--ui-aspect-color) 18%);
+    color: color-mix(in srgb, var(--ui-aspect-accent) 45%, var(--ui-color-text-strong, var(--ui-aspect-color)));
     background: color-mix(in srgb, var(--ui-aspect-accent) 14%, var(--ui-color-surface, #ffffff));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-aspect-accent) 24%, transparent);
     pointer-events: none;
@@ -231,8 +230,7 @@ const style = `
   }
 
   :host([interactive]):hover .frame {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(15, 23, 42, 0.08), 0 22px 42px rgba(15, 23, 42, 0.14);
+    box-shadow: var(--shadow-3, 0 4px 12px rgba(15, 23, 42, 0.12));
     border-color: color-mix(in srgb, var(--ui-aspect-accent) 34%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
   }
 

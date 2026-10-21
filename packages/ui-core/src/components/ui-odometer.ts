@@ -29,10 +29,10 @@ const style = `
     --ui-odometer-container-bg: transparent;
     --ui-odometer-container-border: none;
     --ui-odometer-container-radius: 999px;
-    --ui-odometer-digit-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(226, 232, 240, 0.9));
-    --ui-odometer-digit-border: 1px solid rgba(148, 163, 184, 0.35);
+    --ui-odometer-digit-bg: var(--ui-color-fill, #f0f0f0);
+    --ui-odometer-digit-border: 1px solid var(--ui-color-line-subtle, rgba(148, 163, 184, 0.35));
     --ui-odometer-digit-radius: 0.18em;
-    --ui-odometer-digit-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 1px 2px rgba(15, 23, 42, 0.12);
+    --ui-odometer-digit-shadow: none;
     --ui-odometer-separator-opacity: 0.7;
     --ui-odometer-affix-opacity: 0.82;
 

@@ -159,8 +159,7 @@ const style = `
   }
 
   :host([interactive]:not([disabled])):hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.09), 0 22px 44px rgba(2, 6, 23, 0.14);
+    box-shadow: var(--shadow-3, 0 4px 12px rgba(15, 23, 42, 0.12));
   }
 
   :host([interactive]:not([disabled])):active {

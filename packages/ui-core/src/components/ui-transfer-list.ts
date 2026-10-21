@@ -16,20 +16,20 @@ const style = `
     --ui-transfer-muted: var(--ui-color-muted, #526175);
     --ui-transfer-shell-bg: transparent;
     --ui-transfer-shell-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 84%, transparent);
-    --ui-transfer-shell-border: 1px solid var(--ui-transfer-shell-border-color);
+    --ui-transfer-shell-border: 0;
     --ui-transfer-shell-shadow: none;
     --ui-transfer-shell-backdrop: none;
     --ui-transfer-panel-bg: var(--ui-color-surface, #ffffff);
-    --ui-transfer-panel-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-transfer-panel-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent));
     --ui-transfer-panel-border: 1px solid var(--ui-transfer-panel-border-color);
     --ui-transfer-panel-shadow: none;
     --ui-transfer-panel-backdrop: none;
     --ui-transfer-item-bg: color-mix(in srgb, var(--ui-transfer-panel-bg) 96%, transparent);
-    --ui-transfer-item-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-transfer-item-border-color: transparent;
     --ui-transfer-item-border: 1px solid var(--ui-transfer-item-border-color);
-    --ui-transfer-item-hover-bg: color-mix(in srgb, var(--ui-transfer-accent) 6%, var(--ui-transfer-panel-bg));
+    --ui-transfer-item-hover-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-transfer-accent) 6%, var(--ui-transfer-panel-bg)));
     --ui-transfer-item-hover-border-color: color-mix(in srgb, var(--ui-transfer-accent) 12%, var(--ui-transfer-item-border-color));
-    --ui-transfer-item-selected-bg: color-mix(in srgb, var(--ui-transfer-accent) 11%, var(--ui-transfer-panel-bg));
+    --ui-transfer-item-selected-bg: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-transfer-accent) 11%, var(--ui-transfer-panel-bg)));
     --ui-transfer-item-selected-border-color: color-mix(in srgb, var(--ui-transfer-accent) 28%, var(--ui-transfer-item-border-color));
     --ui-transfer-item-selected-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-transfer-accent) 10%, transparent);
     --ui-transfer-action-bg: color-mix(in srgb, var(--ui-transfer-accent) 8%, var(--ui-transfer-panel-bg));
@@ -43,13 +43,13 @@ const style = `
     --ui-transfer-check-accent: var(--ui-transfer-accent);
     --ui-transfer-indicator-size: 18px;
     --ui-transfer-gap: 16px;
-    --ui-transfer-shell-padding: 16px;
+    --ui-transfer-shell-padding: 0px;
     --ui-transfer-panel-padding: 12px;
     --ui-transfer-panel-gap: 10px;
-    --ui-transfer-panel-radius: 20px;
-    --ui-transfer-shell-radius: calc(var(--ui-transfer-panel-radius) + 8px);
-    --ui-transfer-item-radius: 14px;
-    --ui-transfer-action-radius: 14px;
+    --ui-transfer-panel-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-transfer-shell-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-transfer-item-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-transfer-action-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-transfer-label-size: 14px;
     --ui-transfer-label-line-height: 20px;
     --ui-transfer-description-size: 13px;
@@ -89,12 +89,12 @@ const style = `
   :host([size="sm"]),
   :host([size="1"]) {
     --ui-transfer-gap: 12px;
-    --ui-transfer-shell-padding: 12px;
+    --ui-transfer-shell-padding: 0px;
     --ui-transfer-panel-padding: 10px;
     --ui-transfer-panel-gap: 8px;
-    --ui-transfer-panel-radius: 16px;
-    --ui-transfer-item-radius: 12px;
-    --ui-transfer-action-radius: 12px;
+    --ui-transfer-panel-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-transfer-item-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-transfer-action-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-transfer-label-size: 13px;
     --ui-transfer-label-line-height: 18px;
     --ui-transfer-description-size: 12px;
@@ -125,12 +125,12 @@ const style = `
   :host([size="md"]),
   :host([size="2"]) {
     --ui-transfer-gap: 16px;
-    --ui-transfer-shell-padding: 16px;
+    --ui-transfer-shell-padding: 0px;
     --ui-transfer-panel-padding: 12px;
     --ui-transfer-panel-gap: 10px;
-    --ui-transfer-panel-radius: 20px;
-    --ui-transfer-item-radius: 14px;
-    --ui-transfer-action-radius: 14px;
+    --ui-transfer-panel-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-transfer-item-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-transfer-action-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-transfer-label-size: 14px;
     --ui-transfer-label-line-height: 20px;
     --ui-transfer-description-size: 13px;
@@ -161,12 +161,12 @@ const style = `
   :host([size="lg"]),
   :host([size="3"]) {
     --ui-transfer-gap: 18px;
-    --ui-transfer-shell-padding: 18px;
+    --ui-transfer-shell-padding: 0px;
     --ui-transfer-panel-padding: 14px;
     --ui-transfer-panel-gap: 12px;
-    --ui-transfer-panel-radius: 24px;
-    --ui-transfer-item-radius: 16px;
-    --ui-transfer-action-radius: 16px;
+    --ui-transfer-panel-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-transfer-item-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-transfer-action-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-transfer-label-size: 15px;
     --ui-transfer-label-line-height: 22px;
     --ui-transfer-description-size: 14px;
@@ -329,7 +329,7 @@ const style = `
   .label {
     font-size: var(--ui-transfer-label-size);
     line-height: var(--ui-transfer-label-line-height);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--ui-transfer-text);
   }
 
@@ -391,7 +391,7 @@ const style = `
     min-inline-size: 0;
     font-size: var(--ui-transfer-title-size);
     line-height: var(--ui-transfer-title-line-height);
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--ui-transfer-muted);
@@ -409,7 +409,7 @@ const style = `
     color: color-mix(in srgb, var(--ui-transfer-accent) 76%, var(--ui-transfer-text));
     font-size: var(--ui-transfer-summary-size);
     line-height: 1;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .panel-help,
@@ -457,7 +457,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-transfer-accent) 26%, var(--ui-transfer-item-border-color));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-transfer-accent) 14%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--ui-transfer-accent) 45%, transparent),
       var(--ui-transfer-item-selected-shadow);
   }
 
@@ -604,13 +604,12 @@ const style = `
 
   .move-btn:hover:not(:disabled) {
     background: var(--ui-transfer-action-hover-bg);
-    transform: translateY(-1px);
   }
 
   .move-btn:focus-visible {
     outline: none;
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-transfer-accent) 16%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--ui-transfer-accent) 45%, transparent),
       var(--ui-transfer-action-shadow);
   }
 
@@ -639,7 +638,7 @@ const style = `
   .move-btn-text {
     font-size: var(--ui-transfer-button-size);
     line-height: var(--ui-transfer-button-line-height);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .move-btn-count {

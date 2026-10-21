@@ -89,19 +89,10 @@ const style = `
     --ui-spinning-text-rotation: 1turn;
     --ui-spinning-text-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-spinning-text-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-spinning-text-bg:
-      radial-gradient(
-        circle at 50% 50%,
-        color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 92%, transparent) 0%,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 62%,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent) 100%
-      );
-    --ui-spinning-text-border-color:
-      color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 84%, transparent);
+    --ui-spinning-text-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-spinning-text-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-spinning-text-border: 1px solid var(--ui-spinning-text-border-color);
-    --ui-spinning-text-shadow:
-      0 1px 3px rgba(15, 23, 42, 0.06),
-      0 24px 44px rgba(15, 23, 42, 0.12);
+    --ui-spinning-text-shadow: none;
     --ui-spinning-text-backdrop: none;
     --ui-spinning-text-orbit-color:
       color-mix(in srgb, var(--ui-spinning-text-accent) 18%, var(--ui-spinning-text-border-color));
@@ -389,7 +380,7 @@ const style = `
     outline: none;
     border-color: color-mix(in srgb, var(--ui-spinning-text-focus-ring) 24%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-spinning-text-focus-ring) 18%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-spinning-text-focus-ring)),
       var(--ui-spinning-text-shadow);
   }
 

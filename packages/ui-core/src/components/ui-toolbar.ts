@@ -10,10 +10,10 @@ import {
 const style = `
   :host {
     --ui-toolbar-gap: 8px;
-    --ui-toolbar-padding: 8px;
-    --ui-toolbar-radius: 12px;
-    --ui-toolbar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-toolbar-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-toolbar-padding: 4px;
+    --ui-toolbar-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-toolbar-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-toolbar-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-toolbar-shadow:
       none;
 
@@ -82,15 +82,15 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-toolbar-gap: 6px;
-    --ui-toolbar-padding: 6px;
-    --ui-toolbar-radius: 10px;
+    --ui-toolbar-gap: 4px;
+    --ui-toolbar-padding: 2px;
+    --ui-toolbar-radius: var(--ui-radius, 6px);
   }
 
   :host([size="lg"]) {
-    --ui-toolbar-gap: 10px;
-    --ui-toolbar-padding: 10px;
-    --ui-toolbar-radius: 14px;
+    --ui-toolbar-gap: 6px;
+    --ui-toolbar-padding: 6px;
+    --ui-toolbar-radius: calc(var(--ui-radius, 6px) + 4px);
   }
 
   :host([density="compact"]) {
@@ -214,7 +214,22 @@ export class UIToolbar extends ElementBase {
     focusRovingItem(target);
   }
 
+  /** A contrast toolbar is a dark surface: its toggles that set no variant of their own follow it. */
+  private _inheritToggleVariant(): void {
+    const contrast = this.getAttribute('variant') === 'contrast';
+    this.querySelectorAll('ui-toggle').forEach((toggle) => {
+      if (contrast && !toggle.hasAttribute('variant')) {
+        toggle.setAttribute('variant', 'contrast');
+        toggle.setAttribute('data-inherited-variant', '');
+      } else if (!contrast && toggle.hasAttribute('data-inherited-variant')) {
+        toggle.removeAttribute('variant');
+        toggle.removeAttribute('data-inherited-variant');
+      }
+    });
+  }
+
   private _syncRovingState(): void {
+    this._inheritToggleVariant();
     const items = this._focusables();
     if (!items.length) return;
     const active = items.find((item) => item === document.activeElement) || items[resolveRovingFocusIndex(items, { getDisabled: () => false })];

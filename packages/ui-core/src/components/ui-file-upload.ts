@@ -27,9 +27,9 @@ type UploadEntry = {
 
 const style = `
   :host {
-    --ui-file-upload-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-file-upload-border-color: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent));
     --ui-file-upload-border: 1px solid var(--ui-file-upload-border-color);
-    --ui-file-upload-radius: var(--ui-radius, 12px);
+    --ui-file-upload-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-file-upload-bg: var(--ui-color-surface, #ffffff);
     --ui-file-upload-text: var(--ui-color-text, #0f172a);
     --ui-file-upload-muted: var(--ui-color-muted, #526175);
@@ -101,10 +101,16 @@ const style = `
     box-sizing: border-box;
   }
 
+  :host(:not([disabled])) .surface:hover:not([data-dragging="true"]) {
+    border-color: var(--ui-color-line-strong, var(--ui-file-upload-border-color));
+    background: color-mix(in srgb, currentColor 2%, var(--ui-file-upload-bg));
+  }
+
   .surface[data-dragging="true"] {
-    border-color: color-mix(in srgb, var(--ui-file-upload-focus) 62%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-file-upload-focus) 18%, transparent);
-    transform: translateY(-1px);
+    border-color: var(--ui-file-upload-focus);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-file-upload-focus);
+    outline-offset: -1px;
+    background: color-mix(in srgb, var(--ui-file-upload-focus) 6%, var(--ui-file-upload-bg));
   }
 
   :host([surface="dropzone"]) .surface {
@@ -112,16 +118,10 @@ const style = `
     justify-items: center;
     text-align: center;
     min-block-size: 168px;
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-file-upload-bg) 94%, #ffffff 6%),
-        var(--ui-file-upload-bg)
-      );
   }
 
   .headline {
-    font: 600 14px/1.35 "Inter", "IBM Plex Sans", sans-serif;
+    font: 500 14px/1.35 "Inter", "IBM Plex Sans", sans-serif;
   }
 
   .subline {
@@ -135,12 +135,24 @@ const style = `
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: 999px;
-    padding: 8px 12px;
-    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
-    font: 600 12px/1 "Inter", "IBM Plex Sans", sans-serif;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    min-height: var(--ui-control-height-2, 32px);
+    padding: 0 12px;
+    /* A primary button: the theme's text colour on its fill (the tinted version was unreadable on amber). */
+    background: var(--ui-color-primary, #2563eb);
+    color: var(--ui-color-foreground-on-primary, #ffffff);
+    font: 500 14px/1 "Inter", "IBM Plex Sans", sans-serif;
     cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+
+  .cta:hover {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 88%, #000);
+  }
+
+  .cta:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-color-primary, #2563eb));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .list {
@@ -155,9 +167,9 @@ const style = `
     justify-content: space-between;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-file-upload-border-color) 70%, transparent);
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--ui-file-upload-bg) 97%, transparent);
+    border: 1px solid var(--ui-file-upload-border-color);
+    border-radius: var(--ui-file-upload-radius);
+    background: transparent;
   }
 
   .actions[hidden] {
@@ -192,15 +204,15 @@ const style = `
     gap: 10px;
     align-items: center;
     padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-file-upload-border-color) 76%, transparent);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--ui-file-upload-bg) 94%, transparent);
+    border: 1px solid var(--ui-file-upload-border-color);
+    border-radius: var(--ui-file-upload-radius);
+    background: transparent;
   }
 
   .preview {
     inline-size: 38px;
     block-size: 38px;
-    border-radius: 10px;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     background: color-mix(in srgb, var(--ui-file-upload-text) 8%, transparent);
     overflow: hidden;
     display: inline-grid;
@@ -257,12 +269,12 @@ const style = `
 
   .status[data-state="pending"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%));
   }
 
   .status[data-state="uploading"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%);
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%));
   }
 
   .status[data-state="success"] {
@@ -297,7 +309,16 @@ const style = `
   .progress-bar {
     block-size: 100%;
     border-radius: inherit;
-    background: color-mix(in srgb, var(--ui-file-upload-success) 74%, transparent);
+    background: var(--ui-color-primary, #2563eb);
+    transition: inline-size 200ms ease;
+  }
+
+  .progress-bar[data-state="success"] {
+    background: var(--ui-file-upload-success);
+  }
+
+  .progress-bar[data-state="error"] {
+    background: var(--ui-file-upload-danger);
   }
 
   .progress-text {
@@ -307,13 +328,24 @@ const style = `
   }
 
   .file-remove {
-    border: none;
-    border-radius: 999px;
-    padding: 6px 9px;
-    background: color-mix(in srgb, currentColor 8%, transparent);
+    border: 1px solid var(--ui-file-upload-border-color);
+    border-radius: var(--ui-control-radius-1, var(--ui-radius, 6px));
+    min-block-size: var(--ui-control-height-1, 24px);
+    padding: 0 8px;
+    background: transparent;
     color: inherit;
     cursor: pointer;
-    font: 600 11px/1 "Inter", sans-serif;
+    font: 500 12px/1 "Inter", sans-serif;
+    transition: background-color 120ms ease;
+  }
+
+  .file-remove:hover {
+    background: var(--ui-color-fill-hover, color-mix(in srgb, currentColor 8%, transparent));
+  }
+
+  .file-remove:focus-visible {
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-file-upload-focus));
+    outline-offset: var(--ui-ring-offset, 1px);
   }
 
   .file-remove[data-tone="danger"] {
@@ -321,8 +353,9 @@ const style = `
   }
 
   .file-remove[data-variant="primary"] {
+    border-color: transparent;
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%);
+    color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%));
   }
 
   .file-error {
@@ -346,6 +379,15 @@ const style = `
   .meta[hidden],
   .list[hidden] {
     display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surface,
+    .cta,
+    .file-remove,
+    .progress-bar {
+      transition: none !important;
+    }
   }
 
   :host([disabled]) .surface,
@@ -965,6 +1007,7 @@ export class UIFileUpload extends ElementBase {
         track.className = 'progress-track';
         const bar = document.createElement('div');
         bar.className = 'progress-bar';
+        bar.dataset.state = uploadEntry.state;
         bar.style.inlineSize = `${progressValue}%`;
         track.append(bar);
 

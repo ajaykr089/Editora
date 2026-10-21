@@ -198,12 +198,11 @@ const style = `
   :host([interactive]):focus-visible .badge {
     border-color: color-mix(in srgb, var(--ui-badge-accent) 52%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-badge-accent) 26%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--ui-badge-accent) 45%, transparent),
       0 10px 22px rgba(15, 23, 42, 0.14);
   }
 
   :host([interactive]:not([disabled])):hover .badge {
-    transform: translateY(-1px);
     border-color: color-mix(in srgb, var(--ui-badge-accent) 36%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
     box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 14px 26px rgba(15, 23, 42, 0.14);
   }
@@ -237,7 +236,7 @@ const style = `
     height: var(--ui-badge-dot-size);
     border-radius: 999px;
     background: var(--ui-badge-dot-color);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-badge-dot-color) 24%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-badge-dot-color) 45%, transparent);
     flex: 0 0 auto;
   }
 

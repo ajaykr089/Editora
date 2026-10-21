@@ -6,7 +6,7 @@ const style = `
     --ui-app-header-height: var(--base-app-header-height, 64px);
     --ui-app-header-height-dense: var(--base-app-header-height-dense, 52px);
     --ui-app-header-height-large: 76px;
-    --ui-app-header-bg-base: var(--base-app-header-bg, var(--color-panel, var(--ui-color-surface, #ffffff)));
+    --ui-app-header-bg-base: var(--base-app-header-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-app-header-bg: var(--ui-app-header-bg-base);
     --ui-app-header-sticky-bg-base: var(--base-app-header-sticky-bg, var(--ui-color-surface, #ffffff));
     --ui-app-header-surface-bg: var(--ui-app-header-bg);
@@ -14,7 +14,7 @@ const style = `
     --ui-app-header-color: var(--ui-color-text, var(--ui-text, #202020));
     --ui-app-header-muted: color-mix(in srgb, var(--ui-app-header-color) 56%, var(--ui-color-muted, var(--ui-muted, #646464)) 44%);
     --ui-app-header-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-app-header-border-color: color-mix(in srgb, var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14))) 84%, transparent);
+    --ui-app-header-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14))) 84%, transparent));
     --ui-app-header-border: var(--base-app-header-border, 1px solid var(--ui-app-header-border-color));
     --ui-app-header-control-bg: color-mix(in srgb, var(--ui-app-header-bg-base) 90%, transparent);
     --ui-app-header-control-bg-hover: color-mix(in srgb, var(--ui-app-header-accent) 8%, var(--ui-app-header-bg-base));

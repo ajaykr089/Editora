@@ -23,12 +23,12 @@ const LIGHT_DOM_STYLE = `
     --ui-accordion-surface-alt-base: var(--color-surface, var(--ui-color-surface-alt, #f8fafc));
     --ui-accordion-surface: var(--ui-accordion-surface-base);
     --ui-accordion-surface-alt: var(--ui-accordion-surface-alt-base);
-    --ui-accordion-hover-surface: color-mix(in srgb, var(--ui-accordion-accent) 6%, var(--ui-accordion-surface-alt));
-    --ui-accordion-open-surface: color-mix(in srgb, var(--ui-accordion-accent) 5%, var(--ui-accordion-surface));
+    --ui-accordion-hover-surface: var(--ui-color-fill, color-mix(in srgb, var(--ui-accordion-accent) 6%, var(--ui-accordion-surface-alt)));
+    --ui-accordion-open-surface: var(--ui-accordion-surface);
     --ui-accordion-text: var(--ui-color-text, var(--ui-text, #202020));
     --ui-accordion-muted: var(--ui-color-muted, var(--ui-muted, #646464));
     --ui-accordion-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
-    --ui-accordion-shadow: var(--base-card-shadow, var(--shadow-2, none));
+    --ui-accordion-shadow: var(--base-card-shadow, none);
     --ui-accordion-duration: 190ms;
     --ui-accordion-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-accordion-padding-x: 16px;
@@ -36,7 +36,7 @@ const LIGHT_DOM_STYLE = `
     --ui-accordion-gap: var(--ui-default-gap, 8px);
     --ui-accordion-title-size: var(--ui-default-font-size, 14px);
     --ui-accordion-title-line-height: var(--ui-default-line-height, 20px);
-    --ui-accordion-title-weight: 600;
+    --ui-accordion-title-weight: 500;
     --ui-accordion-description-size: 12px;
     --ui-accordion-description-line-height: 16px;
     --ui-accordion-panel-size: 14px;
@@ -165,7 +165,7 @@ const LIGHT_DOM_STYLE = `
     inset-block: 0;
     inset-inline-start: 0;
     inline-size: 0;
-    background: linear-gradient(180deg, var(--ui-accordion-accent) 0%, color-mix(in srgb, var(--ui-accordion-accent) 70%, #0f172a 30%) 100%);
+    background: var(--ui-accordion-accent);
     transition: inline-size var(--ui-accordion-duration) var(--ui-accordion-easing);
     pointer-events: none;
   }
@@ -178,7 +178,8 @@ const LIGHT_DOM_STYLE = `
     inline-size: var(--ui-accordion-indicator-size);
   }
 
-  ui-accordion[data-ui-accordion-root="true"][indicator="none"] > [data-ui-accordion-item]::before {
+  /* The accent bar on an open item is opt-in: indicator="line". */
+  ui-accordion[data-ui-accordion-root="true"]:not([indicator="line"]) > [data-ui-accordion-item]::before {
     display: none;
   }
 
@@ -211,11 +212,11 @@ const LIGHT_DOM_STYLE = `
   }
 
   ui-accordion[data-ui-accordion-root="true"] > [data-ui-accordion-item][open] [data-ui-accordion-trigger] {
-    color: color-mix(in srgb, var(--ui-accordion-text) 82%, var(--ui-accordion-accent) 18%);
+    color: var(--ui-accordion-text);
   }
 
   ui-accordion[data-ui-accordion-root="true"] [data-ui-accordion-trigger]:focus-visible {
-    outline: 2px solid var(--ui-accordion-focus-ring);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-accordion-focus-ring));
     outline-offset: -2px;
     position: relative;
     z-index: 1;
@@ -246,12 +247,12 @@ const LIGHT_DOM_STYLE = `
     border-radius: var(--ui-accordion-badge-radius);
     padding: 3px 8px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.02em;
     text-transform: uppercase;
     line-height: 1.2;
     background: color-mix(in srgb, var(--ui-accordion-accent) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-accordion-accent) 68%, var(--ui-accordion-text) 32%);
+    color: color-mix(in srgb, var(--ui-accordion-accent) 45%, var(--ui-color-text-strong, var(--ui-accordion-text)));
   }
 
   ui-accordion[data-ui-accordion-root="true"] [data-ui-accordion-chevron] {

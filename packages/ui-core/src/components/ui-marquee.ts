@@ -19,28 +19,25 @@ const style = `
     --ui-marquee-padding-block: 12px;
     --ui-marquee-content-align: center;
     --ui-marquee-min-block-size: 56px;
-    --ui-marquee-radius: var(--base-marquee-radius, 18px);
+    --ui-marquee-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-marquee-bg: var(--base-marquee-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-marquee-color: var(--ui-color-text, var(--ui-text, #202020));
-    --ui-marquee-border-color:
-      color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent);
+    --ui-marquee-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-marquee-border: 1px solid var(--ui-marquee-border-color);
-    --ui-marquee-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 16px 30px rgba(15, 23, 42, 0.08);
+    --ui-marquee-shadow: none;
     --ui-marquee-backdrop: none;
     --ui-marquee-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-marquee-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
 
-    --ui-marquee-item-radius: 999px;
+    --ui-marquee-item-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-marquee-item-padding-inline: 14px;
     --ui-marquee-item-padding-block: 8px;
     --ui-marquee-item-gap: 8px;
     --ui-marquee-item-min-block-size: 36px;
     --ui-marquee-item-font-size: 13px;
     --ui-marquee-item-line-height: 1.25;
-    --ui-marquee-item-bg: color-mix(in srgb, var(--ui-marquee-accent) 8%, transparent);
-    --ui-marquee-item-border: 1px solid color-mix(in srgb, var(--ui-marquee-accent) 18%, transparent);
+    --ui-marquee-item-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-marquee-accent) 8%, transparent));
+    --ui-marquee-item-border: 1px solid transparent;
     --ui-marquee-item-shadow: none;
     --ui-marquee-item-backdrop: none;
     --ui-marquee-item-color: inherit;
@@ -402,7 +399,7 @@ const style = `
   :host([pause-on-focus]:focus-within) .viewport {
     border-color: color-mix(in srgb, var(--ui-marquee-accent) 24%, var(--ui-marquee-border-color));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-marquee-focus-ring) 22%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-marquee-focus-ring)),
       var(--ui-marquee-shadow);
   }
 

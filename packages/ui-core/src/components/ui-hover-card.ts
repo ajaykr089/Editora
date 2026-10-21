@@ -9,16 +9,16 @@ type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 const style = `
   :host {
     --ui-hover-card-z: 1700;
-    --ui-hover-card-radius: var(--base-card-radius, var(--ui-radius, 6px));
-    --ui-hover-card-bg: var(--base-card-bg, var(--color-panel, var(--ui-color-surface, var(--ui-surface, #ffffff))));
+    --ui-hover-card-radius: var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px));
+    --ui-hover-card-bg: var(--base-card-bg, var(--color-panel-solid, var(--ui-color-surface, var(--ui-surface, #ffffff))));
     --ui-hover-card-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-hover-card-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-hover-card-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-hover-card-border: var(--base-card-border, 1px solid var(--ui-hover-card-border-color));
-    --ui-hover-card-shadow: var(--base-card-shadow, var(--shadow-3, none));
-    --ui-hover-card-padding: var(--ui-default-gap, 8px);
+    --ui-hover-card-shadow: var(--base-panel-shadow, var(--shadow-5, none));
+    --ui-hover-card-padding: 16px;
     --ui-hover-card-min-width: 220px;
     --ui-hover-card-max-width: min(380px, calc(100vw - 16px));
-    --ui-hover-card-backdrop: var(--base-panel-backdrop, var(--backdrop-filter-panel, none));
+    --ui-hover-card-backdrop: none;
     --ui-hover-card-arrow-size: 10px;
     --ui-hover-card-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-hover-card-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));

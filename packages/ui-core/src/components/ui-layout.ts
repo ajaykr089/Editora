@@ -3,11 +3,11 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     --ui-layout-bg: var(--ui-color-background, #f8fafc);
-    --ui-layout-surface: var(--ui-color-surface, #ffffff);
+    --ui-layout-surface: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-layout-color: var(--ui-color-text, #0f172a);
-    --ui-layout-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 80%, transparent);
+    --ui-layout-border: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-layout-shadow: none;
-    --ui-layout-radius: 18px;
+    --ui-layout-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-layout-gap: 14px;
     --ui-layout-padding: 14px;
     --ui-layout-header-padding: 12px 14px;

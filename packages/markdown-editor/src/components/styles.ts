@@ -383,7 +383,7 @@ export const MARKDOWN_EDITOR_CSS = `
 }
 .md-preview .footnotes ol { margin: 0.5em 0 0; }
 .md-preview .footnotes li > p { margin: 0 0 0.25em; }
-.md-preview a[data-footnote-backref] { margin-left: 0.25em; text-decoration: none; }
+.md-preview a[data-footnote-backref] { margin-left: 0.25em; text-decoration: underline; }
 .md-preview .sr-only {
   position: absolute;
   width: 1px;

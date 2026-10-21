@@ -12,7 +12,7 @@ const style = `
     --ui-container-max-xl: 1440px;
     --ui-container-bg: transparent;
     --ui-container-border: transparent;
-    --ui-container-radius: 14px;
+    --ui-container-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-container-shadow: none;
     --ui-container-color: inherit;
   }
@@ -38,18 +38,14 @@ const style = `
   :host([variant="surface"]) {
     --ui-container-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-container-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
-    --ui-container-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.05),
-      0 12px 28px rgba(2, 6, 23, 0.08);
+    --ui-container-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
     --ui-container-color: var(--ui-color-text, #0f172a);
   }
 
   :host([variant="elevated"]) {
     --ui-container-bg: var(--ui-color-surface, #ffffff);
     --ui-container-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 64%, transparent);
-    --ui-container-shadow:
-      0 2px 10px rgba(2, 6, 23, 0.1),
-      0 30px 64px rgba(2, 6, 23, 0.15);
+    --ui-container-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
     --ui-container-color: var(--ui-color-text, #0f172a);
   }
 
@@ -61,9 +57,7 @@ const style = `
         color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, transparent)
       );
     --ui-container-border: color-mix(in srgb, #ffffff 64%, var(--ui-color-border, #cbd5e1));
-    --ui-container-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.07),
-      0 20px 48px rgba(2, 6, 23, 0.14);
+    --ui-container-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
     --ui-container-color: var(--ui-color-text, #0f172a);
   }
 

@@ -15,16 +15,16 @@ type CollapsibleToggleDetail = {
 
 const style = `
   :host {
-    --ui-collapsible-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent);
-    --ui-collapsible-surface: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, #ffffff 2%);
-    --ui-collapsible-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-collapsible-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-collapsible-surface: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-collapsible-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent));
     --ui-collapsible-text: var(--ui-color-text, #0f172a);
     --ui-collapsible-muted: var(--ui-color-muted, #526175);
     --ui-collapsible-accent: var(--ui-color-primary, #2563eb);
-    --ui-collapsible-radius: 14px;
+    --ui-collapsible-radius: calc(var(--ui-radius, 6px) + 2px);
     --ui-collapsible-shadow: none;
 
-    --ui-collapsible-header-min-h: 46px;
+    --ui-collapsible-header-min-h: 40px;
     --ui-collapsible-padding-x: 14px;
     --ui-collapsible-padding-y: 11px;
 
@@ -106,10 +106,6 @@ const style = `
     box-shadow: none;
   }
 
-  .shell[data-open="true"] {
-    border-color: color-mix(in srgb, var(--ui-collapsible-accent) 34%, var(--ui-collapsible-border));
-  }
-
   .shell[data-disabled="true"] {
     opacity: 0.72;
   }
@@ -174,7 +170,7 @@ const style = `
     white-space: nowrap;
     font-size: 14px;
     line-height: 1.3;
-    font-weight: 650;
+    font-weight: 500;
     letter-spacing: 0.01em;
   }
 
@@ -236,7 +232,7 @@ const style = `
 
   .shell[data-open="true"] .panel {
     grid-template-rows: 1fr;
-    border-top-color: color-mix(in srgb, var(--ui-collapsible-accent) 20%, var(--ui-collapsible-border));
+    border-top-color: var(--ui-collapsible-border);
   }
 
   .panel-inner {

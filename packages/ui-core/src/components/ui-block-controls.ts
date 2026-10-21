@@ -8,7 +8,7 @@ const style = `
     --ui-block-controls-padding: var(--base-block-controls-padding, 8px);
     --ui-block-controls-radius: var(--base-block-controls-radius, var(--ui-radius, 6px));
     --ui-block-controls-border: var(--base-block-controls-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 88%, transparent));
-    --ui-block-controls-bg: var(--base-block-controls-bg, var(--color-panel, var(--ui-color-surface, #ffffff)));
+    --ui-block-controls-bg: var(--base-block-controls-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-block-controls-shadow: var(--base-block-controls-shadow, var(--shadow-2, none));
     --ui-block-controls-accent: var(--ui-color-primary, #2563eb);
     --ui-block-controls-focus-ring: var(--ui-color-focus-ring, #2563eb);
@@ -79,12 +79,11 @@ const style = `
   .toolbar:focus-within {
     border-color: color-mix(in srgb, var(--ui-block-controls-focus-ring) 52%, transparent);
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-block-controls-focus-ring) 22%, transparent),
+      0 0 0 2px var(--ui-ring-color, var(--ui-block-controls-focus-ring)),
       0 14px 30px rgba(15, 23, 42, 0.14);
   }
 
   :host(:not([disabled])):hover .toolbar {
-    transform: translateY(-1px);
   }
 
   :host([orientation="vertical"]) .toolbar {

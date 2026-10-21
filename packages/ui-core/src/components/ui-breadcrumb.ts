@@ -9,12 +9,12 @@ const style = `
     --ui-breadcrumb-item-padding-block: var(--base-breadcrumb-item-padding-block, 4px);
     --ui-breadcrumb-item-padding-inline: var(--base-breadcrumb-item-padding-inline, 9px);
     --ui-breadcrumb-accent: var(--ui-color-primary, #2563eb);
-    --ui-breadcrumb-color: color-mix(in srgb, var(--ui-color-muted, #526175) 76%, var(--ui-color-text, #0f172a) 24%);
+    --ui-breadcrumb-color: var(--ui-color-text-secondary, color-mix(in srgb, var(--ui-color-muted, #526175) 76%, var(--ui-color-text, #0f172a) 24%));
     --ui-breadcrumb-muted: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 70%, transparent);
-    --ui-breadcrumb-current: var(--ui-color-text, #0f172a);
-    --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 10%, var(--ui-color-surface, #ffffff));
+    --ui-breadcrumb-current: var(--ui-color-text-strong, var(--ui-color-text, #0f172a));
+    --ui-breadcrumb-hover-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-breadcrumb-accent) 10%, var(--ui-color-surface, #ffffff)));
     --ui-breadcrumb-focus-ring: var(--ui-color-focus-ring, #2563eb);
-    --ui-breadcrumb-current-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 12%, var(--ui-color-surface, #ffffff));
+    --ui-breadcrumb-current-bg: transparent;
     --ui-breadcrumb-separator-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 22%, transparent);
     --ui-breadcrumb-shadow: var(--base-breadcrumb-shadow, none);
     color-scheme: light dark;
@@ -87,29 +87,23 @@ const style = `
     cursor: pointer;
     text-decoration: none;
     font: inherit;
-    transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+    transition: background-color 150ms ease, color 150ms ease;
   }
 
   .crumb-action:hover {
     background: var(--ui-breadcrumb-hover-bg);
     color: var(--ui-breadcrumb-current);
-    transform: translateY(-1px);
-  }
-
-  .crumb-action:active {
-    transform: translateY(0);
   }
 
   .crumb-action:focus-visible {
-    outline: 2px solid var(--ui-breadcrumb-focus-ring);
-    outline-offset: 1px;
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-breadcrumb-focus-ring));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .crumb-current {
     color: var(--ui-breadcrumb-current);
-    font-weight: 620;
+    font-weight: 500;
     background: var(--ui-breadcrumb-current-bg);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-breadcrumb-accent) 26%, transparent);
   }
 
   .crumb-disabled {

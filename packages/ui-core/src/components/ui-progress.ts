@@ -10,22 +10,17 @@ const style = `
   :host {
     display: block;
     width: 100%;
-    --ui-progress-bg: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 45%, transparent);
+    --ui-progress-bg: var(--ui-color-fill-active, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 45%, transparent));
     --ui-progress-fill: var(--ui-color-primary, #2563eb);
-    --ui-progress-fill-soft:
-      linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--ui-progress-fill, #2563eb) 82%, white 18%),
-        var(--ui-progress-fill, #2563eb)
-      );
+    --ui-progress-fill-soft: var(--ui-progress-fill, #2563eb);
     --ui-progress-buffer: color-mix(in srgb, var(--ui-progress-fill, #2563eb) 24%, transparent);
-    --ui-progress-height: 10px;
+    --ui-progress-height: 6px;
     --ui-progress-radius: 999px;
     --ui-progress-shadow: none;
-    --ui-progress-label: #334155;
+    --ui-progress-label: var(--ui-color-text-secondary, #334155);
     --ui-progress-duration: 220ms;
     --ui-progress-easing: cubic-bezier(0.2, 0.9, 0.24, 1);
-    --ui-progress-track-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-progress-track-border: 0;
     --ui-progress-circle-size: 72px;
     --ui-progress-circle-thickness: 8px;
     --ui-progress-circle-track: color-mix(in srgb, var(--ui-progress-bg) 82%, transparent);
@@ -43,7 +38,7 @@ const style = `
     align-items: baseline;
     justify-content: space-between;
     gap: 8px;
-    font: 600 12px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    font: 500 12px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ui-progress-label);
     letter-spacing: 0.01em;
     min-height: 16px;
@@ -225,9 +220,9 @@ const style = `
   :host([shape="round"]) { --ui-progress-radius: 10px; }
   :host([shape="pill"]) { --ui-progress-radius: 999px; }
 
-  :host([size="xs"]) { --ui-progress-height: 4px; }
-  :host([size="sm"]) { --ui-progress-height: 8px; }
-  :host([size="lg"]) { --ui-progress-height: 14px; }
+  :host([size="xs"]) { --ui-progress-height: 3px; }
+  :host([size="sm"]) { --ui-progress-height: 4px; }
+  :host([size="lg"]) { --ui-progress-height: 8px; }
 
   :host([striped]) .value {
     background-image:

@@ -6,13 +6,13 @@ const style = `
     --ui-avatar-size: var(--base-avatar-size-md, 40px);
     --ui-avatar-radius: var(--base-avatar-radius, 999px);
     --ui-avatar-bg-base: var(--base-avatar-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
-    --ui-avatar-bg: var(--ui-avatar-bg-base);
-    --ui-avatar-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 78%, var(--ui-color-text, #0f172a) 22%);
+    --ui-avatar-bg: color-mix(in srgb, var(--ui-avatar-accent) 14%, var(--ui-avatar-bg-base));
+    --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 50%, var(--ui-color-text-strong, var(--ui-color-text, #0f172a)));
     --ui-avatar-muted: var(--ui-color-muted, #526175);
-    --ui-avatar-border: var(--base-avatar-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.14)) 82%, transparent));
-    --ui-avatar-ring: var(--base-avatar-shadow, 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12));
+    --ui-avatar-border: var(--base-avatar-border, 0);
+    --ui-avatar-ring: var(--base-avatar-shadow, none);
     --ui-avatar-font-size: var(--ui-default-font-size, 14px);
-    --ui-avatar-font-weight: 650;
+    --ui-avatar-font-weight: 500;
     --ui-avatar-status-size: 11px;
     --ui-avatar-status-border: var(--base-avatar-status-border, 2px solid var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-avatar-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -124,7 +124,7 @@ const style = `
   }
 
   :host([ring]) .avatar {
-    --ui-avatar-ring: 0 0 0 3px color-mix(in srgb, var(--ui-avatar-accent) 24%, transparent), 0 10px 24px color-mix(in srgb, var(--ui-avatar-accent) 20%, rgba(15, 23, 42, 0.2));
+    --ui-avatar-ring: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 45%, transparent), 0 10px 24px color-mix(in srgb, var(--ui-avatar-accent) 20%, rgba(15, 23, 42, 0.2));
   }
 
   :host([interactive]) .avatar {
@@ -137,15 +137,11 @@ const style = `
 
   :host([interactive]):focus-visible .avatar {
     border-color: color-mix(in srgb, var(--ui-avatar-accent) 52%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-avatar-accent) 26%, transparent),
-      0 10px 26px color-mix(in srgb, var(--ui-avatar-accent) 20%, rgba(15, 23, 42, 0.18));
+    box-shadow: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
   }
 
   :host([interactive]):hover .avatar {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--ui-avatar-accent) 32%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 16px 30px rgba(15, 23, 42, 0.16);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 30%, transparent);
   }
 
   :host([interactive]:active:not([disabled])) .avatar {
@@ -193,7 +189,7 @@ const style = `
 
   :host([state="error"]) .avatar {
     border-color: color-mix(in srgb, var(--ui-avatar-accent) 44%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 18%, transparent), 0 12px 24px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 40%, transparent);
   }
 
   :host([state="success"]) {
@@ -202,7 +198,7 @@ const style = `
 
   :host([state="success"]) .avatar {
     border-color: color-mix(in srgb, var(--ui-avatar-accent) 46%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 20%, transparent), 0 12px 24px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-accent) 40%, transparent);
   }
 
   :host([shape="rounded"]) .avatar {

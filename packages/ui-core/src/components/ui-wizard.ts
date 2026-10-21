@@ -23,9 +23,9 @@ type VisualStepState =
 
 const style = `
   :host {
-    --ui-wizard-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-wizard-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
     --ui-wizard-surface: color-mix(in srgb, var(--ui-color-surface, #ffffff) 99%, transparent);
-    --ui-wizard-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-wizard-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent));
     --ui-wizard-text: var(--ui-color-text, #0f172a);
     --ui-wizard-muted: var(--ui-color-muted, #526175);
     --ui-wizard-accent: var(--ui-color-primary, #2563eb);
@@ -34,7 +34,7 @@ const style = `
     --ui-wizard-warning: var(--ui-color-warning, #b45309);
     --ui-wizard-danger: var(--ui-color-danger, #dc2626);
 
-    --ui-wizard-radius: 14px;
+    --ui-wizard-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-wizard-gap: 12px;
     --ui-wizard-padding: 12px;
     --ui-wizard-step-min-width: 180px;
@@ -54,7 +54,7 @@ const style = `
     border-radius: var(--ui-wizard-radius);
     background: var(--ui-wizard-bg);
     color: var(--ui-wizard-text);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 14px 30px rgba(15, 23, 42, 0.08);
+    box-shadow: none;
     padding: var(--ui-wizard-padding);
     display: grid;
     gap: var(--ui-wizard-gap);
@@ -83,7 +83,7 @@ const style = `
     margin: 0;
     font-size: 14px;
     line-height: 1.35;
-    font-weight: 650;
+    font-weight: 500;
     letter-spacing: 0.01em;
   }
 
@@ -175,9 +175,9 @@ const style = `
   .step {
     min-inline-size: 0;
     inline-size: 100%;
-    border: 1px solid color-mix(in srgb, var(--ui-wizard-border) 88%, transparent);
-    border-radius: 12px;
-    background: var(--ui-wizard-surface);
+    border: 1px solid transparent;
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    background: transparent;
     padding: 8px 10px;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -194,17 +194,12 @@ const style = `
   }
 
   .step:hover {
-    border-color: color-mix(in srgb, var(--ui-wizard-accent) 34%, var(--ui-wizard-border));
-    background: color-mix(in srgb, var(--ui-wizard-accent) 7%, var(--ui-wizard-surface));
-  }
-
-  .step:active {
-    transform: translateY(1px);
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-wizard-accent) 7%, var(--ui-wizard-surface)));
   }
 
   .step:focus-visible {
-    outline: 2px solid var(--ui-wizard-focus);
-    outline-offset: 1px;
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-wizard-focus));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .step[disabled] {
@@ -213,9 +208,8 @@ const style = `
   }
 
   .step[data-active="true"] {
-    border-color: color-mix(in srgb, var(--ui-wizard-accent) 46%, transparent);
-    background: color-mix(in srgb, var(--ui-wizard-accent) 13%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-wizard-accent) 26%, transparent);
+    border-color: transparent;
+    background: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-wizard-accent) 13%, transparent));
   }
 
   .step-badge {
@@ -228,7 +222,7 @@ const style = `
     place-items: center;
     font-size: 11px;
     line-height: 1;
-    font-weight: 700;
+    font-weight: 600;
     background: color-mix(in srgb, var(--ui-wizard-surface) 92%, transparent);
     color: var(--ui-wizard-muted);
   }
@@ -382,13 +376,13 @@ const style = `
   }
 
   .btn {
-    border: 1px solid color-mix(in srgb, var(--ui-wizard-border) 84%, transparent);
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--ui-wizard-surface) 98%, transparent);
+    border: 1px solid var(--ui-color-line, color-mix(in srgb, var(--ui-wizard-border) 84%, transparent));
+    border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    background: transparent;
     color: var(--ui-wizard-text);
-    font: 600 12px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.01em;
-    padding: 9px 13px;
+    font: 500 var(--ui-control-font-size-2, 14px)/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: var(--ui-control-height-2, 32px);
+    padding: 0 12px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -402,16 +396,12 @@ const style = `
   }
 
   .btn:hover {
-    border-color: color-mix(in srgb, var(--ui-wizard-accent) 34%, var(--ui-wizard-border));
-  }
-
-  .btn:active {
-    transform: translateY(1px);
+    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-wizard-accent) 8%, transparent));
   }
 
   .btn:focus-visible {
-    outline: 2px solid var(--ui-wizard-focus);
-    outline-offset: 1px;
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-wizard-focus));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   .btn[disabled] {
@@ -421,9 +411,13 @@ const style = `
   }
 
   .btn.primary {
-    border-color: color-mix(in srgb, var(--ui-wizard-accent) 44%, transparent);
-    background: color-mix(in srgb, var(--ui-wizard-accent) 16%, transparent);
-    color: color-mix(in srgb, var(--ui-wizard-accent) 86%, #0f172a 14%);
+    border-color: transparent;
+    background: var(--ui-wizard-accent);
+    color: var(--ui-color-foreground-on-primary, #ffffff);
+  }
+
+  .btn.primary:hover {
+    background: color-mix(in srgb, var(--ui-wizard-accent) 88%, var(--ui-color-text-strong, #0f172a));
   }
 
   .btn.primary[data-loading="true"] {
@@ -517,6 +511,15 @@ const style = `
     --ui-wizard-success: #4ade80;
     --ui-wizard-warning: #fbbf24;
     --ui-wizard-danger: #f87171;
+  }
+
+  /* The contrast accent is a light blue: the primary button needs dark text and a lighter hover. */
+  :host([variant="contrast"]) .btn.primary {
+    color: #0f172a;
+  }
+
+  :host([variant="contrast"]) .btn.primary:hover {
+    background: color-mix(in srgb, var(--ui-wizard-accent) 86%, #ffffff);
   }
 
   :host([headless]) .frame {

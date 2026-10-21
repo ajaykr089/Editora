@@ -43,6 +43,7 @@ const style = `
 
   .command {
     max-height: min(76vh, 720px);
+    --ui-command-shadow: var(--shadow-6, 0 24px 60px rgba(2, 6, 23, 0.28));
   }
 
   :host([headless]) .overlay,

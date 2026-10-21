@@ -181,3 +181,28 @@ describe('applySystemTheme', () => {
     expect(() => stop()).not.toThrow();
   });
 });
+
+describe('themes that only set raw colours', () => {
+  it('keep the derived roles coherent with a dark background and a custom primary', () => {
+    const vars = themeToVariables({
+      colors: { primary: '#60a5fa', background: '#020617', surface: '#0f172a', text: '#e2e8f0', muted: '#94a3b8' }
+    } as never);
+    // neutral roles follow the dark colours, not the light gray scale
+    expect(vars['--ui-color-fill']).toMatch(/color-mix\(in srgb, #e2e8f0 8%, #0f172a\)/);
+    expect(vars['--ui-color-line']).toMatch(/color-mix/);
+    expect(vars['--ui-color-text-strong']).toBe('#e2e8f0');
+    // accent roles follow the primary, not the amber scale
+    expect(vars['--ui-color-accent-fill']).toMatch(/color-mix\(in srgb, #60a5fa 14%, #0f172a\)/);
+    expect(vars['--ui-color-accent-solid']).toBe('#60a5fa');
+  });
+
+  it('leaves the shipped light and dark themes and accent palettes alone', () => {
+    const light = themeToVariables(baselineLightTokens);
+    expect(light['--ui-color-fill']).toBe(baselineLightTokens.palette!.gray!['3']);
+    expect(light['--ui-color-accent-fill']).toBe(baselineLightTokens.palette!.accent!['3']);
+    const dark = themeToVariables(baselineDarkTokens);
+    expect(dark['--ui-color-fill']).toBe(baselineDarkTokens.palette!.gray!['3']);
+    const blue = themeToVariables(withAccentPalette(baselineLightTokens, 'blue'));
+    expect(blue['--ui-color-accent-fill']).not.toMatch(/color-mix/);
+  });
+});
