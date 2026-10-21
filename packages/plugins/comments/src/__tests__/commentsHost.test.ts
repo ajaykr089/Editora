@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { CommentsPlugin, configureComments, getCommentThreads, setCommentThreads } from '../index';
+import { CommentsPlugin, configureComments, getCommentThreads, removeCommentThread, setCommentThreads, upsertCommentThread } from '../index';
 import type { CommentThread, CommentsOptions } from '../index';
 
 const HTML = '<p>Alpha beta gamma delta</p><p>Epsilon zeta eta</p>';
@@ -74,6 +74,9 @@ function post(root: HTMLElement, plugin: ReturnType<typeof CommentsPlugin>, text
   type(root.querySelector('.new-comment-textarea')!, text);
   (root.querySelector('.rte-comment-composer') as HTMLFormElement).requestSubmit();
 }
+
+/** What a click on a card does: it becomes the active thread. */
+const setActive = (card: HTMLElement) => card.querySelector('.rte-comment-text')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
 const cards = (root: HTMLElement) => Array.from(root.querySelectorAll<HTMLElement>('.rte-comment-item'));
 
@@ -497,5 +500,185 @@ describe('storageKey (comments kept in localStorage)', () => {
     (cards(root)[0].querySelector('[data-action="more"]') as HTMLButtonElement).click();
     (cards(root)[0].querySelector('.rte-comment-menu-item[data-action="delete"]') as HTMLButtonElement).click();
     expect(stored()).toEqual([]);
+  });
+});
+
+describe('live updates from elsewhere', () => {
+  const KEY = 'live-doc';
+  const text = (card: HTMLElement) => card.querySelector('.rte-comment-text')?.textContent;
+
+  /** Two threads with their highlights in the document, panel open, no options that could echo. */
+  async function setup(options: CommentsOptions = {}) {
+    const a = anchored('t1', 'beta');
+    const b = anchored('t2', 'zeta');
+    const root = editor(`<p>Alpha ${a.html} gamma</p><p>Epsilon ${b.html} eta</p>`);
+    const plugin = make({ initialThreads: [a.thread, b.thread], ...options });
+    await settle();
+    plugin.commands?.toggleComments?.(undefined, ctx(root));
+    return { root, plugin, a, b };
+  }
+
+  it('adds a thread, and replaces one in place, without calling onChange or writing storage', async () => {
+    const onChange = vi.fn();
+    const { root, a, b } = await setup({ onChange, storageKey: KEY });
+    const c = anchored('t3', 'gamma');
+    // the third highlight has to be in the document for its thread to show
+    contentOf(root).querySelector('p')!.insertAdjacentHTML('beforeend', ` ${c.html}`);
+    await settle();
+
+    expect(upsertCommentThread(root, c.thread)).toBe(true);
+    expect(cards(root).map(text)).toEqual(['about beta', 'about gamma', 'about zeta']); // the order of the document
+    expect(getCommentThreads(root).map((t) => t.id)).toEqual(['t1', 't2', 't3']);
+
+    // A change to t1 (a reply, an edit, a new text) keeps its place in the list.
+    const changed: CommentThread = { ...a.thread, text: 'edited elsewhere', editedAt: '2026-10-20T10:00:00.000Z', replies: [{ id: 'r1', author: { name: 'Bob' }, text: 'a remote reply', createdAt: '2026-10-20T09:00:00.000Z' }] };
+    expect(upsertCommentThread(root, changed)).toBe(true);
+    expect(getCommentThreads(root).map((t) => t.id)).toEqual(['t1', 't2', 't3']);
+    expect(text(cards(root)[0])).toBe('edited elsewhere');
+    expect(cards(root)[0].querySelector('.rte-comment-edited')).not.toBeNull();
+    expect(cards(root)[0].querySelector('.rte-comment-reply-text')!.textContent).toBe('a remote reply');
+    expect(b.thread.id).toBe('t2');
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it('leaves what the person here is doing alone: drafts, an edit in progress, the focus', async () => {
+    const { root, a } = await setup();
+    // a half-written reply under t2, focus in it
+    const reply = cards(root)[1].querySelector<HTMLTextAreaElement>('.rte-comment-reply-textarea')!;
+    reply.focus();
+    type(reply, 'half-written reply');
+    // and a comment being edited on t1
+    (cards(root)[0].querySelector('[data-action="more"]') as HTMLButtonElement).click();
+    (cards(root)[0].querySelector('.rte-comment-menu-item[data-action="edit"]') as HTMLButtonElement).click();
+    type(root.querySelector('.rte-comment-edit-textarea')!, 'my edit so far');
+    // the focus goes back to the reply
+    cards(root)[1].querySelector<HTMLTextAreaElement>('.rte-comment-reply-textarea')!.focus();
+
+    upsertCommentThread(root, { ...a.thread, text: 'someone else changed this', replies: [] });
+    upsertCommentThread(root, anchored('t2', 'zeta', { text: 't2 changed too' }).thread);
+
+    expect(root.querySelector<HTMLTextAreaElement>('.rte-comment-edit-textarea')!.value).toBe('my edit so far');
+    const activeReply = document.activeElement as HTMLTextAreaElement;
+    expect(activeReply.classList.contains('rte-comment-reply-textarea')).toBe(true);
+    expect(activeReply.dataset.commentId).toBe('t2');
+    expect(activeReply.value).toBe('half-written reply');
+    expect(text(cards(root)[1])).toBe('t2 changed too');
+  });
+
+  it('keeps a new comment being written, and the thread they are on', async () => {
+    const { root, a } = await setup();
+    setActive(cards(root)[1]);
+    root.querySelector<HTMLButtonElement>('.rte-comments-new')!.click();
+    type(root.querySelector('.new-comment-textarea')!, 'my new note');
+    upsertCommentThread(root, { ...a.thread, text: 'remote change' });
+    expect(root.querySelector<HTMLTextAreaElement>('.new-comment-textarea')!.value).toBe('my new note');
+    expect(root.querySelector('.rte-comment-item.is-active .rte-comment-text')!.textContent).toBe('about zeta');
+  });
+
+  it('cancels the edit of a reply that was deleted elsewhere', async () => {
+    const a = anchored('t1', 'beta', { replies: [{ id: 'r1', author: { name: 'Bob' }, text: 'mine to edit', createdAt: '2026-10-20T09:00:00.000Z' }] });
+    const root = editor(`<p>Alpha ${a.html}</p>`);
+    const plugin = make({ initialThreads: [a.thread] });
+    await settle();
+    plugin.commands?.toggleComments?.(undefined, ctx(root));
+    const reply = cards(root)[0].querySelector<HTMLElement>('.rte-comment-reply')!;
+    (reply.querySelector('[data-action="more"]') as HTMLButtonElement).click();
+    (reply.querySelector('.rte-comment-menu-item[data-action="edit"]') as HTMLButtonElement).click();
+    expect(root.querySelector('.rte-comment-edit-textarea')).not.toBeNull();
+
+    upsertCommentThread(root, { ...a.thread, replies: [] });
+    expect(root.querySelector('.rte-comment-edit-textarea')).toBeNull();
+    expect(cards(root)[0].querySelectorAll('.rte-comment-reply')).toHaveLength(0);
+  });
+
+  it('a thread marked resolved elsewhere moves to Resolved, and its highlight follows', async () => {
+    const { root, a } = await setup();
+    upsertCommentThread(root, { ...a.thread, resolved: true, resolvedAt: '2026-10-20T10:00:00.000Z', resolvedBy: { name: 'Bob' } });
+    expect(cards(root).map(text)).toEqual(['about zeta']);
+    expect(root.querySelector('#anchor-t1')!.classList.contains('rte-comment-anchor-resolved')).toBe(true);
+    root.querySelector<HTMLButtonElement>('.rte-comments-tab[data-filter="resolved"]')!.click();
+    expect(cards(root)[0].querySelector('.rte-comment-status')!.textContent).toContain('Resolved by Bob');
+
+    upsertCommentThread(root, { ...a.thread, resolved: false });
+    expect(root.querySelector('#anchor-t1')!.classList.contains('rte-comment-anchor-resolved')).toBe(false);
+  });
+
+  it('a thread whose highlight has not arrived is kept, and shows when it does', async () => {
+    const { root } = await setup();
+    const c = anchored('t3', 'gamma');
+    expect(upsertCommentThread(root, c.thread)).toBe(true);
+    expect(cards(root)).toHaveLength(2); // not shown yet
+    expect(getCommentThreads(root).map((t) => t.id)).toContain('t3');
+
+    contentOf(root).querySelector('p')!.insertAdjacentHTML('beforeend', ` ${c.html}`);
+    await settle();
+    expect(cards(root)).toHaveLength(3);
+  });
+
+  it('refuses what is not a thread, and changes nothing', async () => {
+    const { root } = await setup();
+    expect(upsertCommentThread(root, null as never)).toBe(false);
+    expect(upsertCommentThread(root, { id: '"] x', text: 'hi' } as never)).toBe(false);
+    expect(upsertCommentThread(root, { id: 'ok', text: '   ' } as never)).toBe(false);
+    expect(upsertCommentThread(document.body, anchored('t9', 'beta').thread)).toBe(false);
+    expect(getCommentThreads(root).map((t) => t.id)).toEqual(['t1', 't2']);
+  });
+
+  it('removes a thread: its card goes, so do its drafts and its place as the active thread, and its highlight goes neutral', async () => {
+    const onChange = vi.fn();
+    const { root } = await setup({ onChange });
+    const reply = cards(root)[0].querySelector<HTMLTextAreaElement>('.rte-comment-reply-textarea')!;
+    type(reply, 'a draft');
+    setActive(cards(root)[0]);
+
+    expect(removeCommentThread(root, 't1')).toBe(true);
+    expect(cards(root).map(text)).toEqual(['about zeta']);
+    expect(getCommentThreads(root).map((t) => t.id)).toEqual(['t2']);
+    expect(document.getElementById('rte-comments-emphasis')).toBeNull();
+    expect(document.getElementById('rte-comments-orphans')!.textContent).toContain('[id="anchor-t1"]');
+    expect(contentOf(root).querySelector('#anchor-t1')).not.toBeNull(); // the document is not changed
+    expect(onChange).not.toHaveBeenCalled();
+
+    expect(removeCommentThread(root, 't1')).toBe(false);
+    expect(removeCommentThread(document.body, 't2')).toBe(false);
+  });
+
+  it('only touches the editor it is given', async () => {
+    const first = anchored('t1', 'beta');
+    const one = editor(`<p>Alpha ${first.html}</p>`);
+    const two = editor(`<p>Alpha ${anchored('t1', 'beta').html}</p>`);
+    const plugin = make();
+    plugin.commands?.toggleComments?.(undefined, ctx(one));
+    upsertCommentThread(two, first.thread);
+    expect(getCommentThreads(two).map((t) => t.id)).toEqual(['t1']);
+    expect(getCommentThreads(one)).toEqual([]);
+  });
+});
+
+describe('the panel and changes in the document', () => {
+  it('is not redrawn for a change that shows nothing (an open menu stays open), but is for one that does', async () => {
+    const a = anchored('t1', 'beta');
+    const b = anchored('t2', 'zeta');
+    const root = editor(`<p>Alpha ${a.html} gamma</p><p>Epsilon ${b.html} eta</p>`);
+    const plugin = make({ initialThreads: [a.thread, b.thread] });
+    await settle();
+    plugin.commands?.toggleComments?.(undefined, ctx(root));
+
+    const card = cards(root)[0];
+    (card.querySelector('[data-action="more"]') as HTMLButtonElement).click();
+    expect(card.querySelector<HTMLElement>('.rte-comment-menu')!.hidden).toBe(false);
+
+    // typing elsewhere in the document
+    contentOf(root).querySelectorAll('p')[1].insertAdjacentText('beforeend', ' more words');
+    await settle();
+    expect(cards(root)[0]).toBe(card); // the very same element: nothing was rebuilt
+    expect(card.querySelector<HTMLElement>('.rte-comment-menu')!.hidden).toBe(false);
+
+    // a highlight disappearing is something the panel shows
+    contentOf(root).querySelector('#anchor-t2')!.remove();
+    await settle();
+    expect(cards(root)).toHaveLength(1);
   });
 });

@@ -74,6 +74,8 @@ interface CommentsEditorState {
   /** The instance was picked because it was the next one waiting, not because one of its commands ran here. */
   instanceAssumed: boolean;
   orphanIds: string[];
+  /** Which threads, resolved or not, the panel was last drawn for: it is only redrawn when that changes. */
+  renderedKey: string;
   watchedContent: HTMLElement | null;
   contentObserver: MutationObserver | null;
   syncTimer: number | null;
@@ -321,6 +323,53 @@ function replaceThreads(state: CommentsEditorState, input: unknown): void {
   dismissUndo(state);
   updateEmphasis(state);
   syncDocument(state);
+  renderPanel(state);
+}
+
+/**
+ * Add or replace one thread that came from somewhere else (another person, through the host), without disturbing
+ * what this person is doing: a half-written comment or reply, an edit in progress, the thread they are on, where
+ * the list is scrolled and where the focus is all stay as they are. Nothing is reported back through `onChange`
+ * or written to `storageKey`: the host supplied it, and echoing it would only start a loop.
+ */
+function upsertThread(state: CommentsEditorState, input: unknown): boolean {
+  const [thread] = normalizeThreads([input]);
+  if (!thread) return false;
+
+  // A reply that is being edited here but was deleted there has nothing left to edit.
+  if (state.editing && state.editing.commentId === thread.id && state.editing.replyId) {
+    const replyId = state.editing.replyId;
+    if (!thread.replies.some((reply) => reply.id === replyId)) {
+      state.editing = null;
+      state.editDraft = '';
+    }
+  }
+
+  // Replacing the entry keeps its place in the list; a new one goes last. The highlight in the document is made to
+  // show whether the thread is resolved, as for threads loaded at the start (`aligned` is false until then).
+  state.comments.set(thread.id, toInternal(thread));
+  syncDocument(state);
+  renderPanel(state);
+  return true;
+}
+
+/** Take away a thread that was deleted somewhere else. Its highlight stays in the document, but loses its colour. */
+function dropThread(state: CommentsEditorState, commentId: string): boolean {
+  if (!state.comments.has(commentId)) return false;
+  state.comments.delete(commentId);
+  state.expandedReplies.delete(commentId);
+  delete state.replyTexts[commentId];
+  if (state.editing?.commentId === commentId) {
+    state.editing = null;
+    state.editDraft = '';
+  }
+  if (state.hoverId === commentId) state.hoverId = null;
+  if (state.activeId === commentId) setActiveThread(state, null);
+  state.closeMenu?.(false);
+  updateEmphasis(state);
+  syncDocument(state);
+  renderPanel(state);
+  return true;
 }
 
 function attachInstance(state: CommentsEditorState, instance: PluginInstance, assumed: boolean): void {
@@ -358,6 +407,7 @@ function getOrCreateState(root: HTMLElement, instance?: PluginInstance): Comment
     instance: null,
     instanceAssumed: false,
     orphanIds: [],
+    renderedKey: '',
     watchedContent: null,
     contentObserver: null,
     syncTimer: null,
@@ -476,7 +526,9 @@ function syncDocument(state: CommentsEditorState): void {
   });
 
   updateOrphans(state);
-  if (state.panelVisible) renderPanel(state);
+  // Most changes to the document (typing, a highlight's class changing under our own Resolve) change nothing the
+  // panel shows. Redrawing anyway would close a menu someone has just opened, so only redraw for a real change.
+  if (state.panelVisible && panelKey(syncAnchoredComments(state)) !== state.renderedKey) renderPanel(state);
   if (changed) emitChange(state, 'document', changed);
 }
 
@@ -1497,12 +1549,18 @@ function createEmptyState(filter: CommentsFilter, total: number): HTMLElement {
   return empty;
 }
 
+/** What the list of threads depends on that can change without the panel being told: which are shown, and resolved. */
+function panelKey(visible: Comment[]): string {
+  return visible.map((comment) => `${comment.id}:${comment.resolved ? 1 : 0}`).join('|');
+}
+
 function renderPanel(state?: CommentsEditorState): void {
   const targetState = state || getActiveState();
   const panel = targetState?.panelElement;
   if (!targetState || !panel) return;
 
   const all = getCommentsInDisplayOrder(targetState);
+  targetState.renderedKey = panelKey(syncAnchoredComments(targetState));
   const counts: Record<CommentsFilter, number> = {
     open: all.filter((comment) => !comment.resolved).length,
     resolved: all.filter((comment) => comment.resolved).length,
@@ -2130,6 +2188,25 @@ export function setCommentThreads(target: Element, threads: CommentThread[]): vo
   if (!root) return;
   ensureGlobalTracking();
   replaceThreads(getOrCreateState(root), threads);
+}
+
+/**
+ * Add or replace a single thread, for changes that arrive while the editor is open (another person replied,
+ * edited or resolved). Unlike `setCommentThreads` it leaves the rest alone and does not disturb what the person here
+ * is typing. Returns false when `thread` cannot be used. Does not call `onChange`.
+ */
+export function upsertCommentThread(target: Element, thread: CommentThread): boolean {
+  const root = editorRootOf(target);
+  if (!root) return false;
+  ensureGlobalTracking();
+  return upsertThread(getOrCreateState(root), thread);
+}
+
+/** Take away a single thread that was deleted elsewhere. Returns false when the editor has no such thread. Does not call `onChange`. */
+export function removeCommentThread(target: Element, threadId: string): boolean {
+  const root = editorRootOf(target);
+  const state = root ? stateByEditor.get(root) : null;
+  return state ? dropThread(state, threadId) : false;
 }
 
 /** Give an editor the options that `CommentsPlugin(options)` takes, when the plugin cannot know which editor is its own. */

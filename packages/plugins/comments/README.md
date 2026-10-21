@@ -82,14 +82,16 @@ No backend yet? `CommentsPlugin({ storageKey: "comments:my-document" })` keeps t
 | `canModify(author, user)` | Who may edit or delete a comment. Default: your own, when both have an `id`; anyone, when there are no ids. |
 
 ```ts
-import { getCommentThreads, setCommentThreads, configureComments } from "@editora/comments";
+import { getCommentThreads, setCommentThreads, upsertCommentThread, removeCommentThread, configureComments } from "@editora/comments";
 
 getCommentThreads(editorElement); // all threads that were not deleted
 setCommentThreads(editorElement, threads); // replace them (does not call onChange)
+upsertCommentThread(editorElement, thread); // add or replace one thread: for changes that arrive live
+removeCommentThread(editorElement, threadId); // take away one thread
 configureComments(editorElement, options); // the options above, given explicitly
 ```
 
-`editorElement` is the editor or anything inside it. Every change is also dispatched as an `editora:comments-change` event on the editor (`detail`: `{ threads, reason, threadId }`). A thread whose highlight is not in the document is kept but not shown; a highlight with no thread loses its colour.
+`editorElement` is the editor or anything inside it. For shared comments, apply what other people do with `upsertCommentThread` / `removeCommentThread`: unlike `setCommentThreads` they leave what the person here is typing, their open edit and the focus alone, and they do not call `onChange` (so nothing echoes back to your server). Every change is also dispatched as an `editora:comments-change` event on the editor (`detail`: `{ threads, reason, threadId }`). A thread whose highlight is not in the document is kept but not shown; a highlight with no thread loses its colour.
 
 ## Toolbar Commands
 

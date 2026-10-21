@@ -70,16 +70,43 @@ Create one `CommentsPlugin(...)` for each editor, as with any plugin: the option
 ## Reading and setting threads
 
 ```ts
-import { getCommentThreads, setCommentThreads, configureComments } from "@editora/plugins";
+import { getCommentThreads, setCommentThreads, upsertCommentThread, removeCommentThread, configureComments } from "@editora/plugins";
 
 getCommentThreads(editorElement);            // CommentThread[]: everything that was not deleted
 setCommentThreads(editorElement, threads);   // replace what the editor has (does not call onChange)
+upsertCommentThread(editorElement, thread); // add or replace ONE thread (live updates)
+removeCommentThread(editorElement, threadId); // take away one thread (live updates)
 configureComments(editorElement, options);   // the same options as CommentsPlugin(options), given explicitly
 ```
 
 `editorElement` is the editor, or anything inside it. The editor also dispatches `editora:comments-change` (bubbling, `detail` is `{ threads, reason, threadId }`) on every change, for code that does not own the plugin call.
 
 A thread whose highlight is not in the document is kept (and returned by `getCommentThreads`) but not shown. A highlight in the document with no thread behind it loses its colour, so it does not look clickable.
+
+### Live updates (shared comments)
+
+`setCommentThreads` replaces everything, including what the person here is typing, so it is for loading. For changes that arrive while the editor is open (someone replied, edited, resolved or deleted), use the one-thread calls:
+
+```ts
+socket.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if (message.type === "thread") upsertCommentThread(editorElement, message.thread);
+  if (message.type === "thread-deleted") removeCommentThread(editorElement, message.id);
+};
+
+CommentsPlugin({
+  currentUser,
+  // send what changed; `threads.find(...)` is missing when a thread was deleted
+  onChange: (threads, { threadId }) => {
+    const thread = threads.find((t) => t.id === threadId);
+    socket.send(JSON.stringify(thread ? { type: "thread", thread } : { type: "thread-deleted", id: threadId }));
+  },
+});
+```
+
+`upsertCommentThread` adds the thread, or replaces the one with that id and keeps its place. It leaves everything the person is doing alone: a half-written comment or reply, an edit in progress, the thread they are on, where the list is scrolled and where the focus is. A thread marked resolved elsewhere moves to the Resolved tab and its highlight follows. Neither call reports back through `onChange` or `storageKey`, so a change you apply cannot bounce back to the server. Both return `false` when there was nothing to do (not a usable thread, or no such thread).
+
+The highlight is part of the document, so the document has to be shared too (for example with the collaboration plugin). A thread whose highlight has not reached this browser yet is kept and shows as soon as the highlight appears; a thread removed here leaves its highlight in the text, without its colour, until the document itself changes.
 
 ### The thread format
 
