@@ -71,32 +71,33 @@ type CalendarCell = {
 
 const style = `
   :host {
-    --ui-calendar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
-    --ui-calendar-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-calendar-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
+    --ui-calendar-border: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-calendar-text: var(--ui-color-text, #0f172a);
     --ui-calendar-muted: var(--ui-color-muted, #526175);
     --ui-calendar-accent: var(--ui-color-primary, #2563eb);
 
-    --ui-calendar-radius: 14px;
+    --ui-calendar-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-calendar-shadow: none;
     --ui-calendar-gap: 10px;
-    --ui-calendar-day-radius: 10px;
-    --ui-calendar-day-hover-bg: color-mix(in srgb, var(--ui-calendar-accent) 10%, transparent);
-    --ui-calendar-selected-bg: color-mix(in srgb, var(--ui-calendar-accent) 14%, transparent);
-    --ui-calendar-selected-border: color-mix(in srgb, var(--ui-calendar-accent) 44%, transparent);
+    --ui-calendar-day-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-calendar-day-hover-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-calendar-accent) 10%, transparent));
+    --ui-calendar-selected-bg: var(--ui-calendar-accent);
+    --ui-calendar-selected-color: var(--ui-color-foreground-on-primary, #ffffff);
+    --ui-calendar-selected-border: var(--ui-calendar-accent);
     --ui-calendar-today-ring: color-mix(in srgb, var(--ui-calendar-accent) 56%, transparent);
     --ui-calendar-range-bg: color-mix(in srgb, var(--ui-calendar-accent) 9%, transparent);
     --ui-calendar-range-edge: color-mix(in srgb, var(--ui-calendar-accent) 20%, transparent);
     --ui-calendar-disabled-opacity: 0.45;
 
-    --ui-calendar-day-height: 52px;
+    --ui-calendar-day-height: 40px;
     --ui-calendar-day-font-size: 12px;
     --ui-calendar-weekday-font-size: 11px;
     --ui-calendar-title-font-size: 14px;
     --ui-calendar-day-padding-block: 6px;
     --ui-calendar-day-padding-inline: 6px;
     --ui-calendar-frame-padding: 12px;
-    --ui-calendar-week-gap: 6px;
+    --ui-calendar-week-gap: 2px;
     --ui-calendar-control-height: 30px;
 
     display: block;
@@ -335,7 +336,7 @@ const style = `
     border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 84%, transparent);
     border-radius: 12px;
     background: color-mix(in srgb, var(--ui-calendar-bg) 96%, transparent);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+    box-shadow: var(--shadow-5, 0 8px 24px rgba(15, 23, 42, 0.1));
     padding: 10px;
     display: grid;
     gap: 8px;
@@ -422,11 +423,11 @@ const style = `
   }
 
   .day {
-    border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 78%, transparent);
+    border: 1px solid transparent;
     border-radius: var(--ui-calendar-day-radius);
     min-block-size: var(--ui-calendar-day-height);
     padding: var(--ui-calendar-day-padding-block) var(--ui-calendar-day-padding-inline);
-    background: color-mix(in srgb, var(--ui-calendar-bg) 98%, transparent);
+    background: transparent;
     color: var(--ui-calendar-text);
     display: grid;
     align-content: center;
@@ -440,13 +441,11 @@ const style = `
   }
 
   .day:hover {
-    border-color: color-mix(in srgb, var(--ui-calendar-accent) 34%, var(--ui-calendar-border));
     background: var(--ui-calendar-day-hover-bg);
   }
 
   .day[data-outside="true"] {
-    color: color-mix(in srgb, var(--ui-calendar-muted) 88%, transparent);
-    background: color-mix(in srgb, var(--ui-calendar-bg) 92%, transparent);
+    color: var(--ui-calendar-muted);
   }
 
   .day[data-today="true"] {
@@ -456,17 +455,19 @@ const style = `
   .day[data-selected="true"] {
     border-color: var(--ui-calendar-selected-border);
     background: var(--ui-calendar-selected-bg);
+    color: var(--ui-calendar-selected-color);
   }
 
   .day[data-range="true"] {
     background: var(--ui-calendar-range-bg);
-    border-color: color-mix(in srgb, var(--ui-calendar-accent) 26%, var(--ui-calendar-border));
+    border-color: transparent;
     border-radius: 0;
   }
 
   .day[data-range-start="true"],
   .day[data-range-end="true"] {
-    background: var(--ui-calendar-range-edge);
+    background: var(--ui-calendar-selected-bg);
+    color: var(--ui-calendar-selected-color);
     border-color: var(--ui-calendar-selected-border);
     border-radius: var(--ui-calendar-day-radius);
   }
@@ -497,7 +498,7 @@ const style = `
 
   .day-number {
     font-size: var(--ui-calendar-day-font-size);
-    font-weight: 650;
+    font-weight: 500;
     line-height: 1;
     justify-self: center;
   }
@@ -563,7 +564,7 @@ const style = `
     border-radius: 8px;
     border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 80%, transparent);
     background: color-mix(in srgb, var(--ui-calendar-bg) 98%, #ffffff 2%);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+    box-shadow: var(--shadow-5, 0 8px 24px rgba(15, 23, 42, 0.14));
     color: var(--ui-calendar-text);
     font: 500 11px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     /* Not drawn at all until its day is hovered or focused, so a hidden tooltip near an edge cannot widen the page. */

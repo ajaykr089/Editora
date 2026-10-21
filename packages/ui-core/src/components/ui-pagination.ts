@@ -4,18 +4,19 @@ const style = `
   :host {
     display: inline-flex;
     max-width: 100%;
-    --ui-pagination-gap: 6px;
-    --ui-pagination-radius: 10px;
-    --ui-pagination-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-pagination-item-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
-    --ui-pagination-item-bg-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
+    --ui-pagination-gap: 2px;
+    --ui-pagination-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
+    --ui-pagination-bg: transparent;
+    --ui-pagination-item-bg: transparent;
+    --ui-pagination-item-bg-hover: var(--ui-color-fill, color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent));
     --ui-pagination-active-bg: var(--ui-color-primary, #2563eb);
-    --ui-pagination-active-color: #ffffff;
-    --ui-pagination-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
-    --ui-pagination-color: var(--ui-color-text, #0f172a);
-    --ui-pagination-muted: var(--ui-color-muted, #526175);
-    --ui-pagination-padding: 6px 11px;
-    --ui-pagination-font-size: 13px;
+    --ui-pagination-active-color: var(--ui-color-foreground-on-primary, #ffffff);
+    --ui-pagination-border: transparent;
+    --ui-pagination-color: var(--ui-color-text-strong, var(--ui-color-text, #0f172a));
+    --ui-pagination-muted: var(--ui-color-text-secondary, var(--ui-color-muted, #526175));
+    --ui-pagination-h: var(--ui-control-height-2, 32px);
+    --ui-pagination-padding: 0 8px;
+    --ui-pagination-font-size: var(--ui-control-font-size-2, 14px);
     --ui-pagination-shadow: none;
     color-scheme: light dark;
   }
@@ -26,9 +27,9 @@ const style = `
     flex-wrap: wrap;
     align-items: center;
     gap: var(--ui-pagination-gap);
-    padding: 6px;
-    border: 1px solid var(--ui-pagination-border);
-    border-radius: calc(var(--ui-pagination-radius) + 2px);
+    padding: 0;
+    border: 0;
+    border-radius: var(--ui-pagination-radius);
     background: var(--ui-pagination-bg);
     box-shadow: var(--ui-pagination-shadow);
   }
@@ -47,22 +48,22 @@ const style = `
     background: var(--ui-pagination-item-bg);
     color: var(--ui-pagination-color);
     font-size: var(--ui-pagination-font-size);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.2;
     box-sizing: border-box;
-    min-width: 34px;
+    min-width: var(--ui-pagination-h);
+    min-height: var(--ui-pagination-h);
     cursor: pointer;
     transition: border-color 130ms ease, background-color 130ms ease, color 130ms ease, transform 130ms ease;
   }
 
   button:hover:not(:disabled) {
     background: var(--ui-pagination-item-bg-hover);
-    border-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, var(--ui-pagination-border));
   }
 
   button:focus-visible {
-    outline: 2px solid var(--ui-color-focus-ring, #2563eb);
-    outline-offset: 1px;
+    outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
+    outline-offset: var(--ui-ring-offset, 2px);
   }
 
   button[aria-current="page"] {
@@ -79,15 +80,17 @@ const style = `
   :host([size="sm"]) {
     --ui-pagination-gap: 4px;
     --ui-pagination-radius: 8px;
-    --ui-pagination-padding: 4px 8px;
-    --ui-pagination-font-size: 12px;
+    --ui-pagination-h: var(--ui-control-height-1, 24px);
+    --ui-pagination-padding: 0 6px;
+    --ui-pagination-font-size: var(--ui-control-font-size-1, 12px);
   }
 
   :host([size="lg"]) {
     --ui-pagination-gap: 8px;
     --ui-pagination-radius: 12px;
-    --ui-pagination-padding: 7px 13px;
-    --ui-pagination-font-size: 14px;
+    --ui-pagination-h: var(--ui-control-height-3, 40px);
+    --ui-pagination-padding: 0 12px;
+    --ui-pagination-font-size: var(--ui-control-font-size-3, 16px);
   }
 
   :host([variant="classic"]) .pagination {

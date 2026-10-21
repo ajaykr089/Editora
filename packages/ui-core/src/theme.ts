@@ -679,13 +679,10 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   alert: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'padding-x': '16px',
     'padding-y': '14px',
     gap: 'var(--ui-default-gap)',
-    'icon-size': '26px',
     'dismiss-size': '28px'
   },
   alertDialog: {
@@ -721,10 +718,7 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'badge-radius': '999px'
   },
   avatar: {
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
     radius: '999px',
-    shadow: '0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12)',
     'size-sm': '30px',
     'size-md': '40px',
     'size-lg': '52px',
@@ -952,13 +946,10 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   },
   alert: {
     bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-2)',
     'padding-x': '16px',
     'padding-y': '14px',
     gap: 'var(--ui-default-gap)',
-    'icon-size': '26px',
     'dismiss-size': '28px'
   },
   alertDialog: {
@@ -994,10 +985,7 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'badge-radius': '999px'
   },
   avatar: {
-    bg: 'var(--color-panel-solid)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
     radius: '999px',
-    shadow: '0 1px 2px rgba(2, 6, 23, 0.18), 0 12px 24px rgba(2, 6, 23, 0.28)',
     'size-sm': '30px',
     'size-md': '40px',
     'size-lg': '52px',

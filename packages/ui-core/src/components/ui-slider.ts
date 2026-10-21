@@ -5,22 +5,21 @@ type SliderMark = { value: number; label?: string };
 const style = `
   :host {
     --ui-slider-width: min(340px, 100%);
-    --ui-slider-track-size: 6px;
+    --ui-slider-track-size: 4px;
     --ui-slider-track-radius: 999px;
-    --ui-slider-thumb-size: 18px;
-    --ui-slider-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-slider-thumb-size: 16px;
+    --ui-slider-bg: transparent;
     --ui-slider-text: var(--ui-color-text, #0f172a);
     --ui-slider-muted: var(--ui-color-muted, #526175);
-    --ui-slider-track: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-slider-track: var(--ui-color-fill-active, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent));
     --ui-slider-fill: var(--ui-color-primary, #2563eb);
     --ui-slider-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-slider-shadow:
       none;
-    --ui-slider-thumb-shadow:
-      none;
-    --ui-slider-thumb-ring: 0 0 0 4px color-mix(in srgb, var(--ui-slider-focus) 18%, transparent);
-    --ui-slider-padding: 10px;
-    --ui-slider-radius: 14px;
+    --ui-slider-thumb-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    --ui-slider-thumb-ring: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-ring-color, var(--ui-slider-focus));
+    --ui-slider-padding: 0px;
+    --ui-slider-radius: 0px;
     --ui-slider-label-size: 13px;
     --ui-slider-value-size: 12px;
     --ui-slider-indicator-size: 10px;
@@ -40,7 +39,7 @@ const style = `
     gap: 8px;
     color: var(--ui-slider-text);
     background: var(--ui-slider-bg);
-    border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 60%, transparent);
+    border: 0;
     border-radius: var(--ui-slider-radius);
     box-shadow: var(--ui-slider-shadow);
     padding: var(--ui-slider-padding);
@@ -108,15 +107,12 @@ const style = `
     right: calc(100% - var(--ui-slider-end, 0%));
     block-size: var(--ui-slider-track-size);
     border-radius: var(--ui-slider-track-radius);
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--ui-slider-fill) 86%, #ffffff 14%),
-      var(--ui-slider-fill)
-    );
+    background: var(--ui-slider-fill);
     pointer-events: none;
   }
 
   .track-indicator {
+    display: none;
     position: absolute;
     top: 50%;
     left: var(--ui-slider-end, 0%);
@@ -180,8 +176,8 @@ const style = `
     inline-size: var(--ui-slider-thumb-size);
     block-size: var(--ui-slider-thumb-size);
     border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--ui-slider-fill) 42%, transparent);
-    background: color-mix(in srgb, var(--ui-slider-fill) 94%, #ffffff 6%);
+    border: 0;
+    background: #ffffff;
     box-shadow: var(--ui-slider-thumb-shadow);
     margin-top: calc((var(--ui-slider-track-size) - var(--ui-slider-thumb-size)) / 2);
     cursor: pointer;
@@ -192,8 +188,8 @@ const style = `
     inline-size: var(--ui-slider-thumb-size);
     block-size: var(--ui-slider-thumb-size);
     border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--ui-slider-fill) 42%, transparent);
-    background: color-mix(in srgb, var(--ui-slider-fill) 94%, #ffffff 6%);
+    border: 0;
+    background: #ffffff;
     box-shadow: var(--ui-slider-thumb-shadow);
     cursor: pointer;
     transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;

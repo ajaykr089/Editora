@@ -69,24 +69,20 @@ const style = `
     color-scheme: light dark;
 
     --ui-drawer-overlay: color-mix(in srgb, #020617 56%, transparent);
-    --ui-drawer-bg: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
-      color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 20%, var(--ui-color-surface, #ffffff)) 100%
-    );
+    --ui-drawer-bg: var(--color-panel-solid, var(--ui-color-surface-elevated, var(--ui-color-surface, #ffffff)));
     --ui-drawer-color: var(--ui-color-text, #0f172a);
     --ui-drawer-muted: var(--ui-color-muted, #526175);
-    --ui-drawer-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-drawer-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-drawer-border: 1px solid var(--ui-drawer-border-color);
-    --ui-drawer-shadow: none;
+    --ui-drawer-shadow: var(--shadow-6, none);
     --ui-drawer-focus-ring: var(--ui-color-focus-ring, #2563eb);
-    --ui-drawer-control-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 90%, transparent);
-    --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-drawer-control-bg));
+    --ui-drawer-control-bg: var(--ui-color-fill, color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 90%, transparent));
+    --ui-drawer-control-bg-hover: var(--ui-color-fill-hover, color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-drawer-control-bg)));
     --ui-drawer-panel-backdrop: none;
     --ui-drawer-inset: 0px;
     --ui-drawer-width: min(420px, 94vw);
     --ui-drawer-height: min(520px, 80vh);
-    --ui-drawer-radius: 16px;
+    --ui-drawer-radius: calc(var(--ui-radius, 6px) * 2);
     --ui-drawer-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-drawer-header-padding: 16px 20px;
     --ui-drawer-body-padding: 20px;
