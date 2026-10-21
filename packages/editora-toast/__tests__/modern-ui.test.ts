@@ -177,6 +177,24 @@ describe('stack layout', () => {
     expect(byText('one').dataset.collapsed).toBe('true');
   });
 
+  it('opens on a tap (some touch browsers send no mouse events for one) and closes on a tap elsewhere', async () => {
+    manager.configure({ maxVisible: 5 });
+    manager.show({ message: 'one', duration: 0 });
+    await waitForToasts(1);
+    manager.show({ message: 'two', duration: 0 });
+    await waitForToasts(2);
+    const touch = (target: EventTarget) => {
+      const event = new Event('pointerdown', { bubbles: true }) as any;
+      event.pointerType = 'touch';
+      target.dispatchEvent(event);
+    };
+    expect(container().dataset.expanded).toBe('false');
+    touch(byText('two'));
+    expect(container().dataset.expanded).toBe('true');
+    touch(document.body);
+    expect(container().dataset.expanded).toBe('false');
+  });
+
   it('closes the gap at once when a toast is dismissed, before its exit animation ends', async () => {
     manager.configure({ stack: false, maxVisible: 5 });
     manager.show({ message: 'keep', duration: 0 });

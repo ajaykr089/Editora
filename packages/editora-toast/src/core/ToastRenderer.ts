@@ -64,6 +64,13 @@ export class ToastRenderer {
       this.holdAll(container, 'pointer');
       this.syncOpen(container);
     });
+    // A tap opens the deck (some touch browsers send no mouse events for it); a tap elsewhere closes it again.
+    container.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch' || container.dataset.hover === 'true') return;
+      container.dataset.hover = 'true';
+      this.holdAll(container, 'pointer');
+      this.syncOpen(container);
+    });
     container.addEventListener('mouseleave', () => {
       delete container.dataset.hover;
       this.releaseAll(container, 'pointer');
