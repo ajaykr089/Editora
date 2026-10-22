@@ -341,7 +341,7 @@ const style = `
   }
 
   .error {
-    color: var(--ui-color-danger, #dc2626);
+    color: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     font-weight: 600;
   }
 
@@ -406,7 +406,7 @@ const style = `
     padding-inline: 8px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--ui-transfer-accent) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-transfer-accent) 76%, var(--ui-transfer-text));
+    color: color-mix(in srgb, var(--ui-transfer-accent) 45%, var(--ui-transfer-text));
     font-size: var(--ui-transfer-summary-size);
     line-height: 1;
     font-weight: 600;
@@ -500,7 +500,7 @@ const style = `
     font-size: 12px;
     line-height: 1;
     font-weight: 800;
-    color: color-mix(in srgb, var(--ui-transfer-check-accent) 86%, var(--ui-transfer-text));
+    color: color-mix(in srgb, var(--ui-transfer-check-accent) 45%, var(--ui-transfer-text));
     opacity: 0;
     transform: scale(0.85);
     transition:
@@ -527,7 +527,7 @@ const style = `
 
   :host([selection-indicator="tick"]) .indicator-mark {
     font-size: 15px;
-    color: color-mix(in srgb, var(--ui-transfer-check-accent) 88%, var(--ui-transfer-text));
+    color: color-mix(in srgb, var(--ui-transfer-check-accent) 45%, var(--ui-transfer-text));
   }
 
   :host([selection-indicator="tick"]) .item[data-selected="false"] .indicator-mark {

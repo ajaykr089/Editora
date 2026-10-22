@@ -66,19 +66,19 @@ const style = `
   }
 
   :host([tone="brand"]) {
-    --ui-odometer-color: var(--ui-color-primary, #2563eb);
+    --ui-odometer-color: var(--ui-color-accent-text, var(--ui-color-primary, #2563eb));
   }
 
   :host([tone="success"]) {
-    --ui-odometer-color: var(--ui-color-success, #15803d);
+    --ui-odometer-color: var(--ui-color-success-text, var(--ui-color-success, #15803d));
   }
 
   :host([tone="warning"]) {
-    --ui-odometer-color: var(--ui-color-warning, #b45309);
+    --ui-odometer-color: var(--ui-color-warning-text, var(--ui-color-warning, #b45309));
   }
 
   :host([tone="danger"]) {
-    --ui-odometer-color: var(--ui-color-danger, #dc2626);
+    --ui-odometer-color: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
   }
 
   :host([theme="dark"]) {
@@ -89,7 +89,7 @@ const style = `
   }
 
   :host([theme="brand"]) {
-    --ui-odometer-color: var(--ui-color-primary, #2563eb);
+    --ui-odometer-color: var(--ui-color-accent-text, var(--ui-color-primary, #2563eb));
     --ui-odometer-digit-bg: linear-gradient(180deg, rgba(219, 234, 254, 0.98), rgba(191, 219, 254, 0.94));
     --ui-odometer-digit-border: 1px solid rgba(37, 99, 235, 0.22);
   }

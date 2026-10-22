@@ -28,10 +28,10 @@ const style = `
     --ui-multi-select-text: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-multi-select-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-multi-select-danger: var(--ui-color-danger, #dc2626);
+    --ui-multi-select-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-multi-select-accent: var(--ui-color-primary, #2563eb);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-multi-select-panel-bg: var(--base-multi-select-panel-bg, color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent));
     --ui-multi-select-panel-border: var(--base-multi-select-panel-border, 1px solid color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent));
     --ui-multi-select-panel-shadow: var(--base-multi-select-panel-shadow, var(--shadow-4, 0 20px 34px rgba(2, 6, 23, 0.16)));
@@ -538,21 +538,21 @@ const style = `
     --ui-multi-select-accent: var(--ui-color-success, #15803d);
     --ui-multi-select-focus: var(--ui-color-success, #15803d);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-success, #15803d) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: var(--ui-color-success-text, color-mix(in srgb, var(--ui-color-success, #15803d) 82%, #0f172a 18%));
   }
 
   :host([tone="warning"]) {
     --ui-multi-select-accent: var(--ui-color-warning, #b45309);
     --ui-multi-select-focus: var(--ui-color-warning, #b45309);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-warning, #b45309) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-color-warning, #b45309) 82%, #0f172a 18%));
   }
 
   :host([tone="danger"]) {
     --ui-multi-select-accent: var(--ui-color-danger, #dc2626);
     --ui-multi-select-focus: var(--ui-color-danger, #dc2626);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-danger, #dc2626) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 82%, #0f172a 18%));
   }
 `;
 
@@ -1154,6 +1154,9 @@ export class UIMultiSelect extends ElementBase {
       const visibleOptions = filtered.slice(0, renderLimit);
       const truncated = filtered.length > visibleOptions.length;
       setPanelOpen(this._panelEl, this.open, 'bottom');
+      // a listbox that is still loading carries no options yet: aria-busy says so (and satisfies the required children)
+      if (loading) this._panelEl.setAttribute('aria-busy', 'true');
+      else this._panelEl.removeAttribute('aria-busy');
       if (loading) {
         const status = document.createElement('div');
         status.className = 'status';
@@ -1165,6 +1168,10 @@ export class UIMultiSelect extends ElementBase {
       if (!filtered.length) {
         const empty = document.createElement('div');
         empty.className = 'status';
+        // an empty listbox still needs an option-like child; this one is inert
+        empty.setAttribute('role', 'option');
+        empty.setAttribute('aria-disabled', 'true');
+        empty.setAttribute('aria-selected', 'false');
         empty.textContent = 'No matching options';
         this._panelEl.replaceChildren(empty);
         this._inputEl.removeAttribute('aria-activedescendant');

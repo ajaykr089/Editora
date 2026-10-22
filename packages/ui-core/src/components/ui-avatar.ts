@@ -18,7 +18,7 @@ const style = `
     --ui-avatar-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-avatar-accent: var(--ui-color-primary, #2563eb);
     --ui-avatar-badge-bg: color-mix(in srgb, var(--ui-avatar-accent) 14%, var(--ui-color-surface, #ffffff));
-    --ui-avatar-badge-color: color-mix(in srgb, var(--ui-avatar-accent) 82%, var(--ui-color-text, #0f172a) 18%);
+    --ui-avatar-badge-color: color-mix(in srgb, var(--ui-avatar-accent) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-avatar-badge-radius: var(--base-avatar-badge-radius, 999px);
     color-scheme: light dark;
   }
@@ -60,7 +60,7 @@ const style = `
 
   :host([variant="surface"]) {
     --ui-avatar-bg: var(--ui-avatar-bg-base);
-    --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 78%, var(--ui-color-text, #0f172a) 22%);
+    --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 45%, var(--ui-color-text-strong, #0f172a));
   }
 
   :host([variant="soft"]) {
@@ -79,7 +79,7 @@ const style = `
   :host([variant="outline"]) {
     --ui-avatar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent);
     --ui-avatar-border: 1px solid color-mix(in srgb, var(--ui-avatar-accent) 45%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
-    --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 82%, var(--ui-color-text, #0f172a) 18%);
+    --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-avatar-ring: none;
   }
 

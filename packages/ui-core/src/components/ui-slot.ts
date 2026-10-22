@@ -103,7 +103,7 @@ const style = `
     --ui-slot-border-color: color-mix(in srgb, var(--ui-slot-accent) 30%, transparent);
     --ui-slot-padding: 2px 9px;
     --ui-slot-radius: 999px;
-    --ui-slot-text: color-mix(in srgb, var(--ui-slot-accent) 88%, #0f172a);
+    --ui-slot-text: color-mix(in srgb, var(--ui-slot-accent) 35%, var(--ui-color-text-strong, #0f172a));
   }
 
   :host([variant="contrast"]) {

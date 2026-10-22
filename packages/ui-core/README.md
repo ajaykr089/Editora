@@ -541,6 +541,12 @@ argument:
 Apply the theme early, before the first render. To theme one part of the page, call
 `applyTheme(tokens, element)`.
 
+Theme a part of the page with `applyTheme(tokens, element)` (or `ThemeProvider` in `@editora/ui-react`), not by
+setting a few `--ui-color-*` variables yourself. The fills, lines and soft accent colours that components read
+(`--ui-color-fill`, `--ui-color-line`, `--ui-color-accent-fill` and the like) are derived from the whole theme, so
+overriding only `--ui-color-text` and `--ui-color-surface` on an element leaves them at the page theme. If you need
+plain CSS, spread `themeToVariables(tokens)` (below) onto the element instead.
+
 ### Follow the system light/dark setting
 
 ```js
@@ -573,6 +579,8 @@ stay on theme.
 | `--ui-color-surface-elevated`, `--ui-color-info` | raised surface (menus, popovers) and the informational colour |
 | `--ui-color-placeholder` | placeholder text (62% of the text colour, 4.5:1 or better on the field) |
 | `--ui-color-foreground-on-warning` | text on a solid warning fill: dark when the warning colour is light (amber) |
+| `--ui-color-danger-text`, `-success-text`, `-warning-text`, `-info-text`, `-accent-text` | the status and accent hues as text: pulled toward the text colour until they read at 4.5:1 or better on the surface and on their own tint. The plain `--ui-color-danger` and the like are fill and icon colours (about 3-4:1 as text on white) |
+| `--ui-color-danger-solid`, `-success-solid`, `--ui-color-foreground-on-danger`, `-on-success` | a solid fill that white text reads on, and that text colour |
 | `--ui-ring-color`, `--ui-ring-width`, `--ui-ring-offset` | the focus ring |
 | `--ui-control-height-{1..4}`, `--ui-control-font-size-{1..4}`, `--ui-control-padding-inline-{1..4}`, `--ui-control-radius-{1..4}` | the control scale: 24, 32, 40 and 48px (see below) |
 | `--ui-motion-enter-easing`, `--ui-motion-exit-easing` | easing for things that appear and disappear |

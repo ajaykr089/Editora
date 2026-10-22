@@ -149,7 +149,7 @@ const style = `
 
   :host([variant="soft"]) {
     --ui-animated-text-color:
-      color-mix(in srgb, var(--ui-animated-text-accent) 72%, var(--ui-color-text, var(--ui-text, #0f172a)));
+      color-mix(in srgb, var(--ui-animated-text-accent) 62%, var(--ui-color-text, var(--ui-text, #0f172a)));
     --ui-animated-text-bg:
       color-mix(in srgb, var(--ui-animated-text-accent) 8%, var(--ui-color-surface, #ffffff));
     --ui-animated-text-border:
@@ -159,7 +159,7 @@ const style = `
   }
 
   :host([variant="solid"]) {
-    --ui-animated-text-color: color-mix(in srgb, var(--ui-animated-text-accent) 88%, #061221);
+    --ui-animated-text-color: color-mix(in srgb, var(--ui-animated-text-accent) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-animated-text-bg:
       linear-gradient(
         180deg,
@@ -202,7 +202,7 @@ const style = `
 
   :host([variant="minimal"]) {
     --ui-animated-text-color:
-      color-mix(in srgb, var(--ui-animated-text-accent) 84%, var(--ui-color-text, var(--ui-text, #0f172a)));
+      color-mix(in srgb, var(--ui-animated-text-accent) 45%, var(--ui-color-text-strong, var(--ui-color-text, var(--ui-text, #0f172a))));
     --ui-animated-text-bg: transparent;
     --ui-animated-text-border: none;
     --ui-animated-text-shadow: none;
@@ -449,8 +449,8 @@ const style = `
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--ui-animated-text-accent) 96%, #ffffff 4%),
-        color-mix(in srgb, var(--ui-animated-text-accent) 58%, #0f172a 42%)
+        color-mix(in srgb, var(--ui-animated-text-accent) 62%, var(--ui-color-text-strong, #0f172a)),
+        color-mix(in srgb, var(--ui-animated-text-accent) 40%, var(--ui-color-text-strong, #0f172a))
       );
     -webkit-background-clip: text;
     background-clip: text;

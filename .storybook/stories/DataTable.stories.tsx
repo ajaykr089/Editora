@@ -602,7 +602,7 @@ export const AccessibilityKeyboardMap = () => (
         border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 22%, var(--ui-color-border, #cbd5e1))',
         borderRadius: 'var(--ui-radius, 12px)',
         background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-color-surface-alt, #f8fafc))',
-        color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 74%, #0f172a 26%)',
+        color: 'var(--ui-color-accent-text, #1d4ed8)',
         fontSize: 'var(--ui-font-size-md, 14px)',
         padding: 'var(--ui-space-md, 12px)',
         lineHeight: 1.5

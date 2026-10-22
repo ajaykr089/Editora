@@ -1039,7 +1039,7 @@ export class UIDock extends ElementBase {
         badgeEl.style.setProperty('padding', '0 6px');
         badgeEl.style.setProperty('border-radius', '999px');
         badgeEl.style.setProperty('background', 'var(--ui-dock-accent)');
-        badgeEl.style.setProperty('color', '#ffffff');
+        badgeEl.style.setProperty('color', 'var(--ui-color-foreground-on-primary, #ffffff)');
         badgeEl.style.setProperty('font-size', '11px');
         badgeEl.style.setProperty('font-weight', '700');
         badgeEl.style.setProperty('box-shadow', 'none');

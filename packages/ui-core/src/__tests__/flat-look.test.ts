@@ -236,5 +236,47 @@ describe('flat look across every component', () => {
     // sortable helper text is not dimmed below 4.5:1
     expect(read('ui-sortable.ts')).not.toMatch(/\.list-helper \{[^}]*opacity/);
   });
+
+  it('themed QA: solid alert text, contrast wizard fills, animated text tone text', () => {
+    const read = (f: string) => readFileSync(resolve(dir, f), 'utf8');
+    const alert = read('ui-alert.ts');
+    expect(alert).toMatch(/:host\(\[variant="solid"\]\) \.alert \{\s*--ui-alert-bg: color-mix\(in srgb, var\(--ui-alert-accent\) 78%/);
+    expect(alert).toMatch(/--ui-alert-muted: color-mix\(in srgb, #ffffff 92%, transparent\)/);
+    // the contrast wizard brings its own fills and line; the global light ones must not leak in
+    const wizard = read('ui-wizard.ts');
+    expect(wizard).toMatch(/:host\(\[variant="contrast"\]\) \{[^}]*--ui-wizard-accent-fill: color-mix\(in srgb, #93c5fd 20%, #0f172a\)/);
+    expect(wizard).not.toMatch(/background: var\(--ui-color-accent-fill/);
+    expect(read('ui-animated-text.ts')).toMatch(/var\(--ui-animated-text-accent\) 62%, var\(--ui-color-text/);
+  });
+
+  it('status colours used as text go through the readable tokens, not the fill colours', () => {
+    const files = readdirSync(dir).filter((f) => /^ui-.*\.ts$/.test(f));
+    const offenders: string[] = [];
+    for (const file of files) {
+      const source = readFileSync(resolve(dir, file), 'utf8');
+      // an alias such as --ui-input-error that feeds a `color:` must be defined from danger-text
+      const names = new Set(Array.from(source.matchAll(/color:\s*var\((--[a-z0-9-]*(?:error|danger|invalid)[a-z0-9-]*)\)/g), (m) => m[1]));
+      for (const name of names) {
+        if (name.startsWith('--ui-chart')) continue; // the chart has its own -text aliases
+        const definition = source.match(new RegExp(`${name}:\\s*([^;]+);`));
+        if (definition && /--ui-color-danger,/.test(definition[1]) && !/--ui-color-danger-text/.test(definition[1])) offenders.push(`${file} ${name}`);
+      }
+      // a direct use of the raw token as a text colour
+      if (/^\s*color:\s*var\(--ui-color-danger,/m.test(source)) offenders.push(`${file} direct`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('layout containers inherit their text colour instead of repainting it', () => {
+    for (const [file, name] of [
+      ['ui-flex.ts', '--ui-flex-color'],
+      ['ui-grid.ts', '--ui-grid-color'],
+      ['ui-masonry-grid.ts', '--ui-masonry-color'],
+      ['ui-placement-grid.ts', '--ui-placement-color']
+    ]) {
+      const source = readFileSync(resolve(dir, file), 'utf8');
+      expect(source.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1].trim(), file).toBe('inherit');
+    }
+  });
 });
 

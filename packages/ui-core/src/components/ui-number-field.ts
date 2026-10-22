@@ -18,7 +18,7 @@ const style = `
     --ui-number-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-number-field-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-number-field-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
-    --ui-number-field-danger: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-number-field-danger: var(--ui-color-danger-text, var(--ui-color-danger, var(--ui-error, #dc2626)));
     --ui-number-field-shadow: none;
     --ui-number-field-gap: 8px;
     --ui-number-field-shell-gap: 8px;

@@ -11,9 +11,9 @@ const style = `
     --ui-tags-input-text: var(--ui-color-text, #0f172a);
     --ui-tags-input-muted: var(--ui-color-muted, #526175);
     --ui-tags-input-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-tags-input-danger: var(--ui-color-danger, #dc2626);
+    --ui-tags-input-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-tags-input-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
-    --ui-tags-input-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+    --ui-tags-input-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-tags-input-chip-remove-bg: color-mix(in srgb, currentColor 8%, transparent);
     --ui-tags-input-min-height: var(--ui-control-height-2, 32px);
     --ui-tags-input-font-size: var(--ui-control-font-size-2, 14px);

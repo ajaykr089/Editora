@@ -17,7 +17,7 @@ const style = `
     --ui-date-field-text: var(--ui-color-text, #0f172a);
     --ui-date-field-muted: var(--ui-color-muted, #526175);
     --ui-date-field-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-date-field-danger: var(--ui-color-danger, #dc2626);
+    --ui-date-field-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     display: block;
     inline-size: 100%;
     min-inline-size: 0;

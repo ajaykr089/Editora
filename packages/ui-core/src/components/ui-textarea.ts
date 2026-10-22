@@ -15,8 +15,8 @@ const style = `
     --ui-textarea-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
     --ui-textarea-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-textarea-accent: var(--ui-color-primary, #2563eb);
-    --ui-textarea-danger: var(--ui-color-danger, #dc2626);
-    --ui-textarea-success: var(--ui-color-success, #15803d);
+    --ui-textarea-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
+    --ui-textarea-success: var(--ui-color-success-text, var(--ui-color-success, #15803d));
     --ui-textarea-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-textarea-padding-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
     --ui-textarea-padding-y: 6px;

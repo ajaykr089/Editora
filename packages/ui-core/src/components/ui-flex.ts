@@ -29,7 +29,7 @@ const style = `
     --ui-flex-gap: 0px;
     --ui-flex-row-gap: var(--ui-flex-gap);
     --ui-flex-column-gap: var(--ui-flex-gap);
-    --ui-flex-color: var(--ui-color-text, inherit);
+    --ui-flex-color: inherit;
     color-scheme: light dark;
     display: var(--ui-flex-display);
     color: var(--ui-flex-color);

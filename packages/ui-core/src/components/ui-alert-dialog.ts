@@ -22,7 +22,10 @@ const style = `
     --ui-alert-z: 1301;
     --ui-alert-backdrop-z: 1300;
     --ui-alert-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
-    --ui-alert-danger: var(--ui-color-danger, #dc2626);
+    --ui-alert-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
+    /* A solid dialog: the fill, and the text colour that reads on it. */
+    --ui-alert-solid-bg: var(--ui-alert-accent);
+    --ui-alert-on-accent: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-alert-backdrop: var(--base-alert-dialog-backdrop, var(--color-overlay, rgba(2, 6, 23, 0.52)));
     --ui-alert-btn-bg: color-mix(in srgb, var(--ui-alert-bg-base) 90%, var(--ui-color-background, #ffffff) 10%);
     --ui-alert-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
@@ -50,18 +53,23 @@ const style = `
 
   :host([tone='success']) {
     --ui-alert-accent: var(--ui-color-success, #15803d);
+    --ui-alert-solid-bg: var(--ui-color-success-solid, var(--ui-alert-accent));
+    --ui-alert-on-accent: var(--ui-color-foreground-on-success, #ffffff);
     --ui-alert-confirm-bg: color-mix(in srgb, var(--ui-alert-accent) 76%, #000000);
     --ui-alert-confirm-color: #ffffff;
   }
 
   :host([tone='warning']) {
     --ui-alert-accent: var(--ui-color-warning, #b45309);
+    --ui-alert-on-accent: var(--ui-color-foreground-on-warning, #ffffff);
     --ui-alert-confirm-bg: var(--ui-alert-accent);
     --ui-alert-confirm-color: var(--ui-color-foreground-on-warning, #ffffff);
   }
 
   :host([tone='danger']) {
     --ui-alert-accent: var(--ui-color-danger, #dc2626);
+    --ui-alert-solid-bg: var(--ui-color-danger-solid, var(--ui-alert-accent));
+    --ui-alert-on-accent: var(--ui-color-foreground-on-danger, #ffffff);
     --ui-alert-confirm-bg: color-mix(in srgb, var(--ui-alert-accent) 80%, #000000);
     --ui-alert-confirm-color: #ffffff;
   }
@@ -112,17 +120,17 @@ const style = `
   }
 
   :host([variant='solid']) {
-    --ui-alert-bg: var(--ui-alert-accent);
+    --ui-alert-bg: var(--ui-alert-solid-bg);
     --ui-alert-border: 1px solid color-mix(in srgb, #000000 16%, transparent);
-    --ui-alert-text: #ffffff;
-    --ui-alert-muted: color-mix(in srgb, #ffffff 98%, transparent);
+    --ui-alert-text: var(--ui-alert-on-accent);
+    --ui-alert-muted: color-mix(in srgb, var(--ui-alert-on-accent) 98%, transparent);
     --ui-alert-btn-bg: color-mix(in srgb, #000000 14%, transparent);
-    --ui-alert-btn-border: color-mix(in srgb, #ffffff 30%, transparent);
+    --ui-alert-btn-border: color-mix(in srgb, var(--ui-alert-on-accent) 30%, transparent);
     --ui-alert-btn-hover: color-mix(in srgb, #000000 22%, transparent);
     --ui-alert-confirm-bg: color-mix(in srgb, #000000 30%, transparent);
-    --ui-alert-confirm-color: #ffffff;
-    --ui-alert-icon-bg: color-mix(in srgb, #ffffff 18%, transparent);
-    --ui-alert-icon-color: #ffffff;
+    --ui-alert-confirm-color: var(--ui-alert-on-accent);
+    --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-on-accent) 18%, transparent);
+    --ui-alert-icon-color: var(--ui-alert-on-accent);
   }
 
   :host([elevation='none']) {

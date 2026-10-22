@@ -76,6 +76,9 @@ const style = `
     --ui-chart-grid: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 45%, transparent);
     --ui-chart-accent: var(--ui-color-primary, #2563eb);
     --ui-chart-success: var(--ui-color-success, #15803d);
+    --ui-chart-success-text: var(--ui-color-success-text, color-mix(in srgb, var(--ui-chart-success) 74%, var(--ui-chart-text)));
+    --ui-chart-danger-text: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-chart-danger) 74%, var(--ui-chart-text)));
+    --ui-chart-warning-text: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-chart-warning) 74%, var(--ui-chart-text)));
     --ui-chart-warning: var(--ui-color-warning, #b45309);
     --ui-chart-danger: var(--ui-color-danger, #dc2626);
     --ui-chart-radius: calc(var(--ui-radius, 6px) + 4px);
@@ -121,6 +124,9 @@ const style = `
     --ui-chart-accent: #93c5fd;
     --ui-chart-success: #34d399;
     --ui-chart-warning: #fbbf24;
+    --ui-chart-success-text: var(--ui-chart-success);
+    --ui-chart-danger-text: var(--ui-chart-danger);
+    --ui-chart-warning-text: var(--ui-chart-warning);
     --ui-chart-danger: #f87171;
     --ui-chart-shadow: none;
   }
@@ -217,19 +223,19 @@ const style = `
   }
 
   .status-pill[data-state="success"] {
-    color: color-mix(in srgb, var(--ui-chart-success) 74%, var(--ui-chart-text));
+    color: var(--ui-chart-success-text);
     border-color: color-mix(in srgb, var(--ui-chart-success) 35%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-success) 13%, transparent);
   }
 
   .status-pill[data-state="error"] {
-    color: color-mix(in srgb, var(--ui-chart-danger) 74%, var(--ui-chart-text));
+    color: var(--ui-chart-danger-text);
     border-color: color-mix(in srgb, var(--ui-chart-danger) 35%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-danger) 12%, transparent);
   }
 
   .status-pill[data-state="loading"] {
-    color: color-mix(in srgb, var(--ui-chart-warning) 74%, var(--ui-chart-text));
+    color: var(--ui-chart-warning-text);
     border-color: color-mix(in srgb, var(--ui-chart-warning) 32%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-warning) 10%, transparent);
   }
@@ -268,11 +274,11 @@ const style = `
   }
 
   .metric-value[data-tone="up"] {
-    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-chart-text));
+    color: var(--ui-chart-success-text);
   }
 
   .metric-value[data-tone="down"] {
-    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-chart-text));
+    color: var(--ui-chart-danger-text);
   }
 
   .plot-shell {
@@ -557,13 +563,13 @@ const style = `
   }
 
   .message[data-tone="error"] {
-    color: color-mix(in srgb, var(--ui-chart-danger) 68%, var(--ui-chart-text));
+    color: var(--ui-chart-danger-text);
     border-color: color-mix(in srgb, var(--ui-chart-danger) 30%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-danger) 10%, transparent);
   }
 
   .message[data-tone="success"] {
-    color: color-mix(in srgb, var(--ui-chart-success) 68%, var(--ui-chart-text));
+    color: var(--ui-chart-success-text);
     border-color: color-mix(in srgb, var(--ui-chart-success) 30%, var(--ui-chart-border));
     background: color-mix(in srgb, var(--ui-chart-success) 10%, transparent);
   }

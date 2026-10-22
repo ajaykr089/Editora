@@ -545,6 +545,15 @@ export class UIHoverCard extends ElementBase {
     if (!panel) return;
     panel.setAttribute('aria-hidden', this._isOpen ? 'false' : 'true');
     if (!this._isOpen) panel.setAttribute('data-ready', 'false');
+    // a role="dialog" needs a name: the author's label, else the trigger's text, else the card's heading
+    const trigger = this.querySelector('[slot="trigger"]') as HTMLElement | null;
+    const heading = this.querySelector('[slot="card"] :is(h1, h2, h3, h4, h5, h6, strong)') as HTMLElement | null;
+    const name =
+      (this.getAttribute('aria-label') || this.getAttribute('label') || '').trim() ||
+      (trigger?.getAttribute('aria-label') || trigger?.textContent || '').trim() ||
+      (heading?.textContent || '').trim() ||
+      'Details';
+    panel.setAttribute('aria-label', name);
   }
 
   private _bindGlobalListeners(): void {

@@ -1497,6 +1497,77 @@ export function themeToVariables(tokens: ThemeTokens): Record<string, string> {
   return resolvedThemeVariables(createThemeTokens(tokens));
 }
 
+const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+function hexToRgb(color: string): [number, number, number] | null {
+  const m = HEX.exec(color.trim());
+  if (!m) return null;
+  const full = m[1].length === 3 ? m[1].replace(/./g, (c) => c + c) : m[1];
+  return [parseInt(full.slice(0, 2), 16), parseInt(full.slice(2, 4), 16), parseInt(full.slice(4, 6), 16)];
+}
+
+function mixHex(a: string, b: string, amountOfB: number): string | null {
+  const ra = hexToRgb(a);
+  const rb = hexToRgb(b);
+  if (!ra || !rb) return null;
+  const out = ra.map((v, i) => Math.round(v + (rb[i] - v) * amountOfB));
+  return '#' + out.map((v) => v.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Readable versions of the status colours. The theme's `danger`, `success` and `warning` are fill and
+ * icon colours (the Radix step 9 family): used as TEXT they read at only about 3-4:1 on white. These are
+ * the same hues pulled toward the text colour until they read at 4.5:1 or better on the surface and on
+ * their own soft tint, and, for danger and success, the same hue darkened until white text on it does.
+ */
+function deriveStatusTokens(tokens: ThemeTokens): VariableMap {
+  const out: VariableMap = {};
+  const c = tokens.colors;
+  const surface = c.surface || c.background;
+  const text = c.text;
+  if (!surface || !text) return out;
+  const tones: Array<[string, string | undefined]> = [
+    // the accent's text step (Radix step 11) can sit just under 4.5:1 (amber is 4.49:1 on near-white)
+    ['accent', tokens.palette?.accent?.['11'] || c.primary],
+    ['danger', c.danger],
+    ['success', c.success],
+    ['warning', c.warning],
+    ['info', c.info]
+  ];
+  for (const [tone, base] of tones) {
+    if (!base) continue;
+    if (!hexToRgb(base)) {
+      // not a hex colour: let the browser do the mixing, with a fixed share of the text colour
+      out[`--ui-color-${tone}-text`] = `color-mix(in srgb, ${base} 62%, ${text})`;
+      continue;
+    }
+    const tint = mixHex(base, surface, 0.86);
+    let textColor = base;
+    for (let step = 0; step <= 18; step += 1) {
+      const candidate = mixHex(base, text, step * 0.05);
+      if (!candidate) break;
+      textColor = candidate;
+      const onSurface = contrastRatio(candidate, surface) ?? 0;
+      const onTint = tint ? contrastRatio(candidate, tint) ?? 0 : onSurface;
+      if (onSurface >= 5.5 && onTint >= 5) break;
+    }
+    out[`--ui-color-${tone}-text`] = textColor;
+
+    if (tone === 'danger' || tone === 'success') {
+      let solid = base;
+      for (let step = 0; step <= 12; step += 1) {
+        const candidate = mixHex(base, '#000000', step * 0.05);
+        if (!candidate) break;
+        solid = candidate;
+        if ((contrastRatio('#ffffff', candidate) ?? 0) >= 4.6) break;
+      }
+      out[`--ui-color-${tone}-solid`] = solid;
+      out[`--ui-color-foreground-on-${tone}`] = '#ffffff';
+    }
+  }
+  return out;
+}
+
 /**
  * A theme that only sets raw colours (a dark background, a blue primary) still carries the light
  * baseline's gray and amber 12-step scales, so the derived roles (fill, line, soft accent) would
@@ -1664,6 +1735,7 @@ function resolvedThemeVariables(raw: ThemeTokens): VariableMap {
   addScaleVariables(target, '--base-input-', next.components?.input);
 
   Object.assign(target, deriveSemanticTokens(next));
+  Object.assign(target, deriveStatusTokens(next));
   // Text on a solid warning fill: white when it reads, dark when the warning colour is light (amber).
   setOn(target, '--ui-color-foreground-on-warning', readableForeground(next.colors.warning || next.colors.primary, '#ffffff'));
   return target;

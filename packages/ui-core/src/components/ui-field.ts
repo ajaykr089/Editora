@@ -11,7 +11,7 @@ const style = `
     --ui-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-field-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-field-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
-    --ui-field-error-color: var(--ui-color-danger, var(--ui-error, #c81e1e));
+    --ui-field-error-color: var(--ui-color-danger-text, var(--ui-color-danger, var(--ui-error, #c81e1e)));
     --ui-field-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-field-border: 0;
     --ui-field-shadow:

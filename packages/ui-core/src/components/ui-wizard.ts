@@ -29,10 +29,14 @@ const style = `
     --ui-wizard-text: var(--ui-color-text, #0f172a);
     --ui-wizard-muted: var(--ui-color-muted, #526175);
     --ui-wizard-accent: var(--ui-color-primary, #2563eb);
+    --ui-wizard-fill: var(--ui-color-fill, color-mix(in srgb, var(--ui-wizard-accent) 7%, var(--ui-wizard-surface)));
+    --ui-wizard-fill-soft: var(--ui-color-fill, color-mix(in srgb, var(--ui-wizard-accent) 8%, transparent));
+    --ui-wizard-accent-fill: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-wizard-accent) 13%, transparent));
+    --ui-wizard-line: var(--ui-color-line, color-mix(in srgb, var(--ui-wizard-border) 84%, transparent));
     --ui-wizard-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-wizard-success: var(--ui-color-success, #15803d);
-    --ui-wizard-warning: var(--ui-color-warning, #b45309);
-    --ui-wizard-danger: var(--ui-color-danger, #dc2626);
+    --ui-wizard-success: var(--ui-color-success-text, var(--ui-color-success, #15803d));
+    --ui-wizard-warning: var(--ui-color-warning-text, var(--ui-color-warning, #b45309));
+    --ui-wizard-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
 
     --ui-wizard-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-wizard-gap: 12px;
@@ -194,7 +198,7 @@ const style = `
   }
 
   .step:hover {
-    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-wizard-accent) 7%, var(--ui-wizard-surface)));
+    background: var(--ui-wizard-fill);
   }
 
   .step:focus-visible {
@@ -209,7 +213,7 @@ const style = `
 
   .step[data-active="true"] {
     border-color: transparent;
-    background: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-wizard-accent) 13%, transparent));
+    background: var(--ui-wizard-accent-fill);
   }
 
   .step-badge {
@@ -376,7 +380,7 @@ const style = `
   }
 
   .btn {
-    border: 1px solid var(--ui-color-line, color-mix(in srgb, var(--ui-wizard-border) 84%, transparent));
+    border: 1px solid var(--ui-wizard-line);
     border-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     background: transparent;
     color: var(--ui-wizard-text);
@@ -396,7 +400,7 @@ const style = `
   }
 
   .btn:hover {
-    background: var(--ui-color-fill, color-mix(in srgb, var(--ui-wizard-accent) 8%, transparent));
+    background: var(--ui-wizard-fill-soft);
   }
 
   .btn:focus-visible {
@@ -511,6 +515,11 @@ const style = `
     --ui-wizard-success: #4ade80;
     --ui-wizard-warning: #fbbf24;
     --ui-wizard-danger: #f87171;
+    /* The contrast variant is a dark surface of its own: the theme's light fills and lines do not apply. */
+    --ui-wizard-fill: #1e293b;
+    --ui-wizard-fill-soft: #1e293b;
+    --ui-wizard-accent-fill: color-mix(in srgb, #93c5fd 20%, #0f172a);
+    --ui-wizard-line: #334155;
   }
 
   /* The contrast accent is a light blue: the primary button needs dark text and a lighter hover. */

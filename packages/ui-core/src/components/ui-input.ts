@@ -25,7 +25,7 @@ const style = `
     --ui-label-color: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-input-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
-    --ui-input-error: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-input-error: var(--ui-color-danger-text, var(--ui-color-danger, var(--ui-error, #dc2626)));
     --ui-input-success: var(--ui-color-success, var(--ui-success, #15803d));
     --ui-input-warning: var(--ui-color-warning, var(--ui-warning, #b45309));
     --ui-input-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));

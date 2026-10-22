@@ -19,7 +19,7 @@ const style = `
     --ui-radio-accent: var(--ui-primary, var(--ui-color-primary, #2563eb));
     --ui-radio-dot-color: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-radio-focus: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
-    --ui-radio-invalid: var(--ui-color-danger, #dc2626);
+    --ui-radio-invalid: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-radio-invalid-focus: 0 0 0 2px var(--ui-color-background, #ffffff), 0 0 0 4px var(--ui-radio-invalid);
     --ui-radio-disabled-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f1f5f9) 88%, #ffffff 12%);
     --ui-radio-disabled-border: 1px solid var(--ui-color-line, var(--ui-color-border, #cbd5e1));

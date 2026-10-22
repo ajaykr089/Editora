@@ -503,7 +503,7 @@ export class UIToast extends ElementBase {
           const meta = toast.duration > 0 ? '<span class="meta" part="meta">Auto-dismiss</span>' : '<span class="meta" part="meta">Persistent</span>';
 
           return `
-            <article
+            <div
               class="toast show${toast.closing ? ' closing' : ''}"
               part="toast"
               data-toast-id="${toast.id}"
@@ -517,7 +517,7 @@ export class UIToast extends ElementBase {
               <button class="close" part="close" data-toast-id="${toast.id}" aria-label="Close notification" type="button">
                 <span aria-hidden="true">&times;</span>
               </button>
-            </article>
+            </div>
           `;
         }).join('')}
       </div>

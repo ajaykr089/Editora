@@ -373,6 +373,7 @@ const style = `
   .picker-month[data-active="true"] {
     border-color: var(--ui-calendar-selected-border);
     background: var(--ui-calendar-selected-bg);
+    color: var(--ui-calendar-selected-color);
   }
 
   .grid-wrap {

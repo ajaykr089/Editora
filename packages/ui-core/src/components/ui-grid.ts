@@ -52,7 +52,7 @@ const style = `
     --ui-grid-align-content: normal;
     --ui-grid-justify-content: normal;
     --ui-grid-place-content: initial;
-    --ui-grid-color: var(--ui-color-text, inherit);
+    --ui-grid-color: inherit;
     color-scheme: light dark;
     display: var(--ui-grid-display);
     color: var(--ui-grid-color);

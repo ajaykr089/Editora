@@ -16,7 +16,7 @@ const style = `
     --ui-presence-filter-enter: none;
     --ui-presence-filter-exit: none;
     --ui-presence-perspective: 860px;
-    --ui-presence-color: var(--ui-color-text, inherit);
+    --ui-presence-color: inherit;
     display: contents;
     color: var(--ui-presence-color);
     color-scheme: light dark;

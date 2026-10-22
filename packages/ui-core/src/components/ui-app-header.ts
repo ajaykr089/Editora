@@ -14,6 +14,7 @@ const style = `
     --ui-app-header-color: var(--ui-color-text, var(--ui-text, #202020));
     --ui-app-header-muted: color-mix(in srgb, var(--ui-app-header-color) 56%, var(--ui-color-muted, var(--ui-muted, #646464)) 44%);
     --ui-app-header-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
+    --ui-app-header-on-accent: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-app-header-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14))) 84%, transparent));
     --ui-app-header-border: var(--base-app-header-border, 1px solid var(--ui-app-header-border-color));
     --ui-app-header-control-bg: color-mix(in srgb, var(--ui-app-header-bg-base) 90%, transparent);
@@ -78,12 +79,12 @@ const style = `
 
   :host([variant='solid']) {
     --ui-app-header-bg: var(--ui-app-header-accent);
-    --ui-app-header-color: #ffffff;
-    --ui-app-header-muted: color-mix(in srgb, #ffffff 94%, transparent);
+    --ui-app-header-color: var(--ui-app-header-on-accent, #ffffff);
+    --ui-app-header-muted: color-mix(in srgb, var(--ui-app-header-on-accent, #ffffff) 98%, transparent);
     --ui-app-header-border: 1px solid color-mix(in srgb, #000000 16%, transparent);
-    --ui-app-header-control-bg: color-mix(in srgb, #ffffff 14%, transparent);
-    --ui-app-header-control-bg-hover: color-mix(in srgb, #ffffff 24%, transparent);
-    --ui-app-header-control-color: #ffffff;
+    --ui-app-header-control-bg: color-mix(in srgb, var(--ui-app-header-on-accent, #ffffff) 14%, transparent);
+    --ui-app-header-control-bg-hover: color-mix(in srgb, var(--ui-app-header-on-accent, #ffffff) 24%, transparent);
+    --ui-app-header-control-color: var(--ui-app-header-on-accent, #ffffff);
     --ui-app-header-focus-ring: color-mix(in srgb, #ffffff 72%, var(--ui-app-header-accent) 28%);
   }
 
@@ -101,18 +102,22 @@ const style = `
 
   :host([tone='info']) {
     --ui-app-header-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
+    --ui-app-header-on-accent: var(--ui-color-foreground-on-primary, #ffffff);
   }
 
   :host([tone='success']) {
-    --ui-app-header-accent: var(--ui-color-success, #15803d);
+    --ui-app-header-accent: var(--ui-color-success-solid, var(--ui-color-success, #15803d));
+    --ui-app-header-on-accent: var(--ui-color-foreground-on-success, #ffffff);
   }
 
   :host([tone='warning']) {
     --ui-app-header-accent: var(--ui-color-warning, #b45309);
+    --ui-app-header-on-accent: var(--ui-color-foreground-on-warning, #ffffff);
   }
 
   :host([tone='danger']) {
-    --ui-app-header-accent: var(--ui-color-danger, #dc2626);
+    --ui-app-header-accent: var(--ui-color-danger-solid, var(--ui-color-danger, #dc2626));
+    --ui-app-header-on-accent: var(--ui-color-foreground-on-danger, #ffffff);
   }
 
   :host([sticky]) {

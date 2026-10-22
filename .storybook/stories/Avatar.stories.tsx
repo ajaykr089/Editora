@@ -228,7 +228,7 @@ export const ClinicalRosterWorkflow: Story = {
                       <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', marginTop: 2 }}>{member.role}</Box>
                     </Box>
                   </Flex>
-                  <Flex align="center" style={{ gap: 5, fontSize: 11, color: isActive ? 'var(--ui-color-primary, #2563eb)' : 'var(--ui-color-muted, #64748b)' }}>
+                  <Flex align="center" style={{ gap: 5, fontSize: 11, color: isActive ? 'var(--ui-color-accent-text, #1d4ed8)' : 'var(--ui-color-muted, #64748b)' }}>
                     <ActivityIcon size={12} />
                     {member.status}
                   </Flex>

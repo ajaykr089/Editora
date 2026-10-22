@@ -34,8 +34,8 @@ const style = `
     --ui-file-upload-text: var(--ui-color-text, #0f172a);
     --ui-file-upload-muted: var(--ui-color-muted, #526175);
     --ui-file-upload-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-file-upload-danger: var(--ui-color-danger, #dc2626);
-    --ui-file-upload-success: var(--ui-color-success, #15803d);
+    --ui-file-upload-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
+    --ui-file-upload-success: var(--ui-color-success-text, var(--ui-color-success, #15803d));
     display: block;
     inline-size: 100%;
     min-inline-size: 0;

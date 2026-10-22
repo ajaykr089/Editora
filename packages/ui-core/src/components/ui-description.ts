@@ -33,10 +33,10 @@ const style = `
     letter-spacing: 0.01em;
   }
 
-  :host([tone="brand"]) { --ui-description-color: var(--ui-color-primary, #2563eb); }
-  :host([tone="success"]) { --ui-description-color: var(--ui-color-success, #15803d); }
-  :host([tone="warning"]) { --ui-description-color: var(--ui-color-warning, #b45309); }
-  :host([tone="danger"]) { --ui-description-color: var(--ui-color-danger, #dc2626); }
+  :host([tone="brand"]) { --ui-description-color: var(--ui-color-accent-text, var(--ui-color-primary, #2563eb)); }
+  :host([tone="success"]) { --ui-description-color: var(--ui-color-success-text, var(--ui-color-success, #15803d)); }
+  :host([tone="warning"]) { --ui-description-color: var(--ui-color-warning-text, var(--ui-color-warning, #b45309)); }
+  :host([tone="danger"]) { --ui-description-color: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626)); }
 
   :host([size="sm"]),
   :host([size="1"]) {

@@ -26,7 +26,7 @@ const style = `
     --ui-select-accent: var(--ui-color-primary, #2563eb);
     --ui-select-success: var(--ui-color-success, #15803d);
     --ui-select-warning: var(--ui-color-warning, #b45309);
-    --ui-select-error: var(--ui-color-danger, #dc2626);
+    --ui-select-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
 
     --ui-select-shadow: var(--base-select-shadow, none);
     --ui-select-elevation: var(--ui-select-shadow);
@@ -315,7 +315,7 @@ const style = `
   }
 
   .menu-group {
-    color: color-mix(in srgb, var(--ui-select-muted) 88%, transparent);
+    color: var(--ui-select-muted);
     font: 700 11px/1.3 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.08em;
     text-transform: uppercase;

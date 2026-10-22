@@ -10,11 +10,11 @@ const splitButtonStyles = `
     --ed-split-bg: var(--ui-color-primary, #2563eb);
     --ed-split-bg-hover: color-mix(in srgb, var(--ed-split-bg) 84%, #0f172a 16%);
     --ed-split-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ed-split-text: #ffffff;
+    --ed-split-text: var(--ui-color-foreground-on-primary, #ffffff);
     --ed-split-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ed-split-bg) 20%, transparent);
     --ed-split-menu-bg: var(--ui-color-surface, #ffffff);
     --ed-split-menu-text: var(--ui-color-text, #0f172a);
-    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 58%, transparent);
+    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 74%, transparent);
     --ed-split-menu-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 64%, transparent);
     --ed-split-menu-shadow: 0 22px 44px rgba(2, 6, 23, 0.16), 0 2px 8px rgba(2, 6, 23, 0.08);
     --ed-split-menu-radius: 14px;
@@ -26,6 +26,7 @@ const splitButtonStyles = `
     --ed-split-menu-accent-strong: color-mix(in srgb, var(--ed-split-bg) 18%, transparent);
     --ed-split-menu-accent-border: color-mix(in srgb, var(--ed-split-bg) 24%, transparent);
     --ed-split-menu-danger: var(--ui-color-danger, #dc2626);
+    --ed-split-menu-danger-text: var(--ui-color-danger-text, var(--ed-split-menu-danger));
     display: inline-flex;
     position: relative;
     min-width: 0;
@@ -157,7 +158,7 @@ const splitButtonStyles = `
     --ed-split-bg: var(--ui-color-primary, #2563eb);
     --ed-split-menu-bg: var(--ui-color-surface, #ffffff);
     --ed-split-menu-text: var(--ui-color-text, #0f172a);
-    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 58%, transparent);
+    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 74%, transparent);
     --ed-split-menu-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 64%, transparent);
     --ed-split-menu-shadow: 0 22px 44px rgba(2, 6, 23, 0.16), 0 2px 8px rgba(2, 6, 23, 0.08);
     --ed-split-menu-radius: 14px;
@@ -169,6 +170,7 @@ const splitButtonStyles = `
     --ed-split-menu-accent-strong: color-mix(in srgb, var(--ed-split-bg) 18%, transparent);
     --ed-split-menu-accent-border: color-mix(in srgb, var(--ed-split-bg) 24%, transparent);
     --ed-split-menu-danger: var(--ui-color-danger, #dc2626);
+    --ed-split-menu-danger-text: var(--ui-color-danger-text, var(--ed-split-menu-danger));
     position: fixed;
     z-index: 1600;
     display: grid;
@@ -194,7 +196,8 @@ const splitButtonStyles = `
     --ed-split-bg: #2563eb;
     --ed-split-menu-bg: #ffffff;
     --ed-split-menu-text: #0f172a;
-    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 58%, transparent);
+    --ed-split-menu-danger-text: #b91c1c;
+    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 74%, transparent);
     --ed-split-menu-border: 1px solid color-mix(in srgb, #0f172a 12%, transparent);
     --ed-split-menu-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
   }
@@ -203,7 +206,8 @@ const splitButtonStyles = `
     --ed-split-bg: #2563eb;
     --ed-split-menu-bg: #ffffff;
     --ed-split-menu-text: #0f172a;
-    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 58%, transparent);
+    --ed-split-menu-danger-text: #b91c1c;
+    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 74%, transparent);
     --ed-split-menu-border: 1px solid #dbe4f0;
     --ed-split-menu-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
     --ed-split-menu-accent: #eef4ff;
@@ -215,7 +219,8 @@ const splitButtonStyles = `
     --ed-split-bg: #2563eb;
     --ed-split-menu-bg: #111827;
     --ed-split-menu-text: #f8fafc;
-    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 58%, transparent);
+    --ed-split-menu-danger-text: #fca5a5;
+    --ed-split-menu-muted: color-mix(in srgb, var(--ed-split-menu-text) 74%, transparent);
     --ed-split-menu-border: 1px solid #334155;
     --ed-split-menu-shadow: 0 18px 36px rgba(15, 23, 42, 0.3), 0 2px 8px rgba(15, 23, 42, 0.2);
   }
@@ -334,11 +339,11 @@ const splitButtonStyles = `
   }
 
   .ed-split-button__item--danger {
-    color: color-mix(in srgb, var(--ed-split-menu-danger) 88%, var(--ed-split-menu-text));
+    color: var(--ed-split-menu-danger-text);
   }
 
   .ed-split-button__item--danger .ed-split-button__itemDescription {
-    color: color-mix(in srgb, var(--ed-split-menu-danger) 68%, transparent);
+    color: var(--ed-split-menu-danger-text);
   }
 
   .ed-split-button__item--danger:hover,

@@ -77,7 +77,7 @@ const style = `
     --ui-placement-align-content: normal;
     --ui-placement-justify-content: normal;
     --ui-placement-place-content: initial;
-    --ui-placement-color: var(--ui-color-text, inherit);
+    --ui-placement-color: inherit;
     --ui-placement-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     color-scheme: light dark;
     display: var(--ui-placement-display);

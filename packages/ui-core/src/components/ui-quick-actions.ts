@@ -46,7 +46,7 @@ const style = `
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--ui-quick-border) 82%, transparent);
     background: color-mix(in srgb, var(--ui-quick-accent) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-quick-accent) 88%, #0f172a 12%);
+    color: color-mix(in srgb, var(--ui-quick-accent) 45%, var(--ui-color-text-strong, #0f172a));
     font-size: 17px;
     line-height: 1;
     display: inline-grid;

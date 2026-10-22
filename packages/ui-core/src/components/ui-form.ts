@@ -149,25 +149,25 @@ const style = `
   .status[data-tone="warning"] {
     --ui-form-status-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 12%, transparent);
     --ui-form-status-border: color-mix(in srgb, var(--ui-color-warning, #b45309) 44%, var(--ui-form-border-color));
-    --ui-form-status-text: color-mix(in srgb, var(--ui-color-warning, #b45309) 90%, #111827 10%);
+    --ui-form-status-text: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-color-warning, #b45309) 90%, #111827 10%));
   }
 
   .status[data-tone="error"] {
     --ui-form-status-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 12%, transparent);
     --ui-form-status-border: color-mix(in srgb, var(--ui-color-danger, #dc2626) 44%, var(--ui-form-border-color));
-    --ui-form-status-text: color-mix(in srgb, var(--ui-color-danger, #dc2626) 88%, #111827 12%);
+    --ui-form-status-text: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 88%, #111827 12%));
   }
 
   .status[data-tone="success"] {
     --ui-form-status-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
     --ui-form-status-border: color-mix(in srgb, var(--ui-color-success, #15803d) 44%, var(--ui-form-border-color));
-    --ui-form-status-text: color-mix(in srgb, var(--ui-color-success, #15803d) 90%, #111827 10%);
+    --ui-form-status-text: var(--ui-color-success-text, color-mix(in srgb, var(--ui-color-success, #15803d) 90%, #111827 10%));
   }
 
   .status[data-tone="loading"] {
     --ui-form-status-bg: color-mix(in srgb, var(--ui-form-accent) 12%, transparent);
     --ui-form-status-border: color-mix(in srgb, var(--ui-form-accent) 44%, var(--ui-form-border-color));
-    --ui-form-status-text: color-mix(in srgb, var(--ui-form-accent) 90%, #111827 10%);
+    --ui-form-status-text: color-mix(in srgb, var(--ui-form-accent) 45%, var(--ui-color-text-strong, #0f172a));
   }
 
   .footer {

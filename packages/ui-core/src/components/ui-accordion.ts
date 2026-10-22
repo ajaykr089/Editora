@@ -252,7 +252,7 @@ const LIGHT_DOM_STYLE = `
     text-transform: uppercase;
     line-height: 1.2;
     background: color-mix(in srgb, var(--ui-accordion-accent) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-accordion-accent) 45%, var(--ui-color-text-strong, var(--ui-accordion-text)));
+    color: color-mix(in srgb, var(--ui-accordion-accent) 32%, var(--ui-color-text-strong, var(--ui-accordion-text)));
   }
 
   ui-accordion[data-ui-accordion-root="true"] [data-ui-accordion-chevron] {

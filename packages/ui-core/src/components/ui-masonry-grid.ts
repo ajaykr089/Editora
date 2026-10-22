@@ -27,7 +27,7 @@ const style = `
     --ui-masonry-column-gap: 0px;
     --ui-masonry-item-gap: var(--ui-masonry-column-gap);
     --ui-masonry-fill: balance;
-    --ui-masonry-color: var(--ui-color-text, inherit);
+    --ui-masonry-color: inherit;
     color-scheme: light dark;
     display: var(--ui-masonry-display);
     color: var(--ui-masonry-color);

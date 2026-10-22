@@ -51,7 +51,7 @@ const style = `
     --ui-split-button-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     --ui-split-button-bg: var(--ui-color-primary, #2563eb);
     --ui-split-button-bg-strong: color-mix(in srgb, var(--ui-split-button-bg) 84%, #0f172a 16%);
-    --ui-split-button-color: #ffffff;
+    --ui-split-button-color: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-split-button-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-split-button-bg) 20%, transparent);
     --ui-split-button-menu-bg: var(--ui-color-surface, #ffffff);
     --ui-split-button-menu-color: var(--ui-color-text, #0f172a);
@@ -63,7 +63,7 @@ const style = `
     --ui-split-button-menu-shortcut: color-mix(in srgb, var(--ui-split-button-menu-color) 60%, transparent);
     --ui-split-button-menu-separator: color-mix(in srgb, var(--ui-split-button-menu-color) 10%, transparent);
     --ui-split-button-menu-muted: color-mix(in srgb, var(--ui-split-button-menu-color) 58%, transparent);
-    --ui-split-button-menu-danger: var(--ui-color-danger, #dc2626);
+    --ui-split-button-menu-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-split-button-menu-option-border: transparent;
     --ui-split-button-menu-option-border-strong: color-mix(in srgb, var(--ui-split-button-bg) 24%, transparent);
     --ui-split-button-menu-option-shadow: none;

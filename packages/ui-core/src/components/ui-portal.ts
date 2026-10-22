@@ -12,7 +12,7 @@ const style = `
   :host {
     display: contents;
     color-scheme: light dark;
-    --ui-portal-color: var(--ui-color-text, inherit);
+    --ui-portal-color: inherit;
     color: var(--ui-portal-color);
   }
 

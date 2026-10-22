@@ -149,19 +149,19 @@ const style = `
   }
 
   :host([tone="info"]) {
-    --ui-number-ticker-color: var(--ui-color-info, #0e7490);
+    --ui-number-ticker-color: var(--ui-color-info-text, var(--ui-color-info, #0e7490));
   }
 
   :host([tone="success"]) {
-    --ui-number-ticker-color: var(--ui-color-success, #15803d);
+    --ui-number-ticker-color: var(--ui-color-success-text, var(--ui-color-success, #15803d));
   }
 
   :host([tone="warning"]) {
-    --ui-number-ticker-color: var(--ui-color-warning, #b45309);
+    --ui-number-ticker-color: var(--ui-color-warning-text, var(--ui-color-warning, #b45309));
   }
 
   :host([tone="danger"]) {
-    --ui-number-ticker-color: var(--ui-color-danger, #dc2626);
+    --ui-number-ticker-color: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
   }
 
   :host([align="left"]),
