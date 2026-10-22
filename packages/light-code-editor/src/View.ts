@@ -189,6 +189,10 @@ export class View {
     this.contentElement.contentEditable = 'true';
     this.contentElement.spellcheck = false;
     this.contentElement.tabIndex = 0;
+    // A contenteditable div is announced as nothing at all: make it a named multi-line text box.
+    this.contentElement.setAttribute('role', 'textbox');
+    this.contentElement.setAttribute('aria-multiline', 'true');
+    this.contentElement.setAttribute('aria-label', 'Code editor');
 
     // Assemble: create a single scroll wrapper so gutter and content
     // share the same scroller and remain aligned when scrolling.
@@ -866,6 +870,13 @@ export class View {
   // Set read-only mode
   setReadOnly(readOnly: boolean): void {
     this.contentElement.contentEditable = readOnly ? 'false' : 'true';
+    if (readOnly) this.contentElement.setAttribute('aria-readonly', 'true');
+    else this.contentElement.removeAttribute('aria-readonly');
+  }
+
+  /** The accessible name of the editing surface (what a screen reader calls the editor). */
+  setAccessibleName(name: string): void {
+    this.contentElement.setAttribute('aria-label', name || 'Code editor');
   }
 
   // Apply theme

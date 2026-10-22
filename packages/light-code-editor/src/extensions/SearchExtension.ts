@@ -198,13 +198,15 @@ export class SearchExtension implements EditorExtension {
     this.searchUI = document.createElement('div');
     this.searchUI.className = SearchExtension.css.root;
     this.searchUI.style.display = 'none';
+    this.searchUI.setAttribute('role', 'search');
+    this.searchUI.setAttribute('aria-label', 'Find and replace');
 
     this.searchUI.innerHTML = `
       <div class="${SearchExtension.css.row}">
-        <input type="text" class="${SearchExtension.css.findInput} ${SearchExtension.css.inputBase}" placeholder="Find..." />
-        <button class="${SearchExtension.css.prevButton} ${SearchExtension.css.buttonBase}" type="button" aria-label="Previous match">↑</button>
-        <button class="${SearchExtension.css.nextButton} ${SearchExtension.css.buttonBase}" type="button" aria-label="Next match">↓</button>
-        <button class="${SearchExtension.css.closeButton} ${SearchExtension.css.buttonBase}" type="button" aria-label="Close search">×</button>
+        <input type="text" class="${SearchExtension.css.findInput} ${SearchExtension.css.inputBase}" placeholder="Find..." aria-label="Find" autocomplete="off" spellcheck="false" />
+        <button class="${SearchExtension.css.prevButton} ${SearchExtension.css.buttonBase}" type="button" aria-label="Previous match" title="Previous match (Shift+Enter)"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="${SearchExtension.css.nextButton} ${SearchExtension.css.buttonBase}" type="button" aria-label="Next match" title="Next match (Enter)"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="${SearchExtension.css.closeButton} ${SearchExtension.css.buttonBase}" type="button" aria-label="Close search" title="Close (Esc)"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       </div>
       <div class="${SearchExtension.css.options}">
         <label class="${SearchExtension.css.optionLabel}" title="Case sensitive">
@@ -221,10 +223,10 @@ export class SearchExtension implements EditorExtension {
         </label>
       </div>
       <div class="${SearchExtension.css.meta}">
-        <div class="${SearchExtension.css.status} ${SearchExtension.css.statusLayout}"></div>
+        <div class="${SearchExtension.css.status} ${SearchExtension.css.statusLayout}" role="status" aria-live="polite"></div>
         <div class="${SearchExtension.css.mode} ${SearchExtension.css.modeLayout}" aria-live="polite"></div>
       </div>
-      <input type="text" class="${SearchExtension.css.replaceInput} ${SearchExtension.css.inputBase} ${SearchExtension.css.replaceInputLayout}" placeholder="Replace with..." />
+      <input type="text" class="${SearchExtension.css.replaceInput} ${SearchExtension.css.inputBase} ${SearchExtension.css.replaceInputLayout}" placeholder="Replace with..." aria-label="Replace with" autocomplete="off" spellcheck="false" />
     `;
 
     const input = this.searchUI.querySelector(

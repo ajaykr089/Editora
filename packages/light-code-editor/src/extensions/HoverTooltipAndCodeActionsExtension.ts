@@ -621,6 +621,7 @@ export class HoverTooltipAndCodeActionsExtension implements EditorExtension {
     popup.style.display = 'none';
     popup.setAttribute('aria-hidden', 'true');
     popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-label', 'Diagnostics and quick fixes');
 
     const header = document.createElement('div');
     header.className = HoverTooltipAndCodeActionsExtension.css.header;

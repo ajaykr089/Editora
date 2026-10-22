@@ -558,12 +558,17 @@ export class CodeFoldingExtension implements EditorExtension {
       background: transparent;
       border: none;
       padding: 0;
-      font-size: 10px;
       user-select: none;
     `;
-    indicator.textContent = isCollapsed ? '▶' : '▼';
+    indicator.className = 'lce-fold-toggle';
+    const chevron = document.createElement('span');
+    chevron.className = 'lce-fold-chevron';
+    chevron.dataset.state = isCollapsed ? 'closed' : 'open';
+    chevron.setAttribute('aria-hidden', 'true');
+    indicator.appendChild(chevron);
     indicator.title = isCollapsed ? 'Expand folded region' : 'Collapse region';
     indicator.setAttribute('aria-label', indicator.title);
+    indicator.setAttribute('aria-expanded', String(!isCollapsed));
 
     indicator.addEventListener('mousedown', (event) => {
       event.preventDefault();
