@@ -128,6 +128,7 @@ const style = `
     --ui-gantt-text: var(--ui-color-text, #0f172a);
     --ui-gantt-muted: var(--ui-color-muted, #526175);
     --ui-gantt-accent: var(--ui-color-primary, #2563eb);
+    --ui-gantt-accent-text: var(--ui-color-accent-text, var(--ui-gantt-accent));
     --ui-gantt-selected: color-mix(in srgb, var(--ui-gantt-accent) 10%, transparent);
     display: block;
     min-inline-size: 0;
@@ -343,7 +344,7 @@ const style = `
 
   .head-button:hover,
   .head-button[aria-sort]:not([aria-sort="none"]) {
-    color: var(--ui-gantt-accent);
+    color: var(--ui-gantt-accent-text);
   }
 
   .grid-head span:last-child,
@@ -433,7 +434,7 @@ const style = `
   }
 
   .tick.today-cell {
-    color: var(--ui-gantt-accent);
+    color: var(--ui-gantt-accent-text);
     background: color-mix(in srgb, var(--ui-gantt-accent) 9%, transparent);
   }
 
@@ -632,7 +633,7 @@ const style = `
 
   .expander:hover {
     background: color-mix(in srgb, var(--ui-gantt-accent) 9%, transparent);
-    color: var(--ui-gantt-accent);
+    color: var(--ui-gantt-accent-text);
   }
 
   .rename {
@@ -1112,6 +1113,7 @@ const style = `
     --ui-gantt-text: #e2e8f0;
     --ui-gantt-muted: #93a4bd;
     --ui-gantt-accent: #60a5fa;
+    --ui-gantt-accent-text: #93c5fd;
     --ui-gantt-selected: rgba(96, 165, 250, 0.13);
   }
 

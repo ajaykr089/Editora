@@ -169,6 +169,7 @@ function FloatingReactLab(args: FloatingInteractionsArgs) {
                 data-node-id={nodeId}
                 {...getFloatingProps({
                   ref: floating.floatingRef,
+                  'aria-label': 'Floating options',
                   style: {
                     ...panelStyle,
                     ...transition.styles,

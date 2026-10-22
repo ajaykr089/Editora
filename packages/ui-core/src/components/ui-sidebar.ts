@@ -640,8 +640,9 @@ const template = (body: string) => `
     .resize-handle {
       position: absolute;
       inset-block: 16px;
-      inset-inline-end: 0;
-      inline-size: 10px;
+      /* a 24px target (WCAG 2.5.8) centred on the edge, so half of it sits outside the sidebar */
+      inset-inline-end: -12px;
+      inline-size: 24px;
       cursor: ew-resize;
       background: transparent;
       border: none;
@@ -654,7 +655,7 @@ const template = (body: string) => `
       content: '';
       position: absolute;
       inset-block: 6px;
-      inset-inline-end: 3px;
+      inset-inline-end: 10.5px;
       inline-size: 3px;
       border-radius: 999px;
       background: color-mix(in srgb, currentColor 20%, transparent);
@@ -667,13 +668,13 @@ const template = (body: string) => `
 
     :host([position="right"]) .resize-handle {
       inset-inline-end: auto;
-      inset-inline-start: 0;
+      inset-inline-start: -12px;
       cursor: ew-resize;
     }
 
     :host([position="right"]) .resize-handle::before {
       inset-inline-end: auto;
-      inset-inline-start: 3px;
+      inset-inline-start: 10.5px;
     }
 
     :host(:not([resizable])) .resize-handle {

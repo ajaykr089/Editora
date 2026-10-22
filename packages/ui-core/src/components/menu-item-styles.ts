@@ -61,7 +61,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   return `
   ${sectionLabel} {
     padding: 6px 10px 4px;
-    color: color-mix(in srgb, var(${prefix}-color, #0f172a) 54%, transparent);
+    color: color-mix(in srgb, var(${prefix}-color, #0f172a) 72%, transparent);
     font: 600 11px/1.4 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -113,15 +113,15 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   }
 
   ${danger} {
-    color: #dc2626;
+    color: var(--ui-color-danger-text, #dc2626);
   }
 
   ${success} {
-    color: #15803d;
+    color: var(--ui-color-success-text, #15803d);
   }
 
   ${warning} {
-    color: #b45309;
+    color: var(--ui-color-warning-text, #b45309);
   }
 
   ${icons} {
@@ -187,7 +187,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   }
 
   ${labelCaption} {
-    color: color-mix(in srgb, currentColor 70%, transparent);
+    color: color-mix(in srgb, currentColor 88%, transparent);
     font-size: calc(var(${prefix}-item-font-size, 14px) - 1px);
     line-height: 1.35;
     letter-spacing: inherit;
@@ -198,7 +198,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
     padding-left: 14px;
     flex: 0 0 auto;
     min-width: max-content;
-    color: color-mix(in srgb, currentColor 70%, transparent);
+    color: color-mix(in srgb, currentColor 88%, transparent);
     font-size: calc(var(${prefix}-item-font-size, 14px) - 1px);
     line-height: 1;
     letter-spacing: inherit;

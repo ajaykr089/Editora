@@ -34,7 +34,7 @@ const style = `
     --ui-dialog-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-dialog-btn-hover: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 78%, var(--ui-color-border, #cbd5e1) 22%);
     --ui-dialog-submit-bg: var(--ui-color-primary, #2563eb);
-    --ui-dialog-submit-color: var(--ui-color-primary-contrast, #ffffff);
+    --ui-dialog-submit-color: var(--ui-color-foreground-on-primary, var(--ui-color-primary-contrast, #ffffff));
     --ui-dialog-duration: 170ms;
     --ui-dialog-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   }

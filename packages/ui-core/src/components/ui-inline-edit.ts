@@ -222,6 +222,8 @@ export class UIInlineEdit extends ElementBase {
     const editing = this.hasAttribute('editing');
     const empty = !this.value;
     const disabled = this.hasAttribute('disabled') || this.hasAttribute('readonly');
+    // the editing field needs a name of its own: the author's label, else the placeholder
+    const fieldLabel = escapeHtml((this.getAttribute('aria-label') || this.getAttribute('label') || this.getAttribute('placeholder') || 'Edit value').trim());
 
     this.setContent(`
       <style>${style}</style>
@@ -231,7 +233,7 @@ export class UIInlineEdit extends ElementBase {
           <button class="edit-btn" type="button"${disabled ? ' disabled' : ''}>Edit</button>
         </div>
         <div class="editor"${editing ? '' : ' hidden'}>
-          ${multiline ? `<textarea class="field" rows="4"${disabled ? ' disabled' : ''}>${escapeHtml(value)}</textarea>` : `<input class="field" type="text" value="${escapeHtml(value)}"${disabled ? ' disabled' : ''} />`}
+          ${multiline ? `<textarea class="field" aria-label="${fieldLabel}" rows="4"${disabled ? ' disabled' : ''}>${escapeHtml(value)}</textarea>` : `<input class="field" aria-label="${fieldLabel}" type="text" value="${escapeHtml(value)}"${disabled ? ' disabled' : ''} />`}
           <div class="actions">
             <button class="cancel-btn" type="button"${disabled ? ' disabled' : ''}>Cancel</button>
             <button class="save-btn" type="button"${disabled ? ' disabled' : ''}>Save</button>

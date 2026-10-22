@@ -315,7 +315,7 @@ const style = `
   }
 
   .menu-group {
-    color: color-mix(in srgb, var(--ui-select-muted) 88%, transparent);
+    color: var(--ui-select-muted);
     font: 700 11px/1.3 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.08em;
     text-transform: uppercase;

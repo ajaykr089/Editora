@@ -1154,6 +1154,9 @@ export class UIMultiSelect extends ElementBase {
       const visibleOptions = filtered.slice(0, renderLimit);
       const truncated = filtered.length > visibleOptions.length;
       setPanelOpen(this._panelEl, this.open, 'bottom');
+      // a listbox that is still loading carries no options yet: aria-busy says so (and satisfies the required children)
+      if (loading) this._panelEl.setAttribute('aria-busy', 'true');
+      else this._panelEl.removeAttribute('aria-busy');
       if (loading) {
         const status = document.createElement('div');
         status.className = 'status';
@@ -1165,6 +1168,10 @@ export class UIMultiSelect extends ElementBase {
       if (!filtered.length) {
         const empty = document.createElement('div');
         empty.className = 'status';
+        // an empty listbox still needs an option-like child; this one is inert
+        empty.setAttribute('role', 'option');
+        empty.setAttribute('aria-disabled', 'true');
+        empty.setAttribute('aria-selected', 'false');
         empty.textContent = 'No matching options';
         this._panelEl.replaceChildren(empty);
         this._inputEl.removeAttribute('aria-activedescendant');
