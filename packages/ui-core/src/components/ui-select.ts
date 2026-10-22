@@ -26,7 +26,7 @@ const style = `
     --ui-select-accent: var(--ui-color-primary, #2563eb);
     --ui-select-success: var(--ui-color-success, #15803d);
     --ui-select-warning: var(--ui-color-warning, #b45309);
-    --ui-select-error: var(--ui-color-danger, #dc2626);
+    --ui-select-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
 
     --ui-select-shadow: var(--base-select-shadow, none);
     --ui-select-elevation: var(--ui-select-shadow);

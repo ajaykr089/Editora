@@ -25,7 +25,9 @@ const style = `
     --ui-tabs-text: var(--ui-color-text, #0f172a);
     --ui-tabs-muted: var(--ui-color-muted, #526175);
     --ui-tabs-accent: var(--ui-tabs-active-bg, var(--ui-color-primary, #2563eb));
-    --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 82%, #0f172a 18%);
+    /* The accent as text: readable on the surface, unlike the accent fill itself (light amber, for one). */
+    --ui-tabs-accent-text: var(--ui-color-accent-text, var(--ui-tabs-accent));
+    --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-tabs-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-tabs-indicator-bg: color-mix(in srgb, var(--ui-tabs-accent) 16%, transparent);
     --ui-tabs-indicator-border: color-mix(in srgb, var(--ui-tabs-accent) 32%, transparent);
@@ -114,7 +116,7 @@ const style = `
 
   .tab:hover {
     background: color-mix(in srgb, var(--ui-tabs-accent) 10%, transparent);
-    color: color-mix(in srgb, var(--ui-tabs-accent) 82%, #0f172a 18%);
+    color: color-mix(in srgb, var(--ui-tabs-accent) 45%, var(--ui-color-text-strong, #0f172a));
   }
 
   .tab[aria-selected="true"] {
@@ -335,7 +337,7 @@ const style = `
     --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
     --ui-tabs-border: color-mix(in srgb, var(--ui-tabs-accent) 76%, #0f172a 24%);
     --ui-tabs-muted: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 94%, transparent);
-    --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 78%, #0f172a 22%);
+    --ui-tabs-active-text: var(--ui-tabs-accent-text);
     --ui-tabs-focus: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 72%, var(--ui-tabs-accent));
   }
 
@@ -345,7 +347,7 @@ const style = `
   }
 
   :host([variant="solid"]) .tab[aria-selected="true"] {
-    background: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
+    background: var(--ui-color-surface, #ffffff);
     border-color: color-mix(in srgb, var(--ui-tabs-accent) 44%, var(--ui-tabs-border));
     color: var(--ui-tabs-active-text);
   }
@@ -523,14 +525,17 @@ const style = `
 
   :host([tone="success"]) {
     --ui-tabs-accent: var(--ui-color-success, #15803d);
+    --ui-tabs-accent-text: var(--ui-color-success-text, var(--ui-tabs-accent));
   }
 
   :host([tone="warning"]) {
     --ui-tabs-accent: var(--ui-color-warning, #b45309);
+    --ui-tabs-accent-text: var(--ui-color-warning-text, var(--ui-tabs-accent));
   }
 
   :host([tone="danger"]) {
     --ui-tabs-accent: var(--ui-color-danger, #dc2626);
+    --ui-tabs-accent-text: var(--ui-color-danger-text, var(--ui-tabs-accent));
   }
 
   :host([headless]) .nav,

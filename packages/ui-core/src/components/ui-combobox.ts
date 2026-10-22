@@ -62,9 +62,9 @@ const style = `
     --ui-combobox-panel-z: 1600;
     --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 11%, transparent);
     --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, #2563eb) 18%, transparent);
-    --ui-combobox-error: var(--ui-color-danger, #dc2626);
-    --ui-combobox-success: var(--ui-color-success, #15803d);
-    --ui-combobox-warning: var(--ui-color-warning, #b45309);
+    --ui-combobox-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
+    --ui-combobox-success: var(--ui-color-success-text, var(--ui-color-success, #15803d));
+    --ui-combobox-warning: var(--ui-color-warning-text, var(--ui-color-warning, #b45309));
     --ui-combobox-duration: 150ms;
     --ui-combobox-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 

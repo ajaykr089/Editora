@@ -16,7 +16,7 @@ const style = `
     --ui-time-field-text: var(--ui-color-text, #0f172a);
     --ui-time-field-muted: var(--ui-color-muted, #526175);
     --ui-time-field-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-time-field-danger: var(--ui-color-danger, #dc2626);
+    --ui-time-field-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     display: block;
     inline-size: 100%;
     min-inline-size: 0;

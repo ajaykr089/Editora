@@ -415,7 +415,7 @@ const style = `
     padding-inline: 7px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--ui-sortable-accent) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-sortable-accent) 84%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-text));
     font-size: 11.5px;
     font-weight: 700;
   }
@@ -567,7 +567,7 @@ const style = `
   .empty:has(+ .dropzone[data-active="true"]) {
     border-color: var(--ui-sortable-accent);
     background: color-mix(in srgb, var(--ui-sortable-accent) 7%, transparent);
-    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-text));
   }
 
   .items {
@@ -727,7 +727,7 @@ const style = `
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--ui-sortable-accent) 78%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-text));
   }
 
   .placeholder-title {
@@ -912,7 +912,7 @@ const style = `
 
   .item-badge.selection-badge {
     background: color-mix(in srgb, var(--ui-sortable-accent) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-sortable-accent) 82%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-text));
   }
 
   .item-badge[hidden] {
@@ -926,7 +926,7 @@ const style = `
   .item[data-drop-inside-active="true"] .item-badge.drop-badge {
     display: inline-flex;
     background: color-mix(in srgb, var(--ui-sortable-accent) 18%, var(--ui-sortable-card));
-    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-text));
   }
 
   /* A quiet grip: faint until the card is hovered, focused, selected or dragged. */
@@ -1126,7 +1126,7 @@ const style = `
 
   .root[data-dropzone-style="container"] .dropzone-label {
     display: block;
-    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-text));
     font-size: 12px;
     font-weight: 650;
     letter-spacing: 0.02em;

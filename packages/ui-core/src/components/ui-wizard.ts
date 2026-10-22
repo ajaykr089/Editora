@@ -34,9 +34,9 @@ const style = `
     --ui-wizard-accent-fill: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-wizard-accent) 13%, transparent));
     --ui-wizard-line: var(--ui-color-line, color-mix(in srgb, var(--ui-wizard-border) 84%, transparent));
     --ui-wizard-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-wizard-success: var(--ui-color-success, #15803d);
-    --ui-wizard-warning: var(--ui-color-warning, #b45309);
-    --ui-wizard-danger: var(--ui-color-danger, #dc2626);
+    --ui-wizard-success: var(--ui-color-success-text, var(--ui-color-success, #15803d));
+    --ui-wizard-warning: var(--ui-color-warning-text, var(--ui-color-warning, #b45309));
+    --ui-wizard-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
 
     --ui-wizard-radius: calc(var(--ui-radius, 6px) + 4px);
     --ui-wizard-gap: 12px;

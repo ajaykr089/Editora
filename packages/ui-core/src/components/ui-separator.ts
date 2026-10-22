@@ -113,22 +113,22 @@ const style = `
 
   :host([tone="brand"]) {
     --ui-separator-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 38%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 68%, var(--ui-color-muted, #526175));
+    --ui-separator-label-color: var(--ui-color-accent-text, color-mix(in srgb, var(--ui-color-primary, #2563eb) 68%, var(--ui-color-muted, #526175)));
   }
 
   :host([tone="success"]) {
     --ui-separator-color: color-mix(in srgb, var(--ui-color-success, #15803d) 40%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-success, #15803d) 70%, var(--ui-color-muted, #526175));
+    --ui-separator-label-color: var(--ui-color-success-text, color-mix(in srgb, var(--ui-color-success, #15803d) 70%, var(--ui-color-muted, #526175)));
   }
 
   :host([tone="warning"]) {
     --ui-separator-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 40%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 70%, var(--ui-color-muted, #526175));
+    --ui-separator-label-color: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-color-warning, #b45309) 70%, var(--ui-color-muted, #526175)));
   }
 
   :host([tone="danger"]) {
     --ui-separator-color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 40%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 70%, var(--ui-color-muted, #526175));
+    --ui-separator-label-color: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 70%, var(--ui-color-muted, #526175)));
   }
 
   :host([variant="dashed"]) .line {

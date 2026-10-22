@@ -10,7 +10,7 @@ const splitButtonStyles = `
     --ed-split-bg: var(--ui-color-primary, #2563eb);
     --ed-split-bg-hover: color-mix(in srgb, var(--ed-split-bg) 84%, #0f172a 16%);
     --ed-split-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ed-split-text: #ffffff;
+    --ed-split-text: var(--ui-color-foreground-on-primary, #ffffff);
     --ed-split-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ed-split-bg) 20%, transparent);
     --ed-split-menu-bg: var(--ui-color-surface, #ffffff);
     --ed-split-menu-text: var(--ui-color-text, #0f172a);

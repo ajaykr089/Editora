@@ -453,7 +453,7 @@ const template = (body: string) => `
 
     .item-button[data-tone="danger"] .item-label,
     .item-button[data-tone="danger"] .meta {
-      color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 84%, var(--ui-color-text, #0f172a));
+      color: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 84%, var(--ui-color-text, #0f172a)));
     }
 
     .icon-wrap,

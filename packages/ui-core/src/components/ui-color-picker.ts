@@ -358,7 +358,7 @@ const style = `
     padding: 0 8px;
     border: 1px solid color-mix(in srgb, var(--ui-cp-accent) 36%, var(--ui-cp-border));
     background: color-mix(in srgb, var(--ui-cp-accent) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-cp-accent) 82%, var(--ui-cp-text));
+    color: color-mix(in srgb, var(--ui-cp-accent) 45%, var(--ui-cp-text));
     font: 650 10px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -651,7 +651,7 @@ const style = `
 
   .error {
     min-block-size: 16px;
-    color: var(--ui-color-danger, #dc2626);
+    color: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     font: 500 11px/1.2 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 

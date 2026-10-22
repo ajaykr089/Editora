@@ -26,7 +26,7 @@ const style = `
     --ui-dialog-padding-y: 20px;
     --ui-dialog-width: min(560px, calc(100vw - 24px));
     --ui-dialog-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-dialog-danger: var(--ui-color-danger, #dc2626);
+    --ui-dialog-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-dialog-success: var(--ui-color-success, #15803d);
     --ui-dialog-z: 1201;
     --ui-dialog-backdrop-z: 1200;

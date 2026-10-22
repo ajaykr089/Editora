@@ -7,7 +7,7 @@ const style = `
     --ui-fieldset-bg: transparent;
     --ui-fieldset-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-fieldset-muted: var(--ui-color-muted, var(--ui-muted, #526175));
-    --ui-fieldset-error: var(--ui-color-danger, var(--ui-error, #c81e1e));
+    --ui-fieldset-error: var(--ui-color-danger-text, var(--ui-color-danger, var(--ui-error, #c81e1e)));
     --ui-fieldset-border-color: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent));
     --ui-fieldset-border: 0;
     --ui-fieldset-shadow: none;

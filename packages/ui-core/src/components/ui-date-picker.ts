@@ -81,7 +81,7 @@ const style = `
     --ui-dp-field-bg: var(--ui-dp-bg);
     --ui-dp-field-border: var(--ui-dp-border);
     --ui-dp-field-focus: color-mix(in srgb, var(--ui-dp-accent) 72%, transparent);
-    --ui-dp-field-error: var(--ui-color-danger, #dc2626);
+    --ui-dp-field-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
     --ui-dp-sheet-backdrop: rgba(15, 23, 42, 0.52);
     --ui-dp-sheet-bg: var(--ui-dp-bg);
@@ -456,7 +456,7 @@ const overlayStyle = `
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
-    --ui-dp-field-error: var(--ui-color-danger, #dc2626);
+    --ui-dp-field-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
     --ui-dp-sheet-backdrop: rgba(15, 23, 42, 0.52);
     --ui-dp-sheet-bg: var(--ui-dp-bg);

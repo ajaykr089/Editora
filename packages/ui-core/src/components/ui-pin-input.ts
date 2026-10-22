@@ -15,7 +15,7 @@ const style = `
     --ui-pin-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-pin-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-pin-border-color: var(--ui-color-line, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent));
-    --ui-pin-error: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-pin-error: var(--ui-color-danger-text, var(--ui-color-danger, var(--ui-error, #dc2626)));
     --ui-pin-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-pin-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     color-scheme: light dark;

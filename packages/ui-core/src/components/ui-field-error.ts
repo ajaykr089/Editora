@@ -2,7 +2,7 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-field-error-color: var(--ui-color-danger, var(--ui-error, #c81e1e));
+    --ui-field-error-color: var(--ui-color-danger-text, var(--ui-color-danger, var(--ui-error, #c81e1e)));
     --ui-field-error-size: 12px;
     --ui-field-error-weight: 600;
     --ui-field-error-line-height: 1.45;

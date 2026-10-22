@@ -73,7 +73,7 @@ const style = `
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dtp-accent: var(--ui-color-primary, #2563eb);
     --ui-dtp-success: var(--ui-color-success, #15803d);
-    --ui-dtp-error: var(--ui-color-danger, #dc2626);
+    --ui-dtp-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-dtp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dtp-panel-radius: 14px;
     --ui-dtp-z: 1600;

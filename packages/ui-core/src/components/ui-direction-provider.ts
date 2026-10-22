@@ -4,7 +4,7 @@ const style = `
   :host {
     display: contents;
     color-scheme: light dark;
-    --ui-direction-color: var(--ui-color-text, inherit);
+    --ui-direction-color: inherit;
     color: var(--ui-direction-color);
   }
   .dir-wrap { width: 100%; height: 100%; display: contents; }

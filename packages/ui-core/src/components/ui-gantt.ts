@@ -1043,8 +1043,8 @@ const style = `
     padding: 0 6px;
     block-size: 14px;
     border-radius: 7px;
-    background: var(--ui-color-danger, #dc2626);
-    color: #ffffff;
+    background: var(--ui-color-danger-solid, var(--ui-color-danger, #dc2626));
+    color: var(--ui-color-foreground-on-danger, #ffffff);
     font-size: 10px;
     font-weight: 750;
     line-height: 14px;

@@ -267,19 +267,19 @@ const style = `
   :host([state="loading"]) {
     --ui-data-table-state-bg: color-mix(in srgb, #f59e0b 14%, transparent);
     --ui-data-table-state-border: color-mix(in srgb, #f59e0b 42%, var(--ui-data-table-border-color));
-    --ui-data-table-state-text: #92400e;
+    --ui-data-table-state-text: var(--ui-color-warning-text, #92400e);
   }
 
   :host([state="error"]) {
     --ui-data-table-state-bg: color-mix(in srgb, #ef4444 13%, transparent);
     --ui-data-table-state-border: color-mix(in srgb, #ef4444 42%, var(--ui-data-table-border-color));
-    --ui-data-table-state-text: #b91c1c;
+    --ui-data-table-state-text: var(--ui-color-danger-text, #b91c1c);
   }
 
   :host([state="success"]) {
     --ui-data-table-state-bg: color-mix(in srgb, #16a34a 13%, transparent);
     --ui-data-table-state-border: color-mix(in srgb, #16a34a 42%, var(--ui-data-table-border-color));
-    --ui-data-table-state-text: #166534;
+    --ui-data-table-state-text: var(--ui-color-success-text, #166534);
   }
 
   :host([state="error"]) .frame {

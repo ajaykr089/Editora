@@ -28,10 +28,10 @@ const style = `
     --ui-multi-select-text: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-multi-select-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-multi-select-danger: var(--ui-color-danger, #dc2626);
+    --ui-multi-select-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-multi-select-accent: var(--ui-color-primary, #2563eb);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text-strong, #0f172a));
     --ui-multi-select-panel-bg: var(--base-multi-select-panel-bg, color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent));
     --ui-multi-select-panel-border: var(--base-multi-select-panel-border, 1px solid color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent));
     --ui-multi-select-panel-shadow: var(--base-multi-select-panel-shadow, var(--shadow-4, 0 20px 34px rgba(2, 6, 23, 0.16)));
@@ -538,21 +538,21 @@ const style = `
     --ui-multi-select-accent: var(--ui-color-success, #15803d);
     --ui-multi-select-focus: var(--ui-color-success, #15803d);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-success, #15803d) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: var(--ui-color-success-text, color-mix(in srgb, var(--ui-color-success, #15803d) 82%, #0f172a 18%));
   }
 
   :host([tone="warning"]) {
     --ui-multi-select-accent: var(--ui-color-warning, #b45309);
     --ui-multi-select-focus: var(--ui-color-warning, #b45309);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-warning, #b45309) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-color-warning, #b45309) 82%, #0f172a 18%));
   }
 
   :host([tone="danger"]) {
     --ui-multi-select-accent: var(--ui-color-danger, #dc2626);
     --ui-multi-select-focus: var(--ui-color-danger, #dc2626);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-danger, #dc2626) 82%, #0f172a 18%);
+    --ui-multi-select-chip-text: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 82%, #0f172a 18%));
   }
 `;
 

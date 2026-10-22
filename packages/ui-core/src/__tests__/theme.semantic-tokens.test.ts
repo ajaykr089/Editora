@@ -30,7 +30,8 @@ describe('semantic design tokens', () => {
     expect(vars['--ui-color-text-strong']).toBe(gray['12']);
     expect(vars['--ui-color-accent-fill']).toBe(accent['3']);
     expect(vars['--ui-color-accent-solid']).toBe(accent['9']);
-    expect(vars['--ui-color-accent-text']).toBe(accent['11']);
+    // the text step is kept readable: the palette's step 11, pulled toward the text colour only when it falls short of 4.5:1
+    expect(vars['--ui-color-accent-text']).toMatch(/^#[0-9a-f]{6}$/);
   });
 
   it('follows dark mode and the accent palette without a component knowing', () => {
@@ -204,5 +205,42 @@ describe('themes that only set raw colours', () => {
     expect(dark['--ui-color-fill']).toBe(baselineDarkTokens.palette!.gray!['3']);
     const blue = themeToVariables(withAccentPalette(baselineLightTokens, 'blue'));
     expect(blue['--ui-color-accent-fill']).not.toMatch(/color-mix/);
+  });
+});
+
+describe('status colours as text and as solid fills', () => {
+  const lum = (hex: string) => {
+    const full = hex.length === 4 ? hex.replace(/./g, (c, i) => (i ? c + c : c)) : hex;
+    const ch = (o: number) => {
+      const v = parseInt(full.slice(o, o + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * ch(1) + 0.7152 * ch(3) + 0.0722 * ch(5);
+  };
+  const ratio = (a: string, b: string) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+
+  it('reads at 4.5:1 or better on the surface in the light and the dark theme', () => {
+    for (const [name, tokens] of [['light', baselineLightTokens], ['dark', baselineDarkTokens]] as const) {
+      const vars = themeToVariables(tokens);
+      const surface = tokens.colors.surface as string;
+      for (const tone of ['accent', 'danger', 'success', 'warning', 'info']) {
+        const value = vars[`--ui-color-${tone}-text`];
+        expect(value, `${name} ${tone}`).toMatch(/^#[0-9a-f]{6}$/);
+        expect(ratio(value, surface), `${name} ${tone}-text on ${surface}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  it('gives danger and success a solid fill that white text reads on', () => {
+    const vars = themeToVariables(baselineLightTokens);
+    for (const tone of ['danger', 'success']) {
+      expect(ratio('#ffffff', vars[`--ui-color-${tone}-solid`]), tone).toBeGreaterThanOrEqual(4.5);
+      expect(vars[`--ui-color-foreground-on-${tone}`]).toBe('#ffffff');
+    }
+  });
+
+  it('keeps a non-hex status colour working through color-mix', () => {
+    const vars = themeToVariables({ colors: { danger: 'oklch(60% 0.2 25)', text: '#111111', surface: '#ffffff', background: '#ffffff' } } as never);
+    expect(vars['--ui-color-danger-text']).toMatch(/^color-mix\(/);
   });
 });

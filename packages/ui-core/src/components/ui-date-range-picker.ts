@@ -66,7 +66,7 @@ const style = `
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
-    --ui-dp-field-error: var(--ui-color-danger, #dc2626);
+    --ui-dp-field-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
     --ui-dp-z: 1600;
     --ui-dp-duration: 160ms;
@@ -379,7 +379,7 @@ const overlayStyle = `
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
-    --ui-dp-field-error: var(--ui-color-danger, #dc2626);
+    --ui-dp-field-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
     --ui-dp-duration: 160ms;
     --ui-dp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);

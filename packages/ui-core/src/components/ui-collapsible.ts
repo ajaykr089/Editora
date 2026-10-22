@@ -206,7 +206,7 @@ const style = `
   .icon {
     inline-size: 16px;
     block-size: 16px;
-    color: color-mix(in srgb, var(--ui-collapsible-accent) 74%, var(--ui-collapsible-text));
+    color: color-mix(in srgb, var(--ui-collapsible-accent) 45%, var(--ui-collapsible-text));
     transition:
       transform var(--ui-collapsible-duration) var(--ui-collapsible-easing),
       color var(--ui-collapsible-duration) var(--ui-collapsible-easing);
@@ -274,7 +274,7 @@ const style = `
   }
 
   :host([state="error"]) .state-note {
-    color: var(--ui-color-danger, #dc2626);
+    color: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
   }
 
   :host([state="success"]) .state-note {
