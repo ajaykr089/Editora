@@ -218,7 +218,7 @@ const style = `
   :host([variant="solid"]) .alert {
     --ui-alert-bg: var(--ui-alert-accent);
     --ui-alert-color: #ffffff;
-    --ui-alert-muted: color-mix(in srgb, #ffffff 82%, transparent);
+    --ui-alert-muted: color-mix(in srgb, #ffffff 92%, transparent);
     --ui-alert-border: 1px solid color-mix(in srgb, #000000 18%, transparent);
     --ui-alert-icon-bg: color-mix(in srgb, #ffffff 20%, transparent);
     --ui-alert-icon-color: #ffffff;
@@ -267,7 +267,7 @@ const style = `
 
   /* The tone rules above set a tinted fill; a solid alert must win over them, so these come last. */
   :host([variant="solid"]) .alert {
-    --ui-alert-bg: color-mix(in srgb, var(--ui-alert-accent) 84%, #000000);
+    --ui-alert-bg: color-mix(in srgb, var(--ui-alert-accent) 78%, #000000);
     --ui-alert-border: 1px solid color-mix(in srgb, #000000 18%, transparent);
   }
 

@@ -541,6 +541,12 @@ argument:
 Apply the theme early, before the first render. To theme one part of the page, call
 `applyTheme(tokens, element)`.
 
+Theme a part of the page with `applyTheme(tokens, element)` (or `ThemeProvider` in `@editora/ui-react`), not by
+setting a few `--ui-color-*` variables yourself. The fills, lines and soft accent colours that components read
+(`--ui-color-fill`, `--ui-color-line`, `--ui-color-accent-fill` and the like) are derived from the whole theme, so
+overriding only `--ui-color-text` and `--ui-color-surface` on an element leaves them at the page theme. If you need
+plain CSS, spread `themeToVariables(tokens)` (below) onto the element instead.
+
 ### Follow the system light/dark setting
 
 ```js

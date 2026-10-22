@@ -149,7 +149,7 @@ const style = `
 
   :host([variant="soft"]) {
     --ui-animated-text-color:
-      color-mix(in srgb, var(--ui-animated-text-accent) 72%, var(--ui-color-text, var(--ui-text, #0f172a)));
+      color-mix(in srgb, var(--ui-animated-text-accent) 62%, var(--ui-color-text, var(--ui-text, #0f172a)));
     --ui-animated-text-bg:
       color-mix(in srgb, var(--ui-animated-text-accent) 8%, var(--ui-color-surface, #ffffff));
     --ui-animated-text-border:

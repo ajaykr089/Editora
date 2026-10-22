@@ -2,7 +2,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 import { Button } from '@editora/ui-react';
 import type { ThemeTokens } from '@editora/ui-core';
-import { createThemeTokens, readableForeground } from '@editora/ui-core';
+import { createThemeTokens, readableForeground, themeToVariables } from '@editora/ui-core';
 import { ArrowRightIcon } from '@editora/react-icons';
 import { ShowcasePage, ShowcaseSection, showcasePanelStyle } from './storybook-showcase';
 
@@ -33,21 +33,10 @@ type MatrixRecipe = {
 };
 
 function buttonThemeDeclarations(tokens: ThemeTokens) {
-  return [
-    `--ui-color-primary: ${tokens.colors.primary};`,
-    `--ui-color-primary-hover: ${tokens.colors.primaryHover || tokens.colors.primary};`,
-    `--ui-color-foreground-on-primary: ${tokens.colors.foregroundOnPrimary || '#ffffff'};`,
-    `--ui-color-background: ${tokens.colors.background || '#ffffff'};`,
-    `--ui-color-surface: ${tokens.colors.surface || tokens.colors.background || '#ffffff'};`,
-    `--ui-color-surface-alt: ${tokens.colors.surfaceAlt || tokens.colors.surface || '#f8fafc'};`,
-    `--ui-color-text: ${tokens.colors.text || '#111827'};`,
-    `--ui-color-muted: ${tokens.colors.muted || '#526175'};`,
-    `--ui-color-border: ${tokens.colors.border || 'rgba(15,23,42,0.16)'};`,
-    `--ui-color-focus-ring: ${tokens.colors.focusRing || tokens.colors.primary};`,
-    `--color-panel-solid: ${tokens.surfaces?.panelSolid || tokens.colors.surface || '#ffffff'};`,
-    `--color-panel: ${tokens.surfaces?.panel || tokens.surfaces?.panelTranslucent || '#ffffffcc'};`,
-    `--shadow-1: ${tokens.shadows?.['1'] || 'none'};`
-  ].join(' ');
+  // The supported way to theme a subtree: every variable the theme resolves, derived roles included.
+  return Object.entries(themeToVariables(tokens))
+    .map(([name, value]) => `${name}: ${value};`)
+    .join(' ');
 }
 
 function buttonThemeRule(themeId: string, tokens: ThemeTokens) {

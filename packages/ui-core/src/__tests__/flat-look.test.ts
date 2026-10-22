@@ -236,5 +236,17 @@ describe('flat look across every component', () => {
     // sortable helper text is not dimmed below 4.5:1
     expect(read('ui-sortable.ts')).not.toMatch(/\.list-helper \{[^}]*opacity/);
   });
+
+  it('themed QA: solid alert text, contrast wizard fills, animated text tone text', () => {
+    const read = (f: string) => readFileSync(resolve(dir, f), 'utf8');
+    const alert = read('ui-alert.ts');
+    expect(alert).toMatch(/:host\(\[variant="solid"\]\) \.alert \{\s*--ui-alert-bg: color-mix\(in srgb, var\(--ui-alert-accent\) 78%/);
+    expect(alert).toMatch(/--ui-alert-muted: color-mix\(in srgb, #ffffff 92%, transparent\)/);
+    // the contrast wizard brings its own fills and line; the global light ones must not leak in
+    const wizard = read('ui-wizard.ts');
+    expect(wizard).toMatch(/:host\(\[variant="contrast"\]\) \{[^}]*--ui-wizard-accent-fill: color-mix\(in srgb, #93c5fd 20%, #0f172a\)/);
+    expect(wizard).not.toMatch(/background: var\(--ui-color-accent-fill/);
+    expect(read('ui-animated-text.ts')).toMatch(/var\(--ui-animated-text-accent\) 62%, var\(--ui-color-text/);
+  });
 });
 
