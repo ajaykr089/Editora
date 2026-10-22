@@ -54,4 +54,12 @@ describe('toast.css', () => {
     expect(rule('.editora-toast-progress-track')).toMatch(/height:\s*4px/);
     expect(rule('.editora-toast-progress-bar')).toMatch(/background:\s*var\(--et-accent\)/);
   });
+
+  it('follows contrast preferences and forced colours', () => {
+    expect(css).toMatch(/@media \(prefers-contrast: more\)[\s\S]*?\.editora-toast \{[^}]*border-color: var\(--et-text\)/);
+    const forced = css.match(/@media \(forced-colors: active\) \{([\s\S]*?)\n\}\n/)?.[1] || '';
+    expect(forced).toMatch(/background: Canvas/);
+    expect(forced).toMatch(/color: CanvasText/);
+    expect(forced).toMatch(/\.editora-toast-action\.primary \{[^}]*Highlight/);
+  });
 });

@@ -239,21 +239,34 @@
   opacity: 1;
 }
 
+/* Chevrons, drawn with borders so they stay crisp at any zoom and follow the gutter colour. */
+.fold-indicator.expanded::before,
+.fold-indicator.collapsed::before {
+  content: '';
+  display: block;
+  inline-size: 6px;
+  block-size: 6px;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  color: var(--editor-gutter-foreground, #666);
+  transition: transform 120ms ease;
+}
+
 .fold-indicator.expanded::before {
-  content: '▼';
-  font-size: 10px;
-  color: #666;
+  transform: translateY(-1px) rotate(45deg);
 }
 
 .fold-indicator.collapsed::before {
-  content: '▶';
-  font-size: 10px;
-  color: #666;
+  transform: translateX(-1px) rotate(-45deg);
+}
+
+.fold-indicator:hover::before {
+  color: var(--editor-foreground, #222);
 }
 
 .dark .fold-indicator.expanded::before,
 .dark .fold-indicator.collapsed::before {
-  color: #999;
+  color: var(--editor-gutter-foreground, #a6a6ab);
 }
 
 /* Decorations */
@@ -307,50 +320,216 @@
   color: #858585;
 }
 
-/* Search / Replace overlay */
+/* ------------------------------------------------------------------------------------------------
+ * Overlays: find / replace, go to line, completion, context menu, hover.
+ * One surface (raised, hairline border, soft shadow), one control size, one focus ring, one motion.
+ * Everything reads the --editor-* palette that EditorCore.setTheme writes, with dark fallbacks.
+ * ---------------------------------------------------------------------------------------------- */
+
+[data-lce-editor-container] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--editor-border-strong, #505057) transparent;
+}
+
+.lce-search-ui,
+.lce-goto-line-ui,
+.lce-completion-popup,
+.lce-context-menu,
+.lce-hover-tooltip {
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid var(--editor-border-strong, #4a4a50);
+  background: var(--editor-surface, #262629);
+  color: var(--editor-foreground, #f8f9fa);
+  box-shadow: var(--editor-shadow, 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif;
+  animation: lce-pop-in 120ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes lce-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lce-search-ui,
+  .lce-goto-line-ui,
+  .lce-completion-popup,
+  .lce-context-menu,
+  .lce-hover-tooltip {
+    animation: none;
+  }
+}
+
+/* shared control: inputs and buttons inside the panels */
+.lce-search-input,
+.lce-goto-line-input {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  color: var(--editor-foreground, #f8f9fa);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.lce-search-input:hover,
+.lce-goto-line-input:hover {
+  border-color: var(--editor-border-strong, #505057);
+}
+
+.lce-search-input:focus,
+.lce-goto-line-input:focus {
+  border-color: var(--editor-accent, #4da3ff);
+  box-shadow: 0 0 0 2px var(--editor-accent-soft, rgba(77, 163, 255, 0.25));
+}
+
+.lce-search-btn,
+.lce-goto-line-action,
+.lce-goto-line-close {
+  appearance: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--editor-gutter-foreground, #a6a6ab);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.lce-search-btn {
+  width: 28px;
+  padding: 0;
+}
+
+.lce-goto-line-close {
+  width: 28px;
+  padding: 0;
+}
+
+.lce-search-btn:hover,
+.lce-goto-line-action:hover,
+.lce-goto-line-close:hover {
+  background: var(--editor-surface-hover, #2f2f34);
+  color: var(--editor-foreground, #f8f9fa);
+}
+
+.lce-goto-line-action {
+  background: var(--editor-accent, #4da3ff);
+  color: var(--editor-accent-contrast, #0b1b2b);
+  font-weight: 600;
+}
+
+.lce-goto-line-action:hover {
+  background: color-mix(in srgb, var(--editor-accent, #4da3ff) 88%, #ffffff);
+  color: var(--editor-accent-contrast, #0b1b2b);
+}
+
+.lce-search-btn:focus-visible,
+.lce-goto-line-action:focus-visible,
+.lce-goto-line-close:focus-visible,
+.lce-search-option:focus-within {
+  outline: 2px solid var(--editor-accent, #4da3ff);
+  outline-offset: 1px;
+}
+
+/* Search / replace */
 .lce-search-ui {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 1000;
-  min-width: 250px;
-  max-width: min(320px, calc(100% - 24px));
-  box-sizing: border-box;
-  border-radius: 6px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-background, #1e1e1e);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
-  padding: 8px;
+  min-width: 280px;
+  max-width: min(340px, calc(100% - 24px));
+  padding: 10px;
 }
 
 .lce-search-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 6px;
 }
 
+.lce-search-replace {
+  display: none;
+  margin-top: 8px;
+}
+
+/* match case / whole word / regex as toggle chips */
 .lce-search-options {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 2px 0 6px;
 }
 
 .lce-search-option {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: var(--editor-gutter-foreground, #858585);
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
+  font-weight: 500;
   line-height: 1.2;
   user-select: none;
   cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.lce-search-option:hover {
+  background: var(--editor-surface-hover, #2f2f34);
+  color: var(--editor-foreground, #f8f9fa);
+}
+
+.lce-search-option:has(.lce-search-option-input:checked) {
+  border-color: color-mix(in srgb, var(--editor-accent, #4da3ff) 60%, transparent);
+  background: var(--editor-accent-soft, rgba(77, 163, 255, 0.16));
+  color: var(--editor-foreground, #f8f9fa);
+}
+
+/* The checkbox stays in the DOM and focusable; the chip is its visible state. */
+.lce-search-option {
+  position: relative;
 }
 
 .lce-search-option-input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
   margin: 0;
-  accent-color: var(--editor-cursor, #007acc);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lce-search-option:has(.lce-search-option-input:checked)::before {
+  content: '';
+  inline-size: 8px;
+  block-size: 4px;
+  margin-inline-end: -1px;
+  border-inline-start: 1.5px solid var(--editor-accent, #4da3ff);
+  border-block-end: 1.5px solid var(--editor-accent, #4da3ff);
+  transform: translateY(-1px) rotate(-45deg);
 }
 
 .lce-search-meta {
@@ -360,55 +539,11 @@
   gap: 8px;
 }
 
-.lce-search-input {
-  appearance: none;
-  width: 100%;
-  min-width: 0;
-  height: 30px;
-  padding: 6px 10px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-gutter-background, #252526);
-  color: var(--editor-foreground, #f8f9fa);
-  font-size: 12px;
-  line-height: 1.4;
-  outline: none;
-}
-
-.lce-search-input:focus {
-  border-color: var(--editor-cursor, #007acc);
-  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
-}
-
-.lce-search-replace {
-  display: none;
-  margin-top: 8px;
-}
-
-.lce-search-btn {
-  appearance: none;
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 4px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-gutter-background, #252526);
-  color: var(--editor-gutter-foreground, #858585);
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.lce-search-btn:hover {
-  color: var(--editor-foreground, #f8f9fa);
-}
-
-.lce-search-status {
+.lce-search-status,
+.lce-goto-line-status {
   min-height: 16px;
   margin: 2px 2px 0;
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   line-height: 1.35;
   text-align: left;
@@ -421,27 +556,21 @@
 .lce-search-mode {
   min-height: 16px;
   margin: 2px 2px 0;
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   line-height: 1.35;
   white-space: nowrap;
-  opacity: 0.9;
 }
 
-/* Go to line overlay */
+/* Go to line */
 .lce-goto-line-ui {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 1000;
-  min-width: 220px;
-  max-width: min(280px, calc(100% - 24px));
-  box-sizing: border-box;
-  border-radius: 6px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-background, #1e1e1e);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
-  padding: 8px;
+  min-width: 240px;
+  max-width: min(300px, calc(100% - 24px));
+  padding: 10px;
 }
 
 .lce-goto-line-row {
@@ -450,109 +579,100 @@
   gap: 6px;
 }
 
-.lce-goto-line-input {
-  appearance: none;
-  width: 100%;
-  min-width: 0;
-  height: 30px;
-  padding: 6px 10px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-gutter-background, #252526);
-  color: var(--editor-foreground, #f8f9fa);
-  font-size: 12px;
-  line-height: 1.4;
-  outline: none;
-}
-
-.lce-goto-line-input:focus {
-  border-color: var(--editor-cursor, #007acc);
-  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
-}
-
-.lce-goto-line-action,
-.lce-goto-line-close {
-  appearance: none;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 4px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-gutter-background, #252526);
-  color: var(--editor-gutter-foreground, #858585);
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.lce-goto-line-close {
-  padding: 0;
-  width: 28px;
-}
-
-.lce-goto-line-action:hover,
-.lce-goto-line-close:hover {
-  color: var(--editor-foreground, #f8f9fa);
-}
-
 .lce-goto-line-meta {
   margin-top: 6px;
 }
 
-.lce-goto-line-status {
-  min-height: 16px;
-  margin: 2px 2px 0;
-  color: var(--editor-gutter-foreground, #858585);
-  font-size: 11px;
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Completion popup */
+/* Completion */
 .lce-completion-popup {
   position: absolute;
   z-index: 1001;
-  min-width: 240px;
-  max-width: min(420px, calc(100% - 24px));
-  box-sizing: border-box;
-  border-radius: 8px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-background, #1e1e1e);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  min-width: 280px;
+  max-width: min(460px, calc(100% - 24px));
   overflow: hidden;
 }
 
 .lce-completion-status {
-  padding: 8px 10px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--editor-gutter-border, #3e3e42);
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   line-height: 1.4;
 }
 
 .lce-completion-list {
-  max-height: 304px;
+  max-height: 308px;
+  padding: 4px;
   overflow: auto;
+  scrollbar-width: thin;
+  outline: none;
 }
 
 .lce-completion-item,
 .lce-completion-empty {
-  padding: 8px 10px;
+  padding: 6px 8px;
 }
 
 .lce-completion-item {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 7px;
   cursor: pointer;
 }
 
-.lce-completion-item:hover,
+.lce-completion-item:hover {
+  background: var(--editor-surface-hover, #2f2f34);
+}
+
 .lce-completion-item.is-active {
-  background: rgba(56, 189, 248, 0.12);
+  background: var(--editor-accent-soft, rgba(77, 163, 255, 0.16));
+  box-shadow: inset 2px 0 0 var(--editor-accent, #4da3ff);
+}
+
+.lce-completion-item-icon {
+  --k: #9aa0a6;
+  flex: 0 0 22px;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  margin-top: 1px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--k) 20%, transparent);
+  color: color-mix(in srgb, var(--k) 72%, var(--editor-foreground, #f8f9fa));
+  font: 700 11px/1 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  letter-spacing: -0.02em;
+}
+
+.lce-completion-item-icon[data-kind="tag"],
+.lce-completion-item-icon[data-kind="element"] { --k: #f59e0b; }
+.lce-completion-item-icon[data-kind="attribute"],
+.lce-completion-item-icon[data-kind="attr"],
+.lce-completion-item-icon[data-kind="property"],
+.lce-completion-item-icon[data-kind="prop"] { --k: #3b82f6; }
+.lce-completion-item-icon[data-kind="value"],
+.lce-completion-item-icon[data-kind="enum"],
+.lce-completion-item-icon[data-kind="constant"] { --k: #22c55e; }
+.lce-completion-item-icon[data-kind="keyword"],
+.lce-completion-item-icon[data-kind="module"] { --k: #a855f7; }
+.lce-completion-item-icon[data-kind="function"],
+.lce-completion-item-icon[data-kind="method"] { --k: #eab308; }
+.lce-completion-item-icon[data-kind="variable"],
+.lce-completion-item-icon[data-kind="text"] { --k: #06b6d4; }
+.lce-completion-item-icon[data-kind="snippet"] { --k: #ec4899; }
+.lce-completion-item-icon[data-kind="class"],
+.lce-completion-item-icon[data-kind="type"],
+.lce-completion-item-icon[data-kind="interface"] { --k: #14b8a6; }
+
+.lce-completion-item-body {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .lce-completion-item-main {
@@ -563,23 +683,34 @@
 }
 
 .lce-completion-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--editor-foreground, #f8f9fa);
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.lce-completion-match {
+  background: transparent;
+  /* the accent, pulled toward the text colour so it keeps 4.5:1 on the active row's tint in both themes */
+  color: color-mix(in srgb, var(--editor-accent, #4da3ff) 70%, var(--editor-foreground, #f8f9fa));
+  font-weight: 700;
 }
 
 .lce-completion-item-meta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex: 0 0 auto;
   justify-content: flex-end;
 }
 
 .lce-completion-item-kind,
 .lce-completion-item-detail {
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   line-height: 1.3;
 }
@@ -588,31 +719,57 @@
   text-transform: capitalize;
 }
 
+.lce-completion-item-description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .lce-completion-item-description,
 .lce-completion-empty {
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   line-height: 1.45;
+}
+
+.lce-completion-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--editor-gutter-border, #3e3e42);
+  color: var(--editor-gutter-foreground, #a6a6ab);
+  font-size: 11px;
+  line-height: 1.4;
+  user-select: none;
+}
+
+.lce-completion-footer kbd {
+  display: inline-block;
+  min-inline-size: 16px;
+  margin-inline-end: 3px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  color: var(--editor-foreground, #f8f9fa);
+  font: 500 10px/15px ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  text-align: center;
 }
 
 /* Context menu */
 .lce-context-menu {
   position: absolute;
   z-index: 1002;
-  min-width: 220px;
+  min-width: 232px;
   max-width: min(320px, calc(100% - 24px));
-  box-sizing: border-box;
-  border-radius: 10px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-background, #1e1e1e);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
 .lce-context-menu-list {
   display: flex;
   flex-direction: column;
-  padding: 6px;
+  padding: 5px;
 }
 
 .lce-context-menu-item {
@@ -620,28 +777,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
   width: 100%;
-  padding: 8px 10px;
+  min-height: 30px;
+  padding: 0 10px;
   border: none;
   border-radius: 6px;
   background: transparent;
   color: var(--editor-foreground, #f8f9fa);
   text-align: left;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   cursor: pointer;
+  transition: background-color 100ms ease;
 }
 
 .lce-context-menu-item:hover,
 .lce-context-menu-item:focus-visible {
-  background: rgba(56, 189, 248, 0.12);
+  background: var(--editor-accent-soft, rgba(77, 163, 255, 0.16));
   outline: none;
 }
 
+.lce-context-menu-item:focus-visible {
+  box-shadow: inset 0 0 0 1.5px var(--editor-accent, #4da3ff);
+}
+
 .lce-context-menu-item:disabled {
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -650,14 +814,14 @@
 }
 
 .lce-context-menu-item-shortcut {
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   white-space: nowrap;
 }
 
 .lce-context-menu-separator {
   height: 1px;
-  margin: 6px 4px;
+  margin: 5px 4px;
   background: var(--editor-gutter-border, #3e3e42);
 }
 
@@ -666,12 +830,7 @@
   position: absolute;
   z-index: 1003;
   min-width: 260px;
-  max-width: min(420px, calc(100% - 24px));
-  box-sizing: border-box;
-  border-radius: 10px;
-  border: 1px solid var(--editor-gutter-border, #3e3e42);
-  background: var(--editor-background, #1e1e1e);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+  max-width: min(440px, calc(100% - 24px));
   overflow: hidden;
 }
 
@@ -689,7 +848,7 @@
 }
 
 .lce-hover-tooltip-content {
-  color: var(--editor-gutter-foreground, #cbd5e1);
+  color: var(--editor-foreground, #e4e6ea);
   font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -697,18 +856,18 @@
 
 .lce-hover-tooltip-section-title {
   padding: 10px 12px 6px;
-  color: var(--editor-gutter-foreground, #94a3b8);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .lce-hover-tooltip-actions {
   display: flex;
   flex-direction: column;
-  padding: 0 8px 8px;
-  gap: 4px;
+  padding: 0 6px 6px;
+  gap: 2px;
 }
 
 .lce-hover-tooltip-action {
@@ -718,24 +877,29 @@
   align-items: flex-start;
   gap: 2px;
   width: 100%;
-  padding: 9px 10px;
+  padding: 8px 10px;
   border: none;
-  border-radius: 7px;
+  border-radius: 6px;
   background: transparent;
   color: var(--editor-foreground, #f8f9fa);
   text-align: left;
   font: inherit;
   cursor: pointer;
+  transition: background-color 100ms ease;
 }
 
 .lce-hover-tooltip-action:hover,
 .lce-hover-tooltip-action:focus-visible {
-  background: rgba(56, 189, 248, 0.12);
+  background: var(--editor-accent-soft, rgba(77, 163, 255, 0.16));
   outline: none;
 }
 
+.lce-hover-tooltip-action:focus-visible {
+  box-shadow: inset 0 0 0 1.5px var(--editor-accent, #4da3ff);
+}
+
 .lce-hover-tooltip-action:disabled {
-  color: var(--editor-gutter-foreground, #858585);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   cursor: not-allowed;
 }
 
@@ -750,14 +914,61 @@
 }
 
 .lce-hover-tooltip-action-detail {
-  color: var(--editor-gutter-foreground, #94a3b8);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   line-height: 1.4;
 }
 
 .lce-hover-tooltip-empty {
   padding: 0 12px 12px;
-  color: var(--editor-gutter-foreground, #94a3b8);
+  color: var(--editor-gutter-foreground, #a6a6ab);
   font-size: 11px;
   line-height: 1.45;
+}
+
+/* Fold toggles: chevrons in the gutter. Open regions show their chevron while the gutter is hovered or the
+ * toggle has focus; a folded region always shows it, so collapsed code is never invisible. */
+.lce-fold-toggle {
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+[data-editor-gutter]:hover .lce-fold-toggle,
+.lce-fold-toggle:focus-visible,
+.lce-fold-toggle[aria-expanded="false"] {
+  opacity: 1;
+}
+
+.lce-fold-toggle:hover {
+  background: var(--editor-surface-hover, rgba(128, 128, 128, 0.18));
+}
+
+.lce-fold-toggle:focus-visible {
+  outline: 2px solid var(--editor-accent, #4da3ff);
+  outline-offset: -2px;
+}
+
+.lce-fold-chevron {
+  display: block;
+  inline-size: 6px;
+  block-size: 6px;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  transition: transform 120ms ease;
+}
+
+.lce-fold-chevron[data-state="open"] {
+  transform: translateY(-1px) rotate(45deg);
+}
+
+.lce-fold-chevron[data-state="closed"] {
+  transform: translateX(-1px) rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lce-fold-toggle,
+  .lce-fold-chevron {
+    transition: none;
+  }
 }

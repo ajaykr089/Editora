@@ -440,11 +440,14 @@ export class HoverTooltipAndCodeActionsExtension implements EditorExtension {
     }
 
     if (state.actions.length > 0) {
-      const actionsHeading = document.createElement('div');
-      actionsHeading.className =
-        HoverTooltipAndCodeActionsExtension.css.sectionTitle;
-      actionsHeading.textContent = 'Code Actions';
-      this.actionsElement.appendChild(actionsHeading);
+      // The card header already says "Code Actions" when there is nothing else to show; repeating it is noise.
+      if (headerText !== 'Code Actions') {
+        const actionsHeading = document.createElement('div');
+        actionsHeading.className =
+          HoverTooltipAndCodeActionsExtension.css.sectionTitle;
+        actionsHeading.textContent = 'Code Actions';
+        this.actionsElement.appendChild(actionsHeading);
+      }
 
       const actionsList = document.createElement('div');
       actionsList.className = HoverTooltipAndCodeActionsExtension.css.actions;
@@ -621,6 +624,7 @@ export class HoverTooltipAndCodeActionsExtension implements EditorExtension {
     popup.style.display = 'none';
     popup.setAttribute('aria-hidden', 'true');
     popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-label', 'Diagnostics and quick fixes');
 
     const header = document.createElement('div');
     header.className = HoverTooltipAndCodeActionsExtension.css.header;

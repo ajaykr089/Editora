@@ -313,6 +313,8 @@ export interface FoldRange {
 // Editor configuration
 export interface EditorConfig {
   value?: string;
+  /** The accessible name of the editing surface. Defaults to "Code editor". */
+  ariaLabel?: string;
   theme?: string;
   readOnly?: boolean;
   tabSize?: number;

@@ -121,6 +121,7 @@ export class EditorCore implements EditorAPI {
     this.view.setTabSize(this.config.tabSize || 2);
     this.view.setLineWrapping(!!this.config.lineWrapping);
     this.view.setLineNumbersVisible(this.config.lineNumbers !== false);
+    if (this.config.ariaLabel) this.view.setAccessibleName(this.config.ariaLabel);
     this.hasCustomDecorationHighlightSupport = this.detectCustomHighlightSupport();
     this.observeDecorationRelevantMutations();
 
@@ -547,12 +548,22 @@ export class EditorCore implements EditorAPI {
   setTheme(theme: string): void {
     this.currentTheme = theme;
     // Basic theme support - can be extended
+    const dark = theme === 'dark';
     const themeVars: Record<string, string> = {
-      'editor-background': theme === 'dark' ? '#1e1e1e' : '#ffffff',
-      'editor-foreground': theme === 'dark' ? '#f8f9fa' : '#1a1a1a',
-      'editor-gutter-background': theme === 'dark' ? '#252526' : '#f8f9fa',
-      'editor-gutter-foreground': theme === 'dark' ? '#858585' : '#666666',
-      'editor-gutter-border': theme === 'dark' ? '#3e3e42' : '#e1e5e9'
+      'editor-background': dark ? '#1e1e1e' : '#ffffff',
+      'editor-foreground': dark ? '#f8f9fa' : '#1a1a1a',
+      'editor-gutter-background': dark ? '#252526' : '#f8f9fa',
+      // muted text must read on the editor and on a tinted (active, hovered) row: 4.5:1 or better
+      'editor-gutter-foreground': dark ? '#a6a6ab' : '#5c6066',
+      'editor-gutter-border': dark ? '#3e3e42' : '#e1e5e9',
+      // overlays (completion, find, go to line, menus): a raised surface with a hairline and a soft shadow
+      'editor-surface': dark ? '#262629' : '#ffffff',
+      'editor-surface-hover': dark ? '#2f2f34' : '#f3f4f6',
+      'editor-border-strong': dark ? '#505057' : '#cfd4da',
+      'editor-accent': dark ? '#4da3ff' : '#0b63c4',
+      'editor-accent-soft': dark ? 'rgba(77, 163, 255, 0.16)' : 'rgba(11, 99, 196, 0.10)',
+      'editor-accent-contrast': dark ? '#0b1b2b' : '#ffffff',
+      'editor-shadow': dark ? '0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35)' : '0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08)'
     };
     this.view.applyTheme(themeVars);
     // Notify syntax highlighting extension (if present)

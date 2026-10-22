@@ -64,6 +64,9 @@ export class CompletionExtension implements EditorExtension {
     itemDescription: 'lce-completion-item-description',
     itemKind: 'lce-completion-item-kind',
     itemEmpty: 'lce-completion-empty',
+    itemIcon: 'lce-completion-item-icon',
+    itemMatch: 'lce-completion-match',
+    footer: 'lce-completion-footer',
   } as const;
 
   public readonly name = 'completion';
@@ -74,6 +77,9 @@ export class CompletionExtension implements EditorExtension {
   private listElement: HTMLElement | null = null;
   private items: NormalizedCompletionItem[] = [];
   private selectedIndex = -1;
+  private activePrefix = '';
+  private footerElement: HTMLElement | null = null;
+  private readonly uid = `lce-completion-${Math.random().toString(36).slice(2, 8)}`;
   private isVisible = false;
   private isDestroyed = false;
   private requestSequence = 0;
@@ -378,6 +384,7 @@ export class CompletionExtension implements EditorExtension {
     }
 
     this.items = items.slice(0, this.config.maxItems);
+    this.activePrefix = context.prefix || '';
     this.selectedIndex = this.pickInitialSelection(context.prefix);
     this.renderItems();
     this.renderStatus(
@@ -630,20 +637,32 @@ export class CompletionExtension implements EditorExtension {
     this.popup = document.createElement('div');
     this.popup.className = CompletionExtension.css.popup;
     this.popup.setAttribute('aria-hidden', 'true');
-    this.popup.setAttribute('role', 'dialog');
     this.popup.style.display = 'none';
 
+    // The popup is a combobox listbox for the editor, not a dialog: focus never leaves the editor, the
+    // active suggestion is exposed with aria-activedescendant, and the status line is a polite live region.
     this.statusElement = document.createElement('div');
     this.statusElement.className = CompletionExtension.css.status;
+    this.statusElement.setAttribute('role', 'status');
+    this.statusElement.setAttribute('aria-live', 'polite');
 
     this.listElement = document.createElement('div');
+    this.listElement.id = `${this.uid}-list`;
     this.listElement.className = CompletionExtension.css.list;
     this.listElement.setAttribute('role', 'listbox');
-    this.listElement.setAttribute('aria-label', 'Completions');
-    this.listElement.style.maxHeight = `${this.config.maxVisibleItems * 38}px`;
+    this.listElement.setAttribute('aria-label', 'Suggestions');
+    // a scrollable region has to be focusable for keyboard users; the editor keeps real focus (activedescendant)
+    this.listElement.tabIndex = -1;
+    this.listElement.style.maxHeight = `${this.config.maxVisibleItems * 44}px`;
+
+    this.footerElement = document.createElement('div');
+    this.footerElement.className = CompletionExtension.css.footer;
+    this.footerElement.setAttribute('aria-hidden', 'true');
+    this.footerElement.innerHTML = '<span><kbd>\u2191</kbd><kbd>\u2193</kbd> navigate</span><span><kbd>\u21b5</kbd> accept</span><span><kbd>Esc</kbd> dismiss</span>';
 
     this.popup.appendChild(this.statusElement);
     this.popup.appendChild(this.listElement);
+    this.popup.appendChild(this.footerElement);
     container.appendChild(this.popup);
 
     this.popup.addEventListener('mousedown', (event) => {
@@ -699,14 +718,25 @@ export class CompletionExtension implements EditorExtension {
         row.setAttribute('aria-selected', 'false');
       }
       row.setAttribute('role', 'option');
+      row.id = `${this.uid}-opt-${index}`;
       row.dataset.lceCompletionIndex = String(index);
+
+      const icon = document.createElement('span');
+      icon.className = CompletionExtension.css.itemIcon;
+      icon.setAttribute('aria-hidden', 'true');
+      const kindInfo = CompletionExtension.kindBadge(item.kind);
+      icon.dataset.kind = kindInfo.slug;
+      icon.textContent = kindInfo.glyph;
+
+      const body = document.createElement('div');
+      body.className = 'lce-completion-item-body';
 
       const main = document.createElement('div');
       main.className = CompletionExtension.css.itemMain;
 
       const label = document.createElement('div');
       label.className = CompletionExtension.css.itemLabel;
-      label.textContent = item.label;
+      CompletionExtension.fillHighlighted(label, item.label, this.activePrefix);
 
       const meta = document.createElement('div');
       meta.className = CompletionExtension.css.itemMeta;
@@ -730,15 +760,17 @@ export class CompletionExtension implements EditorExtension {
         main.appendChild(meta);
       }
 
-      row.appendChild(main);
+      body.appendChild(main);
 
       if (item.description) {
         const description = document.createElement('div');
         description.className = CompletionExtension.css.itemDescription;
         description.textContent = item.description;
-        row.appendChild(description);
+        body.appendChild(description);
       }
 
+      row.appendChild(icon);
+      row.appendChild(body);
       fragment.appendChild(row);
     });
 
@@ -748,6 +780,51 @@ export class CompletionExtension implements EditorExtension {
       `.${CompletionExtension.css.itemActive}`,
     ) as HTMLElement | null;
     activeElement?.scrollIntoView({ block: 'nearest' });
+    this.syncEditorAria(activeElement?.id || null);
+  }
+
+  /** Point the editor at the active suggestion (combobox pattern) while the popup is open. */
+  private syncEditorAria(activeId: string | null): void {
+    const surface = this.editor?.getView().getContentElement();
+    if (!surface) return;
+    if (!this.isVisible || !this.listElement) {
+      surface.removeAttribute('aria-activedescendant');
+      surface.removeAttribute('aria-controls');
+      surface.removeAttribute('aria-haspopup');
+      return;
+    }
+    surface.setAttribute('aria-haspopup', 'listbox');
+    surface.setAttribute('aria-controls', this.listElement.id);
+    if (activeId) surface.setAttribute('aria-activedescendant', activeId);
+    else surface.removeAttribute('aria-activedescendant');
+  }
+
+  /** A short glyph and a colour key for a completion kind. */
+  private static kindBadge(kind?: string): { slug: string; glyph: string } {
+    const k = (kind || '').toLowerCase().replace(/[^a-z]/g, '');
+    const table: Record<string, string> = {
+      tag: '<>', element: '<>', attribute: '@', attr: '@', property: 'P', prop: 'P', value: 'V', enum: 'E', keyword: 'K',
+      function: 'f', method: 'm', variable: 'x', snippet: 'S', class: 'C', type: 'T', interface: 'I', constant: 'c', module: 'M', text: 'a',
+    };
+    if (table[k]) return { slug: k, glyph: table[k] };
+    return { slug: 'other', glyph: (kind || '?').trim().charAt(0).toUpperCase() || '?' };
+  }
+
+  /** Write `text` into `el`, wrapping the part that matches what has been typed. */
+  private static fillHighlighted(el: HTMLElement, text: string, prefix: string): void {
+    const needle = (prefix || '').trim();
+    const at = needle ? text.toLowerCase().indexOf(needle.toLowerCase()) : -1;
+    if (at < 0) {
+      el.textContent = text;
+      return;
+    }
+    el.textContent = '';
+    if (at > 0) el.appendChild(document.createTextNode(text.slice(0, at)));
+    const mark = document.createElement('mark');
+    mark.className = CompletionExtension.css.itemMatch;
+    mark.textContent = text.slice(at, at + needle.length);
+    el.appendChild(mark);
+    if (at + needle.length < text.length) el.appendChild(document.createTextNode(text.slice(at + needle.length)));
   }
 
   private renderStatus(message: string): void {
@@ -765,6 +842,7 @@ export class CompletionExtension implements EditorExtension {
     this.popup.setAttribute('aria-hidden', 'false');
     this.popup.classList.add(CompletionExtension.css.popupVisible);
     this.isVisible = true;
+    this.syncEditorAria((this.listElement?.querySelector(`.${CompletionExtension.css.itemActive}`) as HTMLElement | null)?.id || null);
     this.schedulePopupPosition();
   }
 
@@ -794,6 +872,7 @@ export class CompletionExtension implements EditorExtension {
     }
 
     this.isVisible = false;
+    this.syncEditorAria(null);
   }
 
   private schedulePopupPosition(): void {

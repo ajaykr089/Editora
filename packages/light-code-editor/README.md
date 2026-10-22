@@ -35,6 +35,9 @@
 - **Folding, bracket matching, indent guides** and an active-line highlight.
 - **Decorations**: tint lines, put badges in the gutter and mark ranges of text, without rewriting the text DOM.
 - **Light and dark themes**, a read-only mode, and a keymap you can change.
+- **Accessible by default.** The editing surface is a named multi-line text box; the completion list is a combobox
+  listbox (`aria-activedescendant`, a live status line); find, go to line and the menus are named and keyboard
+  operable; text keeps 4.5:1 in both themes. Checked with axe in Chromium, Firefox and WebKit.
 - Written in TypeScript, **no dependencies**. Checked in current Chromium, Firefox and WebKit.
 
 ## Install
@@ -198,6 +201,7 @@ own. The default is `html`.
 ```ts
 createEditor(container, {
   value: '',             // the starting text
+  ariaLabel: 'Code editor', // what a screen reader calls the editing surface; name it for what it edits
   theme: 'light',        // 'light' or 'dark'; change it later with setTheme()
   readOnly: false,
   tabSize: 2,            // how wide a tab is drawn
@@ -460,7 +464,11 @@ options.
 
 Import `@editora/light-code-editor/light-code-editor.css` once. The editor is themed with CSS custom properties, so
 prefer these to the internal selectors: `--editor-background`, `--editor-foreground`, `--editor-cursor`,
-`--editor-gutter-background`, `--editor-gutter-foreground` and `--editor-gutter-border`.
+`--editor-gutter-background`, `--editor-gutter-foreground` and `--editor-gutter-border`. The panels that float over the
+editor (find, go to line, completions, menus, hover cards) read a second group: `--editor-surface`,
+`--editor-surface-hover`, `--editor-border-strong`, `--editor-accent`, `--editor-accent-soft`,
+`--editor-accent-contrast` and `--editor-shadow`. `setTheme()` writes all of them; override any after it to match
+your brand.
 
 The stable hooks for styling decorations are `.lce-decoration-line`, `.lce-decoration-gutter`,
 `.lce-decoration-line--active` and `.lce-decoration-gutter--error`. The rendered parts carry data attributes:

@@ -242,6 +242,7 @@ export class ContextMenuExtension implements EditorExtension {
     this.menuElement.className = ContextMenuExtension.css.root;
     this.menuElement.setAttribute('aria-hidden', 'true');
     this.menuElement.setAttribute('role', 'menu');
+    this.menuElement.setAttribute('aria-label', 'Editor actions');
     this.menuElement.style.display = 'none';
 
     this.listElement = document.createElement('div');

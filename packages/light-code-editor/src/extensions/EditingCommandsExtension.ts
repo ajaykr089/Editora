@@ -530,6 +530,8 @@ export class EditingCommandsExtension implements EditorExtension {
     const root = document.createElement('div');
     root.className = EditingCommandsExtension.css.root;
     root.style.display = 'none';
+    root.setAttribute('role', 'group');
+    root.setAttribute('aria-label', 'Go to line');
     root.innerHTML = `
       <div class="${EditingCommandsExtension.css.row}">
         <input
@@ -543,16 +545,17 @@ export class EditingCommandsExtension implements EditorExtension {
         <button
           type="button"
           class="${EditingCommandsExtension.css.action}"
-          aria-label="Jump to line"
+          aria-label="Go to line"
         >Go</button>
         <button
           type="button"
           class="${EditingCommandsExtension.css.close}"
           aria-label="Close go to line"
-        >×</button>
+          title="Close (Esc)"
+        ><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       </div>
       <div class="${EditingCommandsExtension.css.meta}">
-        <div class="${EditingCommandsExtension.css.status}" aria-live="polite"></div>
+        <div class="${EditingCommandsExtension.css.status}" role="status" aria-live="polite"></div>
       </div>
     `;
 

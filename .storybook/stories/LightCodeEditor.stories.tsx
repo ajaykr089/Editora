@@ -754,14 +754,14 @@ function buildCompletionDemo(context: CompletionContext): CompletionItem[] | Com
       insertText: tag,
       kind: "tag" as const,
       detail: `<${tag}>`,
-      description: "Manual completion suggestion",
+      description: `Inserts a <${tag}> element`,
     })),
     ...htmlAttributeSuggestions.slice(0, 6).map((attribute) => ({
       label: attribute,
       insertText: `${attribute}=""`,
       kind: "attribute" as const,
-      detail: "attribute",
-      description: "Manual completion suggestion",
+      detail: "HTML",
+      description: `Adds ${attribute}="" to the current tag`,
     })),
   ].filter((item) => {
     const prefix = context.prefix.toLowerCase();

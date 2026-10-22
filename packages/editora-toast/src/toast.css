@@ -711,6 +711,38 @@
   .editora-toast-icon[data-spin="true"] svg { animation-duration: 1.6s; }
 }
 
+/* ── Contrast preferences ─────────────────────────────────────── */
+@media (prefers-contrast: more) {
+  .editora-toast { border-color: var(--et-text); box-shadow: none; }
+  .editora-toast-description,
+  .editora-toast-progress-text { color: var(--et-text); }
+  .editora-toast-close { opacity: 1; color: var(--et-text); }
+  .editora-toast-action { border-color: var(--et-text); }
+}
+
+/* Windows High Contrast and other forced palettes: use the user's system colours. */
+@media (forced-colors: active) {
+  .editora-toast {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  .editora-toast-title,
+  .editora-toast-message,
+  .editora-toast-description,
+  .editora-toast-progress-text,
+  .editora-toast-icon { color: CanvasText; }
+  .editora-toast-action { background: ButtonFace; color: ButtonText; border-color: ButtonText; }
+  .editora-toast-action.primary { background: Highlight; color: HighlightText; border-color: Highlight; }
+  .editora-toast-close { opacity: 1; color: ButtonText; }
+  .editora-toast-action:focus-visible,
+  .editora-toast-close:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+  .editora-toast-progress-track { background: GrayText; }
+  .editora-toast-progress-bar { background: Highlight; }
+}
+
 /* ── Mobile ──────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .editora-toast-container {
