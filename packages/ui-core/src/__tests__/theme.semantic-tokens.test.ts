@@ -88,6 +88,20 @@ describe('themeToCss / applyTheme parity', () => {
     }
   });
 
+  it('applyTheme sets color-scheme from the background, so native chrome follows the theme', () => {
+    applyTheme(baselineDarkTokens);
+    expect(root().style.getPropertyValue('color-scheme')).toBe('dark');
+    applyTheme(baselineLightTokens);
+    expect(root().style.getPropertyValue('color-scheme')).toBe('light');
+  });
+
+  it('applyTheme scopes color-scheme to the element it themes', () => {
+    const scope = document.createElement('div');
+    applyTheme(baselineDarkTokens, scope);
+    expect(scope.style.getPropertyValue('color-scheme')).toBe('dark');
+    expect(root().style.getPropertyValue('color-scheme')).toBe('');
+  });
+
   it('serialises the same variables as a stylesheet', () => {
     const css = themeToCss(baselineLightTokens, '.ui-theme');
     expect(css.startsWith('.ui-theme {')).toBe(true);
