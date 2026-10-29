@@ -24,7 +24,6 @@ table th {
   min-width: 80px;
   vertical-align: top;
   position: relative;
-  user-select: none;
 }
 
 .rte-table td:focus,
