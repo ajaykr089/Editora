@@ -84,7 +84,9 @@ export function createOllamaProvider(options: OllamaProviderOptions = {}): AIPro
         if (request.signal?.aborted) throw error;
         throw new AIProviderError(
           'ollama',
-          `Could not reach Ollama at ${baseUrl}. Is it running${baseUrl === OLLAMA_LOCAL_URL ? ' (ollama serve)' : ''}?`,
+          baseUrl === OLLAMA_LOCAL_URL
+            ? 'Ollama is not running on this computer. Install it from https://ollama.com/download and start it, or choose an online model.'
+            : `Could not reach Ollama at ${baseUrl}. Check that it is running and allows requests from this page (OLLAMA_ORIGINS).`,
         );
       }
 

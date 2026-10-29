@@ -59,7 +59,7 @@ describe('ollama provider', () => {
 
   it('explains when the local daemon is not running', async () => {
     const provider = createOllamaProvider({ fetch: async () => Promise.reject(new TypeError('Failed to fetch')) });
-    await expect(collect(provider)).rejects.toThrow(/ollama serve/);
+    await expect(collect(provider)).rejects.toThrow(/not running on this computer.*ollama\.com\/download/);
   });
 
   it('maps library ids to local cloud tags', () => {
@@ -143,7 +143,7 @@ describe('server handler + proxy provider', () => {
     const handler = createAIReviewHandler({ providers: { echo: () => echo }, allowedModels: ['ok'] });
     await expect(collect(createProxyProvider({ url: '/ai', model: 'other', fetch: handlerFetch(handler) }))).rejects.toMatchObject({ status: 400 });
     expect(await collect(createProxyProvider({ url: '/ai', model: 'ok', fetch: handlerFetch(handler) }))).toBe('model=ok prompt=p');
-    await expect(collect(createProxyProvider({ url: '/ai', provider: 'nope', fetch: handlerFetch(handler) }))).rejects.toThrow(/Unknown provider/);
+    await expect(collect(createProxyProvider({ url: '/ai', provider: 'nope', fetch: handlerFetch(handler) }))).rejects.toThrow(/^Unknown provider "nope"\.$/);
   });
 
   it('passes a client key only when allowed', async () => {

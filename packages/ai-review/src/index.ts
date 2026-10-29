@@ -39,5 +39,9 @@ export {
   saveSettings,
   providerFromSettings,
   DEFAULT_SETTINGS,
+  OLLAMA_CLOUD_CHOICE,
+  proxyChoicesFor,
+  defaultSettingsFor,
+  isOllamaRunning,
 } from './dom/settings';
 export type { AISettings, ProviderKind, ProxyChoice, UserSettingsConfig } from './dom/settings';

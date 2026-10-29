@@ -48,7 +48,8 @@ export function createProxyProvider(options: ProxyProviderOptions): AIProvider {
         throw new AIProviderError('proxy', `Could not reach ${options.url}.`);
       }
 
-      if (!response.ok || !response.body) throw await errorFromResponse('proxy', response);
+      // The handler's messages are written for users ("An Ollama API key is required...").
+      if (!response.ok || !response.body) throw await errorFromResponse('proxy', response, true);
       yield* readText(response.body, request.signal);
     },
   };

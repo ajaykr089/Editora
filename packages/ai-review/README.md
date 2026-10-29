@@ -10,9 +10,9 @@ tracked changes. Nothing changes until they say so.
 - **Streams.** Suggestions appear while the model writes; the user can stop it at any time.
 - **Safe to review late.** If someone edits a suggestion before deciding, it can only be dismissed, never applied over
   their edit.
-- **Free to try, bring your own key, or use your server.** Ollama's cloud models through a local Ollama; any
-  OpenAI-compatible API (OpenAI, OpenRouter, Groq, Mistral, DeepSeek, LM Studio...); Claude; or a proxy endpoint that
-  keeps keys off the page.
+- **Online, local or bring your own key.** Ollama Cloud (`https://ollama.com`) through a small endpoint on your
+  server; Ollama on the user's computer (`http://localhost:11434`); any OpenAI-compatible API (OpenAI, OpenRouter, Groq,
+  Mistral, DeepSeek, LM Studio...); or Claude.
 - No runtime dependencies. About 16 kB gzipped.
 
 ## Editora
@@ -55,22 +55,40 @@ editor's HTML contains `<ins>`/`<del>` marks; to save at that moment use `htmlWi
 
 ## Choosing a model
 
-With no `provider`, users get a **Model settings** dialog and the default is Ollama on their own computer.
+Users pick the model in a **Model settings** dialog (or you fix it in code, below). Three ways to run it:
 
-| Option | Where requests go | Key |
+| Option | URL | What the user needs |
 | --- | --- | --- |
-| Ollama on this computer | `http://localhost:11434` | none: run `ollama signin` once to use Ollama's free cloud models (`gemma4:31b-cloud`, `gpt-oss:120b-cloud`, `gpt-oss:20b-cloud`, `nemotron-3-nano:30b-cloud`, `nemotron-3-super:cloud`, `nemotron-3-ultra:cloud`) |
-| OpenAI-compatible API | straight from the browser to the service | the user's own; kept in `sessionStorage`, or `localStorage` if they tick *Remember* |
-| Your server (below) | your endpoint | yours, or the user's forwarded per request |
+| **Ollama Cloud** (online, nothing to install) | `https://ollama.com` | An Ollama account and an API key from [ollama.com/settings/keys](https://ollama.com/settings/keys), or none if your server has its own. Requires [your server endpoint](#your-server): ollama.com does not accept requests straight from web pages. |
+| **Ollama on their computer** | `http://localhost:11434` (or another machine running Ollama) | [Ollama installed](https://ollama.com/download) and running. After `ollama signin`, its cloud models are free to try locally: `gemma4:31b-cloud`, `gpt-oss:120b-cloud`, `gpt-oss:20b-cloud`, `nemotron-3-nano:30b-cloud`, `nemotron-3-super:cloud`, `nemotron-3-ultra:cloud`. |
+| **OpenAI-compatible API** | the service's URL (OpenAI, OpenRouter, Groq, Mistral, DeepSeek, LM Studio...) | Their own key, sent from the browser straight to the service; kept in `sessionStorage`, or `localStorage` if they tick *Remember*. |
+
+The online option appears as soon as you pass your endpoint:
+
+```js
+AIReviewPlugin({ userSettings: { proxy: { url: '/api/ai-review' } } }); // adds "Ollama Cloud (ollama.com)"
+```
+
+Without an endpoint, users get the local and OpenAI-compatible options. The dialog checks whether Ollama is running at
+the local URL and, if not, links to the download and points to the online option. If a rewrite fails because Ollama is
+not running, the error has a **Model settings** button.
+
+If your server has its own Ollama key, users need none and Ollama Cloud becomes the default:
+
+```js
+import { OLLAMA_CLOUD_CHOICE } from '@editora/ai-review';
+
+AIReviewPlugin({ userSettings: { proxy: { url: '/api/ai-review', providers: [{ ...OLLAMA_CLOUD_CHOICE, keyOptional: true }] } } });
+```
 
 Fix the provider in code instead:
 
 ```js
 import { createOllamaProvider, createOpenAICompatibleProvider, createProxyProvider } from '@editora/ai-review';
 
-AIReviewPlugin({ provider: createOllamaProvider({ model: 'gpt-oss:20b-cloud' }) });
+AIReviewPlugin({ provider: createProxyProvider({ url: '/api/ai-review', provider: 'ollama-cloud' }) }); // online
+AIReviewPlugin({ provider: createOllamaProvider({ model: 'gpt-oss:20b-cloud' }) }); // local Ollama
 AIReviewPlugin({ provider: createOpenAICompatibleProvider({ preset: 'openrouter', apiKey, model: 'your-model' }) });
-AIReviewPlugin({ provider: createProxyProvider({ url: '/api/ai-review' }) });
 ```
 
 A provider is anything with `stream({ system, prompt, signal })` returning an async iterable of text, so you can wrap
@@ -92,7 +110,21 @@ fallback model (`fallbacks: false` turns that off).
 ## Your server
 
 ollama.com and most providers do not accept requests from web pages, and you may not want keys in the page at all.
-`@editora/ai-review/server` is a small streaming proxy built on the standard `Request`/`Response`:
+`@editora/ai-review/server` is a small streaming proxy built on the standard `Request`/`Response`. The smallest
+online setup, where each user brings an Ollama key:
+
+```js
+// app/api/ai-review/route.js (Next.js)
+import { createAIReviewHandler, ollamaCloudProvider } from '@editora/ai-review/server';
+
+export const POST = createAIReviewHandler({
+  providers: { 'ollama-cloud': ollamaCloudProvider(process.env.OLLAMA_API_KEY) }, // key optional: users can send theirs
+  allowClientKeys: true,
+  allowedModels: ['gemma4:31b', 'gpt-oss:120b', 'gpt-oss:20b'],
+});
+```
+
+More providers, and checks before each request:
 
 ```js
 // app/api/ai-review/route.js (Next.js); also Hono, Bun, Deno, Cloudflare Workers

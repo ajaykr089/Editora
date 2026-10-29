@@ -62,8 +62,8 @@ export interface DomReviewOptions {
 export interface DomReview {
   readonly review: AIReview;
   readonly ended: boolean;
-  /** Show an error and restore the original text. */
-  fail(message: string): void;
+  /** Show an error and restore the original text; `action` adds a button to the message (e.g. open the model settings). */
+  fail(message: string, action?: { label: string; run: () => void }): void;
   accept(id: string): boolean;
   reject(id: string): boolean;
   acceptAll(): void;
@@ -339,7 +339,7 @@ export function createDomReview(options: DomReviewOptions): DomReview {
     end(true);
   }
 
-  function fail(text: string): void {
+  function fail(text: string, action?: { label: string; run: () => void }): void {
     if (ended) return;
     failed = true;
     message = text;
@@ -348,7 +348,16 @@ export function createDomReview(options: DomReviewOptions): DomReview {
     lockInput(false);
     setActive(null);
     updateBar(review.snapshot());
-    closeButton.focus();
+    if (action) {
+      const actionButton = button(action.label, null, () => {
+        end(true);
+        action.run();
+      });
+      bar.insertBefore(actionButton, closeButton);
+      actionButton.focus();
+    } else {
+      closeButton.focus();
+    }
   }
 
   // ---- events ----------------------------------------------------------------

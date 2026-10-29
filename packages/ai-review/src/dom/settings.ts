@@ -11,15 +11,31 @@ export interface ProxyChoice {
   label: string;
   /** Ask the user for their own key (the handler needs `allowClientKeys`). */
   needsKey?: boolean;
+  /** The server has a key of its own, so the user's key is optional and this can be the default. */
+  keyOptional?: boolean;
   models?: string[];
   defaultModel?: string;
 }
 
+/** Ollama's hosted models on https://ollama.com, through your server (`ollamaCloudProvider` in `@editora/ai-review/server`). */
+export const OLLAMA_CLOUD_CHOICE: ProxyChoice = {
+  id: 'ollama-cloud',
+  label: 'Ollama Cloud (ollama.com)',
+  needsKey: true,
+  models: OLLAMA_CLOUD_MODELS.map((model) => model.id),
+  defaultModel: 'gemma4:31b',
+};
+
 export interface UserSettingsConfig {
   /** localStorage/sessionStorage key prefix. */
   storageKey?: string;
-  /** Your server endpoint and the providers it offers. */
-  proxy?: { url: string; providers: ProxyChoice[] };
+  /**
+   * Your server endpoint (`createAIReviewHandler`) and the providers it offers.
+   * `providers` defaults to Ollama Cloud, the online option for users without
+   * a local Ollama: ollama.com does not accept requests straight from web
+   * pages, so it needs this endpoint.
+   */
+  proxy?: { url: string; providers?: ProxyChoice[] };
   /** Offer "OpenAI-compatible API" with a key typed in the browser. Default true. */
   allowDirectKeys?: boolean;
 }
@@ -38,6 +54,32 @@ export interface AISettings {
 }
 
 export const DEFAULT_SETTINGS: AISettings = { kind: 'ollama-local', model: DEFAULT_OLLAMA_MODEL, baseUrl: OLLAMA_LOCAL_URL };
+
+export function proxyChoicesFor(config?: UserSettingsConfig | null): ProxyChoice[] {
+  if (!config?.proxy) return [];
+  return config.proxy.providers ?? [OLLAMA_CLOUD_CHOICE];
+}
+
+/** What a user gets before choosing: a server provider that has its own key, else Ollama on their computer. */
+export function defaultSettingsFor(config?: UserSettingsConfig | null): AISettings {
+  const ready = proxyChoicesFor(config).find((choice) => choice.keyOptional || !choice.needsKey);
+  if (ready) return { kind: 'proxy', proxyProvider: ready.id, model: ready.defaultModel ?? ready.models?.[0] ?? '' };
+  return DEFAULT_SETTINGS;
+}
+
+/** Whether an Ollama server answers at `baseUrl` (from this page). */
+export async function isOllamaRunning(baseUrl: string = OLLAMA_LOCAL_URL, timeoutMs = 1500): Promise<boolean> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/+$/, '')}/api/tags`, { signal: controller.signal });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const storageKeyFor = (config?: UserSettingsConfig) => config?.storageKey ?? 'editora-ai-review';
 
@@ -101,7 +143,7 @@ export function providerFromSettings(settings: AISettings, config?: UserSettings
 
 export function describeSettings(settings: AISettings, config?: UserSettingsConfig): string {
   if (settings.kind === 'proxy') {
-    const choice = config?.proxy?.providers.find((provider) => provider.id === settings.proxyProvider);
+    const choice = proxyChoicesFor(config).find((provider) => provider.id === settings.proxyProvider);
     return [choice?.label ?? 'Server', settings.model].filter(Boolean).join(' · ');
   }
   if (settings.kind === 'openai-compatible') {
@@ -118,7 +160,7 @@ export function openSettingsDialog(current: AISettings, config: UserSettingsConf
   ensureStyles();
   const id = `air-settings-${(uid += 1)}`;
   const allowDirect = config.allowDirectKeys !== false;
-  const proxyChoices = config.proxy?.providers ?? [];
+  const proxyChoices = proxyChoicesFor(config);
 
   const dialog = document.createElement('dialog');
   dialog.className = 'air-ui air-dialog';
@@ -127,9 +169,9 @@ export function openSettingsDialog(current: AISettings, config: UserSettingsConf
   if (themeFrom) applyTheme(dialog, themeFrom);
 
   const providerOptions = [
-    `<option value="ollama-local">Ollama on this computer (free cloud models)</option>`,
-    allowDirect ? `<option value="openai-compatible">OpenAI-compatible API (your key)</option>` : '',
     ...proxyChoices.map((choice) => `<option value="proxy:${escapeAttr(choice.id)}">${escapeHtml(choice.label)}</option>`),
+    `<option value="ollama-local">Ollama on this computer (${escapeHtml(OLLAMA_LOCAL_URL.replace(/^https?:\/\//, ''))})</option>`,
+    allowDirect ? `<option value="openai-compatible">OpenAI-compatible API (your key)</option>` : '',
   ].join('');
 
   const presetOptions = (Object.keys(OPENAI_COMPATIBLE_PRESETS) as OpenAICompatiblePreset[])
@@ -198,6 +240,25 @@ export function openSettingsDialog(current: AISettings, config: UserSettingsConf
     }
   };
 
+  const link = (href: string, text: string) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  const hasCloud = proxyChoices.some((choice) => choice.id === OLLAMA_CLOUD_CHOICE.id);
+
+  // Is Ollama running where the user said? Checked when the local option is shown or its URL changes.
+  let probe = 0;
+  const checkLocal = () => {
+    const ticket = (probe += 1);
+    const url = urlInput.value.trim() || OLLAMA_LOCAL_URL;
+    providerHint.textContent = `Checking for Ollama at ${url}\u2026`;
+    void isOllamaRunning(url).then((running) => {
+      if (ticket !== probe || providerSelect.value !== 'ollama-local') return;
+      providerHint.innerHTML = running
+        ? `Ollama is running at ${escapeHtml(url)}. Its cloud models are free to try after <code>ollama signin</code>; local models never leave this computer.`
+        : `Ollama is not running at ${escapeHtml(url)}. ${link('https://ollama.com/download', 'Install Ollama')} and start it, then run <code>ollama signin</code> to use its free cloud models${
+            hasCloud ? ', or choose Ollama Cloud above to use ollama.com without installing anything.' : '.'
+          }`;
+    });
+  };
+
   let previousKind = '';
   const sync = (initial = false) => {
     const value = providerSelect.value;
@@ -210,12 +271,12 @@ export function openSettingsDialog(current: AISettings, config: UserSettingsConf
     show('apiKey', value === 'openai-compatible' || Boolean(proxyChoice?.needsKey));
 
     if (value === 'ollama-local') {
-      providerHint.textContent = 'Free to try: install Ollama, run "ollama signin", then pick one of its cloud models. Nothing leaves this computer except the request to Ollama.';
       setModels(OLLAMA_CLOUD_MODELS.map((model) => ollamaLocalCloudTag(model.id)));
       if (changed) {
         urlInput.value = OLLAMA_LOCAL_URL;
         modelInput.value = DEFAULT_OLLAMA_MODEL;
       }
+      if (changed || initial) checkLocal();
     } else if (value === 'openai-compatible') {
       providerHint.textContent = 'OpenAI, OpenRouter, Groq and other services with an OpenAI-style API. Requests go from this browser straight to the service.';
       setModels([]);
@@ -225,10 +286,15 @@ export function openSettingsDialog(current: AISettings, config: UserSettingsConf
       }
       keyHint.textContent = `Stored in this browser only and sent to ${host(urlInput.value)}.`;
     } else if (proxyChoice) {
-      providerHint.textContent = 'Runs through this site\'s server.';
+      const cloud = proxyChoice.id === OLLAMA_CLOUD_CHOICE.id;
+      providerHint.innerHTML = cloud
+        ? `Runs Ollama's models on ${link('https://ollama.com', 'ollama.com')}, nothing to install. Requests go through this site's server, because ollama.com does not accept them straight from web pages.`
+        : 'Runs through this site\'s server.';
       setModels(proxyChoice.models ?? []);
       if (changed) modelInput.value = proxyChoice.defaultModel ?? proxyChoice.models?.[0] ?? '';
-      keyHint.textContent = 'Stored in this browser only; sent to this site\'s server with each request and not saved there.';
+      keyHint.innerHTML = `${cloud ? `Create one at ${link('https://ollama.com/settings/keys', 'ollama.com/settings/keys')}. ` : ''}${
+        proxyChoice.keyOptional ? 'Optional: this site has a key of its own. ' : ''
+      }Stored in this browser only; sent to this site's server with each request and not saved there.`;
     }
   };
 
@@ -248,7 +314,14 @@ export function openSettingsDialog(current: AISettings, config: UserSettingsConf
     urlInput.value = OPENAI_COMPATIBLE_PRESETS[presetSelect.value as OpenAICompatiblePreset].baseUrl;
     sync();
   });
-  urlInput.addEventListener('input', () => sync());
+  let urlTimer: ReturnType<typeof setTimeout> | undefined;
+  urlInput.addEventListener('input', () => {
+    sync();
+    if (providerSelect.value === 'ollama-local') {
+      clearTimeout(urlTimer);
+      urlTimer = setTimeout(checkLocal, 400);
+    }
+  });
 
   document.body.appendChild(dialog);
   const opener = document.activeElement as HTMLElement | null;

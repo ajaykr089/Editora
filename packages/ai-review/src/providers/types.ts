@@ -38,7 +38,8 @@ export function resolveFetch(custom?: FetchLike): FetchLike {
   return (input, init) => fetch(input, init);
 }
 
-export async function errorFromResponse(provider: string, response: Response): Promise<AIProviderError> {
+/** `detailOnly` drops the "<provider> request failed (status):" prefix, for messages already written for users. */
+export async function errorFromResponse(provider: string, response: Response, detailOnly = false): Promise<AIProviderError> {
   let detail = '';
   try {
     const body = await response.text();
@@ -52,5 +53,5 @@ export async function errorFromResponse(provider: string, response: Response): P
     // Body unreadable; fall back to the status line.
   }
   const text = typeof detail === 'string' && detail.trim() ? detail.trim().slice(0, 300) : response.statusText;
-  return new AIProviderError(provider, `${provider} request failed (${response.status}): ${text}`, response.status);
+  return new AIProviderError(provider, detailOnly ? text : `${provider} request failed (${response.status}): ${text}`, response.status);
 }
