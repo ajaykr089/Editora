@@ -16,7 +16,7 @@ Thank you for your interest in contributing to Editora! This document provides g
 
 ## Code of Conduct
 
-By participating in this project, you agree to maintain a respectful and inclusive environment. Please:
+By participating in this project, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md). In short:
 
 - Be respectful and considerate
 - Welcome newcomers and help them get started

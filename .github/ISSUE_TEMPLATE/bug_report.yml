@@ -1,0 +1,56 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. A minimal reproduction gets a bug fixed fastest: fork the
+        [StackBlitz starter](https://stackblitz.com/github/ajaykr089/Editora/tree/main/examples/stackblitz?file=src/App.jsx),
+        change it until the bug shows, and paste the link below.
+  - type: input
+    id: packages
+    attributes:
+      label: Package and version
+      description: The package that misbehaves, with the version you have installed (`npm ls @editora/core @editora/react @editora/plugins`).
+      placeholder: "@editora/plugins 1.2.1"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce
+      description: A link to a StackBlitz or repository, or the exact steps. Include the plugins and toolbar items you use.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: browsers
+    attributes:
+      label: Where does it happen?
+      options:
+        - label: Chrome / Edge
+        - label: Firefox
+        - label: Safari / WebKit
+        - label: Mobile browser
+        - label: Server-side rendering (Next.js, Remix, ...)
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Framework and version, bundler, operating system.
+      placeholder: "React 19, Vite 7, macOS 15"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output or screenshots
+      description: Errors from the browser console, or a screenshot or recording.
