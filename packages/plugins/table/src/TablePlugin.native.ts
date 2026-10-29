@@ -456,12 +456,16 @@ function closestFromNode(node: Node | EventTarget | null, selector: string): Ele
   return element ? element.closest(selector) : null;
 }
 
+const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
+
 // The floating toolbar and keyboard shortcuts are page-wide, so they must not
-// act on a table the user can't edit (read-only editor, locked block).
+// act on a table the user can't edit (read-only editor, locked block), nor on
+// one in another editor or contenteditable on the page that isn't Editora's.
 function isTableEditable(table: HTMLElement | null): boolean {
   if (!table) return false;
+  const content = table.closest(EDITOR_CONTENT_SELECTOR);
   const host = table.closest('[contenteditable]');
-  if (!host) return false;
+  if (!content || !host || !content.contains(host)) return false;
   if (host.getAttribute('contenteditable') === 'false') return false;
   return !host.closest('[data-readonly="true"]');
 }
