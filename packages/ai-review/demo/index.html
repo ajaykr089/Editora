@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI review demo</title>
+    <link rel="stylesheet" href="/packages/core/dist/webcomponent.min.css" />
+    <style>
+      body { margin: 0; padding: 24px 16px 64px; font: 15px/1.5 system-ui, sans-serif; background: #f4f4f7; color: #1d1d24; }
+      main { max-width: 760px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      p.lead { margin: 0 0 16px; color: #5d5d6b; }
+      kbd { font: 12px ui-monospace, monospace; padding: 1px 5px; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>AI review</h1>
+      <p class="lead">Select text (or put the cursor in a paragraph), press the <strong>AI</strong> button or <kbd>⌘J</kbd> / <kbd>Ctrl+J</kbd>, pick an action. The rewrite streams in as suggestions to accept or reject.</p>
+      <editora-editor id="editor" height="460" plugins="heading bold italic underline list link history">
+        <h2>Quarterly update</h2>
+        <p>Me and the team has been working real hard on the new onboarding flow, and we're <strong>super excited</strong> to share that signups is up 23% since launch.</p>
+        <p>There was some problems with the email verification step that effected around 4% of users. We fixed it on tuesday, but we should of caught it in testing.</p>
+        <ul>
+          <li>Next quarter we wanna focus on retention.</li>
+          <li>We also plan to hire two more engineers if budget allows it.</li>
+        </ul>
+      </editora-editor>
+    </main>
+    <script type="module">
+      import '/packages/core/dist/webcomponent.js';
+      import { AIReviewPlugin } from '/packages/ai-review/dist/editora.js';
+
+      const editor = document.getElementById('editor');
+      const configure = () =>
+        editor.setConfig({
+          plugins: ['heading', 'bold', 'italic', 'underline', 'list', 'link', 'history', AIReviewPlugin({
+            userSettings: {
+              proxy: {
+                url: '/api/ai-review',
+                providers: [
+                  { id: 'ollama', label: 'Ollama via this server', models: ['gemma4:31b-cloud', 'gpt-oss:120b-cloud', 'gpt-oss:20b-cloud', 'nemotron-3-nano:30b-cloud', 'nemotron-3-super:cloud', 'nemotron-3-ultra:cloud'] },
+                  { id: 'ollama-cloud', label: 'Ollama Cloud (your key)', needsKey: true, models: ['gemma4:31b', 'gpt-oss:120b', 'gpt-oss:20b', 'nemotron-3-nano:30b', 'nemotron-3-super', 'nemotron-3-ultra'] },
+                ],
+              },
+            },
+          })],
+          toolbar: 'undo redo | heading bold italic underline | bullist numlist | openAIReview',
+        });
+      if (customElements.get('editora-editor')) configure();
+      else customElements.whenDefined('editora-editor').then(configure);
+    </script>
+  </body>
+</html>
