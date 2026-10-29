@@ -192,6 +192,10 @@ export class RichTextEditorElement extends HTMLElement {
   private selectionChangeHandler?: () => void;
   private jsConfig?: EditorConfigDefaults;
   private isInitialized = false;
+  // Builds are async (plugins load on demand) and several things start one: connecting, the attributes
+  // reported during an upgrade, setConfig(), attribute changes. Each build takes a number; a build that a
+  // newer one (or destroy()) has overtaken stops before touching the DOM, so the latest configuration wins.
+  private buildGeneration = 0;
   private autosaveTimer?: ReturnType<typeof setInterval>;
   private contentChangeDebounceTimer?: ReturnType<typeof setTimeout>;
   private keyboardShortcutManager = new KeyboardShortcutManager();
@@ -353,6 +357,8 @@ export class RichTextEditorElement extends HTMLElement {
     
     // Prevent re-initialization
     if (this.isInitialized) return;
+
+    const generation = ++this.buildGeneration;
     
     // Mark this element as an editor container for multi-instance support
     this.setAttribute('data-editora-editor', 'true');
@@ -386,6 +392,8 @@ export class RichTextEditorElement extends HTMLElement {
     
     // Load plugins
     const plugins = await this.loadPlugins();
+    // A newer build started, or the editor was destroyed or removed, while plugins were loading.
+    if (generation !== this.buildGeneration || !this.isConnected) return;
     this.loadedPlugins = plugins;
     
     // Initialize plugins (call init hooks)
@@ -1605,6 +1613,9 @@ export class RichTextEditorElement extends HTMLElement {
    * Destroy the editor
    */
   private destroy(): void {
+    // Any build still loading plugins is now out of date.
+    this.buildGeneration += 1;
+
     if (this.contentChangeDebounceTimer) {
       clearTimeout(this.contentChangeDebounceTimer);
       this.contentChangeDebounceTimer = undefined;
