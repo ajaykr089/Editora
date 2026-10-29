@@ -87,10 +87,21 @@ function ensureTableWrapper(table: HTMLTableElement): HTMLElement {
     return parent;
   }
 
+  // Taking the table out of the editor drops a selection inside it to the spot just after the table, so a click into a
+  // cell of an unwrapped table put the caret outside it and typing landed in the next block. Put it back afterwards.
+  const selection = window.getSelection();
+  const { anchorNode, anchorOffset, focusNode, focusOffset } = selection ?? {};
+  const keepSelection =
+    !!selection && !!anchorNode && !!focusNode && (table.contains(anchorNode) || table.contains(focusNode));
+
   const wrapper = document.createElement('div');
   wrapper.className = 'rte-table-wrapper';
   parent?.insertBefore(wrapper, table);
   wrapper.appendChild(table);
+
+  if (keepSelection && selection && anchorNode && focusNode && anchorNode.isConnected && focusNode.isConnected) {
+    selection.setBaseAndExtent(anchorNode, anchorOffset ?? 0, focusNode, focusOffset ?? 0);
+  }
   return wrapper;
 }
 
