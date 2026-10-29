@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://editora-ecosystem.netlify.app/
+    about: Guides, plugin docs and the API reference.
+  - name: Try it in your browser
+    url: https://stackblitz.com/github/ajaykr089/Editora/tree/main/examples/stackblitz?file=src/App.jsx
+    about: A ready-to-run project. Fork it to make a minimal reproduction for a bug report.
+  - name: Report a security vulnerability
+    url: https://github.com/ajaykr089/Editora/security/advisories/new
+    about: Please report security problems privately, not in a public issue.
