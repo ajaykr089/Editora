@@ -129,8 +129,16 @@ export function cleanPaste(input: PasteInput, options: CleanPasteOptions = {}): 
   const text = typeof input === 'string' ? '' : input.text ?? '';
 
   if (!html.trim()) {
+    // Text needs no HTML parser, so this path also runs on a server without `parse`.
     const converted = textToHtml(text, { markdown: options.markdown !== false && !options.plainText, linkify: options.linkify !== false && !options.plainText });
-    return finish(converted.html, converted.markdown ? 'markdown' : 'plain', [], [], options);
+    return {
+      html: converted.html,
+      text: text.replace(/\r\n?/g, '\n').trim(),
+      source: converted.markdown ? 'markdown' : 'plain',
+      inline: !/^<(p|h[1-6]|ul|ol|pre|blockquote|table|hr)\b/.test(converted.html),
+      images: [],
+      warnings: [],
+    };
   }
 
   const doc = (options.parse ?? defaultParse)(html);

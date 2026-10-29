@@ -81,7 +81,7 @@ Other editors: call `cleanPaste` wherever they let you intercept pasted HTML.
 | `markdown` | `true` | Convert plain text that is clearly Markdown |
 | `linkify` | `true` | Link bare URLs in plain text |
 | `plainText` | `false` | Paragraphs and line breaks only |
-| `parse` | `DOMParser` | On a server, pass one from jsdom or linkedom: `parse: (html) => new JSDOM(html).window.document` |
+| `parse` | `DOMParser` | On a server, HTML needs one from jsdom or linkedom: `parse: (html) => new JSDOM(html).window.document`. Plain text and Markdown need none |
 
 The result also has `text` (a plain-text version), `inline` (true for a phrase pasted mid-sentence), and `images`
 (every image with `kept` or the reason it was dropped).
