@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@editora/core": "1.0.27",
+    "@editora/core": "1.0.28",
     "@editora/icons": "0.1.12",
     "@editora/light-code-editor": "1.1.0",
     "@editora/markdown-editor": "0.2.2",

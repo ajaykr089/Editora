@@ -1,6 +1,6 @@
 {
   "name": "@editora/content-a11y",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Accessibility checks for the content people write (alt text, headings, links, tables, lists, contrast), with fixes. Runs in any editor, on a server or in CI.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
