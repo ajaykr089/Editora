@@ -1777,15 +1777,33 @@ export function applyTheme(
   const styleRoot = resolveStyleRoot(root);
 
   applyThemeToTarget(styleRoot, vars);
+  applyColorScheme(styleRoot, vars['--ui-color-background']);
 
   if (isGlobalRoot) {
     for (const host of registeredHosts) {
       try {
         applyThemeToTarget(host, vars);
+        applyColorScheme(host, vars['--ui-color-background']);
       } catch {
         // no-op
       }
     }
+  }
+}
+
+/**
+ * Tell the browser which scheme the painted background belongs to, so what it draws itself (scrollbars,
+ * form-control chrome, the canvas behind short pages) matches a dark theme on a light system and the
+ * reverse. A background that is not a hex colour leaves the page's own `color-scheme` alone.
+ */
+function applyColorScheme(target: HTMLElement, background: string | undefined) {
+  const luminance = background ? relativeLuminance(background) : null;
+  if (luminance === null) return;
+  try {
+    // 0.179 is where white and black text read equally well: darker backgrounds are dark themes.
+    target.style.setProperty('color-scheme', luminance < 0.179 ? 'dark' : 'light');
+  } catch {
+    // no-op
   }
 }
 
