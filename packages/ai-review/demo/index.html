@@ -30,17 +30,19 @@
     <script type="module">
       import '/packages/core/dist/webcomponent.js';
       import { AIReviewPlugin } from '/packages/ai-review/dist/editora.js';
+      import { OLLAMA_CLOUD_CHOICE } from '/packages/ai-review/dist/index.js';
 
       const editor = document.getElementById('editor');
       const configure = () =>
         editor.setConfig({
           plugins: ['heading', 'bold', 'italic', 'underline', 'list', 'link', 'history', AIReviewPlugin({
+            // The endpoint adds "Ollama Cloud (ollama.com)"; "Ollama via this server" uses the demo server's own Ollama.
             userSettings: {
               proxy: {
                 url: '/api/ai-review',
                 providers: [
-                  { id: 'ollama', label: 'Ollama via this server', models: ['gemma4:31b-cloud', 'gpt-oss:120b-cloud', 'gpt-oss:20b-cloud', 'nemotron-3-nano:30b-cloud', 'nemotron-3-super:cloud', 'nemotron-3-ultra:cloud'] },
-                  { id: 'ollama-cloud', label: 'Ollama Cloud (your key)', needsKey: true, models: ['gemma4:31b', 'gpt-oss:120b', 'gpt-oss:20b', 'nemotron-3-nano:30b', 'nemotron-3-super', 'nemotron-3-ultra'] },
+                  OLLAMA_CLOUD_CHOICE,
+                  { id: 'ollama', label: 'Ollama via this server', keyOptional: true, models: ['gemma4:31b-cloud', 'gpt-oss:120b-cloud', 'gpt-oss:20b-cloud', 'nemotron-3-nano:30b-cloud', 'nemotron-3-super:cloud', 'nemotron-3-ultra:cloud'] },
                 ],
               },
             },

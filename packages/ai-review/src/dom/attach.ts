@@ -1,8 +1,8 @@
 import { REWRITE_PRESETS, type RewritePreset } from '../core/prompt';
 import { runRewrite } from '../core/run';
-import { AIProviderError, type AIProvider } from '../providers/types';
+import type { AIProvider } from '../providers/types';
 import { createDomReview, type DomReview, type ReviewEndInfo, type ReviewLabels } from './overlay';
-import { DEFAULT_SETTINGS, describeSettings, loadSettings, openSettingsDialog, providerFromSettings, type UserSettingsConfig } from './settings';
+import { defaultSettingsFor, describeSettings, loadSettings, openSettingsDialog, providerFromSettings, type UserSettingsConfig } from './settings';
 import { applyTheme, ensureStyles, ICONS } from './styles';
 import { buildTextMap, targetsForRange, textBlocks, type ReviewTarget } from './text';
 
@@ -86,13 +86,13 @@ export function attachAIReview(root: HTMLElement, options: AttachOptions = {}): 
   };
   doc.addEventListener('selectionchange', rememberSelection);
 
-  const settings = () => (settingsConfig ? loadSettings(settingsConfig) ?? DEFAULT_SETTINGS : null);
+  const settings = () => (settingsConfig ? loadSettings(settingsConfig) ?? defaultSettingsFor(settingsConfig) : null);
 
   const resolveProvider = async (): Promise<AIProvider> => {
     const saved = settingsConfig ? loadSettings(settingsConfig) : null;
     if (saved) return providerFromSettings(saved, settingsConfig ?? undefined);
     if (options.provider) return typeof options.provider === 'function' ? options.provider() : options.provider;
-    return providerFromSettings(DEFAULT_SETTINGS, settingsConfig ?? undefined);
+    return providerFromSettings(defaultSettingsFor(settingsConfig), settingsConfig ?? undefined);
   };
 
   const providerLabel = () => {
@@ -101,7 +101,7 @@ export function attachAIReview(root: HTMLElement, options: AttachOptions = {}): 
     if (options.provider && typeof options.provider !== 'function') {
       return [options.provider.id, options.provider.model].filter(Boolean).join(' · ');
     }
-    return options.provider ? '' : describeSettings(DEFAULT_SETTINGS);
+    return options.provider ? '' : describeSettings(defaultSettingsFor(settingsConfig), settingsConfig ?? undefined);
   };
 
   const contextFor = (targets: ReviewTarget[]): string | undefined => {
@@ -120,11 +120,8 @@ export function attachAIReview(root: HTMLElement, options: AttachOptions = {}): 
     return text ? text.slice(0, limit) : undefined;
   };
 
-  const describeError = (error: unknown): string => {
-    const text = error instanceof Error ? error.message : String(error);
-    const connection = error instanceof AIProviderError && (!error.status || error.status === 401 || error.status === 403 || error.status === 404);
-    return connection && settingsConfig ? `${text} ${labels.connectionHelp}` : text;
-  };
+  // The error bar offers a "Model settings" button when users can change the model.
+  const describeError = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
   function cancel(): void {
     abort?.abort();
@@ -176,7 +173,7 @@ export function attachAIReview(root: HTMLElement, options: AttachOptions = {}): 
       });
     } catch (error) {
       if (controller.signal.aborted) return;
-      review.fail(describeError(error));
+      review.fail(describeError(error), settingsConfig ? { label: labels.settings, run: () => void openSettings() } : undefined);
       options.onError?.(error);
     } finally {
       if (abort === controller) abort = null;
@@ -308,7 +305,7 @@ export function attachAIReview(root: HTMLElement, options: AttachOptions = {}): 
 
   async function openSettings(): Promise<void> {
     if (!settingsConfig) return;
-    await openSettingsDialog(settings() ?? DEFAULT_SETTINGS, settingsConfig, root);
+    await openSettingsDialog(settings() ?? defaultSettingsFor(settingsConfig), settingsConfig, root);
   }
 
   return {
