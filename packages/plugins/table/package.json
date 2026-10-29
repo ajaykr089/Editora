@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-table",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Table plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
