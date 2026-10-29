@@ -1,0 +1,27 @@
+{
+  "name": "editora-stackblitz",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Smallest working Editora setup (React + Vite), ready to open in StackBlitz.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@editora/core": "^1.0.26",
+    "@editora/plugins": "^1.2.0",
+    "@editora/react": "^1.0.29",
+    "@editora/themes": "^1.0.20",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  },
+  "stackblitz": {
+    "startCommand": "npm run dev"
+  }
+}

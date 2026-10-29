@@ -1,0 +1,8 @@
+body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: #1c2024; background: #fafafa; }
+.page { max-width: 760px; margin: 0 auto; padding: 40px 20px 60px; }
+h1 { margin: 0 0 4px; font-size: 28px; }
+.lead { margin: 0 0 24px; color: #5c6066; }
+.label { margin: 28px 0 8px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #5c6066; }
+.output { margin: 0; padding: 14px; overflow: auto; border: 1px solid #e0e1e6; border-radius: 6px; background: #fff; font-size: 13px; white-space: pre-wrap; }
+.links { margin-top: 28px; color: #5c6066; }
+a { color: #1d4ed8; }
