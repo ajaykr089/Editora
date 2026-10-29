@@ -1,6 +1,6 @@
 {
   "name": "@editora/ai-review",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Review AI rewrites as accept/reject suggestions in any rich text editor: word-level diffs, streaming, Ollama and bring-your-own-key providers.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "@editora/core",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "description": "Framework-agnostic rich text editor (WYSIWYG) with a plugin system, an accessible toolbar and TypeScript types. Works in plain JavaScript, React and any other framework.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
