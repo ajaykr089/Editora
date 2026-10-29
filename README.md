@@ -1,52 +1,85 @@
-# Editora - Best Free Premium Rich Text Editor
 <div align="center">
-  <img src="images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
+  <img src="images/editora_logo_blocks.svg" alt="Editora logo" width="96" height="auto">
+
+  <h1>Editora</h1>
+
+  <p><strong>A free, accessible rich text editor (WYSIWYG) for React and the web.</strong><br>
+  Modular plugins, light and dark themes, TypeScript types. MIT licensed.</p>
+
+  <p>
+    <a href="https://www.npmjs.com/package/@editora/core"><img alt="npm version" src="https://img.shields.io/npm/v/@editora/core?label=%40editora%2Fcore&color=cb3837"></a>
+    <a href="https://github.com/ajaykr089/Editora/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/ajaykr089/Editora/ci.yml?branch=main&label=CI"></a>
+    <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue"></a>
+    <img alt="Written in TypeScript" src="https://img.shields.io/badge/TypeScript-ready-3178c6">
+    <a href="https://github.com/ajaykr089/Editora/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ajaykr089/Editora?style=flat"></a>
+  </p>
+
+  <p>
+    <a href="https://stackblitz.com/github/ajaykr089/Editora/tree/main/examples/stackblitz?file=src/App.jsx"><strong>Try it in your browser</strong></a> ·
+    <a href="https://editora-ecosystem.netlify.app/">Docs</a> ·
+    <a href="https://editora-free.netlify.app/">Web demo</a> ·
+    <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+    <a href="https://www.npmjs.com/org/editora">npm</a>
+  </p>
+
+  <img src="images/editora-demo.gif" alt="Editing a document in Editora: typing, bold and italic from the toolbar, and the toolbar's overflow menu" width="760">
 </div>
 
-
-<p align="center">
-  <a href="https://www.npmjs.com/package/@editora/core"><img alt="npm version" src="https://img.shields.io/npm/v/@editora/core?label=%40editora%2Fcore&color=cb3837"></a>
-  <a href="https://github.com/ajaykr089/Editora/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/ajaykr089/Editora/ci.yml?branch=main&label=CI"></a>
-  <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue"></a>
-  <img alt="Written in TypeScript" src="https://img.shields.io/badge/TypeScript-ready-3178c6">
-  <a href="https://github.com/ajaykr089/Editora/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ajaykr089/Editora?style=flat"></a>
-</p>
-
-![Editora Ecosystem](./images/editora-linkedin-graphic.png)
-
-- **Try it in your browser, no install (StackBlitz):** https://stackblitz.com/github/ajaykr089/Editora/tree/main/examples/stackblitz?file=src/App.jsx
-- **CodeSandbox:** https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main
-- **Editor Example:** https://qjr47y-5173.csb.app/editora-editor
-- **Editora Ecosystem:** https://editora-ecosystem.netlify.app/
-- **Web Demo:** https://editora-free.netlify.app/
-- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
-
-The **best free rich text editor** with enterprise-grade features. A comprehensive, production-ready WYSIWYG editor built with React, TypeScript, and modern web technologies. Get premium features completely free—no subscriptions, no limitations.
-
-**🌐 [Try it Live](https://editora-ecosystem.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
-
-**Free alternative to TinyMCE, Quill, Draft.js, and Slate.** See an [honest comparison, including when not to use Editora](https://editora-ecosystem.netlify.app/docs/getting-started/alternatives).
-
-## 🤖 AI-Ready Metadata
-
-- **LLM Index:** [llms.txt](./llms.txt)
-- **LLM Full Guide:** [llms-full.txt](./llms-full.txt)
-- **Canonical Inventory:** [COMPONENT_INVENTORY.md](./COMPONENT_INVENTORY.md)
-- **Component Registry:** [components.json](./components.json)
-- **Registry Schema:** [components.schema.json](./components.schema.json)
-- **Regenerate Registry:** `npm run generate:components`
-
-### CLI Quick Add
+## Quick start
 
 ```bash
-npx @editora/cli add button
-npx @editora/cli add modal
-npx @editora/cli add datatable
-npx @editora/cli add editor
-npx @editora/cli add toast
-npx @editora/cli add accordion
-npx @editora/cli add ui-select
+npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom
 ```
+
+```tsx
+import { useState } from 'react';
+import { EditoraEditor } from '@editora/react';
+import {
+  BoldPlugin,
+  HeadingPlugin,
+  HistoryPlugin,
+  ItalicPlugin,
+  LinkPlugin,
+  ListPlugin,
+  UnderlinePlugin,
+} from '@editora/plugins/lite';
+
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
+
+// Create the plugins once, outside the component (or with useMemo), so the editor is not rebuilt on every render.
+const plugins = [
+  HeadingPlugin(),
+  BoldPlugin(),
+  ItalicPlugin(),
+  UnderlinePlugin(),
+  ListPlugin(),
+  LinkPlugin(),
+  HistoryPlugin(),
+];
+
+const toolbar = {
+  items: ['undo', 'redo', 'heading', 'bold', 'italic', 'underline', 'link', 'bullist', 'numlist'],
+};
+
+export default function App() {
+  const [html, setHtml] = useState('<h2>Launch briefing</h2><p>Start writing, or paste something in.</p>');
+
+  return (
+    <EditoraEditor
+      value={html}
+      onChange={setHtml}
+      plugins={plugins}
+      toolbar={toolbar}
+      placeholder="Start writing..."
+    />
+  );
+}
+```
+
+Add plugins and the toolbar grows with them. The same editor is available as a web component for plain HTML, Vue, Angular and Svelte (`@editora/core`). **Free alternative to TinyMCE, Quill, Draft.js and Slate:** see an [honest comparison, including when not to use Editora](https://editora-ecosystem.netlify.app/docs/getting-started/alternatives).
+
+Also available: a [CodeSandbox](https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main) and an [editor example](https://qjr47y-5173.csb.app/editora-editor).
 
 ## 🚀 Why Editora? (Free Premium Features)
 
@@ -166,6 +199,27 @@ Use the enterprise preset when you need advanced workflows (all free + customiza
 - Structured/dynamic authoring: `ConditionalContentPlugin`, `DataBindingPlugin`, `MergeTagPlugin`, `TemplatePlugin`, `CitationsPlugin`
 - Automation/productivity: `SmartPastePlugin`, `SlashCommandsPlugin`, `BlocksLibraryPlugin`, `TranslationWorkflowPlugin`
 - Manager-backed advanced plugins: `MediaManagerPlugin`, `DocumentManagerPlugin`
+
+## 🤖 AI-Ready Metadata
+
+- **LLM Index:** [llms.txt](./llms.txt)
+- **LLM Full Guide:** [llms-full.txt](./llms-full.txt)
+- **Canonical Inventory:** [COMPONENT_INVENTORY.md](./COMPONENT_INVENTORY.md)
+- **Component Registry:** [components.json](./components.json)
+- **Registry Schema:** [components.schema.json](./components.schema.json)
+- **Regenerate Registry:** `npm run generate:components`
+
+### CLI Quick Add
+
+```bash
+npx @editora/cli add button
+npx @editora/cli add modal
+npx @editora/cli add datatable
+npx @editora/cli add editor
+npx @editora/cli add toast
+npx @editora/cli add accordion
+npx @editora/cli add ui-select
+```
 
 ## 🏗️ Architecture
 
