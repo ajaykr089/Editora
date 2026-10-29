@@ -1,0 +1,72 @@
+{
+  "name": "@editora/paste-cleaner",
+  "version": "0.0.0",
+  "description": "Clean what people paste from Word, Google Docs, Sheets, Excel, Pages and the web into semantic HTML, with real lists, headings and tables. Works with any editor.",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/paste-cleaner"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./editora": {
+      "types": "./dist/editora.d.ts",
+      "import": "./dist/editora.js",
+      "require": "./dist/editora.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.json",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "jsdom": "^22.1.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "paste",
+    "clipboard",
+    "paste-from-word",
+    "google-docs",
+    "sanitize",
+    "html-cleaner",
+    "word-lists",
+    "markdown",
+    "rich-text-editor",
+    "contenteditable",
+    "tiptap",
+    "prosemirror",
+    "editora"
+  ]
+}
