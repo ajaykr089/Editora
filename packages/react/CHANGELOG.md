@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.30
+
+### Patch Changes
+
+- 74b6ac4: README: a "Try it live" link to a ready-to-run StackBlitz project, so the npm page lets people try the editor without installing anything. No code changes.
+
 ## 1.0.29
 
 ### Patch Changes

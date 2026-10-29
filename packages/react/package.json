@@ -1,6 +1,6 @@
 {
   "name": "@editora/react",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "React rich text editor (WYSIWYG) with 30+ plugins, an accessible toolbar and TypeScript types. Free and open source, for React 16.8 and newer.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
