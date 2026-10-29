@@ -1,6 +1,6 @@
 {
   "name": "@editora/paste-cleaner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Clean what people paste from Word, Google Docs, Sheets, Excel, Pages and the web into semantic HTML, with real lists, headings and tables. Works with any editor.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
