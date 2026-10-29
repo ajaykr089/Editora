@@ -22,7 +22,7 @@
     <a href="https://www.npmjs.com/org/editora">npm</a>
   </p>
 
-  <img src="images/editora-demo.gif" alt="Editing a document in Editora: typing, bold and italic from the toolbar, and the toolbar's overflow menu" width="760">
+  <img src="images/editora-demo.gif" alt="Editing a document in Editora: typing, bold and italic, editing a table cell, and the toolbar's overflow menu" width="760">
 </div>
 
 ## Quick start
