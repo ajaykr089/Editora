@@ -2,6 +2,16 @@
   "name": "@editora/emojis",
   "version": "1.0.4",
   "description": "Emoji plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "emoji",
+    "emoji-picker",
+    "emoticons",
+    "unicode"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

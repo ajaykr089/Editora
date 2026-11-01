@@ -2,6 +2,17 @@
   "name": "@editora/plugin-table",
   "version": "1.0.9",
   "description": "Table plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "table",
+    "tables",
+    "rows",
+    "columns",
+    "grid"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

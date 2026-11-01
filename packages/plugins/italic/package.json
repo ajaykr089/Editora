@@ -2,6 +2,16 @@
   "name": "@editora/plugin-italic",
   "version": "1.0.4",
   "description": "Italic plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "italic",
+    "emphasis",
+    "formatting",
+    "text-style"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

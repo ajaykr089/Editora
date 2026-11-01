@@ -2,6 +2,19 @@
   "name": "@editora/collaboration",
   "version": "0.1.4",
   "description": "Real-time collaborative editing for Editora, backed by Yjs CRDT sync and awareness-based presence.",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "collaboration",
+    "real-time",
+    "yjs",
+    "crdt",
+    "presence",
+    "multiplayer",
+    "co-editing"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

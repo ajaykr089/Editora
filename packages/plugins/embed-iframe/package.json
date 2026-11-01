@@ -2,6 +2,17 @@
   "name": "@editora/embed-iframe",
   "version": "1.0.4",
   "description": "Embed iframe plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "embed",
+    "iframe",
+    "youtube",
+    "video",
+    "oembed"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

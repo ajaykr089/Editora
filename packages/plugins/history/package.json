@@ -2,6 +2,15 @@
   "name": "@editora/plugin-history",
   "version": "1.0.5",
   "description": "History plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "undo",
+    "redo",
+    "history"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

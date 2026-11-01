@@ -2,6 +2,16 @@
   "name": "@editora/format-painter",
   "version": "1.0.3",
   "description": "Format painter plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "format-painter",
+    "copy-formatting",
+    "paint-format",
+    "formatting"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

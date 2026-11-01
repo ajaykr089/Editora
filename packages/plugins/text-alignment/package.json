@@ -2,6 +2,16 @@
   "name": "@editora/text-alignment",
   "version": "1.0.3",
   "description": "Text alignment plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "text-alignment",
+    "align",
+    "justify",
+    "formatting"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

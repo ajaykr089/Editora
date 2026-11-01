@@ -2,6 +2,17 @@
   "name": "@editora/math",
   "version": "1.0.4",
   "description": "Math plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "math",
+    "latex",
+    "mathml",
+    "equation",
+    "formula"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

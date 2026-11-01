@@ -2,6 +2,16 @@
   "name": "@editora/plugin-bold",
   "version": "1.0.4",
   "description": "Bold plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "bold",
+    "strong",
+    "formatting",
+    "text-style"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

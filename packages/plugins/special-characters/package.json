@@ -2,6 +2,16 @@
   "name": "@editora/special-characters",
   "version": "1.0.4",
   "description": "Special characters plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "special-characters",
+    "symbols",
+    "unicode",
+    "character-map"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

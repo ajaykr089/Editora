@@ -2,6 +2,16 @@
   "name": "@editora/strikethrough",
   "version": "1.0.3",
   "description": "Strikethrough plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "strikethrough",
+    "strike",
+    "formatting",
+    "text-style"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {
