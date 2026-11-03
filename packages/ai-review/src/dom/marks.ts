@@ -9,11 +9,24 @@ export const NEW_BLOCK_ATTR = 'data-air-new-block';
 /** Escape a value for a double-quoted attribute selector. */
 const quote = (value: string) => value.replace(/["\\]/g, '\\$&');
 
-function createMark(tag: 'del' | 'ins', id: string, provisional: boolean): HTMLElement {
+/** Editor root attribute naming the model of the running rewrite (set by attachAIReview). */
+export const MODEL_ATTR = 'data-air-model';
+export const PROVIDER_ATTR = 'data-air-provider';
+
+function createMark(tag: 'del' | 'ins', id: string, provisional: boolean, block?: Element): HTMLElement {
   const mark = document.createElement(tag);
   mark.className = tag === 'del' ? DEL_CLASS : INS_CLASS;
   mark.setAttribute(HUNK_ATTR, id);
   if (provisional) mark.setAttribute('data-air-provisional', '');
+  if (tag === 'ins') {
+    // Provenance markers, so authorship recorders label accepted text as AI-written.
+    mark.setAttribute('data-provenance', 'ai');
+    const source = block?.closest(`[${MODEL_ATTR}]`);
+    const model = source?.getAttribute(MODEL_ATTR);
+    const provider = source?.getAttribute(PROVIDER_ATTR);
+    if (model) mark.setAttribute('data-provenance-model', model);
+    if (provider) mark.setAttribute('data-provenance-provider', provider);
+  }
   return mark;
 }
 
@@ -76,7 +89,7 @@ export function markInlineHunks(target: ReviewTarget, hunks: ReviewHunk[]): void
     const end = target.start + hunk.end;
     const lastDeleted = end > start ? wrapRange(segments, start, end, hunk.id, hunk.provisional) : null;
     if (!hunk.inserted) continue;
-    const ins = createMark('ins', hunk.id, hunk.provisional);
+    const ins = createMark('ins', hunk.id, hunk.provisional, target.block);
     fillInserted(ins, hunk.inserted);
     if (lastDeleted) lastDeleted.parentNode!.insertBefore(ins, lastDeleted.nextSibling);
     else insertAt(target.block, segments, start, ins);
@@ -94,7 +107,7 @@ export function markBlockReplacement(targets: ReviewTarget[], hunk: ReviewHunk):
   const last = targets[targets.length - 1];
   if (targets.length === 1) {
     // Inside one paragraph the new text stays in that paragraph, lines kept as line breaks.
-    const ins = createMark('ins', hunk.id, false);
+    const ins = createMark('ins', hunk.id, false, last.block);
     fillInserted(ins, blocks.join('\n'));
     const { segments } = buildTextMap(last.block);
     const marks = last.block.querySelectorAll(`del[${HUNK_ATTR}="${quote(hunk.id)}"]`);
@@ -108,7 +121,7 @@ export function markBlockReplacement(targets: ReviewTarget[], hunk: ReviewHunk):
   for (const text of blocks) {
     const block = document.createElement(last.block.tagName === 'LI' ? 'li' : targets[0].block.tagName.toLowerCase());
     block.setAttribute(NEW_BLOCK_ATTR, hunk.id);
-    const ins = createMark('ins', hunk.id, false);
+    const ins = createMark('ins', hunk.id, false, last.block);
     fillInserted(ins, text);
     block.appendChild(ins);
     anchor.parentNode!.insertBefore(block, anchor.nextSibling);
