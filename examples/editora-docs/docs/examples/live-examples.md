@@ -4,15 +4,14 @@ description: Runnable live examples for Editora editor and ecosystem packages us
 keywords: [live examples, storybook, editor, ui, icons, toast]
 ---
 
+# Live Examples
+
+Runnable live examples for Editora editor and ecosystem packages using the hosted Storybook.
+
 ## Live URLs
 
 - **Website:** [current docs site](/)
 - **Storybook:** https://editora-ecosystem-storybook.netlify.app/
-
-
-# Live Examples
-
-Runnable live examples for Editora editor and ecosystem packages using the hosted Storybook.
 
 ## Storybook Host
 

@@ -2,7 +2,7 @@
 title: "@editora/rich-text-convert"
 sidebar_label: Format converter
 sidebar_position: 6
-description: "Convert rich text between Tiptap/ProseMirror JSON, Lexical, Slate/Plate, Portable Text, Editor.js, HTML and Markdown, with a report of anything that could not be carried over."
+description: "Convert rich text between Tiptap/ProseMirror, Lexical, Slate, Plate, Portable Text, Editor.js, HTML and Markdown, with a report of what was lost."
 keywords: [editora, convert, migration, tiptap, prosemirror, lexical, slate, portable text, editor.js, markdown]
 ---
 

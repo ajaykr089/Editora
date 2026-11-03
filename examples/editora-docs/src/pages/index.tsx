@@ -69,7 +69,7 @@ export default function Home(): JSX.Element {
 
   return (
     <Layout
-      title="Free open-source rich text editor for React and web components"
+      title="Free open-source rich text editor for React and JS"
       description="Editora is a free, MIT-licensed rich text (WYSIWYG) editor with a framework-agnostic web-component core, a React wrapper, 30+ plugins, themes and a matching UI kit."
     >
       <Head>

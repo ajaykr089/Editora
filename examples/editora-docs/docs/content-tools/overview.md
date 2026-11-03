@@ -1,12 +1,12 @@
 ---
-title: Content tools
+title: Content tools overview
 sidebar_label: Overview
 sidebar_position: 1
-description: Five small packages for what people write in a rich-text editor - clean pastes, check accessibility, review AI rewrites, send as email and convert between editor formats. They work with Editora or any other editor.
+description: Five packages for what people write in any rich text editor - clean pastes, check accessibility, review AI rewrites, send as email, convert formats.
 keywords: [editora, paste cleaner, accessibility, ai review, email html, rich text converter, tiptap, lexical]
 ---
 
-# Content tools
+# Content tools overview
 
 Five packages that work on the content itself rather than on the editor. Each one has no runtime dependencies, runs
 with Editora or any other editor (Tiptap, Lexical, ProseMirror, Quill, a plain `contenteditable`), and most also run

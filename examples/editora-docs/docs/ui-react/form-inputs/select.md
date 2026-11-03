@@ -1,6 +1,6 @@
 ---
 title: Select
-description: Theme-backed select with composition pattern — Select.Option, Select.OptGroup, Select.Label, Select.Description, Select.Error, Select.Leading, and Select.Trailing sub-components.
+description: Theme-backed React select with a composition API - Select.Option, Select.OptGroup, label, description, error, and leading and trailing slots.
 sidebar_label: Select
 ---
 
