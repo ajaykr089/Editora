@@ -4,9 +4,9 @@
  * editor. Returns a standard fetch handler: use it as a Next.js route, in
  * Hono, Deno, Bun, Cloudflare Workers, or in Express via `toNodeHandler`.
  */
-import { createOllamaProvider, OLLAMA_CLOUD_URL } from './providers/ollama';
-import { CLIENT_KEY_HEADER } from './providers/proxy';
-import { AIProviderError, type AIProvider } from './providers/types';
+import { createOllamaProvider, OLLAMA_CLOUD_URL } from './providers/ollama.js';
+import { CLIENT_KEY_HEADER } from './providers/proxy.js';
+import { AIProviderError, type AIProvider } from './providers/types.js';
 
 export interface ProviderFactoryInput {
   /** The key the user typed in, when `allowClientKeys` is on and one was sent. */
@@ -225,6 +225,6 @@ function concat(chunks: Uint8Array[]): Uint8Array {
   return out;
 }
 
-export { createOllamaProvider, OLLAMA_CLOUD_URL, OLLAMA_LOCAL_URL, OLLAMA_CLOUD_MODELS } from './providers/ollama';
-export { createOpenAICompatibleProvider, OPENAI_COMPATIBLE_PRESETS } from './providers/openai';
-export type { AIProvider } from './providers/types';
+export { createOllamaProvider, OLLAMA_CLOUD_URL, OLLAMA_LOCAL_URL, OLLAMA_CLOUD_MODELS } from './providers/ollama.js';
+export { createOpenAICompatibleProvider, OPENAI_COMPATIBLE_PRESETS } from './providers/openai.js';
+export type { AIProvider } from './providers/types.js';
