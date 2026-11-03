@@ -1,6 +1,6 @@
-import { applyChanges, diffText, tokenize } from '../core/diff';
-import { cleanModelOutput, buildRewritePrompt } from '../core/prompt';
-import { AIReview, splitBlocks } from '../core/review';
+import { applyChanges, diffText, tokenize } from '../core/diff.js';
+import { cleanModelOutput, buildRewritePrompt } from '../core/prompt.js';
+import { AIReview, splitBlocks } from '../core/review.js';
 
 describe('tokenize', () => {
   it('keeps words, contractions, spaces and punctuation as separate tokens', () => {

@@ -1,5 +1,5 @@
-import { accessibleText, all } from '../dom';
-import type { Fix, Rule } from '../types';
+import { accessibleText, all } from '../dom.js';
+import type { Fix, Rule } from '../types.js';
 
 const FILENAME = /^[\w\-. ()%]+\.(?:jpe?g|png|gif|webp|avif|svg|bmp|tiff?|heic)$|^(?:img|image|dsc|dscn|pxl|photo|screenshot|screen shot)[\s_-]?\d[\w\s\-.:]*$/i;
 const GENERIC = new Set(['image', 'img', 'photo', 'picture', 'graphic', 'icon', 'logo', 'pic', 'banner', 'spacer', 'placeholder', 'untitled', 'alt', 'alt text', 'description', 'thumbnail', 'figure', 'screenshot']);

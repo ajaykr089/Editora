@@ -1,7 +1,7 @@
-export { checkContent, fixContent, RULES } from './check';
-export type { CheckResult, ContentInput, FixOptions, FixResult } from './check';
-export type { CheckOptions, Fix, Issue, Level, Rule, Severity } from './types';
-export { contrastRatio, parseColor, nearestPassingColor } from './color';
-export { formatReport } from './report';
-export { attachContentChecker } from './overlay';
-export type { ContentChecker, ContentCheckerOptions } from './overlay';
+export { checkContent, fixContent, RULES } from './check.js';
+export type { CheckResult, ContentInput, FixOptions, FixResult } from './check.js';
+export type { CheckOptions, Fix, Issue, Level, Rule, Severity } from './types.js';
+export { contrastRatio, parseColor, nearestPassingColor } from './color.js';
+export { formatReport } from './report.js';
+export { attachContentChecker } from './overlay.js';
+export type { ContentChecker, ContentCheckerOptions } from './overlay.js';

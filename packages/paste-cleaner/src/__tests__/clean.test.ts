@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { cleanPaste } from '../clean';
-import { detectSource } from '../detect';
+import { cleanPaste } from '../clean.js';
+import { detectSource } from '../detect.js';
 
 const fixture = (name: string) => readFileSync(join(__dirname, 'fixtures', name), 'utf8');
 const [sheetsHtml, excelHtml] = fixture('sheets-excel.html').split('<!-- excel -->');

@@ -1,4 +1,4 @@
-import type { Issue } from './types';
+import type { Issue } from './types.js';
 
 const LABEL: Record<Issue['severity'], string> = { error: 'error', warning: 'warning', info: 'info' };
 

@@ -5,8 +5,8 @@
  *   import { PasteCleanerPlugin } from '@editora/paste-cleaner/editora';
  *   editor.setConfig({ plugins: ['bold', 'list', 'table', 'history', PasteCleanerPlugin()] });
  */
-import { cleanPaste, type CleanPasteResult } from './clean';
-import { insertHtml, type AttachPasteCleanerOptions } from './dom';
+import { cleanPaste, type CleanPasteResult } from './clean.js';
+import { insertHtml, type AttachPasteCleanerOptions } from './dom.js';
 
 export interface EditoraPlugin {
   name: string;
@@ -84,4 +84,4 @@ export function PasteCleanerPlugin(options: PasteCleanerPluginOptions = {}): Edi
   };
 }
 
-export { cleanPaste } from './clean';
+export { cleanPaste } from './clean.js';

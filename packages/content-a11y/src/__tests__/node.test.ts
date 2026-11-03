@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'fs';
 import { JSDOM } from 'jsdom';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { checkContent, fixContent } from '../check';
+import { checkContent, fixContent } from '../check.js';
 
 const parse = (html: string) => new JSDOM(html).window.document;
 const bin = join(__dirname, '..', '..', 'bin', 'content-a11y.js');

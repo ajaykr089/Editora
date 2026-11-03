@@ -1,6 +1,6 @@
-import { contrastRatio, nearestPassingColor, parseColor, type RGBA } from '../color';
-import { all, inlineStyle, setInlineStyle, tagOf, textOf, unwrap } from '../dom';
-import type { Rule } from '../types';
+import { contrastRatio, nearestPassingColor, parseColor, type RGBA } from '../color.js';
+import { all, inlineStyle, setInlineStyle, tagOf, textOf, unwrap } from '../dom.js';
+import type { Rule } from '../types.js';
 
 /** Four or more capitalised words in a row (acronyms on their own are fine). */
 const SHOUTING = /\b(?:[A-Z][A-Z'’-]+\s+){3,}[A-Z][A-Z'’-]+\b/;

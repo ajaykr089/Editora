@@ -1,5 +1,5 @@
 import type Anthropic from '@anthropic-ai/sdk';
-import { AIProviderError, type AIProvider, type CompletionRequest } from './providers/types';
+import { AIProviderError, type AIProvider, type CompletionRequest } from './providers/types.js';
 
 export type ClaudeEffort = 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 

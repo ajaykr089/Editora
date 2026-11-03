@@ -1,6 +1,6 @@
-import { createDomReview } from '../dom/overlay';
-import { defaultSettingsFor, OLLAMA_CLOUD_CHOICE, openSettingsDialog, proxyChoicesFor, DEFAULT_SETTINGS } from '../dom/settings';
-import { buildTextMap } from '../dom/text';
+import { createDomReview } from '../dom/overlay.js';
+import { defaultSettingsFor, OLLAMA_CLOUD_CHOICE, openSettingsDialog, proxyChoicesFor, DEFAULT_SETTINGS } from '../dom/settings.js';
+import { buildTextMap } from '../dom/text.js';
 
 // jsdom has no <dialog> behaviour.
 beforeAll(() => {

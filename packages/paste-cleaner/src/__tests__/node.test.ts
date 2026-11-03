@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { cleanPaste } from '../clean';
+import { cleanPaste } from '../clean.js';
 
 // On a server there is no DOMParser. Plain text and Markdown need no HTML parser, so they must work without one;
 // only HTML input needs `parse`.

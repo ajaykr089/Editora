@@ -1,5 +1,5 @@
-import type { ReviewHunk } from '../core/review';
-import { BLOCK_SELECTOR, buildTextMap, readText, type ReviewTarget, type TextSegment } from './text';
+import type { ReviewHunk } from '../core/review.js';
+import { BLOCK_SELECTOR, buildTextMap, readText, type ReviewTarget, type TextSegment } from './text.js';
 
 export const HUNK_ATTR = 'data-air-hunk';
 export const DEL_CLASS = 'air-del';
