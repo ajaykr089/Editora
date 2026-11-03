@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-italic",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Italic plugin for Rich Text Editor",
   "keywords": [
     "editora",

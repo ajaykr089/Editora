@@ -1,5 +1,11 @@
 # @editora/indent
 
+## 1.0.4
+
+### Patch Changes
+
+- b8ce465: Add npm keywords, so the package can be found by searching for what it does (for example "media library", "latex" or "undo") and not only by its name.
+
 ## 1.0.3
 
 ### Patch Changes

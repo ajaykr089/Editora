@@ -1,6 +1,6 @@
 {
   "name": "@editora/collaboration",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Real-time collaborative editing for Editora, backed by Yjs CRDT sync and awareness-based presence.",
   "keywords": [
     "editora",

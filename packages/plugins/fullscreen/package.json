@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-fullscreen",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Fullscreen plugin for Rich Text Editor",
   "keywords": [
     "editora",
