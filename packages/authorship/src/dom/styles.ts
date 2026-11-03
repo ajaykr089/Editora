@@ -106,6 +106,7 @@ ${KIND_VARS}
 .eda-btn:focus-visible, .eda-kinds input:focus-visible { outline: 2px solid var(--eda-accent); outline-offset: 2px; }
 .eda-btn-primary { background: var(--eda-accent); border-color: var(--eda-accent); color: #fff; }
 .eda-btn-primary:hover { background: var(--eda-accent); filter: brightness(1.08); }
+.eda-dark .eda-btn-primary, .dark .eda-btn-primary, [data-theme="dark"] .eda-btn-primary { color: #15151b; }
 .eda-replay-backdrop { position: fixed; inset: 0; z-index: 2147483003; background: rgba(10, 10, 20, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
 .eda-replay {
   width: min(760px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; gap: 10px;

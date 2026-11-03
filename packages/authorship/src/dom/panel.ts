@@ -30,6 +30,8 @@ export interface AuthorshipPanel {
   destroy(): void;
 }
 
+const EDITOR_HOST = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
+
 const percent = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`);
 
 function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -173,10 +175,17 @@ export function createAuthorshipPanel(controller: AuthorshipController, highligh
     if (!panel) return;
     const rect = (anchor ?? root).getBoundingClientRect();
     const width = panel.offsetWidth;
-    const left = Math.max(16, Math.min(rect.left, win.innerWidth - width - 16));
-    const below = rect.bottom + 6;
-    panel.style.left = `${left}px`;
-    panel.style.top = `${Math.max(16, Math.min(below, win.innerHeight - panel.offsetHeight - 16))}px`;
+    const height = panel.offsetHeight;
+    const clampTop = (top: number) => `${Math.max(16, Math.min(top, win.innerHeight - height - 16))}px`;
+    // Beside the editor when there is room, so the panel does not cover the text it highlights.
+    const editor = (root.closest(EDITOR_HOST) ?? root).getBoundingClientRect();
+    if (win.innerWidth - editor.right >= width + 28) {
+      panel.style.left = `${editor.right + 12}px`;
+      panel.style.top = clampTop(editor.top);
+      return;
+    }
+    panel.style.left = `${Math.max(16, Math.min(rect.left, win.innerWidth - width - 16))}px`;
+    panel.style.top = clampTop(rect.bottom + 6);
   };
 
   const onKey = (event: KeyboardEvent) => {
