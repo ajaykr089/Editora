@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Doc } from '../ast';
-import { readDocx, writeDocx } from '../index';
-import { fromUtf8, unzip } from '../zip';
+import { DocxError, readDocx, writeDocx } from '../index';
+import { fromUtf8, unzip, utf8, zip } from '../zip';
 
 const fixture = (name: string) => readFileSync(join(__dirname, 'fixtures', name));
 // A 2x1 red PNG.
@@ -168,8 +168,52 @@ describe('reading files from other tools', () => {
   });
 });
 
-describe('errors', () => {
+describe('errors and limits', () => {
+  const failure = async (promise: Promise<unknown>) => promise.then(() => undefined, (error: DocxError) => ({ name: error.name, code: error.code, message: error.message }));
+
   it('rejects files that are not Word documents', async () => {
-    await expect(readDocx(new Uint8Array([1, 2, 3]))).rejects.toThrow(/Not a \.docx/);
+    expect(await failure(readDocx(new Uint8Array([1, 2, 3])))).toEqual({ name: 'DocxError', code: 'not-docx', message: 'Not a .docx file: no ZIP directory found.' });
+  });
+
+  it('explains old .doc files and password-protected documents', async () => {
+    const ole = new Uint8Array(512);
+    ole.set([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
+    expect(await failure(readDocx(ole))).toMatchObject({ code: 'legacy-or-encrypted', message: expect.stringMatching(/97-2003 \(\.doc\) file or a password-protected/) });
+  });
+
+  it('says when a file is an Excel or PowerPoint file', async () => {
+    const xlsx = await zip([['xl/workbook.xml', utf8('<workbook/>')]]);
+    expect(await failure(readDocx(xlsx))).toMatchObject({ code: 'not-docx', message: 'This is an Excel file, not a Word document.' });
+  });
+
+  it('says when a download was cut short', async () => {
+    const { data } = await writeDocx(sample);
+    // Keep the directory at the end but lose bytes in the middle.
+    const truncated = new Uint8Array([...data.subarray(0, 200), ...data.subarray(data.length - 2000)]);
+    expect(await failure(readDocx(truncated))).toMatchObject({ name: 'DocxError', code: 'corrupt' });
+  });
+
+  it('enforces maxSize before reading anything', async () => {
+    const { data } = await writeDocx(sample);
+    expect(await failure(readDocx(data, { maxSize: 1000 }))).toMatchObject({ code: 'too-large', message: expect.stringMatching(/maxSize/) });
+  });
+
+  it('stops a zip bomb while it expands', async () => {
+    // 20 MB of zeros compresses to a few KB.
+    const bomb = await zip([
+      ['_rels/.rels', utf8('<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>')],
+      ['word/document.xml', new Uint8Array(20 * 1024 * 1024)],
+    ]);
+    expect(bomb.length).toBeLessThan(100 * 1024);
+    expect(await failure(readDocx(bomb, { maxUncompressedSize: 1024 * 1024 }))).toMatchObject({ code: 'too-large', message: expect.stringMatching(/maxUncompressedSize/) });
+  });
+
+  it('only expands the parts it reads', async () => {
+    const { data } = await writeDocx(sample);
+    const files = await unzip(data);
+    files.set('word/embeddings/huge.bin', new Uint8Array(30 * 1024 * 1024));
+    const withJunk = await zip([...files]);
+    // The 30 MB part is never expanded, so a 5 MB budget is enough.
+    expect((await readDocx(withJunk, { maxUncompressedSize: 5 * 1024 * 1024 })).doc).toEqual(sample);
   });
 });

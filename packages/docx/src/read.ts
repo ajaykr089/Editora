@@ -2,7 +2,7 @@ import { normalize, paragraph, type Block, type Doc, type Inline, type Link, typ
 import { base64, imageType } from './media';
 import type { Report } from './report';
 import { child, children, find, findAll, isElement, parseXml, textContent, type XElement } from './xml';
-import { fromUtf8, unzip, type ZipFiles } from './zip';
+import { DocxError, fromUtf8, openZip, type ZipFiles } from './zip';
 
 export interface DocxImage {
   /** Path inside the .docx, e.g. `word/media/image1.png`. */
@@ -28,6 +28,10 @@ export interface ReadOptions {
    * bold, larger paragraphs become headings. Default true.
    */
   inferStructure?: boolean;
+  /** Largest file accepted, in bytes. Default 100 MB. */
+  maxSize?: number;
+  /** Most bytes the parts read may expand to, in total; guards against "zip bombs". Default 500 MB. */
+  maxUncompressedSize?: number;
 }
 
 interface Rel {
@@ -95,6 +99,7 @@ function readRels(files: ZipFiles, part: string): Map<string, Rel> {
   const data = files.get(relsPath);
   if (!data) return rels;
   for (const rel of findAll(parseXml(fromUtf8(data)), 'rel:Relationship')) {
+    if (!rel.attrs.Id || !rel.attrs.Target) continue;
     const external = rel.attrs.TargetMode === 'External';
     rels.set(rel.attrs.Id, { target: external ? rel.attrs.Target : resolvePath(part, rel.attrs.Target), external, type: rel.attrs.Type ?? '' });
   }
@@ -127,19 +132,32 @@ function readNumbering(files: ZipFiles, path: string | undefined): Map<string, L
   const data = path && files.get(path);
   if (!data) return out;
   const root = parseXml(fromUtf8(data));
+  const level = (lvl: XElement): Level => {
+    const format = child(lvl, 'w:numFmt')?.attrs['w:val'] ?? 'decimal';
+    return { ordered: format !== 'bullet' && format !== 'none', start: Number(child(lvl, 'w:start')?.attrs['w:val'] ?? 1) };
+  };
   const abstracts = new Map<string, Level[]>();
+  // List styles: an abstractNum with numStyleLink has no levels of its own; the one with the matching styleLink does.
+  const byStyleLink = new Map<string, Level[]>();
+  const linked = new Map<string, string>();
   for (const abstract of findAll(root, 'w:abstractNum')) {
     const levels: Level[] = [];
-    for (const lvl of children(abstract, 'w:lvl')) {
-      const format = child(lvl, 'w:numFmt')?.attrs['w:val'] ?? 'decimal';
-      levels[Number(lvl.attrs['w:ilvl'] ?? 0)] = { ordered: format !== 'bullet' && format !== 'none', start: Number(child(lvl, 'w:start')?.attrs['w:val'] ?? 1) };
-    }
-    abstracts.set(abstract.attrs['w:abstractNumId'], levels);
+    for (const lvl of children(abstract, 'w:lvl')) levels[Number(lvl.attrs['w:ilvl'] ?? 0)] = level(lvl);
+    const id = abstract.attrs['w:abstractNumId'];
+    abstracts.set(id, levels);
+    const styleLink = child(abstract, 'w:styleLink')?.attrs['w:val'];
+    if (styleLink && levels.length) byStyleLink.set(styleLink, levels);
+    const numStyleLink = child(abstract, 'w:numStyleLink')?.attrs['w:val'];
+    if (numStyleLink) linked.set(id, numStyleLink);
   }
+  for (const [id, style] of linked) if (!abstracts.get(id)?.length) abstracts.set(id, byStyleLink.get(style) ?? []);
   for (const num of findAll(root, 'w:num')) {
     const levels = [...(abstracts.get(child(num, 'w:abstractNumId')?.attrs['w:val'] ?? '') ?? [])];
     for (const override of children(num, 'w:lvlOverride')) {
       const index = Number(override.attrs['w:ilvl'] ?? 0);
+      // An override can replace the whole level, or just restart its numbering.
+      const replaced = child(override, 'w:lvl');
+      if (replaced) levels[index] = level(replaced);
       const start = child(override, 'w:startOverride')?.attrs['w:val'];
       if (start !== undefined) levels[index] = { ...(levels[index] ?? { ordered: true, start: 1 }), start: Number(start) };
     }
@@ -678,11 +696,36 @@ function readTable(table: XElement, context: Context): Block {
 // ---- entry point --------------------------------------------------------------------------
 
 export async function readDocxDoc(data: Uint8Array | ArrayBuffer, report: Report, options: ReadOptions = {}): Promise<Doc> {
-  const files = await unzip(data instanceof Uint8Array ? data : new Uint8Array(data));
+  try {
+    return await readPackage(data, report, options);
+  } catch (error) {
+    if (error instanceof DocxError) throw error;
+    // Anything else means a damaged part; keep the original for debugging.
+    throw new DocxError('The file could not be read: it may be damaged.', 'corrupt', { cause: error });
+  }
+}
+
+async function readPackage(data: Uint8Array | ArrayBuffer, report: Report, options: ReadOptions): Promise<Doc> {
+  const archive = openZip(data instanceof Uint8Array ? data : new Uint8Array(data), options);
+  // Expand only the parts that are read: relationships first, then what they point at.
+  const files: ZipFiles = new Map();
+  const load = async (name: string | undefined) => {
+    if (!name || files.has(name)) return;
+    const bytes = await archive.read(name);
+    if (bytes) files.set(name, bytes);
+  };
+  const relsOf = (part: string) => resolvePath(part, `_rels/${part.split('/').pop()}.rels`);
+  await load(relsOf(''));
+  const rootMain = relOfType(readRels(files, ''), 'officeDocument')?.target ?? 'word/document.xml';
+  await load(rootMain);
+  await load(relsOf(rootMain));
+  for (const rel of readRels(files, rootMain).values()) {
+    if (!rel.external && /\/(styles|numbering|footnotes|endnotes|comments|header|footer|image)$/.test(rel.type)) await load(rel.target);
+  }
   const rootRels = readRels(files, '');
   const main = relOfType(rootRels, 'officeDocument')?.target ?? 'word/document.xml';
   const xml = files.get(main);
-  if (!xml) throw new Error('Not a Word document: word/document.xml is missing.');
+  if (!xml) throw new DocxError(archive.names.some((name) => name.startsWith('xl/')) ? 'This is an Excel file, not a Word document.' : archive.names.some((name) => name.startsWith('ppt/')) ? 'This is a PowerPoint file, not a Word document.' : 'Not a Word document: word/document.xml is missing.', 'not-docx');
   const rels = readRels(files, main);
 
   const images = new Map<string, string>();

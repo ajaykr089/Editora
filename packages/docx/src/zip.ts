@@ -11,15 +11,40 @@ const decoder = new TextDecoder();
 export const utf8 = (text: string) => encoder.encode(text);
 export const fromUtf8 = (bytes: Uint8Array) => decoder.decode(bytes);
 
-async function transform(bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> {
+/** Thrown for files that are not usable .docx archives, with a message fit to show the user. */
+export class DocxError extends Error {
+  /** The underlying error, for damaged files. */
+  readonly cause?: unknown;
+
+  constructor(message: string, readonly code: 'not-docx' | 'legacy-or-encrypted' | 'too-large' | 'corrupt', options?: { cause?: unknown }) {
+    super(message);
+    this.name = 'DocxError';
+    if (options?.cause !== undefined) this.cause = options.cause;
+  }
+}
+
+async function transform(bytes: Uint8Array, stream: CompressionStream | DecompressionStream, limit = Infinity): Promise<Uint8Array> {
   const writer = stream.writable.getWriter();
-  void writer.write(bytes as Uint8Array<ArrayBuffer>).then(() => writer.close());
+  // Errors surface on the reading side; keep the writer's from going unhandled.
+  writer.write(bytes as Uint8Array<ArrayBuffer>).then(() => writer.close()).catch(() => undefined);
   const chunks: Uint8Array[] = [];
+  let total = 0;
   const reader = stream.readable.getReader();
   for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
+    let result: ReadableStreamReadResult<Uint8Array>;
+    try {
+      result = await reader.read();
+    } catch {
+      throw new DocxError('The file is damaged: part of it could not be decompressed.', 'corrupt');
+    }
+    if (result.done) break;
+    total += result.value.length;
+    // Stop as soon as a part grows past the limit, so a "zip bomb" cannot fill memory.
+    if (total > limit) {
+      await reader.cancel().catch(() => undefined);
+      throw new DocxError('The file expands to more data than allowed (maxUncompressedSize).', 'too-large');
+    }
+    chunks.push(result.value);
   }
   return concat(chunks);
 }
@@ -50,8 +75,30 @@ export function crc32(bytes: Uint8Array): number {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-/** Read every entry of a ZIP archive. */
-export async function unzip(data: Uint8Array): Promise<ZipFiles> {
+export interface ZipLimits {
+  /** Largest archive accepted, in bytes. */
+  maxSize?: number;
+  /** Most bytes all parts read may expand to, in total. */
+  maxUncompressedSize?: number;
+}
+
+export interface ZipArchive {
+  names: string[];
+  /** Decompress one entry; undefined when it does not exist. Parts are only expanded when asked for. */
+  read(name: string): Promise<Uint8Array | undefined>;
+}
+
+const MB = 1024 * 1024;
+
+/** Open a ZIP archive without expanding anything yet. */
+export function openZip(data: Uint8Array, limits: ZipLimits = {}): ZipArchive {
+  const maxSize = limits.maxSize ?? 100 * MB;
+  let budget = limits.maxUncompressedSize ?? 500 * MB;
+  if (data.length > maxSize) throw new DocxError(`The file is ${Math.round(data.length / MB)} MB, more than the ${Math.round(maxSize / MB)} MB allowed (maxSize).`, 'too-large');
+  // Word 97-2003 files, and password-protected .docx files, are OLE compound documents, not ZIP.
+  if (data[0] === 0xd0 && data[1] === 0xcf && data[2] === 0x11 && data[3] === 0xe0) {
+    throw new DocxError('This is an old Word 97-2003 (.doc) file or a password-protected document. Save it as .docx without a password and try again.', 'legacy-or-encrypted');
+  }
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   // The end-of-central-directory record is in the last 64 KB + 22 bytes.
   let end = -1;
@@ -61,29 +108,62 @@ export async function unzip(data: Uint8Array): Promise<ZipFiles> {
       break;
     }
   }
-  if (end < 0) throw new Error('Not a .docx file: no ZIP directory found.');
+  if (end < 0) throw new DocxError('Not a .docx file: no ZIP directory found.', 'not-docx');
   const count = view.getUint16(end + 10, true);
   let offset = view.getUint32(end + 16, true);
-  if (offset === 0xffffffff) throw new Error('ZIP64 archives are not supported.');
-  const files: ZipFiles = new Map();
-  for (let entry = 0; entry < count; entry += 1) {
-    if (view.getUint32(offset, true) !== 0x02014b50) throw new Error('Corrupt ZIP directory.');
-    const method = view.getUint16(offset + 10, true);
-    const compressedSize = view.getUint32(offset + 20, true);
-    const nameLength = view.getUint16(offset + 28, true);
-    const extraLength = view.getUint16(offset + 30, true);
-    const commentLength = view.getUint16(offset + 32, true);
-    const local = view.getUint32(offset + 42, true);
-    const name = fromUtf8(data.subarray(offset + 46, offset + 46 + nameLength));
-    offset += 46 + nameLength + extraLength + commentLength;
-    if (name.endsWith('/')) continue;
-    // Sizes come from the central directory: local headers may defer them to a data descriptor.
-    const start = local + 30 + view.getUint16(local + 26, true) + view.getUint16(local + 28, true);
-    const raw = data.subarray(start, start + compressedSize);
-    if (method === 0) files.set(name, raw.slice());
-    else if (method === 8) files.set(name, await transform(raw, new DecompressionStream('deflate-raw')));
-    else throw new Error(`Unsupported ZIP compression method ${method} for ${name}.`);
+  if (offset === 0xffffffff) throw new DocxError('ZIP64 archives are not supported.', 'not-docx');
+  const entries = new Map<string, { method: number; start: number; size: number }>();
+  try {
+    for (let entry = 0; entry < count; entry += 1) {
+      if (view.getUint32(offset, true) !== 0x02014b50) throw new DocxError('The file is damaged: its ZIP directory is broken.', 'corrupt');
+      const method = view.getUint16(offset + 10, true);
+      const size = view.getUint32(offset + 20, true);
+      const nameLength = view.getUint16(offset + 28, true);
+      const extraLength = view.getUint16(offset + 30, true);
+      const commentLength = view.getUint16(offset + 32, true);
+      const local = view.getUint32(offset + 42, true);
+      const name = fromUtf8(data.subarray(offset + 46, offset + 46 + nameLength));
+      offset += 46 + nameLength + extraLength + commentLength;
+      if (name.endsWith('/')) continue;
+      // Sizes come from the central directory: local headers may defer them to a data descriptor.
+      const start = local + 30 + view.getUint16(local + 26, true) + view.getUint16(local + 28, true);
+      if (start + size > data.length) throw new DocxError('The file is damaged or incomplete (was the download cut short?).', 'corrupt');
+      entries.set(name, { method, start, size });
+    }
+  } catch (error) {
+    if (error instanceof DocxError) throw error;
+    throw new DocxError('The file is damaged: its ZIP directory is broken.', 'corrupt');
   }
+  const cache = new Map<string, Promise<Uint8Array>>();
+  return {
+    names: [...entries.keys()],
+    read(name) {
+      const entry = entries.get(name);
+      if (!entry) return Promise.resolve(undefined);
+      let pending = cache.get(name);
+      if (!pending) {
+        const raw = data.subarray(entry.start, entry.start + entry.size);
+        pending = (async () => {
+          let bytes: Uint8Array;
+          if (entry.method === 0) bytes = raw.slice();
+          else if (entry.method === 8) bytes = await transform(raw, new DecompressionStream('deflate-raw'), budget);
+          else throw new DocxError(`Unsupported ZIP compression method ${entry.method} for ${name}.`, 'not-docx');
+          budget -= bytes.length;
+          if (budget < 0) throw new DocxError('The file expands to more data than allowed (maxUncompressedSize).', 'too-large');
+          return bytes;
+        })();
+        cache.set(name, pending);
+      }
+      return pending;
+    },
+  };
+}
+
+/** Read every entry of a ZIP archive. */
+export async function unzip(data: Uint8Array, limits?: ZipLimits): Promise<ZipFiles> {
+  const archive = openZip(data, limits);
+  const files: ZipFiles = new Map();
+  for (const name of archive.names) files.set(name, (await archive.read(name))!);
   return files;
 }
 

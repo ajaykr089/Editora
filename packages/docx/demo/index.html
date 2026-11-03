@@ -3,128 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DOCX</title>
+<title>Word import and export</title>
+<link rel="stylesheet" href="/core/webcomponent.min.css">
 <style>
-  :root { --bg: #f7f7f8; --card: #fff; --ink: #1d1d1f; --muted: #60646c; --line: #dcdde0; --ok: #1a7f37; --warn: #8a5a00; --accent: #2b59c3; }
+  :root { --bg: #f6f7f9; --card: #fff; --ink: #1f2328; --muted: #59636e; --line: #d8dde3; --accent: #0b57d0; --accent-ink: #fff; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1216; --card: #171b21; --ink: #e6edf3; --muted: #9198a1; --line: #30363d; --accent: #4493f8; --accent-ink: #0b0f14; color-scheme: dark; } }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
-  header { padding: 20px 24px 8px; }
-  h1 { margin: 0; font-size: 22px; }
-  header p { margin: 4px 0 0; color: var(--muted); }
-  main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px 24px 32px; }
-  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
-  h2 { margin: 0 0 10px; font-size: 15px; }
-  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-  button, select { font: inherit; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: inherit; cursor: pointer; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .drop { border: 2px dashed var(--line); border-radius: 8px; padding: 18px; text-align: center; color: var(--muted); margin-bottom: 10px; }
-  .drop.over { border-color: var(--accent); color: var(--accent); }
-  textarea { width: 100%; height: 300px; padding: 10px; border: 1px solid var(--line); border-radius: 6px; font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: #fbfbfc; }
-  .preview { border: 1px solid var(--line); border-radius: 6px; padding: 8px 16px; min-height: 120px; max-height: 520px; overflow: auto; }
-  .preview table { border-collapse: collapse; }
-  .preview td, .preview th { border: 1px solid var(--line); padding: 4px 8px; }
-  .preview img { max-width: 100%; }
-  .preview blockquote { border-left: 3px solid var(--line); margin-left: 0; padding-left: 12px; color: var(--muted); }
-  ul.warnings { margin: 8px 0 0; padding-left: 18px; color: var(--warn); font-size: 13px; }
-  ul.warnings:empty::before { content: 'No warnings.'; color: var(--ok); margin-left: -18px; }
-  #status { color: var(--muted); font-size: 13px; }
-  @media (max-width: 800px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .page { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+  .lede { margin: 4px 0 20px; color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .bar .spacer { flex: 1; }
+  button, select { font: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button svg { width: 16px; height: 16px; }
+  .editor-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .hint { margin: 8px 2px 0; color: var(--muted); font-size: 13px; }
+  details { margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details .row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+  pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px; border-radius: 8px; background: var(--bg); font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>
 </head>
 <body>
-<header>
-  <h1>DOCX</h1>
-  <p>Open a Word file as HTML, Markdown or editor JSON, or write HTML into a Word file. Everything runs in this page.</p>
-</header>
-<main>
-  <section>
-    <h2>Open a .docx</h2>
-    <div class="drop" id="drop">Drop a .docx here, or <label style="color:var(--accent);cursor:pointer;text-decoration:underline">choose one<input type="file" id="file" accept=".docx" hidden></label></div>
+<div class="page">
+  <h1>Word import and export</h1>
+  <p class="lede">Open a .docx in the editor, edit it, and save it back as Word. Nothing leaves this page.</p>
+
+  <div class="bar" role="toolbar" aria-label="Document">
+    <button class="primary" id="import" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Import Word
+    </button>
+    <button id="export" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+      Save as Word
+    </button>
+    <span class="spacer"></span>
+    <label class="sr-only" for="sample">Load a sample Word file</label>
+    <select id="sample">
+      <option value="">Try a sample file…</option>
+      <option value="docx-library.docx">Numbered lists, footnotes, merged cells</option>
+      <option value="textutil.docx">A file with no styles (from macOS TextEdit)</option>
+    </select>
+  </div>
+
+  <div class="editor-card" id="editor-card">
+    <editora-editor id="editor" height="460" plugins="heading bold italic underline strikethrough list link table code history">
+      <h1>Project update</h1>
+      <p>Status is <strong>green</strong>. See <a href="https://example.com/plan">the plan</a> and the <code>deploy</code> notes.</p>
+      <h2>Done</h2>
+      <ul><li>Search<ul><li>3× faster</li></ul></li><li>Dark mode</li></ul>
+      <ol start="3"><li>Third step</li><li>Fourth step</li></ol>
+      <blockquote><p>Ship it.</p></blockquote>
+      <table><tbody><tr><th>Owner</th><th>Task</th></tr><tr><td>Sam</td><td>Deploy</td></tr></tbody></table>
+    </editora-editor>
+  </div>
+  <p class="hint">You can also drag a .docx file onto the editor.</p>
+
+  <details id="developer">
+    <summary>What the converter sees</summary>
     <div class="row">
-      <button id="sample-library">Sample: docx library file</button>
-      <button id="sample-textutil">Sample: Apple textutil file</button>
-      <label for="as">Show as</label>
-      <select id="as"><option>html</option><option>markdown</option><option>tiptap</option><option>lexical</option><option>ast</option></select>
+      <label for="view">Show the editor's content as</label>
+      <select id="view"><option>markdown</option><option>tiptap</option><option>lexical</option><option>portable-text</option><option>ast</option></select>
     </div>
-    <div class="preview" id="read-preview" aria-label="Document preview"></div>
-    <ul class="warnings" id="read-warnings" aria-label="Warnings when reading"></ul>
-  </section>
-  <section>
-    <h2>Write a .docx</h2>
-    <textarea id="html" spellcheck="false" aria-label="HTML to write"></textarea>
-    <div class="row" style="margin-top:10px">
-      <button class="primary" id="download">Download .docx</button>
-      <button id="reopen">Read it back on the left</button>
-      <span id="status"></span>
-    </div>
-    <ul class="warnings" id="write-warnings" aria-label="Warnings when writing"></ul>
-  </section>
-</main>
+    <pre id="output" aria-live="off"></pre>
+  </details>
+</div>
+
 <script type="module">
-import { readDocx, writeDocx } from '/dist/index.js';
+import '/core/webcomponent.js';
+import { createDocxImport, downloadDocx } from '/dist/ui.js';
 import { convert, read } from '/convert/index.js';
 
-const $ = (id) => document.getElementById(id);
-const list = (id, warnings) => $(id).replaceChildren(...warnings.map((warning) => Object.assign(document.createElement('li'), { textContent: warning })));
-
-$('html').value = `<h1>Project update</h1>
-<p>Status is <strong>green</strong>. See <a href="https://example.com/plan">the plan</a> and the <code>deploy</code> notes.</p>
-<h2>Done</h2>
-<ul><li>Search<ul><li>3× faster</li></ul></li><li>Dark mode</li></ul>
-<ol start="3"><li>Third step</li><li>Fourth step</li></ol>
-<blockquote><p>Ship it.</p></blockquote>
-<pre><code>npm run release</code></pre>
-<table><tr><th>Owner</th><th>Task</th></tr><tr><td rowspan="2">Sam</td><td>Deploy</td></tr><tr><td>Announce</td></tr></table>
-<p><img src="https://picsum.photos/id/1018/600/240" alt="Mountains"></p>`;
-
-let current = null;
-async function show(bytes, name) {
-  const { doc, warnings } = await readDocx(bytes);
-  current = { doc, warnings, name };
-  render();
-}
-function render() {
-  if (!current) return;
-  const as = $('as').value;
-  const output = convert(current.doc, { from: 'ast', to: as }).output;
-  if (as === 'html') $('read-preview').innerHTML = output; // Our own converter's output.
-  else $('read-preview').replaceChildren(Object.assign(document.createElement('pre'), { textContent: typeof output === 'string' ? output : JSON.stringify(output, null, 2), style: 'white-space:pre-wrap;font-size:12px' }));
-  list('read-warnings', current.warnings);
-  window.lastRead = current;
-}
-
-$('file').addEventListener('change', async () => {
-  const file = $('file').files[0];
-  if (file) await show(new Uint8Array(await file.arrayBuffer()), file.name);
+const editor = document.getElementById('editor');
+await customElements.whenDefined('editora-editor');
+editor.setConfig({
+  plugins: ['heading', 'bold', 'italic', 'underline', 'strikethrough', 'list', 'link', 'table', 'code', 'history'],
+  toolbar: 'undo redo | heading bold italic underline strikethrough | bullist numlist | link table',
 });
-for (const type of ['dragenter', 'dragover']) $('drop').addEventListener(type, (event) => { event.preventDefault(); $('drop').classList.add('over'); });
-for (const type of ['dragleave', 'drop']) $('drop').addEventListener(type, () => $('drop').classList.remove('over'));
-$('drop').addEventListener('drop', async (event) => {
-  event.preventDefault();
-  const file = event.dataTransfer.files[0];
-  if (file) await show(new Uint8Array(await file.arrayBuffer()), file.name);
-});
-for (const [id, name] of [['sample-library', 'docx-library.docx'], ['sample-textutil', 'textutil.docx']]) {
-  $(id).addEventListener('click', async () => show(new Uint8Array(await (await fetch(`/fixtures/${name}`)).arrayBuffer()), name));
-}
-$('as').addEventListener('change', render);
 
-async function build() {
-  $('status').textContent = 'Writing...';
-  const { data, warnings } = await writeDocx(read($('html').value, 'html'), { title: 'Project update' });
-  list('write-warnings', warnings);
-  $('status').textContent = `${(data.length / 1024).toFixed(1)} KB`;
-  window.lastWrite = { data, warnings };
-  return data;
-}
-$('download').addEventListener('click', async () => {
-  const data = await build();
-  const url = URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
-  Object.assign(document.createElement('a'), { href: url, download: 'project-update.docx' }).click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+let title = 'Project update';
+const importer = createDocxImport({
+  dropTarget: document.getElementById('editor-card'),
+  onImport: ({ doc, file }) => {
+    editor.setContent(convert(doc, { from: 'ast', to: 'html' }).output);
+    title = file.name.replace(/\.docx$/i, '');
+    showConverted();
+  },
 });
-$('reopen').addEventListener('click', async () => show(await build(), 'written.docx'));
-window.demo = { show, build };
+document.getElementById('import').addEventListener('click', () => importer.open());
+
+document.getElementById('export').addEventListener('click', async () => {
+  const doc = read(editor.getContent(), 'html');
+  window.lastExport = await downloadDocx(doc, `${title}.docx`, { title });
+});
+
+document.getElementById('sample').addEventListener('change', async (event) => {
+  const name = event.target.value;
+  event.target.value = '';
+  if (!name) return;
+  const bytes = await (await fetch(`/fixtures/${name}`)).arrayBuffer();
+  await importer.importFile(new File([bytes], name, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+});
+
+function showConverted() {
+  const developer = document.getElementById('developer');
+  if (!developer.open) return;
+  const output = convert(editor.getContent(), { from: 'html', to: document.getElementById('view').value }).output;
+  document.getElementById('output').textContent = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
+}
+document.getElementById('developer').addEventListener('toggle', showConverted);
+document.getElementById('view').addEventListener('change', showConverted);
+window.demo = { importer, editor, read, convert };
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // Demo: open a .docx as HTML, or turn HTML into a .docx.
 //
-//   npm run build -w @editora/docx -w @editora/rich-text-convert
+//   npm run build -w @editora/core -w @editora/docx -w @editora/rich-text-convert
 //   node packages/docx/demo/server.mjs   # http://localhost:5196
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkg = join(here, '..');
+// The repo's workspace link to @editora/core (its exports do not expose package.json).
+const core = join(pkg, '..', '..', 'node_modules', '@editora', 'core');
 const port = Number(process.env.PORT ?? 5196);
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.map': 'application/json', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
 
@@ -18,6 +20,7 @@ const roots = [
   ['/dist/', join(pkg, 'dist')],
   ['/convert/', join(pkg, '..', 'rich-text-convert', 'dist')],
   ['/fixtures/', join(pkg, 'src', '__tests__', 'fixtures')],
+  ['/core/', join(core, 'dist')],
 ];
 
 createServer(async (req, res) => {

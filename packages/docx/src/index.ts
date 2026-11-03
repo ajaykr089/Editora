@@ -40,6 +40,7 @@ export async function writeDocx(doc: Doc, options: WriteOptions = {}): Promise<D
   return { data, warnings: report.warnings };
 }
 
+export { DocxError } from './zip';
 export type { Block, Doc, Inline, Mark } from './ast';
 export type { DocxImage, ReadOptions } from './read';
 export type { WriteOptions } from './write';

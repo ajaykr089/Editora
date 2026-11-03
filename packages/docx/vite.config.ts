@@ -6,7 +6,7 @@ export default defineConfig({
     target: 'es2020',
     sourcemap: true,
     lib: {
-      entry: { index: resolve(__dirname, 'src/index.ts') },
+      entry: { index: resolve(__dirname, 'src/index.ts'), ui: resolve(__dirname, 'src/ui.ts') },
       formats: ['es', 'cjs'],
       fileName: (format, entry) => `${entry}.${format === 'es' ? 'js' : 'cjs'}`,
     },
