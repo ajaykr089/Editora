@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { checkContent, fixContent, RULES } from '../check';
-import { contrastRatio, nearestPassingColor, parseColor } from '../color';
+import { checkContent, fixContent, RULES } from '../check.js';
+import { contrastRatio, nearestPassingColor, parseColor } from '../color.js';
 
 const rulesFor = (html: string, options = {}) => checkContent(html, options).issues.map((issue) => issue.rule);
 const fixture = readFileSync(join(__dirname, 'fixtures', 'problems.html'), 'utf8');

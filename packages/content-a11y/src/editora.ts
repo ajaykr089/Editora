@@ -5,8 +5,8 @@
  *   import { ContentA11yPlugin } from '@editora/content-a11y/editora';
  *   editor.setConfig({ plugins: ['heading', 'bold', 'link', 'history', ContentA11yPlugin({ minHeadingLevel: 2 })] });
  */
-import { fixContent } from './check';
-import { attachContentChecker, type ContentChecker, type ContentCheckerOptions } from './overlay';
+import { fixContent } from './check.js';
+import { attachContentChecker, type ContentChecker, type ContentCheckerOptions } from './overlay.js';
 
 export interface EditoraPlugin {
   name: string;
@@ -165,4 +165,4 @@ export function ContentA11yPlugin(options: ContentA11yPluginOptions = {}): Edito
   };
 }
 
-export { checkContent, fixContent } from './check';
+export { checkContent, fixContent } from './check.js';

@@ -1,5 +1,5 @@
-import { all, inlineStyle, isAllBold, rename, tagOf, textOf, unwrap } from '../dom';
-import type { Rule } from '../types';
+import { all, inlineStyle, isAllBold, rename, tagOf, textOf, unwrap } from '../dom.js';
+import type { Rule } from '../types.js';
 
 const HEADING = 'h1, h2, h3, h4, h5, h6';
 const levelOf = (heading: Element) => parseInt(tagOf(heading).slice(1), 10);
