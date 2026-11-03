@@ -19,6 +19,19 @@ Official documentation for the Editora ecosystem covering editor runtime, React 
 - `@editora/ui-core`
 - `@editora/ui-react`
 - `@editora/light-code-editor`
+- `@editora/markdown-editor`
+
+### Content tools
+
+Work with Editora or any other editor:
+
+- `@editora/paste-cleaner`: clean pastes from Word, Google Docs, Sheets and the web
+- `@editora/content-a11y`: accessibility checks and fixes for what authors write
+- `@editora/ai-review`: AI rewrites as accept/reject suggestions
+- `@editora/email-html`: editor HTML to email-safe HTML
+- `@editora/rich-text-convert`: convert between Tiptap, Lexical, Slate, Portable Text, Editor.js, HTML and Markdown
+
+See [Content tools](./content-tools/overview).
 
 ## Documentation principles
 

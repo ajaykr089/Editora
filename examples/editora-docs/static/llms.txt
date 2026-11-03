@@ -26,6 +26,14 @@ Primary packages:
 - @editora/icons
 - @editora/react-icons
 - @editora/toast
+- @editora/markdown-editor (markdown editor for React)
+
+Content tools (work with any editor; docs: https://editora-ecosystem.netlify.app/docs/content-tools/overview):
+- @editora/paste-cleaner (clean pastes from Word, Google Docs, Sheets, Excel and the web)
+- @editora/content-a11y (WCAG checks and fixes for authored content; CLI for CI)
+- @editora/ai-review (AI rewrites as accept/reject suggestions; Ollama, OpenAI-compatible, Claude)
+- @editora/email-html (editor HTML to email-safe HTML plus plain text)
+- @editora/rich-text-convert (convert between Tiptap/ProseMirror, Lexical, Slate, Plate, Portable Text, Editor.js, HTML, Markdown)
 
 Machine-readable registries:
 - https://editora-ecosystem.netlify.app/components.json
