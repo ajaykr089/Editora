@@ -1,6 +1,6 @@
-import type { AIProvider } from '../providers/types';
-import { AIReview } from './review';
-import { buildRewritePrompt, cleanModelOutput, type RewritePromptInput } from './prompt';
+import type { AIProvider } from '../providers/types.js';
+import { AIReview } from './review.js';
+import { buildRewritePrompt, cleanModelOutput, type RewritePromptInput } from './prompt.js';
 
 export interface RunRewriteOptions extends Omit<RewritePromptInput, 'blocks'> {
   provider: AIProvider;

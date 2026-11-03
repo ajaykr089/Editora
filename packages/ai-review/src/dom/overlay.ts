@@ -1,7 +1,7 @@
-import { AIReview, type ReviewHunk, type ReviewSnapshot } from '../core/review';
-import { applyHunk, DEL_CLASS, HUNK_ATTR, isStale, markBlockReplacement, markInlineHunks, marksFor, NEW_BLOCK_ATTR, revertHunk } from './marks';
-import { applyTheme, ensureStyles, ICONS } from './styles';
-import { targetText, type ReviewTarget } from './text';
+import { AIReview, type ReviewHunk, type ReviewSnapshot } from '../core/review.js';
+import { applyHunk, DEL_CLASS, HUNK_ATTR, isStale, markBlockReplacement, markInlineHunks, marksFor, NEW_BLOCK_ATTR, revertHunk } from './marks.js';
+import { applyTheme, ensureStyles, ICONS } from './styles.js';
+import { targetText, type ReviewTarget } from './text.js';
 
 export interface ReviewLabels {
   region: string;

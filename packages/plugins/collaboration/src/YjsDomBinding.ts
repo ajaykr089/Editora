@@ -58,6 +58,8 @@ export class YjsDomBinding {
     if (this.destroyed) return;
     const selection = this.captureSelection();
     this.observer.disconnect();
+    // Authorship recorders (@editora/authorship) label the text this change adds as a collaborator's.
+    this.root.dispatchEvent(new CustomEvent('provenance:expect', { detail: { kind: 'collaborator', timeoutMs: 1000 }, bubbles: true }));
     try {
       reconcileDomFromY(this.root, this.fragment, this.root.ownerDocument);
       // A DOM mutation made by script (as this one is) never fires a native

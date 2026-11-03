@@ -5,8 +5,8 @@
  *   import { AIReviewPlugin } from '@editora/ai-review/editora';
  *   editor.setConfig({ plugins: ['bold', 'italic', 'history', AIReviewPlugin()] });
  */
-import { attachAIReview, type AIReviewController, type AttachOptions } from './dom/attach';
-import { ICONS } from './dom/styles';
+import { attachAIReview, type AIReviewController, type AttachOptions } from './dom/attach.js';
+import { ICONS } from './dom/styles.js';
 
 /** The subset of @editora/core's Plugin type this plugin fills in. */
 export interface EditoraPlugin {
@@ -179,5 +179,5 @@ export function AIReviewPlugin(options: AIReviewPluginOptions = {}): EditoraPlug
   };
 }
 
-export { attachAIReview } from './dom/attach';
-export type { AIReviewController, AttachOptions } from './dom/attach';
+export { attachAIReview } from './dom/attach.js';
+export type { AIReviewController, AttachOptions } from './dom/attach.js';

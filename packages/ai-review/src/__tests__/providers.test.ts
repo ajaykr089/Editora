@@ -1,10 +1,10 @@
-import { createOllamaProvider, ollamaLocalCloudTag } from '../providers/ollama';
-import { createOpenAICompatibleProvider } from '../providers/openai';
-import { createProxyProvider } from '../providers/proxy';
-import { AIProviderError, type AIProvider } from '../providers/types';
-import { runRewrite } from '../core/run';
-import { AIReview } from '../core/review';
-import { createAIReviewHandler, ollamaCloudProvider } from '../server';
+import { createOllamaProvider, ollamaLocalCloudTag } from '../providers/ollama.js';
+import { createOpenAICompatibleProvider } from '../providers/openai.js';
+import { createProxyProvider } from '../providers/proxy.js';
+import { AIProviderError, type AIProvider } from '../providers/types.js';
+import { runRewrite } from '../core/run.js';
+import { AIReview } from '../core/review.js';
+import { createAIReviewHandler, ollamaCloudProvider } from '../server.js';
 
 function streamOf(parts: string[]): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();

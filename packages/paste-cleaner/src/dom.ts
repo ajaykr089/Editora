@@ -1,4 +1,4 @@
-import { cleanPaste, type CleanPasteOptions, type CleanPasteResult } from './clean';
+import { cleanPaste, type CleanPasteOptions, type CleanPasteResult } from './clean.js';
 
 export interface AttachPasteCleanerOptions extends CleanPasteOptions {
   /**

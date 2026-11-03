@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Authorship demo</title>
+    <link rel="stylesheet" href="/packages/core/dist/webcomponent.min.css" />
+    <style>
+      body { margin: 0; padding: 24px 16px 64px; font: 15px/1.5 system-ui, sans-serif; background: #f4f4f7; color: #1d1d24; }
+      body.dark { background: #15151b; color: #ececf1; }
+      body.dark p.lead, body.dark label.opt { color: #a9a9b8; }
+      body.dark pre, body.dark .tools button { background: #1f1f27; border-color: #3b3b48; color: #ececf1; }
+      main { max-width: 820px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      p.lead { margin: 0 0 16px; color: #5d5d6b; }
+      .tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+      .tools button { font: inherit; font-size: 13px; padding: 6px 11px; border-radius: 8px; border: 1px solid #d4d4dc; background: #fff; cursor: pointer; }
+      .tools button:hover { background: #f0f0f4; }
+      pre { background: #fff; border: 1px solid #dcdce3; border-radius: 10px; padding: 12px; overflow: auto; max-height: 320px; font-size: 12px; white-space: pre-wrap; }
+      label.opt { font-size: 13px; color: #5d5d6b; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Authorship</h1>
+      <p class="lead">Type, paste, ask the AI (⌘J / Ctrl+J, needs local Ollama) or use the buttons below, then press the <strong>Authorship</strong> toolbar button to see where each part came from, replay the writing and export the record.</p>
+      <p><label class="opt"><input type="checkbox" id="cleaner" /> Load @editora/paste-cleaner too (reloads)</label></p>
+      <div id="mount"></div>
+      <div class="tools">
+        <button type="button" id="paste-gdocs">Paste from Google Docs</button>
+        <button type="button" id="paste-word">Paste from Word</button>
+        <button type="button" id="ai">Insert AI text (as ai-review would)</button>
+        <button type="button" id="remote">Collaborator edit</button>
+        <button type="button" id="script">Change by a script</button>
+        <button type="button" id="verify">Verify with the witness</button>
+        <button type="button" id="annotated">Annotated HTML</button>
+      </div>
+      <pre id="out" aria-live="polite">Report appears here.</pre>
+    </main>
+    <script type="module">
+      import '/packages/core/dist/webcomponent.js';
+      import { AuthorshipPlugin } from '/packages/authorship/dist/editora.js';
+      import { announceProvenance, toAnnotatedHtml, documentSourceType } from '/packages/authorship/dist/index.js';
+
+      const params = new URLSearchParams(location.search);
+      const cleaner = params.get('cleaner') === '1';
+      document.getElementById('cleaner').checked = cleaner;
+      document.getElementById('cleaner').addEventListener('change', (event) => {
+        params.set('cleaner', event.target.checked ? '1' : '0');
+        location.search = params.toString();
+      });
+
+      // A fresh id per page load: the demo witness refuses a second history for the same document.
+      const docId = `demo-${crypto.randomUUID()}`;
+      const out = document.getElementById('out');
+      let controller = null;
+      const show = (value) => (out.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2));
+      const summary = () => {
+        const report = controller.getReport();
+        const shares = Object.fromEntries(Object.entries(report.byKind).filter(([, v]) => v.chars).map(([k, v]) => [k, `${Math.round(v.share * 100)}% (${v.chars})`]));
+        return { shares, pastes: report.pastes.map((p) => `${p.origin.source}: ${p.chars}`), ai: report.ai.map((a) => `${a.origin.model}: ${a.chars}`), events: report.events, documentType: documentSourceType(report) };
+      };
+
+      const plugins = ['heading', 'bold', 'italic', 'underline', 'list', 'link', 'history'];
+      if (cleaner) plugins.push((await import('/packages/paste-cleaner/dist/editora.js')).PasteCleanerPlugin());
+      try {
+        const { AIReviewPlugin } = await import('/packages/ai-review/dist/editora.js');
+        plugins.push(AIReviewPlugin());
+      } catch {
+        // ai-review not built.
+      }
+      plugins.push(
+        AuthorshipPlugin({
+          author: 'Ana',
+          witness: { url: '/api/witness', doc: docId, intervalMs: 4000 },
+          onReady: (c) => {
+            controller = window.authorship = c;
+            c.on('change', () => show(summary()));
+            c.on('error', (error) => console.warn('[authorship]', error));
+          },
+        }),
+      );
+
+      const editor = document.createElement('editora-editor');
+      editor.id = 'editor';
+      editor.setAttribute('height', '380');
+      editor.innerHTML = params.get('essay') === '1' ? '<h2>Why the valley floods more often</h2><p></p>' : '<h2>Field notes</h2><p>This paragraph was here before recording started.</p><p></p>';
+      // ?theme=dark shows the dark theme.
+      const theme = params.get('theme') === 'dark' ? 'dark' : undefined;
+      if (theme) document.body.classList.add('dark');
+      const configure = () => editor.setConfig({ plugins, theme, toolbar: 'undo redo | heading bold italic underline | bullist numlist | openAIReview toggleAuthorship' });
+      await customElements.whenDefined('editora-editor');
+      configure();
+      document.getElementById('mount').append(editor);
+
+      const content = () => editor.querySelector('.editora-content, .rte-content');
+      const caretToEnd = () => {
+        const root = content();
+        root.focus();
+        const last = root.lastElementChild ?? root;
+        const range = document.createRange();
+        range.selectNodeContents(last);
+        range.collapse(false);
+        const selection = getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      };
+
+      // A real paste event; when nothing handles it (no cleaner), insert like the browser would.
+      const paste = (html) => {
+        caretToEnd();
+        const data = new DataTransfer();
+        data.setData('text/html', html);
+        data.setData('text/plain', html.replace(/<[^>]+>/g, ''));
+        const event = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true });
+        content().dispatchEvent(event);
+        if (!event.defaultPrevented) document.execCommand('insertHTML', false, html.replace(/<meta[^>]*>/g, ''));
+      };
+      document.getElementById('paste-gdocs').onclick = () =>
+        paste('<meta charset="utf-8"><b style="font-weight:normal;" id="docs-internal-guid-4f1c2a"><p dir="ltr"><span style="font-size:11pt;">Rainfall in the valley rose by a third over the decade, according to the regional survey.</span></p></b>');
+      document.getElementById('paste-word').onclick = () =>
+        paste('<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><body><p class=MsoNormal>Word says the samples were taken at dawn.<o:p></o:p></p></body></html>');
+      document.getElementById('ai').onclick = () => {
+        caretToEnd();
+        const p = document.createElement('p');
+        p.innerHTML = '<ins class="air-ins" data-provenance="ai" data-provenance-model="gemma4:31b-cloud" data-provenance-provider="ollama">The data suggests a steady shift toward wetter winters.</ins>';
+        content().append(p);
+        // Accept: the mark goes, the text stays.
+        setTimeout(() => p.firstChild.replaceWith(...p.firstChild.childNodes), 300);
+      };
+      document.getElementById('remote').onclick = () => {
+        announceProvenance(content(), { kind: 'collaborator', author: 'Bo' });
+        const p = document.createElement('p');
+        p.textContent = 'Bo: I added the station names to the appendix.';
+        content().append(p);
+      };
+      document.getElementById('script').onclick = () => {
+        const p = document.createElement('p');
+        p.textContent = 'A browser extension slipped this in.';
+        content().append(p);
+      };
+      document.getElementById('verify').onclick = async () => {
+        await controller.flush();
+        const state = controller.serialize();
+        const result = await (await fetch('/api/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ state, doc: docId }) })).json();
+        show(result);
+      };
+      document.getElementById('annotated').onclick = () => show(toAnnotatedHtml(content(), controller.serialize()));
+    </script>
+  </body>
+</html>

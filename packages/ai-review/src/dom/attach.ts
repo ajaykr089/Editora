@@ -1,10 +1,11 @@
-import { REWRITE_PRESETS, type RewritePreset } from '../core/prompt';
-import { runRewrite } from '../core/run';
-import type { AIProvider } from '../providers/types';
-import { createDomReview, type DomReview, type ReviewEndInfo, type ReviewLabels } from './overlay';
-import { defaultSettingsFor, describeSettings, loadSettings, openSettingsDialog, providerFromSettings, type UserSettingsConfig } from './settings';
-import { applyTheme, ensureStyles, ICONS } from './styles';
-import { buildTextMap, targetsForRange, textBlocks, type ReviewTarget } from './text';
+import { REWRITE_PRESETS, type RewritePreset } from '../core/prompt.js';
+import { runRewrite } from '../core/run.js';
+import type { AIProvider } from '../providers/types.js';
+import { createDomReview, type DomReview, type ReviewEndInfo, type ReviewLabels } from './overlay.js';
+import { defaultSettingsFor, describeSettings, loadSettings, openSettingsDialog, providerFromSettings, type UserSettingsConfig } from './settings.js';
+import { MODEL_ATTR, PROVIDER_ATTR } from './marks.js';
+import { applyTheme, ensureStyles, ICONS } from './styles.js';
+import { buildTextMap, targetsForRange, textBlocks, type ReviewTarget } from './text.js';
 
 export interface MenuLabels {
   menu: string;
@@ -162,6 +163,9 @@ export function attachAIReview(root: HTMLElement, options: AttachOptions = {}): 
 
     try {
       const provider = await resolveProvider();
+      root.setAttribute(PROVIDER_ATTR, provider.id);
+      if (provider.model) root.setAttribute(MODEL_ATTR, provider.model);
+      else root.removeAttribute(MODEL_ATTR);
       await runRewrite({
         provider,
         review: review.review,

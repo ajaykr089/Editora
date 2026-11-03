@@ -1,7 +1,7 @@
-import { AIReview } from '../core/review';
-import { applyHunk, htmlWithoutSuggestions, isStale, markBlockReplacement, markInlineHunks, revertHunk } from '../dom/marks';
-import { createDomReview } from '../dom/overlay';
-import { buildTextMap, targetsForRange, targetText } from '../dom/text';
+import { AIReview } from '../core/review.js';
+import { applyHunk, htmlWithoutSuggestions, isStale, markBlockReplacement, markInlineHunks, revertHunk } from '../dom/marks.js';
+import { createDomReview } from '../dom/overlay.js';
+import { buildTextMap, targetsForRange, targetText } from '../dom/text.js';
 
 function editor(html: string): HTMLElement {
   document.body.innerHTML = `<div class="wrap"><div class="editora-content" contenteditable="true">${html}</div></div>`;
@@ -46,7 +46,7 @@ describe('marks', () => {
     markInlineHunks(target, [...review.hunks]);
 
     expect(root.innerHTML).toBe(
-      `<p>The <strong>quick</strong> <del class="air-del" data-air-hunk="${review.hunks[0].id}">brown</del><ins class="air-ins" data-air-hunk="${review.hunks[0].id}">red</ins> fox.</p>`,
+      `<p>The <strong>quick</strong> <del class="air-del" data-air-hunk="${review.hunks[0].id}">brown</del><ins class="air-ins" data-air-hunk="${review.hunks[0].id}" data-provenance="ai">red</ins> fox.</p>`,
     );
     expect(isStale(root, review.hunks[0])).toBe(false);
 
@@ -130,5 +130,20 @@ describe('createDomReview', () => {
     dom.fail('Network down');
     expect(root.innerHTML).toBe(original);
     expect(document.querySelector('.air-bar')!.textContent).toContain('Network down');
+  });
+});
+
+describe('provenance markers', () => {
+  it('marks inserted suggestions as AI-written with the running model', () => {
+    const root = editor('<p>The quick fox.</p>');
+    root.setAttribute('data-air-model', 'gemma4:31b-cloud');
+    root.setAttribute('data-air-provider', 'ollama');
+    const block = root.querySelector('p')!;
+    markInlineHunks({ block, start: 0, end: buildTextMap(block).text.length }, [{ id: 'h1', start: 4, end: 9, original: 'quick', inserted: 'swift', status: 'pending' } as any]);
+    const ins = root.querySelector('ins')!;
+    expect(ins.getAttribute('data-provenance')).toBe('ai');
+    expect(ins.getAttribute('data-provenance-model')).toBe('gemma4:31b-cloud');
+    expect(ins.getAttribute('data-provenance-provider')).toBe('ollama');
+    expect(root.querySelector('del')!.hasAttribute('data-provenance')).toBe(false);
   });
 });

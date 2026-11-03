@@ -1,4 +1,4 @@
-import { attachPasteCleaner, insertHtml } from '../dom';
+import { attachPasteCleaner, insertHtml } from '../dom.js';
 
 function editor(html: string): HTMLElement {
   document.body.innerHTML = `<div contenteditable="true">${html}</div>`;

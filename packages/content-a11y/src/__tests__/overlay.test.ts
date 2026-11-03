@@ -1,4 +1,4 @@
-import { attachContentChecker } from '../overlay';
+import { attachContentChecker } from '../overlay.js';
 
 function editor(html: string): HTMLElement {
   document.body.innerHTML = `<div contenteditable="true">${html}</div>`;

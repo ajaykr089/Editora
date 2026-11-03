@@ -1,5 +1,5 @@
-import { readText } from './streams';
-import { errorFromResponse, resolveFetch, AIProviderError, type AIProvider, type CompletionRequest, type FetchLike } from './types';
+import { readText } from './streams.js';
+import { errorFromResponse, resolveFetch, AIProviderError, type AIProvider, type CompletionRequest, type FetchLike } from './types.js';
 
 export interface ProxyProviderOptions {
   /** Your endpoint built with `createAIReviewHandler` from `@editora/ai-review/server`. */

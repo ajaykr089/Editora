@@ -1,5 +1,5 @@
-import { readLines } from './streams';
-import { errorFromResponse, resolveFetch, AIProviderError, type AIProvider, type CompletionRequest, type FetchLike } from './types';
+import { readLines } from './streams.js';
+import { errorFromResponse, resolveFetch, AIProviderError, type AIProvider, type CompletionRequest, type FetchLike } from './types.js';
 
 export interface ModelOption {
   id: string;

@@ -1,5 +1,5 @@
-import { readServerSentData } from './streams';
-import { errorFromResponse, resolveFetch, AIProviderError, type AIProvider, type CompletionRequest, type FetchLike } from './types';
+import { readServerSentData } from './streams.js';
+import { errorFromResponse, resolveFetch, AIProviderError, type AIProvider, type CompletionRequest, type FetchLike } from './types.js';
 
 /**
  * Base URLs of common services that speak the OpenAI chat completions API.
