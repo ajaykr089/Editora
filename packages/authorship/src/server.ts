@@ -8,8 +8,8 @@
  *   // Fetch-style (Next.js route, Workers, Deno): export const POST = witness;
  *   // Node http / Express: app.post('/api/authorship', toNodeHandler(witness));
  */
-import { receiptIsValid, signReceipt, verifyAuthorship, type VerifyOptions, type VerifyResult } from './core/chain';
-import type { AuthorshipState, WitnessReceipt } from './core/types';
+import { receiptIsValid, signReceipt, verifyAuthorship, type VerifyOptions, type VerifyResult } from './core/chain.js';
+import type { AuthorshipState, WitnessReceipt } from './core/types.js';
 
 export interface WitnessStore {
   /** Last receipt issued for a document. */
@@ -119,6 +119,6 @@ export function toNodeHandler(handler: (request: Request) => Promise<Response>) 
   };
 }
 
-export { verifyAuthorship } from './core/chain';
-export type { VerifyOptions, VerifyResult } from './core/chain';
-export type { AuthorshipState, WitnessReceipt } from './core/types';
+export { verifyAuthorship } from './core/chain.js';
+export type { VerifyOptions, VerifyResult } from './core/chain.js';
+export type { AuthorshipState, WitnessReceipt } from './core/types.js';

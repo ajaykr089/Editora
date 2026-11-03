@@ -2,8 +2,8 @@
  * Rebuild a document's text (and origins) from its log at any moment. Bursts
  * of typing are spread over their duration, so playback looks like typing.
  */
-import { spliceRuns } from './runs';
-import type { AuthorshipLog, LogEvent, Run } from './types';
+import { spliceRuns } from './runs.js';
+import type { AuthorshipLog, LogEvent, Run } from './types.js';
 
 export interface ReplayFrame {
   text: string;
@@ -54,7 +54,7 @@ export function createReplay(log: AuthorshipLog): Replay {
 
   const after = (count: number): ReplayFrame => {
     const target = Math.max(0, Math.min(count, events.length));
-    let checkpoint = Math.min(Math.floor(target / CHECKPOINT_EVERY), checkpoints.length - 1);
+    const checkpoint = Math.min(Math.floor(target / CHECKPOINT_EVERY), checkpoints.length - 1);
     let frame = checkpoints[checkpoint];
     while (frame.index < target) {
       frame = apply(frame, events[frame.index]);

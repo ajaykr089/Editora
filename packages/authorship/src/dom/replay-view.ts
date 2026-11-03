@@ -3,10 +3,10 @@
  * longer than 1.5 s are shortened so a three-hour essay plays in minutes.
  * Formatting is not replayed, only the text.
  */
-import { createReplay } from '../core/replay';
-import type { AuthorshipLog, Origin } from '../core/types';
-import { mergeLabels, type AuthorshipLabels } from './labels';
-import { applyTheme, ensureStyles } from './styles';
+import { createReplay } from '../core/replay.js';
+import type { AuthorshipLog, Origin } from '../core/types.js';
+import { mergeLabels, type AuthorshipLabels } from './labels.js';
+import { applyTheme, ensureStyles } from './styles.js';
 
 export interface ReplayViewOptions {
   /** Origins, to colour the text (from `serialize().origins`). */
@@ -145,7 +145,7 @@ export function openReplayView(log: AuthorshipLog, options: ReplayViewOptions = 
       let pos = 0;
       for (const [length, id] of state.runs) {
         const span = doc.createElement('span');
-        span.textContent = state.text.slice(pos, pos + length).replace(/￼/g, '▫');
+        span.textContent = state.text.slice(pos, pos + length).replace(/\ufffc/g, '▫');
         const origin = options.origins?.[id];
         if (colourBox.checked && origin && origin.kind !== 'typed' && origin.kind !== 'existing') {
           span.className = `eda-overlay-${origin.kind}`;

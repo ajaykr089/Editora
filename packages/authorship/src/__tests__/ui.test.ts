@@ -1,8 +1,8 @@
-import { attachAuthorship } from '../dom/attach';
-import { readEmbeddedState, toAnnotatedHtml, documentSourceType } from '../dom/export';
-import { createHighlighter } from '../dom/highlight';
-import { createAuthorshipPanel } from '../dom/panel';
-import { openReplayView } from '../dom/replay-view';
+import { attachAuthorship } from '../dom/attach.js';
+import { readEmbeddedState, toAnnotatedHtml, documentSourceType } from '../dom/export.js';
+import { createHighlighter } from '../dom/highlight.js';
+import { createAuthorshipPanel } from '../dom/panel.js';
+import { openReplayView } from '../dom/replay-view.js';
 
 // jsdom has no layout; browsers do.
 Range.prototype.getClientRects ??= function () {

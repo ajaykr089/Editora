@@ -6,13 +6,13 @@
  *   import { AuthorshipPlugin } from '@editora/authorship/editora';
  *   editor.setConfig({ plugins: ['bold', 'history', AuthorshipPlugin({ author: 'Ana' })], toolbar: '... | toggleAuthorship' });
  */
-import { attachAuthorship, type AttachAuthorshipOptions, type AuthorshipController } from './dom/attach';
-import { createHighlighter, type Highlighter } from './dom/highlight';
-import type { AuthorshipLabels } from './dom/labels';
-import { createAuthorshipPanel, type AuthorshipPanel } from './dom/panel';
-import { openReplayView } from './dom/replay-view';
-import { ICON } from './dom/styles';
-import type { OriginKind } from './core/types';
+import { attachAuthorship, type AttachAuthorshipOptions, type AuthorshipController } from './dom/attach.js';
+import { createHighlighter, type Highlighter } from './dom/highlight.js';
+import type { AuthorshipLabels } from './dom/labels.js';
+import { createAuthorshipPanel, type AuthorshipPanel } from './dom/panel.js';
+import { openReplayView } from './dom/replay-view.js';
+import { ICON } from './dom/styles.js';
+import type { OriginKind } from './core/types.js';
 
 /** The subset of @editora/core's Plugin type this plugin fills in. */
 export interface EditoraPlugin {
@@ -192,5 +192,5 @@ export function AuthorshipPlugin(options: AuthorshipPluginOptions = {}): Editora
   };
 }
 
-export { attachAuthorship } from './dom/attach';
-export type { AuthorshipController, AttachAuthorshipOptions } from './dom/attach';
+export { attachAuthorship } from './dom/attach.js';
+export type { AuthorshipController, AttachAuthorshipOptions } from './dom/attach.js';

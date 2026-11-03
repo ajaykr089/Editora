@@ -3,10 +3,10 @@
  * out. It never looks at the DOM, so it runs the same in a browser, a worker
  * or on a server (e.g. to rebuild a document from a log).
  */
-import { diffText, type TextEdit } from './diff';
-import { textHash } from './hash';
-import { normalizeRuns, originIdAt, runsLength, sliceRuns, spliceRuns } from './runs';
-import type { AuthorshipLog, AuthorshipState, ChangeCause, LogEvent, Origin, OriginKind, OriginSpec, Run } from './types';
+import { diffText, type TextEdit } from './diff.js';
+import { textHash } from './hash.js';
+import { normalizeRuns, originIdAt, runsLength, sliceRuns, spliceRuns } from './runs.js';
+import type { AuthorshipLog, AuthorshipState, ChangeCause, LogEvent, Origin, OriginKind, OriginSpec, Run } from './types.js';
 
 /** Part of an insertion: `len` characters from one origin. */
 export interface Piece {
@@ -21,8 +21,8 @@ export interface UpdateOptions {
   hint?: number;
   /** Origin for every inserted character (default `{ kind: 'external' }`). */
   origin?: OriginSpec;
-  /** Per-range origins: called with each inserted range in the new text. */
-  assign?: (start: number, end: number) => Piece[];
+  /** Per-range origins: called with each inserted range in the new text and the text the same edit removed. */
+  assign?: (start: number, end: number, removed: Fragment | null) => Piece[];
   /** Runs for the whole new text to take inserted origins from (undo restoring an earlier state). */
   runs?: Run[];
   now?: number;
@@ -173,13 +173,14 @@ export class AuthorshipEngine {
     const removed: Fragment[] = [];
 
     for (const edit of edits) {
-      if (edit.del) removed.push(this.toFragment(text, runs, edit.at, edit.at + edit.del));
+      const removedHere = edit.del ? this.toFragment(text, runs, edit.at, edit.at + edit.del) : null;
+      if (removedHere) removed.push(removedHere);
       const end = edit.at + edit.ins.length;
       let inserted: Run[] = [];
       if (edit.ins) {
         if (options.runs) inserted = sliceRuns(options.runs, edit.at, end);
         else {
-          const pieces = options.assign?.(edit.at, end) ?? [{ len: edit.ins.length, origin: options.origin ?? { kind: 'external' } }];
+          const pieces = options.assign?.(edit.at, end, removedHere) ?? [{ len: edit.ins.length, origin: options.origin ?? { kind: 'external' } }];
           inserted = pieces.map((piece) => [piece.len, this.resolve(piece.origin, runs, edit.at, t)] as Run);
         }
         inserted = fitRuns(inserted, edit.ins.length, () => this.register({ kind: 'external' }, t));

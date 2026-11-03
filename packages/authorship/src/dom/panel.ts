@@ -3,14 +3,14 @@
  * origin at the cursor (announced politely for screen readers), pastes, AI
  * inserts, writing time, and buttons for replay and export.
  */
-import type { AuthorshipReport } from '../core/report';
-import type { OriginKind } from '../core/types';
-import { ORIGIN_KINDS } from '../core/types';
-import type { AuthorshipController } from './attach';
-import type { Highlighter } from './highlight';
-import { describeOrigin, formatDuration, formatTime, mergeLabels, type AuthorshipLabels } from './labels';
-import { applyTheme, ensureStyles } from './styles';
-import { offsetOfPoint } from './text';
+import type { AuthorshipReport } from '../core/report.js';
+import type { OriginKind } from '../core/types.js';
+import { ORIGIN_KINDS } from '../core/types.js';
+import type { AuthorshipController } from './attach.js';
+import type { Highlighter } from './highlight.js';
+import { describeOrigin, formatDuration, formatTime, mergeLabels, type AuthorshipLabels } from './labels.js';
+import { applyTheme, ensureStyles } from './styles.js';
+import { offsetOfPoint } from './text.js';
 
 export interface PanelOptions {
   labels?: Partial<AuthorshipLabels>;

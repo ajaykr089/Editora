@@ -6,14 +6,14 @@
  * text is compared with the last known text and the inserted ranges get
  * that origin. Text that changes with no known cause is "external".
  */
-import { sealBatch } from '../core/chain';
-import { AuthorshipEngine, type ChangeRecord, type EngineOptions, type Fragment, type Piece } from '../core/engine';
-import { textHash } from '../core/hash';
-import { buildReport, type AuthorshipReport, type ReportOptions } from '../core/report';
-import { runsLength, scaleRuns } from '../core/runs';
-import type { AuthorshipState, ChangeCause, LogBatch, Origin, OriginKind, OriginSpec, Run, WitnessReceipt } from '../core/types';
-import { detectPasteSource } from './detect';
-import { createDocMapper, offsetOfPoint, offsetsOfRange, type DocMap } from './text';
+import { sealBatch } from '../core/chain.js';
+import { AuthorshipEngine, type ChangeRecord, type EngineOptions, type Fragment, type Piece } from '../core/engine.js';
+import { textHash } from '../core/hash.js';
+import { buildReport, type AuthorshipReport, type ReportOptions } from '../core/report.js';
+import { runsLength, scaleRuns } from '../core/runs.js';
+import type { AuthorshipState, ChangeCause, LogBatch, Origin, OriginKind, OriginSpec, Run, WitnessReceipt } from '../core/types.js';
+import { detectPasteSource } from './detect.js';
+import { createDocMapper, offsetOfPoint, offsetsOfRange, type DocMap } from './text.js';
 
 /** Attribute that marks inserted text's origin: `data-provenance="ai"` plus `data-provenance-model` etc. */
 export const PROVENANCE_ATTR = 'data-provenance';
@@ -110,11 +110,26 @@ const TOOL_WINDOW_MS = 800;
 const SNAPSHOTS = 200;
 const FRAGMENTS = 20;
 const FRAGMENT_MS = 10 * 60_000;
+const RECENT_REMOVALS = 8;
+const REMOVAL_MS = 3000;
 
 // Shared by every editor on the page: copy in one, paste in another keeps origins.
 const recentFragments: Array<{ key: string; fragment: Fragment; t: number }> = [];
 
-const fragmentKey = (text: string) => text.replace(/￼/g, '').replace(/\s+/g, ' ').trim();
+/** `[start, end)` of a fragment. */
+function sliceFragment(fragment: Fragment, start: number, end: number): Fragment {
+  const runs: Fragment['runs'] = [];
+  let pos = 0;
+  for (const [length, origin] of fragment.runs) {
+    const from = Math.max(start, pos);
+    const to = Math.min(end, pos + length);
+    if (to > from) runs.push([to - from, origin]);
+    pos += length;
+  }
+  return { text: fragment.text.slice(start, end), runs };
+}
+
+const fragmentKey = (text: string) => text.replace(/\ufffc/g, '').replace(/\s+/g, ' ').trim();
 
 function rememberFragment(fragment: Fragment): void {
   const key = fragmentKey(fragment.text);
@@ -165,6 +180,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
   let lastKey = 0;
   let lastCommand: string | undefined;
   let dragFragment: Fragment | null = null;
+  const recentRemovals: Array<{ fragment: Fragment; t: number }> = [];
   let witnessTimer: ReturnType<typeof setInterval> | null = null;
   let sending: Promise<void> | null = null;
 
@@ -194,7 +210,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     if (snapshots.size > SNAPSHOTS) snapshots.delete(snapshots.keys().next().value as string);
   };
 
-  const assignFor = (next: DocMap, origin: OriginSpec | 'inherit', fragment: Fragment | undefined, allowReuse: boolean) => {
+  const assignFor = (next: DocMap, origin: OriginSpec | 'inherit', fragment: Fragment | undefined, allowReuse: boolean, allowMoved: boolean) => {
     const cache = new Map<Element, OriginSpec | null>();
     const provenanceOf = (node: Node): OriginSpec | null => {
       const parent = node.parentElement;
@@ -205,11 +221,25 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       }
       return cache.get(parent)!;
     };
-    return (start: number, end: number): Piece[] => {
+    // Text put back as a change just removed it (an editor or tool re-wrapping the DOM) keeps its origin.
+    let removedByEdit: Fragment | null = null;
+    const removedJustNow = (text: string): Fragment | undefined => {
+      if (!allowMoved || (!text.trim() && text.length < 2)) return undefined;
+      const t = now();
+      const candidates = [removedByEdit, ...recentRemovals.filter((entry) => t - entry.t <= REMOVAL_MS).map((entry) => entry.fragment)];
+      for (const candidate of candidates) {
+        const at = candidate ? candidate.text.indexOf(text) : -1;
+        if (candidate && at >= 0) return sliceFragment(candidate, at, at + text.length);
+      }
+      return undefined;
+    };
+    const reused = (source: Fragment, length: number): Piece[] => scaleRuns(engine.adoptFragment(source), length).map(([len, id]) => ({ len, origin: id }));
+    return (start: number, end: number, removed: Fragment | null): Piece[] => {
+    removedByEdit = removed;
     const inserted = next.text.slice(start, end);
     if (allowReuse) {
-      const source = fragment && fragmentKey(fragment.text) === fragmentKey(inserted) ? fragment : findFragment(inserted);
-      if (source) return scaleRuns(engine.adoptFragment(source), inserted.length).map(([len, id]) => ({ len, origin: id }));
+      const source = removedJustNow(inserted) ?? (fragment && fragmentKey(fragment.text) === fragmentKey(inserted) ? fragment : findFragment(inserted));
+      if (source) return reused(source, inserted.length);
     }
     const pieces: Piece[] = [];
     const add = (len: number, spec: OriginSpec | 'inherit') => {
@@ -232,7 +262,17 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       pos = to;
     }
     add(end - pos, last);
-    return pieces;
+    if (!allowReuse || pieces.length < 2) return pieces;
+    // Unmarked text next to a marked insert may be text the tool only moved.
+    const out: Piece[] = [];
+    let offset = start;
+    for (const piece of pieces) {
+      const source = piece.origin === origin ? removedJustNow(next.text.slice(offset, offset + piece.len)) : undefined;
+      if (source) out.push(...reused(source, piece.len));
+      else out.push(piece);
+      offset += piece.len;
+    }
+    return out;
     };
   };
 
@@ -269,7 +309,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
         cause,
         hint: current?.hint,
         now: t,
-        ...(snapshot ? { runs: snapshot } : { assign: assignFor(next, origin, current?.fragment, allowReuse) }),
+        ...(snapshot ? { runs: snapshot } : { assign: assignFor(next, origin, current?.fragment, allowReuse, cause === 'external' || cause === 'tool' || cause === 'undo') }),
       });
     } catch (error) {
       emit('error', error instanceof Error ? error : new Error(String(error)));
@@ -277,7 +317,11 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     }
     remember(next.text);
     if (!change) return;
-    for (const fragment of change.removed) if (fragment.text.length >= 2) rememberFragment(fragment);
+    for (const fragment of change.removed) {
+      if (fragment.text.length >= 2) rememberFragment(fragment);
+      recentRemovals.unshift({ fragment, t });
+    }
+    recentRemovals.length = Math.min(recentRemovals.length, RECENT_REMOVALS);
     const record: AuthorshipChange = { ...change, text: next.text };
     options.onChange?.(record);
     emit('change', record);
@@ -381,8 +425,12 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     const internal = findFragment(text);
     const info = detectPasteSource(html, text, data ? Array.from(data.types) : []);
     catchUp();
+    // Where the selection starts: the paste replaces from there (the diff alone would keep a shared prefix).
+    const selection = doc.getSelection();
+    const hint = selection && selection.rangeCount > 0 && root.contains(selection.anchorNode) ? offsetsOfRange(map, selection.getRangeAt(0))[0] : undefined;
     setPending({
       cause: 'paste',
+      hint,
       origin: { kind: 'pasted', author: author(), source: info.source, via: 'paste', label: info.url },
       fragment: internal,
       until: now() + 2000,

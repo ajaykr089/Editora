@@ -1,4 +1,4 @@
-import type { OriginKind } from '../core/types';
+import type { OriginKind } from '../core/types.js';
 
 const STYLE_ID = 'eda-authorship-styles';
 const DARK_HOST = '[data-theme="dark"], [theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark';

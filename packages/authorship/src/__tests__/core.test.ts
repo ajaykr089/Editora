@@ -1,11 +1,11 @@
 // @vitest-environment node
 import { webcrypto } from 'node:crypto';
-import { applyEdits, diffText } from '../core/diff';
-import { AuthorshipEngine } from '../core/engine';
-import { buildReport } from '../core/report';
-import { createReplay } from '../core/replay';
-import { sealBatch, signReceipt, verifyAuthorship } from '../core/chain';
-import { scaleRuns, sliceRuns, spliceRuns } from '../core/runs';
+import { applyEdits, diffText } from '../core/diff.js';
+import { AuthorshipEngine } from '../core/engine.js';
+import { buildReport } from '../core/report.js';
+import { createReplay } from '../core/replay.js';
+import { sealBatch, signReceipt, verifyAuthorship } from '../core/chain.js';
+import { scaleRuns, sliceRuns, spliceRuns } from '../core/runs.js';
 
 const subtle = webcrypto.subtle as unknown as SubtleCrypto;
 

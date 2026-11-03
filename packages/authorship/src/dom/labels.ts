@@ -1,4 +1,4 @@
-import type { Origin, OriginKind } from '../core/types';
+import type { Origin, OriginKind } from '../core/types.js';
 
 export interface AuthorshipLabels {
   kinds: Record<OriginKind, string>;

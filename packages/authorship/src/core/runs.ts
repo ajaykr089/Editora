@@ -1,4 +1,4 @@
-import type { Run } from './types';
+import type { Run } from './types.js';
 
 export function runsLength(runs: readonly Run[]): number {
   let total = 0;

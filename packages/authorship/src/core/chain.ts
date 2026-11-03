@@ -4,9 +4,9 @@
  * breaks every hash after it. A witness server can sign each batch hash
  * with its own clock (see `@editora/authorship/server`).
  */
-import { canonicalJson, hmacHex, sha256Hex, textHash } from './hash';
-import { createReplay } from './replay';
-import type { AuthorshipLog, AuthorshipState, LogBase, LogBatch, LogEvent, WitnessReceipt } from './types';
+import { canonicalJson, hmacHex, sha256Hex, textHash } from './hash.js';
+import { createReplay } from './replay.js';
+import type { AuthorshipLog, AuthorshipState, LogBase, LogBatch, LogEvent, WitnessReceipt } from './types.js';
 
 export async function baseHash(base: LogBase, subtle?: SubtleCrypto): Promise<string> {
   return sha256Hex(canonicalJson(base), subtle);

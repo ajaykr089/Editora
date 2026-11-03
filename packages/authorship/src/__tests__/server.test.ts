@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { webcrypto } from 'node:crypto';
-import { sealBatch, verifyAuthorship } from '../core/chain';
-import { AuthorshipEngine } from '../core/engine';
-import type { WitnessReceipt } from '../core/types';
-import { createAuthorshipWitness, type WitnessStore } from '../server';
+import { sealBatch, verifyAuthorship } from '../core/chain.js';
+import { AuthorshipEngine } from '../core/engine.js';
+import type { WitnessReceipt } from '../core/types.js';
+import { createAuthorshipWitness, type WitnessStore } from '../server.js';
 
 const SECRET = 'a-long-enough-test-secret';
 const post = (body: unknown) => new Request('http://x/api', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });

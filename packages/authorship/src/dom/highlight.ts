@@ -3,11 +3,11 @@
  * Highlights where supported, an overlay of rectangles otherwise. Hovering
  * shaded text shows where it came from.
  */
-import type { Origin, OriginKind } from '../core/types';
-import type { AuthorshipController } from './attach';
-import { describeOrigin, formatTime, mergeLabels, type AuthorshipLabels } from './labels';
-import { applyTheme, DEFAULT_HIGHLIGHT_KINDS, ensureStyles, HIGHLIGHT_PREFIX } from './styles';
-import { rangeFor } from './text';
+import type { Origin, OriginKind } from '../core/types.js';
+import type { AuthorshipController } from './attach.js';
+import { describeOrigin, formatTime, mergeLabels, type AuthorshipLabels } from './labels.js';
+import { applyTheme, DEFAULT_HIGHLIGHT_KINDS, ensureStyles, HIGHLIGHT_PREFIX } from './styles.js';
+import { rangeFor } from './text.js';
 
 export interface HighlighterOptions {
   /** Kinds to shade (default pasted, AI, collaborator, tool, external). */

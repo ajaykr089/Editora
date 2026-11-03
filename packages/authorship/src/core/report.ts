@@ -1,5 +1,5 @@
-import type { AuthorshipState, LogEvent, Origin, OriginKind, Run } from './types';
-import { ORIGIN_KINDS } from './types';
+import type { AuthorshipState, LogEvent, Origin, OriginKind, Run } from './types.js';
+import { ORIGIN_KINDS } from './types.js';
 
 export interface KindTotal {
   chars: number;

@@ -18,6 +18,7 @@ export function detectPasteSource(html: string, text: string, types: readonly st
   if (/urn:schemas-microsoft-com:office:excel|ProgId"?\s*content="?Excel/i.test(html)) return info('excel');
   if (/urn:schemas-microsoft-com:office:word|ProgId"?\s*content="?Word|class="?Mso|mso-[a-z-]+:/i.test(html)) return info('word');
   if (/content="?LibreOffice|content="?OpenOffice/i.test(html)) return info('libreoffice');
-  if (/Cocoa HTML Writer|Apple-converted-space|apple-content-edited/i.test(html)) return info('apple');
+  // Not Apple-converted-space: Safari adds it to copies from any web page.
+  if (/Cocoa HTML Writer|apple-content-edited/i.test(html)) return info('apple');
   return info(text || html ? 'web' : 'plain');
 }

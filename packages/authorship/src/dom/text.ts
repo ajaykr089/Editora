@@ -9,7 +9,7 @@
 
 export const BLOCK_SELECTOR = 'p,h1,h2,h3,h4,h5,h6,li,ul,ol,blockquote,pre,td,th,tr,table,dt,dd,dl,figure,figcaption,caption,div,address,section,article,header,footer,hr';
 export const IGNORE_SELECTOR = '[data-authorship-ignore],[data-air-ui]';
-export const OBJECT_CHAR = '￼';
+export const OBJECT_CHAR = '\ufffc';
 
 const SKIPPED_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE']);
 const OBJECT_TAGS = new Set(['IMG', 'SVG', 'VIDEO', 'AUDIO', 'IFRAME', 'CANVAS', 'MATH', 'INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'OBJECT', 'EMBED']);
@@ -26,7 +26,7 @@ export interface DocMap {
 }
 
 export function readText(data: string): string {
-  return data.replace(/[ \n\r\t]/g, ' ');
+  return data.replace(/[\u00a0\n\r\t]/g, ' ');
 }
 
 /** A <br> with nothing after it in its block only keeps an empty line open. */

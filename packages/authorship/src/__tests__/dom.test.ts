@@ -1,6 +1,6 @@
-import { announceProvenance, attachAuthorship, type AuthorshipController } from '../dom/attach';
-import { detectPasteSource } from '../dom/detect';
-import { buildDocMap, createDocMapper, offsetOfPoint, rangeFor } from '../dom/text';
+import { announceProvenance, attachAuthorship, type AuthorshipController } from '../dom/attach.js';
+import { detectPasteSource } from '../dom/detect.js';
+import { buildDocMap, createDocMapper, offsetOfPoint, rangeFor } from '../dom/text.js';
 
 function editor(html: string): HTMLElement {
   document.body.innerHTML = `<div class="host"><div class="toolbar"><button data-command="insertEmoji">😀</button></div><div class="editora-content" contenteditable="true">${html}</div></div>`;
@@ -57,7 +57,7 @@ if (typeof (globalThis as any).ClipboardEvent === 'undefined' || !('clipboardDat
 describe('doc map', () => {
   it('reads blocks, breaks and islands', () => {
     const root = editor('<h2>Title</h2><p>One <b>two</b><br>three <span contenteditable="false">@Ann</span></p><ul><li>a</li><li>b</li></ul><p><br></p>');
-    expect(buildDocMap(root).text).toBe('Title\nOne two\nthree ￼\na\nb');
+    expect(buildDocMap(root).text).toBe('Title\nOne two\nthree \ufffc\na\nb');
   });
 
   it('maps offsets to DOM ranges and back', () => {
@@ -76,6 +76,9 @@ describe('detectPasteSource', () => {
     expect(detectPasteSource('<b id="docs-internal-guid-1234"><p>x</p></b>', 'x').source).toBe('google-docs');
     expect(detectPasteSource('<p class=MsoNormal>x</p>', 'x').source).toBe('word');
     expect(detectPasteSource('<p>x</p>', 'x').source).toBe('web');
+    // Safari's copy from a web page.
+    expect(detectPasteSource('<span>a<span class="Apple-converted-space"> </span>b</span>', 'a b').source).toBe('web');
+    expect(detectPasteSource('<meta name="Generator" content="Cocoa HTML Writer"><p>x</p>', 'x').source).toBe('apple');
     expect(detectPasteSource('', 'x').source).toBe('plain');
   });
 });
@@ -264,6 +267,38 @@ describe('paste inserted by the editor itself', () => {
     });
     await flush();
     expect(controller.originAt(1)).toMatchObject({ kind: 'pasted', source: 'google-docs' });
+    controller.destroy();
+  });
+});
+
+describe('text put back by a tool', () => {
+  it('keeps the origin of a character removed and re-inserted moments later', async () => {
+    const root = editor('<p>Old text.</p>');
+    const controller = attachAuthorship(root, { author: 'Ana', autoStart: true });
+    const p = root.querySelector('p')!;
+    // A review tool wraps the old words and moves the period after its suggestion.
+    p.innerHTML = 'Old text';
+    await flush();
+    p.innerHTML = 'Old text<ins data-provenance="ai"> new</ins>.';
+    await flush();
+    expect(controller.originAt(controller.getText().length - 1)?.kind).toBe('existing');
+    expect(controller.originAt(9)?.kind).toBe('ai');
+    controller.destroy();
+  });
+});
+
+describe('paste over a selection', () => {
+  it('labels the pasted words as pasted even when the replaced text contained them', async () => {
+    const root = editor('<p>hello world</p>');
+    const controller = attachAuthorship(root, { author: 'Ana', autoStart: true });
+    const p = root.querySelector('p')!;
+    const range = document.createRange();
+    range.selectNodeContents(p);
+    getSelection()!.removeAllRanges();
+    getSelection()!.addRange(range);
+    paste(root, '<p class=MsoNormal>hello</p>', () => (p.textContent = 'hello'));
+    await flush();
+    expect(controller.originAt(0)).toMatchObject({ kind: 'pasted', source: 'word' });
     controller.destroy();
   });
 });

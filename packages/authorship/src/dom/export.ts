@@ -4,10 +4,10 @@
  * type terms. No standard for text provenance exists yet; the IPTC terms
  * are the closest widely used vocabulary (built for images and video).
  */
-import type { AuthorshipReport } from '../core/report';
-import type { AuthorshipState, OriginKind } from '../core/types';
-import { PROVENANCE_ATTR } from './attach';
-import { buildDocMap } from './text';
+import type { AuthorshipReport } from '../core/report.js';
+import type { AuthorshipState, OriginKind } from '../core/types.js';
+import { PROVENANCE_ATTR } from './attach.js';
+import { buildDocMap } from './text.js';
 
 export const IPTC_DIGITAL_SOURCE_TYPE = 'http://cv.iptc.org/newscodes/digitalsourcetype/';
 export const EMBED_TYPE = 'application/vnd.editora.authorship+json';
