@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="/packages/core/dist/webcomponent.min.css" />
     <style>
       body { margin: 0; padding: 24px 16px 64px; font: 15px/1.5 system-ui, sans-serif; background: #f4f4f7; color: #1d1d24; }
+      body.dark { background: #15151b; color: #ececf1; }
+      body.dark p.lead, body.dark label.opt { color: #a9a9b8; }
+      body.dark pre, body.dark .tools button { background: #1f1f27; border-color: #3b3b48; color: #ececf1; }
       main { max-width: 820px; margin: 0 auto; }
       h1 { font-size: 22px; margin: 0 0 4px; }
       p.lead { margin: 0 0 16px; color: #5d5d6b; }
@@ -81,8 +84,11 @@
       const editor = document.createElement('editora-editor');
       editor.id = 'editor';
       editor.setAttribute('height', '380');
-      editor.innerHTML = '<h2>Field notes</h2><p>This paragraph was here before recording started.</p><p></p>';
-      const configure = () => editor.setConfig({ plugins, toolbar: 'undo redo | heading bold italic underline | bullist numlist | openAIReview toggleAuthorship' });
+      editor.innerHTML = params.get('essay') === '1' ? '<h2>Why the valley floods more often</h2><p></p>' : '<h2>Field notes</h2><p>This paragraph was here before recording started.</p><p></p>';
+      // ?theme=dark shows the dark theme.
+      const theme = params.get('theme') === 'dark' ? 'dark' : undefined;
+      if (theme) document.body.classList.add('dark');
+      const configure = () => editor.setConfig({ plugins, theme, toolbar: 'undo redo | heading bold italic underline | bullist numlist | openAIReview toggleAuthorship' });
       await customElements.whenDefined('editora-editor');
       configure();
       document.getElementById('mount').append(editor);

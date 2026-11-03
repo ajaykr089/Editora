@@ -1,7 +1,7 @@
 {
   "name": "@editora/authorship",
   "version": "0.0.0",
-  "description": "Record where every piece of text in a rich text editor came from (typed, pasted, AI, collaborator), highlight it, replay how it was written and export a verifiable report.",
+  "description": "Authorship tracking and AI disclosure for rich text editors: see which text was typed, pasted (from Word, Google Docs or the web), AI-written (with the model) or added by a collaborator. Highlights, writing replay, annotated HTML export and a tamper-evident witness server.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -61,15 +61,25 @@
   },
   "keywords": [
     "authorship",
+    "authorship-tracking",
     "provenance",
-    "ai-content",
+    "content-provenance",
+    "text-provenance",
     "ai-disclosure",
+    "ai-transparency",
+    "ai-generated-content",
+    "ai-labeling",
+    "eu-ai-act",
     "writing-replay",
+    "writing-process",
+    "paste-detection",
     "academic-integrity",
-    "content-credentials",
+    "edtech",
+    "iptc",
     "rich-text-editor",
-    "contenteditable",
     "wysiwyg",
+    "contenteditable",
+    "react",
     "editora"
   ]
 }
