@@ -181,3 +181,38 @@ describe('attachAuthorship', () => {
     again.destroy();
   });
 });
+
+describe('attachAuthorship edge cases', () => {
+  it('treats a click on a page button outside the editor as external, not a tool', async () => {
+    const root = editor('<p>A</p>');
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    const controller = attachAuthorship(root, { author: 'Ana', autoStart: true });
+    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    root.querySelector('p')!.append('B');
+    await flush();
+    expect(controller.originAt(1)?.kind).toBe('external');
+    controller.destroy();
+  });
+
+  it('reports a failing witness through flush and the error event only', async () => {
+    const root = editor('<p>A</p>');
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown) => unhandled.push(reason);
+    process.on('unhandledRejection', onUnhandled);
+    const errors: Error[] = [];
+    const controller = attachAuthorship(root, {
+      author: 'Ana',
+      autoStart: true,
+      witness: { url: '/w', doc: 'd', intervalMs: 60_000, fetch: (async () => new Response('nope', { status: 500 })) as typeof fetch },
+    });
+    controller.on('error', (error) => errors.push(error));
+    type(root, root.querySelector('p')!.firstChild as Text, 1, 'b');
+    await expect(controller.flush()).rejects.toThrow(/Witness answered 500/);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    process.off('unhandledRejection', onUnhandled);
+    expect(errors).toHaveLength(1);
+    expect(unhandled).toEqual([]);
+    controller.destroy();
+  });
+});

@@ -33,3 +33,17 @@ export { buildDocMap, rangeFor, offsetOfPoint, offsetsOfRange } from './dom/text
 export type { DocMap, TextSegment } from './dom/text';
 export { detectPasteSource } from './dom/detect';
 export type { PasteSource, PasteInfo } from './dom/detect';
+
+// UI: highlights, summary panel, replay dialog.
+export { createHighlighter } from './dom/highlight';
+export type { Highlighter, HighlighterOptions } from './dom/highlight';
+export { createAuthorshipPanel } from './dom/panel';
+export type { AuthorshipPanel, PanelOptions } from './dom/panel';
+export { openReplayView } from './dom/replay-view';
+export type { ReplayView, ReplayViewOptions } from './dom/replay-view';
+export { DEFAULT_LABELS, describeOrigin, mergeLabels } from './dom/labels';
+export type { AuthorshipLabels } from './dom/labels';
+
+// Export: annotated HTML, embedded JSON, IPTC terms.
+export { toAnnotatedHtml, embedState, readEmbeddedState, digitalSourceType, documentSourceType, IPTC_DIGITAL_SOURCE_TYPE, EMBED_TYPE } from './dom/export';
+export type { AnnotateOptions } from './dom/export';

@@ -40,6 +40,12 @@ export interface AttachAuthorshipOptions extends EngineOptions {
   witness?: WitnessOptions;
   /** Called after each recorded change. */
   onChange?: (change: AuthorshipChange) => void;
+  /**
+   * Whether a click or key outside the content was on the editor's own UI, so
+   * the text change right after it counts as "tool" rather than "external".
+   * Default: inside the editor element, a dialog, menu or listbox, or a `[data-command]` control.
+   */
+  isEditorUi?: (target: Element) => boolean;
 }
 
 export interface AuthorshipChange extends ChangeRecord {
@@ -136,6 +142,9 @@ function specFromElement(element: Element, author: string | undefined): OriginSp
   return { kind, author: read('author') ?? author, source: read('source'), model: read('model'), provider: read('provider'), label: read('label') };
 }
 
+const EDITOR_HOST = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
+const EDITOR_UI = '[role="dialog"], [role="menu"], [role="listbox"], [role="toolbar"], [data-command]';
+
 const isApple = () => typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform || navigator.userAgent);
 
 export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOptions = {}): AuthorshipController {
@@ -205,17 +214,20 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       if (last && (last.origin === spec || (typeof last.origin === 'object' && typeof spec === 'object' && JSON.stringify(last.origin) === JSON.stringify(spec)))) last.len += len;
       else pieces.push({ len, origin: spec });
     };
+    // Line breaks and islands between text nodes take the origin of the text after them.
     let pos = start;
+    let last: OriginSpec | 'inherit' = origin;
     for (const segment of next.segments) {
       if (segment.end <= start) continue;
       if (segment.start >= end) break;
       const from = Math.max(start, segment.start);
       const to = Math.min(end, segment.end);
-      add(from - pos, origin);
-      add(to - from, provenanceOf(segment.node) ?? origin);
+      last = provenanceOf(segment.node) ?? origin;
+      add(from - pos, last);
+      add(to - from, last);
       pos = to;
     }
-    add(end - pos, origin);
+    add(end - pos, last);
     return pieces;
     };
   };
@@ -338,8 +350,13 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     }
   };
 
+  const host = root.closest(EDITOR_HOST) ?? root.parentElement;
+  const isEditorUi = options.isEditorUi ?? ((target: Element) => Boolean(host?.contains(target)) || Boolean(target.closest(EDITOR_UI)));
+
   const onOutsideInteraction = (event: Event) => {
     if (!recording || inRoot(event.target)) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || !isEditorUi(target)) return;
     lastOutside = now();
     const command = (event.target as Element | null)?.closest?.('[data-command]')?.getAttribute('data-command');
     lastCommand = command ?? undefined;
@@ -436,7 +453,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
 
   const flush = (): Promise<void> => {
     const run = async () => {
-      if (sending) await sending.catch(() => undefined);
+      if (sending) await sending;
       catchUp();
       await sendBatches();
     };
@@ -444,8 +461,14 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       emit('error', error instanceof Error ? error : new Error(String(error)));
       throw error;
     });
-    sending = promise.finally(() => {
-      if (sending === promise) sending = null;
+    // `sending` only orders sends; the caller handles the rejection of `promise`.
+    const settled = promise.then(
+      () => undefined,
+      () => undefined,
+    );
+    sending = settled;
+    void settled.then(() => {
+      if (sending === settled) sending = null;
     });
     return promise;
   };
