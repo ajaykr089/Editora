@@ -1,9 +1,9 @@
-import { snippet } from './dom';
-import { imageRules } from './rules/images';
-import { GENERIC_LINK_TEXT, linkRules } from './rules/links';
-import { structureRules } from './rules/structure';
-import { textRules } from './rules/text';
-import type { CheckOptions, Issue, ResolvedOptions, Rule } from './types';
+import { snippet } from './dom.js';
+import { imageRules } from './rules/images.js';
+import { GENERIC_LINK_TEXT, linkRules } from './rules/links.js';
+import { structureRules } from './rules/structure.js';
+import { textRules } from './rules/text.js';
+import type { CheckOptions, Issue, ResolvedOptions, Rule } from './types.js';
 
 /** Every rule, in the order issues are grouped in reports. */
 export const RULES: Rule[] = [...imageRules, ...linkRules, ...structureRules, ...textRules];

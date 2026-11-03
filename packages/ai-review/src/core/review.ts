@@ -1,4 +1,4 @@
-import { applyChanges, diffText, diffTokens, opsToChanges, tokenize, type TextChange } from './diff';
+import { applyChanges, diffText, diffTokens, opsToChanges, tokenize, type TextChange } from './diff.js';
 
 export type HunkStatus = 'pending' | 'accepted' | 'rejected';
 

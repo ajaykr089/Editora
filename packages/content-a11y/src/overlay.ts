@@ -1,5 +1,5 @@
-import { checkContent, type CheckResult } from './check';
-import type { CheckOptions, Fix, Issue } from './types';
+import { checkContent, type CheckResult } from './check.js';
+import type { CheckOptions, Fix, Issue } from './types.js';
 
 export interface ContentCheckerOptions extends CheckOptions {
   /** Re-check while the person types (default true). */

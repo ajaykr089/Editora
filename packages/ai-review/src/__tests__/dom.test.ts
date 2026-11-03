@@ -1,7 +1,7 @@
-import { AIReview } from '../core/review';
-import { applyHunk, htmlWithoutSuggestions, isStale, markBlockReplacement, markInlineHunks, revertHunk } from '../dom/marks';
-import { createDomReview } from '../dom/overlay';
-import { buildTextMap, targetsForRange, targetText } from '../dom/text';
+import { AIReview } from '../core/review.js';
+import { applyHunk, htmlWithoutSuggestions, isStale, markBlockReplacement, markInlineHunks, revertHunk } from '../dom/marks.js';
+import { createDomReview } from '../dom/overlay.js';
+import { buildTextMap, targetsForRange, targetText } from '../dom/text.js';
 
 function editor(html: string): HTMLElement {
   document.body.innerHTML = `<div class="wrap"><div class="editora-content" contenteditable="true">${html}</div></div>`;

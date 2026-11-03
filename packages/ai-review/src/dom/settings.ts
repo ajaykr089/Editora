@@ -1,8 +1,8 @@
-import { createOllamaProvider, OLLAMA_CLOUD_MODELS, OLLAMA_LOCAL_URL, ollamaLocalCloudTag, DEFAULT_OLLAMA_MODEL } from '../providers/ollama';
-import { createOpenAICompatibleProvider, OPENAI_COMPATIBLE_PRESETS, type OpenAICompatiblePreset } from '../providers/openai';
-import { createProxyProvider } from '../providers/proxy';
-import type { AIProvider } from '../providers/types';
-import { applyTheme, ensureStyles } from './styles';
+import { createOllamaProvider, OLLAMA_CLOUD_MODELS, OLLAMA_LOCAL_URL, ollamaLocalCloudTag, DEFAULT_OLLAMA_MODEL } from '../providers/ollama.js';
+import { createOpenAICompatibleProvider, OPENAI_COMPATIBLE_PRESETS, type OpenAICompatiblePreset } from '../providers/openai.js';
+import { createProxyProvider } from '../providers/proxy.js';
+import type { AIProvider } from '../providers/types.js';
+import { applyTheme, ensureStyles } from './styles.js';
 
 /** A provider your server offers through `createAIReviewHandler`. */
 export interface ProxyChoice {

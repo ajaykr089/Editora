@@ -1,16 +1,16 @@
 // Headless core: works on plain text, in the browser or on a server.
-export { tokenize, diffTokens, diffText, opsToChanges, applyChanges, DEFAULT_MAX_EDIT_DISTANCE } from './core/diff';
-export type { DiffOp, DiffOpType, TextChange } from './core/diff';
-export { AIReview, splitBlocks } from './core/review';
-export type { ReviewHunk, HunkStatus, ReviewSnapshot, ReviewListener, ReviewOptions } from './core/review';
-export { buildRewritePrompt, cleanModelOutput, REWRITE_PRESETS } from './core/prompt';
-export type { RewritePreset, RewritePromptInput, RewritePrompt } from './core/prompt';
-export { runRewrite } from './core/run';
-export type { RunRewriteOptions } from './core/run';
+export { tokenize, diffTokens, diffText, opsToChanges, applyChanges, DEFAULT_MAX_EDIT_DISTANCE } from './core/diff.js';
+export type { DiffOp, DiffOpType, TextChange } from './core/diff.js';
+export { AIReview, splitBlocks } from './core/review.js';
+export type { ReviewHunk, HunkStatus, ReviewSnapshot, ReviewListener, ReviewOptions } from './core/review.js';
+export { buildRewritePrompt, cleanModelOutput, REWRITE_PRESETS } from './core/prompt.js';
+export type { RewritePreset, RewritePromptInput, RewritePrompt } from './core/prompt.js';
+export { runRewrite } from './core/run.js';
+export type { RunRewriteOptions } from './core/run.js';
 
 // Providers.
-export { AIProviderError } from './providers/types';
-export type { AIProvider, CompletionRequest, FetchLike } from './providers/types';
+export { AIProviderError } from './providers/types.js';
+export type { AIProvider, CompletionRequest, FetchLike } from './providers/types.js';
 export {
   createOllamaProvider,
   ollamaLocalCloudTag,
@@ -18,21 +18,21 @@ export {
   OLLAMA_LOCAL_URL,
   OLLAMA_CLOUD_URL,
   DEFAULT_OLLAMA_MODEL,
-} from './providers/ollama';
-export type { OllamaProviderOptions, ModelOption } from './providers/ollama';
-export { createOpenAICompatibleProvider, OPENAI_COMPATIBLE_PRESETS } from './providers/openai';
-export type { OpenAICompatibleProviderOptions, OpenAICompatiblePreset } from './providers/openai';
-export { createProxyProvider, CLIENT_KEY_HEADER } from './providers/proxy';
-export type { ProxyProviderOptions } from './providers/proxy';
+} from './providers/ollama.js';
+export type { OllamaProviderOptions, ModelOption } from './providers/ollama.js';
+export { createOpenAICompatibleProvider, OPENAI_COMPATIBLE_PRESETS } from './providers/openai.js';
+export type { OpenAICompatibleProviderOptions, OpenAICompatiblePreset } from './providers/openai.js';
+export { createProxyProvider, CLIENT_KEY_HEADER } from './providers/proxy.js';
+export type { ProxyProviderOptions } from './providers/proxy.js';
 
 // Any contenteditable element.
-export { attachAIReview, DEFAULT_MENU_LABELS } from './dom/attach';
-export type { AttachOptions, AIReviewController, MenuLabels } from './dom/attach';
-export { createDomReview, DEFAULT_REVIEW_LABELS } from './dom/overlay';
-export type { DomReview, DomReviewOptions, ReviewEndInfo, ReviewLabels } from './dom/overlay';
-export { htmlWithoutSuggestions } from './dom/marks';
-export { targetsForRange, buildTextMap } from './dom/text';
-export type { ReviewTarget, TextMap } from './dom/text';
+export { attachAIReview, DEFAULT_MENU_LABELS } from './dom/attach.js';
+export type { AttachOptions, AIReviewController, MenuLabels } from './dom/attach.js';
+export { createDomReview, DEFAULT_REVIEW_LABELS } from './dom/overlay.js';
+export type { DomReview, DomReviewOptions, ReviewEndInfo, ReviewLabels } from './dom/overlay.js';
+export { htmlWithoutSuggestions } from './dom/marks.js';
+export { targetsForRange, buildTextMap } from './dom/text.js';
+export type { ReviewTarget, TextMap } from './dom/text.js';
 export {
   openSettingsDialog,
   loadSettings,
@@ -43,5 +43,5 @@ export {
   proxyChoicesFor,
   defaultSettingsFor,
   isOllamaRunning,
-} from './dom/settings';
-export type { AISettings, ProviderKind, ProxyChoice, UserSettingsConfig } from './dom/settings';
+} from './dom/settings.js';
+export type { AISettings, ProviderKind, ProxyChoice, UserSettingsConfig } from './dom/settings.js';

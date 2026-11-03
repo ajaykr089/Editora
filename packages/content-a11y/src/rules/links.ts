@@ -1,5 +1,5 @@
-import { accessibleText, all, unwrap } from '../dom';
-import type { Rule } from '../types';
+import { accessibleText, all, unwrap } from '../dom.js';
+import type { Rule } from '../types.js';
 
 export const GENERIC_LINK_TEXT = [
   'click here', 'click', 'here', 'click this', 'tap here', 'read more', 'more', 'learn more', 'more info',

@@ -1,6 +1,6 @@
 {
   "name": "@editora/email-html",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Turn rich-text editor HTML into email-safe HTML: inline styles, table layout, Outlook fixes, bulletproof buttons and a plain-text version, with warnings for what email clients will not show.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

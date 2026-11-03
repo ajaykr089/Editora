@@ -28,6 +28,13 @@ Last updated: 2026-03-07
 - @editora/ui-react: React wrappers around ui-core components.
 - @editora/icons and @editora/react-icons: icon packages.
 - @editora/toast: notification APIs and primitives.
+- @editora/markdown-editor: markdown editor for React with live preview.
+- @editora/paste-cleaner: cleanPaste({ html, text }) -> { html, source, warnings }; PasteCleanerPlugin from @editora/paste-cleaner/editora.
+- @editora/content-a11y: checkContent(html) / fixContent(html); ContentA11yPlugin from @editora/content-a11y/editora; CLI `content-a11y`.
+- @editora/ai-review: attachAIReview(element) or AIReviewPlugin from @editora/ai-review/editora; server proxy from @editora/ai-review/server.
+- @editora/email-html: toEmailHtml(html, options) -> { html, text, warnings, size }; CLI `email-html`.
+- @editora/rich-text-convert: convert(input, { from?, to }) -> { output, warnings }; CLI `rich-text-convert`.
+- Content tools docs: https://editora-ecosystem.netlify.app/docs/content-tools/overview
 
 ## Coding contract for AI assistants
 1. Use concrete imports from @editora/* packages.

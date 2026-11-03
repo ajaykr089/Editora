@@ -16,7 +16,9 @@ Understand how Editora packages fit together in a scalable monorepo ecosystem.
 - **Visual system**: `@editora/themes`
 - **Icons**: `@editora/icons`, `@editora/react-icons`
 - **UI layer**: `@editora/ui-core`, `@editora/ui-react`
-- **Code/source editing**: `@editora/light-code-editor`
+- **Code/source editing**: `@editora/light-code-editor`, `@editora/markdown-editor`
+- **Content tools** (any editor): `@editora/paste-cleaner`, `@editora/content-a11y`, `@editora/ai-review`,
+  `@editora/email-html`, `@editora/rich-text-convert` ([overview](../content-tools/overview))
 
 ## Recommended adoption order
 
