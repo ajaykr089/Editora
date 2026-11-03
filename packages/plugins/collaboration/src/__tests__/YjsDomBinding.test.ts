@@ -20,6 +20,31 @@ function relay(a: Y.Doc, b: Y.Doc): () => void {
 }
 
 describe('YjsDomBinding onChange propagation', () => {
+  it('announces remote changes as a collaborator\'s before applying them', async () => {
+    const docA = new Y.Doc();
+    const docB = new Y.Doc();
+    const stopRelay = relay(docA, docB);
+    const rootA = document.createElement('div');
+    rootA.innerHTML = '<p>Hello</p>';
+    const bindingA = new YjsDomBinding(rootA, docA, docA.getXmlFragment('content'));
+    const rootB = document.createElement('div');
+    const announced: Array<{ kind: string; text: string }> = [];
+    rootB.addEventListener('provenance:expect', (event) => announced.push({ kind: (event as CustomEvent).detail.kind, text: rootB.textContent ?? '' }));
+    const bindingB = new YjsDomBinding(rootB, docB, docB.getXmlFragment('content'));
+    await new Promise((r) => setTimeout(r, 0));
+
+    announced.length = 0;
+    rootA.innerHTML = '<p>Hello there</p>';
+    rootA.dispatchEvent(new Event('input', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 0));
+    // Announced while B still showed the old text, so a recorder classifies the change that follows.
+    expect(announced).toEqual([{ kind: 'collaborator', text: 'Hello' }]);
+
+    bindingA.destroy();
+    bindingB.destroy();
+    stopRelay();
+  });
+
   it('fires a native "input" event on the root when a remote update is applied', async () => {
     const docA = new Y.Doc();
     const docB = new Y.Doc();
