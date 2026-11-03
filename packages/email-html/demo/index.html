@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email HTML</title>
+<style>
+  :root { --bg: #f7f7f8; --card: #fff; --ink: #1d1d1f; --muted: #60646c; --line: #dcdde0; --ok: #1a7f37; --warn: #8a5a00; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px 24px 32px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+  section.wide { grid-column: 1 / -1; }
+  h2 { margin: 0 0 10px; font-size: 15px; }
+  textarea, pre { width: 100%; height: 340px; margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 6px; font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: #fbfbfc; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  ul.warnings { margin: 8px 0 0; padding-left: 18px; color: var(--warn); font-size: 13px; }
+  ul.warnings:empty::before { content: 'No warnings.'; color: var(--ok); margin-left: -18px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  label { color: var(--muted); font-size: 13px; }
+  input[type="text"] { font: inherit; padding: 5px 9px; border: 1px solid var(--line); border-radius: 6px; min-width: 240px; }
+  .frames { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  figure { margin: 0; }
+  figcaption { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+  iframe { border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+  #desktop { width: 680px; height: 900px; max-width: 100%; }
+  #phone { width: 375px; height: 900px; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Email HTML</h1>
+  <p>Editor HTML in, email-safe HTML out. Edit the input; the previews update.</p>
+</header>
+<main>
+  <section>
+    <h2>Editor HTML</h2>
+    <div class="row">
+      <label for="preheader">Preheader</label>
+      <input type="text" id="preheader" value="Three things that shipped this week">
+    </div>
+    <textarea id="input" spellcheck="false" aria-label="Editor HTML"></textarea>
+    <ul class="warnings" id="warnings" aria-label="Warnings"></ul>
+  </section>
+  <section>
+    <h2>Plain-text part</h2>
+    <div class="row"><span id="size" style="color:var(--muted);font-size:13px"></span></div>
+    <pre id="text" aria-label="Plain text"></pre>
+  </section>
+  <section class="wide">
+    <h2>Email</h2>
+    <div class="frames">
+      <figure><figcaption>Desktop</figcaption><iframe id="desktop" title="Email at desktop width"></iframe></figure>
+      <figure><figcaption>Phone (375px)</figcaption><iframe id="phone" title="Email at phone width"></iframe></figure>
+    </div>
+  </section>
+</main>
+<script type="module">
+import { toEmailHtml } from '/dist/index.js';
+
+const SAMPLE = `<h1>This week at Acme</h1>
+<p>Hi <span class="rte-merge-tag" contenteditable="false" data-token="{{ first_name }}">{{ first_name }}</span>, here is what <strong>shipped</strong>, what's <em>next</em>, and one thing to <a href="https://example.com/feedback">tell us about</a>.</p>
+<p><img src="https://picsum.photos/id/1018/1072/480" alt="Mountains at sunrise" width="1072" height="480"></p>
+<h2>Shipped</h2>
+<ul>
+  <li><p>Faster search, about <code>3×</code> on large workspaces</p></li>
+  <li><p>Dark mode</p><ul><li>Follows your system setting</li></ul></li>
+  <li><p>Offline drafts</p></li>
+</ul>
+<blockquote><p>"The new search is the first thing I noticed." — a customer</p></blockquote>
+<h2>Next</h2>
+<ol><li>Shared templates</li><li>Comment threads</li></ol>
+<table>
+  <thead><tr><th>Plan</th><th>Seats</th><th>Price</th></tr></thead>
+  <tbody><tr><td>Team</td><td>10</td><td>$49</td></tr><tr><td>Business</td><td>50</td><td>$199</td></tr></tbody>
+</table>
+<pre><code>npm install @acme/sdk
+acme login</code></pre>
+<p style="text-align:center"><a class="button" href="https://example.com/start">See what's new</a></p>
+<hr>
+<p style="font-size:0.8125rem;color:#59636e">You get this because you signed up at acme.example. <a href="{{ unsubscribe_url }}">Unsubscribe</a>.</p>
+<div style="display:flex;gap:12px"><span>Left</span><span>Right</span></div>`;
+
+const $ = (id) => document.getElementById(id);
+$('input').value = SAMPLE;
+
+function update() {
+  const result = toEmailHtml($('input').value, { title: 'This week at Acme', preheader: $('preheader').value });
+  $('desktop').srcdoc = result.html;
+  $('phone').srcdoc = result.html;
+  $('text').textContent = result.text;
+  $('size').textContent = `Email HTML: ${(result.size / 1024).toFixed(1)} KB (Gmail clips over 102 KB)`;
+  $('warnings').replaceChildren(...result.warnings.map((warning) => Object.assign(document.createElement('li'), { textContent: warning })));
+  window.lastResult = result;
+}
+let timer;
+for (const id of ['input', 'preheader']) $(id).addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(update, 250);
+});
+update();
+</script>
+</body>
+</html>
