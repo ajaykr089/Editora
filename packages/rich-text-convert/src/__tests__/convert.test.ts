@@ -48,8 +48,9 @@ describe('round trips', () => {
       const output = write(sample, format, {}, report);
       const back = read(output, format, new Report());
       if (format === 'editorjs') {
-        // Editor.js's code tool has no language, and nested lists take the parent's style.
+        // Editor.js's code tool has no language, nested lists take the parent's style, and inline code needs a plugin.
         expect(report.warnings).toEqual([
+          'Editor.js keeps "code" only when the InlineCode (@editorjs/inline-code) inline tool is registered',
           'Editor.js nested lists share their parent list style; mixed bullet/numbered nesting was unified',
           'The Editor.js code tool has no language; it was dropped',
         ]);
@@ -227,6 +228,17 @@ describe('format specifics', () => {
       { _type: 'block', listItem: 'bullet', level: 1, children: [{ _type: 'span', text: 'c' }] },
     ];
     expect(convert(blocks, { to: 'markdown' }).output).toBe('- a\n  - b\n- c\n');
+  });
+
+  it('warns which Editor.js inline tools the marks need, as Editor.js strips tags no tool allows', () => {
+    const { output, warnings } = convert('<p><b>b</b> <u>u</u> <mark>m</mark> <code>c</code> <s>s</s></p>', { to: 'editorjs' });
+    expect((output as any).blocks[0].data.text).toBe('<b>b</b> <u class="cdx-underline">u</u> <mark class="cdx-marker">m</mark> <code class="inline-code">c</code> <s>s</s>');
+    expect(warnings).toEqual([
+      'Editor.js keeps "underline" only when the Underline (@editorjs/underline) inline tool is registered',
+      'Editor.js keeps "highlight" only when the Marker (@editorjs/marker) inline tool is registered',
+      'Editor.js keeps "code" only when the InlineCode (@editorjs/inline-code) inline tool is registered',
+      'Editor.js has no official "strike" inline tool; the mark is lost unless you register one that allows <s>',
+    ]);
   });
 
   it('reads Editor.js nested and string lists', () => {

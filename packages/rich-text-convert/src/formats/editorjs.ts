@@ -1,4 +1,4 @@
-import { flattenToInlines, paragraph, type Block, type Doc, type Inline, type ListItemNode, type ListNode } from '../ast';
+import { flattenToInlines, paragraph, type Block, type Doc, type Inline, type ListItemNode, type ListNode, type Mark } from '../ast';
 import { parseHtml } from '../html-parser';
 import type { Report } from '../report';
 import { readBlocks, readInlines, writeInlines } from './html';
@@ -21,8 +21,26 @@ export interface EditorJsWriteOptions {
   lists?: 'nested' | 'strings';
 }
 
-// Editor.js inline tools: Bold, Italic, Link, Underline, Marker, InlineCode.
-const MARK_TAGS = { bold: 'b', italic: 'i', highlight: 'mark class="cdx-marker"', code: 'code class="inline-code"' } as const;
+// The tags Editor.js's inline tools write. Bold, Italic and Link are built in; the others are plugins.
+const MARK_TAGS = { bold: 'b', italic: 'i', underline: 'u class="cdx-underline"', highlight: 'mark class="cdx-marker"', code: 'code class="inline-code"' } as const;
+
+// Editor.js strips any inline tag that no registered inline tool allows.
+const MARK_TOOLS: Partial<Record<Mark, string>> = {
+  underline: 'Underline (@editorjs/underline)',
+  highlight: 'Marker (@editorjs/marker)',
+  code: 'InlineCode (@editorjs/inline-code)',
+};
+
+function usedMarks(blocks: Block[], out = new Set<Mark>()): Set<Mark> {
+  const inlines = (list: Inline[]) => list.forEach((node) => node.type === 'text' && node.marks?.forEach((mark) => out.add(mark)));
+  for (const block of blocks) {
+    if (block.type === 'paragraph' || block.type === 'heading') inlines(block.children);
+    else if (block.type === 'blockquote') usedMarks(block.children, out);
+    else if (block.type === 'list') block.items.forEach((item) => usedMarks(item.children, out));
+    else if (block.type === 'table') block.rows.forEach((row) => row.cells.forEach((cell) => usedMarks(cell.children, out)));
+  }
+  return out;
+}
 
 const fromHtml = (html: unknown, report: Report): Inline[] => readInlines(parseHtml(String(html ?? '')).children, report);
 const toHtml = (inlines: Inline[]) => writeInlines(inlines, { markTags: MARK_TAGS });
@@ -121,6 +139,13 @@ export function writeEditorJs(doc: Doc, report: Report, options: EditorJsWriteOp
   let counter = 0;
   const id = () => `b${(counter++).toString(36).padStart(4, '0')}`;
   const blocks: EditorJsBlock[] = [];
+
+  for (const mark of usedMarks(doc.children)) {
+    if (mark === 'bold' || mark === 'italic') continue;
+    const tool = MARK_TOOLS[mark];
+    if (tool) report.warn(`Editor.js keeps "${mark}" only when the ${tool} inline tool is registered`);
+    else report.warn(`Editor.js has no official "${mark}" inline tool; the mark is lost unless you register one that allows <${mark === 'strike' ? 's' : mark === 'subscript' ? 'sub' : 'sup'}>`);
+  }
 
   const write = (nodes: Block[]) => {
     for (const node of nodes) {

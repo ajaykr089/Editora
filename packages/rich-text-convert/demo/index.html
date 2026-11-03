@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rich-text convert</title>
+<style>
+  :root { --bg: #f7f7f8; --card: #fff; --ink: #1d1d1f; --muted: #60646c; --line: #dcdde0; --ok: #1a7f37; --bad: #c62828; --warn: #8a5a00; --accent: #2b59c3; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 24px 32px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+  section.wide { grid-column: 1 / -1; }
+  h2 { margin: 0 0 10px; font-size: 15px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  label { color: var(--muted); font-size: 13px; }
+  select, button { font: inherit; padding: 5px 9px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: inherit; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  textarea, pre { width: 100%; height: 300px; margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 6px; font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: #fbfbfc; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  ul.warnings { margin: 8px 0 0; padding-left: 18px; color: var(--warn); font-size: 13px; }
+  ul.warnings:empty::before { content: 'No warnings: everything was carried over.'; color: var(--ok); margin-left: -18px; }
+  #editor { min-height: 160px; border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; }
+  #editor :focus { outline: none; }
+  #editor table { border-collapse: collapse; }
+  #editor td, #editor th { border: 1px solid var(--line); padding: 4px 8px; }
+  #editor blockquote { border-left: 3px solid var(--line); margin-left: 0; padding-left: 12px; color: var(--muted); }
+  #editor pre { height: auto; }
+  #editor img { max-width: 240px; }
+  #editor ul[data-type="taskList"] { list-style: none; padding-left: 4px; }
+  #editor ul[data-type="taskList"] li { display: flex; gap: 6px; }
+  .verdict { font-weight: 600; }
+  .verdict.ok { color: var(--ok); }
+  .verdict.bad { color: var(--bad); }
+  #diff { height: auto; max-height: 220px; margin-top: 8px; }
+  #diff:empty { display: none; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rich-text convert</h1>
+  <p>Convert between editor formats, then load the result in the real editor and check it round-trips.</p>
+</header>
+<main>
+  <section>
+    <h2>Input</h2>
+    <div class="row">
+      <label for="sample">Sample</label>
+      <select id="sample"></select>
+      <label for="from">From</label>
+      <select id="from"><option value="">auto-detect</option></select>
+    </div>
+    <textarea id="input" spellcheck="false" aria-label="Input"></textarea>
+    <p id="detected" style="margin:6px 0 0;color:var(--muted);font-size:13px"></p>
+  </section>
+  <section>
+    <h2>Output</h2>
+    <div class="row">
+      <label for="to">To</label>
+      <select id="to"></select>
+      <label><input type="checkbox" id="lexical-images"> Lexical image nodes</label>
+    </div>
+    <pre id="output" aria-label="Output"></pre>
+    <ul class="warnings" id="warnings" aria-label="Warnings"></ul>
+  </section>
+  <section class="wide">
+    <h2 id="editor-title">In the real editor</h2>
+    <div class="row">
+      <span class="verdict" id="verdict"></span>
+      <button id="use-editor">Use the editor's content as input</button>
+    </div>
+    <div id="editor"></div>
+    <pre id="diff"></pre>
+  </section>
+</main>
+<script type="module">
+import { convert, detectFormat, FORMATS, read } from '/dist/index.js';
+
+const SAMPLES = {
+  'Release notes (HTML)': `<h2>Release 2.0</h2>
+<p>Plain, <strong>bold</strong>, <em>italic</em>, <u>underlined</u>, <s>struck</s>, <code>code()</code> and <a href="https://example.com">a link</a>.<br>Second line, H<sub>2</sub>O and x<sup>2</sup>.</p>
+<blockquote><p>Quoted text</p></blockquote>
+<ul><li>First<ul><li>Nested</li></ul></li><li>Second</li></ul>
+<ol start="3"><li>Third</li><li>Fourth</li></ol>
+<ul data-type="taskList"><li data-checked="true">Done</li><li data-checked="false">Todo</li></ul>
+<pre><code class="language-js">const a = 1;
+console.log(a);</code></pre>
+<hr>
+<p><img src="https://picsum.photos/id/10/240/120" alt="Forest"></p>
+<table><tr><th>Name</th><th>Score</th></tr><tr><td><strong>Ada</strong></td><td>10</td></tr></table>`,
+  'Notes (Markdown)': `# Meeting notes
+
+**Decisions** made on _Tuesday_:
+
+1. Ship the ~~beta~~ release
+2. Write \`docs\` — see [the guide](https://example.com/guide)
+   - with examples
+
+- [x] Agenda sent
+- [ ] Minutes
+
+| Owner | Task |
+| --- | --- |
+| Sam | Deploy |
+
+> Keep it small.
+`,
+  'Editor.js save()': JSON.stringify({ time: 1, version: '2.31.7', blocks: [
+    { id: 'a', type: 'header', data: { text: 'From Editor.js', level: 2 } },
+    { id: 'b', type: 'paragraph', data: { text: 'Text with <b>bold</b>, <i>italic</i>, <mark class="cdx-marker">marked</mark> and <a href="https://example.com">a link</a>.' } },
+    { id: 'c', type: 'list', data: { style: 'unordered', meta: {}, items: [{ content: 'One', meta: {}, items: [{ content: 'Nested', meta: {}, items: [] }] }, { content: 'Two', meta: {}, items: [] }] } },
+    { id: 'd', type: 'quote', data: { text: 'A quote', caption: '', alignment: 'left' } },
+    { id: 'e', type: 'code', data: { code: 'npm i @editora/rich-text-convert' } },
+    { id: 'f', type: 'delimiter', data: {} },
+    { id: 'g', type: 'table', data: { withHeadings: true, content: [['Name', 'Score'], ['Ada', '10']] } },
+  ] }, null, 2),
+  'Portable Text': JSON.stringify([
+    { _type: 'block', _key: 'a', style: 'h2', markDefs: [], children: [{ _type: 'span', _key: 'a1', text: 'From Sanity', marks: [] }] },
+    { _type: 'block', _key: 'b', style: 'normal', markDefs: [{ _key: 'l', _type: 'link', href: 'https://example.com' }], children: [
+      { _type: 'span', _key: 'b1', text: 'Some ', marks: [] }, { _type: 'span', _key: 'b2', text: 'strong', marks: ['strong'] }, { _type: 'span', _key: 'b3', text: ' text and ', marks: [] }, { _type: 'span', _key: 'b4', text: 'a link', marks: ['l'] }] },
+    { _type: 'block', _key: 'c', style: 'normal', listItem: 'bullet', level: 1, markDefs: [], children: [{ _type: 'span', _key: 'c1', text: 'Bullet', marks: [] }] },
+    { _type: 'block', _key: 'd', style: 'normal', listItem: 'bullet', level: 2, markDefs: [], children: [{ _type: 'span', _key: 'd1', text: 'Nested', marks: ['em'] }] },
+    { _type: 'code', _key: 'e', language: 'ts', code: 'export const answer = 42;' },
+  ], null, 2),
+};
+
+const $ = (id) => document.getElementById(id);
+for (const name of Object.keys(SAMPLES)) $('sample').add(new Option(name, name));
+for (const format of FORMATS) {
+  $('from').add(new Option(format, format));
+  $('to').add(new Option(format, format));
+}
+$('to').value = 'tiptap';
+$('input').value = SAMPLES[$('sample').value];
+
+// ---- the real editors, loaded on demand --------------------------------------------------
+const cdn = (spec) => import(`https://esm.sh/${spec}`);
+let destroy = () => {};
+let current = null; // { format, getValue(): Promise<unknown> }
+
+const mounts = {
+  async tiptap(value, element) {
+    const { Editor } = await cdn('@tiptap/core@3.32.2');
+    const StarterKit = (await cdn('@tiptap/starter-kit@3.32.2')).default;
+    const { Table, TableRow, TableCell, TableHeader } = await cdn('@tiptap/extension-table@3.32.2');
+    const Image = (await cdn('@tiptap/extension-image@3.32.2')).default;
+    const Subscript = (await cdn('@tiptap/extension-subscript@3.32.2')).default;
+    const Superscript = (await cdn('@tiptap/extension-superscript@3.32.2')).default;
+    const { TaskList, TaskItem } = await cdn('@tiptap/extension-list@3.32.2');
+    const Highlight = (await cdn('@tiptap/extension-highlight@3.32.2')).default;
+    // enableContentCheck: without it Tiptap silently swaps content it cannot load for an empty document.
+    let invalid = null;
+    const editor = new Editor({
+      element,
+      extensions: [StarterKit, Table, TableRow, TableCell, TableHeader, Image, Subscript, Superscript, Highlight, TaskList, TaskItem.configure({ nested: true })],
+      content: value,
+      enableContentCheck: true,
+      onContentError: ({ error }) => { invalid = error; },
+    });
+    if (invalid) throw invalid;
+    return { label: 'Tiptap 3.32', getValue: async () => editor.getJSON(), destroy: () => editor.destroy() };
+  },
+  async lexical(value, element) {
+    const lexical = await cdn('lexical@0.53.0');
+    const deps = '?deps=lexical@0.53.0';
+    const { registerRichText, HeadingNode, QuoteNode } = await cdn(`@lexical/rich-text@0.53.0${deps}`);
+    const { ListNode, ListItemNode, registerList, registerCheckList } = await cdn(`@lexical/list@0.53.0${deps}`);
+    const { LinkNode } = await cdn(`@lexical/link@0.53.0${deps}`);
+    const { CodeNode, CodeHighlightNode } = await cdn(`@lexical/code@0.53.0${deps}`);
+    const { TableNode, TableRowNode, TableCellNode } = await cdn(`@lexical/table@0.53.0${deps}`);
+    // HorizontalRuleNode lives in @lexical/react; this stand-in has the same JSON.
+    class HorizontalRuleNode extends lexical.DecoratorNode {
+      static getType() { return 'horizontalrule'; }
+      static clone(node) { return new HorizontalRuleNode(node.__key); }
+      static importJSON() { return new HorizontalRuleNode(); }
+      exportJSON() { return { type: 'horizontalrule', version: 1 }; }
+      createDOM() { return document.createElement('hr'); }
+      updateDOM() { return false; }
+      isInline() { return false; }
+      decorate() { return null; }
+    }
+    const editor = lexical.createEditor({ namespace: 'demo', nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, CodeNode, CodeHighlightNode, TableNode, TableRowNode, TableCellNode, HorizontalRuleNode], onError: (error) => { throw error; } });
+    const root = document.createElement('div');
+    root.contentEditable = 'true';
+    element.append(root);
+    editor.setRootElement(root);
+    const cleanups = [registerRichText(editor), registerList(editor), registerCheckList?.(editor)].filter(Boolean);
+    editor.setEditorState(editor.parseEditorState(value));
+    return { label: 'Lexical 0.53', getValue: async () => editor.getEditorState().toJSON(), destroy: () => { cleanups.forEach((fn) => fn()); editor.setRootElement(null); } };
+  },
+  async editorjs(value, element) {
+    const EditorJS = (await cdn('@editorjs/editorjs@2.31.7')).default;
+    const tools = {
+      header: (await cdn('@editorjs/header@2.8.9')).default,
+      list: { class: (await cdn('@editorjs/list@2.0.9')).default, inlineToolbar: true },
+      quote: (await cdn('@editorjs/quote@2.7.6')).default,
+      code: (await cdn('@editorjs/code@2.9.4')).default,
+      delimiter: (await cdn('@editorjs/delimiter@1.4.2')).default,
+      table: (await cdn('@editorjs/table@2.4.6')).default,
+      checklist: (await cdn('@editorjs/checklist@1.6.0')).default,
+      underline: (await cdn('@editorjs/underline@1.2.1')).default,
+      marker: (await cdn('@editorjs/marker@1.4.0')).default,
+      inlineCode: (await cdn('@editorjs/inline-code@1.5.2')).default,
+      image: { class: (await cdn('@editorjs/image@2.10.3')).default, config: { uploader: { uploadByUrl: async (url) => ({ success: 1, file: { url } }) } } },
+    };
+    const holder = document.createElement('div');
+    element.append(holder);
+    const editor = new EditorJS({ holder, tools, data: value, minHeight: 40 });
+    await editor.isReady;
+    return { label: 'Editor.js 2.31', getValue: () => editor.save(), destroy: () => editor.destroy() };
+  },
+  async html(value, element) {
+    const box = document.createElement('div');
+    box.innerHTML = value; // The demo's own converter output.
+    element.append(box);
+    return { label: 'the browser (HTML rendered)', getValue: async () => box.innerHTML };
+  },
+};
+
+function firstDiff(a, b, path = '') {
+  if (JSON.stringify(a) === JSON.stringify(b)) return null;
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+      const diff = firstDiff(a[key], b[key], `${path}.${key}`);
+      if (diff) return diff;
+    }
+  }
+  return { path, expected: a, editor: b };
+}
+
+let run = 0;
+async function update() {
+  const id = ++run;
+  const input = $('input').value;
+  const to = $('to').value;
+  let result;
+  let from;
+  try {
+    from = $('from').value || detectFormat(input);
+    $('detected').textContent = $('from').value ? '' : `Detected: ${from}`;
+    result = convert(input, { from, to, lexical: { imageNodes: $('lexical-images').checked } });
+  } catch (error) {
+    $('output').textContent = String(error.message ?? error);
+    $('warnings').replaceChildren();
+    return;
+  }
+  $('output').textContent = typeof result.output === 'string' ? result.output : JSON.stringify(result.output, null, 2);
+  $('warnings').replaceChildren(...result.warnings.map((warning) => Object.assign(document.createElement('li'), { textContent: warning })));
+
+  destroy();
+  destroy = () => {};
+  $('editor').replaceChildren();
+  $('diff').textContent = '';
+  const mount = mounts[to];
+  if (!mount) {
+    current = null;
+    $('editor-title').textContent = 'In the real editor';
+    $('verdict').className = 'verdict';
+    $('verdict').textContent = `No live editor for "${to}" in this demo (Tiptap, Lexical, Editor.js and HTML have one).`;
+    return;
+  }
+  $('verdict').className = 'verdict';
+  $('verdict').textContent = 'Loading the editor...';
+  try {
+    const mounted = await mount(result.output, $('editor'));
+    if (id !== run) return mounted.destroy?.();
+    destroy = mounted.destroy ?? (() => {});
+    current = { format: to, getValue: mounted.getValue };
+    $('editor-title').textContent = `In ${mounted.label}`;
+    // Round trip: what the editor saves must read as the document we gave it.
+    const saved = await mounted.getValue();
+    const expected = read(result.output, to);
+    const back = read(saved, to);
+    const diff = firstDiff(expected, back);
+    $('verdict').className = `verdict ${diff ? 'bad' : 'ok'}`;
+    $('verdict').textContent = diff ? '✗ The editor changed the document when loading it' : '✓ The editor loaded it, and its saved output reads back as the same document';
+    $('diff').textContent = diff ? JSON.stringify(diff, null, 2) : '';
+    window.lastCheck = { to, ok: !diff, diff, warnings: result.warnings };
+  } catch (error) {
+    if (id !== run) return;
+    $('verdict').className = 'verdict bad';
+    $('verdict').textContent = `✗ The editor rejected the output: ${error.message ?? error}`;
+    window.lastCheck = { to, ok: false, error: String(error.stack ?? error) };
+    console.error(error);
+  }
+}
+
+$('sample').addEventListener('change', () => {
+  $('input').value = SAMPLES[$('sample').value];
+  $('from').value = '';
+  update();
+});
+for (const id of ['from', 'to', 'lexical-images']) $(id).addEventListener('change', update);
+let timer;
+$('input').addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(update, 300);
+});
+$('use-editor').addEventListener('click', async () => {
+  if (!current) return;
+  const value = await current.getValue();
+  $('input').value = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  $('from').value = current.format;
+  update();
+});
+window.demo = { update, convert, SAMPLES };
+update();
+</script>
+</body>
+</html>

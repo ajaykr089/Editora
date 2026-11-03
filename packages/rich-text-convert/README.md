@@ -13,6 +13,10 @@ const { output, warnings } = convert(tiptapJson, { to: 'lexical' });
 
 The input format is detected when `from` is left out. JSON formats can be passed as objects or as JSON strings.
 
+**Tiptap:** the output uses StarterKit plus Table, Image, TaskList/TaskItem, Subscript, Superscript and Highlight
+when the content has them. Register those extensions, and pass `enableContentCheck: true`: without it, Tiptap
+silently replaces content with a node or mark it does not know by an empty document.
+
 ## Formats
 
 | `from` / `to` | What it is |
@@ -39,7 +43,7 @@ and each difference becomes a warning:
 | ProseMirror basic schema | Underline, strike, sub/superscript, highlight; task-list checkboxes | `The basic ProseMirror schema has no "underline" mark...` |
 | Markdown | Merged table cells; block content inside table cells | `...table...` |
 | Portable Text | Checkboxes, list start numbers, inline images; rules, images and tables become blocks your schema must define | `Portable Text lists have no start number...` |
-| Editor.js | Code language; merged cells; mixed bullet/numbered nesting | `The Editor.js code tool has no language...` |
+| Editor.js | Code language; merged cells; mixed bullet/numbered nesting. Editor.js strips inline tags no tool allows: underline, highlight and inline code need the Underline, Marker and InlineCode tools, and strike, sub and superscript have no official tool | `Editor.js keeps "underline" only when the Underline (@editorjs/underline) inline tool is registered` |
 | Slate / Plate | List start numbers; Plate checkboxes | `Slate lists have no start number...` |
 | Any | Unknown nodes (mentions, callouts, embeds...) are unwrapped to their text or dropped | `Unsupported block "callout" was unwrapped` |
 
@@ -93,8 +97,20 @@ Lexical 0.53, Slate 0.120, @portabletext/to-html 6):
 - Slate's normalizer leaves our `slate` and `plate` values unchanged.
 - @portabletext/to-html renders our Portable Text to the same document.
 
-Editor.js needs a browser to run, so its output is checked against its documented block formats only. If a
-document from your editor converts wrongly, please open an issue with the JSON.
+In a browser (the demo below), the output was also loaded into live Tiptap 3.32, Lexical 0.53 and Editor.js 2.31
+editors, and what each editor saved back was read as the same document, apart from the losses reported as warnings.
+
+If a document from your editor converts wrongly, please open an issue with the JSON.
+
+## Demo
+
+```bash
+npm run build -w @editora/rich-text-convert
+node packages/rich-text-convert/demo/server.mjs   # http://localhost:5194
+```
+
+Pick a sample or paste your own content, choose the target, and the page loads the result in the real editor (from
+esm.sh) and checks that what the editor saves reads back as the same document.
 
 ## License
 
