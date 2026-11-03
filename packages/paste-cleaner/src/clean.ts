@@ -1,6 +1,6 @@
-import { detectSource, type PasteSource } from './detect';
-import { textToHtml } from './text';
-import { fontSizeInPoints, ownStyle, parseStyleSheets, type StyleSheetInfo } from './styles';
+import { detectSource, type PasteSource } from './detect.js';
+import { textToHtml } from './text.js';
+import { fontSizeInPoints, ownStyle, parseStyleSheets, type StyleSheetInfo } from './styles.js';
 
 export interface CleanPasteOptions {
   /** Keep text and highlight colours as inline styles (default false). */
