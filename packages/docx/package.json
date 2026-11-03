@@ -1,0 +1,76 @@
+{
+  "name": "@editora/docx",
+  "version": "0.0.0",
+  "description": "Read and write Word .docx files with no dependencies: real headings, numbered and nested lists, links, images, tables with merged cells, footnotes and tracked changes, with warnings for anything Word or the target cannot hold. Converts to any editor format via @editora/rich-text-convert.",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/docx"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "editora-docx": "bin/editora-docx.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.json",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@editora/rich-text-convert": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@editora/rich-text-convert": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "docx",
+    "word",
+    "microsoft-word",
+    "import",
+    "export",
+    "rich-text",
+    "tiptap",
+    "lexical",
+    "prosemirror",
+    "editor",
+    "editora"
+  ]
+}

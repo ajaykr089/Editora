@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOCX</title>
+<style>
+  :root { --bg: #f7f7f8; --card: #fff; --ink: #1d1d1f; --muted: #60646c; --line: #dcdde0; --ok: #1a7f37; --warn: #8a5a00; --accent: #2b59c3; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px 24px 32px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+  h2 { margin: 0 0 10px; font-size: 15px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  button, select { font: inherit; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .drop { border: 2px dashed var(--line); border-radius: 8px; padding: 18px; text-align: center; color: var(--muted); margin-bottom: 10px; }
+  .drop.over { border-color: var(--accent); color: var(--accent); }
+  textarea { width: 100%; height: 300px; padding: 10px; border: 1px solid var(--line); border-radius: 6px; font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: #fbfbfc; }
+  .preview { border: 1px solid var(--line); border-radius: 6px; padding: 8px 16px; min-height: 120px; max-height: 520px; overflow: auto; }
+  .preview table { border-collapse: collapse; }
+  .preview td, .preview th { border: 1px solid var(--line); padding: 4px 8px; }
+  .preview img { max-width: 100%; }
+  .preview blockquote { border-left: 3px solid var(--line); margin-left: 0; padding-left: 12px; color: var(--muted); }
+  ul.warnings { margin: 8px 0 0; padding-left: 18px; color: var(--warn); font-size: 13px; }
+  ul.warnings:empty::before { content: 'No warnings.'; color: var(--ok); margin-left: -18px; }
+  #status { color: var(--muted); font-size: 13px; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>DOCX</h1>
+  <p>Open a Word file as HTML, Markdown or editor JSON, or write HTML into a Word file. Everything runs in this page.</p>
+</header>
+<main>
+  <section>
+    <h2>Open a .docx</h2>
+    <div class="drop" id="drop">Drop a .docx here, or <label style="color:var(--accent);cursor:pointer;text-decoration:underline">choose one<input type="file" id="file" accept=".docx" hidden></label></div>
+    <div class="row">
+      <button id="sample-library">Sample: docx library file</button>
+      <button id="sample-textutil">Sample: Apple textutil file</button>
+      <label for="as">Show as</label>
+      <select id="as"><option>html</option><option>markdown</option><option>tiptap</option><option>lexical</option><option>ast</option></select>
+    </div>
+    <div class="preview" id="read-preview" aria-label="Document preview"></div>
+    <ul class="warnings" id="read-warnings" aria-label="Warnings when reading"></ul>
+  </section>
+  <section>
+    <h2>Write a .docx</h2>
+    <textarea id="html" spellcheck="false" aria-label="HTML to write"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="primary" id="download">Download .docx</button>
+      <button id="reopen">Read it back on the left</button>
+      <span id="status"></span>
+    </div>
+    <ul class="warnings" id="write-warnings" aria-label="Warnings when writing"></ul>
+  </section>
+</main>
+<script type="module">
+import { readDocx, writeDocx } from '/dist/index.js';
+import { convert, read } from '/convert/index.js';
+
+const $ = (id) => document.getElementById(id);
+const list = (id, warnings) => $(id).replaceChildren(...warnings.map((warning) => Object.assign(document.createElement('li'), { textContent: warning })));
+
+$('html').value = `<h1>Project update</h1>
+<p>Status is <strong>green</strong>. See <a href="https://example.com/plan">the plan</a> and the <code>deploy</code> notes.</p>
+<h2>Done</h2>
+<ul><li>Search<ul><li>3× faster</li></ul></li><li>Dark mode</li></ul>
+<ol start="3"><li>Third step</li><li>Fourth step</li></ol>
+<blockquote><p>Ship it.</p></blockquote>
+<pre><code>npm run release</code></pre>
+<table><tr><th>Owner</th><th>Task</th></tr><tr><td rowspan="2">Sam</td><td>Deploy</td></tr><tr><td>Announce</td></tr></table>
+<p><img src="https://picsum.photos/id/1018/600/240" alt="Mountains"></p>`;
+
+let current = null;
+async function show(bytes, name) {
+  const { doc, warnings } = await readDocx(bytes);
+  current = { doc, warnings, name };
+  render();
+}
+function render() {
+  if (!current) return;
+  const as = $('as').value;
+  const output = convert(current.doc, { from: 'ast', to: as }).output;
+  if (as === 'html') $('read-preview').innerHTML = output; // Our own converter's output.
+  else $('read-preview').replaceChildren(Object.assign(document.createElement('pre'), { textContent: typeof output === 'string' ? output : JSON.stringify(output, null, 2), style: 'white-space:pre-wrap;font-size:12px' }));
+  list('read-warnings', current.warnings);
+  window.lastRead = current;
+}
+
+$('file').addEventListener('change', async () => {
+  const file = $('file').files[0];
+  if (file) await show(new Uint8Array(await file.arrayBuffer()), file.name);
+});
+for (const type of ['dragenter', 'dragover']) $('drop').addEventListener(type, (event) => { event.preventDefault(); $('drop').classList.add('over'); });
+for (const type of ['dragleave', 'drop']) $('drop').addEventListener(type, () => $('drop').classList.remove('over'));
+$('drop').addEventListener('drop', async (event) => {
+  event.preventDefault();
+  const file = event.dataTransfer.files[0];
+  if (file) await show(new Uint8Array(await file.arrayBuffer()), file.name);
+});
+for (const [id, name] of [['sample-library', 'docx-library.docx'], ['sample-textutil', 'textutil.docx']]) {
+  $(id).addEventListener('click', async () => show(new Uint8Array(await (await fetch(`/fixtures/${name}`)).arrayBuffer()), name));
+}
+$('as').addEventListener('change', render);
+
+async function build() {
+  $('status').textContent = 'Writing...';
+  const { data, warnings } = await writeDocx(read($('html').value, 'html'), { title: 'Project update' });
+  list('write-warnings', warnings);
+  $('status').textContent = `${(data.length / 1024).toFixed(1)} KB`;
+  window.lastWrite = { data, warnings };
+  return data;
+}
+$('download').addEventListener('click', async () => {
+  const data = await build();
+  const url = URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+  Object.assign(document.createElement('a'), { href: url, download: 'project-update.docx' }).click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+$('reopen').addEventListener('click', async () => show(await build(), 'written.docx'));
+window.demo = { show, build };
+</script>
+</body>
+</html>
