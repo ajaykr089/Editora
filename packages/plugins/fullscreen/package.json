@@ -2,6 +2,15 @@
   "name": "@editora/plugin-fullscreen",
   "version": "1.0.3",
   "description": "Fullscreen plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "fullscreen",
+    "distraction-free",
+    "zen-mode"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

@@ -2,6 +2,15 @@
   "name": "@editora/line-height",
   "version": "1.0.3",
   "description": "Line height plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "line-height",
+    "line-spacing",
+    "typography"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

@@ -2,6 +2,15 @@
   "name": "@editora/indent",
   "version": "1.0.3",
   "description": "Indent plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "indent",
+    "outdent",
+    "formatting"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

@@ -2,6 +2,16 @@
   "name": "@editora/font-size",
   "version": "1.0.4",
   "description": "Font size plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "font-size",
+    "font",
+    "text-size",
+    "typography"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

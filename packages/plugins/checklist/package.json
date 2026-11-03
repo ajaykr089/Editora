@@ -2,6 +2,17 @@
   "name": "@editora/checklist",
   "version": "1.0.6",
   "description": "Checklist plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "checklist",
+    "todo",
+    "task-list",
+    "checkbox",
+    "list"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

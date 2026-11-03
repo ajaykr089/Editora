@@ -2,6 +2,16 @@
   "name": "@editora/plugin-link",
   "version": "1.0.6",
   "description": "Link plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "link",
+    "hyperlink",
+    "url",
+    "anchor"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

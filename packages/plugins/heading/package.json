@@ -2,6 +2,18 @@
   "name": "@editora/plugin-heading",
   "version": "1.0.4",
   "description": "Heading plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "heading",
+    "headings",
+    "h1",
+    "h2",
+    "h3",
+    "block-format"
+  ],
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],

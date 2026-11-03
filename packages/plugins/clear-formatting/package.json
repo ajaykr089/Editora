@@ -2,6 +2,15 @@
   "name": "@editora/clear-formatting",
   "version": "1.0.4",
   "description": "Clear formatting plugin for Editora",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "clear-formatting",
+    "remove-formatting",
+    "formatting"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

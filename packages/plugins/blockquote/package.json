@@ -2,6 +2,15 @@
   "name": "@editora/plugin-blockquote",
   "version": "1.0.4",
   "description": "Blockquote plugin for Rich Text Editor",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "wysiwyg",
+    "plugin",
+    "blockquote",
+    "quote",
+    "formatting"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {
