@@ -77,8 +77,11 @@
     var container = document.getElementById("breadcrumbs");
     if (!container) return;
 
-    var titleEl = document.querySelector(".docs-content h1, main h1, .hero h1");
-    var pageLabel = titleEl ? titleEl.textContent.trim() : document.title.split("|")[0].replace("Editora -", "").trim();
+    // The page heading, not document.title: titles are written for search results.
+    var titleEl = document.querySelector(".docs-content h1, main h1, .hero h1, h1");
+    var pageLabel = titleEl
+      ? titleEl.textContent.trim().replace(/^[^\p{L}\p{N}@]+/u, "")
+      : document.title.split(/[|:]/)[0].trim();
 
     var crumbs = ['<a href="' + rootPrefix + 'index.html">Home</a>'];
     if (currentDir === "docs") {
