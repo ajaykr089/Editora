@@ -1,6 +1,6 @@
 {
   "name": "@editora/rich-text-convert",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Convert rich text between Tiptap/ProseMirror JSON, Lexical, Slate/Plate, Portable Text, Editor.js, HTML and Markdown, with a report of anything that could not be carried over.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
