@@ -1,6 +1,6 @@
 import { announceProvenance, attachAuthorship, type AuthorshipController } from '../dom/attach';
 import { detectPasteSource } from '../dom/detect';
-import { buildDocMap, offsetOfPoint, rangeFor } from '../dom/text';
+import { buildDocMap, createDocMapper, offsetOfPoint, rangeFor } from '../dom/text';
 
 function editor(html: string): HTMLElement {
   document.body.innerHTML = `<div class="host"><div class="toolbar"><button data-command="insertEmoji">😀</button></div><div class="editora-content" contenteditable="true">${html}</div></div>`;
@@ -213,6 +213,57 @@ describe('attachAuthorship edge cases', () => {
     process.off('unhandledRejection', onUnhandled);
     expect(errors).toHaveLength(1);
     expect(unhandled).toEqual([]);
+    controller.destroy();
+  });
+});
+
+describe('createDocMapper', () => {
+  it('matches a full read after random edits', async () => {
+    const root = editor('<h2>T</h2><p>one <b>two</b></p><ul><li>a</li><li>b<br>c</li></ul><p><br></p><div><p>x</p>y</div>');
+    const mapper = createDocMapper(root);
+    const observer = new MutationObserver((records) => mapper.invalidate(records));
+    observer.observe(root, { childList: true, characterData: true, subtree: true, attributes: true });
+    mapper.build();
+    const edits: Array<() => void> = [
+      () => (root.querySelector('b')!.firstChild as Text).appendData('!'),
+      () => root.querySelector('li')!.append(' more'),
+      () => root.insertAdjacentHTML('beforeend', '<p>new <i>para</i></p>'),
+      () => root.querySelector('p')!.remove(),
+      () => root.querySelector('ul')!.insertAdjacentHTML('afterbegin', '<li>first</li>'),
+      () => root.querySelector('div')!.setAttribute('contenteditable', 'false'),
+      () => root.querySelector('div')!.removeAttribute('contenteditable'),
+      () => root.append(document.createTextNode('loose')),
+      () => root.querySelector('h2')!.replaceChildren('Title'),
+    ];
+    for (let round = 0; round < 3; round += 1) {
+      for (const edit of edits) {
+        try {
+          edit();
+        } catch {
+          // An element an earlier edit removed.
+        }
+        mapper.invalidate(observer.takeRecords());
+        const cached = mapper.build();
+        const fresh = buildDocMap(root);
+        expect(cached.text).toBe(fresh.text);
+        expect(cached.segments.map((s) => [s.start, s.end])).toEqual(fresh.segments.map((s) => [s.start, s.end]));
+      }
+    }
+    observer.disconnect();
+  });
+});
+
+describe('paste inserted by the editor itself', () => {
+  it('stays pasted when the insert fires a typing beforeinput (WebKit execCommand)', async () => {
+    const root = editor('<p>A</p>');
+    const controller = attachAuthorship(root, { author: 'Ana', autoStart: true });
+    const p = root.querySelector('p')!;
+    paste(root, '<b id="docs-internal-guid-2">B</b>', () => {
+      root.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertText', data: 'B', bubbles: true }));
+      p.append('B');
+    });
+    await flush();
+    expect(controller.originAt(1)).toMatchObject({ kind: 'pasted', source: 'google-docs' });
     controller.destroy();
   });
 });

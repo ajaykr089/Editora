@@ -30,6 +30,8 @@ export interface ReplayView {
 }
 
 const MAX_GAP_MS = 1500;
+// Month as a word: "3/11/2026" reads differently in the US and elsewhere.
+const stampFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'medium' });
 const SPEEDS = [1, 2, 5, 10, 50];
 
 export function openReplayView(log: AuthorshipLog, options: ReplayViewOptions = {}, doc: Document = document): ReplayView {
@@ -159,7 +161,7 @@ export function openReplayView(log: AuthorshipLog, options: ReplayViewOptions = 
       if (playing) caret.scrollIntoView?.({ block: 'nearest' });
     }
     slider.value = String(Math.round((position / total) * 1000));
-    const stamp = Number.isFinite(real) && events.length ? new Date(Math.max(real, replay.start)).toLocaleString() : '';
+    const stamp = Number.isFinite(real) && events.length ? stampFormat.format(Math.max(real, replay.start)) : '';
     time.textContent = `${stamp} · ${state.index}/${events.length}`;
     playButton.textContent = playing ? 'Pause' : position >= total ? 'Replay' : 'Play';
   };

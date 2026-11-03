@@ -29,8 +29,8 @@ export type {
 // Any contenteditable element.
 export { attachAuthorship, announceProvenance, PROVENANCE_ATTR, EXPECT_EVENT } from './dom/attach';
 export type { AttachAuthorshipOptions, AuthorshipController, AuthorshipChange, ExpectOptions, WitnessOptions } from './dom/attach';
-export { buildDocMap, rangeFor, offsetOfPoint, offsetsOfRange } from './dom/text';
-export type { DocMap, TextSegment } from './dom/text';
+export { buildDocMap, createDocMapper, rangeFor, offsetOfPoint, offsetsOfRange } from './dom/text';
+export type { DocMap, DocMapper, TextSegment } from './dom/text';
 export { detectPasteSource } from './dom/detect';
 export type { PasteSource, PasteInfo } from './dom/detect';
 

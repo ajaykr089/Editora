@@ -43,47 +43,124 @@ function isPlaceholderBr(br: Element, root: Element): boolean {
   return true;
 }
 
-export function buildDocMap(root: HTMLElement): DocMap {
+/** The text of one child of the root, read on its own so it can be cached until that child changes. */
+interface Piece {
+  text: string;
+  /** Offsets relative to the piece. */
+  segments: TextSegment[];
+  /** The piece starts / ends with a block boundary. */
+  breakBefore: boolean;
+  breakAfter: boolean;
+}
+
+function readPiece(child: Node, root: HTMLElement): Piece {
   const segments: TextSegment[] = [];
   let text = '';
   let pendingBreak = false;
+  let breakBefore = false;
+  let started = false;
 
   const push = (value: string) => {
-    if (pendingBreak && text && !text.endsWith('\n')) text += '\n';
+    if (!started) {
+      started = true;
+      breakBefore = pendingBreak;
+    }
+    // Checks the last character rather than text.endsWith, which flattens a string grown with +=.
+    if (pendingBreak && text && text.charCodeAt(text.length - 1) !== 10) text += '\n';
     pendingBreak = false;
     text += value;
   };
 
-  const walk = (parent: Node) => {
-    for (let child = parent.firstChild; child; child = child.nextSibling) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        const data = (child as Text).data;
-        if (!data) continue;
-        push('');
-        segments.push({ node: child as Text, start: text.length, end: text.length + data.length });
-        text += readText(data);
-        continue;
-      }
-      if (child.nodeType !== Node.ELEMENT_NODE) continue;
-      const element = child as HTMLElement;
-      if (SKIPPED_TAGS.has(element.tagName) || element.matches(IGNORE_SELECTOR)) continue;
-      if (element.tagName === 'BR') {
-        if (!isPlaceholderBr(element, root)) push('\n');
-        continue;
-      }
-      if (OBJECT_TAGS.has(element.tagName) || element.getAttribute('contenteditable') === 'false') {
-        push(OBJECT_CHAR);
-        continue;
-      }
-      const block = element.matches(BLOCK_SELECTOR);
-      if (block) pendingBreak = true;
-      walk(element);
-      if (block) pendingBreak = true;
+  const visit = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const data = (node as Text).data;
+      if (!data) return;
+      push('');
+      segments.push({ node: node as Text, start: text.length, end: text.length + data.length });
+      text += readText(data);
+      return;
     }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const element = node as HTMLElement;
+    if (SKIPPED_TAGS.has(element.tagName) || element.matches(IGNORE_SELECTOR)) return;
+    if (element.tagName === 'BR') {
+      if (!isPlaceholderBr(element, root)) push('\n');
+      return;
+    }
+    if (OBJECT_TAGS.has(element.tagName) || element.getAttribute('contenteditable') === 'false') {
+      push(OBJECT_CHAR);
+      return;
+    }
+    const block = element.matches(BLOCK_SELECTOR);
+    if (block) pendingBreak = true;
+    for (let inner = element.firstChild; inner; inner = inner.nextSibling) visit(inner);
+    if (block) pendingBreak = true;
   };
 
-  walk(root);
-  return { text, segments };
+  visit(child);
+  const block = child.nodeType === Node.ELEMENT_NODE && (child as Element).matches(BLOCK_SELECTOR);
+  return { text, segments, breakBefore: block || breakBefore, breakAfter: block || pendingBreak };
+}
+
+/**
+ * Reads the root child by child, reusing the text of children that have not
+ * changed since the last read. Feed it MutationObserver records.
+ */
+export interface DocMapper {
+  build(): DocMap;
+  invalidate(records: readonly MutationRecord[]): void;
+  reset(): void;
+}
+
+export function createDocMapper(root: HTMLElement): DocMapper {
+  let cache = new Map<Node, Piece>();
+  return {
+    build() {
+      const segments: TextSegment[] = [];
+      // Parts joined once at the end: `endsWith` on a string grown with += flattens it every time.
+      const parts: string[] = [];
+      let length = 0;
+      let lastChar = '';
+      let pendingBreak = false;
+      const next = new Map<Node, Piece>();
+      for (let child = root.firstChild; child; child = child.nextSibling) {
+        // Only blocks are cached: an inline child's <br> placeholders depend on its siblings.
+        const cacheable = child.nodeType === Node.ELEMENT_NODE && (child as Element).matches(BLOCK_SELECTOR);
+        const piece = (cacheable && cache.get(child)) || readPiece(child, root);
+        if (cacheable) next.set(child, piece);
+        if (piece.breakBefore) pendingBreak = true;
+        if (piece.text) {
+          if (pendingBreak && length && lastChar !== '\n') {
+            parts.push('\n');
+            length += 1;
+          }
+          pendingBreak = false;
+          const offset = length;
+          for (const segment of piece.segments) segments.push({ node: segment.node, start: segment.start + offset, end: segment.end + offset });
+          parts.push(piece.text);
+          length += piece.text.length;
+          lastChar = piece.text[piece.text.length - 1];
+        }
+        if (piece.breakAfter) pendingBreak = true;
+      }
+      cache = next;
+      return { text: parts.join(''), segments };
+    },
+    invalidate(records) {
+      for (const record of records) {
+        let node: Node | null = record.target;
+        while (node && node.parentNode !== root && node !== root) node = node.parentNode;
+        if (node && node !== root) cache.delete(node);
+      }
+    },
+    reset() {
+      cache = new Map();
+    },
+  };
+}
+
+export function buildDocMap(root: HTMLElement): DocMap {
+  return createDocMapper(root).build();
 }
 
 /** Index of the last segment starting at or before `offset`. */

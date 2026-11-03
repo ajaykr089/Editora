@@ -13,7 +13,7 @@ import { buildReport, type AuthorshipReport, type ReportOptions } from '../core/
 import { runsLength, scaleRuns } from '../core/runs';
 import type { AuthorshipState, ChangeCause, LogBatch, Origin, OriginKind, OriginSpec, Run, WitnessReceipt } from '../core/types';
 import { detectPasteSource } from './detect';
-import { buildDocMap, offsetOfPoint, offsetsOfRange, type DocMap } from './text';
+import { createDocMapper, offsetOfPoint, offsetsOfRange, type DocMap } from './text';
 
 /** Attribute that marks inserted text's origin: `data-provenance="ai"` plus `data-provenance-model` etc. */
 export const PROVENANCE_ATTR = 'data-provenance';
@@ -99,6 +99,8 @@ interface Pending {
   fragment?: Fragment;
   until: number;
   sticky?: boolean;
+  /** Until then a typing beforeinput does not replace it (WebKit fires insertText for an editor's own paste insert). */
+  guardUntil?: number;
 }
 
 const KINDS = new Set<OriginKind>(['existing', 'typed', 'pasted', 'ai', 'tool', 'collaborator', 'external']);
@@ -155,7 +157,8 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
   const snapshots = new Map<string, Run[]>();
   let recording = false;
   let destroyed = false;
-  let map: DocMap = buildDocMap(root);
+  const mapper = createDocMapper(root);
+  let map: DocMap = mapper.build();
   let pending: Pending | null = null;
   let composing = false;
   let lastOutside = 0;
@@ -181,6 +184,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
 
   const setPending = (next: Omit<Pending, 'until'> & { until?: number }) => {
     if (pending?.sticky && pending.until >= now() && !next.sticky) return;
+    if (pending?.guardUntil && pending.guardUntil >= now() && next.cause === 'type') return;
     pending = { until: now() + PENDING_MS, ...next };
   };
 
@@ -234,7 +238,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
 
   const reconcile = () => {
     if (!recording || composing || destroyed) return;
-    const next = buildDocMap(root);
+    const next = mapper.build();
     map = next;
     if (next.text === engine.text) return;
 
@@ -279,11 +283,21 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     emit('change', record);
   };
 
-  const observer = typeof MutationObserver !== 'undefined' ? new MutationObserver(() => reconcile()) : null;
+  const observer =
+    typeof MutationObserver !== 'undefined'
+      ? new MutationObserver((records) => {
+          mapper.invalidate(records);
+          reconcile();
+        })
+      : null;
+  const OBSERVE: MutationObserverInit = { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['contenteditable', 'data-authorship-ignore', 'data-air-ui'] };
 
   /** Apply DOM changes not seen yet, so `map` matches the DOM before reading offsets. */
   const catchUp = () => {
-    if (observer?.takeRecords().length) reconcile();
+    const records = observer?.takeRecords() ?? [];
+    if (!records.length) return;
+    mapper.invalidate(records);
+    reconcile();
   };
 
   const selectionFragment = (): Fragment | null => {
@@ -330,10 +344,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     else if (type === 'historyUndo' || type === 'historyRedo') setPending({ cause: 'undo', origin: { kind: 'external' }, hint });
   };
 
-  const onInput = () => {
-    catchUp();
-    reconcile();
-  };
+  const onInput = () => controller.sync();
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (!recording) return;
@@ -375,6 +386,7 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       origin: { kind: 'pasted', author: author(), source: info.source, via: 'paste', label: info.url },
       fragment: internal,
       until: now() + 2000,
+      guardUntil: now() + 300,
     });
   };
 
@@ -386,12 +398,12 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     if (!recording || !inRoot(event.target)) return;
     const data = event.dataTransfer;
     if (dragFragment) {
-      setPending({ cause: 'move', origin: typed(), fragment: dragFragment, until: now() + 2000 });
+      setPending({ cause: 'move', origin: typed(), fragment: dragFragment, until: now() + 2000, guardUntil: now() + 300 });
       dragFragment = null;
       return;
     }
     const info = detectPasteSource(data?.getData('text/html') ?? '', data?.getData('text/plain') ?? '', data ? Array.from(data.types) : []);
-    setPending({ cause: 'drop', origin: { kind: 'pasted', author: author(), source: info.source, via: 'drop', label: info.url }, until: now() + 2000 });
+    setPending({ cause: 'drop', origin: { kind: 'pasted', author: author(), source: info.source, via: 'drop', label: info.url }, until: now() + 2000, guardUntil: now() + 300 });
   };
 
   const onCopy = () => {
@@ -481,14 +493,16 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
     },
     start(state) {
       if (destroyed || recording) return;
-      map = buildDocMap(root);
+      // The DOM may have changed while nothing was observing it.
+      mapper.reset();
+      map = mapper.build();
       const saved = state ?? options.state;
       if (saved) engine.load(saved, map.text);
       else if (!engine.log && !engine.origins.length) engine.reset(map.text);
       else if (engine.text !== map.text) engine.update(map.text, { cause: 'external', origin: { kind: 'external' } });
       recording = true;
       remember(map.text);
-      observer?.observe(root, { childList: true, characterData: true, subtree: true });
+      observer?.observe(root, OBSERVE);
       if (options.witness) witnessTimer = setInterval(() => void flush().catch(() => undefined), options.witness.intervalMs ?? 15_000);
       emit('start', undefined);
     },
@@ -507,7 +521,8 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       pending = { cause, origin: { author: origin.kind === 'collaborator' ? undefined : author(), ...origin }, until: now() + (expectOptions.timeoutMs ?? 2000), sticky: true };
     },
     sync() {
-      catchUp();
+      const records = observer?.takeRecords() ?? [];
+      if (records.length) mapper.invalidate(records);
       reconcile();
     },
     getText: () => engine.text,
@@ -523,7 +538,9 @@ export function attachAuthorship(root: HTMLElement, options: AttachAuthorshipOpt
       catchUp();
       return engine.originAt(offsetOfPoint(map, node, offset));
     },
-    getReport: (reportOptions) => buildReport(engine.serialize(), reportOptions),
+    // Reads the engine's state directly: serialize() would deep-copy the whole log on every call.
+    getReport: (reportOptions) =>
+      buildReport({ origins: engine.origins, runs: engine.runs, text: engine.text, length: engine.text.length, log: engine.log ?? undefined }, reportOptions),
     serialize: (serializeOptions) => {
       catchUp();
       return engine.serialize(serializeOptions);
