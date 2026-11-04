@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word import and export</title>
+<link rel="stylesheet" href="/core/webcomponent.min.css">
+<style>
+  :root { --bg: #f6f7f9; --card: #fff; --ink: #1f2328; --muted: #59636e; --line: #d8dde3; --accent: #0b57d0; --accent-ink: #fff; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1216; --card: #171b21; --ink: #e6edf3; --muted: #9198a1; --line: #30363d; --accent: #4493f8; --accent-ink: #0b0f14; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .page { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+  .lede { margin: 4px 0 20px; color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .bar .spacer { flex: 1; }
+  button, select { font: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button svg { width: 16px; height: 16px; }
+  .editor-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .hint { margin: 8px 2px 0; color: var(--muted); font-size: 13px; }
+  details { margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details .row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+  pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px; border-radius: 8px; background: var(--bg); font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Word import and export</h1>
+  <p class="lede">Open a .docx in the editor, edit it, and save it back as Word. Nothing leaves this page.</p>
+
+  <div class="bar" role="toolbar" aria-label="Document">
+    <button class="primary" id="import" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Import Word
+    </button>
+    <button id="export" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+      Save as Word
+    </button>
+    <span class="spacer"></span>
+    <label class="sr-only" for="sample">Load a sample Word file</label>
+    <select id="sample">
+      <option value="">Try a sample file…</option>
+      <option value="docx-library.docx">Numbered lists, footnotes, merged cells</option>
+      <option value="textutil.docx">A file with no styles (from macOS TextEdit)</option>
+    </select>
+  </div>
+
+  <div class="editor-card" id="editor-card">
+    <editora-editor id="editor" height="460" plugins="heading bold italic underline strikethrough list link table code history">
+      <h1>Project update</h1>
+      <p>Status is <strong>green</strong>. See <a href="https://example.com/plan">the plan</a> and the <code>deploy</code> notes.</p>
+      <h2>Done</h2>
+      <ul><li>Search<ul><li>3× faster</li></ul></li><li>Dark mode</li></ul>
+      <ol start="3"><li>Third step</li><li>Fourth step</li></ol>
+      <blockquote><p>Ship it.</p></blockquote>
+      <table><tbody><tr><th>Owner</th><th>Task</th></tr><tr><td>Sam</td><td>Deploy</td></tr></tbody></table>
+    </editora-editor>
+  </div>
+  <p class="hint">You can also drag a .docx file onto the editor.</p>
+
+  <details id="developer">
+    <summary>What the converter sees</summary>
+    <div class="row">
+      <label for="view">Show the editor's content as</label>
+      <select id="view"><option>markdown</option><option>tiptap</option><option>lexical</option><option>portable-text</option><option>ast</option></select>
+    </div>
+    <pre id="output" aria-live="off"></pre>
+  </details>
+</div>
+
+<script type="module">
+import '/core/webcomponent.js';
+import { createDocxImport, downloadDocx } from '/dist/ui.js';
+import { convert, read } from '/convert/index.js';
+
+const editor = document.getElementById('editor');
+await customElements.whenDefined('editora-editor');
+editor.setConfig({
+  plugins: ['heading', 'bold', 'italic', 'underline', 'strikethrough', 'list', 'link', 'table', 'code', 'history'],
+  toolbar: 'undo redo | heading bold italic underline strikethrough | bullist numlist | link table',
+});
+
+let title = 'Project update';
+const importer = createDocxImport({
+  dropTarget: document.getElementById('editor-card'),
+  onImport: ({ doc, file }) => {
+    editor.setContent(convert(doc, { from: 'ast', to: 'html' }).output);
+    title = file.name.replace(/\.docx$/i, '');
+    showConverted();
+  },
+});
+document.getElementById('import').addEventListener('click', () => importer.open());
+
+document.getElementById('export').addEventListener('click', async () => {
+  const doc = read(editor.getContent(), 'html');
+  window.lastExport = await downloadDocx(doc, `${title}.docx`, { title });
+});
+
+document.getElementById('sample').addEventListener('change', async (event) => {
+  const name = event.target.value;
+  event.target.value = '';
+  if (!name) return;
+  const bytes = await (await fetch(`/fixtures/${name}`)).arrayBuffer();
+  await importer.importFile(new File([bytes], name, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+});
+
+function showConverted() {
+  const developer = document.getElementById('developer');
+  if (!developer.open) return;
+  const output = convert(editor.getContent(), { from: 'html', to: document.getElementById('view').value }).output;
+  document.getElementById('output').textContent = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
+}
+document.getElementById('developer').addEventListener('toggle', showConverted);
+document.getElementById('view').addEventListener('change', showConverted);
+window.demo = { importer, editor, read, convert };
+</script>
+</body>
+</html>
