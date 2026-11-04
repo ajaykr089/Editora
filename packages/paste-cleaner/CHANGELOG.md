@@ -1,5 +1,11 @@
 # @editora/paste-cleaner
 
+## 0.1.2
+
+### Patch Changes
+
+- 553d978: Typings now resolve in TypeScript projects that use `moduleResolution: "NodeNext"` or `"node16"` (they failed with TS2834 because relative imports had no file extension).
+
 ## 0.1.1
 
 ### Patch Changes
