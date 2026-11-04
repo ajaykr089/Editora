@@ -42,6 +42,20 @@ describe('diffText', () => {
     expect(applyEdits(before, edits)).toBe(after);
   });
 
+  it('keeps a new line whole when it ends like the line before (seen with @editora/agent inserts)', () => {
+    const before = 'Title\nOne.\nHeading\nNarrower than it was.\nNext steps\nItem';
+    const after = 'Title!\nOne!\nHeading?\nNarrower than it was.\nThe extra floods.\nNext steps\nItem';
+    const edits = diffText(before, after);
+    expect(applyEdits(before, edits)).toBe(after);
+    expect(edits.map((edit) => edit.ins)).toContain('The extra floods.\n');
+    // The unchanged line is not touched by any edit.
+    let text = before;
+    for (const edit of edits) {
+      expect(text.slice(edit.at, edit.at + edit.del)).not.toContain('Narrower');
+      text = text.slice(0, edit.at) + edit.ins + text.slice(edit.at + edit.del);
+    }
+  });
+
   it('round-trips random edits', () => {
     const words = ['alpha', 'beta', '\n', 'gamma', ' ', 'delta', 'eps\n'];
     let text = '';

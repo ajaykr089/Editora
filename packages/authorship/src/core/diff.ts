@@ -76,14 +76,25 @@ export function diffText(before: string, after: string, hint?: number): TextEdit
   let prefix = commonPrefix(before, after, min);
   if (hint !== undefined && hint >= 0 && hint < prefix) prefix = hint;
   const suffix = commonSuffix(before, after, min - prefix);
-  const oldMid = before.slice(prefix, before.length - suffix);
-  const newMid = after.slice(prefix, after.length - suffix);
+  let oldMid = before.slice(prefix, before.length - suffix);
+  let newMid = after.slice(prefix, after.length - suffix);
 
-  const oldLines = splitLines(oldMid);
-  const newLines = splitLines(newMid);
+  let oldLines = splitLines(oldMid);
+  let newLines = splitLines(newMid);
   if (oldLines.length < 3 || newLines.length < 3 || oldLines.length * newLines.length > MAX_LINE_MATRIX) {
     return [{ at: prefix, del: oldMid.length, ins: newMid }];
   }
+
+  // Line matching needs whole lines: a common suffix like the "s." of "was." and
+  // "floods." would otherwise split a line that did not change, and it would not match.
+  prefix = before.lastIndexOf('\n', prefix - 1) + 1;
+  const tailStart = before.length - suffix;
+  const lineStart = before.indexOf('\n', tailStart - 1);
+  const trimmedSuffix = lineStart < 0 ? 0 : Math.max(0, before.length - (lineStart + 1));
+  oldMid = before.slice(prefix, before.length - trimmedSuffix);
+  newMid = after.slice(prefix, after.length - trimmedSuffix);
+  oldLines = splitLines(oldMid);
+  newLines = splitLines(newMid);
 
   const edits: TextEdit[] = [];
   let shift = 0;
