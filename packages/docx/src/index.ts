@@ -1,7 +1,7 @@
-import type { Doc } from './ast';
-import { readDocxDoc, type ReadOptions } from './read';
-import { Report } from './report';
-import { writeDocxDoc, type WriteOptions } from './write';
+import type { Doc } from './ast.js';
+import { readDocxDoc, type ReadOptions } from './read.js';
+import { Report } from './report.js';
+import { writeDocxDoc, type WriteOptions } from './write.js';
 
 export interface DocxReadResult {
   /** The document tree; give it to @editora/rich-text-convert (`from: 'ast'`) for any other format. */
@@ -40,7 +40,7 @@ export async function writeDocx(doc: Doc, options: WriteOptions = {}): Promise<D
   return { data, warnings: report.warnings };
 }
 
-export { DocxError } from './zip';
-export type { Block, Doc, Inline, Mark } from './ast';
-export type { DocxImage, ReadOptions } from './read';
-export type { WriteOptions } from './write';
+export { DocxError } from './zip.js';
+export type { Block, Doc, Inline, Mark } from './ast.js';
+export type { DocxImage, ReadOptions } from './read.js';
+export type { WriteOptions } from './write.js';

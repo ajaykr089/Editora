@@ -1,5 +1,5 @@
-import { readDocx } from '../index';
-import { utf8, zip } from '../zip';
+import { readDocx } from '../index.js';
+import { utf8, zip } from '../zip.js';
 
 // Builds a minimal .docx around hand-written parts, to cover markup Word writes but the tools in fixtures/ do not.
 const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';

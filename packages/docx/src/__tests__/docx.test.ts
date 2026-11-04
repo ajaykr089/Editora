@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Doc } from '../ast';
-import { DocxError, readDocx, writeDocx } from '../index';
-import { fromUtf8, unzip, utf8, zip } from '../zip';
+import type { Doc } from '../ast.js';
+import { DocxError, readDocx, writeDocx } from '../index.js';
+import { fromUtf8, unzip, utf8, zip } from '../zip.js';
 
 const fixture = (name: string) => readFileSync(join(__dirname, 'fixtures', name));
 // A 2x1 red PNG.

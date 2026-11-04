@@ -1,8 +1,8 @@
-import type { Block, Doc, Inline, ListNode, Mark, TableNode } from './ast';
-import { EXTENSIONS, fromBase64, imageSize, imageType } from './media';
-import type { Report } from './report';
-import { el, escapeXml } from './xml';
-import { utf8, zip } from './zip';
+import type { Block, Doc, Inline, ListNode, Mark, TableNode } from './ast.js';
+import { EXTENSIONS, fromBase64, imageSize, imageType } from './media.js';
+import type { Report } from './report.js';
+import { el, escapeXml } from './xml.js';
+import { utf8, zip } from './zip.js';
 
 export interface WriteOptions {
   title?: string;

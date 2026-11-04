@@ -1,8 +1,8 @@
-import { normalize, paragraph, type Block, type Doc, type Inline, type Link, type ListItemNode, type ListNode, type Mark, type TableCellNode } from './ast';
-import { base64, imageType } from './media';
-import type { Report } from './report';
-import { child, children, find, findAll, isElement, parseXml, textContent, type XElement } from './xml';
-import { DocxError, fromUtf8, openZip, type ZipFiles } from './zip';
+import { normalize, paragraph, type Block, type Doc, type Inline, type Link, type ListItemNode, type ListNode, type Mark, type TableCellNode } from './ast.js';
+import { base64, imageType } from './media.js';
+import type { Report } from './report.js';
+import { child, children, find, findAll, isElement, parseXml, textContent, type XElement } from './xml.js';
+import { DocxError, fromUtf8, openZip, type ZipFiles } from './zip.js';
 
 export interface DocxImage {
   /** Path inside the .docx, e.g. `word/media/image1.png`. */
