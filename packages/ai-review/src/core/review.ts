@@ -52,6 +52,8 @@ export function splitBlocks(text: string): string[] {
 export class AIReview {
   readonly original: string[];
   private proposal = '';
+  /** Set when the proposal came as one string per block. */
+  private proposedBlocks: string[] | null = null;
   private streaming = true;
   private structureChanged = false;
   private hunkList: ReviewHunk[] = [];
@@ -91,18 +93,27 @@ export class AIReview {
     return () => this.listeners.delete(listener);
   }
 
-  /** Replace the proposal with the model output received so far. */
-  update(proposal: string): void {
+  /**
+   * Replace the proposal with the model output received so far: text with
+   * blank-line separated blocks, or one string per original block (an empty
+   * string deletes that block's text).
+   */
+  update(proposal: string | string[]): void {
     if (!this.streaming) throw new Error('AIReview: update() called after finish()');
-    this.proposal = proposal;
+    this.setProposal(proposal);
     this.recompute();
   }
 
   /** The model finished; `proposal` is its complete output if given. */
-  finish(proposal: string = this.proposal): void {
-    this.proposal = proposal;
+  finish(proposal: string | string[] = this.proposedBlocks ?? this.proposal): void {
+    this.setProposal(proposal);
     this.streaming = false;
     this.recompute();
+  }
+
+  private setProposal(proposal: string | string[]): void {
+    this.proposedBlocks = Array.isArray(proposal) ? proposal.slice() : null;
+    this.proposal = Array.isArray(proposal) ? proposal.join('\n\n') : proposal;
   }
 
   accept(id: string): boolean {
@@ -159,7 +170,7 @@ export class AIReview {
   }
 
   private recompute(): void {
-    const proposed = splitBlocks(this.proposal);
+    const proposed = this.proposedBlocks ?? splitBlocks(this.proposal);
     // While streaming, the last proposed block may be cut mid-word.
     const complete = this.streaming ? Math.max(0, proposed.length - 1) : proposed.length;
     const hunks: ReviewHunk[] = [];

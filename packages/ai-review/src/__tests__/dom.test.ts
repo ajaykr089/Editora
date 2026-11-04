@@ -147,3 +147,28 @@ describe('provenance markers', () => {
     expect(root.querySelector('del')!.hasAttribute('data-provenance')).toBe(false);
   });
 });
+
+describe('per-block proposals', () => {
+  it('keeps block count with an empty block, so a deletion stays inline', () => {
+    const review = new AIReview(['One.', 'Two.', 'Three.']);
+    review.finish(['One!', '', 'Three.']);
+    const snapshot = review.snapshot();
+    expect(snapshot.structureChanged).toBe(false);
+    expect(snapshot.hunks.map((hunk) => [hunk.block, hunk.deleted, hunk.inserted])).toEqual([
+      [0, '.', '!'],
+      [1, 'Two.', ''],
+    ]);
+    expect(review.resolve('accepted')).toEqual(['One!', '', 'Three.']);
+  });
+
+  it('removes a deleted paragraph and fills an empty placeholder block on accept', () => {
+    const root = editor('<p>Keep this.</p><p>Drop this.</p><p></p>');
+    const [keep, drop, placeholder] = Array.from(root.querySelectorAll<HTMLElement>('p'));
+    const targets = [keep, drop, placeholder].map((block) => ({ block, start: 0, end: buildTextMap(block).text.length }));
+    const dom = createDomReview({ root, targets });
+    dom.review.finish(['Keep this.', '', 'Added paragraph.']);
+    expect(root.querySelectorAll('ins[data-provenance="ai"]').length).toBe(1);
+    dom.acceptAll();
+    expect(Array.from(root.querySelectorAll('p')).map((p) => p.textContent)).toEqual(['Keep this.', 'Added paragraph.']);
+  });
+});

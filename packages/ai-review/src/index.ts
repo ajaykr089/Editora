@@ -31,7 +31,7 @@ export type { AttachOptions, AIReviewController, MenuLabels } from './dom/attach
 export { createDomReview, DEFAULT_REVIEW_LABELS } from './dom/overlay.js';
 export type { DomReview, DomReviewOptions, ReviewEndInfo, ReviewLabels } from './dom/overlay.js';
 export { htmlWithoutSuggestions } from './dom/marks.js';
-export { targetsForRange, buildTextMap } from './dom/text.js';
+export { targetsForRange, buildTextMap, textBlocks, BLOCK_SELECTOR } from './dom/text.js';
 export type { ReviewTarget, TextMap } from './dom/text.js';
 export {
   openSettingsDialog,
