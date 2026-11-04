@@ -221,6 +221,9 @@ export function createDocumentTools(draft: DraftDocument, options: DocumentTools
 export async function callTool(tools: AgentTool[], name: string, args: Record<string, unknown>): Promise<ToolResult> {
   const tool = tools.find((candidate) => candidate.name === name);
   if (!tool) return { text: `Error: there is no tool "${name}". Available: ${tools.map((t) => t.name).join(', ')}.`, isError: true };
+  if (args && typeof args.__invalid_arguments === 'string') {
+    return { text: `Error: the arguments for ${name} were not valid JSON: ${args.__invalid_arguments.slice(0, 200)}`, isError: true };
+  }
   try {
     return await tool.run(args ?? {});
   } catch (error) {
