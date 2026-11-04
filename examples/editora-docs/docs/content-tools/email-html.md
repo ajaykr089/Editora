@@ -2,7 +2,7 @@
 title: "@editora/email-html"
 sidebar_label: Email HTML
 sidebar_position: 5
-description: "Turn rich-text editor HTML into email-safe HTML: inline styles, table layout, Outlook fixes, bulletproof buttons and a plain-text version, with warnings for what email clients will not show."
+description: "Turn rich text editor HTML into email-safe HTML for Outlook, Gmail and Apple Mail, with inline styles, bulletproof buttons and a plain-text version."
 keywords: [editora, email, newsletter, outlook, gmail, inline styles, plain text]
 ---
 

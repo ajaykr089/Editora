@@ -1,6 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import { CANONICAL_PATHS } from "./src/seo/docSeo";
 
 const defaultSiteUrl = "https://editora-ecosystem.netlify.app";
 const defaultStorybookUrl = "https://editora-ecosystem-storybook.netlify.app";
@@ -42,6 +43,8 @@ const siteStructuredData = [
     logo: `${siteUrl}/img/brand/editora_logo_blocks.svg`,
     sameAs: [
       "https://github.com/ajaykr089/Editora",
+      "https://www.npmjs.com/package/@editora/core",
+      "https://editora-free.netlify.app",
       storybookUrl,
     ],
   },
@@ -146,7 +149,8 @@ const config: Config = {
         sitemap: {
           changefreq: "weekly",
           priority: 0.6,
-          ignorePatterns: ["/tags/**", "/404", "/404.html", "/search"],
+          // Duplicate component pages point their canonical URL at the other copy.
+          ignorePatterns: ["/tags/**", "/404", "/404.html", "/search", ...Object.keys(CANONICAL_PATHS)],
           filename: "sitemap.xml",
         },
         theme: {
