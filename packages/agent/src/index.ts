@@ -23,3 +23,11 @@ export { createProxyAgentProvider, AGENT_KEY_HEADER } from './providers/proxy.js
 export type { ProxyAgentProviderOptions } from './providers/proxy.js';
 export { AgentProviderError } from './providers/http.js';
 export type { FetchLike } from './providers/http.js';
+
+// One editor's agent, the chat panel and the page side of the MCP bridge.
+export { attachAgent, AgentBusyError } from './dom/attach.js';
+export type { AgentChoice, AgentController, AgentRunSummary, AgentSession, AttachAgentOptions } from './dom/attach.js';
+export { createAgentPanel, DEFAULT_PANEL_LABELS } from './dom/panel.js';
+export type { AgentPanel, AgentPanelLabels, AgentPanelOptions } from './dom/panel.js';
+export { connectMcpBridge } from './dom/mcp-client.js';
+export type { McpBridgeConnection, McpBridgeOptions } from './dom/mcp-client.js';
