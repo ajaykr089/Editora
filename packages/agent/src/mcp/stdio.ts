@@ -66,7 +66,8 @@ export async function handleMcpMessage(options: McpServerOptions, message: JsonR
 }
 
 export interface Readable {
-  on(event: 'data', listener: (chunk: Buffer | string) => void): unknown;
+  /** Chunks are strings or Node Buffers (anything with toString()). */
+  on(event: 'data', listener: (chunk: { toString(): string }) => void): unknown;
   on(event: 'end', listener: () => void): unknown;
 }
 export interface Writable {
