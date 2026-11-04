@@ -27,13 +27,15 @@ export interface EditoraMcpOptions extends Omit<BridgeOptions, 'token'> {
 /** Start the bridge and serve MCP on the given streams. Resolves when the input ends. */
 export async function runEditoraMcp(options: EditoraMcpOptions): Promise<{ bridge: Bridge; done: Promise<void> }> {
   const bridge = await startBridge(options);
+  let client: string | undefined;
   const done = serveStdio(
     {
       name: 'editora',
       version: options.version,
       instructions: MCP_INSTRUCTIONS,
       tools: mcpToolDefinitions(),
-      call: (name, args) => bridge.call(name, args),
+      onInitialize: (info) => (client = typeof info.name === 'string' ? info.name.slice(0, 80) : undefined),
+      call: (name, args) => bridge.call(name, args, client),
     },
     options.input,
     options.output,

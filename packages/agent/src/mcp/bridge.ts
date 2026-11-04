@@ -20,7 +20,8 @@ export interface Bridge {
   readonly port: number;
   readonly url: string;
   readonly connected: boolean;
-  call(name: string, args: Record<string, unknown>): Promise<ToolResult>;
+  /** `client` is the MCP client's name, recorded on the suggestions (e.g. "claude-code"). */
+  call(name: string, args: Record<string, unknown>, client?: string): Promise<ToolResult>;
   close(): Promise<void>;
 }
 
@@ -131,7 +132,7 @@ export async function startBridge(options: BridgeOptions): Promise<Bridge> {
     get connected() {
       return Boolean(page);
     },
-    call(name, args) {
+    call(name, args, client) {
       if (!page) {
         return Promise.resolve({
           text: 'Error: no Editora editor is connected. Open the page that uses AgentPlugin({ mcp: { url, token } }) with this bridge\'s address and token.',
@@ -145,7 +146,7 @@ export async function startBridge(options: BridgeOptions): Promise<Bridge> {
           resolve({ text: 'Error: the editor did not answer in time.', isError: true });
         }, timeout);
         pending.set(id, { resolve, timer });
-        page!.write(`event: call\ndata: ${JSON.stringify({ id, name, arguments: args })}\n\n`);
+        page!.write(`event: call\ndata: ${JSON.stringify({ id, name, arguments: args, ...(client ? { client } : {}) })}\n\n`);
       });
     },
     close() {

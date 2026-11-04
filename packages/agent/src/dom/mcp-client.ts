@@ -29,6 +29,8 @@ interface CallEvent {
   id: string;
   name: string;
   arguments?: Record<string, unknown>;
+  /** The MCP client's name, as it introduced itself. */
+  client?: string;
 }
 
 export function connectMcpBridge(controller: AgentController, options: McpBridgeOptions): McpBridgeConnection {
@@ -43,6 +45,7 @@ export function connectMcpBridge(controller: AgentController, options: McpBridge
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let connected = false;
   let closed = false;
+  let client: string | undefined;
 
   const clearTimers = () => {
     if (commitTimer) clearTimeout(commitTimer);
@@ -55,7 +58,7 @@ export function connectMcpBridge(controller: AgentController, options: McpBridge
     const current = session;
     session = null;
     if (!current) return;
-    if (current.changeCount) current.commit();
+    if (current.changeCount) current.commit(client);
     else current.discard();
   };
 
@@ -78,6 +81,7 @@ export function connectMcpBridge(controller: AgentController, options: McpBridge
     } catch {
       return;
     }
+    if (typeof call.client === 'string' && call.client) client = call.client;
     if (!session) {
       try {
         session = controller.openSession();

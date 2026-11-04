@@ -46,7 +46,8 @@ export interface AgentRunSummary {
 export interface AgentSession {
   tools: AgentTool[];
   readonly changeCount: number;
-  commit(): CommitResult;
+  /** `model` labels the suggestions (the MCP client's name). */
+  commit(model?: string): CommitResult;
   discard(): void;
 }
 
@@ -167,9 +168,9 @@ export function attachAgent(root: HTMLElement, options: AttachAgentOptions = {})
         get changeCount() {
           return snapshot.draft.changeCount;
         },
-        commit() {
+        commit(model) {
           if (session === current) session = null;
-          return commit(snapshot, { id: 'mcp' });
+          return commit(snapshot, { id: 'mcp', model: model ?? 'mcp-client' });
         },
         discard() {
           if (session === current) session = null;

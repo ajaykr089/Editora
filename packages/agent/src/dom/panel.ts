@@ -142,12 +142,24 @@ export function createAgentPanel(controller: AgentController, options: AgentPane
       if (result.stopped === 'limit') notes.push(labels.limit);
       setStatus(notes.join(' '));
       parts.input.value = '';
+      // In a narrow window the panel covers the editor and its review bar: step aside for the review.
+      if (summary.suggestions && overlapsEditor()) {
+        api.close();
+        root.ownerDocument.querySelector<HTMLElement>('.air-bar button:not([hidden])')?.focus({ preventScroll: true });
+      }
     } catch (error) {
       addLog((error as Error)?.message ?? String(error), 'error');
       setStatus('');
     } finally {
       sync();
     }
+  };
+
+  const overlapsEditor = () => {
+    if (!panel) return false;
+    const a = panel.getBoundingClientRect();
+    const b = (root.closest(EDITOR_HOST) ?? root).getBoundingClientRect();
+    return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   };
 
   const place = () => {

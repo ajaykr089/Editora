@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent demo</title>
+    <link rel="stylesheet" href="/packages/core/dist/webcomponent.min.css" />
+    <script type="importmap">
+      { "imports": { "@editora/ai-review": "/packages/ai-review/dist/index.js" } }
+    </script>
+    <style>
+      body { margin: 0; padding: 24px 16px 64px; font: 15px/1.5 system-ui, sans-serif; background: #f4f4f7; color: #1d1d24; }
+      body.dark { background: #15151b; color: #ececf1; }
+      main { max-width: 760px; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      p.lead { margin: 0 0 16px; color: #5d5d6b; }
+      body.dark p.lead { color: #a9a9b8; }
+      code { font: 13px ui-monospace, monospace; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Agent</h1>
+      <p class="lead">Press <strong>Agent</strong> in the toolbar (or <kbd>⌘⇧K</kbd> / <kbd>Ctrl+Shift+K</kbd>), pick a model and say what to change. The agent reads the whole document; its edits appear as suggestions to accept or reject. Ollama models need Ollama on this machine; <em>Demo script</em> needs nothing.</p>
+      <div id="mount"></div>
+    </main>
+    <script type="module">
+      import '/packages/core/dist/webcomponent.js';
+      import { AgentPlugin } from '/packages/agent/dist/editora.js';
+      import { createOllamaAgentProvider } from '/packages/agent/dist/index.js';
+      import { AuthorshipPlugin } from '/packages/authorship/dist/editora.js';
+
+      const params = new URLSearchParams(location.search);
+      const theme = params.get('theme') === 'dark' ? 'dark' : undefined;
+      if (theme) document.body.classList.add('dark');
+
+      // Fixed edits without a model, for trying the review flow offline.
+      const call = (id, name, args) => ({ id, name, arguments: args });
+      const demoScript = () => {
+        const turns = [
+          { content: '', toolCalls: [call('1', 'get_document', {})], stop: 'tool_use' },
+          {
+            content: '',
+            toolCalls: [
+              call('2', 'rewrite_block', { block_id: 'b1', text: 'Why the valley floods more often' }),
+              call('3', 'replace_text', { block_id: 'b2', find: 'I measure the channel', replace: 'I measured the channel' }),
+              call('4', 'rewrite_block', { block_id: 'b3', text: 'What the data shows' }),
+              call('5', 'insert_blocks', { after_block_id: 'b4', blocks: [{ type: 'paragraph', text: 'In short: wetter winters and a narrower channel together explain the extra floods.' }] }),
+            ],
+            stop: 'tool_use',
+          },
+          { content: 'Made the headings sentence case, put the first paragraph in the past tense and added a one-line summary.', toolCalls: [], stop: 'end' },
+        ];
+        return { id: 'demo', model: 'demo-script', chat: async () => (await new Promise((r) => setTimeout(r, 250)), turns.shift() ?? { content: 'Done.', toolCalls: [], stop: 'end' }) };
+      };
+
+      const plugins = ['heading', 'bold', 'italic', 'underline', 'list', 'link', 'history'];
+      plugins.push(
+        AgentPlugin({
+          providers: [
+            { id: 'gemma4', label: 'Ollama · gemma4:31b-cloud', create: () => createOllamaAgentProvider({ model: 'gemma4:31b-cloud' }) },
+            { id: 'gpt-oss', label: 'Ollama · gpt-oss:20b-cloud', create: () => createOllamaAgentProvider({ model: 'gpt-oss:20b-cloud' }) },
+            { id: 'demo', label: 'Demo script (no AI)', create: demoScript },
+          ],
+          ...(params.get('mcp') ? { mcp: { url: params.get('mcpUrl') ?? 'http://127.0.0.1:41820', token: params.get('token') ?? 'demo-token-123' } } : {}),
+          onReady: (agent) => (window.agent = agent),
+        }),
+      );
+      if (params.get('authorship') !== '0') plugins.push(AuthorshipPlugin({ author: 'Ana', onReady: (c) => (window.authorship = c) }));
+
+      await customElements.whenDefined('editora-editor');
+      const editor = document.createElement('editora-editor');
+      editor.setAttribute('height', '440');
+      editor.innerHTML = `<h1>Why The Valley Floods More Often</h1>
+        <p>Over the last ten years the river burst its banks four times, more than in the forty years before. I measure the channel at three points in March and again in September.</p>
+        <h2>What The Data Shows</h2>
+        <p>Regional records show winter rainfall rising by a third over the decade, with most of the increase in short, heavy storms. The channel is also narrower than it was.</p>
+        <h2>Next steps</h2>
+        <ul><li>Compare the figures with the council's flood maps</li><li>Add gauge readings from the two upstream stations</li></ul>`;
+      editor.setConfig({ plugins, theme, toolbar: 'undo redo | heading bold italic underline | bullist numlist | openAgent toggleAuthorship' });
+      document.getElementById('mount').append(editor);
+    </script>
+  </body>
+</html>
