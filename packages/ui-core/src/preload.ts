@@ -1,7 +1,7 @@
 /**
  * Styles for the moment between server-rendered HTML and the custom elements being defined.
  *
- * Before `customElements.define()` runs, a `<ui-tabs>` is an unknown inline element: every panel
+ * Before `customElements.define()` runs, a ui-tabs element is an unknown inline element: every panel
  * shows, a closed dialog's content sits in the page, a select lists its raw `<option>` text and
  * inputs take no space, then everything jumps when the script loads. These rules (all scoped to
  * `:not(:defined)`, so they stop applying the moment an element upgrades) give each element the
