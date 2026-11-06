@@ -1,12 +1,13 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/layout';
-import { createUIElement, hostOnly, flushElementRender } from './_internals';
+import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type LayoutMode = 'dashboard' | 'split' | 'stack';
-export type LayoutVariant = 'default' | 'flat' | 'elevated' | 'glass' | 'contrast';
+/** `shell`: the app frame itself (full height, no outer box, unframed panels, drawer sidebar on narrow screens). */
+export type LayoutVariant = 'default' | 'flat' | 'elevated' | 'glass' | 'contrast' | 'shell';
 export type LayoutDensity = 'default' | 'compact' | 'comfortable';
 export type LayoutMaxWidth = 'sm' | 'md' | 'lg' | 'xl';
 export type LayoutSidebarSide = 'start' | 'end';
@@ -23,6 +24,19 @@ export type LayoutProps = React.HTMLAttributes<HTMLElement> & {
   sidebarWidth?: string;
   asideWidth?: string;
   onLayoutChange?: () => void;
+  /**
+   * Narrow screens: `drawer` turns the sidebar into an off-canvas drawer with a backdrop, opened
+   * by AppHeader's menu button or `sidebarOpen`; `stack` puts it above the content. Defaults to
+   * `drawer` for variant="shell" and `stack` otherwise.
+   */
+  mobileSidebar?: 'drawer' | 'stack';
+  /** Viewport width (px) at and below which the drawer is used. Default 980. */
+  drawerBreakpoint?: number;
+  /** The drawer is open. With onSidebarOpenChange it is controlled. */
+  sidebarOpen?: boolean;
+  onSidebarOpenChange?: (open: boolean, detail: { source: string }) => void;
+  /** Accessible name of the drawer. Default "Navigation". */
+  sidebarLabel?: string;
 };
 
 const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
@@ -38,6 +52,11 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
     sidebarWidth,
     asideWidth,
     onLayoutChange,
+    mobileSidebar,
+    drawerBreakpoint,
+    sidebarOpen,
+    onSidebarOpenChange,
+    sidebarLabel,
     ...rest
   },
   forwardedRef
@@ -52,6 +71,17 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
     el.addEventListener('layoutchange', handler as EventListener);
     return () => el.removeEventListener('layoutchange', handler as EventListener);
   }, [onLayoutChange]);
+
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !onSidebarOpenChange) return;
+    const handler = hostOnly((event: Event) => {
+      const detail = (event as CustomEvent<{ open: boolean; source: string }>).detail;
+      if (detail) onSidebarOpenChange(detail.open, { source: detail.source });
+    });
+    el.addEventListener('sidebar-open-change', handler);
+    return () => el.removeEventListener('sidebar-open-change', handler);
+  }, [onSidebarOpenChange]);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
@@ -83,8 +113,25 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
 
     if (asideWidth) el.setAttribute('aside-width', asideWidth);
     else el.removeAttribute('aside-width');
+
+    if (mobileSidebar) el.setAttribute('mobile-sidebar', mobileSidebar);
+    else el.removeAttribute('mobile-sidebar');
+
+    if (typeof drawerBreakpoint === 'number') el.setAttribute('drawer-breakpoint', String(drawerBreakpoint));
+    else el.removeAttribute('drawer-breakpoint');
+
+    if (sidebarLabel) el.setAttribute('sidebar-label', sidebarLabel);
+    else el.removeAttribute('sidebar-label');
+
+    if (typeof sidebarOpen === 'boolean') el.toggleAttribute('sidebar-open', sidebarOpen);
     flushElementRender(el);
-  }, [mode, variant, density, maxWidth, sidebarSide, collapsed, headless, sidebarWidth, asideWidth]);
+  }, [mode, variant, density, maxWidth, sidebarSide, collapsed, headless, sidebarWidth, asideWidth, mobileSidebar, drawerBreakpoint, sidebarLabel, sidebarOpen]);
+
+  useControlledAttribute(ref, {
+    attribute: 'sidebar-open',
+    value: whenHandled([onSidebarOpenChange], typeof sidebarOpen === 'boolean' ? sidebarOpen : undefined),
+    events: ['sidebar-open-change']
+  });
 
   return createUIElement('ui-layout', { ref, ...rest }, children);
 });

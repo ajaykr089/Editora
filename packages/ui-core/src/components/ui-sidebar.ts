@@ -323,7 +323,7 @@ const template = (body: string) => `
       inset: 0;
       border-radius: inherit;
       pointer-events: none;
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+      box-shadow: var(--base-sidebar-outline, inset 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent));
     }
 
     .header-wrap,

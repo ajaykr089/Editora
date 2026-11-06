@@ -8,7 +8,8 @@ export type AppHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, 'onToggle'>
   bordered?: boolean;
   dense?: boolean;
   headless?: boolean;
-  showMenuButton?: boolean;
+  /** Show the menu button; `narrow` shows it only at 980px and below, where ui-layout uses its drawer. */
+  showMenuButton?: boolean | 'narrow';
   variant?: 'surface' | 'soft' | 'outline' | 'solid';
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
@@ -118,7 +119,8 @@ const AppHeader = React.forwardRef<HTMLElement, AppHeaderProps>(function AppHead
     setBooleanAttr(el, 'bordered', bordered);
     setBooleanAttr(el, 'dense', dense);
     setBooleanAttr(el, 'headless', headless);
-    setBooleanAttr(el, 'show-menu-button', showMenuButton);
+    if (showMenuButton === 'narrow') el.setAttribute('show-menu-button', 'narrow');
+    else setBooleanAttr(el, 'show-menu-button', showMenuButton);
     setStringAttr(el, 'variant', variant && variant !== 'surface' ? variant : null);
     setStringAttr(el, 'tone', tone && tone !== 'neutral' ? tone : null);
     setStringAttr(el, 'size', size && size !== 'md' ? size : null);
