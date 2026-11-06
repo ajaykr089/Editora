@@ -9,12 +9,18 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useTextValue,
 } from './_internals';
 
 export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   children?: React.ReactNode;
   value?: string;
+  /** Starting value of an uncontrolled field (written once, on mount). */
+  defaultValue?: string;
+  /** Every keystroke, like React's onChange on <input>. With `value`, the field is controlled. */
   onChange?: (value: string) => void;
+  /** The edit was committed (blur, or Enter in a single-line field). */
+  onCommit?: (value: string) => void;
   onInput?: (value: string) => void;
   onDebouncedInput?: (value: string) => void;
   onClear?: () => void;
@@ -60,7 +66,9 @@ export type InputErrorProps = React.HTMLAttributes<HTMLElement>;
 const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props, forwardedRef) {
   const {
     value,
+    defaultValue,
     onChange,
+    onCommit,
     onInput,
     onDebouncedInput,
     onClear,
@@ -100,16 +108,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
   } = props;
 
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
-
-  const onInputHandler = React.useCallback((event: Event) => {
-    const detail = getCustomEventDetail<{ value?: string }>(event);
-    if (typeof detail?.value === 'string') onInput?.(detail.value);
-  }, [onInput]);
-
-  const onChangeHandler = React.useCallback((event: Event) => {
-    const detail = getCustomEventDetail<{ value?: string }>(event);
-    if (typeof detail?.value === 'string') onChange?.(detail.value);
-  }, [onChange]);
+  useTextValue(ref, { value, defaultValue, onChange, onInput, onCommit });
 
   const onDebouncedHandler = React.useCallback((event: Event) => {
     const detail = getCustomEventDetail<{ value?: string }>(event);
@@ -123,12 +122,10 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
   useElementEventListeners(
     ref,
     [
-      { type: 'input', listener: onInputHandler },
-      { type: 'change', listener: onChangeHandler },
       { type: 'debounced-input', listener: onDebouncedHandler },
       { type: 'clear', listener: onClearHandler as EventListener },
     ],
-    [onInputHandler, onChangeHandler, onDebouncedHandler, onClearHandler]
+    [onDebouncedHandler, onClearHandler]
   );
 
   useElementAttributes(ref, (el) => {

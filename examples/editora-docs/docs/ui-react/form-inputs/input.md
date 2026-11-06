@@ -46,13 +46,20 @@ function InputDemo() {
 | `Input.Suffix` | `suffix` | Content rendered on the right side of the input |
 | `Input.Error` | `error` | Error message shown when `validation="error"` |
 
+
+:::note Changed in this release
+`onChange` now fires on every keystroke, like React's `onChange` on `<input>`. The old behaviour (only when the edit is committed, on blur or Enter) is `onCommit`. Use `defaultValue` for a starting value; `value` together with `onChange` makes the field controlled.
+:::
+
 ## Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `value` | `string` | — | Controlled value |
-| `onChange` | `(value: string) => void` | — | Fires on committed change |
-| `onInput` | `(value: string) => void` | — | Fires on every keystroke |
+| `value` | `string` | — | Controlled value when `onChange`/`onInput` is passed (a change you do not store is undone); without a handler it is the initial value |
+| `defaultValue` | `string` | — | Starting value of an uncontrolled field (written once, on mount) |
+| `onChange` | `(value: string) => void` | — | Fires on every keystroke, like React's `onChange` on `<input>` |
+| `onCommit` | `(value: string) => void` | — | Fires when the edit is committed (blur, or Enter in a single-line field) |
+| `onInput` | `(value: string) => void` | — | Fires on every keystroke (same as `onChange`) |
 | `onDebouncedInput` | `(value: string) => void` | — | Fires after `debounce` ms of inactivity |
 | `onClear` | `() => void` | — | Fires when the clear button is clicked |
 | `debounce` | `number` | — | Debounce delay in ms for `onDebouncedInput` |

@@ -29,4 +29,8 @@ function ComboboxDemo() {
 
 ## Key Props
 
-`value`, `open`, `state`, `stateText`, `onChange`, `onInput`, `onDebouncedInput`, `onSelect`, `onOpenDetail`, `onCloseDetail`, `onOpen`, `onClose`, `onClear`, `clearable`, `debounce`, `validation`, `size`, `maxlength`, `readOnly`, `autofocus`, `disabled`, `name`, `required`, `placeholder`, `variant`, `radius`, `label`, `description`, `emptyText`, `noFilter`, `allowCustom`
+`value`, `defaultValue`, `open`, `state`, `stateText`, `onChange`, `onInput`, `onDebouncedInput`, `onSelect`, `onOpenDetail`, `onCloseDetail`, `onOpen`, `onClose`, `onClear`, `clearable`, `debounce`, `validation`, `size`, `maxlength`, `readOnly`, `autofocus`, `disabled`, `name`, `required`, `placeholder`, `variant`, `radius`, `label`, `description`, `emptyText`, `noFilter`, `allowCustom`
+
+## Notes
+
+- `value` is the selected value (typing changes the query, reported by `onInput`). With `onChange` or `onSelect` it is controlled: a selection you do not store is undone. Use `defaultValue` for an uncontrolled combobox.

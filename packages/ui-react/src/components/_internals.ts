@@ -157,6 +157,68 @@ export function useControlledAttribute<T extends HTMLElement>(
   }, [ref, eventKey]);
 }
 
+export type TextValueProps = {
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  onInput?: (value: string) => void;
+  onCommit?: (value: string) => void;
+};
+
+/**
+ * Value handling for the text fields (Input, Textarea), following React's model for `<input>`:
+ * `onChange` fires on every keystroke (as `onInput` does), `onCommit` when the edit is committed
+ * (blur or Enter: the old meaning of `onChange`), `defaultValue` sets the starting value of an
+ * uncontrolled field, and `value` with a handler is controlled, so a change the parent does not
+ * accept is undone. `value` without any handler stays an initial value, as the docs use it.
+ */
+export function useTextValue<T extends HTMLElement>(ref: React.RefObject<T | null>, props: TextValueProps): void {
+  const { value, defaultValue, onChange, onInput, onCommit } = props;
+  const readValue = (event: Event) => getCustomEventDetail<{ value?: string }>(event)?.value;
+
+  useElementEventListeners(
+    ref,
+    [
+      {
+        type: 'input',
+        listener: (event: Event) => {
+          const next = readValue(event);
+          if (typeof next !== 'string') return;
+          onChange?.(next);
+          onInput?.(next);
+        }
+      },
+      {
+        type: 'change',
+        listener: (event: Event) => {
+          const next = readValue(event);
+          if (typeof next === 'string') onCommit?.(next);
+        }
+      }
+    ],
+    [onChange, onInput, onCommit],
+    { hostOnly: true }
+  );
+
+  // defaultValue: written once, on mount, only for an uncontrolled field.
+  const defaultApplied = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || defaultApplied.current) return;
+    defaultApplied.current = true;
+    if (value == null && defaultValue != null) {
+      el.setAttribute('value', defaultValue);
+      flushElementRender(el);
+    }
+  }, []);
+
+  useControlledAttribute(ref, {
+    attribute: 'value',
+    value: whenHandled([onChange, onInput], value == null ? undefined : String(value)),
+    events: ['input', 'change', 'clear']
+  });
+}
+
 export function useElementAttributes<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   sync: (element: T) => void,

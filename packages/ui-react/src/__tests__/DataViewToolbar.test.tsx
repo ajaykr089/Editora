@@ -51,7 +51,7 @@ describe('DataViewToolbar', () => {
     const select = document.querySelector('ui-select') as HTMLElement | null;
     const clear = screen.getByText('Reset').closest('ui-button') as HTMLElement | null;
 
-    input?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: 'Ava' } }));
+    input?.dispatchEvent(new CustomEvent('input', { bubbles: true, detail: { value: 'Ava' } }));
     select?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: 'trial' } }));
     fireEvent.click(clear as HTMLElement);
 

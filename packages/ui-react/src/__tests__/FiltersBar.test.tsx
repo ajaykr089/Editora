@@ -49,7 +49,7 @@ describe('FiltersBar', () => {
     const select = document.querySelector('ui-select') as HTMLElement | null;
     const clear = screen.getByText('Reset').closest('ui-button') as HTMLElement | null;
 
-    input?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: 'Grace' } }));
+    input?.dispatchEvent(new CustomEvent('input', { bubbles: true, detail: { value: 'Grace' } }));
     select?.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: 'archived' } }));
     fireEvent.click(clear as HTMLElement);
 
