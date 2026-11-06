@@ -2,9 +2,9 @@
  * Implicit form submission for text fields that render their `<input>` inside a shadow root.
  *
  * A browser only submits a form on Enter when the focused input belongs to that form, and an input
- * in a shadow root never does, so pressing Enter in `<ui-input>` inside a `<form>` did nothing.
+ * in a shadow root never does, so pressing Enter in a ui-input inside a `<form>` did nothing.
  * This reproduces the native behaviour: activate the form's default button (its first submit
- * button) when there is one and it is enabled, otherwise request a submit. Inside a `<ui-form>`
+ * button) when there is one and it is enabled, otherwise request a submit. Inside a ui-form element
  * (whose `<form>` lives in its own shadow root) it calls that element's `requestSubmit()`.
  */
 
