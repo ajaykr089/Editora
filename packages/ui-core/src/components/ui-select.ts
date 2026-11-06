@@ -828,6 +828,7 @@ export class UISelect extends ElementBase {
   private _formUnregister: (() => void) | null = null;
   private _optionsSyncRaf = 0;
   private _panelPlacementRaf = 0;
+  private _renderedExternalHtml = '';
   private _uid = Math.random().toString(36).slice(2, 8);
   private _options: SelectOption[] = [];
   private _menuItems: HTMLButtonElement[] = [];
@@ -1577,6 +1578,16 @@ export class UISelect extends ElementBase {
 
     trigger.disabled = this.disabled;
     trigger.setAttribute('aria-label', ariaLabel);
+    if (hasLabel) trigger.setAttribute('aria-labelledby', `${this._uid}-label`);
+    else trigger.removeAttribute('aria-labelledby');
+    const externalId = this._renderedExternalHtml ? `${this._uid}-external-description` : '';
+    const describedBy = [
+      hasDescription ? `${this._uid}-description` : '',
+      hasError ? `${this._uid}-error` : '',
+      externalId
+    ].filter(Boolean).join(' ');
+    if (describedBy) trigger.setAttribute('aria-describedby', describedBy);
+    else trigger.removeAttribute('aria-describedby');
     trigger.setAttribute('aria-expanded', this._open ? 'true' : 'false');
     trigger.setAttribute('aria-busy', loading ? 'true' : 'false');
     trigger.setAttribute('aria-required', required ? 'true' : 'false');
@@ -1606,6 +1617,23 @@ export class UISelect extends ElementBase {
   }
 
   protected override render(): void {
+    // Once the structure exists, update it in place. Rebuilding replaced the trigger whenever a slot
+    // changed after mount (React adds the options, then sets label/placeholder in an effect), so a
+    // test that had just found the combobox clicked a detached node and the list never opened; it
+    // also dropped focus if the options changed while the trigger was focused.
+    const externalNow = externalDescriptionMarkup(this, this._uid);
+    if (
+      this._triggerEl &&
+      this._triggerEl.getRootNode() === this.root &&
+      externalNow.html === this._renderedExternalHtml
+    ) {
+      this._syncOptionsData();
+      this._renderMenu();
+      if (!this._open && this._panelEl) this._panelEl.hidden = true;
+      this._syncControlState();
+      return;
+    }
+
     const labelAttr = this.getAttribute('label') || '';
     const descriptionAttr = this.getAttribute('description') || '';
     const errorAttr = this.getAttribute('error') || '';
@@ -1623,8 +1651,9 @@ export class UISelect extends ElementBase {
     const errorId = `${this._uid}-error`;
     const triggerId = `${this._uid}-trigger`;
     const listboxId = `${this._uid}-listbox`;
-    const external = externalDescriptionMarkup(this, this._uid);
+    const external = externalNow;
     const describedBy = [hasDescription ? descriptionId : '', hasError ? errorId : '', external.id].filter(Boolean).join(' ');
+    this._renderedExternalHtml = external.html;
 
     this.setContent(`
       <style>${style}</style>
