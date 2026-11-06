@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { findSlottedInput, nameSlottedInput } from '../primitives/slotted-input';
 import { FormControl } from '../primitives/form-control';
 import { scheduleImplicitSubmit } from '../primitives/implicit-submit';
 import { syncControlName, syncSlotFallbackText, syncControlDescription } from '../primitives/control-name';
@@ -217,6 +218,25 @@ const style = `
 
   input::placeholder {
     color: var(--ui-input-placeholder);
+  }
+
+  /* <input slot="input">: the author's own input, so password managers can fill it. */
+  ::slotted(input[slot="input"]) {
+    inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: 500 var(--ui-input-font-size)/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: var(--ui-input-padding);
+    min-block-size: calc(var(--ui-input-min-height) - 2px);
+    margin: 0;
+    outline: none;
+  }
+
+  .control[data-slotted-input] > input {
+    display: none;
   }
 
   .actions {
@@ -712,9 +732,11 @@ function computeStrength(value: string): StrengthState {
 export class UIPasswordField extends ElementBase {
   // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
   static formAssociated = true;
+  private _slottedInput: HTMLInputElement | null = null;
   private _formControl: FormControl = new FormControl(this, {
-    getValue: () => this.value,
-    getValidity: () => ({ control: this._input }),
+    // With the author's own input, that native input is the form field (no second entry).
+    getValue: () => (this._slottedInput ? null : this.value),
+    getValidity: () => ({ control: this._slottedInput ? null : this._input }),
     defaultAttribute: 'value',
     onFormDisabled: (disabled) => {
       if (this._input) this._input.disabled = disabled || this.hasAttribute('disabled');
@@ -776,12 +798,14 @@ export class UIPasswordField extends ElementBase {
     super.connectedCallback();
     this._formControl.connect();
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
+    this.root.addEventListener('click', this._onLabelClick);
     this._registerWithForm();
   }
 
   override disconnectedCallback(): void {
     this._formControl.disconnect();
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
+    this.root.removeEventListener('click', this._onLabelClick);
     this._detachListeners();
 
     if (this._debounceTimer) {
@@ -916,6 +940,7 @@ export class UIPasswordField extends ElementBase {
           <span class="prefix" part="prefix"><slot name="prefix"></slot></span>
 
           <div class="control" part="control">
+            <slot name="input"></slot>
             <input
               part="input"
               type="password"
@@ -953,17 +978,31 @@ export class UIPasswordField extends ElementBase {
 
     this._detachListeners();
 
-    this._input = this.root.querySelector('input');
+    this._bindInput();
     this._clearBtn = this.root.querySelector('.clear-btn');
     this._toggleBtn = this.root.querySelector('.toggle-btn');
-
-    this._input?.addEventListener('input', this._onNativeInput);
-    this._input?.addEventListener('change', this._onNativeChange);
-    this._input?.addEventListener('keydown', this._onNativeKeyDown);
     this._clearBtn?.addEventListener('click', this._onClearClick);
     this._toggleBtn?.addEventListener('click', this._onToggleClick);
 
     this._syncUi();
+  }
+
+  /** The control: the author's <input slot="input"> when there is one, else the inner input. */
+  private _bindInput(): void {
+    this._input?.removeEventListener('input', this._onNativeInput);
+    this._input?.removeEventListener('change', this._onNativeChange);
+    this._input?.removeEventListener('keydown', this._onNativeKeyDown);
+    const slotted = findSlottedInput(this);
+    this._slottedInput = slotted;
+    const control = this.root.querySelector('.control');
+    if (slotted) control?.setAttribute('data-slotted-input', '');
+    else control?.removeAttribute('data-slotted-input');
+    this._input = slotted || (this.root.querySelector('.control > input') as HTMLInputElement | null);
+    if (slotted && !this.hasAttribute('value') && slotted.value) this.setAttribute('value', slotted.value);
+    this._input?.addEventListener('input', this._onNativeInput);
+    this._input?.addEventListener('change', this._onNativeChange);
+    // A native input in the light DOM already submits its form on Enter.
+    if (!slotted) this._input?.addEventListener('keydown', this._onNativeKeyDown);
   }
 
   private _detachListeners(): void {
@@ -989,6 +1028,18 @@ export class UIPasswordField extends ElementBase {
   private _syncControlAttrs(): void {
     this._syncHostTokens();
     if (!this._input) return;
+    if (this._slottedInput) {
+      // Leave the author's name, autocomplete and placeholder alone; only pass on states the host
+      // was given, and the show/hide toggle.
+      const input = this._slottedInput;
+      if (this.hasAttribute('disabled') || this._formControl.disabledByForm) {
+        input.disabled = readBooleanHostAttribute(this, 'disabled') || this._formControl.disabledByForm;
+      }
+      if (this.hasAttribute('required')) input.required = true;
+      if (this.hasAttribute('readonly')) input.readOnly = true;
+      input.type = this._revealed ? 'text' : 'password';
+      return;
+    }
 
     const disabled = readBooleanHostAttribute(this, 'disabled');
     const required = this.hasAttribute('required');
@@ -1155,6 +1206,14 @@ export class UIPasswordField extends ElementBase {
 
     if (!this._input) return;
 
+    if (this._slottedInput) {
+      const labelText = (this.getAttribute('label') || this.getAttribute('aria-label') || '').trim();
+      nameSlottedInput(this._slottedInput, labelText, (this.getAttribute('description') || '').trim());
+      const invalidSlotted = this.getAttribute('validation') === 'error' || !!errorAttr;
+      this._slottedInput.toggleAttribute('aria-invalid', invalidSlotted);
+      return;
+    }
+
     syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
     const describedBy: string[] = [];
@@ -1242,7 +1301,19 @@ export class UIPasswordField extends ElementBase {
     }
   }
 
-  private _onSlotChange(): void {
+  // The label sits in the shadow root and cannot point at the control with `for`, so clicking it
+  // focuses the control here (the inner input, or the author's slotted one).
+  private _onLabelClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest?.('.label')) return;
+    this._input?.focus();
+  };
+
+  private _onSlotChange(event?: Event): void {
+    if ((event?.target as HTMLSlotElement | null)?.name === 'input') {
+      this._bindInput();
+      this._syncControlAttrs();
+    }
     this._syncDerivedState();
   }
 
