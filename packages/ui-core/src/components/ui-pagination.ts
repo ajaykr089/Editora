@@ -243,7 +243,12 @@ export class UIPagination extends ElementBase {
       this._headless = this.hasAttribute('headless');
       if (this._page > this._count) this._page = this._count;
     }
-    this.requestRender();
+    if (oldValue === newValue) return;
+    // Render now rather than on the next microtask. A framework sets `page` and `count` one after
+    // the other right after mount, and the deferred render meant the first paint (and any test
+    // reading it synchronously) showed a single page with Next disabled.
+    if (this.isConnected) this.render();
+    else this.requestRender();
   }
 
   protected render() {
@@ -251,6 +256,14 @@ export class UIPagination extends ElementBase {
       this.setContent('');
       return;
     }
+    // Re-rendering replaces the buttons; remember which one had focus so a keyboard user who
+    // pressed Next keeps focus on Next (or on the page they picked).
+    const focused = this.root.activeElement as HTMLElement | null;
+    const focusKey = focused?.matches?.('button[aria-label]')
+      ? `[aria-label="${focused.getAttribute('aria-label')}"]`
+      : focused?.matches?.('button[data-page]')
+        ? 'button[aria-current="page"]'
+        : '';
     let buttons = '';
     // First/Prev
     buttons += `<button type="button" data-page="1" aria-label="First" ${this._page === 1 ? 'disabled' : ''}>&laquo;</button>`;
@@ -283,6 +296,11 @@ export class UIPagination extends ElementBase {
       nav.addEventListener('click', this._onClick as EventListener);
       nav.removeEventListener('keydown', this._onKeyDown as EventListener);
       nav.addEventListener('keydown', this._onKeyDown as EventListener);
+    }
+    if (focusKey && !this.root.activeElement) {
+      const target = this.root.querySelector(focusKey) as HTMLButtonElement | null;
+      const fallback = this.root.querySelector('button[aria-current="page"]') as HTMLButtonElement | null;
+      (target && !target.disabled ? target : fallback)?.focus({ preventScroll: true });
     }
   }
 
