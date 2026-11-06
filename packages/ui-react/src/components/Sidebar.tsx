@@ -55,6 +55,12 @@ type SidebarSelectDetail = {
   item?: SidebarItemInput;
 };
 
+export type SidebarNavigateDetail = SidebarSelectDetail & {
+  href: string;
+  /** Keep the page: stop the browser from following the link (then route in the app). */
+  preventDefault: () => void;
+};
+
 type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onToggle'> & {
   collapsed?: boolean;
   collapsible?: boolean;
@@ -93,6 +99,13 @@ type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSele
   onCollapseChange?: (collapsed: boolean) => void;
   onWidthChange?: (detail: { width: number; collapsedWidth: number; minWidth: number; maxWidth: number; source: string }) => void;
   onSearchChange?: (query: string) => void;
+  /**
+   * Fires before a link item (`href`) is followed. Call `detail.preventDefault()` to route in the
+   * app instead of a full page load. Clicks that open a new tab are never intercepted.
+   */
+  onNavigate?: (detail: SidebarNavigateDetail) => void;
+  /** `client` always keeps the page on link clicks (route from `onSelect`/`onNavigate`). */
+  navigation?: 'native' | 'client';
 };
 
 type SidebarGroupProps = {
@@ -494,6 +507,8 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     onCollapseChange,
     onWidthChange,
     onSearchChange,
+    onNavigate,
+    navigation,
     ...rest
   },
   forwardedRef
@@ -531,6 +546,11 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       if (detail) onWidthChange?.(detail);
     });
 
+    const handleNavigate = hostOnly((event: Event) => {
+      const detail = (event as CustomEvent<Omit<SidebarNavigateDetail, 'preventDefault'>>).detail;
+      if (!detail || !onNavigate) return;
+      onNavigate({ ...detail, preventDefault: () => event.preventDefault() });
+    });
     const handleSearchChange = hostOnly((event: Event) => {
       const query = (event as CustomEvent<{ query?: string }>).detail?.query;
       if (typeof query === 'string') onSearchChange?.(query);
@@ -542,6 +562,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     el.addEventListener('collapse-change', handleCollapseChange as EventListener);
     el.addEventListener('width-change', handleWidthChange as EventListener);
     el.addEventListener('search-change', handleSearchChange as EventListener);
+    el.addEventListener('navigate', handleNavigate as EventListener);
 
     return () => {
       el.removeEventListener('select', handleSelect as EventListener);
@@ -550,8 +571,9 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       el.removeEventListener('collapse-change', handleCollapseChange as EventListener);
       el.removeEventListener('width-change', handleWidthChange as EventListener);
       el.removeEventListener('search-change', handleSearchChange as EventListener);
+      el.removeEventListener('navigate', handleNavigate as EventListener);
     };
-  }, [onSelect, onChange, onToggle, onCollapseChange, onWidthChange, onSearchChange]);
+  }, [onSelect, onChange, onToggle, onCollapseChange, onWidthChange, onSearchChange, onNavigate]);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
@@ -580,6 +602,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     syncBool('auto-save', autoSave);
 
     syncAttr('position', position && position !== 'left' ? position : null);
+    syncAttr('navigation', navigation === 'client' ? 'client' : null);
     syncAttr('value', value != null && value !== '' ? String(value) : null);
     syncAttr('search-query', typeof searchQuery === 'string' && searchQuery !== '' ? searchQuery : null);
     syncAttr('width', width || null);
@@ -652,10 +675,19 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     searchQuery,
     elevation,
     showIcons,
-    showBadges
+    showBadges,
+    navigation
   ]);
 
-  return createUIElement('ui-sidebar', { ref, ...rest }, children);
+  // Sidebar.Group / Sidebar.Item placed straight inside <Sidebar> used to be dropped (it rendered
+  // "No matches found"); they only worked inside Sidebar.Content. Treat them the same way here.
+  const resolvedChildren = Children.map(children, (child) =>
+    isSidebarMarker(child, SIDEBAR_GROUP_MARKER) || isSidebarMarker(child, SIDEBAR_ITEM_MARKER)
+      ? renderSidebarItems(child)
+      : child
+  );
+
+  return createUIElement('ui-sidebar', { ref, ...rest }, resolvedChildren);
 });
 
 SidebarRoot.displayName = 'Sidebar';

@@ -212,6 +212,7 @@ export type {
   SidebarProps,
   SidebarGroupProps,
   SidebarItemInput,
+  SidebarNavigateDetail,
   SidebarItemProps,
   SidebarSlotProps,
   SidebarSearchInputProps,

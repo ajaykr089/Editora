@@ -1,6 +1,6 @@
 import React from 'react';
-import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { act, fireEvent, render } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import '../../../ui-core/src/components/ui-sidebar';
 import { DashboardIcon } from '@editora/react-icons';
 import {
@@ -178,5 +178,74 @@ describe('Sidebar wrapper', () => {
     expect(item?.dataset.iconHtml).toContain('<svg');
     expect(item?.dataset.contentHtml).toContain('Guides');
     expect(item?.dataset.contentHtml).toContain('Patterns and implementation notes');
+  });
+
+  it('renders Sidebar.Group and Sidebar.Item placed directly inside Sidebar', async () => {
+    const { container } = render(
+      <Sidebar>
+        <SidebarGroup title="Main">
+          <SidebarItem value="home" label="Home" />
+          <SidebarItem value="reports" label="Reports" />
+        </SidebarGroup>
+        <SidebarItem value="settings" label="Settings" />
+      </Sidebar>
+    );
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+    const el = container.querySelector('ui-sidebar') as HTMLElement;
+    const labels = Array.from(el.shadowRoot?.querySelectorAll('.item-button .item-label') || []).map((node) => node.textContent?.trim());
+    expect(labels).toEqual(['Home', 'Reports', 'Settings']);
+    expect(el.shadowRoot?.textContent).not.toContain('No matches found');
+  });
+
+  it('lets the app route link items without a page load', async () => {
+    const onSelect = vi.fn();
+    const routed: string[] = [];
+    const { container } = render(
+      <Sidebar
+        onSelect={onSelect}
+        onNavigate={(detail) => { detail.preventDefault(); routed.push(detail.href); }}
+        items={[{ value: 'reports', label: 'Reports', href: '/reports' }, { value: 'docs', label: 'Docs', href: '/docs', target: '_blank' }]}
+      />
+    );
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+    const el = container.querySelector('ui-sidebar') as HTMLElement;
+    const [reports, docs] = Array.from(el.shadowRoot?.querySelectorAll<HTMLAnchorElement>('a.item-button') || []);
+
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true, composed: true, button: 0 });
+    reports.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(routed).toEqual(['/reports']);
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ value: 'reports' }));
+
+    // A new-tab click (modifier key, or target=_blank) is never intercepted. Record what reached
+    // the window, then cancel it there so jsdom does not try to navigate.
+    const reachedWindow: boolean[] = [];
+    const record = (event: Event) => { reachedWindow.push(event.defaultPrevented); event.preventDefault(); };
+    window.addEventListener('click', record);
+    reports.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true, button: 0, metaKey: true }));
+    docs.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true, button: 0 }));
+    window.removeEventListener('click', record);
+    expect(reachedWindow).toEqual([false, false]);
+    expect(routed).toEqual(['/reports']);
+  });
+
+  it('navigation="client" keeps the page without an onNavigate handler, and Enter still activates links', async () => {
+    const onSelect = vi.fn();
+    const { container } = render(
+      <Sidebar navigation="client" onSelect={onSelect} items={[{ value: 'reports', label: 'Reports', href: '/reports' }]} />
+    );
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+    const el = container.querySelector('ui-sidebar') as HTMLElement;
+    const link = el.shadowRoot?.querySelector('a.item-button') as HTMLAnchorElement;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true, composed: true, button: 0 });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, composed: true });
+    link.dispatchEvent(enter);
+    // The browser turns an unprevented Enter on a link into a click; it must not be swallowed.
+    expect(enter.defaultPrevented).toBe(false);
+    fireEvent.keyDown(link, { key: ' ' });
+    expect(onSelect).toHaveBeenCalledTimes(2);
   });
 });
