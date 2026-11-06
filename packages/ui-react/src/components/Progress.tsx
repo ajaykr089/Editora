@@ -115,3 +115,5 @@ export const Progress = React.forwardRef<HTMLElement, ProgressProps>(function Pr
 });
 
 Progress.displayName = 'Progress';
+
+export default Progress;

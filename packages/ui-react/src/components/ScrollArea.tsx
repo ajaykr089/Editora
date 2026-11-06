@@ -102,3 +102,5 @@ export const ScrollArea = React.forwardRef<HTMLElement, ScrollAreaProps>(functio
 });
 
 ScrollArea.displayName = 'ScrollArea';
+
+export default ScrollArea;

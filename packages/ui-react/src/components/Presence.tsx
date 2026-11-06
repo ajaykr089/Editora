@@ -116,3 +116,5 @@ export const Presence = React.forwardRef<HTMLElement, PresenceProps>(function Pr
 });
 
 Presence.displayName = 'Presence';
+
+export default Presence;
