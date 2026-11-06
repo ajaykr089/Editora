@@ -236,7 +236,8 @@ const style = `
     padding-top: var(--ui-card-padding);
   }
 
-  .body:last-child {
+  .body:last-child,
+  .card[data-has-footer="false"] .body {
     padding-bottom: var(--ui-card-padding);
   }
 
@@ -498,6 +499,9 @@ export class UICard extends ElementBase {
       return true;
     });
     section.hidden = !assigned;
+    // The footer section follows the body even when hidden, so `.body:last-child` never matched
+    // and a card without a footer had no padding under its content.
+    if (name === 'footer') (this.root.querySelector('.card') as HTMLElement | null)?.setAttribute('data-has-footer', String(assigned));
   }
 
   private _onKeyDown(event: KeyboardEvent): void {

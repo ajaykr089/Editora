@@ -16,6 +16,8 @@ export type EmptyStateProps = React.HTMLAttributes<HTMLElement> & {
   actionLabel?: string;
   tone?: 'neutral' | 'success' | 'warning' | 'danger';
   compact?: boolean;
+  /** `plain`: no box of its own (inside a Card, table or panel that already draws one). */
+  variant?: 'default' | 'plain';
   headless?: boolean;
   onAction?: () => void;
 };
@@ -27,6 +29,7 @@ export const EmptyState = React.forwardRef<HTMLElement, EmptyStateProps>(functio
     actionLabel,
     tone,
     compact,
+    variant,
     headless,
     onAction,
     children,
@@ -47,8 +50,9 @@ export const EmptyState = React.forwardRef<HTMLElement, EmptyStateProps>(functio
     syncStringAttribute(el, 'action-label', actionLabel ?? null);
     syncStringAttribute(el, 'tone', tone ?? null);
     syncBooleanAttribute(el, 'compact', compact);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
     syncBooleanAttribute(el, 'headless', headless);
-  }, [title, description, actionLabel, tone, compact, headless]);
+  }, [title, description, actionLabel, tone, compact, headless, variant]);
 
   return createUIElement('ui-empty-state', { ref, ...rest }, children);
 });

@@ -12,7 +12,24 @@ function ensureCardRuntimeStyles() {
   style.textContent = `
     ui-card [data-ui-card-header] {
       display: grid;
-      gap: var(--ui-card-header-gap, 4px);
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--ui-card-header-gap, 4px) 0;
+      align-items: start;
+    }
+
+    ui-card [data-ui-card-header] > :not([data-ui-card-actions]) {
+      grid-column: 1;
+    }
+
+    /* Card.Actions: on the title's row, at the end, whatever else the header holds. */
+    ui-card [data-ui-card-actions] {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+      display: flex;
+      align-items: center;
+      gap: var(--ui-card-actions-gap, 8px);
+      margin-inline-start: var(--ui-card-actions-offset, 12px);
     }
 
     ui-card [data-ui-card-footer] {
@@ -117,6 +134,8 @@ const CardInset = createCardSection('div', 'Card.Inset', 'inset');
 const CardMedia = createCardSection('div', 'Card.Media', 'media', 'data-ui-card-media');
 const CardTitle = createCardSection('h3', 'Card.Title', undefined, 'data-ui-card-title');
 const CardDescription = createCardSection('p', 'Card.Description', undefined, 'data-ui-card-description');
+/** Buttons or menus for the card, placed on the title's row inside Card.Header. */
+const CardActions = createCardSection('div', 'Card.Actions', undefined, 'data-ui-card-actions');
 
 // Create composed component with sub-components as properties
 const ComposedCard = Object.assign(Card, {
@@ -126,6 +145,7 @@ const ComposedCard = Object.assign(Card, {
   Media: CardMedia,
   Title: CardTitle,
   Description: CardDescription,
+  Actions: CardActions,
 });
 
 export { ComposedCard as Card };

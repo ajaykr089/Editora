@@ -91,6 +91,16 @@ const style = `
     outline-offset: 2px;
   }
 
+  /* variant="plain": no box of its own, for use inside a Card, a table or a panel that already
+     draws one. */
+  :host([variant="plain"]) .card {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding-inline: 0;
+  }
+
   :host([compact]) .card {
     padding: 18px;
     gap: 10px;
@@ -166,7 +176,7 @@ function escapeHtml(value: string): string {
 
 export class UIEmptyState extends ElementBase {
   static get observedAttributes() {
-    return ['title', 'description', 'action-label', 'tone', 'compact', 'headless'];
+    return ['title', 'description', 'action-label', 'tone', 'compact', 'headless', 'variant'];
   }
 
   private _actionBtn: HTMLButtonElement | null = null;
