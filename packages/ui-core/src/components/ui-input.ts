@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { scheduleImplicitSubmit } from '../primitives/implicit-submit';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
@@ -527,6 +528,11 @@ function isKnownRadius(radius: string): boolean {
 }
 
 export class UIInput extends ElementBase {
+  // Form-associated: the value is part of a surrounding <form>'s FormData, a <fieldset disabled>
+  // disables it and form.reset() restores it. The real <input> is in the shadow root, so without
+  // this the form never saw the field at all.
+  static formAssociated = true;
+
   static get observedAttributes() {
     return [
       'value',
@@ -574,9 +580,19 @@ export class UIInput extends ElementBase {
   private _formUnregister: (() => void) | null = null;
   private _uid = Math.random().toString(36).slice(2, 9);
   private _autofocusApplied = false;
+  private _internals: ElementInternals | null = null;
+  private _defaultValue: string | null = null;
+  private _formDisabled = false;
+  private _dirty = false;
 
   constructor() {
     super();
+    try {
+      this._internals = typeof this.attachInternals === 'function' ? this.attachInternals() : null;
+    } catch {
+      this._internals = null;
+    }
+    this._onNativeKeyDown = this._onNativeKeyDown.bind(this);
     this._onNativeInput = this._onNativeInput.bind(this);
     this._onNativeChange = this._onNativeChange.bind(this);
     this._onClearClick = this._onClearClick.bind(this);
@@ -584,9 +600,51 @@ export class UIInput extends ElementBase {
   }
 
   override connectedCallback(): void {
+    if (!this._dirty) this._defaultValue = this.getAttribute('value') || '';
     super.connectedCallback();
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
     this._registerWithForm();
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    try {
+      return (this._internals as (ElementInternals & { form?: HTMLFormElement | null }) | null)?.form ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  formResetCallback(): void {
+    this._dirty = false;
+    this.value = this._defaultValue || '';
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formDisabled = disabled;
+    if (this._input) this._input.disabled = disabled || readBooleanHostAttribute(this, 'disabled');
+  }
+
+  private _syncFormState(): void {
+    const internals = this._internals as (ElementInternals & {
+      setFormValue?: (value: string) => void;
+      setValidity?: (flags: ValidityStateFlags, message?: string, anchor?: HTMLElement) => void;
+    }) | null;
+    if (!internals) return;
+    try {
+      internals.setFormValue?.(this.value);
+      const input = this._input;
+      if (input && typeof internals.setValidity === 'function') {
+        if (input.validity && !input.validity.valid) internals.setValidity(input.validity, input.validationMessage, input);
+        else internals.setValidity({});
+      }
+    } catch {
+      // Environments without full form-associated support (older jsdom) keep working without it.
+    }
+  }
+
+  private _onNativeKeyDown(event: KeyboardEvent): void {
+    scheduleImplicitSubmit(event, this, () => this.form);
   }
 
   override disconnectedCallback(): void {
@@ -644,7 +702,7 @@ export class UIInput extends ElementBase {
       input.type = 'text';
     }
     input.placeholder = placeholder;
-    input.disabled = disabled;
+    input.disabled = disabled || this._formDisabled;
     input.required = required;
     input.readOnly = readOnly;
     input.name = name;
@@ -681,6 +739,9 @@ export class UIInput extends ElementBase {
     if (oldValue === newValue) return;
 
     if (name === 'value') {
+      // Until the user types, the value attribute is also the value form.reset() goes back to (a
+      // framework sets it after the element connected, so the connect-time value is not enough).
+      if (!this._dirty) this._defaultValue = newValue || '';
       this._syncInputValue(newValue || '');
       return;
     }
@@ -828,6 +889,7 @@ export class UIInput extends ElementBase {
     if (this._input) {
       this._input.removeEventListener('input', this._onNativeInput);
       this._input.removeEventListener('change', this._onNativeChange);
+      this._input.removeEventListener('keydown', this._onNativeKeyDown);
     }
     if (this._clearBtn) {
       this._clearBtn.removeEventListener('click', this._onClearClick);
@@ -839,6 +901,7 @@ export class UIInput extends ElementBase {
     if (this._input && this._input.value !== value) {
       this._input.value = value;
     }
+    this._syncFormState();
 
     if (this._clearBtn) {
       const canClear = readBooleanHostAttribute(this, 'clearable') && value.length > 0 && !readBooleanHostAttribute(this, 'disabled') && !this.hasAttribute('readonly');
@@ -950,6 +1013,7 @@ export class UIInput extends ElementBase {
 
   private _onNativeInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
+    this._dirty = true;
 
     if (this.getAttribute('value') !== value) {
       this.setAttribute('value', value);
@@ -1088,6 +1152,7 @@ export class UIInput extends ElementBase {
     if (this._input) {
       this._input.addEventListener('input', this._onNativeInput);
       this._input.addEventListener('change', this._onNativeChange);
+      this._input.addEventListener('keydown', this._onNativeKeyDown);
     }
 
     this._clearBtn?.addEventListener('click', this._onClearClick);

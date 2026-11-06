@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { scheduleImplicitSubmit } from '../primitives/implicit-submit';
 import { syncControlName, syncSlotFallbackText, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
@@ -727,6 +728,7 @@ export class UIPasswordField extends ElementBase {
     super();
     this._onNativeInput = this._onNativeInput.bind(this);
     this._onNativeChange = this._onNativeChange.bind(this);
+    this._onNativeKeyDown = this._onNativeKeyDown.bind(this);
     this._onClearClick = this._onClearClick.bind(this);
     this._onToggleClick = this._onToggleClick.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
@@ -930,6 +932,7 @@ export class UIPasswordField extends ElementBase {
 
     this._input?.addEventListener('input', this._onNativeInput);
     this._input?.addEventListener('change', this._onNativeChange);
+    this._input?.addEventListener('keydown', this._onNativeKeyDown);
     this._clearBtn?.addEventListener('click', this._onClearClick);
     this._toggleBtn?.addEventListener('click', this._onToggleClick);
 
@@ -939,6 +942,7 @@ export class UIPasswordField extends ElementBase {
   private _detachListeners(): void {
     this._input?.removeEventListener('input', this._onNativeInput);
     this._input?.removeEventListener('change', this._onNativeChange);
+    this._input?.removeEventListener('keydown', this._onNativeKeyDown);
     this._clearBtn?.removeEventListener('click', this._onClearClick);
     this._toggleBtn?.removeEventListener('click', this._onToggleClick);
     this._clearBtn = null;
@@ -1238,6 +1242,11 @@ export class UIPasswordField extends ElementBase {
     } else {
       this._emitValueEvent('debounced-input', value);
     }
+  }
+
+  // Enter submits the surrounding form, as it would from a native password input.
+  private _onNativeKeyDown(event: KeyboardEvent): void {
+    scheduleImplicitSubmit(event, this);
   }
 
   private _onNativeChange(event: Event): void {

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { submitImplicitly } from '../primitives/implicit-submit';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const style = `
@@ -999,6 +1000,8 @@ export class UINumberField extends ElementBase {
       event.preventDefault();
       this._isEditing = false;
       this._commitRaw('keyboard');
+      // Commit first, then submit the surrounding form like a native number input does.
+      if (!event.isComposing) submitImplicitly(this);
       return;
     }
 
