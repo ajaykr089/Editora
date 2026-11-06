@@ -41,6 +41,10 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      # Gzipped bytes each @editora/ui-react/<Name> entry loads up front, against ui-size-budgets.json.
+      - name: Check ui-react size budgets
+        run: npm run check:ui-size
+
       - name: Test release scripts
         run: npm run test:scripts
 
