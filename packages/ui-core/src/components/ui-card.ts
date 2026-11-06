@@ -463,8 +463,30 @@ export class UICard extends ElementBase {
     this._toggleSection('inset');
     this._toggleSection('header');
     this._toggleSection('footer');
+    this._syncSectionOrder();
     // The title may arrive after the card connected (React renders children into it later).
     if (this.hasAttribute('interactive')) this._syncAutoLabel();
+  }
+
+  /**
+   * The inset goes where it was written relative to the header: above it by default (flush media
+   * at the top), below it when it comes after `<Card.Header>` in the markup. It used to be fixed
+   * above the header, so a header followed by a full-bleed table showed the table first. Media
+   * stays on top, the header above the body and the footer at the bottom, as before.
+   */
+  private _syncSectionOrder(): void {
+    const inset = this.root.querySelector('.inset') as HTMLElement | null;
+    const header = this.root.querySelector('.header') as HTMLElement | null;
+    const body = this.root.querySelector('.body') as HTMLElement | null;
+    if (!inset || !header || !body) return;
+
+    const children = Array.from(this.children);
+    const insetIndex = children.findIndex((node) => node.getAttribute('slot') === 'inset');
+    const headerIndex = children.findIndex((node) => node.getAttribute('slot') === 'header');
+    const insetBelowHeader = insetIndex >= 0 && headerIndex >= 0 && insetIndex > headerIndex;
+
+    const anchor = insetBelowHeader ? body : header;
+    if (inset.nextElementSibling !== anchor) anchor.parentElement?.insertBefore(inset, anchor);
   }
 
   private _toggleSection(name: 'media' | 'inset' | 'header' | 'footer'): void {
