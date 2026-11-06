@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/layout';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -48,7 +48,7 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const handler = () => onLayoutChange?.();
+    const handler = hostOnly(() => onLayoutChange?.());
     el.addEventListener('layoutchange', handler as EventListener);
     return () => el.removeEventListener('layoutchange', handler as EventListener);
   }, [onLayoutChange]);

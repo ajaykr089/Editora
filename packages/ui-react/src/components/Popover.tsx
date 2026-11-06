@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/popover';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -83,12 +83,12 @@ const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popo
     const el = ref.current;
     if (!el) return;
 
-    const handleOpen = () => onOpen?.();
-    const handleClose = () => onClose?.();
-    const handleOpenChange = (event: Event) => {
+    const handleOpen = hostOnly(() => onOpen?.());
+    const handleClose = hostOnly(() => onClose?.());
+    const handleOpenChange = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<PopoverOpenChangeDetail>).detail;
       if (detail) onOpenChange?.(detail);
-    };
+    });
 
     el.addEventListener('open', handleOpen as EventListener);
     el.addEventListener('close', handleClose as EventListener);

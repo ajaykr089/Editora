@@ -56,7 +56,7 @@ const Alert = React.forwardRef<HTMLElement, AlertProps>(function Alert(props, fo
     onClose?.();
   }, [onClose]);
 
-  useElementEventListeners(ref, [{ type: 'close', listener: onCloseHandler as EventListener }], [onCloseHandler]);
+  useElementEventListeners(ref, [{ type: 'close', listener: onCloseHandler as EventListener }], [onCloseHandler], { hostOnly: true });
 
   useElementAttributes(ref, (el) => {
     syncStringAttribute(el, 'title', title ?? null);

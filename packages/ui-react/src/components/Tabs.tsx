@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tabs';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -90,12 +90,12 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     const el = ref.current;
     if (!el) return;
 
-    const handle = (event: Event) => {
+    const handle = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<TabsDetail>).detail;
       if (!detail) return;
       onChange?.(detail.index);
       onTabChange?.(detail);
-    };
+    });
 
     el.addEventListener('change', handle as EventListener);
 

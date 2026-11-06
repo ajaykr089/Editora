@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tooltip';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -65,20 +65,20 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
     const el = ref.current;
     if (!el) return;
 
-    const openHandler = () => {
+    const openHandler = hostOnly(() => {
       onOpen?.();
-    };
+    });
 
-    const closeHandler = () => {
+    const closeHandler = hostOnly(() => {
       onClose?.();
-    };
+    });
 
-    const changeHandler = (event: Event) => {
+    const changeHandler = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<TooltipChangeDetail>).detail;
       if (detail && typeof detail.open === 'boolean') {
         onOpenChange?.(detail.open);
       }
-    };
+    });
 
     el.addEventListener('open', openHandler as EventListener);
     el.addEventListener('close', closeHandler as EventListener);

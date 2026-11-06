@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/dropdown';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -107,20 +107,20 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
     const el = ref.current;
     if (!el) return;
 
-    const handleOpen = () => onOpen?.();
-    const handleClose = () => onClose?.();
-    const handleChange = (event: Event) => {
+    const handleOpen = hostOnly(() => onOpen?.());
+    const handleClose = hostOnly(() => onClose?.());
+    const handleChange = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<{ open?: boolean; reason?: string }>).detail || {};
       if (typeof detail.open === 'boolean') onChange?.(detail.open);
       if (typeof detail.open === 'boolean') onChangeDetail?.({ open: detail.open, reason: detail.reason });
-    };
-    const handleRequestClose = (event: Event) => {
+    });
+    const handleRequestClose = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<{ reason?: string }>).detail || {};
       if (typeof detail.reason === 'string') onRequestClose?.({ reason: detail.reason });
-    };
-    const handleSelect = (event: Event) => {
+    });
+    const handleSelect = hostOnly((event: Event) => {
       onSelect?.((event as CustomEvent<{ value?: string; label?: string; checked?: boolean; item?: HTMLElement }>).detail || {});
-    };
+    });
 
     el.addEventListener('open', handleOpen as EventListener);
     el.addEventListener('close', handleClose as EventListener);

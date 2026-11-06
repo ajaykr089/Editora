@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/drawer';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -80,12 +80,12 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     const el = ref.current;
     if (!el) return;
 
-    const openHandler = () => onOpen?.();
-    const closeHandler = () => onClose?.();
-    const changeHandler = (event: Event) => {
+    const openHandler = hostOnly(() => onOpen?.());
+    const closeHandler = hostOnly(() => onClose?.());
+    const changeHandler = hostOnly((event: Event) => {
       const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
       if (typeof next === 'boolean') onChange?.(next);
-    };
+    });
 
     el.addEventListener('open', openHandler as EventListener);
     el.addEventListener('close', closeHandler as EventListener);

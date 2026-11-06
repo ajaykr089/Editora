@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '@editora/ui-core/context-menu';
 import { createPortal } from 'react-dom';
-import { createUIElement, useForwardedHostRef } from './_internals';
+import { createUIElement, useForwardedHostRef, hostOnly } from './_internals';
 
 type UIContextMenuElement = HTMLElement & {
   open: boolean;
@@ -106,26 +106,26 @@ export const ContextMenu = React.forwardRef<UIContextMenuElement, ContextMenuPro
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const openHandler = (event: Event) => {
+    const openHandler = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
       setPortalHost(el.getPortalContentHost?.() || null);
       onOpen?.();
       if (detail) onOpenDetail?.(detail);
-    };
-    const closeHandler = (event: Event) => {
+    });
+    const closeHandler = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
       setPortalHost(null);
       onClose?.();
       if (detail) onCloseDetail?.(detail);
-    };
-    const changeHandler = (event: Event) => {
+    });
+    const changeHandler = hostOnly((event: Event) => {
       const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
       if (typeof next === 'boolean') onChange?.(next);
-    };
-    const selectHandler = (event: Event) => {
+    });
+    const selectHandler = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<{ index: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }>).detail;
       onSelect?.(detail);
-    };
+    });
 
     el.addEventListener('open', openHandler as EventListener);
     el.addEventListener('close', closeHandler as EventListener);

@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/menu';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -118,17 +118,17 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const onOpenHandler = () => onOpen?.();
-    const onCloseHandler = () => onClose?.();
-    const onChangeHandler = (event: Event) => {
+    const onOpenHandler = hostOnly(() => onOpen?.());
+    const onCloseHandler = hostOnly(() => onClose?.());
+    const onChangeHandler = hostOnly((event: Event) => {
       const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
       if (typeof next === 'boolean') onChange?.(next);
-    };
-    const onSelectHandler = (event: Event) => {
+    });
+    const onSelectHandler = hostOnly((event: Event) => {
       const detail = ((event as CustomEvent<MenuSelectDetail>).detail || {}) as MenuSelectDetail;
       onSelectDetail?.(detail);
       if (typeof detail.index === 'number') onSelect?.(detail.index);
-    };
+    });
     el.addEventListener('open', onOpenHandler as EventListener);
     el.addEventListener('close', onCloseHandler as EventListener);
     el.addEventListener('change', onChangeHandler as EventListener);

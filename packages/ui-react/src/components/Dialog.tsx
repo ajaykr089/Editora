@@ -138,7 +138,8 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
       { type: 'ui-dismiss', listener: dialogDismissHandler as EventListener },
       { type: 'ui-close', listener: dialogCloseHandler as EventListener },
     ],
-    [openHandler, closeHandler, requestCloseHandler, dialogOpenHandler, dialogSubmitHandler, dialogCancelHandler, dialogDismissHandler, dialogCloseHandler]
+    [openHandler, closeHandler, requestCloseHandler, dialogOpenHandler, dialogSubmitHandler, dialogCancelHandler, dialogDismissHandler, dialogCloseHandler],
+    { hostOnly: true }
   );
 
   useElementAttributes(ref, (el) => {

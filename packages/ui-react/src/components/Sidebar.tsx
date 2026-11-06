@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import '@editora/ui-core/sidebar';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 const VOID_HTML_TAGS = new Set([
@@ -506,35 +506,35 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     const el = ref.current;
     if (!el) return;
 
-    const handleSelect = (event: Event) => {
+    const handleSelect = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<SidebarSelectDetail>).detail;
       if (detail) onSelect?.(detail);
-    };
+    });
 
-    const handleChange = (event: Event) => {
+    const handleChange = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<SidebarSelectDetail>).detail;
       if (detail) onChange?.(detail);
-    };
+    });
 
-    const handleToggle = (event: Event) => {
+    const handleToggle = hostOnly((event: Event) => {
       const next = (event as CustomEvent<{ collapsed?: boolean }>).detail?.collapsed;
       if (typeof next === 'boolean') onToggle?.(next);
-    };
+    });
 
-    const handleCollapseChange = (event: Event) => {
+    const handleCollapseChange = hostOnly((event: Event) => {
       const next = (event as CustomEvent<{ collapsed?: boolean }>).detail?.collapsed;
       if (typeof next === 'boolean') onCollapseChange?.(next);
-    };
+    });
 
-    const handleWidthChange = (event: Event) => {
+    const handleWidthChange = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<{ width: number; collapsedWidth: number; minWidth: number; maxWidth: number; source: string }>).detail;
       if (detail) onWidthChange?.(detail);
-    };
+    });
 
-    const handleSearchChange = (event: Event) => {
+    const handleSearchChange = hostOnly((event: Event) => {
       const query = (event as CustomEvent<{ query?: string }>).detail?.query;
       if (typeof query === 'string') onSearchChange?.(query);
-    };
+    });
 
     el.addEventListener('select', handleSelect as EventListener);
     el.addEventListener('change', handleChange as EventListener);

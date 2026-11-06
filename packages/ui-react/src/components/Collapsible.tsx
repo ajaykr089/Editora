@@ -153,7 +153,8 @@ const CollapsibleRoot = React.forwardRef<HTMLElement, CollapsibleProps>(function
       { type: 'toggle', listener: handleToggle },
       { type: 'change', listener: handleChange },
     ],
-    [handleToggle, handleChange]
+    [handleToggle, handleChange],
+    { hostOnly: true }
   );
 
   return createUIElement('ui-collapsible', { ref, ...rest }, children);

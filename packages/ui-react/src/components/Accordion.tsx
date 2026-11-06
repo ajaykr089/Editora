@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import '@editora/ui-core/accordion';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, hostOnly } from './_internals';
 
 type OpenValue = number | number[];
 
@@ -88,15 +88,15 @@ const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordi
     const element = ref.current;
     if (!element || (!onToggle && !onChangeOpen)) return;
 
-    const handleToggle = (event: Event) => {
+    const handleToggle = hostOnly((event: Event) => {
       const next = readOpen(event);
       if (next != null) onToggle?.(next);
-    };
+    });
 
-    const handleChange = (event: Event) => {
+    const handleChange = hostOnly((event: Event) => {
       const next = readOpen(event);
       if (next != null) onChangeOpen?.(next);
-    };
+    });
 
     element.addEventListener('toggle', handleToggle as EventListener);
     element.addEventListener('change', handleChange as EventListener);

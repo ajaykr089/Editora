@@ -76,7 +76,8 @@ const QuickActionsRoot = React.forwardRef<HTMLElement, QuickActionsProps>(functi
       { type: 'change', listener: handleChange },
       { type: 'toggle', listener: handleToggle },
     ],
-    [handleSelect, handleChange, handleToggle]
+    [handleSelect, handleChange, handleToggle],
+    { hostOnly: true }
   );
 
   useElementAttributes(ref, (el) => {

@@ -21,18 +21,35 @@ export function useForwardedHostRef<T extends HTMLElement>(
   return ref;
 }
 
+/**
+ * Wraps a host-event listener so it only runs for events the element itself dispatched.
+ *
+ * Container elements (tabs, dialogs, drawers, menus, sidebars...) hold arbitrary children, and
+ * `change` / `open` / `close` / `select` from those children bubble up to the host: a checkbox in a
+ * tab panel fired the Tabs `onChange` with `undefined` and closed the panel, a dropdown closing
+ * inside a dialog fired the Dialog `onClose`. Events dispatched from inside the host's shadow root
+ * are retargeted to the host, so `target === currentTarget` keeps exactly the element's own events.
+ */
+export function hostOnly<E extends Event = Event>(listener: (event: E) => void): (event: Event) => void {
+  return (event: Event) => {
+    if (event.target !== event.currentTarget) return;
+    listener(event as E);
+  };
+}
+
 export function useElementEventListeners<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   listeners: ElementEventListener[],
-  dependencies: React.DependencyList
+  dependencies: React.DependencyList,
+  options: { hostOnly?: boolean } = {}
 ): void {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const activeListeners = listeners.filter(
-      (entry): entry is { type: string; listener: EventListener } => typeof entry.listener === 'function'
-    );
+    const activeListeners = listeners
+      .filter((entry): entry is { type: string; listener: EventListener } => typeof entry.listener === 'function')
+      .map((entry) => (options.hostOnly ? { type: entry.type, listener: hostOnly(entry.listener) } : entry));
 
     activeListeners.forEach(({ type, listener }) => {
       el.addEventListener(type, listener);
