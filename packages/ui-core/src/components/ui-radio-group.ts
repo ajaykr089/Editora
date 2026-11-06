@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl, isRequired } from '../primitives/form-control';
 import {
   focusRovingItem,
   getRovingFocusBoundaryIndex,
@@ -305,6 +306,21 @@ function normalizeTone(raw: string | null): RadioTone {
 }
 
 export class UIRadioGroup extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => this.value || null,
+    getValidity: () => ({
+      valueMissing: isRequired(this) && !this.value,
+      message: 'Please select one of these options.'
+    }),
+    defaultAttribute: 'value',
+    onFormDisabled: () => {
+      this._disabled = this.hasAttribute('disabled') || this._formControl.disabledByForm;
+      this.requestRender();
+    }
+  });
+
   static get observedAttributes() {
     return [
       'value',
@@ -335,9 +351,23 @@ export class UIRadioGroup extends ElementBase {
     super();
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     this._syncFromAttributes();
     super.connectedCallback();
+    this._formControl.connect();
     this.root.addEventListener('click', this._onClickBound);
     this.root.addEventListener('keydown', this._onKeydownBound);
     if (typeof MutationObserver !== 'undefined') {
@@ -353,6 +383,7 @@ export class UIRadioGroup extends ElementBase {
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this.root.removeEventListener('click', this._onClickBound);
     this.root.removeEventListener('keydown', this._onKeydownBound);
     this._observer?.disconnect();
@@ -399,7 +430,7 @@ export class UIRadioGroup extends ElementBase {
 
   private _syncFromAttributes(): void {
     this._value = this.getAttribute('value') || '';
-    this._disabled = this.hasAttribute('disabled');
+    this._disabled = this.hasAttribute('disabled') || !!this._formControl?.disabledByForm;
     this._required = this.hasAttribute('required');
     this._orientation = normalizeOrientation(this.getAttribute('orientation'));
     this._options = this._collectOptions();

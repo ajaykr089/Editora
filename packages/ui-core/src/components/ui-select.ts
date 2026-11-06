@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl, isRequired } from '../primitives/form-control';
 import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { externalDescriptionMarkup } from '../primitives/control-name';
 import { findFirstEnabledIndex, findIndexByValue, findLastEnabledIndex } from '../primitives/collection';
@@ -785,6 +786,22 @@ const LIVE_ATTRS = new Set([
 ]);
 
 export class UISelect extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => this.value,
+    getValidity: () => ({
+      valueMissing: isRequired(this) && !this.value,
+      message: 'Please select an item in the list.',
+      anchor: this._triggerEl
+    }),
+    defaultAttribute: 'value',
+    onFormDisabled: () => {
+      this._syncControlState();
+      if (this.disabled && this._open) this._closeMenu({ restoreFocus: false });
+    }
+  });
+
   static get observedAttributes() {
     return [
       'aria-description',
@@ -850,8 +867,22 @@ export class UISelect extends ElementBase {
     this._onWindowScroll = this._onWindowScroll.bind(this);
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
 
     this.root.addEventListener('click', this._onRootClick);
     this.root.addEventListener('keydown', this._onRootKeyDown as EventListener);
@@ -882,6 +913,7 @@ export class UISelect extends ElementBase {
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this.root.removeEventListener('click', this._onRootClick);
     this.root.removeEventListener('keydown', this._onRootKeyDown as EventListener);
     this.root.removeEventListener('pointerdown', this._onRootPointerDown as EventListener);
@@ -936,7 +968,7 @@ export class UISelect extends ElementBase {
   }
 
   get disabled(): boolean {
-    return isTruthyAttr(this.getAttribute('disabled')) || isTruthyAttr(this.getAttribute('loading'));
+    return isTruthyAttr(this.getAttribute('disabled')) || isTruthyAttr(this.getAttribute('loading')) || !!this._formControl?.disabledByForm;
   }
 
   set disabled(next: boolean) {

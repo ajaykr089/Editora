@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl, isRequired } from '../primitives/form-control';
 import { submitImplicitly } from '../primitives/implicit-submit';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
@@ -418,6 +419,17 @@ type NumberFieldSource = 'blur' | 'step' | 'wheel' | 'keyboard' | 'programmatic'
 type InvalidReason = 'min' | 'max' | 'step' | 'parse';
 
 export class UINumberField extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => this.value,
+    getValidity: () => ({ valueMissing: isRequired(this) && !this.value, anchor: this._input }),
+    defaultAttribute: 'value',
+    onFormDisabled: (disabled) => {
+      if (this._input) this._input.disabled = disabled || readBooleanHostAttribute(this, 'disabled');
+    }
+  });
+
   static get observedAttributes() {
     return [
       'value',
@@ -467,14 +479,29 @@ export class UINumberField extends ElementBase {
     this._onClick = this._onClick.bind(this);
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
     this.addEventListener('click', this._onClick);
     this._registerWithForm();
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
     this.removeEventListener('click', this._onClick);
     this._detachListeners();
@@ -643,7 +670,7 @@ export class UINumberField extends ElementBase {
   private _syncControlAttrs(): void {
     if (!this._input) return;
     this._input.placeholder = this.getAttribute('placeholder') || '';
-    this._input.disabled = readBooleanHostAttribute(this, 'disabled');
+    this._input.disabled = readBooleanHostAttribute(this, 'disabled') || this._formControl.disabledByForm;
     // The shell holds the prefix, suffix and steppers too: they are as inactive as the input.
     if (this._input.disabled) this.root.querySelector('.shell')?.setAttribute('aria-disabled', 'true');
     else this.root.querySelector('.shell')?.removeAttribute('aria-disabled');

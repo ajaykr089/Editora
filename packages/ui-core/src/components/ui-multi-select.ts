@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl, isRequired } from '../primitives/form-control';
 import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { syncControlDescription } from '../primitives/control-name';
 import { normalizeCollectionText } from '../primitives/collection';
@@ -628,6 +629,18 @@ function normalizeSize(value: string | null): MultiSelectSize {
 }
 
 export class UIMultiSelect extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => this.value,
+    getValidity: () => ({
+      valueMissing: isRequired(this) && this.value.length === 0,
+      message: 'Please select at least one item.',
+      anchor: this._inputEl
+    }),
+    defaultAttribute: 'value'
+  });
+
   static get observedAttributes() {
     return [
       'options',
@@ -702,12 +715,27 @@ export class UIMultiSelect extends ElementBase {
     else this.removeAttribute('open');
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
     this._registerWithForm();
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this._detachOutsideListener();
     if (this._formUnregister) {
       this._formUnregister();

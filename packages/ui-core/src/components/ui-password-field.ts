@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl } from '../primitives/form-control';
 import { scheduleImplicitSubmit } from '../primitives/implicit-submit';
 import { syncControlName, syncSlotFallbackText, syncControlDescription } from '../primitives/control-name';
 
@@ -709,6 +710,17 @@ function computeStrength(value: string): StrengthState {
 }
 
 export class UIPasswordField extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => this.value,
+    getValidity: () => ({ control: this._input }),
+    defaultAttribute: 'value',
+    onFormDisabled: (disabled) => {
+      if (this._input) this._input.disabled = disabled || this.hasAttribute('disabled');
+    }
+  });
+
   static get observedAttributes() {
     return [...FORWARDED_ATTRS, 'aria-label', 'aria-description', 'aria-describedby', 'show-strength', 'revealable'];
   }
@@ -747,13 +759,28 @@ export class UIPasswordField extends ElementBase {
     return this._revealed;
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
     this._registerWithForm();
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
     this._detachListeners();
 
@@ -974,7 +1001,7 @@ export class UIPasswordField extends ElementBase {
     const placeholder = this.getAttribute('placeholder') || '';
     const name = this.getAttribute('name') || '';
 
-    this._input.disabled = disabled;
+    this._input.disabled = disabled || this._formControl.disabledByForm;
     this._input.required = required;
     this._input.readOnly = readOnly;
     this._input.placeholder = placeholder;
