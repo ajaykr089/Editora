@@ -75,6 +75,28 @@ const style = `
     transform: translateY(-0.5px);
   }
 
+  /* description-position="below": the hint goes under the field (DOM order, and so what a
+     screen reader reads, stays label, description, field). */
+  :host([description-position="below"]) .meta:not([hidden]) {
+    display: contents;
+  }
+
+  :host([description-position="below"]) .label {
+    order: 0;
+  }
+
+  :host([description-position="below"]) .shell {
+    order: 1;
+  }
+
+  :host([description-position="below"]) .description {
+    order: 2;
+  }
+
+  :host([description-position="below"]) .footer {
+    order: 3;
+  }
+
   .description {
     margin: 0;
     color: var(--ui-description-color);

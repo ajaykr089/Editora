@@ -56,6 +56,8 @@ export type TextareaProps = BaseProps & {
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
   description?: string;
+  /** Put the description under the field instead of under the label. */
+  descriptionPosition?: 'above' | 'below';
   autosize?: boolean;
   maxRows?: number;
   showCount?: boolean;
@@ -92,6 +94,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     radius,
     label,
     description,
+    descriptionPosition,
     autosize,
     maxRows,
     showCount,
@@ -149,6 +152,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     syncStringAttribute(el, 'radius', radius ? String(radius) : null);
     syncStringAttribute(el, 'label', label || null);
     syncStringAttribute(el, 'description', description || null);
+    syncStringAttribute(el, 'description-position', descriptionPosition === 'below' ? 'below' : null);
     syncNumberAttribute(el, 'max-rows', maxRows);
     syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
     syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
@@ -178,7 +182,8 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     showCount,
     density,
     tone,
-    headless
+    headless,
+    descriptionPosition
   ]);
 
   return createUIElement('ui-textarea', { ref, ...rest }, children);

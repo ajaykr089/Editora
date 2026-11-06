@@ -55,6 +55,8 @@ export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
   description?: string;
+  /** Put the description under the field instead of under the label. */
+  descriptionPosition?: 'above' | 'below';
 };
 
 export type InputPrefixProps = React.HTMLAttributes<HTMLElement>;
@@ -103,6 +105,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     radius,
     label,
     description,
+    descriptionPosition,
     children,
     ...rest
   } = props;
@@ -160,6 +163,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     syncStringAttribute(el, 'radius', radius ? String(radius) : null);
     syncStringAttribute(el, 'label', label ?? null);
     syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'description-position', descriptionPosition === 'below' ? 'below' : null);
   }, [
     clearable,
     debounce,
@@ -191,7 +195,8 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     color,
     radius,
     label,
-    description
+    description,
+    descriptionPosition
   ]);
 
   return createUIElement('ui-input', { ref, value: value ?? undefined, ...rest }, children);
