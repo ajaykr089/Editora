@@ -75,6 +75,88 @@ export function flushElementRender(el: Element | null | undefined): void {
   if (target && typeof target.flushPendingRender === 'function') target.flushPendingRender();
 }
 
+export type ControlledAttribute = {
+  /** The host attribute the prop is written to. */
+  attribute: string;
+  /**
+   * The prop, already in attribute form: a string to write, `true`/`false` for a presence
+   * attribute, `null` for "attribute absent", or `undefined` when the prop was not passed
+   * (uncontrolled: the element keeps whatever the user did).
+   */
+  value: string | boolean | null | undefined;
+  /** Events the element dispatches when it changes that attribute itself. */
+  events: string[];
+};
+
+/**
+ * Makes a prop win over the element's own state, the way React treats `value` on an `<input>`.
+ *
+ * The elements update their own attributes when the user acts (a tab click sets `selected`, a pick
+ * sets `value`, Escape removes `open`) and then dispatch an event. If the parent accepts the change
+ * it re-renders with the new prop and nothing else happens. If it does not (no handler, or it
+ * rejected the value), the attribute used to stay at the element's value, so the UI drifted from
+ * React state. After each such event, once React has handled it, this writes the prop back.
+ */
+/**
+ * The controlled value only when the parent listens for changes. A prop with no handler is the
+ * initial value (the docs and stories use `<Tabs selected={1}>`, `<Switch checked>` that way), so
+ * holding the element to it would freeze the control.
+ */
+export function whenHandled<T>(handlers: unknown[], value: T): T | undefined {
+  return handlers.some((handler) => typeof handler === 'function') ? value : undefined;
+}
+
+export function useControlledAttribute<T extends HTMLElement>(
+  ref: React.RefObject<T | null>,
+  controlled: ControlledAttribute
+): void {
+  const latest = useRef(controlled);
+  useIsomorphicLayoutEffect(() => {
+    latest.current = controlled;
+  });
+
+  const eventKey = controlled.events.join(' ');
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let reconciling = false;
+
+    const reconcile = () => {
+      timer = undefined;
+      const { attribute, value } = latest.current;
+      if (value === undefined || !el.isConnected) return;
+      reconciling = true;
+      try {
+        if (typeof value === 'boolean') {
+          if (el.hasAttribute(attribute) !== value) el.toggleAttribute(attribute, value);
+        } else if (value === null) {
+          if (el.hasAttribute(attribute)) el.removeAttribute(attribute);
+        } else if (el.getAttribute(attribute) !== value) {
+          el.setAttribute(attribute, value);
+        }
+        flushElementRender(el);
+      } finally {
+        reconciling = false;
+      }
+    };
+
+    // A macrotask: by then React has run the onChange handlers and re-rendered with the new prop
+    // if the parent accepted it, so only a rejected change is undone.
+    const onSelfChange = hostOnly(() => {
+      if (reconciling || timer !== undefined) return;
+      timer = setTimeout(reconcile, 0);
+    });
+
+    const types = eventKey.split(' ').filter(Boolean);
+    types.forEach((type) => el.addEventListener(type, onSelfChange));
+    return () => {
+      types.forEach((type) => el.removeEventListener(type, onSelfChange));
+      if (timer !== undefined) clearTimeout(timer);
+    };
+  }, [ref, eventKey]);
+}
+
 export function useElementAttributes<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   sync: (element: T) => void,

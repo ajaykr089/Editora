@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/multi-select';
-import { createUIElement, flushElementRender } from './_internals';
+import { createUIElement, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -171,6 +171,10 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     elevation,
     size
   ]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onChange, onValueChange], value === undefined ? undefined : value.length ? JSON.stringify(value) : null), events: ['change'] });
 
   return createUIElement('ui-multi-select', { ref, ...rest }, children);
 });

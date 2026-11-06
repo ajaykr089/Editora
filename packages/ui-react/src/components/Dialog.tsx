@@ -16,6 +16,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 export type DialogRequestCloseDetail = {
@@ -195,6 +197,10 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
     config,
     headless
   ]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'open', value: whenHandled([onOpen, onClose, onRequestClose, onDialogOpen, onDialogClose, onDialogDismiss, onDialogCancel, onDialogSubmit], typeof open === 'boolean' ? open : undefined), events: ['open', 'close'] });
 
   return createUIElement('ui-dialog', { ref, ...rest }, children);
 });

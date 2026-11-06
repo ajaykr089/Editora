@@ -10,6 +10,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type SliderValueDetail = {
@@ -157,6 +159,10 @@ export const Slider = React.forwardRef<HTMLElement, SliderProps>(function Slider
     nameStart,
     nameEnd
   ]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onInput, onChange, onValueChange], typeof value === 'number' && Number.isFinite(value) ? String(value) : undefined), events: ['input', 'change'] });
 
   return createUIElement('ui-slider', { ref, ...rest }, children);
 });

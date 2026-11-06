@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 import '@editora/ui-core/toggle-group';
 import { Toggle, type ToggleProps } from './Toggle';
-import { createUIElement, flushElementRender } from './_internals';
+import { createUIElement, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -136,6 +136,10 @@ const ToggleGroupRoot = React.forwardRef<HTMLElement, ToggleGroupProps>(function
     syncAttr('activation', activation && activation !== 'auto' ? activation : null);
     flushElementRender(el);
   }, [value, multiple, disabled, headless, allowEmpty, required, orientation, variant, size, density, shape, elevation, activation]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onInput, onChange, onValueChange], value == null ? undefined : Array.isArray(value) ? JSON.stringify(value) : String(value)), events: ['change', 'input'] });
 
   return createUIElement('ui-toggle-group', { ref, ...rest }, children);
 });

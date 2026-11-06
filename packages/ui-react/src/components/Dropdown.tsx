@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/dropdown';
-import { createUIElement, hostOnly, flushElementRender } from './_internals';
+import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -181,6 +181,10 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
     syncBooleanish('typeahead', typeahead, 'value');
     flushElementRender(el);
   }, [open, placement, variant, size, density, radius, shape, elevation, tone, closeOnSelect, typeahead]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'open', value: whenHandled([onOpen, onClose, onChange, onChangeDetail, onRequestClose], typeof open === 'boolean' ? open : undefined), events: ['open', 'close', 'change'] });
 
   return createUIElement('ui-dropdown', { ref, ...rest }, children);
 });

@@ -8,6 +8,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
@@ -176,6 +178,10 @@ const SelectRoot = React.forwardRef<HTMLElement, SelectProps>(function Select(
     checkPlacement,
     validation
   ]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onChange, onInput, onValueChange], value == null ? undefined : String(value)), events: ['change', 'input'] });
 
   return createUIElement('ui-select', { ref, ...rest }, children);
 });

@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/drawer';
-import { createUIElement, hostOnly, flushElementRender } from './_internals';
+import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -265,6 +265,10 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     else el.removeAttribute('aria-describedby');
     flushElementRender(el);
   }, [ariaDescribedBy]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'open', value: whenHandled([onOpen, onClose, onChange], typeof open === 'boolean' ? open : undefined), events: ['open', 'close', 'change'] });
 
   return createUIElement('ui-drawer', { ref, ...rest }, children);
 });

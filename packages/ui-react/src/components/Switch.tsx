@@ -8,6 +8,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type SwitchDetail = {
@@ -98,6 +100,10 @@ const SwitchRoot = React.forwardRef<HTMLElement, SwitchProps>(function Switch(
     syncStringAttribute(el, 'shape', shape && shape !== 'pill' ? shape : null);
     syncStringAttribute(el, 'elevation', elevation && elevation !== 'low' ? elevation : null);
   }, [checked, disabled, headless, loading, required, size, variant, tone, shape, elevation, label, description, name, value]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'checked', value: whenHandled([onInput, onChange], typeof checked === 'boolean' ? checked : undefined), events: ['change', 'input'] });
 
   return createUIElement('ui-switch', { ref, ...rest }, children);
 });

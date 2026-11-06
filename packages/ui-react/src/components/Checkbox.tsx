@@ -9,6 +9,8 @@ import {
   useElementEventListeners,
   useForwardedHostRef,
   warnIfElementNotRegistered,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type CheckedDetail = {
@@ -98,6 +100,10 @@ export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Ch
     density: density && density !== 'default' ? density : undefined,
     preset: preset && preset !== 'default' ? preset : undefined,
   };
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'checked', value: whenHandled([onCheckedChange, onChange, onInput], typeof checked === 'boolean' ? checked : undefined), events: ['change', 'input'] });
 
   return createUIElement('ui-checkbox', hostProps, children);
 });
