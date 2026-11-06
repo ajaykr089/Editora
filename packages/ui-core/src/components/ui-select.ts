@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { hideCloneSource } from '../primitives/clone-source';
 import { FormControl, isRequired } from '../primitives/form-control';
 import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { externalDescriptionMarkup } from '../primitives/control-name';
@@ -1266,6 +1267,12 @@ export class UISelect extends ElementBase {
 
   private _buildOptionsFromChildren(): SelectOption[] {
     const options: SelectOption[] = [];
+    // The <option>s are only a data source (the listbox renders its own); hide them so the
+    // accessibility tree and role queries (WebKit, Testing Library) see each option once.
+    Array.from(this.children).forEach((child) => {
+      const tag = child.tagName.toLowerCase();
+      if ((tag === 'option' || tag === 'optgroup') && !child.hasAttribute('slot')) hideCloneSource(child);
+    });
 
     const pushOption = (opt: HTMLOptionElement, group: string) => {
       const label = (opt.label || opt.textContent || opt.value || '').trim();

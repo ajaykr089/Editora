@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { hideCloneSource } from '../primitives/clone-source';
 import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { externalDescriptionMarkup } from '../primitives/control-name';
 import { normalizeCollectionText } from '../primitives/collection';
@@ -785,6 +786,8 @@ export class UICombobox extends ElementBase {
     const optionElements = Array.from(
       this.querySelectorAll('option,[data-combobox-option]')
     ) as HTMLElement[];
+    // Data source only (the list renders its own options): keep them out of the accessibility tree.
+    optionElements.forEach((node) => hideCloneSource(node));
     const seen = new Set<string>();
 
     return optionElements
