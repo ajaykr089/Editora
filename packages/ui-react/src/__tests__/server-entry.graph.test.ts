@@ -12,7 +12,9 @@ import { describe, expect, it } from 'vitest';
 const srcDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const serverEntry = resolve(srcDir, 'server.ts');
 
-const ALLOWED_PACKAGES = new Set(['react', 'react/jsx-runtime', 'react/jsx-dev-runtime']);
+// @editora/ui-core/preload is a plain string (the pre-definition stylesheet): it defines no element
+// and touches no DOM, which ui-core's preload-styles test checks.
+const ALLOWED_PACKAGES = new Set(['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', '@editora/ui-core/preload']);
 const IMPORT_RE = /(?:^|[\n;])\s*(?:import|export)\s*(?:type\s+)?(?:[^'"()]*?\sfrom\s*)?['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
 const HOOK_NAME_RE = /\buse[A-Z]\w*/g;
 

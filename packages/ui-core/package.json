@@ -24,6 +24,7 @@
       "require": "./dist/runtime.cjs.js",
       "default": "./dist/runtime.esm.js"
     },
+    "./preload.css": "./dist/preload.css",
     "./*": {
       "types": "./dist/standalone/*.d.ts",
       "import": "./dist/*.esm.js",

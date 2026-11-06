@@ -963,7 +963,8 @@ export class UITabs extends ElementBase {
         const tab = model[index];
         const active = index === selectedIndex;
 
-        panel.id = tab?.panelId || `${this._uid}-panel-${index}`;
+        // Keep an id the author gave the panel (links and tests target it); only fill in a missing one.
+        if (!panel.id || panel.id.startsWith(`${this._uid}-panel-`)) panel.id = tab?.panelId || `${this._uid}-panel-${index}`;
         panel.setAttribute('role', 'tabpanel');
         panel.setAttribute('tabindex', active ? '0' : '-1');
         panel.setAttribute('aria-hidden', active ? 'false' : 'true');
