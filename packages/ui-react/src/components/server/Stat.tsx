@@ -1,12 +1,15 @@
 import React from 'react';
 
+// Theme tokens first (contrast-checked text steps from ThemeProvider / applyTheme, then the raw
+// tone colour), the old fixed colours only as the last fallback. They were hard-coded, so a custom
+// brand or dark theme never reached Stat and MetricCard.
 const TONE_ACCENTS = {
-  neutral: '#475569',
-  brand: '#2563eb',
-  info: '#0e7490',
-  success: '#15803d',
-  warning: '#b45309',
-  danger: '#c81e1e',
+  neutral: 'var(--ui-color-muted, #475569)',
+  brand: 'var(--ui-color-accent-text, var(--ui-color-primary, #2563eb))',
+  info: 'var(--ui-color-info-text, var(--ui-color-info, #0e7490))',
+  success: 'var(--ui-color-success-text, var(--ui-color-success, #15803d))',
+  warning: 'var(--ui-color-warning-text, var(--ui-color-warning, #b45309))',
+  danger: 'var(--ui-color-danger-text, var(--ui-color-danger, #c81e1e))',
 } as const;
 
 const SIZE_STYLES = {
