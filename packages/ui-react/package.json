@@ -590,6 +590,12 @@
       "require": "./dist/Portal.cjs.js",
       "default": "./dist/Portal.esm.js"
     },
+    "./EditoraPreloadStyle": {
+      "types": "./dist/components/EditoraPreloadStyle.d.ts",
+      "import": "./dist/EditoraPreloadStyle.esm.js",
+      "require": "./dist/EditoraPreloadStyle.cjs.js",
+      "default": "./dist/EditoraPreloadStyle.esm.js"
+    },
     "./Positioner": {
       "types": "./dist/components/Positioner.d.ts",
       "import": "./dist/Positioner.esm.js",
