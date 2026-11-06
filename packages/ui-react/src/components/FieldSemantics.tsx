@@ -3,7 +3,7 @@ import '@editora/ui-core/control-group';
 import '@editora/ui-core/description';
 import '@editora/ui-core/field-error';
 import '@editora/ui-core/fieldset';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -37,6 +37,7 @@ export const Description = React.forwardRef<HTMLElement, DescriptionProps>(funct
     else el.removeAttribute('variant');
     if (hidden) el.setAttribute('hidden', '');
     else el.removeAttribute('hidden');
+    flushElementRender(el);
   }, [htmlFor, forProp, tone, size, variant, hidden]);
 
   return createUIElement('ui-description', { ref, ...rest }, children);
@@ -74,6 +75,7 @@ export const FieldError = React.forwardRef<HTMLElement, FieldErrorProps>(functio
     else el.removeAttribute('variant');
     if (hidden) el.setAttribute('hidden', '');
     else el.removeAttribute('hidden');
+    flushElementRender(el);
   }, [htmlFor, forProp, active, size, variant, hidden]);
 
   return createUIElement('ui-field-error', { ref, ...rest }, children);
@@ -109,6 +111,7 @@ export const ControlGroup = React.forwardRef<HTMLElement, ControlGroupProps>(fun
     else el.removeAttribute('density');
     if (hidden) el.setAttribute('hidden', '');
     else el.removeAttribute('hidden');
+    flushElementRender(el);
   }, [label, orientation, variant, density, hidden]);
 
   return createUIElement('ui-control-group', { ref, ...rest }, children);
@@ -177,6 +180,7 @@ export const Fieldset = React.forwardRef<HTMLElement, FieldsetProps>(function Fi
     else el.removeAttribute('shape');
     if (headless) el.setAttribute('headless', '');
     else el.removeAttribute('headless');
+    flushElementRender(el);
   }, [legend, description, error, required, invalid, orientation, variant, tone, density, shape, headless]);
 
   return createUIElement('ui-fieldset', { ref, ...rest }, children);

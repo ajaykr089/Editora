@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import '@editora/ui-core/pagination';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -62,7 +62,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
 
   React.useImperativeHandle(forwardedRef, () => ref.current as PaginationElement);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -138,6 +138,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncAttr('aria-label', ariaLabel ?? null);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [page, count, size, variant, ariaLabel, headless]);
 
   return createUIElement('ui-pagination', { ref, ...rest }, children);

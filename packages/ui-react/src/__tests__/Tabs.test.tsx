@@ -134,6 +134,9 @@ describe('container wrappers ignore bubbled child events', () => {
       </Drawer>
     );
     await flush();
+    // Opening from the prop reports itself once; only events after that matter here.
+    onClose.mockClear();
+    onChange.mockClear();
     const child = container.querySelector('[data-testid="child"]') as HTMLElement;
     child.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
     child.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { open: false } }));

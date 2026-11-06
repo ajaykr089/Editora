@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import '@editora/ui-core/accordion';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { createUIElement, warnIfElementNotRegistered, hostOnly } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, hostOnly, flushElementRender } from './_internals';
 
 type OpenValue = number | number[];
 
@@ -67,25 +67,6 @@ const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordi
 
   useIsomorphicLayoutEffect(() => {
     const element = ref.current;
-    if (!element) return;
-
-    setBooleanAttribute(element, 'multiple', multiple);
-    if (collapsible == null) element.removeAttribute('collapsible');
-    else element.setAttribute('collapsible', String(Boolean(collapsible)));
-
-    if (open == null) element.removeAttribute('open');
-    else element.setAttribute('open', Array.isArray(open) ? JSON.stringify(open) : String(open));
-    setAttributeValue(element, 'variant', variant && variant !== 'surface' ? variant : null);
-    setAttributeValue(element, 'size', size && size !== 'md' ? size : null);
-    setAttributeValue(element, 'radius', radius != null ? String(radius) : null);
-    setAttributeValue(element, 'tone', tone && tone !== 'neutral' ? tone : null);
-    setAttributeValue(element, 'indicator', indicator && indicator !== 'line' ? indicator : null);
-    setAttributeValue(element, 'shape', shape && shape !== 'default' ? shape : null);
-    setAttributeValue(element, 'elevation', elevation && elevation !== 'default' ? elevation : null);
-  }, [multiple, collapsible, open, variant, size, radius, tone, indicator, shape, elevation]);
-
-  React.useEffect(() => {
-    const element = ref.current;
     if (!element || (!onToggle && !onChangeOpen)) return;
 
     const handleToggle = hostOnly((event: Event) => {
@@ -105,6 +86,26 @@ const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordi
       element.removeEventListener('change', handleChange as EventListener);
     };
   }, [onToggle, onChangeOpen]);
+
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    setBooleanAttribute(element, 'multiple', multiple);
+    if (collapsible == null) element.removeAttribute('collapsible');
+    else element.setAttribute('collapsible', String(Boolean(collapsible)));
+
+    if (open == null) element.removeAttribute('open');
+    else element.setAttribute('open', Array.isArray(open) ? JSON.stringify(open) : String(open));
+    setAttributeValue(element, 'variant', variant && variant !== 'surface' ? variant : null);
+    setAttributeValue(element, 'size', size && size !== 'md' ? size : null);
+    setAttributeValue(element, 'radius', radius != null ? String(radius) : null);
+    setAttributeValue(element, 'tone', tone && tone !== 'neutral' ? tone : null);
+    setAttributeValue(element, 'indicator', indicator && indicator !== 'line' ? indicator : null);
+    setAttributeValue(element, 'shape', shape && shape !== 'default' ? shape : null);
+    setAttributeValue(element, 'elevation', elevation && elevation !== 'default' ? elevation : null);
+    flushElementRender(element);
+  }, [multiple, collapsible, open, variant, size, radius, tone, indicator, shape, elevation]);
 
   return createUIElement('ui-accordion', { ref, ...rest }, children);
 });

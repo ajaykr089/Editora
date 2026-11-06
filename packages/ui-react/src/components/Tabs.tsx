@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tabs';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -86,7 +86,7 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -136,6 +136,7 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     syncBool('stretched', stretched);
     syncBool('bare', bare);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [selected, value, orientation, activation, variant, size, density, tone, stretched, shape, elevation, loop, bare, headless]);
 
   return createUIElement('ui-tabs', { ref, ...rest }, children);

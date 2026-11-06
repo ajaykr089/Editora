@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/toolbar';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -63,6 +63,7 @@ export const Toolbar = React.forwardRef<HTMLElement, ToolbarProps>(function Tool
     if (typeof loop === 'boolean') syncBool('loop', loop);
     else syncAttr('loop', null);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [orientation, variant, size, density, wrap, loop, headless]);
 
   return createUIElement('ui-toolbar', { ref, ...rest }, children);

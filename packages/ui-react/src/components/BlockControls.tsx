@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import '@editora/ui-core/block-controls';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type BlockControlsNavigateDetail = {
   fromIndex: number;
@@ -59,7 +59,7 @@ export const BlockControls = React.forwardRef<HTMLElement, BlockControlsProps>(f
     warnIfElementNotRegistered('ui-block-controls', 'BlockControls');
   }, []);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const element = ref.current;
     if (!element || !onNavigate) return;
 
@@ -120,6 +120,7 @@ export const BlockControls = React.forwardRef<HTMLElement, BlockControlsProps>(f
 
     if (ariaLabel) element.setAttribute('aria-label', ariaLabel);
     else element.removeAttribute('aria-label');
+    flushElementRender(element);
   }, [orientation, variant, tone, state, elevation, size, radius, density, wrap, loop, disabled, activeIndex, ariaLabel]);
 
   return createUIElement('ui-block-controls', { ref, ...rest }, children);

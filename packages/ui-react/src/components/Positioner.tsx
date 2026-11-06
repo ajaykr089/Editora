@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/positioner';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -66,7 +66,7 @@ export const Positioner = React.forwardRef<HTMLElement, PositionerProps>(functio
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const handlePositionChange = (event: Event) => onPositionChange?.((event as CustomEvent<PositionerStateDetail>).detail);
@@ -103,6 +103,7 @@ export const Positioner = React.forwardRef<HTMLElement, PositionerProps>(functio
     else el.removeAttribute('anchor');
     if (headless) el.setAttribute('headless', '');
     else el.removeAttribute('headless');
+    flushElementRender(el);
   }, [anchor, crossOffset, fitViewport, flip, headless, matchWidth, offset, open, placement, shift, strategy]);
 
   return createUIElement('ui-positioner', { ref, ...rest }, children);

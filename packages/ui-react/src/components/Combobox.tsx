@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/combobox';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -94,7 +94,7 @@ const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combo
 
   React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -194,6 +194,7 @@ const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combo
 
     if (value != null) el.setAttribute('value', value);
     else el.removeAttribute('value');
+    flushElementRender(el);
   }, [
     value,
     open,

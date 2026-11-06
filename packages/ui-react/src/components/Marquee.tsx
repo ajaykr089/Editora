@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/marquee';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type MarqueeDirection = 'left' | 'right' | 'up' | 'down';
 export type MarqueeVariant = 'default' | 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -108,6 +108,7 @@ const MarqueeRoot = React.forwardRef<MarqueeElement, MarqueeProps>(function Marq
     syncAttr('radius', radius == null || radius === '' ? null : String(radius));
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
     syncAttr('padding', normalizeLength(padding));
+    flushElementRender(el);
   }, [
     direction,
     speed,

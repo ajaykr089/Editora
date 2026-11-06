@@ -43,7 +43,9 @@ export function useElementEventListeners<T extends HTMLElement>(
   dependencies: React.DependencyList,
   options: { hostOnly?: boolean } = {}
 ): void {
-  useEffect(() => {
+  // A layout effect, so the listeners are in place before the attribute-sync effect renders the
+  // element (an element may announce its initial state with an event during that render).
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -63,6 +65,16 @@ export function useElementEventListeners<T extends HTMLElement>(
   }, [ref, ...dependencies]);
 }
 
+/**
+ * Renders the element now if attribute changes left a render queued for the next microtask. Call it
+ * at the end of a wrapper's attribute-sync layout effect: the element then shows the props on the
+ * same commit instead of its defaults for one tick.
+ */
+export function flushElementRender(el: Element | null | undefined): void {
+  const target = el as (Element & { flushPendingRender?: () => void }) | null | undefined;
+  if (target && typeof target.flushPendingRender === 'function') target.flushPendingRender();
+}
+
 export function useElementAttributes<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   sync: (element: T) => void,
@@ -73,6 +85,7 @@ export function useElementAttributes<T extends HTMLElement>(
     if (!el) return;
 
     sync(el);
+    flushElementRender(el);
   }, [ref, ...dependencies]);
 }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/tree';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -50,6 +50,7 @@ const TreeItemComponent = React.forwardRef<HTMLElement, TreeItemProps>(function 
     else el.removeAttribute('selected');
     if (disabled) el.setAttribute('disabled', '');
     else el.removeAttribute('disabled');
+    flushElementRender(el);
   }, [value, expanded, selected, disabled]);
 
   return createUIElement(
@@ -70,7 +71,7 @@ const TreeRoot = React.forwardRef<HTMLElement, TreeProps>(function TreeRoot(
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -100,6 +101,7 @@ const TreeRoot = React.forwardRef<HTMLElement, TreeProps>(function TreeRoot(
 
     if (indentSize) el.setAttribute('indent-size', indentSize);
     else el.removeAttribute('indent-size');
+    flushElementRender(el);
   }, [value, indentSize]);
 
   return createUIElement('ui-tree', { ref, ...rest }, children);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIsomorphicLayoutEffect } from './_internals';
 import { Button } from './Button';
 
 const FOCUSABLE_SELECTOR = [
@@ -16,7 +17,7 @@ const FOCUSABLE_SELECTOR = [
 function usePrefersReducedMotion() {
   const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
 
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');

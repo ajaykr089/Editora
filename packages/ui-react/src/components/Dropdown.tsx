@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/dropdown';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -103,7 +103,7 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -179,6 +179,7 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
     syncAttr('tone', tone && tone !== 'default' && tone !== 'brand' ? tone : null);
     syncBooleanish('close-on-select', closeOnSelect, 'value');
     syncBooleanish('typeahead', typeahead, 'value');
+    flushElementRender(el);
   }, [open, placement, variant, size, density, radius, shape, elevation, tone, closeOnSelect, typeahead]);
 
   return createUIElement('ui-dropdown', { ref, ...rest }, children);

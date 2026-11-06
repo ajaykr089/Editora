@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/drawer';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -76,7 +76,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
 
   useImperativeHandle(forwardedRef, () => ref.current as any);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -103,6 +103,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (open) el.setAttribute('open', '');
     else el.removeAttribute('open');
+    flushElementRender(el);
   }, [open]);
 
   useIsomorphicLayoutEffect(() => {
@@ -110,6 +111,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (side) el.setAttribute('side', side);
     else el.removeAttribute('side');
+    flushElementRender(el);
   }, [side]);
 
   useIsomorphicLayoutEffect(() => {
@@ -117,6 +119,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (dismissible) el.setAttribute('dismissible', '');
     else el.removeAttribute('dismissible');
+    flushElementRender(el);
   }, [dismissible]);
 
   useIsomorphicLayoutEffect(() => {
@@ -124,6 +127,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (variant && variant !== 'default') el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
+    flushElementRender(el);
   }, [variant]);
 
   useIsomorphicLayoutEffect(() => {
@@ -131,6 +135,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (density && density !== 'default') el.setAttribute('density', density);
     else el.removeAttribute('density');
+    flushElementRender(el);
   }, [density]);
 
   useIsomorphicLayoutEffect(() => {
@@ -138,6 +143,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (shape && shape !== 'default') el.setAttribute('shape', shape);
     else el.removeAttribute('shape');
+    flushElementRender(el);
   }, [shape]);
 
   useIsomorphicLayoutEffect(() => {
@@ -145,6 +151,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (elevation && elevation !== 'default') el.setAttribute('elevation', elevation);
     else el.removeAttribute('elevation');
+    flushElementRender(el);
   }, [elevation]);
 
   useIsomorphicLayoutEffect(() => {
@@ -152,6 +159,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (tone && tone !== 'default' && tone !== 'brand') el.setAttribute('tone', tone);
     else el.removeAttribute('tone');
+    flushElementRender(el);
   }, [tone]);
 
   useIsomorphicLayoutEffect(() => {
@@ -159,6 +167,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (size && size !== 'default') el.setAttribute('size', size);
     else el.removeAttribute('size');
+    flushElementRender(el);
   }, [size]);
 
   useIsomorphicLayoutEffect(() => {
@@ -166,6 +175,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (state && state !== 'idle') el.setAttribute('state', state);
     else el.removeAttribute('state');
+    flushElementRender(el);
   }, [state]);
 
   useIsomorphicLayoutEffect(() => {
@@ -173,6 +183,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (inset) el.setAttribute('inset', '');
     else el.removeAttribute('inset');
+    flushElementRender(el);
   }, [inset]);
 
   useIsomorphicLayoutEffect(() => {
@@ -180,6 +191,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (typeof closeOnOverlay === 'boolean') el.setAttribute('close-on-overlay', String(closeOnOverlay));
     else el.removeAttribute('close-on-overlay');
+    flushElementRender(el);
   }, [closeOnOverlay]);
 
   useIsomorphicLayoutEffect(() => {
@@ -187,6 +199,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (typeof closeOnEsc === 'boolean') el.setAttribute('close-on-esc', String(closeOnEsc));
     else el.removeAttribute('close-on-esc');
+    flushElementRender(el);
   }, [closeOnEsc]);
 
   useIsomorphicLayoutEffect(() => {
@@ -194,6 +207,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (typeof lockWhileLoading === 'boolean') el.setAttribute('lock-while-loading', String(lockWhileLoading));
     else el.removeAttribute('lock-while-loading');
+    flushElementRender(el);
   }, [lockWhileLoading]);
 
   useIsomorphicLayoutEffect(() => {
@@ -201,6 +215,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (typeof showClose === 'boolean') el.setAttribute('show-close', String(showClose));
     else el.removeAttribute('show-close');
+    flushElementRender(el);
   }, [showClose]);
 
   useIsomorphicLayoutEffect(() => {
@@ -208,6 +223,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (initialFocus) el.setAttribute('initial-focus', initialFocus);
     else el.removeAttribute('initial-focus');
+    flushElementRender(el);
   }, [initialFocus]);
 
   useIsomorphicLayoutEffect(() => {
@@ -215,6 +231,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (title) el.setAttribute('title', title);
     else el.removeAttribute('title');
+    flushElementRender(el);
   }, [title]);
 
   useIsomorphicLayoutEffect(() => {
@@ -222,6 +239,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (description) el.setAttribute('description', description);
     else el.removeAttribute('description');
+    flushElementRender(el);
   }, [description]);
 
   useIsomorphicLayoutEffect(() => {
@@ -229,6 +247,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (ariaLabel) el.setAttribute('aria-label', ariaLabel);
     else el.removeAttribute('aria-label');
+    flushElementRender(el);
   }, [ariaLabel]);
 
   useIsomorphicLayoutEffect(() => {
@@ -236,6 +255,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (ariaLabelledBy) el.setAttribute('aria-labelledby', ariaLabelledBy);
     else el.removeAttribute('aria-labelledby');
+    flushElementRender(el);
   }, [ariaLabelledBy]);
 
   useIsomorphicLayoutEffect(() => {
@@ -243,6 +263,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     if (!el) return;
     if (ariaDescribedBy) el.setAttribute('aria-describedby', ariaDescribedBy);
     else el.removeAttribute('aria-describedby');
+    flushElementRender(el);
   }, [ariaDescribedBy]);
 
   return createUIElement('ui-drawer', { ref, ...rest }, children);

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import '@editora/ui-core/table';
-import { createUIElement, useForwardedHostRef } from './_internals';
+import { createUIElement, useForwardedHostRef, useIsomorphicLayoutEffect } from './_internals';
 
 export type TableSortDirection = 'asc' | 'desc';
 
@@ -56,7 +56,7 @@ export const Table = React.forwardRef<HTMLElement, TableProps>(function Table(pr
 
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 

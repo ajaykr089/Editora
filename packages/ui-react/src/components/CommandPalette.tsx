@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/command-palette';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -63,7 +63,7 @@ const CommandPaletteRoot = React.forwardRef<CommandPaletteElement, CommandPalett
     warnIfElementNotRegistered('ui-command-palette', 'CommandPalette');
   }, []);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -121,6 +121,7 @@ const CommandPaletteRoot = React.forwardRef<CommandPaletteElement, CommandPalett
       el.query = query;
     }
     if (typeof headless === 'boolean') syncAttr('headless', headless ? '' : null);
+    flushElementRender(el);
   }, [open, placeholder, emptyText, query, headless]);
 
   return createUIElement('ui-command-palette', { ref, ...rest }, children);

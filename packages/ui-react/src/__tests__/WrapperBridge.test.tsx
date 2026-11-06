@@ -206,6 +206,7 @@ describe('wrapper bridge helpers', () => {
         value="#336699"
         presets={['#336699', '#112233']}
         recent
+        mode="popover"
         open
         onValueChange={(value) => {
           latestValue = value;

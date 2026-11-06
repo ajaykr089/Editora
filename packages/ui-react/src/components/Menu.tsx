@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/menu';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -115,7 +115,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
 
   React.useImperativeHandle(forwardedRef, () => ref.current as any);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const onOpenHandler = hostOnly(() => onOpen?.());
@@ -146,6 +146,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el || open == null) return;
     if (open) el.setAttribute('open', '');
     else el.removeAttribute('open');
+    flushElementRender(el);
   }, [open]);
 
   useIsomorphicLayoutEffect(() => {
@@ -153,6 +154,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (placement) el.setAttribute('placement', placement);
     else el.removeAttribute('placement');
+    flushElementRender(el);
   }, [placement]);
 
   useIsomorphicLayoutEffect(() => {
@@ -160,6 +162,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (variant && variant !== 'default' && variant !== 'surface') el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
+    flushElementRender(el);
   }, [variant]);
 
   useIsomorphicLayoutEffect(() => {
@@ -167,6 +170,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
     else el.removeAttribute('size');
+    flushElementRender(el);
   }, [size]);
 
   useIsomorphicLayoutEffect(() => {
@@ -174,6 +178,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (density && density !== 'default') el.setAttribute('density', density);
     else el.removeAttribute('density');
+    flushElementRender(el);
   }, [density]);
 
   useIsomorphicLayoutEffect(() => {
@@ -184,6 +189,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
       return;
     }
     el.setAttribute('radius', String(radius));
+    flushElementRender(el);
   }, [radius]);
 
   useIsomorphicLayoutEffect(() => {
@@ -191,6 +197,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (shape && shape !== 'default') el.setAttribute('shape', shape);
     else el.removeAttribute('shape');
+    flushElementRender(el);
   }, [shape]);
 
   useIsomorphicLayoutEffect(() => {
@@ -198,6 +205,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (elevation && elevation !== 'default') el.setAttribute('elevation', elevation);
     else el.removeAttribute('elevation');
+    flushElementRender(el);
   }, [elevation]);
 
   useIsomorphicLayoutEffect(() => {
@@ -205,6 +213,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (!el) return;
     if (tone && tone !== 'default' && tone !== 'brand') el.setAttribute('tone', tone);
     else el.removeAttribute('tone');
+    flushElementRender(el);
   }, [tone]);
 
   useIsomorphicLayoutEffect(() => {
@@ -215,6 +224,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
       return;
     }
     el.setAttribute('close-on-select', closeOnSelect ? 'true' : 'false');
+    flushElementRender(el);
   }, [closeOnSelect]);
 
   useIsomorphicLayoutEffect(() => {
@@ -225,6 +235,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
       return;
     }
     el.setAttribute('typeahead', typeahead ? 'true' : 'false');
+    flushElementRender(el);
   }, [typeahead]);
 
   return createUIElement('ui-menu', { ref, ...rest }, children);

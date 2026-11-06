@@ -92,9 +92,23 @@ export abstract class ElementBase extends DOMElement {
     if (this._renderScheduled) return;
     this._renderScheduled = true;
     queueMicrotask(() => {
+      // Already flushed by flushPendingRender().
+      if (!this._renderScheduled) return;
       this._renderScheduled = false;
       this._requestRender();
     });
+  }
+
+  /**
+   * Runs a render that is waiting for the next microtask, now. Framework wrappers set several
+   * attributes right after the element connected and call this once they are all applied, so the
+   * element is correct by the time the framework's commit returns (a test reading it synchronously
+   * no longer sees the defaults, e.g. a one-page pager before `count` arrived).
+   */
+  flushPendingRender(): void {
+    if (!this._renderScheduled || !this.isConnected) return;
+    this._renderScheduled = false;
+    this._requestRender();
   }
 
   private _requestRender(): void {

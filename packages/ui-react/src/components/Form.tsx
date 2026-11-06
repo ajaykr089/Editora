@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/form';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -88,7 +88,7 @@ const FormRoot = React.forwardRef<HTMLElement, FormProps>(function Form(
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -192,6 +192,7 @@ const FormRoot = React.forwardRef<HTMLElement, FormProps>(function Form(
 
     if (disabled) el.setAttribute('disabled', '');
     else el.removeAttribute('disabled');
+    flushElementRender(el);
   }, [
     novalidate,
     autosave,

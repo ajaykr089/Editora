@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIsomorphicLayoutEffect } from './_internals';
 import '@editora/ui-core/split-button';
 import { createPortal } from 'react-dom';
 
@@ -578,7 +579,7 @@ export const SplitButton = React.forwardRef<HTMLElement, SplitButtonProps>(funct
     };
   }, [open, updateMenuPosition]);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) return;
 
     const onPointerDown = (event: PointerEvent) => {

@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import '@editora/ui-core/sidebar';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 const VOID_HTML_TAGS = new Set([
@@ -517,7 +517,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -644,6 +644,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
 
     if (typeof showBadges === 'boolean') syncAttr('show-badges', showBadges ? 'true' : 'false');
     else syncAttr('show-badges', null);
+    flushElementRender(el);
   }, [
     collapsed,
     collapsible,

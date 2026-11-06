@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/roving-focus-group';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -25,7 +25,7 @@ export const RovingFocusGroup = React.forwardRef<HTMLElement, RovingFocusGroupPr
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const handleActiveItemChange = (event: Event) => {
@@ -51,6 +51,7 @@ export const RovingFocusGroup = React.forwardRef<HTMLElement, RovingFocusGroupPr
     if (loop === false) el.setAttribute('loop', 'false');
     else el.removeAttribute('loop');
     el.container = container ?? null;
+    flushElementRender(el);
   }, [activeAttribute, container, directItemSelector, itemSelector, loop]);
 
   return createUIElement('ui-roving-focus-group', { ref, ...rest }, children);

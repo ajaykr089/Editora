@@ -8,7 +8,7 @@ import type {
   UIAlertDialogOpenDetail,
   UIAlertDialogTemplateOptions
 } from '@editora/ui-core';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 type BaseProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
 type NativeAlertDialogProps = Omit<BaseProps, 'onClose' | 'onChange' | 'onCancel' | 'onOpen'>;
@@ -80,7 +80,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
 
   React.useImperativeHandle(forwardedRef, () => ref.current as AlertDialogElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -164,6 +164,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
 
     if (config) (el as any).config = config;
     else (el as any).config = {};
+    flushElementRender(el);
   }, [
     open,
     headless,

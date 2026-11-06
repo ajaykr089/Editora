@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/icon-cloud';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type IconCloudDirection = 'clockwise' | 'counterclockwise';
 export type IconCloudVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -136,6 +136,7 @@ const IconCloudRoot = React.forwardRef<IconCloudElement, IconCloudProps>(functio
     syncBooleanAttr('pause-on-hover', pauseOnHover);
     syncBooleanAttr('pause-on-item-hover', pauseOnItemHover);
     syncBooleanAttr('pause-on-focus', pauseOnFocus);
+    flushElementRender(el);
   }, [
     radius,
     perspective,

@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/spinning-text';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type SpinningTextDirection = 'clockwise' | 'counterclockwise';
 export type SpinningTextVariant = 'default' | 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -141,6 +141,7 @@ const SpinningTextRoot = React.forwardRef<SpinningTextElement, SpinningTextProps
     syncBooleanAttr('paused', paused);
     syncBooleanAttr('pause-on-hover', pauseOnHover);
     syncBooleanAttr('pause-on-focus', pauseOnFocus);
+    flushElementRender(el);
   }, [
     text,
     repeat,

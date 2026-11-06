@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import '@editora/ui-core/navigation-menu';
-import { createUIElement, useForwardedHostRef, hostOnly } from './_internals';
+import { createUIElement, useForwardedHostRef, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -68,7 +68,7 @@ const NavigationMenuRoot = React.forwardRef<HTMLElement, NavigationMenuProps>(fu
 
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -119,6 +119,7 @@ const NavigationMenuRoot = React.forwardRef<HTMLElement, NavigationMenuProps>(fu
 
     if (headless) el.setAttribute('headless', '');
     else el.removeAttribute('headless');
+    flushElementRender(el);
   }, [selected, orientation, activation, variant, size, radius, elevation, tone, loop, collapsible, headless]);
 
   return createUIElement('ui-navigation-menu', { ref, ...rest }, children);

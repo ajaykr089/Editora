@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '@editora/ui-core/context-menu';
 import { createPortal } from 'react-dom';
-import { createUIElement, useForwardedHostRef, hostOnly } from './_internals';
+import { createUIElement, useForwardedHostRef, hostOnly, useIsomorphicLayoutEffect } from './_internals';
 
 type UIContextMenuElement = HTMLElement & {
   open: boolean;
@@ -103,7 +103,7 @@ export const ContextMenu = React.forwardRef<UIContextMenuElement, ContextMenuPro
     }, 0);
   };
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const openHandler = hostOnly((event: Event) => {

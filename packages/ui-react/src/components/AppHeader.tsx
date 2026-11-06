@@ -1,7 +1,7 @@
 import React from 'react';
 
 import '@editora/ui-core/app-header';
-import { createUIElement } from './_internals';
+import { createUIElement, useIsomorphicLayoutEffect } from './_internals';
 
 export type AppHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, 'onToggle'> & {
   sticky?: boolean;
@@ -102,7 +102,7 @@ const AppHeader = React.forwardRef<HTMLElement, AppHeaderProps>(function AppHead
     ensureAppHeaderRuntimeStyles();
   }, []);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el || !onMenuTrigger) return;
     const handler = () => onMenuTrigger();

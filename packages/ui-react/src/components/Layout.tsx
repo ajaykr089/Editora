@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/layout';
-import { createUIElement, hostOnly } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -45,7 +45,7 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
   const ref = useRef<HTMLElement | null>(null);
   React.useImperativeHandle(forwardedRef, () => ref.current as any);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const handler = hostOnly(() => onLayoutChange?.());
@@ -83,6 +83,7 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
 
     if (asideWidth) el.setAttribute('aside-width', asideWidth);
     else el.removeAttribute('aside-width');
+    flushElementRender(el);
   }, [mode, variant, density, maxWidth, sidebarSide, collapsed, headless, sidebarWidth, asideWidth]);
 
   return createUIElement('ui-layout', { ref, ...rest }, children);

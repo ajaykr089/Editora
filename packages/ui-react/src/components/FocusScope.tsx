@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/focus-scope';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -24,7 +24,7 @@ export const FocusScope = React.forwardRef<HTMLElement, FocusScopeProps>(functio
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const handleEscape = (event: Event) => onEscape?.((event as CustomEvent<{ originalEvent?: Event }>).detail || {});
@@ -57,6 +57,7 @@ export const FocusScope = React.forwardRef<HTMLElement, FocusScopeProps>(functio
     else el.removeAttribute('inert-others');
     if (headless) el.setAttribute('headless', '');
     else el.removeAttribute('headless');
+    flushElementRender(el);
   }, [active, autoFocus, headless, inertOthers, loop, restoreFocus, trapped]);
 
   return createUIElement('ui-focus-scope', { ref, ...rest }, children);

@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 
 import '@editora/ui-core/dropzone';
 import '@editora/ui-core/file-upload';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -71,7 +71,7 @@ function useFileUploadBridge(
     onUploadComplete
   }: Pick<BaseFileUploadProps, 'onChange' | 'onReject' | 'onUploadStart' | 'onUploadProgress' | 'onUploadSuccess' | 'onUploadError' | 'onUploadCancel' | 'onUploadComplete'>
 ) {
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -175,6 +175,7 @@ function useFileUploadAttrs(
     syncAttr('upload-button-text', uploadButtonText ?? null);
     syncAttr('progress', progress ? JSON.stringify(progress) : null);
     (el as HTMLElement & { uploadRequest?: FileUploadUploadRequest | null }).uploadRequest = onUploadRequest ?? null;
+    flushElementRender(el);
   }, [accept, buttonText, description, disabled, dropLabel, label, maxFiles, maxSize, multiple, name, ref, required, showPreviews, progress, uploadOnSelect, uploadButtonText, onUploadRequest]);
 }
 

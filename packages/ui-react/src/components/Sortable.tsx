@@ -11,8 +11,7 @@ import {
   useElementEventListeners,
   useForwardedHostRef,
   useIsomorphicLayoutEffect,
-  warnIfElementNotRegistered,
-} from './_internals';
+  warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type SortableListOrientation = 'vertical' | 'horizontal';
 export type SortableSortMode = 'manual' | 'label';
@@ -578,6 +577,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       host.removeAttribute('custom-item-rendering-ready');
       host.setAttribute('custom-item-rendering-pending', 'true');
     }
+    flushElementRender(host);
   }, [ref, renderItem, portalVersion, items, selection, filterQuery, sort, disabled]);
 
   useIsomorphicLayoutEffect(() => {

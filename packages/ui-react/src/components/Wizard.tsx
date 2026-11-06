@@ -10,7 +10,7 @@ import React, {
 } from "react";
 
 import '@editora/ui-core/wizard';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -140,6 +140,7 @@ const WizardStepComponent = React.forwardRef<HTMLElement, WizardStepProps>(
 
       if (invalid) el.setAttribute("data-invalid", "true");
       else el.removeAttribute("data-invalid");
+      flushElementRender(el);
     }, [value, title, description, state, optional, disabled, invalid]);
 
     const isActive = runtime.activeValue === value;
@@ -214,7 +215,7 @@ const WizardRoot = React.forwardRef<HTMLElement, WizardProps>(
       });
     }, [value]);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       const el = ref.current;
       if (!el) return;
 
@@ -334,6 +335,7 @@ const WizardRoot = React.forwardRef<HTMLElement, WizardProps>(
       syncAttr("next-label", nextLabel || null);
       syncAttr("prev-label", prevLabel || null);
       syncAttr("finish-label", finishLabel || null);
+      flushElementRender(el);
     }, [
       value,
       linear,
