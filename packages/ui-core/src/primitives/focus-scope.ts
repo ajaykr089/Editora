@@ -54,8 +54,63 @@ function isFocusable(node: HTMLElement): boolean {
   return true;
 }
 
-function getFocusable(node: HTMLElement): HTMLElement[] {
-  return Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(isFocusable);
+// Overlays keep their panel in a shadow root and their content in the light DOM (slotted), and
+// that content may contain more web components with shadow roots. querySelectorAll on the panel
+// saw none of it, and document.activeElement is only the outermost host, so a trapped dialog sent
+// every Tab back to its close button and its fields could not be reached from the keyboard. The
+// helpers below follow the composed (flat) tree instead.
+
+function flatChildren(el: Element): Element[] {
+  if (el instanceof HTMLSlotElement) {
+    const assigned = el.assignedElements({ flatten: true });
+    return assigned.length ? assigned : Array.from(el.children);
+  }
+  const shadow = (el as HTMLElement).shadowRoot;
+  if (shadow) return Array.from(shadow.children);
+  return Array.from(el.children);
+}
+
+function isRendered(el: HTMLElement): boolean {
+  if (typeof el.checkVisibility === 'function') return el.checkVisibility();
+  return true;
+}
+
+/** Focusable elements inside `node`, in flat-tree (rendered) order, across slots and shadow roots. */
+export function getFocusable(node: HTMLElement): HTMLElement[] {
+  const found: HTMLElement[] = [];
+  const visit = (el: Element) => {
+    if (!(el instanceof HTMLElement)) {
+      flatChildren(el).forEach(visit);
+      return;
+    }
+    if (el !== node && (el.hasAttribute('hidden') || el.hasAttribute('inert') || el.getAttribute('aria-hidden') === 'true')) return;
+    if (el !== node && el.matches(FOCUSABLE_SELECTOR) && isFocusable(el) && isRendered(el)) found.push(el);
+    flatChildren(el).forEach(visit);
+  };
+  visit(node);
+  return found;
+}
+
+/** The focused element, looking through open shadow roots. */
+export function deepActiveElement(): HTMLElement | null {
+  let active = (typeof document !== 'undefined' ? document.activeElement : null) as HTMLElement | null;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
+  return active;
+}
+
+/** Whether `node` is inside `container` in the composed tree (through slots and shadow hosts). */
+export function composedContains(container: Node, node: Node | null): boolean {
+  let current: Node | null = node;
+  while (current) {
+    if (current === container) return true;
+    const slot = (current as Element).assignedSlot;
+    if (slot) {
+      current = slot;
+      continue;
+    }
+    current = current.parentNode || ((current as ShadowRoot).host ?? null);
+  }
+  return false;
 }
 
 function ensureContainerFocusable(node: HTMLElement): void {
@@ -122,7 +177,7 @@ export function createFocusScope(options: FocusScopeOptions): FocusScopeHandle {
       ...options
     },
     paused: false,
-    previouslyFocused: document.activeElement instanceof HTMLElement ? document.activeElement : null,
+    previouslyFocused: deepActiveElement(),
     inerted: [],
     onKeyDown: () => {},
     onFocusIn: () => {}
@@ -174,8 +229,8 @@ export function createFocusScope(options: FocusScopeOptions): FocusScopeHandle {
       return;
     }
 
-    const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    if (!active || !scope.options.node.contains(active)) {
+    const active = deepActiveElement();
+    if (!active || !composedContains(scope.options.node, active)) {
       event.preventDefault();
       focusInitial();
       return;
@@ -204,7 +259,7 @@ export function createFocusScope(options: FocusScopeOptions): FocusScopeHandle {
     const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
     if (path.includes(scope.options.node)) return;
     if (!(target instanceof Node)) return;
-    if (scope.options.node.contains(target)) return;
+    if (composedContains(scope.options.node, target)) return;
     focusInitial();
   };
 

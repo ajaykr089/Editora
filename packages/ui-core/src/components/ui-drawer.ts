@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { getFocusable, deepActiveElement, composedContains } from '../primitives/focus-scope';
 import OverlayManager from '../overlayManager';
 
 type DrawerSide = 'left' | 'right' | 'top' | 'bottom';
@@ -824,11 +825,10 @@ export class UIDrawer extends ElementBase {
       if (!result.includes(node)) result.push(node);
     };
 
-    this.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(add);
-
-    if (panel) {
-      panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(add);
-    }
+    // Flat-tree order (the drawer's own chrome and the slotted content as rendered), including
+    // fields inside nested components such as ui-input (see focus-scope.ts).
+    if (panel) getFocusable(panel).forEach(add);
+    else this.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(add);
 
     return result;
   }
@@ -1147,8 +1147,8 @@ export class UIDrawer extends ElementBase {
 
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-    const activeInside = !!active && this._isNodeInsideDrawer(active);
+    const active = deepActiveElement();
+    const activeInside = !!active && (this._isNodeInsideDrawer(active) || (!!panel && composedContains(panel, active)));
 
     if (event.shiftKey) {
       if (!activeInside || active === first) {

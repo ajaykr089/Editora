@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { getFocusable, deepActiveElement, composedContains } from '../primitives/focus-scope';
 import { closeOverlay, liftToTopLayer } from '../primitives/overlay-motion';
 import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
 
@@ -1224,7 +1225,8 @@ export class UIAlertDialog extends ElementBase {
   }
 
   private _collectFocusable(panel: HTMLElement): HTMLElement[] {
-    return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter((node) => {
+    // Flat-tree order across the slotted content and nested shadow roots (see focus-scope.ts).
+    return getFocusable(panel).filter((node) => {
       const disabled = (node as HTMLButtonElement).disabled;
       if (disabled) return false;
       if (node.getAttribute('aria-hidden') === 'true') return false;
@@ -1274,12 +1276,12 @@ export class UIAlertDialog extends ElementBase {
       return;
     }
 
-    const active = (this.root.activeElement as HTMLElement | null) || (document.activeElement as HTMLElement | null);
+    const active = deepActiveElement();
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
 
     if (event.shiftKey) {
-      if (active === first || !active || !panel.contains(active)) {
+      if (active === first || !active || !composedContains(panel, active)) {
         event.preventDefault();
         last.focus();
       }

@@ -1,7 +1,7 @@
 import { ElementBase } from '../ElementBase';
 import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
-import { createFocusScope, type FocusScopeHandle } from '../primitives/focus-scope';
+import { createFocusScope, getFocusable, type FocusScopeHandle } from '../primitives/focus-scope';
 import { closeOverlay, liftToTopLayer } from '../primitives/overlay-motion';
 
 const style = `
@@ -888,7 +888,8 @@ export class UIDialog extends ElementBase {
   }
 
   private _collectFocusable(panel: HTMLElement): HTMLElement[] {
-    return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter((node) => {
+    // Flat-tree order, including the slotted content (so `autofocus` on a field in the dialog works).
+    return getFocusable(panel).filter((node) => {
       const disabled = (node as HTMLButtonElement).disabled;
       if (disabled) return false;
       if (node.getAttribute('aria-hidden') === 'true') return false;
