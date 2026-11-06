@@ -82,4 +82,25 @@ describe('Dropdown wrapper', () => {
     expect(onRequestClose).toHaveBeenCalledWith({ reason: 'escape' });
     expect(onSelect).toHaveBeenCalledWith({ value: 'duplicate', label: 'Duplicate' });
   });
+
+  it('exposes one set of menu items: the copy in the open menu, not the hidden originals', async () => {
+    const { container } = render(
+      <Dropdown>
+        <button slot="trigger">Open</button>
+        <div slot="content">
+          <button role="menuitem">Export</button>
+          <button role="menuitem">Archive</button>
+        </div>
+      </Dropdown>
+    );
+    const el = container.querySelector('ui-dropdown') as HTMLElement & { open?: boolean };
+    const source = el.querySelector('[slot="content"]') as HTMLElement;
+    expect(source.getAttribute('aria-hidden')).toBe('true');
+
+    el.setAttribute('open', '');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const copies = Array.from(el.shadowRoot?.querySelectorAll('[role="menuitem"]') || []);
+    expect(copies.map((item) => item.textContent)).toEqual(['Export', 'Archive']);
+    expect(copies.some((item) => item.closest('[aria-hidden="true"]'))).toBe(false);
+  });
 });

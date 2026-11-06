@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { hideCloneSource, revealClone } from '../primitives/clone-source';
 import { OVERLAY_MOTION_CSS, setPanelOpen } from '../primitives/overlay-motion';
 import { resolveTriggerControl } from '../primitives/trigger';
 import { createSharedMenuItemCss } from './menu-item-styles';
@@ -612,7 +613,7 @@ function scrollItemIntoContainer(item: HTMLElement, container: HTMLElement): voi
 }
 
 function cloneContentTree(source: HTMLElement): HTMLElement {
-  return cloneNodeForMenu(source) as HTMLElement;
+  return revealClone(cloneNodeForMenu(source) as HTMLElement);
 }
 
 function cloneNodeForMenu(node: Node): Node {
@@ -1409,6 +1410,7 @@ export class UIDropdown extends ElementBase {
   }
 
   private _onSlotChange(): void {
+    hideCloneSource(this._getContentSource());
     this._syncTriggerA11y();
     if (!this._isOpen) return;
     this._renderMenuContent();
@@ -1442,6 +1444,7 @@ export class UIDropdown extends ElementBase {
 
     this._panelEl = this.root.querySelector('.panel') as HTMLElement | null;
     this._portalEl = this.root.querySelector('.menu') as HTMLElement | null;
+    hideCloneSource(this._getContentSource());
     this._syncMenuPresentation();
     this._syncMenuA11y();
     this._syncTriggerA11y();
