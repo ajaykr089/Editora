@@ -133,8 +133,8 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     if (typeof lockWhileLoading === 'boolean') el.setAttribute('lock-while-loading', String(lockWhileLoading));
     else el.removeAttribute('lock-while-loading');
 
-    if (roleType) el.setAttribute('role', roleType);
-    else el.removeAttribute('role');
+    if (roleType) el.setAttribute('dialog-role', roleType);
+    else el.removeAttribute('dialog-role');
 
     if (tone && tone !== 'neutral') el.setAttribute('tone', tone);
     else el.removeAttribute('tone');

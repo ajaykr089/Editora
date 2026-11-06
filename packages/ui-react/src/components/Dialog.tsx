@@ -158,7 +158,7 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
     syncBooleanStateAttribute(el, 'close-on-esc', closeOnEsc);
     syncBooleanStateAttribute(el, 'lock-while-loading', lockWhileLoading);
 
-    syncStringAttribute(el, 'role', roleType || null);
+    syncStringAttribute(el, 'dialog-role', roleType || null);
     syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
     syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
     syncStringAttribute(el, 'initial-focus', initialFocus || null);

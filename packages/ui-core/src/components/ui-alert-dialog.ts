@@ -716,6 +716,7 @@ export class UIAlertDialog extends ElementBase {
       'close-on-backdrop',
       'lock-while-loading',
       'role',
+      'dialog-role',
       'tone',
       'size',
       'variant',
@@ -864,12 +865,12 @@ export class UIAlertDialog extends ElementBase {
   }
 
   get roleType(): UIAlertDialogRole {
-    const raw = this.getAttribute('role');
+    const raw = this.getAttribute('dialog-role') || this.getAttribute('role');
     return raw === 'dialog' ? 'dialog' : 'alertdialog';
   }
 
   set roleType(value: UIAlertDialogRole) {
-    this.setAttribute('role', value);
+    this.setAttribute('dialog-role', value);
   }
 
   get tone(): UIAlertDialogTone {
@@ -1059,9 +1060,8 @@ export class UIAlertDialog extends ElementBase {
   }
 
   private _syncFromAttributes() {
-    if (!this.hasAttribute('role')) {
-      this.setAttribute('role', 'alertdialog');
-    }
+    // No role on the host: the panel inside the shadow root is the alert dialog. Adding
+    // role="alertdialog" here too put two dialogs in the accessibility tree.
   }
 
   private _syncVisualTokens() {
@@ -1394,6 +1394,19 @@ export class UIAlertDialog extends ElementBase {
   // is exposed as a dialog of its own. Closed, it was an empty, unnamed alert dialog sitting in the
   // page; open, it needs the same name as the dialog inside its shadow root.
   private _syncHostSemantics(open: boolean, name = '', hasExplicitName = false): void {
+    // Only a host that still carries a legacy `role` is a dialog of its own and needs a name.
+    if (!this.hasAttribute('role')) {
+      if (this.hasAttribute(AUTO_NAME_ATTR)) {
+        this.removeAttribute('aria-label');
+        this.removeAttribute(AUTO_NAME_ATTR);
+      }
+      if (open) {
+        if (this.hasAttribute('aria-hidden')) this.removeAttribute('aria-hidden');
+      } else if (this.getAttribute('aria-hidden') !== 'true') {
+        this.setAttribute('aria-hidden', 'true');
+      }
+      return;
+    }
     if (!open) {
       if (this.getAttribute('aria-hidden') !== 'true') this.setAttribute('aria-hidden', 'true');
       if (this.hasAttribute(AUTO_NAME_ATTR)) {

@@ -41,4 +41,27 @@ describe('Dialog wrapper', () => {
     expect(onClose).not.toHaveBeenCalled();
     expect(onDialogClose).not.toHaveBeenCalled();
   });
+
+  it('puts exactly one dialog in the accessibility tree', async () => {
+    const { container } = render(<Dialog open title="Edit item" roleType="alertdialog">Body</Dialog>);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const el = container.querySelector('ui-dialog') as HTMLElement;
+    expect(el.hasAttribute('role')).toBe(false);
+    const dialogs = el.shadowRoot?.querySelectorAll('[role="dialog"], [role="alertdialog"]') || [];
+    expect(dialogs).toHaveLength(1);
+    expect(dialogs[0].getAttribute('role')).toBe('alertdialog');
+    expect(dialogs[0].getAttribute('aria-modal')).toBe('true');
+  });
+
+  it('does not fire onClose when an element inside the dialog closes', () => {
+    const onClose = vi.fn();
+    const { container } = render(
+      <Dialog open onClose={onClose}>
+        <div data-testid="inner">inner</div>
+      </Dialog>
+    );
+    const inner = container.querySelector('[data-testid="inner"]') as HTMLElement;
+    inner.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });

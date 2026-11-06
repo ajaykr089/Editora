@@ -497,6 +497,7 @@ export class UIDialog extends ElementBase {
       'size',
       'state',
       'role',
+      'dialog-role',
       'initial-focus',
       'submit-text',
       'cancel-text',
@@ -661,7 +662,7 @@ export class UIDialog extends ElementBase {
     if (this._config.closeOnEsc != null) this.closeOnEsc = Boolean(this._config.closeOnEsc);
     if (this._config.lockWhileLoading != null) this.lockWhileLoading = Boolean(this._config.lockWhileLoading);
     if (this._config.size) this.setAttribute('size', this._config.size);
-    if (this._config.role) this.setAttribute('role', this._config.role);
+    if (this._config.role) this.setAttribute('dialog-role', this._config.role);
     if (this._config.initialFocus) this.setAttribute('initial-focus', this._config.initialFocus);
     if (this._config.ariaLabel) this.setAttribute('aria-label', this._config.ariaLabel);
     if (this._config.ariaLabelledby) this.setAttribute('aria-labelledby', this._config.ariaLabelledby);
@@ -756,9 +757,14 @@ export class UIDialog extends ElementBase {
     if (!this.hasAttribute('close-on-backdrop') && this.hasAttribute('close-on-overlay')) {
       this.setAttribute('close-on-backdrop', this.getAttribute('close-on-overlay') || 'true');
     }
-    if (!this.hasAttribute('role')) {
-      this.setAttribute('role', 'dialog');
-    }
+    // No role on the host: the panel inside the shadow root is the dialog (it carries aria-modal and
+    // the title/description references). Adding role="dialog" here as well put two dialogs in the
+    // accessibility tree. `dialog-role` (or a legacy `role` on the host) picks the panel's role.
+  }
+
+  private _panelRole(): 'dialog' | 'alertdialog' {
+    const raw = (this.getAttribute('dialog-role') || this.getAttribute('role') || '').trim();
+    return raw === 'alertdialog' ? 'alertdialog' : 'dialog';
   }
 
   private _syncOpenState() {
@@ -1211,7 +1217,7 @@ export class UIDialog extends ElementBase {
         <section
           class="panel"
           part="panel"
-          role="${escapeHtml(this.getAttribute('role') || 'dialog')}"
+          role="${escapeHtml(this._panelRole())}"
           aria-modal="true"
           ${fallbackAriaLabel ? `aria-label="${escapeHtml(fallbackAriaLabel)}"` : ''}
           ${labelledBy ? `aria-labelledby="${escapeHtml(labelledBy)}"` : ''}
