@@ -289,6 +289,17 @@ no setup, and accept most of these options as attributes or props.
   <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/icons/docs/images/ui-icon.png" alt="Six icons drawn by ui-icon: a bell, a solid blue bell, a duotone blue pie chart, a bold bell, an arrow rotated to point down and a bell with a label" width="316">
 </p>
 
+To use those components without loading the whole catalog, give them the icons you use with `addIcons` from
+`@editora/ui-core/add-icons` (or the `@editora/ui-core` root): they draw at once, and the catalog is only fetched if an icon you did not
+add is shown.
+
+```js
+import { addIcons } from '@editora/ui-core/add-icons';
+import { checkIcon, searchIcon } from '@editora/icons/glyphs';
+
+addIcons(checkIcon, searchIcon); // before the icons first render
+```
+
 An icon you register with this package is found by those components too. Do not register the whole catalog with
 ui-core yourself (`registerWithEditoraUI(registerIcon)`): its registry wins over the built-in icons, and every
 `<ui-icon>` would then draw the plain outline, whatever its `icon-variant` or `icon-weight`.
@@ -306,6 +317,8 @@ ui-core yourself (`registerWithEditoraUI(registerIcon)`): its registry wins over
 | `resolveIcon(name, variant?)` | `{ definition, viewBox, variant, glyph }`: the variant that will be drawn, which is `outline` if the one asked for is missing. |
 | `registerIcon(definition)`, `registerIcons(definitions)` | Add icons, or replace them. |
 | `iconDefinitions`, `iconNameList` | The built-in catalog as data, and its names. |
+| `renderIconDefinition(definition, options?)` (from `@editora/icons/renderer`) | Like `renderIconSvg`, for a definition you pass in; needs no catalog. |
+| `checkIcon`, `chevronDownIcon`, … (from `@editora/icons/glyphs`) | Each built-in icon's definition, to import one by one. |
 | `normalizeIconSize(size, fallback?)` | The size `renderIconSvg` would draw: a positive number or CSS length, else the fallback. |
 | `registerWithEditoraUI(register)` | Calls `register(name, svg)` once for every icon, with its outline as markup: for an icon store of your own. |
 
@@ -314,9 +327,23 @@ The types are `IconDefinition`, `IconGlyph`, `IconNode`, `IconTag`, `IconAttrVal
 
 ## Size and where it runs
 
-The catalog is one module: importing anything from the package, even `hasIcon`, brings all 504 icons. `renderIconSvg`
-alone is about 138 KB minified and 48 KB gzipped (there is no per-icon import to tree-shake). If you need a handful of icons on a
-size-sensitive page, render them once and keep the strings.
+The catalog is one module: importing anything from the package root, even `hasIcon`, brings all 504 icons, about
+138 KB minified and 48 KB gzipped.
+
+To ship only the icons you use, import them one by one from `@editora/icons/glyphs` (one export per icon, named in
+camelCase with an `Icon` suffix: `check` is `checkIcon`, `chevron-down` is `chevronDownIcon`) and draw them with
+`renderIconDefinition` from `@editora/icons/renderer` (about 1.7 KB gzipped). A bundler keeps only the icons you
+import:
+
+```js
+import { checkIcon, chevronDownIcon } from '@editora/icons/glyphs';
+import { renderIconDefinition } from '@editora/icons/renderer';
+
+button.innerHTML = renderIconDefinition(checkIcon, { size: 16, variant: 'solid' });
+```
+
+`renderIconDefinition(definition, options?)` takes the same options as `renderIconSvg` and draws the same markup. The
+per-icon exports leave out `tags` and `categories`, which only matter for searching the whole catalog.
 
 Nothing in the package touches the DOM, so it also runs in Node and on the server, and the `<svg>` strings are the same
 everywhere. `require('@editora/icons')` works from Node 14. A bare `import` in a Node ES module needs Node 22.12 or

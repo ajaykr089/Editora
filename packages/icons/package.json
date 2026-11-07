@@ -20,6 +20,18 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
+    },
+    "./glyphs": {
+      "types": "./dist/glyphs.d.ts",
+      "import": "./dist/glyphs.esm.js",
+      "require": "./dist/glyphs.cjs.js",
+      "default": "./dist/glyphs.esm.js"
+    },
+    "./renderer": {
+      "types": "./dist/renderer.d.ts",
+      "import": "./dist/renderer.esm.js",
+      "require": "./dist/renderer.cjs.js",
+      "default": "./dist/renderer.esm.js"
     }
   },
   "files": [

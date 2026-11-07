@@ -51,3 +51,21 @@ Ensure icon-only controls include text alternatives via button labels or aria la
 ## Performance Notes
 
 Prefer static imports and avoid repeated runtime registration on frequent renders.
+
+The package root holds the whole catalog (504 icons, about 48 KB gzipped). To ship only the icons you use, import them one by one from `@editora/icons/glyphs` and draw them with `renderIconDefinition` from `@editora/icons/renderer`:
+
+```ts
+import { checkIcon } from "@editora/icons/glyphs";
+import { renderIconDefinition } from "@editora/icons/renderer";
+
+const svg = renderIconDefinition(checkIcon, { size: 16 });
+```
+
+With the UI components, pass them to `addIcons` from `@editora/ui-core/add-icons` before they first render; `<ui-icon>` then draws them without fetching the catalog:
+
+```ts
+import { addIcons } from "@editora/ui-core/add-icons";
+import { checkIcon, searchIcon } from "@editora/icons/glyphs";
+
+addIcons(checkIcon, searchIcon);
+```
