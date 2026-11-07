@@ -1718,10 +1718,27 @@ export class UIChart extends ElementBase {
     if (!primary) return '';
     const idx = this._activeIndex;
     if (idx == null || !data.labels[idx]) {
+      // Slices of a whole have no order, so a first-to-last change means nothing: show the
+      // largest share instead.
+      const type = this._type();
+      if (type === 'donut' || type === 'radial') {
+        const total = primary.data.reduce((sum, point) => sum + Math.max(0, point.value), 0);
+        const largest = primary.data.reduce((best, point) => (point.value > best.value ? point : best), primary.data[0]);
+        if (!largest || total <= 0) return '';
+        const share = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format((largest.value / total) * 100);
+        return `
+        <div class="insight" part="insight">
+          <span>Largest <strong>${escapeHtml(largest.label)}</strong></span>
+          <strong>${escapeHtml(`${this._formatValue(largest.value)} (${share}%)`)}</strong>
+        </div>
+      `;
+      }
       const stats = this._resolveStats(primary.data);
       const trendTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
+      // The percentage is not in the chart's unit: no value prefix or suffix ($24.3% before).
+      const pct = stats.deltaPct == null ? '' : new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(Math.abs(stats.deltaPct));
       const trend = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}${
-        stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : ''}${this._formatValue(stats.deltaPct, { maximumFractionDigits: 1 })}%)`
+        stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : '-'}${pct}%)`
       }`;
       return `
         <div class="insight" part="insight">

@@ -32,4 +32,17 @@ describe('ui-chart with a few points', () => {
     const cells = Array.from(root.querySelectorAll('table.data-table tbody td')).map((node) => node.textContent);
     expect(cells).toEqual(['$500', '-$1,990']);
   });
+
+  it('prints the change percentage without the value prefix', async () => {
+    const root = await chart({ type: 'line', 'value-prefix': '$', values: '1000,750', labels: 'a,b' });
+    expect(root.querySelector('.insight')!.textContent!.replace(/\s+/g, ' ')).toContain('-$250 (-25%)');
+  });
+
+  it('describes a donut by its largest slice, not a first-to-last change', async () => {
+    const root = await chart({ type: 'donut', 'value-prefix': '$', data: JSON.stringify([{ label: 'Travel', value: 300 }, { label: 'Meals', value: 100 }]) });
+    const text = root.querySelector('.insight')!.textContent!.replace(/\s+/g, ' ');
+    expect(text).toContain('Largest Travel');
+    expect(text).toContain('$300 (75%)');
+    expect(text).not.toContain('Range');
+  });
 });
