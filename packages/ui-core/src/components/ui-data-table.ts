@@ -1,4 +1,6 @@
 import { ElementBase } from '../ElementBase';
+import { navigateTo } from '../primitives/navigate';
+import { numberAttribute } from '../primitives/number-attribute';
 
 const style = `
   :host {
@@ -623,6 +625,10 @@ const lightDomStyle = `
     box-shadow: -1px 0 0 var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08)), -8px 0 14px rgba(15, 23, 42, 0.08);
   }
 
+  ui-data-table:not([headless]) > table tbody tr[data-href] {
+    cursor: pointer;
+  }
+
   ui-data-table:not([headless]) > table thead th:focus-visible,
   ui-data-table:not([headless]) > table tbody tr[tabindex="0"]:focus-visible {
     outline: 2px solid var(--ui-data-table-focus-ring, var(--ui-color-focus-ring, #2563eb));
@@ -757,7 +763,10 @@ export class UIDataTable extends ElementBase {
       'page',
       'page-size',
       'pagination-id',
-      'hide-summary'
+      'hide-summary',
+      'server-side',
+      'total-rows',
+      'hidden-columns'
     ];
   }
 
@@ -773,8 +782,13 @@ export class UIDataTable extends ElementBase {
   private _pageCount = 1;
   private _pageSize = 10;
   private _totalRows = 0;
+  /** Rows on the current page in server-side mode; -1 otherwise. */
+  private _serverRowCount = -1;
   private _filteredRows = 0;
-  private _paginationEl: HTMLElement | null = null;
+  /** Where pagination-id is looked up and its change events are heard (the table's document or shadow root). */
+  private _paginationRoot: Document | ShadowRoot | null = null;
+  /** Watches for a pagination-id pager that is not in the page yet. */
+  private _paginationWatcher: MutationObserver | null = null;
   private _resizeState: { columnIndex: number; startX: number; startWidth: number } | null = null;
   private _columnWidths = new Map<number, number>();
   private _frameEl: HTMLElement | null = null;
@@ -796,6 +810,7 @@ export class UIDataTable extends ElementBase {
   constructor() {
     super();
     this._onClick = this._onClick.bind(this);
+    this._onAuxClick = this._onAuxClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onPaginationChange = this._onPaginationChange.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
@@ -813,6 +828,7 @@ export class UIDataTable extends ElementBase {
     ensureDataTableLightDomStyle();
 
     this.addEventListener('click', this._onClick as EventListener);
+    this.addEventListener('auxclick', this._onAuxClick as EventListener);
     this.addEventListener('keydown', this._onKeyDown as EventListener);
     this.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.addEventListener('dragstart', this._onDragStart as EventListener);
@@ -835,6 +851,7 @@ export class UIDataTable extends ElementBase {
 
   disconnectedCallback() {
     this.removeEventListener('click', this._onClick as EventListener);
+    this.removeEventListener('auxclick', this._onAuxClick as EventListener);
     this.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.removeEventListener('dragstart', this._onDragStart as EventListener);
@@ -1518,6 +1535,7 @@ export class UIDataTable extends ElementBase {
       }
 
       this._applyColumnOrder();
+      this._applyHiddenColumns();
       this._syncHeaderState();
       this._applyPinnedColumns();
       this._table.setAttribute('aria-colcount', String(this._headerCells().length || 0));
@@ -1610,9 +1628,85 @@ export class UIDataTable extends ElementBase {
     });
   }
 
+  /**
+   * `server-side`: the rows in the table are the current page, already sorted and filtered by the
+   * server. The table shows them as they are and still reports sort, filter and page changes for
+   * the app to fetch the next set; `total-rows` gives the size of the whole result.
+   */
+  private _isServerSide(): boolean {
+    return this.hasAttribute('server-side');
+  }
+
+  private _applyServerPagination(rows: HTMLTableRowElement[], emitChange: boolean) {
+    const desiredPage = this._parsePage();
+    const totalAttr = this.getAttribute('total-rows');
+    const total = Math.max(0, Math.floor(numberAttribute(totalAttr, Number.NaN)));
+    const known = Number.isFinite(total);
+    this._totalRows = known ? total : rows.length;
+    this._filteredRows = this._totalRows;
+    this._serverRowCount = rows.length;
+    this._table?.setAttribute('aria-rowcount', String(this._totalRows));
+    this._pageCount = known ? Math.max(1, Math.ceil(total / this._pageSize)) : Math.max(1, desiredPage);
+    this._page = Math.min(this._pageCount, Math.max(1, desiredPage));
+    if (this._page !== desiredPage) this._setPageAttribute(this._page);
+
+    const start = (this._page - 1) * this._pageSize;
+    rows.forEach((row, index) => {
+      row.hidden = false;
+      row.removeAttribute('data-hidden-by-filter');
+      row.removeAttribute('data-hidden-by-page');
+      row.setAttribute('aria-rowindex', String(start + index + 1));
+    });
+
+    if (emitChange) {
+      const startDisplay = this._totalRows === 0 ? 0 : start + 1;
+      this.dispatchEvent(
+        new CustomEvent('page-change', {
+          detail: {
+            page: this._page,
+            count: this._pageCount,
+            pageSize: this._pageSize,
+            total: this._totalRows,
+            start: startDisplay,
+            end: Math.min(start + this._pageSize, this._totalRows)
+          },
+          bubbles: true
+        })
+      );
+    }
+  }
+
+  /** `hidden-columns`: column keys (data-key or header text) or 0-based indexes to hide. */
+  private _applyHiddenColumns() {
+    if (!this._table) return;
+    const headers = this._headerCells();
+    const raw = this.getAttribute('hidden-columns') || '';
+    const hidden = new Set<number>();
+    raw.split(',').map((token) => token.trim()).filter(Boolean).forEach((token) => {
+      const index = this._resolveColumnIndex(headers, /^\d+$/.test(token) ? Number(token) : token);
+      if (index >= 0) hidden.add(index);
+    });
+    Array.from(this._table.rows).forEach((row) => {
+      Array.from(row.cells).forEach((cell, index) => {
+        if (hidden.has(index)) {
+          cell.hidden = true;
+          cell.setAttribute('data-column-hidden', '');
+        } else if (cell.hasAttribute('data-column-hidden')) {
+          cell.hidden = false;
+          cell.removeAttribute('data-column-hidden');
+        }
+      });
+    });
+  }
+
   private _applyPagination(emitChange: boolean) {
     const rows = this._bodyRows();
     this._pageSize = this._parsePageSize();
+    if (this._isServerSide()) {
+      this._applyServerPagination(rows, emitChange);
+      return;
+    }
+    this._serverRowCount = -1;
     this._totalRows = rows.length;
 
     const query = this._parseFilterQuery();
@@ -1833,7 +1927,8 @@ export class UIDataTable extends ElementBase {
       return;
     }
     const start = (this._page - 1) * this._pageSize + 1;
-    const end = Math.min(this._page * this._pageSize, filtered);
+    const pageEnd = this._serverRowCount >= 0 ? start - 1 + this._serverRowCount : this._page * this._pageSize;
+    const end = Math.min(pageEnd, filtered);
     if (filtered === total) {
       summaryEl.textContent = `Showing ${start}-${end} of ${total}`;
       return;
@@ -2140,6 +2235,12 @@ export class UIDataTable extends ElementBase {
         if (!row.hasAttribute('tabindex')) row.setAttribute('tabindex', '0');
         if (this._selectedRows.has(row)) row.setAttribute('data-selected', 'true');
         else row.removeAttribute('data-selected');
+      } else if (visible && row.hasAttribute('data-href')) {
+        // A link row is reached with Tab and followed with Enter.
+        row.removeAttribute('aria-selected');
+        row.removeAttribute('data-selected');
+        row.setAttribute('aria-keyshortcuts', 'Enter');
+        if (!row.hasAttribute('tabindex')) row.setAttribute('tabindex', '0');
       } else {
         row.removeAttribute('aria-selected');
         row.removeAttribute('aria-keyshortcuts');
@@ -2193,7 +2294,8 @@ export class UIDataTable extends ElementBase {
       this._sortDirection = 'asc';
     }
 
-    const rows = Array.from(tbody.rows).filter((row) => !this._isVirtualSpacerRow(row));
+    // Server-side, the server sorts: report the change and leave the rows as they are.
+    const rows = this._isServerSide() ? [] : Array.from(tbody.rows).filter((row) => !this._isVirtualSpacerRow(row));
     const sorted = rows
       .map((row, rowIndex) => ({
         row,
@@ -2234,29 +2336,63 @@ export class UIDataTable extends ElementBase {
   }
 
   private _detachPaginationListener() {
-    if (!this._paginationEl) return;
-    this._paginationEl.removeEventListener('change', this._onPaginationChange as EventListener);
-    this._paginationEl = null;
+    this._paginationWatcher?.disconnect();
+    this._paginationWatcher = null;
+    if (!this._paginationRoot) return;
+    this._paginationRoot.removeEventListener('change', this._onPaginationChange as EventListener, true);
+    this._paginationRoot = null;
   }
 
+  /**
+   * pagination-id used to be looked up once, when the table connected, so a pager placed after the
+   * table (the usual layout) was never found and paging did nothing. The pager is now looked up
+   * by id whenever it is needed, and its change events are heard at the shared root.
+   */
   private _syncPaginationBinding() {
     this._detachPaginationListener();
-    const paginationId = this.getAttribute('pagination-id');
-    if (!paginationId) return;
-    const element = document.getElementById(paginationId);
-    if (!element) return;
-    this._paginationEl = element;
-    this._paginationEl.addEventListener('change', this._onPaginationChange as EventListener);
+    if (!this.getAttribute('pagination-id')) return;
+    const root = this.getRootNode() as Document | ShadowRoot;
+    if (typeof root?.addEventListener !== 'function') return;
+    this._paginationRoot = root;
+    // Capture phase: a pager's change event is heard whether or not it bubbles.
+    root.addEventListener('change', this._onPaginationChange as EventListener, true);
     this._syncPaginationElement();
   }
 
+  /**
+   * The pager may be added after the table (later in the markup, or rendered later): watch the
+   * root until it appears, then give it the page and count.
+   */
+  private _watchForPager() {
+    if (this._paginationWatcher || !this._paginationRoot || typeof MutationObserver === 'undefined') return;
+    this._paginationWatcher = new MutationObserver(() => {
+      if (this._paginationElement()) this._syncPaginationElement();
+    });
+    this._paginationWatcher.observe(this._paginationRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['id'] });
+  }
+
+  private _paginationElement(): HTMLElement | null {
+    const id = this.getAttribute('pagination-id');
+    if (!id || !this._paginationRoot) return null;
+    const root = this._paginationRoot as Document | (ShadowRoot & { getElementById?: (id: string) => HTMLElement | null });
+    return (root.getElementById?.(id) as HTMLElement | null) ?? null;
+  }
+
   private _syncPaginationElement() {
-    if (!this._paginationEl) return;
-    this._paginationEl.setAttribute('count', String(this._pageCount || 1));
-    this._paginationEl.setAttribute('page', String(this._page || 1));
+    const pager = this._paginationElement();
+    if (!pager) {
+      this._watchForPager();
+      return;
+    }
+    this._paginationWatcher?.disconnect();
+    this._paginationWatcher = null;
+    pager.setAttribute('count', String(this._pageCount || 1));
+    pager.setAttribute('page', String(this._page || 1));
   }
 
   private _onPaginationChange(event: Event) {
+    const pager = this._paginationElement();
+    if (!pager || event.target !== pager) return;
     const detail = (event as CustomEvent<{ page?: number }>).detail;
     const nextPage = Number(detail?.page);
     if (!Number.isFinite(nextPage)) return;
@@ -2307,7 +2443,51 @@ export class UIDataTable extends ElementBase {
         if (target !== row && this._isInteractiveTarget(target)) return;
         this._toggleRowSelection(row);
       }
+      return;
     }
+
+    const linkRow = this._linkRowFor(target);
+    if (linkRow) {
+      // Selecting text in a row is not a click on it.
+      if (typeof window !== 'undefined' && String(window.getSelection?.() || '').trim()) return;
+      this._followRowLink(linkRow, event);
+    }
+  }
+
+  /** Middle-click on a link row opens it in a new tab, like a link. */
+  private _onAuxClick(event: MouseEvent) {
+    if (event.button !== 1 || this.hasAttribute('selectable')) return;
+    const pathTarget = event.composedPath().find((node) => node instanceof HTMLElement) as HTMLElement | undefined;
+    const row = this._linkRowFor(pathTarget || (event.target as HTMLElement));
+    if (row) this._followRowLink(row, event);
+  }
+
+  /** The link row (`tbody tr[data-href]`) a click landed on, unless it was on a control inside it. */
+  private _linkRowFor(target: HTMLElement | null): HTMLTableRowElement | null {
+    if (!target || !this._table) return null;
+    const row = target.closest('tbody tr') as HTMLTableRowElement | null;
+    if (!row || !this._table.contains(row) || row.hidden || this._isVirtualSpacerRow(row)) return null;
+    if (!row.getAttribute('data-href')) return null;
+    if (target !== row && this._isInteractiveTarget(target)) return null;
+    return row;
+  }
+
+  /**
+   * Follows a row's `data-href` through the shared navigate contract: a cancelable `navigate` event
+   * (detail: href, row values, row id) that a router can take over (React: NavigationProvider or
+   * onNavigate); otherwise a full navigation. Modifier or middle clicks open a new tab.
+   */
+  private _followRowLink(row: HTMLTableRowElement, event?: MouseEvent | KeyboardEvent) {
+    const href = row.getAttribute('data-href');
+    if (!href) return;
+    const mouse = event && 'button' in event ? (event as MouseEvent) : null;
+    const newTab = !!event && (event.metaKey || event.ctrlKey || event.shiftKey || (mouse ? mouse.button === 1 : false));
+    if (newTab) {
+      event?.preventDefault();
+      if (typeof window !== 'undefined') window.open(href, '_blank', 'noopener');
+      return;
+    }
+    navigateTo(this, { href, rowId: row.getAttribute('data-id') || undefined, row: this._rowValues(row) });
   }
 
   private _onKeyDown(event: KeyboardEvent) {
@@ -2386,10 +2566,24 @@ export class UIDataTable extends ElementBase {
           if (focusRow) focusRow.focus();
           return;
         }
+        if (key === 'Enter' && row.hasAttribute('data-href')) {
+          event.preventDefault();
+          this._followRowLink(row, event);
+          return;
+        }
         if (key === 'Enter' || key === ' ') {
           event.preventDefault();
           this._toggleRowSelection(row);
         }
+      }
+      return;
+    }
+
+    if (key === 'Enter') {
+      const row = this._linkRowFor(target);
+      if (row && (target === row || !this._isInteractiveTarget(target))) {
+        event.preventDefault();
+        this._followRowLink(row, event);
       }
     }
   }

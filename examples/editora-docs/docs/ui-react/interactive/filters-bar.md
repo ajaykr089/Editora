@@ -53,6 +53,27 @@ function PatientsFilters() {
 />
 ```
 
+## Date range with presets
+
+Pass `onDateRangeChange` to add a date-range picker; `dateRangePresets` adds one-click ranges beside it, and the one matching the current range is shown as pressed. `commonDateRangePresets` covers last 7 and 30 days, this and last month, and this year, computed in the user's local time. Ranges are ISO dates with both ends included.
+
+```tsx
+import { FiltersBar, commonDateRangePresets, type FiltersBarDateRange } from '@editora/ui-react';
+
+const [period, setPeriod] = React.useState<FiltersBarDateRange | null>(null);
+
+<FiltersBar
+  search={search}
+  onSearchChange={setSearch}
+  dateRange={period}
+  dateRangeLabel="Period"
+  dateRangePresets={commonDateRangePresets}
+  onDateRangeChange={setPeriod}
+/>
+```
+
+Your own presets take a fixed range or a function: `{ label: 'Q1', range: { start: '2026-01-01', end: '2026-03-31' } }`.
+
 ## Notes
 
 - `searchDebounce` helps when every keystroke would otherwise trigger a network-backed query.

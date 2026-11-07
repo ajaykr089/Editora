@@ -48,6 +48,8 @@ export type ChartProps = React.HTMLAttributes<HTMLElement> & {
   interactive?: boolean;
   showLegend?: boolean;
   showSummary?: boolean;
+  /** Show the chart's numbers as a table below it (always available to screen readers). */
+  showTable?: boolean;
   headless?: boolean;
   valuePrefix?: string;
   valueSuffix?: string;
@@ -91,6 +93,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     interactive,
     showLegend,
     showSummary,
+    showTable,
     headless,
     valuePrefix,
     valueSuffix,
@@ -177,6 +180,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     syncAttr('interactive', interactive === false ? 'false' : null);
     syncAttr('show-legend', typeof showLegend === 'boolean' ? (showLegend ? 'true' : 'false') : null);
     syncAttr('show-summary', typeof showSummary === 'boolean' ? (showSummary ? 'true' : 'false') : null);
+    syncAttr('show-table', showTable ? '' : null);
     syncAttr('value-prefix', valuePrefix || null);
     syncAttr('value-suffix', valueSuffix || null);
     syncAttr('aria-label', ariaLabel || null);
@@ -197,6 +201,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     interactive,
     showLegend,
     showSummary,
+    showTable,
     headless,
     valuePrefix,
     valueSuffix,

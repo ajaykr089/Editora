@@ -51,6 +51,7 @@ Root container for the form with validation, autosave, and state management.
 - `onValidate?: (result: { valid: boolean; errors: Record<string, string | undefined> }) => void` — Fires after validation run
 - `onAutosave?: (values: Record<string, any>) => void` — Fires when autosave triggers
 - `onDirtyChange?: (dirty: boolean, values: Record<string, any>) => void` — Fires when dirty state changes
+- `errors?: Record<string, string | null | undefined>` — Errors to show on the named fields, typically from a server response; each new object is applied once (see [Server errors](#server-errors))
 - `novalidate?: boolean` — Disable native form validation
 - `autosave?: boolean` — Enable autosave on form changes
 - `autosaveDelay?: number` — Delay before autosave triggers (ms)
@@ -77,6 +78,9 @@ Root container for the form with validation, autosave, and state management.
 - `setValue(name: string, value: any): void` — Set a single field value
 - `setValues(values: Record<string, any>): void` — Set multiple field values
 - `reset(values?: Record<string, any>): void` — Reset form to initial or provided values
+- `setErrors(errors, options?: { focus?: boolean }): void` — Show errors on the named fields and focus the first one
+- `clearErrors(names?: string[]): void` — Clear errors set with `setErrors`, for the named fields or all
+- `getErrors(): Record<string, string>` — The errors set with `setErrors` that are still showing
 
 ### Form.Actions
 Container for form action buttons (submit, cancel, etc).
@@ -259,6 +263,32 @@ export function FormWizard() {
         <Button onClick={() => setFormState('submitting')}>
           {step === 3 ? 'Finish' : 'Next'}
         </Button>
+      </Form.Actions>
+    </Form>
+  );
+}
+```
+
+### Server errors
+
+Pass the errors your API returns to `errors` (or call `setErrors` on the element). Each message shows on its field, as Editora fields show their own validation errors; native inputs get it as their validity message and `aria-invalid`. The first field with an error, in page order, is focused. An error clears when the user edits that field, and all of them clear when the form is submitted again.
+
+```tsx
+function SignupForm() {
+  const [errors, setErrors] = React.useState<Record<string, string> | null>(null);
+
+  return (
+    <Form
+      errors={errors}
+      onSubmit={async (values) => {
+        const response = await fetch('/api/signup', { method: 'POST', body: JSON.stringify(values) });
+        if (response.status === 422) setErrors((await response.json()).errors); // { email: 'Already registered' }
+      }}
+    >
+      <Input name="email" label="Email" required />
+      <Input name="company" label="Company" />
+      <Form.Actions>
+        <Button type="submit">Create account</Button>
       </Form.Actions>
     </Form>
   );
