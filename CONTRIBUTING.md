@@ -167,7 +167,21 @@ Types:
 - `test` - Tests
 - `chore` - Build/tooling
 
-### 5. Push and Create Pull Request
+### 5. Add a Changeset
+
+Any change users can notice (a fix, a feature, a behaviour change) needs a changeset, or it will not
+appear in the package's `CHANGELOG.md` or its GitHub Release:
+
+```bash
+npx changeset
+```
+
+Pick the packages you changed and the bump (`patch` for fixes, `minor` for features or behaviour
+changes while a package is 0.x), then describe the change from the user's side: what was wrong or
+what is new, and the API involved. The text is published as is. Commit the generated
+`.changeset/*.md` file with your change. Tests, CI and internal refactors need none.
+
+### 6. Push and Create Pull Request
 
 ```bash
 git push origin your-branch-name
@@ -368,6 +382,7 @@ Before submitting:
 - [ ] Linting passes (`npm run lint`)
 - [ ] Build succeeds (`npm run build`)
 - [ ] Documentation updated
+- [ ] Changeset added for user-facing changes (`npx changeset`)
 - [ ] Commit messages follow convention
 - [ ] PR description is clear
 

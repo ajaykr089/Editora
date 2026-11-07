@@ -97,6 +97,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       - name: Push release tags
+        id: tags
         run: git push origin --tags
 
       # Checks the artifacts npm actually serves, not the working tree: `npm publish` re-runs lifecycle
@@ -106,3 +107,13 @@ jobs:
       # already on npm by now; a red step names the ones to fix and deprecate.
       - name: Verify published packages
         run: npm run verify:published
+
+      # One GitHub Release per tag on the release commit, with that version's CHANGELOG.md section as
+      # its notes, so people watching the repository hear about fixes. Runs even when the verify step
+      # fails (the versions are on npm either way), and skips tags that already have a release, so it
+      # can be re-run locally with the same command.
+      - name: Create GitHub releases
+        if: ${{ !cancelled() && steps.tags.outcome == 'success' }}
+        run: node scripts/create-github-releases.mjs --points-at HEAD
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
