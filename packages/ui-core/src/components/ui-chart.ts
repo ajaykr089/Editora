@@ -587,6 +587,33 @@ const style = `
     animation: ui-chart-shimmer 1.1s linear infinite;
   }
 
+  .data-table {
+    inline-size: 100%;
+    margin-block-start: 12px;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ui-chart-text, var(--ui-color-text, #0f172a));
+  }
+
+  .data-table caption {
+    text-align: start;
+    font-weight: 600;
+    padding-block-end: 6px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 4px 8px;
+    border-block-end: 1px solid var(--ui-color-line-subtle, color-mix(in srgb, currentColor 12%, transparent));
+    text-align: end;
+  }
+
+  .data-table th[scope="row"],
+  .data-table thead th:first-child {
+    text-align: start;
+  }
+
   .sr-only {
     position: absolute;
     inline-size: 1px;
@@ -915,7 +942,8 @@ export class UIChart extends ElementBase {
       'show-summary',
       'value-prefix',
       'value-suffix',
-      'aria-label'
+      'aria-label',
+      'show-table'
     ];
   }
 
@@ -1081,6 +1109,29 @@ export class UIChart extends ElementBase {
 
   private _seriesTone(series: NormalizedSeries, seriesIndex: number): string {
     return series.tone || palette[seriesIndex % palette.length] || 'var(--ui-chart-accent)';
+  }
+
+  /**
+   * The chart's numbers as a table: always there for screen readers (the plot itself is one image
+   * to them), and shown on screen with `show-table`.
+   */
+  private _dataTable(data: NormalizedChartData, title: string): string {
+    if (!data.labels.length || !data.series.length) return '';
+    const visible = this.hasAttribute('show-table') && this.getAttribute('show-table') !== 'false';
+    const caption = this._ariaLabel() || title || 'Chart data';
+    const head = `<tr><th scope="col">Label</th>${data.series.map((series) => `<th scope="col">${escapeHtml(series.name)}</th>`).join('')}</tr>`;
+    const rows = data.labels
+      .map((label) => {
+        const cells = data.series
+          .map((series) => {
+            const point = series.data.find((entry) => entry.label === label);
+            return `<td>${point ? escapeHtml(this._formatValue(point.value)) : ''}</td>`;
+          })
+          .join('');
+        return `<tr><th scope="row">${escapeHtml(label)}</th>${cells}</tr>`;
+      })
+      .join('');
+    return `<table class="data-table${visible ? '' : ' sr-only'}" part="data-table"><caption>${escapeHtml(caption)}</caption><thead>${head}</thead><tbody>${rows}</tbody></table>`;
   }
 
   private _pointTone(point: ChartPoint, index: number, fallback?: string): string {
@@ -1852,6 +1903,7 @@ export class UIChart extends ElementBase {
         ${data.truncated > 0 ? `<div class="message" part="message">Showing last ${data.truncated + data.labels.length} records (truncated to ${MAX_POINTS}).</div>` : ''}
 
         ${stateMessage}
+        ${this._dataTable(data, title)}
       </section>
     `);
   }
