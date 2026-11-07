@@ -1,9 +1,16 @@
 <!doctype html><html><body><script type="module">
-// The CSS variables ThemeProvider / applySystemTheme put on <html>, for injecting into Storybook
-// stories (Storybook itself applies no theme, so a sweep without this only sees fallback colours).
-import { applySystemTheme } from '@editora/ui-core';
-// Follows prefers-color-scheme (the a11y config runs light).
-applySystemTheme();
+// The CSS variables a theme puts on <html>, for injecting into Storybook stories (Storybook itself
+// applies no theme). Default: the system theme (follows prefers-color-scheme). With ?primary=#hex
+// (and ?mode=dark) it applies a custom-brand theme instead, for the palette audit.
+import { applySystemTheme, applyTheme, baselineLightTokens, baselineDarkTokens } from '@editora/ui-core';
+const params = new URLSearchParams(location.search);
+const primary = params.get('primary');
+if (primary) {
+  const base = params.get('mode') === 'dark' ? baselineDarkTokens : baselineLightTokens;
+  applyTheme({ ...base, colors: { ...base.colors, primary, primaryHover: primary } });
+} else {
+  applySystemTheme();
+}
 await new Promise((resolve) => setTimeout(resolve, 50));
 window.themeStyle = document.documentElement.getAttribute('style') || '';
 window.themeMode = document.documentElement.getAttribute('data-ui-mode') || '';
