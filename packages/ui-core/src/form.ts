@@ -30,6 +30,14 @@ export class FormController {
     if (f && typeof f.setValue === 'function') f.setValue(value);
   }
 
+  /** Shows (or with no message clears) an error on a registered field; false when it cannot. */
+  setError(name: string, message?: string): boolean {
+    const f = this.fields.get(name);
+    if (!f || typeof f.setError !== 'function') return false;
+    f.setError(message);
+    return true;
+  }
+
   async validateField(name: string): Promise<ValidationResult> {
     const f = this.fields.get(name);
     if (!f) return { valid: true };

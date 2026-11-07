@@ -13,6 +13,9 @@ type FormElement = HTMLElement & {
   setValue?: (name: string, value: any) => void;
   setValues?: (values: Record<string, any>) => void;
   reset?: (values?: Record<string, any>) => void;
+  setErrors?: (errors: Record<string, string | null | undefined>, options?: { focus?: boolean }) => void;
+  clearErrors?: (names?: string[]) => void;
+  getErrors?: () => Record<string, string>;
 };
 
 export type FormProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSubmit'> & {
@@ -22,6 +25,13 @@ export type FormProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSubmit'> & {
   onValidate?: (result: { valid: boolean; errors: Record<string, string | undefined> }) => void;
   onAutosave?: (values: Record<string, any>) => void;
   onDirtyChange?: (dirty: boolean, values: Record<string, any>) => void;
+  /**
+   * Errors to show on the named fields, typically from a server response
+   * (`{ email: 'Already registered' }`). Each new object is applied once and focuses the first
+   * field with an error; an error clears when its field is edited or the form is submitted again.
+   * The element's `setErrors()` / `clearErrors()` do the same imperatively.
+   */
+  errors?: Record<string, string | null | undefined> | null;
   novalidate?: boolean;
   autosave?: boolean;
   autosaveDelay?: number;
@@ -62,6 +72,7 @@ const FormRoot = React.forwardRef<HTMLElement, FormProps>(function Form(
     onValidate,
     onAutosave,
     onDirtyChange,
+    errors,
     novalidate,
     autosave,
     autosaveDelay,
@@ -87,6 +98,12 @@ const FormRoot = React.forwardRef<HTMLElement, FormProps>(function Form(
   const ref = useRef<FormElement | null>(null);
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+
+  // A new errors object (a new server response) is shown once; the user's edits then clear it field
+  // by field, so the same object is not applied again on later renders.
+  useEffect(() => {
+    if (errors) ref.current?.setErrors?.(errors);
+  }, [errors]);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;

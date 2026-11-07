@@ -460,6 +460,8 @@ export class UIForm extends ElementBase {
   }
 
   private _controller = new FormController();
+  /** Errors set from outside with setErrors() (typically a server response), by field name. */
+  private _externalErrors = new Map<string, string>();
   private _submitting = false;
   private _autosaveTimer: ReturnType<typeof setTimeout> | null = null;
   private _readyFrame: number | null = null;
@@ -720,6 +722,7 @@ export class UIForm extends ElementBase {
   }
 
   async validate() {
+    this.clearErrors();
     const controlled = await this._controller.validateAll();
     const native = this._validateNativeControls();
     const result = {
@@ -770,6 +773,8 @@ export class UIForm extends ElementBase {
     try {
       const values = this.getValues();
       const shouldSkipValidation = this.hasAttribute('novalidate');
+      // Errors from the last response are for the values sent then; this attempt gets new ones.
+      this.clearErrors();
 
       if (!shouldSkipValidation) {
         const controlled = await this._controller.validateAll();
@@ -813,23 +818,81 @@ export class UIForm extends ElementBase {
     }
   }
 
-  private _focusFirstInvalid(nativeInvalid: HTMLElement | null, errors: Record<string, string | undefined>): void {
+  private _focusFirstInvalid(nativeInvalid: HTMLElement | null, errors: Record<string, string | undefined>, inDocumentOrder = false): void {
     if (nativeInvalid) {
       nativeInvalid.focus();
       return;
     }
 
-    const firstName = Object.entries(errors).find(([, message]) => !!message)?.[0];
-    if (!firstName) return;
+    const names = Object.entries(errors).filter(([, message]) => !!message).map(([name]) => name);
+    if (!names.length) return;
 
-    const selectorSafeName = firstName.replace(/"/g, '\\"');
-    const candidate = this.querySelector(`[name="${selectorSafeName}"]`) as HTMLElement | null;
-    if (!candidate || typeof candidate.focus !== 'function') return;
+    const candidates = names
+      .map((name) => this.querySelector(`[name="${name.replace(/["\\]/g, '\\$&')}"]`) as HTMLElement | null)
+      .filter((node): node is HTMLElement => !!node && typeof node.focus === 'function');
+    // setErrors() takes a server's error object, whose key order says nothing about the layout.
+    if (inDocumentOrder) candidates.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+    const candidate = candidates[0];
+    if (!candidate) return;
     candidate.focus();
+    if (isNativeControl(candidate) && !candidate.validity.valid) candidate.reportValidity?.();
   }
 
   async requestSubmit() {
     return this.submit();
+  }
+
+  /**
+   * Shows errors from outside the form, typically a server response, on the named fields:
+   * `form.setErrors({ email: 'Already registered' })`. Editora fields show the message as their own
+   * validation error; native inputs get it as their validity message and aria-invalid. The first
+   * field with an error is focused unless `{ focus: false }`. A field's error clears when it is
+   * edited, and all of them when the form is validated or submitted again. A null or empty message
+   * clears that field's error.
+   */
+  setErrors(errors: Record<string, string | null | undefined>, options: { focus?: boolean } = {}): void {
+    if (!errors || typeof errors !== 'object') return;
+    const shown: Record<string, string> = {};
+    for (const [name, message] of Object.entries(errors)) {
+      if (message) {
+        this._showExternalError(name, String(message));
+        shown[name] = String(message);
+      } else {
+        this._clearExternalError(name);
+      }
+    }
+    if (options.focus !== false && Object.keys(shown).length) this._focusFirstInvalid(null, shown, true);
+  }
+
+  /** Clears errors set with setErrors(): the named fields, or all of them. */
+  clearErrors(names?: string[]): void {
+    const targets = names ? names : Array.from(this._externalErrors.keys());
+    targets.forEach((name) => this._clearExternalError(name));
+  }
+
+  /** The errors set with setErrors() that are still showing, by field name. */
+  getErrors(): Record<string, string> {
+    return Object.fromEntries(this._externalErrors);
+  }
+
+  private _showExternalError(name: string, message: string): void {
+    this._externalErrors.set(name, message);
+    if (this._controller.setError(name, message)) return;
+    const natives = this._groupNativeControls({ includeDisabled: true }).get(name) || [];
+    natives.forEach((control) => {
+      control.setCustomValidity(message);
+      control.setAttribute('aria-invalid', 'true');
+    });
+  }
+
+  private _clearExternalError(name: string): void {
+    if (!this._externalErrors.delete(name)) return;
+    if (this._controller.setError(name, undefined)) return;
+    const natives = this._groupNativeControls({ includeDisabled: true }).get(name) || [];
+    natives.forEach((control) => {
+      control.setCustomValidity('');
+      control.removeAttribute('aria-invalid');
+    });
   }
 
   reset(values?: Record<string, any>): void {
@@ -941,6 +1004,9 @@ export class UIForm extends ElementBase {
     if (!target || target === this) return;
     const owner = target.closest('ui-form');
     if (owner && owner !== this) return;
+    // Editing a field answers the error a server gave for it.
+    const name = target.getAttribute('name');
+    if (name && this._externalErrors.has(name)) this._clearExternalError(name);
     this._scheduleDirtyRefresh();
   }
 
