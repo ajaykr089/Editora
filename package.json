@@ -45,6 +45,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.release.json",
     "generate:components": "node scripts/generate-components-registry.js",
     "check:components": "npm run generate:components && git diff --exit-code -- components.json components.schema.json examples/editora-docs/static/components.json examples/editora-docs/static/components.schema.json",
+    "generate:api-docs": "node scripts/generate-api-docs.mjs",
+    "check:api-docs": "node scripts/generate-api-docs.mjs --check",
     "check:element-registrations": "node scripts/check-custom-element-registrations.js",
     "check:ui-size": "node scripts/check-ui-size.mjs",
     "cli": "node packages/cli/bin/editora.js",

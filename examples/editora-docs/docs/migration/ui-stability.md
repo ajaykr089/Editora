@@ -68,7 +68,7 @@ Unit tests for ui-core and ui-react, React 19 compatibility, interaction tests i
 1.0 will come when:
 
 - two minor releases have shipped without a breaking change to the public API above;
-- the API reference is generated from the source, so it cannot fall behind;
+- every prop in the generated API reference (for example [DataTable](../ui-react/api/data-table.md)), which is built from the source so it cannot fall behind, has a description;
 - a full reference app (a marketing site and the product behind it) is built and tested on every change.
 
 From 1.0, breaking changes only come in major releases.

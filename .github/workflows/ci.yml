@@ -29,6 +29,9 @@ jobs:
       - name: Verify component registry is up to date
         run: npm run check:components
 
+      - name: Verify the generated API reference is up to date
+        run: npm run check:api-docs
+
       - name: Verify custom element registrations are complete
         run: npm run check:element-registrations
 
