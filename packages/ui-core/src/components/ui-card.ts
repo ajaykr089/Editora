@@ -232,7 +232,8 @@ const style = `
     display: none;
   }
 
-  .body:first-child {
+  .body:first-child,
+  .card[data-has-header="false"][data-has-media="false"] .body {
     padding-top: var(--ui-card-padding);
   }
 
@@ -502,6 +503,9 @@ export class UICard extends ElementBase {
     // The footer section follows the body even when hidden, so `.body:last-child` never matched
     // and a card without a footer had no padding under its content.
     if (name === 'footer') (this.root.querySelector('.card') as HTMLElement | null)?.setAttribute('data-has-footer', String(assigned));
+    // Likewise the header section comes first even when hidden, so `.body:first-child` never
+    // matched and a card without a header had no padding above its content.
+    if (name === 'header' || name === 'media') (this.root.querySelector('.card') as HTMLElement | null)?.setAttribute(`data-has-${name}`, String(assigned));
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
