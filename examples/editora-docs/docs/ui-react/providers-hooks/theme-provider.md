@@ -27,8 +27,27 @@ function App() {
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `tokens` | `Partial<ThemeTokens>` | - | Initial theme tokens to merge with defaults |
+| `density` | `'compact' \| 'default' \| 'comfortable'` | `'default'` | App-wide density (same as `tokens.density`) |
 | `children` | `React.ReactNode` | - | Child components that will have theme access |
 | `storageKey` | `string \| null` | `'editora.theme.tokens'` | localStorage key for theme persistence |
+
+## Density
+
+`density` rescales the shared control sizes for every component under the provider: buttons, inputs, selects, tabs and the other controls size themselves from the `--ui-control-height-*`, `--ui-control-padding-inline-*` and `--ui-control-font-size-*` tokens, and `--ui-default-gap` follows too.
+
+```tsx
+<ThemeProvider density="compact">
+  <App />
+</ThemeProvider>
+```
+
+| Density | Default control height | Padding | Gap |
+| --- | --- | --- | --- |
+| `compact` | 28px | 10px | 6px |
+| `default` | 32px | 12px | 8px |
+| `comfortable` | 36px | 14px | 12px |
+
+A component's own `density` prop still overrides the app-wide setting for that component.
 
 ## Theme Tokens
 
