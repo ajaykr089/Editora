@@ -17,6 +17,7 @@
   <a href="https://editora-ecosystem.netlify.app/">Component catalog</a> ·
   <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
   <a href="https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main">CodeSandbox</a> ·
+  <a href="https://github.com/ajaykr089/Editora/blob/main/packages/ui-react/CHANGELOG.md">Changelog</a> ·
   <a href="https://github.com/ajaykr089/Editora">GitHub</a>
 </p>
 
@@ -35,6 +36,40 @@
 - **Floating layers**: hooks for popovers, menus and tooltips with flip, shift and focus management.
 - Wrappers for [`@editora/ui-core`](https://www.npmjs.com/package/@editora/ui-core), so the components are standard
   custom elements underneath.
+
+## What's new
+
+**0.3.0** (2026-11-07)
+
+- `Form` takes `errors` to show errors from a server response on their fields, and focuses the first one.
+- `DataTable` for server-driven screens: `serverSide` with `totalRows`, `hiddenColumns`, and rows with `data-href`
+  that open as links.
+- `FiltersBar` date range with presets (`dateRange`, `dateRangePresets`, `commonDateRangePresets`).
+- Charts include their data as a table for screen readers; `showTable` shows it on screen.
+- Fixes: a pager placed after its `DataTable` now pages it, a file's Retry button retries only that file, focus stays
+  on the first field with an error, and `Switch` toggles on `element.click()` and assistive-technology activation.
+
+**0.2.0** (2026-11-07)
+
+- **Behaviour change:** `Input` and `Textarea` `onChange` fires on every keystroke, like React's `<input>`. The old
+  "on blur or Enter" event is the new `onCommit` prop. `defaultValue` is new on Input, Textarea, NumberField and
+  Combobox.
+- **Behaviour change:** form fields are form-associated, so an empty `required` field now blocks a native form submit
+  (add `novalidate` to validate in JavaScript), and Enter in a text field submits its form.
+- Controlled props (`value`, `checked`, `open`, `selected`, `page`, ...) win when you pass a change handler.
+- `<NavigationProvider navigate={(href) => router.push(href)}>` routes Sidebar, Breadcrumb, Tabs and Pagination links
+  through your router.
+- `Layout variant="shell"` app frame with an off-canvas sidebar on narrow screens; `ThemeProvider density`;
+  `Card.Actions`, `EmptyState variant="plain"`, `Alert live={false}`, `descriptionPosition="below"`.
+- `<EditoraPreloadStyle />` stops server-rendered pages from jumping while the components load.
+- Built-in icons load on first use, so a Button costs 8.9 KB gzipped instead of 55.9 KB.
+- Fixes: events bubbling from a child no longer trigger a parent's `onChange`/`onClose` (a checkbox in a tab panel
+  closed the panel), the first render has every prop applied, Select shows its placeholder for `value=""`, focus traps
+  in Dialog and Drawer reach the fields inside them, and missing numeric attributes keep their defaults (toasts showed
+  1 at a time, tooltips opened with no delay).
+
+Every change, with details: [CHANGELOG.md](https://github.com/ajaykr089/Editora/blob/main/packages/ui-react/CHANGELOG.md)
+and [GitHub Releases](https://github.com/ajaykr089/Editora/releases).
 
 ## Install
 
