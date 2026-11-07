@@ -12,7 +12,22 @@ description: Props, attributes and events of the AspectRatio component in @edito
 import { AspectRatio } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `elevation` | `'none' \| 'low' \| 'high'` |   |
+| `fit` | `'cover' \| 'contain' \| 'fill' \| 'none' \| 'scale-down'` |   |
+| `headless` | `boolean` |   |
+| `interactive` | `boolean` |   |
+| `radius` | `number \| string` |   |
+| `ratio` | `number \| string` |   |
+| `showRatioBadge` | `boolean` |   |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` |   |
+| `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'surface' \| 'soft' \| 'outline' \| 'solid'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-aspect-ratio>`
 

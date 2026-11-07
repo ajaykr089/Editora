@@ -12,4 +12,15 @@ description: Props of the CodeSnippet component in @editora/ui-react, generated 
 import { CodeSnippet } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `block` | `boolean` |   |
+| `children` | `React.ReactNode` |   |
+| `code` | `string` |   |
+| `size` | `keyof typeof SIZE_STYLES` |   |
+| `tone` | `keyof typeof TONE_STYLES` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).

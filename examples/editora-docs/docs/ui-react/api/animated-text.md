@@ -12,7 +12,7 @@ description: Props, attributes and events of the AnimatedText component in @edit
 import { AnimatedText } from '@editora/ui-react';
 ```
 
-## AnimatedTextProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

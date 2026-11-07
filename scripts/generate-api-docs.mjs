@@ -2,8 +2,8 @@
 /**
  * Generates the @editora/ui-react API reference from the source, so it cannot fall behind:
  * one page per component in examples/editora-docs/docs/ui-react/api/, listing
- *   - the props of every `...Props` type the component's module exports (from the TypeScript
- *     types, with their JSDoc), and
+ *   - the props of the component and of its parts (`Tabs.Tab`), read from the components' own
+ *     TypeScript signatures, with their JSDoc, and
  *   - for wrappers, the custom element's attributes and the events it dispatches (from ui-core).
  *
  *   node scripts/generate-api-docs.mjs          write the pages
@@ -68,8 +68,7 @@ const isOwn = (declaration) => {
   return file.includes('/packages/ui-react/') || file.includes('/packages/ui-core/');
 };
 
-function propsOf(declaration) {
-  const type = checker.getTypeAtLocation(declaration.name);
+function propsOf(type, location) {
   const own = [];
   let inherited = 0;
   for (const symbol of checker.getPropertiesOfType(type)) {
@@ -81,7 +80,7 @@ function propsOf(declaration) {
     const decl = declarations.find(isOwn);
     const typeText = decl && (ts.isPropertySignature(decl) || ts.isPropertyDeclaration(decl)) && decl.type
       ? decl.type.getText()
-      : checker.typeToString(checker.getTypeOfSymbolAtLocation(symbol, declaration), undefined, ts.TypeFormatFlags.NoTruncation);
+      : checker.typeToString(checker.getTypeOfSymbolAtLocation(symbol, location), undefined, ts.TypeFormatFlags.NoTruncation);
     const docs = ts.displayPartsToString(symbol.getDocumentationComment(checker));
     const deprecated = symbol.getJsDocTags(checker).find((tag) => tag.name === 'deprecated');
     own.push({
@@ -94,16 +93,46 @@ function propsOf(declaration) {
   return { own, inherited };
 }
 
-/** The `...Props` types a component module exports, in source order. */
-function propsTypes(sourcePath) {
-  const file = program.getSourceFile(join(root, sourcePath));
-  if (!file) return [];
-  return file.statements.filter(
-    (statement) =>
-      (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
-      statement.name.text.endsWith('Props') &&
-      statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
-  );
+/** The props a component accepts: the first parameter of its call signature (function or forwardRef). */
+function componentProps(type, location) {
+  const signature = type.getCallSignatures()[0];
+  const param = signature?.getParameters()[0];
+  return param ? checker.getTypeOfSymbolAtLocation(param, location) : null;
+}
+
+/**
+ * The component and its parts (`Tabs.Tab`, `Select.Option`, ...), each with its props type, read
+ * from the exported component itself: many modules do not export a named props type, and some
+ * re-export their component from components/server/.
+ */
+function sectionsFor(entry) {
+  const file = program.getSourceFile(join(root, entry.source));
+  const moduleSymbol = file && checker.getSymbolAtLocation(file);
+  if (!moduleSymbol) return [];
+  const exports = checker.getExportsOfModule(moduleSymbol);
+  let exported = exports.find((symbol) => symbol.getName() === (entry.reactExport || entry.name));
+  if (!exported) {
+    // A module of several small components (FieldSemantics: Description, FieldError, ...).
+    return exports
+      .filter((symbol) => /^[A-Z]/.test(symbol.getName()) && !(symbol.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Interface)))
+      .map((symbol) => {
+        const target = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+        const props = componentProps(checker.getTypeOfSymbolAtLocation(target, file), file);
+        return props ? { title: symbol.getName(), props, file } : null;
+      })
+      .filter(Boolean);
+  }
+  if (exported.flags & ts.SymbolFlags.Alias) exported = checker.getAliasedSymbol(exported);
+  const componentType = checker.getTypeOfSymbolAtLocation(exported, file);
+  const sections = [];
+  const main = componentProps(componentType, file);
+  if (main) sections.push({ title: entry.name, props: main });
+  for (const part of checker.getPropertiesOfType(componentType)) {
+    if (!/^[A-Z]/.test(part.getName()) || !(part.getDeclarations() || []).some(isOwn)) continue;
+    const partProps = componentProps(checker.getTypeOfSymbolAtLocation(part, file), file);
+    if (partProps) sections.push({ title: `${entry.name}.${part.getName()}`, props: partProps });
+  }
+  return sections.map((section) => ({ ...section, file }));
 }
 
 /** Attributes and events of a ui-core element, read from its source. */
@@ -121,6 +150,11 @@ function elementApi(tagName) {
 }
 
 function page(entry) {
+  const sections = sectionsFor(entry);
+  // A module of several components imports those; otherwise the component itself.
+  const imports = sections.length && !sections.some((section) => section.title === entry.name || section.title.startsWith(`${entry.name}.`))
+    ? sections.map((section) => section.title).join(', ')
+    : entry.name;
   const lines = [
     '---',
     `title: ${entry.name} API`,
@@ -133,17 +167,15 @@ function page(entry) {
     `# ${entry.name} API`,
     '',
     '```tsx',
-    `import { ${entry.name} } from '@editora/ui-react';`,
+    `import { ${imports} } from '@editora/ui-react';`,
     '```',
     '',
   ];
 
-  // The component's own props first, then its parts' (Select before Select.Option).
-  const types = propsTypes(entry.source).sort((a, b) => Number(b.name.text === `${entry.name}Props`) - Number(a.name.text === `${entry.name}Props`));
-  if (!types.length) lines.push('This component has no props of its own.', '');
-  for (const declaration of types) {
-    const { own, inherited } = propsOf(declaration);
-    lines.push(`## ${declaration.name.text}`, '');
+  if (!sections.length) lines.push('This component has no props of its own.', '');
+  for (const section of sections) {
+    const { own, inherited } = propsOf(section.props, section.file);
+    lines.push(`## ${section.title === entry.name ? 'Props' : `${section.title} props`}`, '');
     if (own.length) {
       lines.push('| Prop | Type | Description |', '| --- | --- | --- |');
       for (const prop of own.sort((a, b) => a.name.localeCompare(b.name))) {
@@ -153,6 +185,7 @@ function page(entry) {
     }
     // No count: it depends on the installed React types and would make the check flap.
     if (inherited) lines.push('Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).', '');
+    if (!own.length && !inherited) lines.push('No props.', '');
   }
 
   const element = entry.wrapperFor ? elementApi(entry.wrapperFor) : null;

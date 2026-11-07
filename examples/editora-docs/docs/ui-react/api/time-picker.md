@@ -12,7 +12,7 @@ description: Props, attributes and events of the TimePicker component in @editor
 import { TimePicker } from '@editora/ui-react';
 ```
 
-## TimePickerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

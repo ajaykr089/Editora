@@ -12,7 +12,7 @@ description: Props, attributes and events of the Sortable component in @editora/
 import { Sortable } from '@editora/ui-react';
 ```
 
-## SortableProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

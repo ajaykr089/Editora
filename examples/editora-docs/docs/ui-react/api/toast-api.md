@@ -12,9 +12,8 @@ description: Props of the ToastAPI component in @editora/ui-react, generated fro
 import { ToastAPI } from '@editora/ui-react';
 ```
 
-## ToastProviderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `children` (required) | `React.ReactNode` |   |
 | `config` | `Partial<ToastConfig>` |   |

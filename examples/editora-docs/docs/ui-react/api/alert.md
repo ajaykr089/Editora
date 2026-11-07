@@ -12,7 +12,7 @@ description: Props, attributes and events of the Alert component in @editora/ui-
 import { Alert } from '@editora/ui-react';
 ```
 
-## AlertProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -34,7 +34,34 @@ import { Alert } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AlertSectionProps
+## Alert.Icon props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Alert.Title props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Alert.Description props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Alert.Actions props
 
 | Prop | Type | Description |
 | --- | --- | --- |

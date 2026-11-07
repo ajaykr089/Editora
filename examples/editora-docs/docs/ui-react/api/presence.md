@@ -12,7 +12,28 @@ description: Props, attributes and events of the Presence component in @editora/
 import { Presence } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `delay` | `number` |   |
+| `enterDuration` | `number` |   |
+| `exitDuration` | `number` |   |
+| `headless` | `boolean` |   |
+| `keepMounted` | `boolean` |   |
+| `lazy` | `boolean` |   |
+| `mode` | `'fade' \| 'scale' \| 'slide-up' \| 'slide-down' \| 'slide-left' \| 'slide-right' \| 'blur' \| 'flip'` |   |
+| `onAfterEnter` | `(state: PresenceState) => void` |   |
+| `onAfterExit` | `(state: PresenceState) => void` |   |
+| `onBeforeEnter` | `(state: PresenceState) => void` |   |
+| `onBeforeExit` | `(state: PresenceState) => void` |   |
+| `onEnter` | `(state: PresenceState) => void` |   |
+| `onExit` | `(state: PresenceState) => void` |   |
+| `present` | `boolean` |   |
+| `size` | `'sm' \| 'md' \| 'lg'` |   |
+| `variant` | `'default' \| 'soft' \| 'glass' \| 'contrast'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-presence>`
 

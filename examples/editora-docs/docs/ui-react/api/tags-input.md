@@ -12,7 +12,7 @@ description: Props, attributes and events of the TagsInput component in @editora
 import { TagsInput } from '@editora/ui-react';
 ```
 
-## TagsInputProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

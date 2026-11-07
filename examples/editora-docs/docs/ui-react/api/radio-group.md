@@ -12,7 +12,22 @@ description: Props, attributes and events of the RadioGroup component in @editor
 import { RadioGroup } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `disabled` | `boolean` |   |
+| `name` | `string` |   |
+| `onValueChange` | `(detail: { value: string; option?: RadioOption; reason?: 'click' \| 'keyboard'; name?: string; }) => void` |   |
+| `options` | `Array<RadioOption \| string>` |   |
+| `orientation` | `'vertical' \| 'horizontal'` |   |
+| `required` | `boolean` |   |
+| `size` | `'sm' \| 'md' \| 'lg'` |   |
+| `tone` | `'brand' \| 'neutral' \| 'success' \| 'warning' \| 'danger' \| 'info'` |   |
+| `value` | `string` |   |
+| `variant` | `'default' \| 'card' \| 'segmented'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-radio-group>`
 

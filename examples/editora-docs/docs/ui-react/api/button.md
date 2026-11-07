@@ -12,7 +12,7 @@ description: Props, attributes and events of the Button component in @editora/ui
 import { Button } from '@editora/ui-react';
 ```
 
-## ButtonProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

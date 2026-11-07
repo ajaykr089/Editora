@@ -12,7 +12,7 @@ description: Props, attributes and events of the AnimatedList component in @edit
 import { AnimatedList } from '@editora/ui-react';
 ```
 
-## AnimatedListProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ import { AnimatedList } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AnimatedListItemProps
+## AnimatedList.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

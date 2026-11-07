@@ -12,7 +12,7 @@ description: Props, attributes and events of the NumberTicker component in @edit
 import { NumberTicker } from '@editora/ui-react';
 ```
 
-## NumberTickerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

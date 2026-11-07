@@ -12,7 +12,7 @@ description: Props of the DataViewToolbar component in @editora/ui-react, genera
 import { DataViewToolbar } from '@editora/ui-react';
 ```
 
-## DataViewToolbarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

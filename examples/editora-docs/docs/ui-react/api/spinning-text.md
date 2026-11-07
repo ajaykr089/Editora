@@ -12,7 +12,7 @@ description: Props, attributes and events of the SpinningText component in @edit
 import { SpinningText } from '@editora/ui-react';
 ```
 
-## SpinningTextProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -42,7 +42,7 @@ import { SpinningText } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SpinningTextCenterProps
+## SpinningText.Center props
 
 | Prop | Type | Description |
 | --- | --- | --- |

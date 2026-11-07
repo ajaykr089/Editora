@@ -12,7 +12,7 @@ description: Props, attributes and events of the Stepper component in @editora/u
 import { Stepper } from '@editora/ui-react';
 ```
 
-## StepperProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

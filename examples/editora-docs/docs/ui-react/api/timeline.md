@@ -12,7 +12,7 @@ description: Props, attributes and events of the Timeline component in @editora/
 import { Timeline } from '@editora/ui-react';
 ```
 
-## TimelineProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

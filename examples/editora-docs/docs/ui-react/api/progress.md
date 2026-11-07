@@ -12,7 +12,30 @@ description: Props, attributes and events of the Progress component in @editora/
 import { Progress } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `animated` | `boolean` |   |
+| `buffer` | `number \| string` |   |
+| `format` | `'percent' \| 'value' \| 'fraction'` |   |
+| `indeterminate` | `boolean` |   |
+| `label` | `string` |   |
+| `max` | `number \| string` |   |
+| `min` | `number \| string` |   |
+| `mode` | `'line' \| 'circle' \| 'radial'` |   |
+| `onComplete` | `(detail: { value: number; max: number }) => void` |   |
+| `onValueChange` | `(detail: { value: number; buffer: number; max: number; min: number; percent: number; bufferPercent: number; }) => void` |   |
+| `precision` | `number` |   |
+| `shape` | `'round' \| 'pill' \| 'square'` |   |
+| `showLabel` | `boolean` |   |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` |   |
+| `striped` | `boolean` |   |
+| `tone` | `'brand' \| 'success' \| 'warning' \| 'danger' \| 'info' \| 'neutral'` |   |
+| `value` | `number \| string` |   |
+| `variant` | `'default' \| 'solid' \| 'soft' \| 'line' \| 'glass' \| 'contrast'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-progress>`
 

@@ -12,7 +12,7 @@ description: Props of the RecordHeader component in @editora/ui-react, generated
 import { RecordHeader } from '@editora/ui-react';
 ```
 
-## RecordHeaderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

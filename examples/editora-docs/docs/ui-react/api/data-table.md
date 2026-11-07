@@ -12,7 +12,7 @@ description: Props, attributes and events of the DataTable component in @editora
 import { DataTable } from '@editora/ui-react';
 ```
 
-## DataTableProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

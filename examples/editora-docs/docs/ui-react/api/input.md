@@ -12,7 +12,7 @@ description: Props, attributes and events of the Input component in @editora/ui-
 import { Input } from '@editora/ui-react';
 ```
 
-## InputProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -59,15 +59,15 @@ import { Input } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## InputPrefixProps
+## Input.Prefix props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## InputSuffixProps
+## Input.Suffix props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## InputErrorProps
+## Input.Error props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

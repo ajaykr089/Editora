@@ -12,7 +12,20 @@ description: Props, attributes and events of the Portal component in @editora/ui
 import { Portal } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `disabled` | `boolean` |   |
+| `headless` | `boolean` |   |
+| `onMount` | `(detail: PortalEventDetail) => void` |   |
+| `onSync` | `(detail: PortalEventDetail) => void` |   |
+| `onTargetMissing` | `(detail: { target: string }) => void` |   |
+| `onUnmount` | `(detail: PortalEventDetail) => void` |   |
+| `strategy` | `'append' \| 'prepend'` |   |
+| `target` | `string` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-portal>`
 

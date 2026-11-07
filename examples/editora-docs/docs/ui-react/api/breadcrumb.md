@@ -12,7 +12,7 @@ description: Props, attributes and events of the Breadcrumb component in @editor
 import { Breadcrumb } from '@editora/ui-react';
 ```
 
-## BreadcrumbProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ import { Breadcrumb } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## BreadcrumbItemProps
+## Breadcrumb.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,7 @@ description: Props, attributes and events of the Drawer component in @editora/ui
 import { Drawer } from '@editora/ui-react';
 ```
 
-## DrawerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -43,11 +43,11 @@ import { Drawer } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DrawerHeaderProps
+## Drawer.Header props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DrawerFooterProps
+## Drawer.Footer props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

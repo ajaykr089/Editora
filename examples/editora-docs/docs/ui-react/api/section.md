@@ -12,7 +12,18 @@ description: Props, attributes and events of the Section component in @editora/u
 import { Section } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `density` | `'compact' \| 'comfortable'` |   |
+| `inset` | `boolean` |   |
+| `radius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'` |   |
+| `size` | `'small' \| 'medium' \| 'large'` |   |
+| `tone` | `'neutral' \| 'brand' \| 'success' \| 'warning' \| 'danger' \| 'info'` |   |
+| `variant` | `'default' \| 'surface' \| 'muted' \| 'outline' \| 'elevated' \| 'contrast' \| 'gradient'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-section>`
 

@@ -12,7 +12,7 @@ description: Props, attributes and events of the ColorPicker component in @edito
 import { ColorPicker } from '@editora/ui-react';
 ```
 
-## ColorPickerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

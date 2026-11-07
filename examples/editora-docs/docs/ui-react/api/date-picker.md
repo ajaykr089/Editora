@@ -12,7 +12,7 @@ description: Props, attributes and events of the DatePicker component in @editor
 import { DatePicker } from '@editora/ui-react';
 ```
 
-## DatePickerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

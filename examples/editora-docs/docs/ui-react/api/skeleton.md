@@ -12,7 +12,7 @@ description: Props, attributes and events of the Skeleton component in @editora/
 import { Skeleton } from '@editora/ui-react';
 ```
 
-## SkeletonProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

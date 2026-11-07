@@ -12,7 +12,7 @@ description: Props, attributes and events of the Rating component in @editora/ui
 import { Rating } from '@editora/ui-react';
 ```
 
-## RatingProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

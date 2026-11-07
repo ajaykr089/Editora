@@ -12,7 +12,13 @@ description: Props, attributes and events of the Anchor component in @editora/ui
 import { Anchor } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-anchor>`
 

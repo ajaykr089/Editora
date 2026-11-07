@@ -12,7 +12,7 @@ description: Props of the PageToolbar component in @editora/ui-react, generated 
 import { PageToolbar } from '@editora/ui-react';
 ```
 
-## PageToolbarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

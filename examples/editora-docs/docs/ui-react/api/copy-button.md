@@ -12,7 +12,7 @@ description: Props of the CopyButton component in @editora/ui-react, generated f
 import { CopyButton } from '@editora/ui-react';
 ```
 
-## CopyButtonProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

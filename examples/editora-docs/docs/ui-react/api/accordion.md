@@ -12,7 +12,7 @@ description: Props, attributes and events of the Accordion component in @editora
 import { Accordion } from '@editora/ui-react';
 ```
 
-## AccordionProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -31,7 +31,7 @@ import { Accordion } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AccordionItemProps
+## Accordion.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -41,11 +41,11 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AccordionTriggerProps
+## Accordion.Trigger props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AccordionPanelProps
+## Accordion.Panel props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

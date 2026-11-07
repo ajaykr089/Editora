@@ -12,7 +12,7 @@ description: Props, attributes and events of the Tree component in @editora/ui-r
 import { Tree } from '@editora/ui-react';
 ```
 
-## TreeProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ import { Tree } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## TreeItemProps
+## Tree.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

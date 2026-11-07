@@ -12,7 +12,7 @@ description: Props, attributes and events of the DateRangeTimePicker component i
 import { DateRangeTimePicker } from '@editora/ui-react';
 ```
 
-## DateRangeTimePickerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,7 @@ description: Props, attributes and events of the AppHeader component in @editora
 import { AppHeader } from '@editora/ui-react';
 ```
 
-## AppHeaderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -31,7 +31,43 @@ import { AppHeader } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AppHeaderSectionProps
+## AppHeader.Start props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## AppHeader.Center props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## AppHeader.Title props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## AppHeader.Subtitle props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## AppHeader.End props
 
 | Prop | Type | Description |
 | --- | --- | --- |

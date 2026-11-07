@@ -12,7 +12,7 @@ description: Props, attributes and events of the AnimatedBeam component in @edit
 import { AnimatedBeam } from '@editora/ui-react';
 ```
 
-## AnimatedBeamProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -52,7 +52,7 @@ import { AnimatedBeam } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AnimatedBeamNodeProps
+## AnimatedBeam.Node props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -65,7 +65,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AnimatedBeamHubProps
+## AnimatedBeam.Hub props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -78,7 +78,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## AnimatedBeamConnectionProps
+## AnimatedBeam.Connection props
 
 | Prop | Type | Description |
 | --- | --- | --- |

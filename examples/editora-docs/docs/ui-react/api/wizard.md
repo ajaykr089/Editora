@@ -12,7 +12,7 @@ description: Props, attributes and events of the Wizard component in @editora/ui
 import { Wizard } from '@editora/ui-react';
 ```
 
-## WizardProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ import { Wizard } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## WizardStepProps
+## Wizard.Step props
 
 | Prop | Type | Description |
 | --- | --- | --- |

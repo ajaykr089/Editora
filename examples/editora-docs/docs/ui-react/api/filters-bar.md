@@ -12,7 +12,7 @@ description: Props of the FiltersBar component in @editora/ui-react, generated f
 import { FiltersBar } from '@editora/ui-react';
 ```
 
-## FiltersBarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

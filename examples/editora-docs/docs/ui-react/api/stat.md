@@ -12,4 +12,19 @@ description: Props of the Stat component in @editora/ui-react, generated from th
 import { Stat } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `description` | `React.ReactNode` |   |
+| `icon` | `React.ReactNode` |   |
+| `label` (required) | `React.ReactNode` |   |
+| `meta` | `React.ReactNode` |   |
+| `size` | `keyof typeof SIZE_STYLES` |   |
+| `tone` | `keyof typeof TONE_ACCENTS` |   |
+| `trend` | `React.ReactNode` |   |
+| `value` (required) | `React.ReactNode` |   |
+| `variant` | `'plain' \| 'card'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).

@@ -12,7 +12,21 @@ description: Props, attributes and events of the Flex component in @editora/ui-r
 import { Flex } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `align` | `Responsive<CssValue>` |   |
+| `columnGap` | `Responsive<CssValue>` |   |
+| `direction` | `Responsive<'row' \| 'column' \| 'row-reverse' \| 'column-reverse'>` |   |
+| `display` | `Responsive<'flex' \| 'inline-flex' \| CssValue>` |   |
+| `gap` | `Responsive<CssValue>` |   |
+| `headless` | `boolean` |   |
+| `justify` | `Responsive<CssValue>` |   |
+| `rowGap` | `Responsive<CssValue>` |   |
+| `wrap` | `Responsive<CssValue>` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-flex>`
 

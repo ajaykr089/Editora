@@ -12,7 +12,7 @@ description: Props, attributes and events of the Listbox component in @editora/u
 import { Listbox } from '@editora/ui-react';
 ```
 
-## ListboxProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

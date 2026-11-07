@@ -12,7 +12,7 @@ description: Props, attributes and events of the CommandPalette component in @ed
 import { CommandPalette } from '@editora/ui-react';
 ```
 
-## CommandPaletteProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -29,7 +29,7 @@ import { CommandPalette } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## CommandPaletteItemProps
+## CommandPalette.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

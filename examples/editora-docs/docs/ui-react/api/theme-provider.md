@@ -12,4 +12,11 @@ description: Props of the ThemeProvider component in @editora/ui-react, generate
 import { ThemeProvider } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` (required) | `React.ReactNode` |   |
+| `density` | `ThemeTokens['density']` | App-wide density: rescales the shared control sizes (height, padding, font size) and default gap for every component under this provider. Same as `tokens.density`. |
+| `storageKey` | `string \| null` | If provided (default: 'editora.theme.tokens'), theme tokens will be persisted to localStorage. Set to `null` to disable persistence. |
+| `tokens` | `Partial<ThemeTokens>` |   |

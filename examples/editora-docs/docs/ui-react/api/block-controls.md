@@ -12,7 +12,7 @@ description: Props, attributes and events of the BlockControls component in @edi
 import { BlockControls } from '@editora/ui-react';
 ```
 
-## BlockControlsProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

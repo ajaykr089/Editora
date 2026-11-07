@@ -12,7 +12,36 @@ description: Props, attributes and events of the FileUpload component in @editor
 import { FileUpload } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `accept` | `string` |   |
+| `buttonText` | `string` |   |
+| `description` | `string` |   |
+| `disabled` | `boolean` |   |
+| `dropLabel` | `string` |   |
+| `label` | `string` |   |
+| `maxFiles` | `number` |   |
+| `maxSize` | `number` |   |
+| `multiple` | `boolean` |   |
+| `name` | `string` |   |
+| `onChange` | `(files: File[]) => void` |   |
+| `onReject` | `(rejected: FileUploadRejectedFile[]) => void` |   |
+| `onUploadCancel` | `(detail: UploadLifecycleDetail) => void` |   |
+| `onUploadComplete` | `(detail: UploadLifecycleDetail) => void` |   |
+| `onUploadError` | `(detail: UploadLifecycleDetail) => void` |   |
+| `onUploadProgress` | `(detail: UploadLifecycleDetail) => void` |   |
+| `onUploadRequest` | `FileUploadUploadRequest` |   |
+| `onUploadStart` | `(detail: UploadLifecycleDetail) => void` |   |
+| `onUploadSuccess` | `(detail: UploadLifecycleDetail) => void` |   |
+| `progress` | `Record<string, number>` |   |
+| `required` | `boolean` |   |
+| `showPreviews` | `boolean` |   |
+| `uploadButtonText` | `string` |   |
+| `uploadOnSelect` | `boolean` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-file-upload>`
 

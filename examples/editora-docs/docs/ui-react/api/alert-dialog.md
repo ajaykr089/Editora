@@ -12,7 +12,7 @@ description: Props, attributes and events of the AlertDialog component in @edito
 import { AlertDialog } from '@editora/ui-react';
 ```
 
-## AlertDialogProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -40,15 +40,6 @@ import { AlertDialog } from '@editora/ui-react';
 | `state` | `'idle' \| 'loading' \| 'error'` |   |
 | `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
 | `variant` | `'surface' \| 'soft' \| 'outline' \| 'solid'` |   |
-
-Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
-
-## AlertDialogSectionProps
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `as` | `keyof JSX.IntrinsicElements` |   |
-| `children` | `React.ReactNode` |   |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

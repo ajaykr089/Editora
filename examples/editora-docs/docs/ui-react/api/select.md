@@ -12,7 +12,7 @@ description: Props, attributes and events of the Select component in @editora/ui
 import { Select } from '@editora/ui-react';
 ```
 
-## SelectProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -45,31 +45,31 @@ import { Select } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectOptionProps
+## Select.Option props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectOptGroupProps
+## Select.OptGroup props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectLabelProps
+## Select.Label props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectDescriptionProps
+## Select.Description props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectErrorProps
+## Select.Error props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectLeadingProps
+## Select.Leading props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectTrailingProps
+## Select.Trailing props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

@@ -12,7 +12,7 @@ description: Props, attributes and events of the PasswordField component in @edi
 import { PasswordField } from '@editora/ui-react';
 ```
 
-## PasswordFieldProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

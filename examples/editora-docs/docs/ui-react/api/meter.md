@@ -12,7 +12,28 @@ description: Props, attributes and events of the Meter component in @editora/ui-
 import { Meter } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `format` | `'percent' \| 'value' \| 'fraction'` |   |
+| `high` | `number \| string` |   |
+| `label` | `string` |   |
+| `low` | `number \| string` |   |
+| `max` | `number \| string` |   |
+| `min` | `number \| string` |   |
+| `mode` | `'line' \| 'circle'` |   |
+| `onValueChange` | `(detail: { value: number; min: number; max: number; low: number; high: number; optimum: number \| null; percent: number; state: 'low' \| 'optimum' \| 'suboptimum' \| 'high'; }) => void` |   |
+| `optimum` | `number \| string` |   |
+| `precision` | `number` |   |
+| `shape` | `'round' \| 'pill' \| 'square'` |   |
+| `showLabel` | `boolean` |   |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` |   |
+| `tone` | `'auto' \| 'brand' \| 'success' \| 'warning' \| 'danger' \| 'neutral'` |   |
+| `value` | `number \| string` |   |
+| `variant` | `'default' \| 'soft' \| 'solid' \| 'contrast'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-meter>`
 

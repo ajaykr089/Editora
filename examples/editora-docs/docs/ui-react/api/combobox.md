@@ -12,7 +12,7 @@ description: Props, attributes and events of the Combobox component in @editora/
 import { Combobox } from '@editora/ui-react';
 ```
 
-## ComboboxProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -52,7 +52,7 @@ import { Combobox } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## ComboboxOptionProps
+## Combobox.Option props
 
 | Prop | Type | Description |
 | --- | --- | --- |

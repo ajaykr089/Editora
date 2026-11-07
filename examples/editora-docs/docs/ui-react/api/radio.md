@@ -12,7 +12,7 @@ description: Props, attributes and events of the Radio component in @editora/ui-
 import { Radio } from '@editora/ui-react';
 ```
 
-## RadioProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

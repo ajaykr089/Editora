@@ -12,7 +12,7 @@ description: Props, attributes and events of the SplitButton component in @edito
 import { SplitButton } from '@editora/ui-react';
 ```
 
-## SplitButtonProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

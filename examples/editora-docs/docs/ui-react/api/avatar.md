@@ -12,7 +12,7 @@ description: Props, attributes and events of the Avatar component in @editora/ui
 import { Avatar } from '@editora/ui-react';
 ```
 
-## AvatarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

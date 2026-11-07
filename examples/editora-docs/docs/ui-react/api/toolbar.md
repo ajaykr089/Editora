@@ -12,7 +12,7 @@ description: Props, attributes and events of the Toolbar component in @editora/u
 import { Toolbar } from '@editora/ui-react';
 ```
 
-## ToolbarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

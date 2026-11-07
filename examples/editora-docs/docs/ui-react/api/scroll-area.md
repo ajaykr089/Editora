@@ -12,7 +12,21 @@ description: Props, attributes and events of the ScrollArea component in @editor
 import { ScrollArea } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `autoHide` | `boolean` |   |
+| `onReachEnd` | `() => void` |   |
+| `onReachStart` | `() => void` |   |
+| `onScrollChange` | `(detail: { scrollTop: number; scrollLeft: number; maxScrollTop: number; maxScrollLeft: number; progressY: number; progressX: number; }) => void` |   |
+| `orientation` | `'vertical' \| 'horizontal' \| 'both'` |   |
+| `shadows` | `boolean` |   |
+| `size` | `'sm' \| 'md' \| 'lg'` |   |
+| `tone` | `'neutral' \| 'brand' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'default' \| 'soft' \| 'inset' \| 'contrast' \| 'minimal'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-scroll-area>`
 

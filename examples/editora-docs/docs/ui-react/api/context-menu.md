@@ -12,7 +12,7 @@ description: Props, attributes and events of the ContextMenu component in @edito
 import { ContextMenu } from '@editora/ui-react';
 ```
 
-## ContextMenuProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

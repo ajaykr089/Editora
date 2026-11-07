@@ -12,7 +12,7 @@ description: Props, attributes and events of the Form component in @editora/ui-r
 import { Form } from '@editora/ui-react';
 ```
 
-## FormProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -44,15 +44,15 @@ import { Form } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## FormActionsProps
+## Form.Actions props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## FormStatusProps
+## Form.Status props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## FormTitleProps
+## Form.Title props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

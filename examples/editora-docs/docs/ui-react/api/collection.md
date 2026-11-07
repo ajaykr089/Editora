@@ -12,7 +12,7 @@ description: Props, attributes and events of the Collection component in @editor
 import { Collection } from '@editora/ui-react';
 ```
 
-## CollectionProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

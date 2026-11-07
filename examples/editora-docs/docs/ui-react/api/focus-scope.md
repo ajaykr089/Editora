@@ -12,7 +12,7 @@ description: Props, attributes and events of the FocusScope component in @editor
 import { FocusScope } from '@editora/ui-react';
 ```
 
-## FocusScopeProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

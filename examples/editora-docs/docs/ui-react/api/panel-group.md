@@ -12,7 +12,19 @@ description: Props, attributes and events of the PanelGroup component in @editor
 import { PanelGroup } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `autoSave` | `boolean` |   |
+| `onLayoutChange` | `(detail: LayoutChangeDetail) => void` |   |
+| `onResize` | `(detail: ResizeDetail) => void` |   |
+| `onResizeEnd` | `(detail: ResizeDetail) => void` |   |
+| `onResizeStart` | `(detail: ResizeDetail) => void` |   |
+| `orientation` | `'horizontal' \| 'vertical'` |   |
+| `storageKey` | `string` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-panel-group>`
 

@@ -12,7 +12,7 @@ description: Props, attributes and events of the HoverCard component in @editora
 import { HoverCard } from '@editora/ui-react';
 ```
 
-## HoverCardProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -33,11 +33,11 @@ import { HoverCard } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## HoverCardTriggerProps
+## HoverCard.Trigger props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## HoverCardContentProps
+## HoverCard.Content props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

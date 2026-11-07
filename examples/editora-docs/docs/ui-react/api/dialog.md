@@ -12,7 +12,7 @@ description: Props, attributes and events of the Dialog component in @editora/ui
 import { Dialog } from '@editora/ui-react';
 ```
 
-## DialogProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

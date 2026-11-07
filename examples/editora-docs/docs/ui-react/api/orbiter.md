@@ -12,7 +12,7 @@ description: Props, attributes and events of the Orbiter component in @editora/u
 import { Orbiter } from '@editora/ui-react';
 ```
 
-## OrbiterProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -46,7 +46,7 @@ import { Orbiter } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## OrbiterItemProps
+## Orbiter.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -61,7 +61,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## OrbiterCenterProps
+## Orbiter.Center props
 
 | Prop | Type | Description |
 | --- | --- | --- |

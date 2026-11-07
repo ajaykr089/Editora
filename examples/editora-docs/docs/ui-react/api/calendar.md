@@ -12,7 +12,7 @@ description: Props, attributes and events of the Calendar component in @editora/
 import { Calendar } from '@editora/ui-react';
 ```
 
-## CalendarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,7 @@ description: Props, attributes and events of the NavigationMenu component in @ed
 import { NavigationMenu } from '@editora/ui-react';
 ```
 
-## NavigationMenuProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -33,27 +33,48 @@ import { NavigationMenu } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## NavigationMenuListProps
+## NavigationMenu.Root props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `activation` | `'automatic' \| 'manual'` |   |
+| `children` | `React.ReactNode` |   |
+| `collapsible` | `boolean` |   |
+| `elevation` | `'none' \| 'low' \| 'high'` |   |
+| `headless` | `boolean` |   |
+| `loop` | `boolean` |   |
+| `onChange` | `(detail: NavigationMenuChangeDetail) => void` |   |
+| `onSelect` | `(selected: number) => void` |   |
+| `orientation` | `'horizontal' \| 'vertical'` |   |
+| `radius` | `number \| string` |   |
+| `selected` | `number` |   |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` |   |
+| `tone` | `'default' \| 'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'surface' \| 'soft' \| 'solid' \| 'outline' \| 'flat' \| 'contrast'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## NavigationMenu.List props
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `children` | `React.ReactNode` |   |
 
-## NavigationMenuItemProps
+## NavigationMenu.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `children` | `React.ReactNode` |   |
 
-## NavigationMenuTriggerProps
+## NavigationMenu.Trigger props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## NavigationMenuLinkProps
+## NavigationMenu.Link props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## NavigationMenuContentProps
+## NavigationMenu.Content props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

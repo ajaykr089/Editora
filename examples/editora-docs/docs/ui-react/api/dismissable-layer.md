@@ -12,7 +12,7 @@ description: Props, attributes and events of the DismissableLayer component in @
 import { DismissableLayer } from '@editora/ui-react';
 ```
 
-## DismissableLayerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

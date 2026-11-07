@@ -12,7 +12,7 @@ description: Props of the PageHeader component in @editora/ui-react, generated f
 import { PageHeader } from '@editora/ui-react';
 ```
 
-## PageHeaderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

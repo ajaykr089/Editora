@@ -12,7 +12,7 @@ description: Props, attributes and events of the Collapsible component in @edito
 import { Collapsible } from '@editora/ui-react';
 ```
 
-## CollapsibleProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ import { Collapsible } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## CollapsibleHeaderProps
+## Collapsible.Header props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## CollapsibleCaptionProps
+## Collapsible.Caption props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -51,7 +51,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## CollapsibleMetaProps
+## Collapsible.Meta props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -59,7 +59,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## CollapsibleContentProps
+## Collapsible.Content props
 
 | Prop | Type | Description |
 | --- | --- | --- |

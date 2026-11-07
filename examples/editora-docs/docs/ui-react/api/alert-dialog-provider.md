@@ -12,7 +12,7 @@ description: Props of the AlertDialogProvider component in @editora/ui-react, ge
 import { AlertDialogProvider } from '@editora/ui-react';
 ```
 
-## AlertDialogProviderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,41 @@ description: Props, attributes and events of the NumberField component in @edito
 import { NumberField } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `allowWheel` | `boolean` |   |
+| `autoComplete` | `string` |   |
+| `clampOnBlur` | `boolean` |   |
+| `decrementTrigger` | `React.ReactNode` |   |
+| `defaultValue` | `string \| number` | Starting value of an uncontrolled field (written once, on mount). |
+| `description` | `string` |   |
+| `disabled` | `boolean` |   |
+| `error` | `string` |   |
+| `format` | `'plain' \| 'grouped'` |   |
+| `incrementTrigger` | `React.ReactNode` |   |
+| `inputMode` | `string` | Hints at the type of data that might be entered by the user while editing the element or its contents |
+| `invalid` | `boolean` |   |
+| `label` | `string` |   |
+| `locale` | `string` |   |
+| `max` | `string \| number` |   |
+| `min` | `string \| number` |   |
+| `name` | `string` |   |
+| `onInput` | `(detail: { rawValue: string; value: number \| null }) => void` | Every keystroke: the raw text and its parsed number (null while it is not a number yet, e.g. "1."). |
+| `onInvalidValue` | `(reason: string) => void` |   |
+| `onValueChange` | `(detail: NumberFieldChangeDetail) => void` | Committed value (blur, Enter, steppers). |
+| `placeholder` | `string` |   |
+| `precision` | `number` |   |
+| `prefix` | `React.ReactNode` |   |
+| `readOnly` | `boolean` |   |
+| `required` | `boolean` |   |
+| `showSteppers` | `boolean` |   |
+| `step` | `string \| number` |   |
+| `suffix` | `React.ReactNode` |   |
+| `value` | `string \| number` | With onValueChange the field is controlled: a committed value the parent rejects is undone. |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-number-field>`
 

@@ -12,4 +12,8 @@ description: Props of the EditoraPreloadStyle component in @editora/ui-react, ge
 import { EditoraPreloadStyle } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `nonce` | `string` | Content-Security-Policy nonce for the inline style. |

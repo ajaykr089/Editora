@@ -12,7 +12,7 @@ description: Props, attributes and events of the DateRangePicker component in @e
 import { DateRangePicker } from '@editora/ui-react';
 ```
 
-## DateRangePickerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,7 @@ description: Props, attributes and events of the Popover component in @editora/u
 import { Popover } from '@editora/ui-react';
 ```
 
-## PopoverProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -34,11 +34,11 @@ import { Popover } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## PopoverTriggerProps
+## Popover.Trigger props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## PopoverContentProps
+## Popover.Content props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

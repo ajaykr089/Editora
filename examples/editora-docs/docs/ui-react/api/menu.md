@@ -12,7 +12,71 @@ description: Props, attributes and events of the Menu component in @editora/ui-r
 import { Menu } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+| `closeOnSelect` | `boolean` |   |
+| `density` | `'default' \| 'compact' \| 'comfortable'` |   |
+| `elevation` | `'default' \| 'none' \| 'low' \| 'high'` |   |
+| `onChange` | `(open: boolean) => void` |   |
+| `onClose` | `() => void` |   |
+| `onOpen` | `() => void` |   |
+| `onSelect` | `(idx: number) => void` |   |
+| `onSelectDetail` | `(detail: MenuSelectDetail) => void` |   |
+| `open` | `boolean` |   |
+| `placement` | `'top' \| 'bottom' \| 'left' \| 'right'` |   |
+| `radius` | `number \| string` |   |
+| `shape` | `'default' \| 'square' \| 'soft'` |   |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` |   |
+| `tone` | `'default' \| 'brand' \| 'neutral' \| 'info' \| 'danger' \| 'success' \| 'warning'` |   |
+| `typeahead` | `boolean` |   |
+| `variant` | `'surface' \| 'soft' \| 'solid' \| 'outline' \| 'flat' \| 'contrast' \| 'default' \| 'line' \| 'glass'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Menu.Item props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `caption` | `React.ReactNode` |   |
+| `checked` | `boolean` |   |
+| `children` | `React.ReactNode` |   |
+| `icon` | `React.ReactNode` |   |
+| `role` | `MenuItemRole` |   |
+| `shortcut` | `React.ReactNode` |   |
+| `tone` | `'danger' \| 'success' \| 'warning'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Menu.Separator props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Menu.SectionLabel props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Menu.Trigger props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Menu.Content props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-menu>`
 

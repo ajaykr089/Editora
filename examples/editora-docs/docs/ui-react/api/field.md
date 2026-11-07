@@ -12,7 +12,27 @@ description: Props, attributes and events of the Field component in @editora/ui-
 import { Field } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+| `density` | `'default' \| 'compact' \| 'comfortable'` |   |
+| `description` | `string` |   |
+| `error` | `string` |   |
+| `headless` | `boolean` |   |
+| `htmlFor` | `string` |   |
+| `invalid` | `boolean` |   |
+| `label` | `string` |   |
+| `labelWidth` | `string` |   |
+| `orientation` | `'vertical' \| 'horizontal'` |   |
+| `required` | `boolean` |   |
+| `shape` | `'default' \| 'square' \| 'soft'` |   |
+| `shell` | `'none' \| 'outline' \| 'filled' \| 'soft' \| 'line'` |   |
+| `tone` | `'default' \| 'brand' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'default' \| 'surface' \| 'outline' \| 'soft' \| 'contrast' \| 'minimal' \| 'elevated'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-field>`
 

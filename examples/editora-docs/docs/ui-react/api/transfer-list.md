@@ -12,7 +12,7 @@ description: Props, attributes and events of the TransferList component in @edit
 import { TransferList } from '@editora/ui-react';
 ```
 
-## TransferListProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

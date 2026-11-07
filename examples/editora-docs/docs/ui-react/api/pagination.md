@@ -12,7 +12,7 @@ description: Props, attributes and events of the Pagination component in @editor
 import { Pagination } from '@editora/ui-react';
 ```
 
-## PaginationProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

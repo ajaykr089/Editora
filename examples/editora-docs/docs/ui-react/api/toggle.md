@@ -12,7 +12,7 @@ description: Props, attributes and events of the Toggle component in @editora/ui
 import { Toggle } from '@editora/ui-react';
 ```
 
-## ToggleProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

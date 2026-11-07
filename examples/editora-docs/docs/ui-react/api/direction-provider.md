@@ -12,7 +12,9 @@ description: Props, attributes and events of the DirectionProvider component in 
 import { DirectionProvider } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-direction-provider>`
 

@@ -12,7 +12,7 @@ description: Props, attributes and events of the PluginPanel component in @edito
 import { PluginPanel } from '@editora/ui-react';
 ```
 
-## PluginPanelProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

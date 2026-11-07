@@ -12,7 +12,7 @@ description: Props, attributes and events of the Table component in @editora/ui-
 import { Table } from '@editora/ui-react';
 ```
 
-## TableProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

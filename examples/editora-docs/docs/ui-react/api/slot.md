@@ -12,7 +12,7 @@ description: Props, attributes and events of the Slot component in @editora/ui-r
 import { Slot } from '@editora/ui-react';
 ```
 
-## SlotProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,7 @@ description: Props, attributes and events of the Dropdown component in @editora/
 import { Dropdown } from '@editora/ui-react';
 ```
 
-## DropdownProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -37,11 +37,11 @@ import { Dropdown } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DropdownTriggerProps
+## Dropdown.Trigger props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DropdownContentProps
+## Dropdown.Content props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DropdownItemProps
+## Dropdown.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -65,11 +65,11 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DropdownSeparatorProps
+## Dropdown.Separator props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DropdownSectionLabelProps
+## Dropdown.SectionLabel props
 
 | Prop | Type | Description |
 | --- | --- | --- |

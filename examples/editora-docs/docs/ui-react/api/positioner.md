@@ -12,7 +12,7 @@ description: Props, attributes and events of the Positioner component in @editor
 import { Positioner } from '@editora/ui-react';
 ```
 
-## PositionerProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

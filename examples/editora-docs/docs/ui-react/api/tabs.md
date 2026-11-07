@@ -12,7 +12,7 @@ description: Props, attributes and events of the Tabs component in @editora/ui-r
 import { Tabs } from '@editora/ui-react';
 ```
 
-## TabsProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ import { Tabs } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## TabsTabProps
+## Tabs.Tab props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -49,7 +49,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## TabsPanelProps
+## Tabs.Panel props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

@@ -12,7 +12,7 @@ description: Props, attributes and events of the QuickActions component in @edit
 import { QuickActions } from '@editora/ui-react';
 ```
 
-## QuickActionsProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -31,7 +31,7 @@ import { QuickActions } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## QuickActionsActionProps
+## QuickActions.Action props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

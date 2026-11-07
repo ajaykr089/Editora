@@ -12,7 +12,34 @@ description: Props, attributes and events of the Icon component in @editora/ui-r
 import { Icon } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `absoluteStrokeWidth` | `boolean` |   |
+| `badge` | `boolean` |   |
+| `children` | `React.ReactNode` |   |
+| `color` | `string` |   |
+| `decorative` | `boolean` |   |
+| `flip` | `'horizontal' \| 'vertical' \| 'both'` |   |
+| `iconVariant` | `'outline' \| 'solid' \| 'duotone'` |   |
+| `iconWeight` | `'thin' \| 'regular' \| 'bold'` |   |
+| `label` | `string` |   |
+| `name` | `string` |   |
+| `pulse` | `boolean` |   |
+| `rotate` | `number` |   |
+| `rtl` | `boolean` |   |
+| `secondaryColor` | `string` |   |
+| `shape` | `'default' \| 'square' \| 'soft'` |   |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| string \| number` |   |
+| `spin` | `boolean` |   |
+| `strokeLinecap` | `'butt' \| 'round' \| 'square'` |   |
+| `strokeLinejoin` | `'miter' \| 'round' \| 'bevel'` |   |
+| `strokeWidth` | `number \| string` |   |
+| `tone` | `'default' \| 'brand' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'default' \| 'surface' \| 'soft' \| 'contrast' \| 'minimal' \| 'elevated'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-icon>`
 

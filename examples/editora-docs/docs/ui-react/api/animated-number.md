@@ -12,7 +12,7 @@ description: Props, attributes and events of the AnimatedNumber component in @ed
 import { AnimatedNumber } from '@editora/ui-react';
 ```
 
-## AnimatedNumberProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

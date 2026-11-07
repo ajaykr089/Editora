@@ -12,7 +12,7 @@ description: Props, attributes and events of the ToggleGroup component in @edito
 import { ToggleGroup } from '@editora/ui-react';
 ```
 
-## ToggleGroupProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -36,7 +36,7 @@ import { ToggleGroup } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## ToggleGroupItemProps
+## ToggleGroup.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

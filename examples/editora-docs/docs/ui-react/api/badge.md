@@ -12,7 +12,7 @@ description: Props, attributes and events of the Badge component in @editora/ui-
 import { Badge } from '@editora/ui-react';
 ```
 
-## BadgeProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

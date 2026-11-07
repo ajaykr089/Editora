@@ -12,7 +12,7 @@ description: Props, attributes and events of the Toast component in @editora/ui-
 import { Toast } from '@editora/ui-react';
 ```
 
-## ToastProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

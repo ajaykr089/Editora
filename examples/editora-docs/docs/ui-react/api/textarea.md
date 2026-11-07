@@ -12,7 +12,7 @@ description: Props, attributes and events of the Textarea component in @editora/
 import { Textarea } from '@editora/ui-react';
 ```
 
-## TextareaProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -53,15 +53,15 @@ import { Textarea } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## TextareaLabelProps
+## Textarea.Label props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## TextareaDescriptionProps
+## Textarea.Description props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## TextareaErrorProps
+## Textarea.Error props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

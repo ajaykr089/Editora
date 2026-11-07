@@ -12,7 +12,7 @@ description: Props, attributes and events of the RovingFocusGroup component in @
 import { RovingFocusGroup } from '@editora/ui-react';
 ```
 
-## RovingFocusGroupProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

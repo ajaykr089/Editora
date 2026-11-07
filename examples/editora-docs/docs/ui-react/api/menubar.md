@@ -12,7 +12,7 @@ description: Props, attributes and events of the Menubar component in @editora/u
 import { Menubar } from '@editora/ui-react';
 ```
 
-## MenubarProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -36,6 +36,14 @@ import { Menubar } from '@editora/ui-react';
 | `tone` | `'default' \| 'brand' \| 'neutral' \| 'info' \| 'danger' \| 'success' \| 'warning'` |   |
 | `typeahead` | `boolean` |   |
 | `variant` | `'default' \| 'surface' \| 'soft' \| 'solid' \| 'outline' \| 'flat' \| 'line' \| 'glass' \| 'contrast'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Menubar.Content props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

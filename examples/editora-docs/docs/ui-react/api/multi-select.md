@@ -12,7 +12,39 @@ description: Props, attributes and events of the MultiSelect component in @edito
 import { MultiSelect } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `clearable` | `boolean` |   |
+| `density` | `'default' \| 'compact' \| 'comfortable'` |   |
+| `description` | `string` |   |
+| `disabled` | `boolean` |   |
+| `elevation` | `'none' \| 'low' \| 'high'` |   |
+| `error` | `string` |   |
+| `label` | `string` |   |
+| `loading` | `boolean` |   |
+| `loadingText` | `string` |   |
+| `maxSelections` | `number` |   |
+| `name` | `string` |   |
+| `onChange` | `(detail: { value: string[]; previousValue: string[]; selectedItems: MultiSelectOption[]; source: string }) => void` |   |
+| `onValueChange` | `(value: string[]) => void` |   |
+| `optionBorder` | `boolean` |   |
+| `optionRadius` | `number \| string` |   |
+| `options` (required) | `Array<MultiSelectOption \| MultiSelectOptionGroup>` |   |
+| `placeholder` | `string` |   |
+| `radius` | `number \| string` |   |
+| `readOnly` | `boolean` |   |
+| `renderLimit` | `number` |   |
+| `required` | `boolean` |   |
+| `selectionIndicator` | `'checkbox' \| 'check' \| 'none'` |   |
+| `shape` | `'default' \| 'square' \| 'soft'` |   |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` |   |
+| `tone` | `'default' \| 'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
+| `value` | `string[]` |   |
+| `variant` | `'default' \| 'surface' \| 'soft' \| 'solid' \| 'outline' \| 'flat' \| 'contrast' \| 'filled' \| 'minimal'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-multi-select>`
 

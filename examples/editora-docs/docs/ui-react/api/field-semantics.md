@@ -9,10 +9,10 @@ description: Props of the FieldSemantics component in @editora/ui-react, generat
 # FieldSemantics API
 
 ```tsx
-import { FieldSemantics } from '@editora/ui-react';
+import { Description, FieldError, ControlGroup, Fieldset } from '@editora/ui-react';
 ```
 
-## DescriptionProps
+## Description props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ import { FieldSemantics } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## FieldErrorProps
+## FieldError props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## ControlGroupProps
+## ControlGroup props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## FieldsetProps
+## Fieldset props
 
 | Prop | Type | Description |
 | --- | --- | --- |

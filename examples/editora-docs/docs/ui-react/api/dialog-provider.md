@@ -12,7 +12,7 @@ description: Props of the DialogProvider component in @editora/ui-react, generat
 import { DialogProvider } from '@editora/ui-react';
 ```
 
-## DialogProviderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

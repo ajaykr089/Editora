@@ -12,7 +12,33 @@ description: Props, attributes and events of the PlacementGrid component in @edi
 import { PlacementGrid } from '@editora/ui-react';
 ```
 
-## PlacementGridItemProps
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `align` | `Responsive<CssValue>` |   |
+| `alignContent` | `Responsive<CssValue>` |   |
+| `autoColumns` | `Responsive<CssValue>` |   |
+| `autoFlow` | `Responsive<CssValue>` |   |
+| `autoRows` | `Responsive<CssValue>` |   |
+| `columnGap` | `Responsive<CssValue>` |   |
+| `columns` | `Responsive<CssValue>` |   |
+| `display` | `Responsive<'grid' \| 'inline-grid' \| CssValue>` |   |
+| `draggable` | `boolean` |   |
+| `gap` | `Responsive<CssValue>` |   |
+| `headless` | `boolean` |   |
+| `interactive` | `boolean` |   |
+| `justify` | `Responsive<CssValue>` |   |
+| `justifyContent` | `Responsive<CssValue>` |   |
+| `order` | `'dom' \| 'row-major'` |   |
+| `place` | `Responsive<CssValue>` |   |
+| `placeContent` | `Responsive<CssValue>` |   |
+| `rowGap` | `Responsive<CssValue>` |   |
+| `rows` | `Responsive<CssValue>` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## PlacementGrid.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

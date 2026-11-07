@@ -12,7 +12,7 @@ description: Props, attributes and events of the Dock component in @editora/ui-r
 import { Dock } from '@editora/ui-react';
 ```
 
-## DockProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -37,11 +37,7 @@ import { Dock } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## DockItemSlotProps
-
-Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
-
-## DockItemProps
+## Dock.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

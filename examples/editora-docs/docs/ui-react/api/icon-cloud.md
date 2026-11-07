@@ -12,7 +12,7 @@ description: Props, attributes and events of the IconCloud component in @editora
 import { IconCloud } from '@editora/ui-react';
 ```
 
-## IconCloudProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -39,7 +39,7 @@ import { IconCloud } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## IconCloudItemProps
+## IconCloud.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## IconCloudCenterProps
+## IconCloud.Center props
 
 | Prop | Type | Description |
 | --- | --- | --- |

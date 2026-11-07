@@ -12,7 +12,7 @@ description: Props of the NavigationProvider component in @editora/ui-react, gen
 import { NavigationProvider } from '@editora/ui-react';
 ```
 
-## NavigationProviderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

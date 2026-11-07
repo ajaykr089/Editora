@@ -12,4 +12,14 @@ description: Props of the Shortcut component in @editora/ui-react, generated fro
 import { Shortcut } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `keys` | `readonly React.ReactNode[]` |   |
+| `separator` | `React.ReactNode` |   |
+| `size` | `keyof typeof SIZE_STYLES` |   |
+| `tone` | `keyof typeof TONE_STYLES` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).

@@ -12,7 +12,20 @@ description: Props, attributes and events of the Separator component in @editora
 import { Separator } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `decorative` | `boolean` |   |
+| `headless` | `boolean` |   |
+| `inset` | `'none' \| 'sm' \| 'md' \| 'lg'` |   |
+| `label` | `string` |   |
+| `orientation` | `'horizontal' \| 'vertical'` |   |
+| `size` | `'thin' \| 'medium' \| 'thick'` |   |
+| `tone` | `'neutral' \| 'brand' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'solid' \| 'dashed' \| 'dotted' \| 'gradient' \| 'glow'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-separator>`
 

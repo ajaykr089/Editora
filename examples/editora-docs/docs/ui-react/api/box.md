@@ -12,7 +12,77 @@ description: Props, attributes and events of the Box component in @editora/ui-re
 import { Box } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `align` | `Responsive<CssValue>` |   |
+| `alignContent` | `Responsive<CssValue>` |   |
+| `alignSelf` | `Responsive<CssValue>` |   |
+| `bg` | `Responsive<CssValue>` |   |
+| `bottom` | `Responsive<CssValue>` |   |
+| `color` | `Responsive<CssValue>` |   |
+| `columnGap` | `Responsive<CssValue>` |   |
+| `disabled` | `boolean` |   |
+| `display` | `Responsive<CssValue>` |   |
+| `elevation` | `'default' \| 'none' \| 'low' \| 'high'` |   |
+| `flexBasis` | `Responsive<CssValue>` |   |
+| `flexGrow` | `Responsive<CssValue>` |   |
+| `flexShrink` | `Responsive<CssValue>` |   |
+| `gap` | `Responsive<CssValue>` |   |
+| `gridArea` | `Responsive<CssValue>` |   |
+| `gridColumn` | `Responsive<CssValue>` |   |
+| `gridColumnEnd` | `Responsive<CssValue>` |   |
+| `gridColumnStart` | `Responsive<CssValue>` |   |
+| `gridRow` | `Responsive<CssValue>` |   |
+| `gridRowEnd` | `Responsive<CssValue>` |   |
+| `gridRowStart` | `Responsive<CssValue>` |   |
+| `h` | `Responsive<CssValue>` |   |
+| `headless` | `boolean` |   |
+| `height` | `Responsive<CssValue>` |   |
+| `inset` | `Responsive<CssValue>` |   |
+| `interactive` | `boolean` |   |
+| `justify` | `Responsive<CssValue>` |   |
+| `left` | `Responsive<CssValue>` |   |
+| `m` | `Responsive<CssValue>` |   |
+| `maxH` | `Responsive<CssValue>` |   |
+| `maxHeight` | `Responsive<CssValue>` |   |
+| `maxW` | `Responsive<CssValue>` |   |
+| `maxWidth` | `Responsive<CssValue>` |   |
+| `mb` | `Responsive<CssValue>` |   |
+| `minH` | `Responsive<CssValue>` |   |
+| `minHeight` | `Responsive<CssValue>` |   |
+| `minW` | `Responsive<CssValue>` |   |
+| `minWidth` | `Responsive<CssValue>` |   |
+| `ml` | `Responsive<CssValue>` |   |
+| `mr` | `Responsive<CssValue>` |   |
+| `mt` | `Responsive<CssValue>` |   |
+| `mx` | `Responsive<CssValue>` |   |
+| `my` | `Responsive<CssValue>` |   |
+| `opacity` | `Responsive<CssValue>` |   |
+| `overflow` | `Responsive<CssValue>` |   |
+| `overflowX` | `Responsive<CssValue>` |   |
+| `overflowY` | `Responsive<CssValue>` |   |
+| `p` | `Responsive<CssValue>` |   |
+| `pb` | `Responsive<CssValue>` |   |
+| `pl` | `Responsive<CssValue>` |   |
+| `position` | `Responsive<CssValue>` |   |
+| `pr` | `Responsive<CssValue>` |   |
+| `pt` | `Responsive<CssValue>` |   |
+| `px` | `Responsive<CssValue>` |   |
+| `py` | `Responsive<CssValue>` |   |
+| `radius` | `'default' \| 'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' \| number \| string` |   |
+| `right` | `Responsive<CssValue>` |   |
+| `rowGap` | `Responsive<CssValue>` |   |
+| `state` | `'idle' \| 'loading' \| 'error' \| 'success'` |   |
+| `tone` | `'default' \| 'neutral' \| 'brand' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
+| `top` | `Responsive<CssValue>` |   |
+| `variant` | `'default' \| 'surface' \| 'elevated' \| 'outline' \| 'glass' \| 'gradient' \| 'soft' \| 'contrast'` |   |
+| `w` | `Responsive<CssValue>` |   |
+| `width` | `Responsive<CssValue>` |   |
+| `zIndex` | `Responsive<CssValue>` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-box>`
 

@@ -12,7 +12,7 @@ description: Props, attributes and events of the EmptyState component in @editor
 import { EmptyState } from '@editora/ui-react';
 ```
 
-## EmptyStateProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

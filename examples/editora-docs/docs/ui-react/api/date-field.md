@@ -12,7 +12,25 @@ description: Props, attributes and events of the DateField component in @editora
 import { DateField } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `description` | `string` |   |
+| `disabled` | `boolean` |   |
+| `error` | `string` |   |
+| `label` | `string` |   |
+| `locale` | `string` |   |
+| `max` | `string` |   |
+| `min` | `string` |   |
+| `name` | `string` |   |
+| `onChange` | `(detail: { value: string \| null; previousValue: string \| null; source: string }) => void` |   |
+| `onValueChange` | `(value: string \| null) => void` |   |
+| `readOnly` | `boolean` |   |
+| `required` | `boolean` |   |
+| `value` | `string` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-date-field>`
 

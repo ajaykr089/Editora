@@ -12,7 +12,7 @@ description: Props, attributes and events of the SelectionPopup component in @ed
 import { SelectionPopup } from '@editora/ui-react';
 ```
 
-## SelectionPopupProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ import { SelectionPopup } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SelectionPopupContentProps
+## SelectionPopup.Content props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

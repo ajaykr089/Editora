@@ -12,7 +12,7 @@ description: Props, attributes and events of the PinInput component in @editora/
 import { PinInput } from '@editora/ui-react';
 ```
 
-## PinInputProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

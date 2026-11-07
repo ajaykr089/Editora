@@ -12,7 +12,7 @@ description: Props, attributes and events of the Tooltip component in @editora/u
 import { Tooltip } from '@editora/ui-react';
 ```
 
-## TooltipProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

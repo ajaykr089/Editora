@@ -12,7 +12,7 @@ description: Props, attributes and events of the InlineEdit component in @editor
 import { InlineEdit } from '@editora/ui-react';
 ```
 
-## InlineEditProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

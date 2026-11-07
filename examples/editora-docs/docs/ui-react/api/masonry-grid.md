@@ -12,7 +12,20 @@ description: Props, attributes and events of the MasonryGrid component in @edito
 import { MasonryGrid } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `columnGap` | `Responsive<CssValue>` |   |
+| `columns` | `Responsive<CssValue>` |   |
+| `columnWidth` | `Responsive<CssValue>` |   |
+| `display` | `Responsive<'block' \| 'inline-block' \| CssValue>` |   |
+| `fill` | `Responsive<'auto' \| 'balance' \| 'balance-all' \| CssValue>` |   |
+| `gap` | `Responsive<CssValue>` |   |
+| `headless` | `boolean` |   |
+| `itemGap` | `Responsive<CssValue>` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-masonry-grid>`
 

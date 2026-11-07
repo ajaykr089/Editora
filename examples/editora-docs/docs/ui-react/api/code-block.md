@@ -12,4 +12,19 @@ description: Props of the CodeBlock component in @editora/ui-react, generated fr
 import { CodeBlock } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `actions` | `React.ReactNode` |   |
+| `as` | `keyof JSX.IntrinsicElements` |   |
+| `children` | `React.ReactNode` |   |
+| `code` | `string` |   |
+| `description` | `React.ReactNode` |   |
+| `footer` | `React.ReactNode` |   |
+| `language` | `React.ReactNode` |   |
+| `lineNumbers` | `boolean` |   |
+| `title` | `React.ReactNode` |   |
+| `wrap` | `boolean` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).

@@ -12,7 +12,7 @@ description: Props, attributes and events of the Switch component in @editora/ui
 import { Switch } from '@editora/ui-react';
 ```
 
-## SwitchProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ import { Switch } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## SwitchDescriptionProps
+## Switch.Description props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

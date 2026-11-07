@@ -12,7 +12,7 @@ description: Props, attributes and events of the Checkbox component in @editora/
 import { Checkbox } from '@editora/ui-react';
 ```
 
-## CheckboxProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

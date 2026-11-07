@@ -12,7 +12,7 @@ description: Props of the Carousel component in @editora/ui-react, generated fro
 import { Carousel } from '@editora/ui-react';
 ```
 
-## CarouselProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -39,7 +39,7 @@ import { Carousel } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## CarouselItemProps
+## Carousel.Item props
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -12,7 +12,7 @@ description: Props, attributes and events of the Gantt component in @editora/ui-
 import { Gantt } from '@editora/ui-react';
 ```
 
-## GanttProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

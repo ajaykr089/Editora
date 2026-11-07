@@ -12,7 +12,7 @@ description: Props, attributes and events of the Slider component in @editora/ui
 import { Slider } from '@editora/ui-react';
 ```
 
-## SliderProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |

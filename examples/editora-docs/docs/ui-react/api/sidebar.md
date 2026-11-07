@@ -12,7 +12,122 @@ description: Props, attributes and events of the Sidebar component in @editora/u
 import { Sidebar } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `autoSave` | `boolean` |   |
+| `collapsed` | `boolean` |   |
+| `collapsedWidth` | `string` |   |
+| `collapsible` | `boolean` |   |
+| `density` | `'compact' \| 'default' \| 'comfortable'` |   |
+| `elevation` | `'none' \| 'low' \| 'high'` |   |
+| `headless` | `boolean` |   |
+| `itemFontSize` | `number \| string` |   |
+| `itemGap` | `number \| string` |   |
+| `itemHeight` | `number \| string` |   |
+| `itemLineHeight` | `number \| string` |   |
+| `itemPaddingX` | `number \| string` |   |
+| `itemPaddingY` | `number \| string` |   |
+| `itemRadius` | `number \| string` |   |
+| `items` | `SidebarItemInput[]` |   |
+| `maxWidth` | `string` |   |
+| `minWidth` | `string` |   |
+| `navigation` | `'native' \| 'client'` | `client` always keeps the page on link clicks (route from `onSelect`/`onNavigate`). |
+| `onChange` | `(detail: SidebarSelectDetail) => void` |   |
+| `onCollapseChange` | `(collapsed: boolean) => void` |   |
+| `onNavigate` | `(detail: SidebarNavigateDetail) => void` | Fires before a link item (`href`) is followed. Call `detail.preventDefault()` to route in the app instead of a full page load. Clicks that open a new tab are never intercepted. |
+| `onSearchChange` | `(query: string) => void` |   |
+| `onSelect` | `(detail: SidebarSelectDetail) => void` |   |
+| `onToggle` | `(collapsed: boolean) => void` |   |
+| `onWidthChange` | `(detail: { width: number; collapsedWidth: number; minWidth: number; maxWidth: number; source: string }) => void` |   |
+| `position` | `'left' \| 'right'` |   |
+| `radius` | `number \| string` |   |
+| `rail` | `boolean` |   |
+| `resizable` | `boolean` |   |
+| `searchQuery` | `string` |   |
+| `sectionLabelTransform` | `'uppercase' \| 'none' \| 'capitalize'` |   |
+| `showBadges` | `boolean` |   |
+| `showIcons` | `boolean` |   |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` |   |
+| `storageKey` | `string` |   |
+| `tone` | `SidebarTone` |   |
+| `value` | `string` |   |
+| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split'` |   |
+| `width` | `string` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Sidebar.Header props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Sidebar.Search props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Sidebar.SearchInput props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `icon` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Sidebar.Content props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+## Sidebar.Group props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+| `title` | `string` |   |
+
+## Sidebar.Item props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `active` | `boolean` |   |
+| `badge` | `string` |   |
+| `children` | `React.ReactNode` |   |
+| `description` | `string` |   |
+| `disabled` | `boolean` |   |
+| `href` | `string` |   |
+| `icon` | `React.ReactNode \| string` |   |
+| `label` | `string` |   |
+| `rel` | `string` |   |
+| `section` | `string` |   |
+| `target` | `string` |   |
+| `tone` | `SidebarTone` |   |
+| `value` (required) | `string` |   |
+
+## Sidebar.Promo props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Sidebar.Footer props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-sidebar>`
 

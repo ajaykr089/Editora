@@ -12,7 +12,32 @@ description: Props, attributes and events of the Label component in @editora/ui-
 import { Label } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+| `density` | `'default' \| 'compact' \| 'comfortable'` |   |
+| `description` | `string` |   |
+| `disabled` | `boolean` |   |
+| `for` | `string` |   |
+| `headless` | `boolean` |   |
+| `htmlFor` | `string` |   |
+| `required` | `boolean` |   |
+| `shape` | `'default' \| 'square' \| 'soft'` |   |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` |   |
+| `tone` | `'default' \| 'brand' \| 'success' \| 'warning' \| 'danger'` |   |
+| `variant` | `'default' \| 'surface' \| 'soft' \| 'contrast' \| 'minimal' \| 'elevated'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Label.Text props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Label.Description props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-label>`
 

@@ -12,7 +12,9 @@ description: Props, attributes and events of the VisuallyHidden component in @ed
 import { VisuallyHidden } from '@editora/ui-react';
 ```
 
-This component has no props of its own.
+## Props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Element: `<ui-visually-hidden>`
 

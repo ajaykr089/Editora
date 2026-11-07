@@ -12,7 +12,7 @@ description: Props, attributes and events of the Chart component in @editora/ui-
 import { Chart } from '@editora/ui-react';
 ```
 
-## ChartProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -38,7 +38,33 @@ import { Chart } from '@editora/ui-react';
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## ChartHeaderProps
+## Chart.Root props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `ariaLabel` | `string` |   |
+| `data` | `ChartPoint[]` |   |
+| `disabled` | `boolean` |   |
+| `headless` | `boolean` |   |
+| `interactive` | `boolean` |   |
+| `labels` | `string[]` |   |
+| `onPointSelect` | `(detail: ChartPointSelectDetail) => void` |   |
+| `series` | `ChartSeries[]` |   |
+| `showLegend` | `boolean` |   |
+| `showSummary` | `boolean` |   |
+| `showTable` | `boolean` | Show the chart's numbers as a table below it (always available to screen readers). |
+| `state` | `ChartState` |   |
+| `subtitle` | `string` |   |
+| `title` | `string` |   |
+| `type` | `'line' \| 'area' \| 'bar' \| 'donut' \| 'step' \| 'scatter' \| 'radial'` |   |
+| `valuePrefix` | `string` |   |
+| `values` | `number[]` |   |
+| `valueSuffix` | `string` |   |
+| `variant` | `'default' \| 'contrast' \| 'minimal'` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Chart.Header props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -46,7 +72,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## ChartTitleProps
+## Chart.Title props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -54,7 +80,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
-## ChartSubtitleProps
+## Chart.Subtitle props
 
 | Prop | Type | Description |
 | --- | --- | --- |

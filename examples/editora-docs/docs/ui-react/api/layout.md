@@ -12,7 +12,7 @@ description: Props, attributes and events of the Layout component in @editora/ui
 import { Layout } from '@editora/ui-react';
 ```
 
-## LayoutProps
+## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -32,6 +32,26 @@ import { Layout } from '@editora/ui-react';
 | `sidebarSide` | `LayoutSidebarSide` |   |
 | `sidebarWidth` | `string` |   |
 | `variant` | `LayoutVariant` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Layout.Header props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Layout.Sidebar props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Layout.Content props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Layout.Aside props
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Layout.Footer props
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
