@@ -524,6 +524,12 @@
       "require": "./dist/NavigationMenu.cjs.js",
       "default": "./dist/NavigationMenu.esm.js"
     },
+    "./NavigationProvider": {
+      "types": "./dist/components/NavigationProvider.d.ts",
+      "import": "./dist/NavigationProvider.esm.js",
+      "require": "./dist/NavigationProvider.cjs.js",
+      "default": "./dist/NavigationProvider.esm.js"
+    },
     "./NumberField": {
       "types": "./dist/components/NumberField.d.ts",
       "import": "./dist/NumberField.esm.js",

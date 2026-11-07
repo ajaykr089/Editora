@@ -3311,6 +3311,18 @@
       "wrapperFor": "ui-navigation-menu"
     },
     {
+      "id": "ui-react:NavigationProvider",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "NavigationProvider",
+      "reactExport": "NavigationProvider",
+      "source": "packages/ui-react/src/components/NavigationProvider.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-navigation-provider--playground",
+      "wrapperFor": null,
+      "notes": "React-only component"
+    },
+    {
       "id": "ui-react:NumberField",
       "package": "@editora/ui-react",
       "framework": "react",

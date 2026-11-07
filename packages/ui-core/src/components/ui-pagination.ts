@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { requestNavigate } from '../primitives/navigate';
 
 const style = `
   :host {
@@ -41,7 +42,8 @@ const style = `
     padding: 0 3px;
   }
 
-  button {
+  :is(button, a.page-link) {
+    text-decoration: none;
     padding: var(--ui-pagination-padding);
     border-radius: var(--ui-pagination-radius);
     border: 1px solid var(--ui-pagination-border);
@@ -57,22 +59,22 @@ const style = `
     transition: border-color 130ms ease, background-color 130ms ease, color 130ms ease, transform 130ms ease;
   }
 
-  button:hover:not(:disabled) {
+  :is(button, a.page-link):hover:not(:disabled) {
     background: var(--ui-pagination-item-bg-hover);
   }
 
-  button:focus-visible {
+  :is(button, a.page-link):focus-visible {
     outline: var(--ui-ring-width, 2px) solid var(--ui-ring-color, var(--ui-color-focus-ring, #2563eb));
     outline-offset: var(--ui-ring-offset, 2px);
   }
 
-  button[aria-current="page"] {
+  :is(button, a.page-link)[aria-current="page"] {
     background: var(--ui-pagination-active-bg);
     color: var(--ui-pagination-active-color);
     border-color: var(--ui-pagination-active-bg);
   }
 
-  button:disabled {
+  :is(button, a.page-link):disabled {
     opacity: 0.46;
     cursor: not-allowed;
   }
@@ -105,22 +107,22 @@ const style = `
     padding: 0;
   }
 
-  :host([variant="flat"]) button,
-  :host([variant="minimal"]) button {
+  :host([variant="flat"]) :is(button, a.page-link),
+  :host([variant="minimal"]) :is(button, a.page-link) {
     border-color: transparent;
     background: transparent;
     box-shadow: none;
     min-width: 30px;
   }
 
-  :host([variant="flat"]) button:hover:not(:disabled),
-  :host([variant="minimal"]) button:hover:not(:disabled) {
+  :host([variant="flat"]) :is(button, a.page-link):hover:not(:disabled),
+  :host([variant="minimal"]) :is(button, a.page-link):hover:not(:disabled) {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
     border-color: transparent;
   }
 
-  :host([variant="flat"]) button[aria-current="page"],
-  :host([variant="minimal"]) button[aria-current="page"] {
+  :host([variant="flat"]) :is(button, a.page-link)[aria-current="page"],
+  :host([variant="minimal"]) :is(button, a.page-link)[aria-current="page"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 16%, transparent);
     color: var(--ui-color-primary, #2563eb);
     border-color: transparent;
@@ -132,12 +134,12 @@ const style = `
     box-shadow: none;
   }
 
-  :host([variant="outline"]) button {
+  :host([variant="outline"]) :is(button, a.page-link) {
     background: var(--ui-color-surface, #ffffff);
     border-color: var(--ui-pagination-border);
   }
 
-  :host([variant="outline"]) button[aria-current="page"] {
+  :host([variant="outline"]) :is(button, a.page-link)[aria-current="page"] {
     background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-color-surface, #ffffff));
     color: var(--ui-color-primary, #2563eb);
     border-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-pagination-border));
@@ -161,15 +163,15 @@ const style = `
     padding: 8px;
   }
 
-  :host([variant="solid"]) button,
-  :host([variant="contrast"]) button {
+  :host([variant="solid"]) :is(button, a.page-link),
+  :host([variant="contrast"]) :is(button, a.page-link) {
     border-color: transparent;
   }
 
   :host([headless]) .pagination { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    button {
+    :is(button, a.page-link) {
       transition: none !important;
     }
   }
@@ -180,7 +182,7 @@ const style = `
       box-shadow: none;
     }
 
-    button {
+    :is(button, a.page-link) {
       border-width: 2px;
     }
   }
@@ -203,7 +205,7 @@ const style = `
 
 export class UIPagination extends ElementBase {
   static get observedAttributes() {
-    return ['page', 'count', 'headless', 'variant', 'size', 'aria-label'];
+    return ['page', 'count', 'headless', 'variant', 'size', 'aria-label', 'href-template'];
   }
 
   private _page = 1;
@@ -259,31 +261,43 @@ export class UIPagination extends ElementBase {
     // Re-rendering replaces the buttons; remember which one had focus so a keyboard user who
     // pressed Next keeps focus on Next (or on the page they picked).
     const focused = this.root.activeElement as HTMLElement | null;
-    const focusKey = focused?.matches?.('button[aria-label]')
-      ? `[aria-label="${focused.getAttribute('aria-label')}"]`
-      : focused?.matches?.('button[data-page]')
-        ? 'button[aria-current="page"]'
+    const focusKey = focused?.matches?.('[data-page][aria-label]')
+      ? `[data-page][aria-label="${focused.getAttribute('aria-label')}"]`
+      : focused?.matches?.('[data-page]')
+        ? '[data-page][aria-current="page"]'
         : '';
+    // With href-template ("?page={page}") the controls are real links (open in a new tab, shareable,
+    // crawlable) that go through the shared navigate contract; otherwise buttons.
+    const template = this.getAttribute('href-template') || '';
+    const control = (page: number, content: string, extra: { label?: string; disabled?: boolean; current?: boolean } = {}) => {
+      const label = extra.label ? ` aria-label="${extra.label}"` : '';
+      const current = extra.current ? ' aria-current="page"' : '';
+      if (template && !extra.disabled) {
+        const href = template.split('{page}').join(String(page)).replace(/"/g, '&quot;');
+        return `<a class="page-link" href="${href}" data-page="${page}"${label}${current}>${content}</a>`;
+      }
+      return `<button type="button" data-page="${page}"${label}${current} ${extra.disabled ? 'disabled' : ''}>${content}</button>`;
+    };
     let buttons = '';
     // First/Prev
-    buttons += `<button type="button" data-page="1" aria-label="First" ${this._page === 1 ? 'disabled' : ''}>&laquo;</button>`;
-    buttons += `<button type="button" data-page="${this._page - 1}" aria-label="Previous" ${this._page === 1 ? 'disabled' : ''}>&lsaquo;</button>`;
+    buttons += control(1, '&laquo;', { label: 'First', disabled: this._page === 1 });
+    buttons += control(this._page - 1, '&lsaquo;', { label: 'Previous', disabled: this._page === 1 });
     // Page numbers (show up to 5, with ellipsis)
     const range = this._getPageRange(this._page, this._count);
     if (range[0] > 1) {
-      buttons += `<button type="button" data-page="1">1</button>`;
+      buttons += control(1, '1');
       if (range[0] > 2) buttons += `<span class="ellipsis" aria-hidden="true">…</span>`;
     }
     for (let i = range[0]; i <= range[1]; i++) {
-      buttons += `<button type="button" data-page="${i}" ${i === this._page ? 'aria-current="page"' : ''}>${i}</button>`;
+      buttons += control(i, String(i), { current: i === this._page });
     }
     if (range[1] < this._count) {
       if (range[1] < this._count - 1) buttons += `<span class="ellipsis" aria-hidden="true">…</span>`;
-      buttons += `<button type="button" data-page="${this._count}">${this._count}</button>`;
+      buttons += control(this._count, String(this._count));
     }
     // Next/Last
-    buttons += `<button type="button" data-page="${this._page + 1}" aria-label="Next" ${this._page === this._count ? 'disabled' : ''}>&rsaquo;</button>`;
-    buttons += `<button type="button" data-page="${this._count}" aria-label="Last" ${this._page === this._count ? 'disabled' : ''}>&raquo;</button>`;
+    buttons += control(this._page + 1, '&rsaquo;', { label: 'Next', disabled: this._page === this._count });
+    buttons += control(this._count, '&raquo;', { label: 'Last', disabled: this._page === this._count });
     this.setContent(`
       <style>${style}</style>
       <nav class="pagination" role="navigation" aria-label="${this.getAttribute('aria-label') || 'Pagination'}" tabindex="0">
@@ -299,7 +313,7 @@ export class UIPagination extends ElementBase {
     }
     if (focusKey && !this.root.activeElement) {
       const target = this.root.querySelector(focusKey) as HTMLButtonElement | null;
-      const fallback = this.root.querySelector('button[aria-current="page"]') as HTMLButtonElement | null;
+      const fallback = this.root.querySelector('[data-page][aria-current="page"]') as HTMLButtonElement | null;
       (target && !target.disabled ? target : fallback)?.focus({ preventScroll: true });
     }
   }
@@ -327,7 +341,7 @@ export class UIPagination extends ElementBase {
   }
 
   focusCurrent(): void {
-    const current = this.root.querySelector('button[aria-current="page"]') as HTMLElement | null;
+    const current = this.root.querySelector('[data-page][aria-current="page"]') as HTMLElement | null;
     current?.focus();
   }
 
@@ -339,17 +353,24 @@ export class UIPagination extends ElementBase {
   }
 
   private _onClick(e: Event) {
-    const btn = (e.target as HTMLElement).closest('button[data-page]');
+    const btn = (e.target as HTMLElement).closest('[data-page]') as HTMLElement | null;
     if (!btn || btn.hasAttribute('disabled')) return;
     const page = Number(btn.getAttribute('data-page'));
-    if (isNaN(page) || page < 1 || page > this._count || page === this._page) return;
+    if (isNaN(page) || page < 1 || page > this._count) return;
+    if (btn instanceof HTMLAnchorElement) {
+      // A page link: the app's router may take it over; otherwise the browser follows it.
+      const keepPage = requestNavigate(this, { href: btn.getAttribute('href') || '', page, previousPage: this._page }, e);
+      if (!keepPage) return;
+      e.preventDefault();
+    }
+    if (page === this._page) return;
     this._applyPageChange(page);
   }
 
   private _onKeyDown(e: KeyboardEvent) {
     const nav = this.root.querySelector('.pagination');
     if (!nav) return;
-    const buttons = Array.from(nav.querySelectorAll('button:not(:disabled)'));
+    const buttons = Array.from(nav.querySelectorAll('button:not(:disabled), a[data-page]'));
     const active = this.root.activeElement as Element | null;
     let idx = buttons.indexOf(active as HTMLButtonElement);
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {

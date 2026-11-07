@@ -219,6 +219,43 @@ export function useTextValue<T extends HTMLElement>(ref: React.RefObject<T | nul
   });
 }
 
+export type ComponentNavigateDetail<D = Record<string, unknown>> = D & {
+  href: string;
+  /** Keep the page: the app handles `href` itself. */
+  preventDefault: () => void;
+};
+
+/**
+ * The shared link contract for wrappers whose element dispatches `navigate` (Sidebar, Breadcrumb,
+ * Tabs, Pagination): the component's `onNavigate` runs first; if it did not keep the page and a
+ * NavigationProvider is present, the provider's router takes the link (no page load).
+ */
+export function useNavigateBridge<T extends HTMLElement, D = Record<string, unknown>>(
+  ref: React.RefObject<T | null>,
+  onNavigate: ((detail: ComponentNavigateDetail<D>) => void) | undefined,
+  provider: { navigate: (href: string, detail: any) => void } | null
+): void {
+  const latest = useRef({ onNavigate, provider });
+  useIsomorphicLayoutEffect(() => {
+    latest.current = { onNavigate, provider };
+  });
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const handler = hostOnly((event: Event) => {
+      const detail = (event as CustomEvent<D & { href: string }>).detail;
+      if (!detail || typeof detail.href !== 'string') return;
+      const { onNavigate: own, provider: router } = latest.current;
+      own?.({ ...detail, preventDefault: () => event.preventDefault() });
+      if (event.defaultPrevented || !router) return;
+      event.preventDefault();
+      router.navigate(detail.href, detail);
+    });
+    el.addEventListener('navigate', handler);
+    return () => el.removeEventListener('navigate', handler);
+  }, [ref]);
+}
+
 export function useElementAttributes<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   sync: (element: T) => void,

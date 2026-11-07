@@ -10,7 +10,10 @@ import {
   useElementEventListeners,
   useForwardedHostRef,
   warnIfElementNotRegistered,
+  useNavigateBridge,
+  type ComponentNavigateDetail,
 } from './_internals';
+import { useNavigationContext } from './NavigationProvider';
 
 type BreadcrumbSelectDetail = {
   index: number;
@@ -36,6 +39,13 @@ export type BreadcrumbProps = BaseProps & {
   disabled?: boolean;
   ariaLabel?: string;
   onSelect?: (detail: BreadcrumbSelectDetail) => void;
+  /**
+   * Before a link is followed. `detail.preventDefault()` keeps the page so your router handles
+   * `detail.href`; a surrounding NavigationProvider does this for every component at once.
+   */
+  onNavigate?: (detail: ComponentNavigateDetail<{ index: number; label: string }>) => void;
+  /** `client` always keeps the page on link clicks. */
+  navigation?: 'native' | 'client';
 };
 
 export type BreadcrumbItemProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -64,11 +74,14 @@ const BreadcrumbRoot = React.forwardRef<HTMLElement, BreadcrumbProps>(function B
     disabled,
     ariaLabel,
     onSelect,
+    onNavigate,
+    navigation,
     ...rest
   },
   forwardedRef
 ) {
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
+  useNavigateBridge(ref, onNavigate, useNavigationContext());
 
   React.useEffect(() => {
     warnIfElementNotRegistered('ui-breadcrumb', 'Breadcrumb');
@@ -107,7 +120,7 @@ const BreadcrumbRoot = React.forwardRef<HTMLElement, BreadcrumbProps>(function B
     syncStringAttribute(el, 'aria-label', ariaLabel || null);
   }, [separator, maxItems, currentIndex, size, variant, radius, elevation, tone, state, disabled, ariaLabel]);
 
-  return createUIElement('ui-breadcrumb', { ref, ...rest }, children);
+  return createUIElement('ui-breadcrumb', { ref, navigation: navigation === 'client' ? 'client' : undefined, ...rest }, children);
 });
 
 BreadcrumbRoot.displayName = 'Breadcrumb';

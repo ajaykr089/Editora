@@ -8,7 +8,8 @@ import React, {
 } from 'react';
 import '@editora/ui-core/sidebar';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createUIElement, hostOnly, flushElementRender } from './_internals';
+import { createUIElement, hostOnly, flushElementRender, useNavigateBridge } from './_internals';
+import { useNavigationContext } from './NavigationProvider';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 const VOID_HTML_TAGS = new Set([
@@ -546,11 +547,6 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       if (detail) onWidthChange?.(detail);
     });
 
-    const handleNavigate = hostOnly((event: Event) => {
-      const detail = (event as CustomEvent<Omit<SidebarNavigateDetail, 'preventDefault'>>).detail;
-      if (!detail || !onNavigate) return;
-      onNavigate({ ...detail, preventDefault: () => event.preventDefault() });
-    });
     const handleSearchChange = hostOnly((event: Event) => {
       const query = (event as CustomEvent<{ query?: string }>).detail?.query;
       if (typeof query === 'string') onSearchChange?.(query);
@@ -562,7 +558,6 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     el.addEventListener('collapse-change', handleCollapseChange as EventListener);
     el.addEventListener('width-change', handleWidthChange as EventListener);
     el.addEventListener('search-change', handleSearchChange as EventListener);
-    el.addEventListener('navigate', handleNavigate as EventListener);
 
     return () => {
       el.removeEventListener('select', handleSelect as EventListener);
@@ -571,9 +566,11 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       el.removeEventListener('collapse-change', handleCollapseChange as EventListener);
       el.removeEventListener('width-change', handleWidthChange as EventListener);
       el.removeEventListener('search-change', handleSearchChange as EventListener);
-      el.removeEventListener('navigate', handleNavigate as EventListener);
     };
-  }, [onSelect, onChange, onToggle, onCollapseChange, onWidthChange, onSearchChange, onNavigate]);
+  }, [onSelect, onChange, onToggle, onCollapseChange, onWidthChange, onSearchChange]);
+
+  // Links: onNavigate, then a surrounding NavigationProvider (shared link contract).
+  useNavigateBridge(ref, onNavigate as any, useNavigationContext());
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;

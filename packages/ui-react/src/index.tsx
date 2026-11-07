@@ -411,3 +411,6 @@ export {
 } from './components/AnimatedNumber';
 export { EditoraPreloadStyle } from './components/server/EditoraPreloadStyle';
 export type { EditoraPreloadStyleProps } from './components/server/EditoraPreloadStyle';
+export { NavigationProvider, useNavigationContext } from './components/NavigationProvider';
+export type { NavigationProviderProps, NavigationContextValue, NavigateDetail } from './components/NavigationProvider';
+export type { ComponentNavigateDetail } from './components/_internals';
