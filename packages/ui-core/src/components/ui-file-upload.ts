@@ -531,6 +531,29 @@ export class UIFileUpload extends ElementBase {
     this._syncUi();
   }
 
+  /**
+   * Uploads one file again (after an error or a cancel), leaving the others as they are. Resolves
+   * when that upload has finished; the same events fire as for startUpload().
+   */
+  async retryUpload(fileOrKey: string | File): Promise<void> {
+    if (!this.uploadRequest || this._disabled()) return;
+    const key = typeof fileOrKey === 'string' ? fileOrKey : this._fileKey(fileOrKey);
+    const file = this._files.find((candidate) => this._fileKey(candidate) === key);
+    if (!file || this._uploadControllers.has(key)) return;
+    const state = this._uploadState.get(key)?.state;
+    if (state === 'success' || state === 'uploading') return;
+
+    const requestId = ++this._uploadSequence;
+    this._emit('upload-start', { files: [file], requestId, retry: true });
+    await this._runUpload(file, requestId);
+    this._emit('upload-complete', {
+      files: this.files,
+      requestId,
+      statuses: Object.fromEntries(Array.from(this._uploadState.entries()).map(([entryKey, value]) => [entryKey, { ...value }]))
+    });
+    this._syncUi();
+  }
+
   cancelUploads(): void {
     Array.from(this._uploadControllers.keys()).forEach((key) => this.cancelUpload(key));
   }
@@ -980,11 +1003,11 @@ export class UIFileUpload extends ElementBase {
       } else if (uploadEntry.state === 'error') {
         actionEl.textContent = 'Retry';
         actionEl.dataset.variant = 'primary';
+        actionEl.setAttribute('aria-label', `Retry ${file.name}`);
         actionEl.addEventListener('click', (event) => {
           event.stopPropagation();
-          this._uploadState.set(fileKey, { state: 'pending', progress: null });
-          this._syncUi();
-          void this.startUpload();
+          // Only this file: other failed or pending files wait for their own Retry or Upload.
+          void this.retryUpload(fileKey);
         });
       } else {
         actionEl.textContent = 'Remove';
