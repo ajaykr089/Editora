@@ -5,6 +5,10 @@
   --th-max: 1160px;
   --th-gutter: clamp(16px, 4vw, 32px);
   --th-tint: color-mix(in srgb, var(--ui-color-primary) 7%, var(--ui-color-background, #fff));
+  /* One radius for every card, Editora's (Card, Chart, DataTable, Stat) and the page's own;
+     containers that hold cards use a larger outer radius. */
+  --base-card-radius: 14px;
+  --th-radius-outer: 20px;
   color-scheme: light;
 }
 
@@ -155,7 +159,7 @@ a {
 
 .preview {
   border: 1px solid var(--ui-color-border);
-  border-radius: 16px;
+  border-radius: var(--th-radius-outer);
   background: var(--ui-color-surface, #fff);
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.06),
@@ -213,11 +217,8 @@ a {
 }
 
 .preview-panel {
+  /* Only a grid cell: Chart and DataTable draw their own card frame. */
   min-inline-size: 0;
-  border: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
-  border-radius: 12px;
-  background: var(--ui-color-surface, #fff);
-  padding: 4px;
 }
 
 .cell-title {
@@ -296,7 +297,7 @@ a {
 .feature {
   padding: 22px;
   border: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
-  border-radius: 14px;
+  border-radius: var(--base-card-radius);
   background: var(--ui-color-surface, #fff);
 }
 
@@ -352,5 +353,306 @@ a {
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
+  }
+}
+
+/* Shared section headings */
+.section-title {
+  margin: 10px auto 0;
+  max-width: 24ch;
+  text-align: center;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.section-title-start,
+.eyebrow-start {
+  text-align: start;
+  margin-inline: 0;
+}
+
+.muted {
+  color: var(--ui-color-muted);
+  line-height: 1.6;
+}
+
+/* Pricing */
+.pricing {
+  padding-block: clamp(56px, 8vw, 96px);
+  background: var(--th-tint);
+  border-block: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
+}
+
+.billing-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  margin: 36px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 26px;
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--base-card-radius);
+  background: var(--ui-color-surface, #fff);
+}
+
+.plan-popular {
+  border-color: var(--ui-color-primary);
+  box-shadow: 0 0 0 1px var(--ui-color-primary), 0 18px 40px -22px color-mix(in srgb, var(--ui-color-primary) 55%, transparent);
+}
+
+.plan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.plan h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.plan-blurb {
+  margin: 0;
+  min-block-size: 3.2em;
+  color: var(--ui-color-muted);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0 0;
+}
+
+.plan-price .amount {
+  font-size: 44px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-price .unit,
+.plan-billing {
+  color: var(--ui-color-muted);
+  font-size: 13px;
+}
+
+.plan-billing {
+  margin: -6px 0 6px;
+}
+
+.plan-features {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
+  list-style: none;
+  font-size: 14px;
+}
+
+.plan-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.plan-features ui-icon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--ui-color-primary);
+}
+
+/* Testimonials */
+.testimonials {
+  padding-block: clamp(56px, 8vw, 96px);
+}
+
+.quotes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quote {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px;
+  border: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
+  border-radius: var(--base-card-radius);
+  background: var(--ui-color-surface, #fff);
+}
+
+.quote blockquote {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+
+.quote-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quote-name {
+  font-weight: 650;
+}
+
+.quote-role {
+  color: var(--ui-color-muted);
+  font-size: 13px;
+}
+
+/* FAQ */
+.faq {
+  padding-block: clamp(48px, 7vw, 88px);
+  border-top: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(24px, 5vw, 64px);
+  align-items: start;
+}
+
+.faq-answer {
+  margin: 0;
+  color: var(--ui-color-muted);
+  line-height: 1.6;
+}
+
+/* Signup */
+.signup {
+  padding-block: 0 clamp(56px, 8vw, 96px);
+}
+
+.signup-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  padding: clamp(28px, 5vw, 48px);
+  border-radius: var(--th-radius-outer);
+  color: #ecfdf5;
+  background:
+    radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--th-amber) 28%, transparent), transparent 60%),
+    linear-gradient(135deg, #115e59, #0f766e 55%, #134e4a);
+}
+
+.signup-card h2 {
+  margin: 0;
+  font-size: clamp(26px, 3.4vw, 36px);
+  letter-spacing: -0.03em;
+}
+
+.signup-card p {
+  margin: 10px 0 0;
+  color: color-mix(in srgb, #ecfdf5 80%, transparent);
+  line-height: 1.6;
+}
+
+.signup-form {
+  --ui-color-text: #f0fdfa;
+  --ui-color-muted: #ccfbf1;
+}
+
+.signup-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+/* Footer */
+.footer {
+  padding-block: 48px 32px;
+  border-top: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
+  font-size: 14px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.footer-brand .brand-name {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.footer-brand p {
+  margin: 8px 0 0;
+  color: var(--ui-color-muted);
+}
+
+.footer h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.footer ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer a {
+  color: var(--ui-color-muted);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--ui-color-text);
+}
+
+.footer-bottom {
+  margin: 40px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--ui-color-line-subtle, var(--ui-color-border));
+  color: var(--ui-color-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .plans,
+  .quotes,
+  .faq-grid,
+  .signup-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
   }
 }

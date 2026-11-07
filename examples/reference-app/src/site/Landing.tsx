@@ -5,6 +5,7 @@ import { Chart } from '@editora/ui-react/Chart';
 import { DataTable } from '@editora/ui-react/DataTable';
 import { Icon } from '@editora/ui-react/Icon';
 import { Stat } from '@editora/ui-react/Stat';
+import { Faq, Footer, Pricing, Signup, Testimonials } from './Sections';
 
 type Props = { mode: 'light' | 'dark'; onToggleMode: () => void };
 
@@ -176,7 +177,12 @@ export function Landing(props: Props) {
         <Hero />
         <Customers />
         <Features />
+        <Pricing />
+        <Testimonials />
+        <Faq />
+        <Signup />
       </main>
+      <Footer />
     </>
   );
 }
