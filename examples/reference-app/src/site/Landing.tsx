@@ -38,8 +38,8 @@ function Nav({ mode, onToggleMode }: Props) {
           <Button variant="ghost" size="sm" aria-label={mode === 'dark' ? 'Use light theme' : 'Use dark theme'} onClick={onToggleMode}>
             <Icon name={mode === 'dark' ? 'sun' : 'moon'} decorative />
           </Button>
-          <Button variant="ghost" size="sm">Sign in</Button>
-          <Button size="sm">Start free</Button>
+          <Button variant="ghost" size="sm" onClick={() => { window.location.hash = '#/app'; }}>Sign in</Button>
+          <Button size="sm" onClick={() => { window.location.hash = '#/app'; }}>Start free</Button>
         </div>
       </div>
     </header>
@@ -112,7 +112,7 @@ function Hero() {
           right approver. Month-end goes from days to an afternoon.
         </p>
         <div className="hero-actions">
-          <Button size="lg">Start free</Button>
+          <Button size="lg" onClick={() => { window.location.hash = '#/app'; }}>Start free</Button>
           <Button size="lg" variant="secondary" endIcon={<Icon name="arrow-right" decorative />}>See how it works</Button>
         </div>
         <p className="fineprint">14-day trial · No card needed · Cancel any time</p>
