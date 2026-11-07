@@ -71,6 +71,22 @@ describe('ui-data-table server-side', () => {
   });
 });
 
+describe('ui-data-table pagination-id', () => {
+  it('binds a pager that comes after the table in the page', async () => {
+    const el = await mount({ 'pagination-id': 'late-pager', 'page-size': '1' }, table([['A', 'a', '1'], ['B', 'b', '2'], ['C', 'c', '3']]));
+    const pager = document.createElement('div');
+    pager.id = 'late-pager';
+    document.body.appendChild(pager);
+    await frame();
+    expect(pager.getAttribute('count')).toBe('3');
+    pager.dispatchEvent(new CustomEvent('change', { detail: { page: 2 }, bubbles: true }));
+    expect(bodyRows(el).map((row) => row.hidden)).toEqual([true, false, true]);
+    // change events from anything else do not page the table
+    document.body.dispatchEvent(new CustomEvent('change', { detail: { page: 3 }, bubbles: true }));
+    expect(el.getAttribute('page')).toBe('2');
+  });
+});
+
 describe('ui-data-table hidden-columns', () => {
   it('hides columns by key or index and shows them again', async () => {
     const el = await mount({ 'hidden-columns': 'email, 2' }, table([['Ava', 'ava@x.io', '10']]));

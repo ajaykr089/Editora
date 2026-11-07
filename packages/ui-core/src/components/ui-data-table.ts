@@ -785,7 +785,8 @@ export class UIDataTable extends ElementBase {
   /** Rows on the current page in server-side mode; -1 otherwise. */
   private _serverRowCount = -1;
   private _filteredRows = 0;
-  private _paginationEl: HTMLElement | null = null;
+  /** Where pagination-id is looked up and its change events are heard (the table's document or shadow root). */
+  private _paginationRoot: Document | ShadowRoot | null = null;
   private _resizeState: { columnIndex: number; startX: number; startWidth: number } | null = null;
   private _columnWidths = new Map<number, number>();
   private _frameEl: HTMLElement | null = null;
@@ -2333,29 +2334,46 @@ export class UIDataTable extends ElementBase {
   }
 
   private _detachPaginationListener() {
-    if (!this._paginationEl) return;
-    this._paginationEl.removeEventListener('change', this._onPaginationChange as EventListener);
-    this._paginationEl = null;
+    if (!this._paginationRoot) return;
+    this._paginationRoot.removeEventListener('change', this._onPaginationChange as EventListener, true);
+    this._paginationRoot = null;
   }
 
+  /**
+   * pagination-id used to be looked up once, when the table connected, so a pager placed after the
+   * table (the usual layout) was never found and paging did nothing. The pager is now looked up
+   * by id whenever it is needed, and its change events are heard at the shared root.
+   */
   private _syncPaginationBinding() {
     this._detachPaginationListener();
-    const paginationId = this.getAttribute('pagination-id');
-    if (!paginationId) return;
-    const element = document.getElementById(paginationId);
-    if (!element) return;
-    this._paginationEl = element;
-    this._paginationEl.addEventListener('change', this._onPaginationChange as EventListener);
+    if (!this.getAttribute('pagination-id')) return;
+    const root = this.getRootNode() as Document | ShadowRoot;
+    if (typeof root?.addEventListener !== 'function') return;
+    this._paginationRoot = root;
+    // Capture phase: a pager's change event is heard whether or not it bubbles.
+    root.addEventListener('change', this._onPaginationChange as EventListener, true);
     this._syncPaginationElement();
+    // A pager after the table in the markup exists once the current parse or render finishes.
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => this._syncPaginationElement());
+  }
+
+  private _paginationElement(): HTMLElement | null {
+    const id = this.getAttribute('pagination-id');
+    if (!id || !this._paginationRoot) return null;
+    const root = this._paginationRoot as Document | (ShadowRoot & { getElementById?: (id: string) => HTMLElement | null });
+    return (root.getElementById?.(id) as HTMLElement | null) ?? null;
   }
 
   private _syncPaginationElement() {
-    if (!this._paginationEl) return;
-    this._paginationEl.setAttribute('count', String(this._pageCount || 1));
-    this._paginationEl.setAttribute('page', String(this._page || 1));
+    const pager = this._paginationElement();
+    if (!pager) return;
+    pager.setAttribute('count', String(this._pageCount || 1));
+    pager.setAttribute('page', String(this._page || 1));
   }
 
   private _onPaginationChange(event: Event) {
+    const pager = this._paginationElement();
+    if (!pager || event.target !== pager) return;
     const detail = (event as CustomEvent<{ page?: number }>).detail;
     const nextPage = Number(detail?.page);
     if (!Number.isFinite(nextPage)) return;
