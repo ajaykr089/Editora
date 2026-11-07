@@ -3,6 +3,22 @@ import '../components/ui-gantt';
 
 const flush = (ms = 30) => new Promise((resolve) => setTimeout(resolve, ms));
 
+type Pending = { flushPendingRender(): void; scrollFrame: number | null };
+
+/**
+ * Waits until the chart has rendered and has nothing queued (a render or a scroll re-render), so a
+ * spy installed afterwards counts only what the test itself causes, however slow the machine is.
+ */
+const settle = async (gantt: HTMLElement) => {
+  const el = gantt as unknown as Pending;
+  for (let i = 0; i < 100; i++) {
+    await flush(10);
+    el.flushPendingRender();
+    if (gantt.shadowRoot?.querySelector('.frame') && el.scrollFrame == null) return;
+  }
+  throw new Error('ui-gantt never settled');
+};
+
 const make = (count: number) =>
   Array.from({ length: count }, (_, i) => ({ id: `t${i}`, label: `Task ${i}`, start: '2026-03-02', end: '2026-03-06' }));
 
@@ -11,7 +27,7 @@ const mount = async (attrs: Record<string, string> = {}, count = 4) => {
   gantt.setAttribute('tasks', JSON.stringify(make(count)));
   for (const [name, value] of Object.entries(attrs)) gantt.setAttribute(name, value);
   document.body.appendChild(gantt);
-  await flush();
+  await settle(gantt);
   return { gantt, root: gantt.shadowRoot as ShadowRoot };
 };
 
