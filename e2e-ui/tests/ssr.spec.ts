@@ -31,3 +31,14 @@ test('without the preload styles the same page jumps (guards the measurement)', 
   const after = await measure(page);
   expect(Math.abs(after.afterTop - before.afterTop)).toBeGreaterThan(40);
 });
+
+test('before upgrade the preload styles show the server-rendered selected tab panel', async ({ page }) => {
+  await page.goto('/ssr.html?preload=1');
+  await page.waitForFunction(() => (window as any).ready);
+  const shown = (id: string) => page.evaluate((el) => getComputedStyle(document.getElementById(el)!).display !== 'none', id);
+  expect(await shown('q1')).toBe(false);
+  expect(await shown('q2')).toBe(true);
+  // the plain tabs above still show their first panel
+  expect(await shown('p1')).toBe(true);
+  expect(await shown('p2')).toBe(false);
+});

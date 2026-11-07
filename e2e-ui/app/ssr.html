@@ -7,6 +7,8 @@
 <ui-dropdown id="dd"><button slot="trigger">Actions</button><div slot="content" id="ddc"><button>Export</button></div></ui-dropdown>
 <ui-card id="card"><div slot="header">Card title</div><div>Card body</div></ui-card>
 <p id="after">After</p>
+<!-- After the measured point: a server-rendered selected tab other than the first. -->
+<ui-tabs id="tabs2" selected="1"><div slot="tab">One</div><div slot="tab">Two</div><div slot="panel" id="q1">First</div><div slot="panel" id="q2">Second</div></ui-tabs>
 <script type="module">
 // ?preload=1 applies the pre-definition stylesheet first; window.defineElements() loads ui-core.
 if (new URLSearchParams(location.search).has('preload')) {
