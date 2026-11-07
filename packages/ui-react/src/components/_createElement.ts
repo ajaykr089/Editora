@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
+import { IS_SERVER, takeServerAttributes } from './_serverAttributes';
 
 // Kept apart from _internals.ts on purpose: this file is reachable from `@editora/ui-react/server`,
 // which React Server Components load, so it must not import a hook or anything that needs a DOM.
@@ -15,15 +16,25 @@ export function createUIElement(
   props?: (Record<string, unknown> & { className?: unknown; class?: unknown }) | null,
   ...children: ReactNode[]
 ): ReactElement {
-  if (!props || !('className' in props) || !tag.includes('-')) {
+  if (!props || !tag.includes('-')) {
     return createElement(tag, props, ...children);
   }
 
   const { className, ...rest } = props;
-  const merged = [rest.class, className]
+  // On the server, the attributes the wrapper's effects would write (see _serverAttributes.ts).
+  const recorded = IS_SERVER ? takeServerAttributes(rest.ref) : null;
+  const merged = [rest.class, className, recorded?.class]
     .filter((token): token is string => typeof token === 'string' && token !== '')
     .join(' ');
-  const hostProps = merged ? { ...rest, class: merged } : rest;
+  const hostProps: Record<string, unknown> = recorded ? { ...rest, ...recorded } : { ...rest };
+  if (merged) hostProps.class = merged;
+  else delete hostProps.class;
+  // The server markup carries those attributes and the client props do not (the effects write
+  // them after hydrating), so React would report the difference as a hydration mismatch. This
+  // only covers the host's own attributes and text, not its children.
+  if (!IS_SERVER && 'ref' in rest && hostProps.suppressHydrationWarning === undefined) {
+    hostProps.suppressHydrationWarning = true;
+  }
 
   return createElement(tag, hostProps, ...children);
 }
