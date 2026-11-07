@@ -86,37 +86,35 @@ await user.type(email, 'ann@acme.test');
 
 `onChange` on `Input` and `Textarea` fires on every keystroke; `onCommit` fires on blur or Enter.
 
-## Helpers
+## Helpers: `@editora/ui-testing`
 
-These two helpers cover the most common interactions. Copy them into your test utilities:
+`@editora/ui-testing` packages the common interactions, by label or name, so tests read like the screen. It also replaces the setup file above:
+
+```bash
+npm install -D @editora/ui-testing
+```
 
 ```ts
-// test/editora.ts
-import { screen, within } from 'shadow-dom-testing-library';
-import type { UserEvent } from '@testing-library/user-event';
+// test/setup.ts
+import { setupEditoraTests } from '@editora/ui-testing';
 
-/** Opens a Select found by its accessible name and picks an option by its text. */
-export async function selectOption(user: UserEvent, name: string | RegExp, option: string | RegExp) {
-  const combobox = await screen.findByShadowRole('combobox', { name });
-  await user.click(combobox);
-  const listbox = await screen.findByShadowRole('listbox');
-  await user.click(within(listbox).getByShadowRole('option', { name: option }));
-}
-
-/** Opens a Dropdown by its trigger's name and returns its open menu. */
-export async function openDropdown(user: UserEvent, trigger: string | RegExp) {
-  await user.click(await screen.findByRole('button', { name: trigger }));
-  return screen.findByShadowRole('menu');
-}
+await setupEditoraTests(); // ResizeObserver and matchMedia stubs, icons loaded up front
 ```
 
 ```tsx
+import { chooseMenuItem, fillField, getFieldError, selectOption, selectTab, toggleField } from '@editora/ui-testing';
+
 await selectOption(user, 'Role', 'Staff');
 expect(onChange).toHaveBeenCalledWith('staff');
 
-const menu = await openDropdown(user, 'Actions');
-await user.click(within(menu).getByShadowRole('menuitem', { name: 'Export' }));
+await chooseMenuItem(user, 'Actions', 'Export');
+await selectTab(user, 'Billing');
+await fillField(user, 'Email', 'ann@acme.test', { commit: true }); // commit: leave the field, so onCommit fires
+await toggleField(user, 'Send updates');
+expect(await getFieldError('Email')).toBe('Already registered'); // after form.setErrors(...)
 ```
+
+`openDropdown(user, trigger)` returns the open menu for anything more specific. Two things the helpers handle that plain user-event does not: `user.clear()` refuses an `<input>` inside a shadow root (the page reports its host as focused), and jsdom never fires `change` when a field loses focus, so `onCommit` would not run.
 
 ### Duplicate roles
 
@@ -139,6 +137,16 @@ await expect(page.getByRole('combobox', { name: 'Kind' })).toHaveText('Beta');
 
 await page.getByRole('tab', { name: 'Billing' }).click();
 await page.getByRole('textbox', { name: 'Email' }).fill('ann@acme.test');
+```
+
+The same helpers exist for Playwright, taking a `Page` or a `Locator`:
+
+```ts
+import { fillField, getFieldError, selectOption } from '@editora/ui-testing/playwright';
+
+await selectOption(page, 'Kind', 'Beta');
+await fillField(page, 'Email', 'ann@acme.test');
+expect(await getFieldError(page, 'Email')).toBe('');
 ```
 
 The hidden originals of menu items and select options never match. Use it for anything layout, focus, form-association or animation related, which jsdom does not model.
