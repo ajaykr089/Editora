@@ -28,7 +28,8 @@ const style = `
 
     color-scheme: light dark;
     display: inline-grid;
-    inline-size: min(100%, 520px);
+    /* --ui-width, like Select and the date pickers, so a form can make every field the same width. */
+    inline-size: min(100%, var(--ui-width, 520px));
     min-inline-size: 0;
     font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
