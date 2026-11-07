@@ -44,6 +44,13 @@ const style = `
     align-items: stretch;
   }
 
+  /* soft and contrast draw a track: pad it, and the toggles inside drop their own frame
+     (data-in-track) so there is one border, with corners nested inside the track's. */
+  :host([variant="soft"]),
+  :host([variant="contrast"]) {
+    --ui-toggle-group-padding: 3px;
+  }
+
   :host([variant="soft"]) {
     --ui-toggle-group-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 8%, var(--ui-color-surface, #ffffff));
     --ui-toggle-group-border: color-mix(in srgb, var(--ui-color-primary, #2563eb) 24%, var(--ui-color-border, #cbd5e1));
@@ -329,7 +336,9 @@ export class UIToggleGroup extends ElementBase {
 
   /** A contrast group is a dark surface: its toggles that set no variant of their own follow it. */
   private _inheritVariant(toggle: HTMLElement): void {
-    const contrast = this.getAttribute('variant') === 'contrast';
+    const variant = this.getAttribute('variant');
+    toggle.toggleAttribute('data-in-track', variant === 'soft' || variant === 'contrast');
+    const contrast = variant === 'contrast';
     if (contrast && !toggle.hasAttribute('variant')) {
       toggle.setAttribute('variant', 'contrast');
       toggle.setAttribute('data-inherited-variant', '');
