@@ -1,5 +1,55 @@
 # Change Log
 
+## 0.2.0
+
+### Minor Changes
+
+- 56cc0f7: `Card.Actions` puts buttons or menus on the title's row inside `Card.Header`, at the end, without a wrapper (the header was a single-column grid). `EmptyState variant="plain"` draws no box of its own, for use inside a Card, table or panel. `Alert live={false}` (`live="false"`) is a static page banner: no `role="alert"`/`status` and no `aria-live`, so it is not announced when the page loads. Also fixes Card without a footer, which had no padding under its content.
+- cddc05a: Input and Textarea take `description-position="below"` (React `descriptionPosition="below"`) to show the description under the field, above any error, instead of between the label and the field. The reading order for screen readers is unchanged.
+- 5e8cd10: Layout `variant="shell"` for app frames: full viewport height (`--ui-layout-shell-height`), no outer frame or padding, unframed panels with one divider per edge, a sidebar column that follows the sidebar's width, and only the content area scrolling. AppHeader and Sidebar inside it lose their own outer border and radius (they read inherited `--base-*` tokens), so there are no boxes inside boxes. On narrow screens (`drawer-breakpoint`, default 980px) the shell's sidebar becomes an off-canvas drawer with a backdrop: AppHeader's menu button opens it (its `aria-expanded` follows), Escape, the backdrop or picking a link/item closes it, focus moves into it and back, and the rest of the page is inert while it is open. Other variants keep the stacked sidebar unless `mobile-sidebar="drawer"`. New: `sidebar-open` / `openSidebar()` / `closeSidebar()` / `sidebar-open-change`, and in React `sidebarOpen`, `onSidebarOpenChange`, `mobileSidebar`, `drawerBreakpoint`, `sidebarLabel`. AppHeader `showMenuButton="narrow"` shows the button only where the drawer is used.
+- 4a5aea1: One router-agnostic link API. Sidebar, Breadcrumb, Tabs and Pagination dispatch the same cancelable `navigate` event (`detail.href`) before following a link; new-tab clicks stay with the browser and `navigation="client"` always keeps the page. New in React: `<NavigationProvider navigate={(href) => router.push(href)}>` routes every component's links through your router (React Router, Next.js, TanStack Router…), and each of the four takes `onNavigate`. Tabs accept `href` per tab (route tabs); Pagination's `hrefTemplate="?page={page}"` renders real page links. Also fixes `Breadcrumb.Item href` in React, which never rendered a link (the element read only `href`, the wrapper passed `data-href`).
+- 1c27821: New pre-definition stylesheet for server-rendered pages: `@editora/ui-core/preload.css` (also `PRELOAD_CSS` from `@editora/ui-core/preload`, and `<EditoraPreloadStyle />` from `@editora/ui-react` / `@editora/ui-react/server` for the document head). Until the custom elements are defined it gives each element the display it will have, hides what it will hide (closed dialogs and drawers, menu and popover content, raw `<option>`s, every tab panel but the first) and reserves the height of form controls, labels, tab strips and cards. On a test page the content below moved 155–223px when the scripts loaded; with the stylesheet it moves about 5px, with no flash of hidden content. Every rule is scoped to `:not(:defined)` inside `@layer editora-preload`, so it stops applying once an element upgrades and app styles override it. Also: `ui-tabs` no longer overwrites an `id` the author set on a panel.
+- 697ba7b: Text fields follow React's model for `<input>`. **Behaviour change:** `onChange` on `Input` and `Textarea` now fires on every keystroke (like `onInput`); the old behaviour, firing when the edit is committed on blur or Enter, is the new `onCommit` prop. New `defaultValue` on Input, Textarea, NumberField and Combobox sets the starting value of an uncontrolled field. `value` with a change handler is controlled: typing works when you store each value, and a value you reject or transform (for example upper-casing) is what the field shows, with the caret kept where the user typed. `value` without a handler is still an initial value. NumberField adds `onInput({ rawValue, value })` per keystroke and is controlled on commit (partial text such as `1.` is not a number yet); Combobox's selected `value` is controlled on selection. FiltersBar's search box is no longer forced to a controlled empty value when you pass `onSearchChange` without `search`.
+- 3df4735: App-wide density: `ThemeProvider density="compact" | "default" | "comfortable"` (or `tokens.density` with `applyTheme`) rescales the shared control tokens every control sizes itself from: heights 28/32/36px for the default size, padding, font size and the default gap. A component's own `density` still overrides it.
+
+### Patch Changes
+
+- 12ef8d6: Dialog and AlertDialog put a single dialog in the accessibility tree: the panel inside the shadow root (named by its title, with `aria-modal`). The host no longer gets `role="dialog"` / `role="alertdialog"` added. The panel role is set with the new `dialog-role` attribute (the React `roleType` prop now writes it); a `role` attribute on the host is still read for backwards compatibility.
+- 4d4c9ee: Controlled props win. When you pass `selected`/`value` (Tabs), `page` (Pagination), `value` (Select, Slider, RadioGroup, ToggleGroup, MultiSelect), `checked` (Checkbox, Switch), `pressed` (Toggle) or `open` (Dialog, Drawer, Dropdown, Popover) together with a change handler, the element now goes back to the prop when your handler does not accept a change, instead of drifting from React state. Without a handler the prop is still the initial value, as before. Text fields (Input, Textarea, NumberField, Combobox) are unchanged for now.
+- 700c5f8: Every `@editora/ui-react/<Name>` entry now has both a default and a named export (the same component). Avatar, Checkbox, DirectionProvider, Portal, Presence, Progress, Radio, RadioGroup, ScrollArea, Separator and VisuallyHidden only had the named one, so `import Checkbox from '@editora/ui-react/Checkbox'` rendered "Element type is invalid".
+- db566c8: React wrappers are correct on the first render: the element renders once with every prop applied, in the same commit, instead of showing its defaults until the next microtask (a test reading the shadow DOM straight after `render()` saw, for example, an Input without its label or a Meter without its value). Wrapper event listeners are attached before that render, so an event the element dispatches while rendering is no longer missed. `ui-rating` no longer drops an `aria-label` that is set after it named itself. New `flushPendingRender()` on every element runs a queued render immediately.
+- 179505e: Container wrappers (Tabs, Dialog, AlertDialog, Drawer, Dropdown, Menu, ContextMenu, Menubar, NavigationMenu, Popover, Tooltip, HoverCard, Accordion, Collapsible, QuickActions, Sidebar, Layout, Alert) now only react to events their own element dispatches. A `change`, `open`, `close` or `select` bubbling up from a child (a checkbox in a tab panel, a dropdown inside a dialog) no longer calls the parent's `onChange`/`onClose`; a checkbox in a tab panel used to close the panel. Tabs also keep keyboard focus on the active tab when panel content re-renders (the tab strip is only rebuilt when the tabs themselves change, and focus is restored when it is), and only count their own tabs and panels, not those of a nested `ui-tabs`.
+- c0e2cf4: Server-rendered HTML now carries the attributes the wrappers set on their elements (`label`, `description`, `size`, `selected`, `disabled`, ...). They were written only in layout effects, which do not run on the server, so the preload styles could not reserve a labelled field's height and elements upgraded from their defaults before hydration. Wrapper hosts, `Tabs.Tab` and `Tabs.Panel` also no longer log hydration mismatches for attributes the elements add to themselves when they upgrade.
+- e94ea43: Stat, MetricCard, Kbd, CodeSnippet and SplitButton take their colours from the theme (ThemeProvider / applyTheme tokens, including the contrast-checked `--ui-color-*-text` steps) instead of fixed values such as `#2563eb`, so a custom brand palette or dark theme reaches them. The old colours remain as fallbacks when no theme is applied.
+- 8c7a9f9: Select: `value=""` with a `placeholder` now shows the placeholder instead of the first option (the React wrapper synced `value` before `placeholder` and removed an empty value instead of writing it). `ui-select` also updates its shadow DOM in place after the first render instead of rebuilding it when options or slots change, so the combobox a test just found stays connected and clicking it opens the list (it used to be replaced one tick after mount, which made the list impossible to open from Testing Library), and focus survives option changes.
+- 6f5a0cc: Sidebar: link items (`href`) dispatch a cancelable `navigate` event before the browser follows them. In React, `onNavigate={(d) => { d.preventDefault(); router.push(d.href); }}` routes without a page reload, and `navigation="client"` keeps the page on every link click. Clicks that open a new tab (Cmd/Ctrl/Shift/middle click, `target="_blank"`) are never intercepted. Enter on a link item now follows it (it was swallowed). `Sidebar.Group` and `Sidebar.Item` placed directly inside `<Sidebar>` now render; they used to be ignored ("No matches found") unless wrapped in `Sidebar.Content`.
+- Updated dependencies [b25a486]
+- Updated dependencies [8c7ae64]
+- Updated dependencies [4c0898f]
+- Updated dependencies [56cc0f7]
+- Updated dependencies [7b34943]
+- Updated dependencies [cddc05a]
+- Updated dependencies [12ef8d6]
+- Updated dependencies [e7315af]
+- Updated dependencies [1e7ba3a]
+- Updated dependencies [d0aec84]
+- Updated dependencies [ea0ae06]
+- Updated dependencies [5e8cd10]
+- Updated dependencies [f303688]
+- Updated dependencies [4a5aea1]
+- Updated dependencies [2042a85]
+- Updated dependencies [783d56b]
+- Updated dependencies [74dce9b]
+- Updated dependencies [1c27821]
+- Updated dependencies [db566c8]
+- Updated dependencies [179505e]
+- Updated dependencies [616fed6]
+- Updated dependencies [8c7a9f9]
+- Updated dependencies [6f5a0cc]
+- Updated dependencies [95a2110]
+- Updated dependencies [3df4735]
+  - @editora/ui-core@0.3.0
+
 ## 0.1.28
 
 ### Patch Changes

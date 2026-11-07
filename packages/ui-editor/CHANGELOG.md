@@ -1,5 +1,36 @@
 # Change Log
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [b25a486]
+- Updated dependencies [8c7ae64]
+- Updated dependencies [4c0898f]
+- Updated dependencies [56cc0f7]
+- Updated dependencies [7b34943]
+- Updated dependencies [cddc05a]
+- Updated dependencies [12ef8d6]
+- Updated dependencies [e7315af]
+- Updated dependencies [1e7ba3a]
+- Updated dependencies [d0aec84]
+- Updated dependencies [ea0ae06]
+- Updated dependencies [5e8cd10]
+- Updated dependencies [f303688]
+- Updated dependencies [4a5aea1]
+- Updated dependencies [2042a85]
+- Updated dependencies [783d56b]
+- Updated dependencies [74dce9b]
+- Updated dependencies [1c27821]
+- Updated dependencies [db566c8]
+- Updated dependencies [179505e]
+- Updated dependencies [616fed6]
+- Updated dependencies [8c7a9f9]
+- Updated dependencies [6f5a0cc]
+- Updated dependencies [95a2110]
+- Updated dependencies [3df4735]
+  - @editora/ui-core@0.3.0
+
 ## 0.1.10
 
 ### Patch Changes
