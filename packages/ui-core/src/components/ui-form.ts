@@ -834,6 +834,9 @@ export class UIForm extends ElementBase {
     if (inDocumentOrder) candidates.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
     const candidate = candidates[0];
     if (!candidate) return;
+    // Showing the error re-renders the field on the next microtask, which would replace the inner
+    // input after it took focus (focus then fell back to the page): render first.
+    (candidate as HTMLElement & { flushPendingRender?: () => void }).flushPendingRender?.();
     candidate.focus();
     if (isNativeControl(candidate) && !candidate.validity.valid) candidate.reportValidity?.();
   }
