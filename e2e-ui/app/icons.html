@@ -1,0 +1,6 @@
+<!doctype html><html><body><ui-button id="b" icon="search">Find</ui-button><ui-icon id="i" name="settings"></ui-icon><script type="module">
+const t0 = performance.now(); await import('@editora/ui-core');
+const first = { icon: !!document.getElementById('i').shadowRoot.querySelector('svg'), fallback: !!document.getElementById('i').shadowRoot.querySelector('.fallback') };
+await new Promise((r) => setTimeout(r, 600));
+window.result = { first, later: { icon: !!document.getElementById('i').shadowRoot.querySelector('svg'), button: !!document.getElementById('b').shadowRoot.querySelector('ui-icon')?.shadowRoot?.querySelector('svg') } };
+</script></body></html>

@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><title>ssr</title><style id="pre"></style></head><body style="margin:0;font:14px system-ui">
+<!-- Markup as a server would send it, before any element is defined. -->
+<ui-tabs id="tabs"><div slot="tab">One</div><div slot="tab">Two</div><div slot="panel" id="p1">Panel one</div><div slot="panel" id="p2">Panel two with a lot of text</div></ui-tabs>
+<ui-dialog id="dlg" title="Edit"><p>Dialog body that must not show</p></ui-dialog>
+<ui-select id="sel" label="Kind"><option value="a">Alpha</option><option value="b">Beta</option></ui-select>
+<ui-input id="inp" label="Email"></ui-input><ui-select id="sel2" label="Status"><option>Open</option></ui-select><ui-textarea label="Notes"></ui-textarea>
+<ui-dropdown id="dd"><button slot="trigger">Actions</button><div slot="content" id="ddc"><button>Export</button></div></ui-dropdown>
+<ui-card id="card"><div slot="header">Card title</div><div>Card body</div></ui-card>
+<p id="after">After</p>
+<script type="module">
+// ?preload=1 applies the pre-definition stylesheet first; window.defineElements() loads ui-core.
+if (new URLSearchParams(location.search).has('preload')) {
+  const { PRELOAD_CSS } = await import('@editora/ui-core/preload');
+  document.getElementById('pre').textContent = PRELOAD_CSS;
+}
+window.defineElements = () => import('@editora/ui-core');
+window.ready = true;
+</script>
+</body></html>

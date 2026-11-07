@@ -120,9 +120,7 @@ await user.click(within(menu).getByShadowRole('menuitem', { name: 'Export' }));
 
 ### Duplicate roles
 
-Menus, dropdowns, menubars and popovers copy their content into their own panel and hide the original with `aria-hidden`, so role queries find one set of items.
-
-A Select's `<option>` children are the exception: they stay in the light DOM, and jsdom cannot tell they are not displayed, so `getAllByShadowRole('option')` returns them as well as the listbox's options. Query inside the listbox, as `selectOption` does.
+Menus, dropdowns, menubars and popovers copy their content into their own panel, and a Select or Combobox renders its own list from its `<option>` children. The originals are hidden with `aria-hidden`, so role queries find each item and option once. Querying inside the listbox, as `selectOption` does, is still the most precise.
 
 ## Forms
 
@@ -143,4 +141,4 @@ await page.getByRole('tab', { name: 'Billing' }).click();
 await page.getByRole('textbox', { name: 'Email' }).fill('ann@acme.test');
 ```
 
-Playwright queries the accessibility tree, so the hidden originals of menu items and select options never match. Use it for anything layout, focus, form-association or animation related, which jsdom does not model.
+The hidden originals of menu items and select options never match. Use it for anything layout, focus, form-association or animation related, which jsdom does not model.

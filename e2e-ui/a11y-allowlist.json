@@ -1,0 +1,4 @@
+{
+  "description": "axe findings accepted in the Storybook sweep, per story id and rule, each with the reason. Keep this empty where possible: fix the component instead.",
+  "rules": {}
+}
