@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { numberAttribute } from '../primitives/number-attribute';
 import { requestNavigate } from '../primitives/navigate';
 
 const style = `
@@ -468,7 +469,7 @@ export class UIBreadcrumb extends ElementBase {
   }
 
   private _maxItems() {
-    const parsed = Number(this.getAttribute('max-items'));
+    const parsed = numberAttribute(this.getAttribute('max-items'), Number.POSITIVE_INFINITY);
     if (!Number.isFinite(parsed)) return Number.POSITIVE_INFINITY;
     return Math.max(3, Math.floor(parsed));
   }

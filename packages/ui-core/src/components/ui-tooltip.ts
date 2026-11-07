@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { numberAttribute } from '../primitives/number-attribute';
 import { showPortalFor } from '../portal';
 import { liftToTopLayer } from '../primitives/overlay-motion';
 
@@ -173,10 +174,7 @@ function isTruthy(raw: string | null): boolean {
   return normalized !== 'false' && normalized !== '0' && normalized !== 'off';
 }
 
-function parseNumber(raw: string | null, fallback: number): number {
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : fallback;
-}
+const parseNumber = numberAttribute;
 
 function parsePlacement(raw: string | null): TooltipPlacement {
   if (raw === 'top' || raw === 'right' || raw === 'bottom' || raw === 'left') return raw;

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { numberAttribute } from '../primitives/number-attribute';
 import {
   createPositioner,
   type PositionerHandle
@@ -367,7 +368,7 @@ export class UIHoverCard extends ElementBase {
   }
 
   get delay(): number {
-    const value = Number(this.getAttribute('delay'));
+    const value = numberAttribute(this.getAttribute('delay'), 120);
     return Number.isFinite(value) && value >= 0 ? value : 120;
   }
 
@@ -376,7 +377,7 @@ export class UIHoverCard extends ElementBase {
   }
 
   get closeDelay(): number {
-    const value = Number(this.getAttribute('close-delay'));
+    const value = numberAttribute(this.getAttribute('close-delay'), Number.NaN);
     if (Number.isFinite(value) && value >= 0) return value;
     return this.delay;
   }
@@ -597,7 +598,7 @@ export class UIHoverCard extends ElementBase {
       return;
     }
 
-    const rawOffset = Number(this.getAttribute('offset'));
+    const rawOffset = numberAttribute(this.getAttribute('offset'), 10);
     const offset = Number.isFinite(rawOffset) ? rawOffset : 10;
     const placement = normalizePlacement(this.getAttribute('placement'));
     const arrow = panel.querySelector('.arrow') as HTMLElement | null;
