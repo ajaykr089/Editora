@@ -298,7 +298,8 @@ const style = `
     grid-template-columns: minmax(32px, auto) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) auto;
     inline-size: 100%;
-    min-inline-size: calc(var(--ui-chart-plot-min-width) + 38px);
+    /* Dense data keeps the minimum width (and scrolls); a few points fit a narrow card. */
+    min-inline-size: calc(min(var(--ui-chart-plot-min-width), var(--ui-chart-fit-width, var(--ui-chart-plot-min-width))) + 38px);
     block-size: 100%;
     min-block-size: 0;
   }
@@ -355,7 +356,7 @@ const style = `
     position: relative;
     grid-column: 2;
     grid-row: 1;
-    min-inline-size: var(--ui-chart-plot-min-width);
+    min-inline-size: min(var(--ui-chart-plot-min-width), var(--ui-chart-fit-width, var(--ui-chart-plot-min-width)));
     min-block-size: 0;
   }
 
@@ -1080,8 +1081,9 @@ export class UIChart extends ElementBase {
     } else {
       const pad = span * fitPadding;
       if (includeZero) {
-        min -= pad * 0.25;
-        max += pad;
+        // Pad only the sides that have values: all-positive bars start at 0, not below it.
+        if (min < 0) min -= max > 0 ? pad * 0.25 : pad;
+        if (max > 0) max += pad;
       } else {
         min -= pad;
         max += pad;
@@ -1100,10 +1102,11 @@ export class UIChart extends ElementBase {
       const formatted = new Intl.NumberFormat(undefined, {
         maximumFractionDigits: Math.abs(value) >= 100 ? 0 : 1,
         ...options
-      }).format(value);
-      return `${prefix}${formatted}${suffix}`;
+      }).format(Math.abs(value));
+      // The sign goes before the prefix: -$1,990, not $-1,990.
+      return `${value < 0 ? '-' : ''}${prefix}${formatted}${suffix}`;
     } catch {
-      return `${prefix}${value.toFixed(Math.abs(value) >= 100 ? 0 : 1)}${suffix}`;
+      return `${value < 0 ? '-' : ''}${prefix}${Math.abs(value).toFixed(Math.abs(value) >= 100 ? 0 : 1)}${suffix}`;
     }
   }
 
@@ -1835,6 +1838,7 @@ export class UIChart extends ElementBase {
         data-state="${state}"
         data-disabled="${disabled ? 'true' : 'false'}"
         aria-disabled="${disabled ? 'true' : 'false'}"
+        ${type === 'donut' || type === 'radial' ? '' : `style="--ui-chart-fit-width: ${data.labels.length * 28}px"`}
       >
         <div class="sr-only" aria-live="polite">${escapeHtml(title)} ${escapeHtml(statusText(state))}</div>
 
