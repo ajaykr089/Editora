@@ -153,7 +153,7 @@ const style = `
     --ui-hover-card-bg: #0f172a;
     --ui-hover-card-color: #e2e8f0;
     --ui-hover-card-border-color: #334155;
-    --ui-hover-card-focus-ring: #93c5fd;
+    --ui-hover-card-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-hover-card-shadow:
       0 2px 8px rgba(2, 6, 23, 0.24),
       0 30px 62px rgba(2, 6, 23, 0.4);

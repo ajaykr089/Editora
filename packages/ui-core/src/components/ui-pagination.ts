@@ -151,7 +151,7 @@ const style = `
     --ui-pagination-border: #334155;
     --ui-pagination-color: #e2e8f0;
     --ui-pagination-muted: #93a4bd;
-    --ui-pagination-active-bg: #93c5fd;
+    --ui-pagination-active-bg: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-pagination-active-color: #0f172a;
     --ui-pagination-shadow: none;
   }

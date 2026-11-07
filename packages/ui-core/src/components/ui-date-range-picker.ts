@@ -314,7 +314,7 @@ const style = `
     --ui-dp-border: #334155;
     --ui-dp-text: #e2e8f0;
     --ui-dp-muted: #93a4bd;
-    --ui-dp-accent: #93c5fd;
+    --ui-dp-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-dp-surface: linear-gradient(180deg, color-mix(in srgb, #0f172a 86%, #1e293b), #0f172a);
   }
 

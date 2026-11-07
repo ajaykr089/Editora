@@ -135,7 +135,7 @@ const style = `
     --ui-selection-popup-bg: #0f172a;
     --ui-selection-popup-color: #e2e8f0;
     --ui-selection-popup-border-color: #334155;
-    --ui-selection-popup-focus: #93c5fd;
+    --ui-selection-popup-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-selection-popup-shadow:
       0 16px 42px rgba(2, 6, 23, 0.42),
       0 34px 72px rgba(2, 6, 23, 0.38);

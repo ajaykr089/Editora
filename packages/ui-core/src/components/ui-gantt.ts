@@ -1113,7 +1113,7 @@ const style = `
     --ui-gantt-text: #e2e8f0;
     --ui-gantt-muted: #93a4bd;
     --ui-gantt-accent: #60a5fa;
-    --ui-gantt-accent-text: #93c5fd;
+    --ui-gantt-accent-text: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-gantt-selected: rgba(96, 165, 250, 0.13);
   }
 

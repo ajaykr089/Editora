@@ -300,10 +300,10 @@ const style = `
     --ui-switch-thumb-color: #334155;
     --ui-switch-label: #e2e8f0;
     --ui-switch-description: #9ca3af;
-    --ui-switch-accent: #93c5fd;
+    --ui-switch-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-switch-accent-hover: #60a5fa;
     --ui-switch-accent-contrast: #0f172a;
-    --ui-switch-focus: #93c5fd;
+    --ui-switch-focus: var(--ui-color-accent-on-dark, #93c5fd);
   }
 
   :host([tone="success"]) {

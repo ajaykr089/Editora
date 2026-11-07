@@ -197,7 +197,7 @@ const style = `
     --ui-field-description-color: #93a4bd;
     --ui-field-border-color: #334155;
     --ui-field-shell-border-color: #334155;
-    --ui-field-focus-ring: #93c5fd;
+    --ui-field-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-field-shadow:
       0 2px 8px rgba(2, 6, 23, 0.2),
       0 22px 44px rgba(2, 6, 23, 0.34);

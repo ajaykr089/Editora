@@ -295,7 +295,7 @@ const style = `
     --ui-drtp-border: #334155;
     --ui-dp-text: #e2e8f0;
     --ui-dp-muted: #94a3b8;
-    --ui-drtp-accent: #93c5fd;
+    --ui-drtp-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-drtp-surface: linear-gradient(180deg, color-mix(in srgb, #0f172a 84%, #1e293b), #0f172a);
     --ui-drtp-shadow: 0 18px 36px rgba(2, 6, 23, 0.48);
   }

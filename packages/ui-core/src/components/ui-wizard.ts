@@ -510,15 +510,15 @@ const style = `
     --ui-wizard-border: #334155;
     --ui-wizard-text: #e2e8f0;
     --ui-wizard-muted: #93a4bd;
-    --ui-wizard-accent: #93c5fd;
-    --ui-wizard-focus: #93c5fd;
+    --ui-wizard-accent: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-wizard-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-wizard-success: #4ade80;
     --ui-wizard-warning: #fbbf24;
     --ui-wizard-danger: #f87171;
     /* The contrast variant is a dark surface of its own: the theme's light fills and lines do not apply. */
     --ui-wizard-fill: #1e293b;
     --ui-wizard-fill-soft: #1e293b;
-    --ui-wizard-accent-fill: color-mix(in srgb, #93c5fd 20%, #0f172a);
+    --ui-wizard-accent-fill: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 14%, #0f172a);
     --ui-wizard-line: #334155;
   }
 

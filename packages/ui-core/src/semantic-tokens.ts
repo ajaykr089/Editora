@@ -72,6 +72,10 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
   put('--ui-color-accent-solid', accent['9'] || c.primary);
   put('--ui-color-accent-solid-hover', accent['10'] || c.primaryHover || c.primary);
   put('--ui-color-accent-text', accent['11']);
+  // The brand accent for dark surfaces (contrast variants, dark panels): a light tint of the primary
+  // colour, readable on near-black. Those variants hard-coded a light blue (#93c5fd), so they never
+  // followed a custom brand.
+  put('--ui-color-accent-on-dark', c.primary ? `color-mix(in srgb, ${c.primary} 45%, #ffffff)` : undefined);
 
   // Tokens that components already read but the theme never defined, so they always fell
   // back to a hard-coded Tailwind-era colour (and stayed light in dark mode).

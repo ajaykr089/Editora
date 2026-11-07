@@ -269,7 +269,7 @@ const shadowStyle = `
     --ui-context-menu-bg: #0f172a;
     --ui-context-menu-color: #f8fafc;
     --ui-context-menu-border-color: #334155;
-    --ui-context-menu-ring: #93c5fd;
+    --ui-context-menu-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-context-menu-item-hover-bg: color-mix(in srgb, #ffffff 12%, transparent);
   }
 

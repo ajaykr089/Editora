@@ -244,7 +244,8 @@ describe('flat look across every component', () => {
     expect(alert).toMatch(/--ui-alert-muted: color-mix\(in srgb, #ffffff 92%, transparent\)/);
     // the contrast wizard brings its own fills and line; the global light ones must not leak in
     const wizard = read('ui-wizard.ts');
-    expect(wizard).toMatch(/:host\(\[variant="contrast"\]\) \{[^}]*--ui-wizard-accent-fill: color-mix\(in srgb, #93c5fd 20%, #0f172a\)/);
+    // (its accent is the brand tint for dark surfaces, falling back to the old light blue)
+    expect(wizard).toMatch(/:host\(\[variant="contrast"\]\) \{[^}]*--ui-wizard-accent-fill: color-mix\(in srgb, var\(--ui-color-accent-on-dark, #93c5fd\) 14%, #0f172a\)/);
     expect(wizard).not.toMatch(/background: var\(--ui-color-accent-fill/);
     expect(read('ui-animated-text.ts')).toMatch(/var\(--ui-animated-text-accent\) 62%, var\(--ui-color-text/);
   });

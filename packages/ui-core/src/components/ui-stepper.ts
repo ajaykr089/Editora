@@ -174,8 +174,8 @@ const style = `
     --ui-stepper-border: #334155;
     --ui-stepper-text: #e2e8f0;
     --ui-stepper-muted: #93a4bd;
-    --ui-stepper-accent: #93c5fd;
-    --ui-stepper-focus: #93c5fd;
+    --ui-stepper-accent: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-stepper-focus: var(--ui-color-accent-on-dark, #93c5fd);
   }
 
   :host([variant="minimal"]) .frame {

@@ -121,7 +121,7 @@ const style = `
     --ui-timeline-border: #334155;
     --ui-timeline-text: #e2e8f0;
     --ui-timeline-muted: #93a4bd;
-    --ui-timeline-accent: #93c5fd;
+    --ui-timeline-accent: var(--ui-color-accent-on-dark, #93c5fd);
   }
 
   @media (prefers-reduced-motion: reduce) {

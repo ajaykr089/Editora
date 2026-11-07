@@ -488,8 +488,8 @@ const style = `
     --ui-multi-select-text: #e2e8f0;
     --ui-multi-select-muted: #93a4bd;
     --ui-multi-select-border-color: #334155;
-    --ui-multi-select-focus: #93c5fd;
-    --ui-multi-select-chip-bg: color-mix(in srgb, #93c5fd 18%, transparent);
+    --ui-multi-select-focus: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 18%, transparent);
     --ui-multi-select-chip-text: #e2e8f0;
   }
 

@@ -267,7 +267,7 @@ const style = `
     --ui-dropdown-color: #f8fafc;
     --ui-dropdown-muted: #94a3b8;
     --ui-dropdown-border-color: #334155;
-    --ui-dropdown-ring: #93c5fd;
+    --ui-dropdown-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-dropdown-item-active-color: #f8fafc;
     --ui-dropdown-item-secondary-active-color: color-mix(in srgb, #f8fafc 82%, transparent);
     --ui-dropdown-item-hover-bg: color-mix(in srgb, #ffffff 12%, transparent);

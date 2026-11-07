@@ -202,8 +202,8 @@ const style = `
 
   :host([variant="contrast"]) {
     --ui-progress-bg: #1f2937;
-    --ui-progress-fill: #93c5fd;
-    --ui-progress-buffer: rgba(147, 197, 253, 0.36);
+    --ui-progress-fill: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-progress-buffer: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 36%, transparent);
     --ui-progress-label: #e2e8f0;
     --ui-progress-track-border: 1px solid #334155;
     --ui-progress-fill-soft: var(--ui-progress-fill);

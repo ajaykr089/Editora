@@ -198,7 +198,7 @@ const menuStyle = `
     --ui-menu-bg: #0f172a;
     --ui-menu-color: #f8fafc;
     --ui-menu-border-color: #334155;
-    --ui-menu-ring: #93c5fd;
+    --ui-menu-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-menu-item-hover-bg: color-mix(in srgb, #ffffff 12%, transparent);
   }
 

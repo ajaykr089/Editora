@@ -482,7 +482,7 @@ const style = `
     --ui-label-color: #cbd5e1;
     --ui-description-color: #93a4bd;
     --ui-input-border-color: #334155;
-    --ui-input-focus-ring: #93c5fd;
+    --ui-input-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-input-placeholder: color-mix(in srgb, #e2e8f0 46%, transparent);
     --ui-input-shadow: 0 2px 8px rgba(2, 6, 23, 0.24);
     --ui-password-field-toggle-hover-bg: color-mix(in srgb, #e2e8f0 12%, transparent);

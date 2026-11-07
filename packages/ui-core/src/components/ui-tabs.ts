@@ -516,10 +516,10 @@ const style = `
     --ui-tabs-muted: #94a3b8;
     --ui-tabs-accent: var(--ui-tabs-active-bg, #93c5fd);
     --ui-tabs-active-text: #dbeafe;
-    --ui-tabs-focus: #93c5fd;
-    --ui-tabs-indicator-bg: color-mix(in srgb, #93c5fd 24%, transparent);
-    --ui-tabs-indicator-border: color-mix(in srgb, #93c5fd 46%, transparent);
-    --ui-tabs-indicator-shadow: 0 0 0 1px rgba(147, 197, 253, 0.24);
+    --ui-tabs-focus: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-tabs-indicator-bg: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 24%, transparent);
+    --ui-tabs-indicator-border: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 46%, transparent);
+    --ui-tabs-indicator-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 24%, transparent);
     --ui-tabs-shadow: 0 16px 34px rgba(2, 6, 23, 0.42), 0 32px 54px rgba(2, 6, 23, 0.4);
   }
 

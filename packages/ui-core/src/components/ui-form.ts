@@ -214,7 +214,7 @@ const style = `
     --ui-form-muted: #93a4bd;
     --ui-form-border-color: #334155;
     --ui-form-padding: 16px;
-    --ui-form-focus-ring: #93c5fd;
+    --ui-form-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-form-shadow: var(--shadow-3, 0 4px 12px rgba(2, 6, 23, 0.1));
   }
 

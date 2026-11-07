@@ -314,7 +314,7 @@ const style = `
     --ui-number-field-color: #e2e8f0;
     --ui-number-field-muted: #94a3b8;
     --ui-number-field-border-color: #334155;
-    --ui-number-field-focus: #93c5fd;
+    --ui-number-field-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-number-field-placeholder: color-mix(in srgb, #e2e8f0 46%, transparent);
     --ui-number-field-shadow: 0 2px 8px rgba(2, 6, 23, 0.24);
   }

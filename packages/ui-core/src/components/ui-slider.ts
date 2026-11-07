@@ -287,10 +287,10 @@ const style = `
     --ui-slider-text: #e2e8f0;
     --ui-slider-muted: #93a4bd;
     --ui-slider-track: #334155;
-    --ui-slider-fill: #93c5fd;
-    --ui-slider-focus: #93c5fd;
+    --ui-slider-fill: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-slider-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-slider-thumb-shadow:
-      0 0 0 1px color-mix(in srgb, #93c5fd 36%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 36%, transparent),
       0 4px 14px rgba(2, 6, 23, 0.42);
     --ui-slider-shadow:
       0 14px 34px rgba(2, 6, 23, 0.46),

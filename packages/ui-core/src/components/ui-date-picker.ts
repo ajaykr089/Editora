@@ -300,7 +300,7 @@ const style = `
     --ui-dp-border: #334155;
     --ui-dp-text: #e2e8f0;
     --ui-dp-muted: #93a4bd;
-    --ui-dp-accent: #93c5fd;
+    --ui-dp-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-dp-field-bg: #0f172a;
     --ui-dp-sheet-bg: #0f172a;
     --ui-dp-sheet-backdrop: rgba(2, 6, 23, 0.74);
