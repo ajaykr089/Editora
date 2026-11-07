@@ -1,7 +1,14 @@
 import React, { useEffect } from 'react';
 
 import '@editora/ui-core/data-table';
-import { createUIElement, useForwardedHostRef, useIsomorphicLayoutEffect } from './_internals';
+import {
+  createUIElement,
+  useForwardedHostRef,
+  useIsomorphicLayoutEffect,
+  useNavigateBridge,
+  type ComponentNavigateDetail
+} from './_internals';
+import { useNavigationContext } from './NavigationProvider';
 
 export type DataTableSortDirection = 'asc' | 'desc';
 export type DataTableState = 'idle' | 'loading' | 'error' | 'success';
@@ -83,6 +90,9 @@ export type DataTableBulkClearDetail = {
   page: number;
 };
 
+/** A row link (`<tr data-href>`) being followed. `row` maps column keys to cell text. */
+export type DataTableRowNavigateDetail = ComponentNavigateDetail<{ rowId?: string; row: Record<string, string> }>;
+
 export type DataTableProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   sortable?: boolean;
@@ -118,6 +128,21 @@ export type DataTableProps = React.HTMLAttributes<HTMLElement> & {
   virtualize?: boolean;
   rowHeight?: number;
   overscan?: number;
+  /**
+   * The rows passed in are the current page, already sorted and filtered by the server: the table
+   * shows them as they are and still reports sort, filter and page changes for you to fetch the
+   * next set. Use with `totalRows`.
+   */
+  serverSide?: boolean;
+  /** With `serverSide`: the number of rows in the whole result, for the summary and paging. */
+  totalRows?: number;
+  /** Columns to hide, by key (`data-key` or header text) or 0-based index. */
+  hiddenColumns?: Array<string | number>;
+  /**
+   * Runs before a row link (`<tr data-href>`) is followed. Call `detail.preventDefault()` to route it
+   * yourself; a surrounding NavigationProvider does this for every component at once.
+   */
+  onNavigate?: (detail: DataTableRowNavigateDetail) => void;
   onSortChange?: (detail: DataTableSortChangeDetail) => void;
   onRowSelect?: (detail: DataTableRowSelectDetail) => void;
   onPageChange?: (detail: DataTablePageChangeDetail) => void;
@@ -163,6 +188,10 @@ export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function 
     virtualize,
     rowHeight,
     overscan,
+    serverSide,
+    totalRows,
+    hiddenColumns,
+    onNavigate,
     onSortChange,
     onRowSelect,
     onPageChange,
@@ -176,6 +205,7 @@ export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function 
   } = props;
 
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
+  useNavigateBridge(ref, onNavigate, useNavigationContext());
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
@@ -315,7 +345,10 @@ export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function 
       ...(bulkClearLabel ? { 'bulk-clear-label': bulkClearLabel } : {}),
       ...(virtualize ? { virtualize: '' } : {}),
       ...(typeof rowHeight === 'number' && Number.isFinite(rowHeight) ? { 'row-height': String(rowHeight) } : {}),
-      ...(typeof overscan === 'number' && Number.isFinite(overscan) ? { overscan: String(overscan) } : {})
+      ...(typeof overscan === 'number' && Number.isFinite(overscan) ? { overscan: String(overscan) } : {}),
+      ...(serverSide ? { 'server-side': '' } : {}),
+      ...(typeof totalRows === 'number' && Number.isFinite(totalRows) ? { 'total-rows': String(totalRows) } : {}),
+      ...(hiddenColumns && hiddenColumns.length ? { 'hidden-columns': hiddenColumns.map(String).join(',') } : {})
     },
     children
   );
