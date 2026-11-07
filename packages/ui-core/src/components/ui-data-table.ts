@@ -161,8 +161,8 @@ const style = `
     --ui-data-table-summary-color: #94a3b8;
     --ui-data-table-empty-color: #94a3b8;
     --ui-data-table-sort-indicator: #94a3b8;
-    --ui-data-table-sort-active: #93c5fd;
-    --ui-data-table-focus-ring: #93c5fd;
+    --ui-data-table-sort-active: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-data-table-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
   }
 
   :host([elevation="none"]) {

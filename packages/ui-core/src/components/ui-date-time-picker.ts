@@ -312,7 +312,7 @@ ${TIME_GRID_CSS}
     --ui-dtp-border: #334155;
     --ui-dp-text: #e2e8f0;
     --ui-dp-muted: #94a3b8;
-    --ui-dtp-accent: #93c5fd;
+    --ui-dtp-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-dtp-surface: linear-gradient(180deg, color-mix(in srgb, #0f172a 84%, #1e293b), #0f172a);
     --ui-dtp-shadow: 0 18px 36px rgba(2, 6, 23, 0.48);
   }

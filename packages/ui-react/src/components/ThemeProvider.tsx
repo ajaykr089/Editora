@@ -19,6 +19,11 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 
 type Props = {
   tokens?: Partial<ThemeTokens>;
+  /**
+   * App-wide density: rescales the shared control sizes (height, padding, font size) and default gap
+   * for every component under this provider. Same as `tokens.density`.
+   */
+  density?: ThemeTokens['density'];
   children: React.ReactNode;
   /**
    * If provided (default: 'editora.theme.tokens'), theme tokens will be persisted to localStorage.
@@ -121,9 +126,13 @@ function resolveThemeUpdater(prev: ThemeTokens, next: ThemeUpdater): ThemeTokens
   return mergeThemeTokens(prev, value);
 }
 
-export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.tokens' }: Props) {
+export function ThemeProvider({ tokens, density, children, storageKey = 'editora.theme.tokens' }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const explicitTokens = tokens && Object.keys(tokens).length ? tokens : null;
+  const withDensity = useMemo(
+    () => (density ? { ...(tokens || {}), density } : tokens),
+    [tokens, density]
+  );
+  const explicitTokens = withDensity && Object.keys(withDensity).length ? withDensity : null;
   const computeInitial = () => {
     if (typeof window !== 'undefined' && storageKey) {
       try {

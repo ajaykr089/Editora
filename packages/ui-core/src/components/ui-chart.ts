@@ -121,7 +121,7 @@ const style = `
     --ui-chart-text: #e2e8f0;
     --ui-chart-muted: #94a3b8;
     --ui-chart-grid: color-mix(in srgb, #475569 74%, transparent);
-    --ui-chart-accent: #93c5fd;
+    --ui-chart-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-chart-success: #34d399;
     --ui-chart-warning: #fbbf24;
     --ui-chart-success-text: var(--ui-chart-success);

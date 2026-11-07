@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { requestNavigate } from '../primitives/navigate';
 
 type SidebarTone = 'default' | 'brand' | 'success' | 'warning' | 'danger';
 
@@ -1292,31 +1293,15 @@ export class UISidebar extends ElementBase {
     handle.onpointerdown = (event) => this._startResize(event);
   }
 
-  /**
-   * Link items dispatch a cancelable `navigate` event before the browser follows them. Calling
-   * `preventDefault()` on it (or setting `navigation="client"`) keeps the page and leaves routing to
-   * the app; without that a single-page app got `select` and then a full page reload. Clicks that
-   * open a new tab or window (modifier keys, middle button, a `target` other than `_self`) are
-   * always left to the browser.
-   */
+  // Link items: the shared navigate contract (primitives/navigate.ts).
   private _handleNavigate(event: MouseEvent, link: HTMLElement, value: string): void {
-    const href = link.getAttribute('href') || '';
-    const linkTarget = (link.getAttribute('target') || '').trim();
-    const opensElsewhere =
-      event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || (event.button ?? 0) !== 0 ||
-      (!!linkTarget && linkTarget !== '_self');
-    if (opensElsewhere) return;
-
     const items = this._flattenItems(this._collectItems());
     const index = items.findIndex((item) => item.value === value);
     const item = items[index];
-    const navigateEvent = new CustomEvent('navigate', {
-      detail: { index, value, label: item?.label || value, href, item },
-      bubbles: true,
-      cancelable: true
-    });
-    const allowed = this.dispatchEvent(navigateEvent);
-    if (!allowed || this.getAttribute('navigation') === 'client') event.preventDefault();
+    const href = link.getAttribute('href') || '';
+    if (requestNavigate(this, { index, value, label: item?.label || value, href, item }, event, link.getAttribute('target') || '')) {
+      event.preventDefault();
+    }
   }
 
   private _toggleExpanded(id: string): void {

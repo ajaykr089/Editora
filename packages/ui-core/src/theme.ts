@@ -66,6 +66,12 @@ export interface ThemeTokens {
     '6'?: string;
   };
   spacing?: { xs?: string; sm?: string; md?: string; lg?: string; xl?: string; xxl?: string };
+  /**
+   * App-wide density. Rescales the shared control tokens (--ui-control-height-*, -padding-inline-*,
+   * -font-size-*) that buttons, inputs, selects, tabs and the other controls size themselves from,
+   * and the --ui-density-gap spacing. A component's own `density` attribute still overrides it.
+   */
+  density?: 'compact' | 'default' | 'comfortable';
   spaceScale?: ThemeScale;
   typography?: {
     family?: string;

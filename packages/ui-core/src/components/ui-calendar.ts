@@ -623,12 +623,12 @@ const style = `
     --ui-calendar-border: #334155;
     --ui-calendar-text: #e2e8f0;
     --ui-calendar-muted: #93a4bd;
-    --ui-calendar-accent: #93c5fd;
+    --ui-calendar-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-calendar-shadow: 0 16px 38px rgba(2, 6, 23, 0.5);
-    --ui-calendar-selected-bg: color-mix(in srgb, #93c5fd 22%, transparent);
-    --ui-calendar-selected-border: color-mix(in srgb, #93c5fd 72%, transparent);
-    --ui-calendar-range-bg: color-mix(in srgb, #93c5fd 12%, transparent);
-    --ui-calendar-range-edge: color-mix(in srgb, #93c5fd 20%, transparent);
+    --ui-calendar-selected-bg: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 22%, transparent);
+    --ui-calendar-selected-border: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 72%, transparent);
+    --ui-calendar-range-bg: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 12%, transparent);
+    --ui-calendar-range-edge: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 20%, transparent);
   }
 
   :host([disabled]) .frame {

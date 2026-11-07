@@ -156,7 +156,7 @@ const style = `
     --ui-cp-border: #334155;
     --ui-cp-text: #e2e8f0;
     --ui-cp-muted: #93a4bd;
-    --ui-cp-accent: #93c5fd;
+    --ui-cp-accent: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-cp-checker-a: #475569;
     --ui-cp-checker-b: #334155;
     --ui-cp-shadow: 0 18px 40px rgba(2, 6, 23, 0.55);

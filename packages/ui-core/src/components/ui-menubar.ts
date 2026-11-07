@@ -168,7 +168,7 @@ const hostStyle = `
     --ui-menubar-item-hover-bg: color-mix(in srgb, #ffffff 16%, transparent);
     --ui-menubar-item-active-bg: color-mix(in srgb, #ffffff 20%, transparent);
     --ui-menubar-item-active-color: #ffffff;
-    --ui-menubar-ring: #93c5fd;
+    --ui-menubar-ring: var(--ui-color-accent-on-dark, #93c5fd);
     border-color: #334155;
   }
 

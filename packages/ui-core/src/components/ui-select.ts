@@ -614,7 +614,7 @@ const style = `
     --ui-select-label: #e2e8f0;
     --ui-select-description: #93a4bd;
     --ui-select-border-color: #334155;
-    --ui-select-focus: #93c5fd;
+    --ui-select-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-select-indicator-color: #9fb3cf;
     --ui-select-elevation: 0 10px 30px rgba(2, 6, 23, 0.35);
     --ui-select-menu-bg: #0b1324;

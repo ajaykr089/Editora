@@ -112,8 +112,8 @@ const style = `
     --ui-quick-border: #334155;
     --ui-quick-text: #e2e8f0;
     --ui-quick-muted: #93a4bd;
-    --ui-quick-accent: #93c5fd;
-    --ui-quick-focus: #93c5fd;
+    --ui-quick-accent: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-quick-focus: var(--ui-color-accent-on-dark, #93c5fd);
   }
 
   :host([variant="minimal"]) .root {

@@ -10,6 +10,6 @@ Real-browser tests for `@editora/ui-core` and `@editora/ui-react`, run in CI (`.
 
 Setup: `npm ci` here (its own lockfile; it does not touch the root install), then `npx playwright install chromium firefox webkit`.
 
-`npm run app` serves the test app for manual checks: `/` (fixes), `/forms.html`, `/signin.html`, `/typing.html`, `/shell.html`, `/keyboard.html`, `/ssr.html?preload=1`, `/visual.html?density=compact`.
+`npm run app` serves the test app for manual checks: `/` (fixes), `/forms.html`, `/signin.html`, `/typing.html`, `/shell.html`, `/keyboard.html`, `/navigation.html`, `/density.html?density=compact`, `/ssr.html?preload=1`, `/visual.html?density=compact`.
 
 The repo-wide size budget (`npm run check:ui-size` at the root) is separate: see `scripts/check-ui-size.mjs`.

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { requestNavigate } from '../primitives/navigate';
 
 const style = `
   :host {
@@ -553,7 +554,7 @@ export class UIBreadcrumb extends ElementBase {
     if (!item) return null;
 
     const label = (item.getAttribute('data-label') || item.textContent || '').trim();
-    const href = item.getAttribute('href') || undefined;
+    const href = item.getAttribute('href') || item.getAttribute('data-href') || undefined;
     const detail: SelectDetail = { index: sourceIndex, label, href, source };
 
     const event = new CustomEvent<SelectDetail>('select', {
@@ -581,7 +582,19 @@ export class UIBreadcrumb extends ElementBase {
     if (Number.isNaN(sourceIndex)) return;
 
     const selectEvent = this._emitSelect(sourceIndex, 'click');
-    if (selectEvent?.defaultPrevented) event.preventDefault();
+    if (selectEvent?.defaultPrevented) {
+      event.preventDefault();
+      return;
+    }
+    // Links follow the shared navigate contract: an app router can take over (no page load).
+    if (action.tagName.toLowerCase() === 'a') {
+      const href = action.getAttribute('href') || '';
+      const item = this._getSourceItems()[sourceIndex];
+      const label = (item?.getAttribute('data-label') || item?.textContent || '').trim();
+      if (requestNavigate(this, { index: sourceIndex, label, href }, event, action.getAttribute('target') || '')) {
+        event.preventDefault();
+      }
+    }
   }
 
   private _onRootKeyDown(event: KeyboardEvent) {
@@ -636,7 +649,7 @@ export class UIBreadcrumb extends ElementBase {
           content = '<span class="crumb-ellipsis" aria-hidden="true">…</span>';
         } else {
           const label = this._renderLabel(token.item);
-          const href = token.item.getAttribute('href');
+          const href = (token.item.getAttribute('href') || token.item.getAttribute('data-href'));
           const rel = token.item.getAttribute('rel');
           const target = token.item.getAttribute('target');
 

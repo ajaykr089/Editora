@@ -148,9 +148,9 @@ const style = `
     --ui-toggle-bg: #0f172a;
     --ui-toggle-color: #e2e8f0;
     --ui-toggle-border: #334155;
-    --ui-toggle-active-bg: #93c5fd;
+    --ui-toggle-active-bg: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-toggle-active-color: #0f172a;
-    --ui-toggle-focus: #93c5fd;
+    --ui-toggle-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-toggle-shadow:
       0 10px 24px rgba(2, 6, 23, 0.38),
       0 24px 50px rgba(2, 6, 23, 0.34);

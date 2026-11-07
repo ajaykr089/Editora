@@ -1,7 +1,8 @@
 import * as React from 'react';
 
 import '@editora/ui-core/pagination';
-import { createUIElement, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
+import { createUIElement, flushElementRender, useControlledAttribute, whenHandled, useNavigateBridge, type ComponentNavigateDetail } from './_internals';
+import { useNavigationContext } from './NavigationProvider';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -32,6 +33,16 @@ export type PaginationProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'
   ariaLabel?: string;
   onPageChange?: (detail: PaginationChangeDetail) => void;
   onChange?: (detail: PaginationChangeDetail) => void;
+  /**
+   * Render the page controls as links: `?page={page}` (any URL with `{page}`). Each link can be
+   * opened in a new tab; a normal click goes through onNavigate / NavigationProvider.
+   */
+  hrefTemplate?: string;
+  /**
+   * Before a link is followed. `detail.preventDefault()` keeps the page so your router handles
+   * `detail.href`; a surrounding NavigationProvider does this for every component at once.
+   */
+  onNavigate?: (detail: ComponentNavigateDetail<{ page: number; previousPage: number }>) => void;
   onFirst?: (detail: PaginationChangeDetail) => void;
   onPrev?: (detail: PaginationChangeDetail) => void;
   onNext?: (detail: PaginationChangeDetail) => void;
@@ -48,6 +59,8 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     ariaLabel,
     onPageChange,
     onChange,
+    hrefTemplate,
+    onNavigate,
     onFirst,
     onPrev,
     onNext,
@@ -58,6 +71,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
   forwardedRef
 ) {
   const ref = React.useRef<PaginationElement | null>(null);
+  useNavigateBridge(ref, onNavigate, useNavigationContext());
   const setByProps = React.useRef(new Set<string>());
 
   React.useImperativeHandle(forwardedRef, () => ref.current as PaginationElement);
@@ -137,9 +151,10 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     syncAttr('size', size && size !== 'md' ? size : null);
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncAttr('aria-label', ariaLabel ?? null);
+    syncAttr('href-template', hrefTemplate || null);
     syncBool('headless', headless);
     flushElementRender(el);
-  }, [page, count, size, variant, ariaLabel, headless]);
+  }, [page, count, size, variant, ariaLabel, headless, hrefTemplate]);
 
   // With a change handler the prop wins over the element's own state; without one it is the
   // initial value, as the docs use it (see useControlledAttribute).

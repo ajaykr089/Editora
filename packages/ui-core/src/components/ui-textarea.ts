@@ -248,8 +248,8 @@ const style = `
     --ui-textarea-text: #e2e8f0;
     --ui-textarea-muted: #93a4bd;
     --ui-textarea-border: #334155;
-    --ui-textarea-accent: #93c5fd;
-    --ui-textarea-focus: #93c5fd;
+    --ui-textarea-accent: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-textarea-focus: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-textarea-shadow:
       0 12px 32px rgba(2, 6, 23, 0.46),
       0 24px 56px rgba(2, 6, 23, 0.42);

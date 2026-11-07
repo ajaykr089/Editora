@@ -167,7 +167,7 @@ const style = `
     --ui-floating-toolbar-color: #f8fafc;
     --ui-floating-toolbar-muted: #93a4bd;
     --ui-floating-toolbar-border-color: #334155;
-    --ui-floating-toolbar-focus-ring: #93c5fd;
+    --ui-floating-toolbar-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
   }
 
   :host([tone="success"]) {

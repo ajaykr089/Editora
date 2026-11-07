@@ -1,7 +1,8 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tabs';
-import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
+import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled, useNavigateBridge, type ComponentNavigateDetail } from './_internals';
+import { useNavigationContext } from './NavigationProvider';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -20,6 +21,8 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
 
 export type TabsTabProps = React.HTMLAttributes<HTMLElement> & {
   value?: string;
+  /** A route tab: selecting it navigates (onNavigate / NavigationProvider, else a page load). */
+  href?: string;
   icon?: string;
   disabled?: boolean;
 };
@@ -57,6 +60,13 @@ export type TabsProps = BaseProps & {
   headless?: boolean;
   onChange?: (index: number) => void;
   onTabChange?: (detail: TabsDetail) => void;
+  /**
+   * Before a link is followed. `detail.preventDefault()` keeps the page so your router handles
+   * `detail.href`; a surrounding NavigationProvider does this for every component at once.
+   */
+  onNavigate?: (detail: ComponentNavigateDetail<{ index: number; value: string; label: string }>) => void;
+  /** `client` never does a page load for route tabs. */
+  navigation?: 'native' | 'client';
 };
 
 const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
@@ -78,11 +88,14 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     headless,
     onChange,
     onTabChange,
+    onNavigate,
+    navigation,
     ...rest
   },
   forwardedRef
 ) {
   const ref = useRef<HTMLElement | null>(null);
+  useNavigateBridge(ref, onNavigate, useNavigationContext());
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
@@ -144,17 +157,18 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
   useControlledAttribute(ref, { attribute: 'selected', value: whenHandled([onChange, onTabChange], selected != null ? String(selected) : undefined), events: ['change'] });
   useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onChange, onTabChange], selected == null && value ? value : undefined), events: ['change'] });
 
-  return createUIElement('ui-tabs', { ref, ...rest }, children);
+  return createUIElement('ui-tabs', { ref, navigation: navigation === 'client' ? 'client' : undefined, ...rest }, children);
 });
 
 TabsRoot.displayName = 'Tabs';
 
 const TabsTab = React.forwardRef<HTMLDivElement, TabsTabProps>(
-  function TabsTab({ value, icon, disabled, ...props }, ref) {
+  function TabsTab({ value, href, icon, disabled, ...props }, ref) {
     return React.createElement('div', {
       ref,
       slot: 'tab',
       'data-value': value,
+      'data-href': href,
       'data-icon': icon,
       'data-disabled': disabled ? 'true' : undefined,
       ...props

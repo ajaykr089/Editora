@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { applySystemTheme, loadIcons } from '@editora/ui-core';
+import { loadIcons, baselineDarkTokens, baselineLightTokens } from '@editora/ui-core';
 import { Input } from '@editora/ui-react/Input';
 import { Select } from '@editora/ui-react/Select';
 import { Textarea } from '@editora/ui-react/Textarea';
@@ -13,12 +13,13 @@ import { Badge } from '@editora/ui-react/Badge';
 import { Card } from '@editora/ui-react/Card';
 import { EmptyState } from '@editora/ui-react/EmptyState';
 import { Pagination } from '@editora/ui-react/Pagination';
+import { ThemeProvider } from '@editora/ui-react/ThemeProvider';
 
 // ?theme=light|dark&density=compact|default|comfortable: one screenshot per combination.
 const params = new URLSearchParams(location.search);
 
 const density = (params.get('density') || 'default') as 'compact' | 'default' | 'comfortable';
-applySystemTheme(); // follows prefers-color-scheme, which the spec emulates
+
 
 function Showcase() {
   return (
@@ -30,18 +31,18 @@ function Showcase() {
           <Card.Actions><Button size="sm" variant="secondary">Export</Button><Button size="sm" icon="plus">Add</Button></Card.Actions>
         </Card.Header>
         <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr 1fr' }}>
-          <Input label="Payee" description="Who was paid" density={density} defaultValue="Acme Ltd" />
-          <Select label="Category" density={density} value="travel" onChange={() => {}}>
+          <Input label="Payee" description="Who was paid" defaultValue="Acme Ltd" />
+          <Select label="Category" value="travel" onChange={() => {}}>
             <option value="travel">Travel</option><option value="meals">Meals</option>
           </Select>
-          <Textarea label="Notes" density={density} defaultValue="Train tickets" />
+          <Textarea label="Notes" defaultValue="Train tickets" />
           <div style={{ display: 'grid', gap: 8, alignContent: 'start' }}>
-            <Checkbox density={density} checked onChange={() => {}}>Billable</Checkbox>
+            <Checkbox checked onChange={() => {}}>Billable</Checkbox>
             <Switch checked onChange={() => {}}>Reimbursed</Switch>
           </div>
         </div>
       </Card>
-      <Tabs density={density}>
+      <Tabs>
         <Tabs.Tab>Overview</Tabs.Tab><Tabs.Tab>Receipts</Tabs.Tab><Tabs.Tab>History</Tabs.Tab>
         <Tabs.Panel><Alert tone="warning" title="2 receipts missing" description="Upload them before the 30th." live={false} /></Tabs.Panel>
         <Tabs.Panel>-</Tabs.Panel><Tabs.Panel>-</Tabs.Panel>
@@ -57,6 +58,12 @@ function Showcase() {
 }
 
 loadIcons().then(() => {
-  createRoot(document.getElementById('root')!).render(<Showcase />);
+  // App-wide density and the light or dark theme (the spec emulates prefers-color-scheme).
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  createRoot(document.getElementById('root')!).render(
+    <ThemeProvider tokens={dark ? baselineDarkTokens : baselineLightTokens} density={density} storageKey={null}>
+      <Showcase />
+    </ThemeProvider>
+  );
   setTimeout(() => { (window as any).ready = true; }, 300);
 });

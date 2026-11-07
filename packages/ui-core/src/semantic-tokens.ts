@@ -18,9 +18,25 @@ export type SemanticTokenMap = Record<string, string>;
 const CONTROL_SIZES = ['1', '2', '3', '4'] as const;
 
 /** Radix Themes control metrics: size 1 = 24px, 2 = 32px (the default), 3 = 40px, 4 = 48px. */
-const CONTROL_HEIGHT: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '24px', '2': '32px', '3': '40px', '4': '48px' };
-const CONTROL_FONT_SIZE: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '12px', '2': '14px', '3': '16px', '4': '18px' };
-const CONTROL_PADDING_INLINE: Record<(typeof CONTROL_SIZES)[number], string> = { '1': '8px', '2': '12px', '3': '16px', '4': '20px' };
+type ControlScale = Record<(typeof CONTROL_SIZES)[number], string>;
+type Density = 'compact' | 'default' | 'comfortable';
+// Per theme density (ThemeTokens.density). Default = Radix Themes metrics.
+const CONTROL_HEIGHTS: Record<Density, ControlScale> = {
+  compact: { '1': '20px', '2': '28px', '3': '36px', '4': '44px' },
+  default: { '1': '24px', '2': '32px', '3': '40px', '4': '48px' },
+  comfortable: { '1': '28px', '2': '36px', '3': '44px', '4': '52px' },
+};
+const CONTROL_FONT_SIZES: Record<Density, ControlScale> = {
+  compact: { '1': '12px', '2': '13px', '3': '15px', '4': '17px' },
+  default: { '1': '12px', '2': '14px', '3': '16px', '4': '18px' },
+  comfortable: { '1': '13px', '2': '15px', '3': '16px', '4': '18px' },
+};
+const CONTROL_PADDINGS_INLINE: Record<Density, ControlScale> = {
+  compact: { '1': '6px', '2': '10px', '3': '14px', '4': '18px' },
+  default: { '1': '8px', '2': '12px', '3': '16px', '4': '20px' },
+  comfortable: { '1': '10px', '2': '14px', '3': '18px', '4': '22px' },
+};
+const DENSITY_GAP: Record<Density, string> = { compact: '6px', default: '8px', comfortable: '12px' };
 /** Extra radius, on top of the theme radius, for the larger control sizes (Radix: radius-2, radius-2, radius-3, radius-4). */
 const CONTROL_RADIUS_EXTRA: Record<(typeof CONTROL_SIZES)[number], number> = { '1': 0, '2': 0, '3': 2, '4': 4 };
 
@@ -56,6 +72,10 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
   put('--ui-color-accent-solid', accent['9'] || c.primary);
   put('--ui-color-accent-solid-hover', accent['10'] || c.primaryHover || c.primary);
   put('--ui-color-accent-text', accent['11']);
+  // The brand accent for dark surfaces (contrast variants, dark panels): a light tint of the primary
+  // colour, readable on near-black. Those variants hard-coded a light blue (#93c5fd), so they never
+  // followed a custom brand.
+  put('--ui-color-accent-on-dark', c.primary ? `color-mix(in srgb, ${c.primary} 45%, #ffffff)` : undefined);
 
   // Tokens that components already read but the theme never defined, so they always fell
   // back to a hard-coded Tailwind-era colour (and stayed light in dark mode).
@@ -69,11 +89,15 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
   vars['--ui-ring-width'] = '2px';
   vars['--ui-ring-offset'] = '2px';
 
-  // Control scale shared by buttons, inputs, selects and the like.
+  // Control scale shared by buttons, inputs, selects and the like, at the theme's density.
+  const density: Density = tokens.density === 'compact' || tokens.density === 'comfortable' ? tokens.density : 'default';
+  vars['--ui-density'] = density;
+  vars['--ui-density-gap'] = DENSITY_GAP[density];
+  vars['--ui-default-gap'] = DENSITY_GAP[density];
   for (const size of CONTROL_SIZES) {
-    vars[`--ui-control-height-${size}`] = CONTROL_HEIGHT[size];
-    vars[`--ui-control-font-size-${size}`] = CONTROL_FONT_SIZE[size];
-    vars[`--ui-control-padding-inline-${size}`] = CONTROL_PADDING_INLINE[size];
+    vars[`--ui-control-height-${size}`] = CONTROL_HEIGHTS[density][size];
+    vars[`--ui-control-font-size-${size}`] = CONTROL_FONT_SIZES[density][size];
+    vars[`--ui-control-padding-inline-${size}`] = CONTROL_PADDINGS_INLINE[density][size];
     // Built on the theme's single `radius`, so `radius: '10px'` still reshapes every control.
     const extra = CONTROL_RADIUS_EXTRA[size];
     const radius = tokens.radius || radiusScale['2'] || '6px';

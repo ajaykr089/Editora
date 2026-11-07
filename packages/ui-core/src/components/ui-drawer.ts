@@ -416,7 +416,7 @@ const style = `
     --ui-drawer-muted: #94a3b8;
     --ui-drawer-border-color: #334155;
     --ui-drawer-overlay: rgba(2, 6, 23, 0.78);
-    --ui-drawer-focus-ring: #93c5fd;
+    --ui-drawer-focus-ring: var(--ui-color-accent-on-dark, #93c5fd);
     --ui-drawer-control-bg: #111827;
     --ui-drawer-control-bg-hover: color-mix(in srgb, #ffffff 14%, transparent);
   }

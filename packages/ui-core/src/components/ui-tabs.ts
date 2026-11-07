@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { navigateTo } from '../primitives/navigate';
 import {
   focusRovingItem,
   getRovingFocusBoundaryIndex,
@@ -15,6 +16,8 @@ type TabModel = {
   disabled: boolean;
   tabId: string;
   panelId: string;
+  /** A route tab: selecting it navigates (shared navigate contract). */
+  href: string;
 };
 
 const style = `
@@ -516,10 +519,10 @@ const style = `
     --ui-tabs-muted: #94a3b8;
     --ui-tabs-accent: var(--ui-tabs-active-bg, #93c5fd);
     --ui-tabs-active-text: #dbeafe;
-    --ui-tabs-focus: #93c5fd;
-    --ui-tabs-indicator-bg: color-mix(in srgb, #93c5fd 24%, transparent);
-    --ui-tabs-indicator-border: color-mix(in srgb, #93c5fd 46%, transparent);
-    --ui-tabs-indicator-shadow: 0 0 0 1px rgba(147, 197, 253, 0.24);
+    --ui-tabs-focus: var(--ui-color-accent-on-dark, #93c5fd);
+    --ui-tabs-indicator-bg: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 24%, transparent);
+    --ui-tabs-indicator-border: color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 46%, transparent);
+    --ui-tabs-indicator-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-accent-on-dark, #93c5fd) 24%, transparent);
     --ui-tabs-shadow: 0 16px 34px rgba(2, 6, 23, 0.42), 0 32px 54px rgba(2, 6, 23, 0.4);
   }
 
@@ -673,7 +676,7 @@ export class UITabs extends ElementBase {
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['slot', 'data-label', 'data-value', 'data-icon', 'data-disabled', 'disabled', 'data-active']
+      attributeFilter: ['slot', 'data-label', 'data-value', 'data-icon', 'data-disabled', 'disabled', 'data-active', 'data-href']
     });
 
     if (typeof ResizeObserver !== 'undefined') {
@@ -752,7 +755,8 @@ export class UITabs extends ElementBase {
       const disabled = source.hasAttribute('disabled') || isTruthy(source.getAttribute('data-disabled'));
       const tabId = `${this._uid}-tab-${index}`;
       const panelId = `${this._uid}-panel-${index}`;
-      return { index, value, label, icon, disabled, tabId, panelId };
+      const href = source.getAttribute('data-href') || source.getAttribute('href') || '';
+      return { index, value, label, icon, disabled, tabId, panelId, href };
     });
   }
 
@@ -842,6 +846,9 @@ export class UITabs extends ElementBase {
     if (emitChange) {
       this._emit('change', model, nextIndex);
       this._emit('select', model, nextIndex);
+      // Route tabs (href): ask the app to navigate; without a listener that keeps the page, follow the
+      // link. Use activation="manual" so arrow keys move focus without navigating.
+      if (next.href) navigateTo(this, { href: next.href, index: nextIndex, value: next.value, label: next.label });
     }
   }
 
