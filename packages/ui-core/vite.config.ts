@@ -32,7 +32,7 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['@editora/icons'],
+      external: [/^@editora\/icons(\/|$)/],
       output: {
         exports: 'named',
         interop: 'auto',

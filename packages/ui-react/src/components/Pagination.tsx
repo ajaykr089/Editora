@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import '@editora/ui-core/pagination';
-import { createUIElement, flushElementRender, useControlledAttribute, whenHandled, useNavigateBridge, type ComponentNavigateDetail } from './_internals';
+import { createUIElement, useElementAttributes, useControlledAttribute, whenHandled, useNavigateBridge, type ComponentNavigateDetail } from './_internals';
 import { useNavigationContext } from './NavigationProvider';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
@@ -122,9 +122,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     };
   }, [onPageChange, onChange, onFirst, onPrev, onNext, onLast]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementAttributes(ref, (el) => {
 
     // Only remove an attribute this component set itself. A ui-data-table linked through paginationId writes
     // `count` (and `page`) on the pager; removing them because the prop is undefined left a one-page pager.
@@ -153,7 +151,6 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     syncAttr('aria-label', ariaLabel ?? null);
     syncAttr('href-template', hrefTemplate || null);
     syncBool('headless', headless);
-    flushElementRender(el);
   }, [page, count, size, variant, ariaLabel, headless, hrefTemplate]);
 
   // With a change handler the prop wins over the element's own state; without one it is the

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { numberAttribute } from '../primitives/number-attribute';
 import { hideCloneSource, revealClone } from '../primitives/clone-source';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
@@ -422,7 +423,7 @@ export class UIPopover extends ElementBase {
   }
 
   private _offset(): number {
-    const value = Number(this.getAttribute('offset'));
+    const value = numberAttribute(this.getAttribute('offset'), 8);
     return Number.isFinite(value) ? value : 8;
   }
 

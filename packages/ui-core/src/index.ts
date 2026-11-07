@@ -138,6 +138,7 @@ export * from './overlayManager';
 export * from './scroll-lock';
 export * from './plugin';
 export * from './icons';
+export { addIcons } from './add-icons';
 export * from './primitives/dismissable-layer';
 export * from './primitives/focus-scope';
 export * from './primitives/positioner';

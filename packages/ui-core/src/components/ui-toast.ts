@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { numberAttribute } from '../primitives/number-attribute';
 
 type ToastTone = 'info' | 'success' | 'warning' | 'error' | 'loading' | 'neutral';
 
@@ -370,7 +371,7 @@ export class UIToast extends ElementBase {
   }
 
   private _maxVisible(): number {
-    const parsed = Number(this.getAttribute('max-visible'));
+    const parsed = numberAttribute(this.getAttribute('max-visible'), 5);
     if (!Number.isFinite(parsed)) return 5;
     return Math.max(1, Math.trunc(parsed));
   }

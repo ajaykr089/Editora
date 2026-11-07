@@ -7,6 +7,7 @@ import {
   type PositionerState
 } from '../primitives/positioner';
 import { safeQuerySelector } from '../primitives/selector';
+import { numberAttribute } from '../primitives/number-attribute';
 
 const style = `
   :host {
@@ -15,10 +16,7 @@ const style = `
   }
 `;
 
-function parseNumber(value: string | null, fallback = 0): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
+const parseNumber = (raw: string | null, fallback = 0): number => numberAttribute(raw, fallback);
 
 function isTruthy(value: string | null): boolean {
   if (value == null) return false;

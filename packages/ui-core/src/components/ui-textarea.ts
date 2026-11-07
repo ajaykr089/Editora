@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { numberAttribute } from '../primitives/number-attribute';
 import { FormControl } from '../primitives/form-control';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
@@ -346,10 +347,7 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function parseNumber(raw: string | null, fallback: number): number {
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : fallback;
-}
+const parseNumber = numberAttribute;
 
 // The native minLength/maxLength setters throw on negatives and wrap anything above 2^31 - 1
 // into one, so only values the control can really hold are forwarded.

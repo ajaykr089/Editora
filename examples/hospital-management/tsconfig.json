@@ -12,6 +12,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@editora/icons": ["../../packages/icons/src/index.ts"],
+      "@editora/icons/*": ["../../packages/icons/src/*"],
       "@editora/react-icons": ["../../packages/react-icons/src/index.ts"],
       "@editora/ui-core": ["../../packages/ui-core/src/index.ts"],
       "@editora/ui-react": ["../../packages/ui-react/src/index.tsx"],

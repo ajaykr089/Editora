@@ -1,11 +1,14 @@
-import type { IconRenderOptions, IconVariant } from '@editora/icons';
+import type { IconDefinition, IconRenderOptions, IconVariant } from '@editora/icons';
 
 // The built-in icon set (@editora/icons) is about 135 KB minified, and icons are looked up by name,
 // so a bundler cannot drop the ones an app does not use. A static import put the whole set into
 // every component that can show an icon (a Button entry was 55 KB gzipped, 80% of it icons). It is
 // loaded on first use instead: bundlers split it into its own chunk, components that never render a
 // built-in icon never load it, and icons render once it arrives. Custom icons (registerIcon) and
-// apps that call loadIcons() up front are unaffected.
+// apps that call loadIcons() up front are unaffected. Apps that want no icon chunk at all import
+// the icons they use from `@editora/icons/glyphs` and pass them to addIcons() (add-icons.ts, kept
+// apart so the renderer it needs only ships to apps that use it): those render at once and never
+// trigger the load.
 type CoreIcons = typeof import('@editora/icons');
 let core: CoreIcons | null = null;
 let loading: Promise<CoreIcons> | null = null;
@@ -55,6 +58,22 @@ function hasCoreIcon(name: string): boolean {
 }
 
 const customRegistry = new Map<string, string>();
+const definitionRegistry = new Map<string, IconDefinition>();
+
+type DefinitionRenderer = (definition: IconDefinition, options: IconRenderOptions) => string;
+let definitionRenderer: DefinitionRenderer | null = null;
+
+/** Internal: used by addIcons() in add-icons.ts. */
+export function registerIconDefinitions(definitions: IconDefinition[], renderer: DefinitionRenderer): void {
+  definitionRenderer = renderer;
+  for (const definition of definitions) {
+    for (const name of [definition.name, ...(definition.aliases || [])]) {
+      const normalized = normalizeName(name);
+      if (normalized) definitionRegistry.set(normalized, definition);
+    }
+  }
+  coreCache.clear();
+}
 const coreCache = new Map<string, string>();
 
 function normalizeName(name: string): string {
@@ -125,7 +144,7 @@ export function clearCustomIcons(): void {
 export function hasIcon(name: string): boolean {
   const normalized = normalizeName(name);
   if (!normalized) return false;
-  if (customRegistry.has(normalized)) return true;
+  if (customRegistry.has(normalized) || definitionRegistry.has(normalized)) return true;
   return hasCoreIcon(normalized);
 }
 
@@ -139,14 +158,15 @@ export function getIcon(name: string, options?: UIIconRenderOptions): string {
 
   const custom = customRegistry.get(normalized);
   if (custom) return custom;
-  if (!hasCoreIcon(normalized)) return '';
+  const definition = definitionRegistry.get(normalized);
+  if (!definition && !hasCoreIcon(normalized)) return '';
 
   const key = cacheKey(normalized, options);
   const cached = coreCache.get(key);
   if (cached) return cached;
 
-  if (!core) return '';
-  const svg = core.renderIconSvg(normalized, {
+  if (!definition && !core) return '';
+  const renderOptions: IconRenderOptions = {
     variant: options?.variant || 'outline',
     iconWeight: options?.iconWeight,
     secondaryColor: options?.secondaryColor,
@@ -159,7 +179,8 @@ export function getIcon(name: string, options?: UIIconRenderOptions): string {
     rtl: options?.rtl,
     color: 'currentColor',
     decorative: true
-  });
+  };
+  const svg = definition && definitionRenderer ? definitionRenderer(definition, renderOptions) : core!.renderIconSvg(normalized, renderOptions);
 
   if (svg) coreCache.set(key, svg);
   return svg;

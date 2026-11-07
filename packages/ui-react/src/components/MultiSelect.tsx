@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/multi-select';
-import { createUIElement, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
+import { createUIElement, useElementAttributes, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -99,9 +99,7 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     };
   }, [onChange, onValueChange]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementAttributes(ref, (el) => {
     const syncAttr = (attr: string, next: string | null) => {
       const current = el.getAttribute(attr);
       if (next == null) {
@@ -143,7 +141,6 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     syncBool('readonly', readOnly);
     syncBool('loading', loading);
     syncBool('clearable', clearable);
-    flushElementRender(el);
   }, [
     options,
     value,

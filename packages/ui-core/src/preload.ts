@@ -205,6 +205,27 @@ export const PRELOAD_CSS = `@layer editora-preload {
     min-block-size: 148px;
   }
 
+  /* The selected panel (a server-rendered selected attribute), not the first. Browsers without
+     :nth-child(… of S) drop these rules and keep showing the first panel. */
+  ui-tabs[selected="1"]:not(:defined) > [slot="panel"]:not(:nth-child(2 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="1"]:not(:defined) > :nth-child(2 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="2"]:not(:defined) > [slot="panel"]:not(:nth-child(3 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="2"]:not(:defined) > :nth-child(3 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="3"]:not(:defined) > [slot="panel"]:not(:nth-child(4 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="3"]:not(:defined) > :nth-child(4 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="4"]:not(:defined) > [slot="panel"]:not(:nth-child(5 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="4"]:not(:defined) > :nth-child(5 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="5"]:not(:defined) > [slot="panel"]:not(:nth-child(6 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="5"]:not(:defined) > :nth-child(6 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="6"]:not(:defined) > [slot="panel"]:not(:nth-child(7 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="6"]:not(:defined) > :nth-child(7 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="7"]:not(:defined) > [slot="panel"]:not(:nth-child(8 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="7"]:not(:defined) > :nth-child(8 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="8"]:not(:defined) > [slot="panel"]:not(:nth-child(9 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="8"]:not(:defined) > :nth-child(9 of [slot="panel"]) { display: block; }
+  ui-tabs[selected="9"]:not(:defined) > [slot="panel"]:not(:nth-child(10 of [slot="panel"])) { display: none; }
+  ui-tabs[selected="9"]:not(:defined) > :nth-child(10 of [slot="panel"]) { display: block; }
+
   /* Tab labels in a row of about the strip's height, instead of stacked blocks. */
   ui-tabs:not(:defined) > [slot="tab"] {
     display: inline-block;

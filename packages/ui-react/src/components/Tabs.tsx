@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tabs';
-import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled, useNavigateBridge, type ComponentNavigateDetail } from './_internals';
+import { createUIElement, hostOnly, useElementAttributes, useControlledAttribute, whenHandled, useNavigateBridge, type ComponentNavigateDetail } from './_internals';
 import { useNavigationContext } from './NavigationProvider';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -117,10 +117,7 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     };
   }, [onChange, onTabChange]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
+  useElementAttributes(ref, (el) => {
     const syncAttr = (name: string, next: string | null) => {
       const current = el.getAttribute(name);
       if (next == null) {
@@ -149,7 +146,6 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     syncBool('stretched', stretched);
     syncBool('bare', bare);
     syncBool('headless', headless);
-    flushElementRender(el);
   }, [selected, value, orientation, activation, variant, size, density, tone, stretched, shape, elevation, loop, bare, headless]);
 
   // With a change handler the prop wins over the element's own state; without one it is the
@@ -164,9 +160,12 @@ TabsRoot.displayName = 'Tabs';
 
 const TabsTab = React.forwardRef<HTMLDivElement, TabsTabProps>(
   function TabsTab({ value, href, icon, disabled, ...props }, ref) {
+    // ui-tabs gives its tab and panel elements ids, roles and `hidden` when it upgrades, which may
+    // be before React hydrates them.
     return React.createElement('div', {
       ref,
       slot: 'tab',
+      suppressHydrationWarning: true,
       'data-value': value,
       'data-href': href,
       'data-icon': icon,
@@ -179,7 +178,7 @@ TabsTab.displayName = 'Tabs.Tab';
 
 const TabsPanel = React.forwardRef<HTMLDivElement, TabsPanelProps>(
   function TabsPanel({ ...props }, ref) {
-    return React.createElement('div', { ref, slot: 'panel', ...props });
+    return React.createElement('div', { ref, slot: 'panel', suppressHydrationWarning: true, ...props });
   }
 );
 TabsPanel.displayName = 'Tabs.Panel';

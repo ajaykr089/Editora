@@ -3,6 +3,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 // Re-exported so existing wrappers keep one import site; defined in its own hook-free module so the
 // server entry can use it without loading this file (see _createElement.ts).
 export { createUIElement } from './_createElement';
+import { IS_SERVER, queueServerAttributes } from './_serverAttributes';
 
 export const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -261,6 +262,9 @@ export function useElementAttributes<T extends HTMLElement>(
   sync: (element: T) => void,
   dependencies: React.DependencyList
 ): void {
+  // Effects do not run on the server: hand the sync to createUIElement, which writes what it sets
+  // into the server markup.
+  if (IS_SERVER) queueServerAttributes(ref, sync as (element: never) => void);
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;

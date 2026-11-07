@@ -25,6 +25,7 @@ export default defineConfig({
       { find: /^@editora\/ui-core\/(.+)$/, replacement: `${pkgs}/ui-core/src/standalone/$1.ts` },
       { find: '@editora/ui-core', replacement: `${pkgs}/ui-core/src/index.ts` },
       { find: /^@editora\/ui-react\/(.+)$/, replacement: `${pkgs}/ui-react/src/components/$1.tsx` },
+      { find: /^@editora\/icons\/(glyphs|renderer)$/, replacement: `${pkgs}/icons/src/$1.ts` },
       { find: '@editora/icons', replacement: `${pkgs}/icons/src/index.ts` },
       { find: '@editora/react-icons', replacement: `${pkgs}/react-icons/src/index.ts` },
       { find: '@editora/toast', replacement: `${pkgs}/editora-toast/src/index.ts` },

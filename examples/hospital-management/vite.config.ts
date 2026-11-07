@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@', replacement: resolve(__dirname, 'src') },
+      { find: /^@editora\/icons\/(glyphs|renderer)$/, replacement: resolve(__dirname, '../../packages/icons/src') + '/$1.ts' },
       { find: '@editora/icons', replacement: resolve(__dirname, '../../packages/icons/src/index.ts') },
       { find: '@editora/react-icons', replacement: resolve(__dirname, '../../packages/react-icons/src/index.ts') },
       { find: '@editora/ui-core/runtime', replacement: resolve(__dirname, '../../packages/ui-core/src/runtime.ts') },

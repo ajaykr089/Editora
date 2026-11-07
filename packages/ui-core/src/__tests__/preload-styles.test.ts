@@ -42,7 +42,7 @@ describe('preload styles', () => {
     for (const rule of rules) {
       // Split on top-level commas only (not the ones inside :is(...)).
       const selectors = rule.slice(0, rule.indexOf('{')).split(/,(?![^(]*\))/).map((part) => part.trim()).filter(Boolean);
-      for (const selector of selectors) expect(selector).toMatch(/^(ui-[a-z-]+|:is\([^)]*\))(\[[a-z-]+\])*:not\(:defined\)/);
+      for (const selector of selectors) expect(selector).toMatch(/^(ui-[a-z-]+|:is\([^)]*\))(\[[a-z-]+(="[^"]*")?\])*:not\(:defined\)/);
     }
     expect(PRELOAD_CSS).toContain('ui-tabs:not(:defined) > [slot="panel"] ~ [slot="panel"]');
     expect(PRELOAD_CSS).toMatch(/ui-dialog:not\(:defined\),[\s\S]*?display: none/);
