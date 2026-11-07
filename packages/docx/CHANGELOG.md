@@ -1,5 +1,11 @@
 # @editora/docx
 
+## 0.1.1
+
+### Patch Changes
+
+- b7d7881: Typings now resolve in TypeScript projects that use `moduleResolution: "NodeNext"` or `"node16"` (they failed with TS2834 because relative imports had no file extension).
+
 ## 0.1.0
 
 ### Minor Changes

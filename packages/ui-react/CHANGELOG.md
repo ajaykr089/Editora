@@ -1,5 +1,25 @@
 # Change Log
 
+## 0.3.0
+
+### Minor Changes
+
+- 48455d8: Charts carry their numbers as a table: one row per label and a column per series, with the chart's title as caption. It is always there for screen readers, which get the plot itself as a single image, and `show-table` (React `showTable`) shows it on screen below the chart.
+- 1a8e02d: DataTable for server-driven admin screens. `server-side` (React `serverSide`) shows the rows it is given as the current page and never sorts, filters or slices them itself, while still reporting sort, filter and page changes; `total-rows` (`totalRows`) drives the summary and pagination. `hidden-columns` (`hiddenColumns`) hides columns by key or index. Rows with `data-href` become links: a click anywhere on the row (not on a control in it) or Enter follows it through the shared `navigate` contract, so `NavigationProvider` or `onNavigate` can route it; modifier and middle clicks open a new tab.
+- c5cab3e: `FiltersBar` has a date range: `dateRange` / `onDateRangeChange` add a date-range picker, and `dateRangePresets` one-click ranges beside it (the active one shows as pressed). `commonDateRangePresets` provides last 7 and 30 days, this and last month, and this year in the user's local time.
+- da7c0bd: Forms can show errors from a server response. `ui-form` has `setErrors({ email: 'Already registered' })`, `clearErrors(names?)` and `getErrors()`, and React's `Form` an `errors` prop that applies each new object once. Messages show on Editora fields as their own validation errors and on native inputs as their validity message with `aria-invalid`; the first field with an error, in page order, is focused. An error clears when its field is edited, and all of them when the form is validated or submitted again, so they never block the next attempt.
+
+### Patch Changes
+
+- Updated dependencies [48455d8]
+- Updated dependencies [1a8e02d]
+- Updated dependencies [a924a61]
+- Updated dependencies [93a7258]
+- Updated dependencies [69068ed]
+- Updated dependencies [da7c0bd]
+- Updated dependencies [e428bb3]
+  - @editora/ui-core@0.4.0
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-testing",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Test helpers for apps built on Editora UI: jsdom setup and user-level actions (pick an option, open a menu, fill a field, read a field's error) that reach inside shadow roots, for Testing Library and Playwright.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -51,7 +51,7 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@editora/ui-core": ">=0.3.0",
+    "@editora/ui-core": ">=0.4.0",
     "@playwright/test": ">=1.40",
     "@testing-library/dom": ">=9",
     "@testing-library/user-event": ">=14",

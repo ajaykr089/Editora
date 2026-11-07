@@ -1,5 +1,20 @@
 # Change Log
 
+## 0.4.0
+
+### Minor Changes
+
+- 48455d8: Charts carry their numbers as a table: one row per label and a column per series, with the chart's title as caption. It is always there for screen readers, which get the plot itself as a single image, and `show-table` (React `showTable`) shows it on screen below the chart.
+- 1a8e02d: DataTable for server-driven admin screens. `server-side` (React `serverSide`) shows the rows it is given as the current page and never sorts, filters or slices them itself, while still reporting sort, filter and page changes; `total-rows` (`totalRows`) drives the summary and pagination. `hidden-columns` (`hiddenColumns`) hides columns by key or index. Rows with `data-href` become links: a click anywhere on the row (not on a control in it) or Enter follows it through the shared `navigate` contract, so `NavigationProvider` or `onNavigate` can route it; modifier and middle clicks open a new tab.
+- da7c0bd: Forms can show errors from a server response. `ui-form` has `setErrors({ email: 'Already registered' })`, `clearErrors(names?)` and `getErrors()`, and React's `Form` an `errors` prop that applies each new object once. Messages show on Editora fields as their own validation errors and on native inputs as their validity message with `aria-invalid`; the first field with an error, in page order, is focused. An error clears when its field is edited, and all of them when the form is validated or submitted again, so they never block the next attempt.
+
+### Patch Changes
+
+- a924a61: `ui-data-table` `pagination-id` works when the pager comes after the table in the page. It was looked up once when the table connected, so the usual layout (table, then pager) left paging dead; the pager is now found by id when needed.
+- 93a7258: `ui-file-upload`: a file's Retry button uploads only that file; it used to restart every failed or pending file. New `retryUpload(file)` does the same from code, and the Retry button is labelled with the file name for screen readers.
+- 69068ed: `ui-form` keeps focus on the first field with an error. Showing the error re-rendered an Editora field right after it took focus, so focus fell back to the page, both for `setErrors` and for a submit that failed validation.
+- e428bb3: `ui-switch` toggles when the switch element itself is clicked: `element.click()`, and assistive technology activating the element with `role="switch"`. Only clicks inside its shadow root were handled, so those did nothing (a mouse click on the switch was not affected).
+
 ## 0.3.0
 
 ### Minor Changes

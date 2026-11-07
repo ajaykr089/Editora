@@ -1,6 +1,6 @@
 {
   "name": "@editora/docx",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read and write Word .docx files with no dependencies: real headings, numbered and nested lists, links, images, tables with merged cells, footnotes and tracked changes, with warnings for anything Word or the target cannot hold. Converts to any editor format via @editora/rich-text-convert.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

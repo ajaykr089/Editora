@@ -1,6 +1,6 @@
 {
   "name": "@editora/agent",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "AI agent for rich text editors: let Ollama, OpenAI-compatible models, Claude or any MCP client (Claude Desktop, Claude Code, Cursor) read and edit a document, with every edit shown as a suggestion to accept or reject.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
