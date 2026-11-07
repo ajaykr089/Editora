@@ -62,3 +62,4 @@ e2e-ui/playwright-report-a11y/
 e2e-ui/tests/*-snapshots/*-darwin.png
 e2e-ui/tests/*-snapshots/*-win32.png
 !e2e-ui/package-lock.json
+!examples/reference-app/package-lock.json

@@ -1,0 +1,17 @@
+{
+  "name": "editora-reference-app",
+  "private": true,
+  "description": "Tallyhawk: a fictional expense and approvals product (marketing site and app) built with Editora UI, from the packages' source. A design reference, and the app CI tests every change against.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "vite": "5.4.19"
+  }
+}

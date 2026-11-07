@@ -4,14 +4,41 @@
     {
       "name": "editora-docs",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "examples/editora-docs", "run", "start", "--", "--port", "3010"],
+      "runtimeArgs": [
+        "--prefix",
+        "examples/editora-docs",
+        "run",
+        "start",
+        "--",
+        "--port",
+        "3010"
+      ],
       "port": 3010
     },
     {
       "name": "sandbox",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "sandbox", "run", "dev", "--", "--port", "5173"],
+      "runtimeArgs": [
+        "--prefix",
+        "sandbox",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5173"
+      ],
       "port": 5173
+    },
+    {
+      "name": "reference-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "examples/reference-app",
+        "run",
+        "dev"
+      ],
+      "port": 5210
     }
   ]
 }
