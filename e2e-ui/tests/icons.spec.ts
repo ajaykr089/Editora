@@ -9,3 +9,12 @@ test('built-in icons load on first use: no fallback letter flashes, then the svg
   expect(result.first.fallback).toBe(false);
   expect(result.later).toEqual({ icon: true, button: true });
 });
+
+test('icons registered with addIcons draw at once and never request the full set', async ({ page }) => {
+  await page.goto('/icons-glyphs.html');
+  await page.waitForFunction(() => (window as any).result, null, { timeout: 30_000 });
+  const result = await page.evaluate(() => (window as any).result);
+  expect(result.first).toEqual({ icon: true, button: true });
+  expect(result.later).toEqual({ icon: true, button: true });
+  expect(result.fullSet).toEqual([]);
+});

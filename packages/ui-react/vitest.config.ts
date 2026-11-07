@@ -10,6 +10,8 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      { find: /^@editora\/icons\/(glyphs|renderer)$/, replacement: resolve(__dirname, '../icons/src') + '/$1.ts' },
+      { find: /^@editora\/icons$/, replacement: resolve(__dirname, '../icons/src/index.ts') },
       { find: '@editora/ui-core/runtime', replacement: resolve(__dirname, '../ui-core/src/runtime.ts') },
       { find: '@editora/ui-core/sortable', replacement: resolve(__dirname, '../ui-core/src/sortable.ts') },
       { find: /^@editora\/ui-core\/(.+)$/, replacement: resolve(__dirname, '../ui-core/src/standalone') + '/$1.ts' },

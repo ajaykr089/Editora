@@ -1,0 +1,16 @@
+<!doctype html><html><body><script type="module">
+// Icons registered by definition: they draw at once and the full icon set is never requested.
+const { addIcons } = await import('@editora/ui-core/add-icons');
+await import('@editora/ui-core/button');
+const { checkIcon, settingsIcon } = await import('@editora/icons/glyphs');
+addIcons(checkIcon, settingsIcon);
+document.body.insertAdjacentHTML('beforeend', '<ui-button id="b" icon="tick">Save</ui-button><ui-icon id="i" name="settings" variant="solid"></ui-icon>');
+const drawn = () => ({
+  icon: !!document.getElementById('i').shadowRoot.querySelector('svg'),
+  button: !!document.getElementById('b').shadowRoot.querySelector('ui-icon')?.shadowRoot?.querySelector('svg'),
+});
+const first = drawn();
+await new Promise((r) => setTimeout(r, 500));
+const requested = performance.getEntriesByType('resource').map((entry) => entry.name);
+window.result = { first, later: drawn(), fullSet: requested.filter((name) => /icons\/src\/(index|definitions|registry)/.test(name)) };
+</script></body></html>
