@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIsomorphicLayoutEffect } from './_internals';
 import '@editora/ui-core/split-button';
 import { createPortal } from 'react-dom';
 
@@ -34,19 +35,19 @@ const splitButtonStyles = `
   }
 
   .ed-split-button--neutral {
-    --ed-split-bg: #ffffff;
-    --ed-split-bg-hover: #f8fafc;
-    --ed-split-border: 1px solid color-mix(in srgb, #0f172a 12%, transparent);
-    --ed-split-text: #0f172a;
+    --ed-split-bg: var(--ui-color-surface, #ffffff);
+    --ed-split-bg-hover: var(--ui-color-surface-alt, #f8fafc);
+    --ed-split-border: 1px solid color-mix(in srgb, var(--ui-color-text, #0f172a) 12%, transparent);
+    --ed-split-text: var(--ui-color-text, #0f172a);
     --ed-split-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 24px rgba(15, 23, 42, 0.08);
   }
 
   .ed-split-button--flat {
     --ed-split-radius: 10px;
-    --ed-split-bg: #ffffff;
-    --ed-split-bg-hover: #f1f5f9;
-    --ed-split-border: 1px solid #dbe4f0;
-    --ed-split-text: #0f172a;
+    --ed-split-bg: var(--ui-color-surface, #ffffff);
+    --ed-split-bg-hover: var(--ui-color-surface-alt, #f1f5f9);
+    --ed-split-border: 1px solid var(--ui-color-border, #dbe4f0);
+    --ed-split-text: var(--ui-color-text, #0f172a);
     --ed-split-shadow: none;
     --ed-split-menu-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
   }
@@ -578,7 +579,7 @@ export const SplitButton = React.forwardRef<HTMLElement, SplitButtonProps>(funct
     };
   }, [open, updateMenuPosition]);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) return;
 
     const onPointerDown = (event: PointerEvent) => {

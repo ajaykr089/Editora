@@ -212,6 +212,7 @@ export type {
   SidebarProps,
   SidebarGroupProps,
   SidebarItemInput,
+  SidebarNavigateDetail,
   SidebarItemProps,
   SidebarSlotProps,
   SidebarSearchInputProps,
@@ -408,3 +409,5 @@ export {
   type AnimatedNumberDirection,
   type AnimatedNumberCompleteEvent,
 } from './components/AnimatedNumber';
+export { EditoraPreloadStyle } from './components/server/EditoraPreloadStyle';
+export type { EditoraPreloadStyleProps } from './components/server/EditoraPreloadStyle';

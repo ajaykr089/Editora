@@ -1,6 +1,15 @@
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+import { PRELOAD_CSS } from './src/preload';
+
+// Emits dist/preload.css (`@editora/ui-core/preload.css`) from the same string the JS entry exports.
+const preloadCss = (): Plugin => ({
+  name: 'editora-preload-css',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'preload.css', source: PRELOAD_CSS });
+  }
+});
 
 const standaloneDir = resolve(__dirname, 'src/standalone');
 const standaloneEntries = Object.fromEntries(
@@ -10,6 +19,7 @@ const standaloneEntries = Object.fromEntries(
 );
 
 export default defineConfig({
+  plugins: [preloadCss()],
   build: {
     lib: {
       entry: {

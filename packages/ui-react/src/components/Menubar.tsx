@@ -108,7 +108,8 @@ const MenubarRoot = React.forwardRef<HTMLElement, MenubarProps>(function Menubar
       { type: 'close', listener: onCloseHandler as EventListener },
       { type: 'select', listener: onSelectHandler },
     ],
-    [onChangeHandler, onOpenHandler, onCloseHandler, onSelectHandler]
+    [onChangeHandler, onOpenHandler, onCloseHandler, onSelectHandler],
+    { hostOnly: true }
   );
 
   useElementAttributes(ref, (el) => {

@@ -16,6 +16,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 export type DialogRequestCloseDetail = {
@@ -138,7 +140,8 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
       { type: 'ui-dismiss', listener: dialogDismissHandler as EventListener },
       { type: 'ui-close', listener: dialogCloseHandler as EventListener },
     ],
-    [openHandler, closeHandler, requestCloseHandler, dialogOpenHandler, dialogSubmitHandler, dialogCancelHandler, dialogDismissHandler, dialogCloseHandler]
+    [openHandler, closeHandler, requestCloseHandler, dialogOpenHandler, dialogSubmitHandler, dialogCancelHandler, dialogDismissHandler, dialogCloseHandler],
+    { hostOnly: true }
   );
 
   useElementAttributes(ref, (el) => {
@@ -157,7 +160,7 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
     syncBooleanStateAttribute(el, 'close-on-esc', closeOnEsc);
     syncBooleanStateAttribute(el, 'lock-while-loading', lockWhileLoading);
 
-    syncStringAttribute(el, 'role', roleType || null);
+    syncStringAttribute(el, 'dialog-role', roleType || null);
     syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
     syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
     syncStringAttribute(el, 'initial-focus', initialFocus || null);
@@ -194,6 +197,10 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
     config,
     headless
   ]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'open', value: whenHandled([onOpen, onClose, onRequestClose, onDialogOpen, onDialogClose, onDialogDismiss, onDialogCancel, onDialogSubmit], typeof open === 'boolean' ? open : undefined), events: ['open', 'close'] });
 
   return createUIElement('ui-dialog', { ref, ...rest }, children);
 });

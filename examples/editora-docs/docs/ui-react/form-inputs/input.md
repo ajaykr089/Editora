@@ -46,13 +46,39 @@ function InputDemo() {
 | `Input.Suffix` | `suffix` | Content rendered on the right side of the input |
 | `Input.Error` | `error` | Error message shown when `validation="error"` |
 
+
+:::note Changed in this release
+`onChange` now fires on every keystroke, like React's `onChange` on `<input>`. The old behaviour (only when the edit is committed, on blur or Enter) is `onCommit`. Use `defaultValue` for a starting value; `value` together with `onChange` makes the field controlled.
+:::
+
+
+## Sign-in fields and password managers
+
+Password managers and browser autofill look for real inputs in the page, and an input inside a shadow root is found unreliably. For credential fields, put your own native input in the `input` slot: the component keeps its label, styling, clear and show/hide buttons around it, but the field itself is an ordinary input with your `name` and `autocomplete`, part of the form like any other.
+
+```tsx
+<form method="post" action="/login">
+  <Input label="Email">
+    <input slot="input" name="email" type="email" autoComplete="username" />
+  </Input>
+  <PasswordField label="Password">
+    <input slot="input" name="password" autoComplete="current-password" />
+  </PasswordField>
+  <Button type="submit">Sign in</Button>
+</form>
+```
+
+The component does not change the input's `name`, `type` (except the show/hide toggle), `autocomplete` or `placeholder`. It names the input after the label unless you labelled it yourself. Enter submits the form natively, and the value is submitted once.
+
 ## Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `value` | `string` | — | Controlled value |
-| `onChange` | `(value: string) => void` | — | Fires on committed change |
-| `onInput` | `(value: string) => void` | — | Fires on every keystroke |
+| `value` | `string` | — | Controlled value when `onChange`/`onInput` is passed (a change you do not store is undone); without a handler it is the initial value |
+| `defaultValue` | `string` | — | Starting value of an uncontrolled field (written once, on mount) |
+| `onChange` | `(value: string) => void` | — | Fires on every keystroke, like React's `onChange` on `<input>` |
+| `onCommit` | `(value: string) => void` | — | Fires when the edit is committed (blur, or Enter in a single-line field) |
+| `onInput` | `(value: string) => void` | — | Fires on every keystroke (same as `onChange`) |
 | `onDebouncedInput` | `(value: string) => void` | — | Fires after `debounce` ms of inactivity |
 | `onClear` | `() => void` | — | Fires when the clear button is clicked |
 | `debounce` | `number` | — | Debounce delay in ms for `onDebouncedInput` |

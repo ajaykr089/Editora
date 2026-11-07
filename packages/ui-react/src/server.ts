@@ -30,3 +30,5 @@ export { Separator } from './components/server/Separator';
 export { Shortcut } from './components/server/Shortcut';
 export { Stat } from './components/server/Stat';
 export { VisuallyHidden } from './components/server/VisuallyHidden';
+export { EditoraPreloadStyle } from './components/server/EditoraPreloadStyle';
+export type { EditoraPreloadStyleProps } from './components/server/EditoraPreloadStyle';

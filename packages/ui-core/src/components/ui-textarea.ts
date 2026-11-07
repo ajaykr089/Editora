@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl } from '../primitives/form-control';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
@@ -53,6 +54,28 @@ const style = `
     font-weight: 600;
     line-height: 1.25;
     color: var(--ui-textarea-text);
+  }
+
+  /* description-position="below": the hint goes under the field (DOM order, and so what a
+     screen reader reads, stays label, description, field). */
+  :host([description-position="below"]) .meta:not([hidden]) {
+    display: contents;
+  }
+
+  :host([description-position="below"]) .label {
+    order: 0;
+  }
+
+  :host([description-position="below"]) .field {
+    order: 1;
+  }
+
+  :host([description-position="below"]) .description {
+    order: 2;
+  }
+
+  :host([description-position="below"]) .footer {
+    order: 3;
   }
 
   .description {
@@ -340,6 +363,17 @@ function parseLength(raw: string | null): number | null {
 }
 
 export class UITextarea extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => this.value,
+    getValidity: () => ({ control: this._textarea }),
+    defaultAttribute: 'value',
+    onFormDisabled: (disabled) => {
+      if (this._textarea) this._textarea.disabled = disabled || this.hasAttribute('disabled');
+    }
+  });
+
   static get observedAttributes() {
     return [
       'value',
@@ -389,12 +423,27 @@ export class UITextarea extends ElementBase {
     this._onClear = this._onClear.bind(this);
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
     this._tryRegisterWithForm();
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this._detachListeners();
 
     if (this._debounceTimer) {
@@ -542,7 +591,7 @@ export class UITextarea extends ElementBase {
     const radius = this.getAttribute('radius');
 
     this._textarea.placeholder = placeholder;
-    this._textarea.disabled = disabled;
+    this._textarea.disabled = disabled || this._formControl.disabledByForm;
     this._textarea.readOnly = readOnly;
     this._textarea.required = required;
     this._textarea.rows = Math.max(1, rows);

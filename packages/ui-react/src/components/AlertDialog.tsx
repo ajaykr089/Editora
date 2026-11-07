@@ -8,7 +8,7 @@ import type {
   UIAlertDialogOpenDetail,
   UIAlertDialogTemplateOptions
 } from '@editora/ui-core';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 type BaseProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
 type NativeAlertDialogProps = Omit<BaseProps, 'onClose' | 'onChange' | 'onCancel' | 'onOpen'>;
@@ -80,17 +80,17 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
 
   React.useImperativeHandle(forwardedRef, () => ref.current as AlertDialogElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const handleOpen = (event: Event) => onOpen?.((event as CustomEvent<UIAlertDialogOpenDetail>).detail);
-    const handleConfirm = (event: Event) => onConfirm?.((event as CustomEvent<UIAlertDialogConfirmDetail>).detail);
-    const handleCancel = (event: Event) => onCancel?.((event as CustomEvent<UIAlertDialogCancelDetail>).detail);
-    const handleDismiss = (event: Event) => onDismiss?.((event as CustomEvent<UIAlertDialogDismissDetail>).detail);
-    const handleClose = (event: Event) => onClose?.((event as CustomEvent<UIAlertDialogCloseDetail>).detail);
-    const handleChange = (event: Event) =>
-      onChange?.((event as CustomEvent<{ id: string; inputValue?: string; checked?: boolean }>).detail);
+    const handleOpen = hostOnly((event: Event) => onOpen?.((event as CustomEvent<UIAlertDialogOpenDetail>).detail));
+    const handleConfirm = hostOnly((event: Event) => onConfirm?.((event as CustomEvent<UIAlertDialogConfirmDetail>).detail));
+    const handleCancel = hostOnly((event: Event) => onCancel?.((event as CustomEvent<UIAlertDialogCancelDetail>).detail));
+    const handleDismiss = hostOnly((event: Event) => onDismiss?.((event as CustomEvent<UIAlertDialogDismissDetail>).detail));
+    const handleClose = hostOnly((event: Event) => onClose?.((event as CustomEvent<UIAlertDialogCloseDetail>).detail));
+    const handleChange = hostOnly((event: Event) =>
+      onChange?.((event as CustomEvent<{ id: string; inputValue?: string; checked?: boolean }>).detail));
 
     el.addEventListener('ui-open', handleOpen as EventListener);
     el.addEventListener('ui-confirm', handleConfirm as EventListener);
@@ -133,8 +133,8 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     if (typeof lockWhileLoading === 'boolean') el.setAttribute('lock-while-loading', String(lockWhileLoading));
     else el.removeAttribute('lock-while-loading');
 
-    if (roleType) el.setAttribute('role', roleType);
-    else el.removeAttribute('role');
+    if (roleType) el.setAttribute('dialog-role', roleType);
+    else el.removeAttribute('dialog-role');
 
     if (tone && tone !== 'neutral') el.setAttribute('tone', tone);
     else el.removeAttribute('tone');
@@ -164,6 +164,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
 
     if (config) (el as any).config = config;
     else (el as any).config = {};
+    flushElementRender(el);
   }, [
     open,
     headless,

@@ -323,7 +323,7 @@ const template = (body: string) => `
       inset: 0;
       border-radius: inherit;
       pointer-events: none;
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+      box-shadow: var(--base-sidebar-outline, inset 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent));
     }
 
     .header-wrap,
@@ -1256,6 +1256,7 @@ export class UISidebar extends ElementBase {
         }
         if (action === 'navigate') {
           this._selectValue(value);
+          this._handleNavigate(event, target, value);
           return;
         }
         event.preventDefault();
@@ -1273,9 +1274,13 @@ export class UISidebar extends ElementBase {
           event.preventDefault();
           this._expanded.delete(id);
           this._syncExpandedDom();
+        } else if (event.key === 'Enter' && target.dataset.action === 'navigate') {
+          // Leave Enter on a link to the browser: it fires the click that selects and navigates.
+          // Preventing it here meant a keyboard user could never follow a link item.
         } else if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           if (target.dataset.action === 'toggle') this._toggleExpanded(id);
+          else if (target.dataset.action === 'navigate') target.click();
           else this._selectValue(value);
         }
       };
@@ -1285,6 +1290,33 @@ export class UISidebar extends ElementBase {
     if (!handle) return;
     handle.onkeydown = (event) => this._handleResizeKey(event);
     handle.onpointerdown = (event) => this._startResize(event);
+  }
+
+  /**
+   * Link items dispatch a cancelable `navigate` event before the browser follows them. Calling
+   * `preventDefault()` on it (or setting `navigation="client"`) keeps the page and leaves routing to
+   * the app; without that a single-page app got `select` and then a full page reload. Clicks that
+   * open a new tab or window (modifier keys, middle button, a `target` other than `_self`) are
+   * always left to the browser.
+   */
+  private _handleNavigate(event: MouseEvent, link: HTMLElement, value: string): void {
+    const href = link.getAttribute('href') || '';
+    const linkTarget = (link.getAttribute('target') || '').trim();
+    const opensElsewhere =
+      event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || (event.button ?? 0) !== 0 ||
+      (!!linkTarget && linkTarget !== '_self');
+    if (opensElsewhere) return;
+
+    const items = this._flattenItems(this._collectItems());
+    const index = items.findIndex((item) => item.value === value);
+    const item = items[index];
+    const navigateEvent = new CustomEvent('navigate', {
+      detail: { index, value, label: item?.label || value, href, item },
+      bubbles: true,
+      cancelable: true
+    });
+    const allowed = this.dispatchEvent(navigateEvent);
+    if (!allowed || this.getAttribute('navigation') === 'client') event.preventDefault();
   }
 
   private _toggleExpanded(id: string): void {

@@ -562,7 +562,10 @@ describe('floating interaction utilities', () => {
     await waitFor(() => expect(document.activeElement).toBe(getByTestId('advanced-item-0')));
     fireEvent.keyDown(trigger, { key: 'Enter' });
     expect(getByTestId('advanced-floating')).toBeTruthy();
-    expect(getByTestId('advanced-transition').textContent).toBe('open');
+    // useTransition goes 'initial' -> 'open' on the next animation frame: wait for it instead of
+    // reading it synchronously (that only passed when the frame had already run; CI under React 19
+    // read 'initial').
+    await waitFor(() => expect(getByTestId('advanced-transition').textContent).toBe('open'));
 
     fireEvent.keyDown(document.activeElement || floating, { key: 'a' });
     await waitFor(() => expect(getByTestId('typing').textContent).toBe('true'));

@@ -56,4 +56,23 @@ describe('Pagination wrapper', () => {
       expect(el?.getAttribute('variant')).toBe('flat');
     });
   });
+
+  it('renders every page on its first render, with no tick in between', () => {
+    const { container } = render(<Pagination page={1} count={3} />);
+    const el = container.querySelector('ui-pagination') as HTMLElement;
+    const pages = Array.from(el.shadowRoot?.querySelectorAll('button[data-page]:not([aria-label])') || []).map((b) => b.textContent);
+    expect(pages).toEqual(['1', '2', '3']);
+    const next = el.shadowRoot?.querySelector('button[aria-label="Next"]') as HTMLButtonElement;
+    expect(next.disabled).toBe(false);
+  });
+
+  it('keeps focus on Next after paging with it', () => {
+    const { container } = render(<Pagination page={1} count={4} />);
+    const el = container.querySelector('ui-pagination') as HTMLElement;
+    const next = () => el.shadowRoot?.querySelector('button[aria-label="Next"]') as HTMLButtonElement;
+    next().focus();
+    next().click();
+    expect(el.getAttribute('page')).toBe('2');
+    expect(el.shadowRoot?.activeElement).toBe(next());
+  });
 });

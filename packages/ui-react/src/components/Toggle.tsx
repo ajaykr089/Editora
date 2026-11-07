@@ -8,6 +8,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type ToggleDetail = {
@@ -96,6 +98,10 @@ export const Toggle = React.forwardRef<HTMLElement, ToggleProps>(function Toggle
     syncStringAttribute(el, 'icon-on', iconOn || null);
     syncStringAttribute(el, 'icon-off', iconOff || null);
   }, [pressed, disabled, loading, headless, required, size, variant, tone, shape, elevation, name, value, iconOn, iconOff]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'pressed', value: whenHandled([onInput, onChange], typeof pressed === 'boolean' ? pressed : undefined), events: ['change', 'input'] });
 
   return createUIElement('ui-toggle', { ref, ...rest }, children);
 });

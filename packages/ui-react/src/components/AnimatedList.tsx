@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/animated-list';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type AnimatedListEffect =
   | 'fade-up'
@@ -142,6 +142,7 @@ const AnimatedListRoot = React.forwardRef<AnimatedListElement, AnimatedListProps
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
     syncAttr('padding', normalizeLength(padding));
     syncAttr('gap', normalizeLength(gap));
+    flushElementRender(el);
   }, [
     effect,
     animation,

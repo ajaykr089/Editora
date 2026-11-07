@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import '@editora/ui-core/data-table';
-import { createUIElement, useForwardedHostRef } from './_internals';
+import { createUIElement, useForwardedHostRef, useIsomorphicLayoutEffect } from './_internals';
 
 export type DataTableSortDirection = 'asc' | 'desc';
 export type DataTableState = 'idle' | 'loading' | 'error' | 'success';
@@ -177,7 +177,7 @@ export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function 
 
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 

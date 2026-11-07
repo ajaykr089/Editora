@@ -90,7 +90,8 @@ describe('Rating Component', () => {
     variants.forEach(variant => {
       const { container } = render(<Rating variant={variant as any} />);
       const ratingElement = container.querySelector('ui-rating');
-      expect(ratingElement?.getAttribute('variant')).toBe(variant);
+      // The element drops the attribute for its default value.
+      expect(ratingElement?.getAttribute('variant')).toBe(variant === 'default' ? null : variant);
     });
   });
 
@@ -100,7 +101,8 @@ describe('Rating Component', () => {
     sizes.forEach(size => {
       const { container } = render(<Rating size={size as any} />);
       const ratingElement = container.querySelector('ui-rating');
-      expect(ratingElement?.getAttribute('size')).toBe(size);
+      // The element drops the attribute for its default value.
+      expect(ratingElement?.getAttribute('size')).toBe(size === 'md' ? null : size);
     });
   });
 
@@ -130,7 +132,8 @@ describe('Rating Component', () => {
     shapes.forEach(shape => {
       const { container } = render(<Rating shape={shape as any} />);
       const ratingElement = container.querySelector('ui-rating');
-      expect(ratingElement?.getAttribute('shape')).toBe(shape);
+      // The element drops the attribute for its default value.
+      expect(ratingElement?.getAttribute('shape')).toBe(shape === 'rounded' ? null : shape);
     });
   });
 

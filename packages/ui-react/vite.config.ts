@@ -66,6 +66,10 @@ function markClientEntries() {
 
 export default defineConfig({
   plugins: [markClientEntries()],
+  resolve: {
+    // Inlined from source (it is a self-contained string): see the external list below.
+    alias: [{ find: /^@editora\/ui-core\/preload$/, replacement: path.resolve(__dirname, '../ui-core/src/preload.ts') }],
+  },
   build: {
     lib: {
       entry: {
@@ -87,7 +91,9 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime', /^@editora\/ui-core(\/.*)?$/, '@editora/toast'],
+      // @editora/ui-core/preload is a plain CSS string: bundle it so the server entry still reaches
+      // nothing but react (server-entry.dist.test.ts).
+      external: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime', /^@editora\/ui-core(?!\/preload$)(\/.*)?$/, '@editora/toast'],
       onwarn(warning, warn) {
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && /use client/i.test(warning.message)) {
           return;

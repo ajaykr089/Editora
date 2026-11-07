@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tooltip';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -61,24 +61,24 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const openHandler = () => {
+    const openHandler = hostOnly(() => {
       onOpen?.();
-    };
+    });
 
-    const closeHandler = () => {
+    const closeHandler = hostOnly(() => {
       onClose?.();
-    };
+    });
 
-    const changeHandler = (event: Event) => {
+    const changeHandler = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<TooltipChangeDetail>).detail;
       if (detail && typeof detail.open === 'boolean') {
         onOpenChange?.(detail.open);
       }
-    };
+    });
 
     el.addEventListener('open', openHandler as EventListener);
     el.addEventListener('close', closeHandler as EventListener);
@@ -125,6 +125,7 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
 
     if (typeof arrow === 'boolean') syncAttr('arrow', arrow ? 'true' : 'false');
     else syncAttr('arrow', null);
+    flushElementRender(el);
   }, [text, placement, open, disabled, headless, variant, size, tone, delay, closeDelay, trigger, offset, interactive, arrow]);
 
   return createUIElement('ui-tooltip', { ref, ...rest }, children);

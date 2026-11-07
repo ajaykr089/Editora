@@ -209,6 +209,146 @@ const style = `
     display: none !important;
   }
 
+  /* App shell: the layout is the page frame itself. No outer box, full viewport height, panels
+     unframed so the components in them (AppHeader, Sidebar, Card) bring their own chrome instead
+     of sitting in boxes inside boxes; only the content area scrolls. */
+  :host([variant="shell"]) .layout {
+    height: var(--ui-layout-shell-height, 100dvh);
+    max-width: none;
+    padding: 0;
+    gap: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  :host([variant="shell"]) .header,
+  :host([variant="shell"]) .footer,
+  :host([variant="shell"]) .panel {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* Components in the shell are flush with it: the shell draws one divider per edge, and the
+     AppHeader / Sidebar inside it drop their own outer border and radius (they read these
+     inherited --base-* tokens). */
+  :host([variant="shell"]) .header {
+    padding: 0;
+    border-block-end: var(--ui-layout-border);
+    --base-app-header-radius: 0;
+    --base-app-header-border: 0 solid transparent;
+  }
+
+  :host([variant="shell"]) .sidebar-panel,
+  :host([data-drawer]) .sidebar-panel {
+    --base-sidebar-radius: 0;
+    --base-sidebar-border: 0 solid transparent;
+    --base-sidebar-outline: none;
+  }
+
+  :host([variant="shell"]) .sidebar-panel {
+    border-inline-end: var(--ui-layout-border);
+  }
+
+  :host([variant="shell"][sidebar-side="end"]) .sidebar-panel {
+    border-inline-end: 0;
+    border-inline-start: var(--ui-layout-border);
+  }
+
+  :host([variant="shell"]) .aside-panel {
+    border-inline-start: var(--ui-layout-border);
+  }
+
+  :host([variant="shell"]) .footer {
+    border-block-start: var(--ui-layout-border);
+  }
+
+  :host([variant="shell"]) .body {
+    min-height: 0;
+    gap: 0;
+  }
+
+  :host([variant="shell"]) .panel {
+    min-height: 0;
+    padding: 0;
+    overflow: auto;
+  }
+
+  :host([variant="shell"]) .content-panel {
+    padding: var(--ui-layout-content-padding);
+  }
+
+  :host([variant="shell"]) .sidebar-panel ::slotted(*),
+  :host([variant="shell"]) .aside-panel ::slotted(*) {
+    block-size: 100%;
+  }
+
+  /* Off-canvas sidebar on narrow screens (variant="shell", or mobile-sidebar="drawer"). */
+  .backdrop {
+    display: none;
+  }
+
+  :host([data-drawer]) .body {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :host([data-drawer]) .sidebar-panel {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: var(--ui-layout-drawer-z, 1000);
+    inline-size: var(--ui-layout-drawer-width, auto);
+    max-inline-size: 86vw;
+    max-block-size: none;
+    min-height: 0;
+    padding: 0;
+    overflow: auto;
+    border: 0;
+    border-radius: 0;
+    background: var(--ui-layout-surface);
+    box-shadow: 0 24px 48px rgba(2, 6, 23, 0.24);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 200ms ease, visibility 0s linear 200ms;
+  }
+
+  :host([data-drawer][sidebar-side="end"]) .sidebar-panel {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    transform: translateX(100%);
+  }
+
+  :host([data-drawer][sidebar-open]) .sidebar-panel {
+    transform: none;
+    visibility: visible;
+    transition: transform 200ms ease;
+  }
+
+  :host([data-drawer][sidebar-open]) .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--ui-layout-drawer-z, 1000) - 1);
+    background: var(--ui-layout-backdrop, rgba(15, 23, 42, 0.45));
+  }
+
+  :host([data-drawer]) .sidebar-panel ::slotted(*) {
+    block-size: 100%;
+  }
+
+  :host([data-drawer]) .sidebar-panel {
+    border: 0 !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :host([data-drawer]) .sidebar-panel,
+    :host([data-drawer][sidebar-open]) .sidebar-panel {
+      transition: none;
+    }
+  }
+
   @media (max-width: 980px) {
     .body {
       grid-template-columns: minmax(0, 1fr) !important;
@@ -286,6 +426,34 @@ function normalizeTrackSize(value: string | null, fallback: string): string {
   return raw;
 }
 
+function deepActiveElement(): HTMLElement | null {
+  let active = (typeof document !== 'undefined' ? document.activeElement : null) as HTMLElement | null;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
+  return active;
+}
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** First focusable element in a slot's content, looking into open shadow roots. */
+function firstFocusable(slot: HTMLSlotElement | null): HTMLElement | null {
+  const search = (root: ParentNode): HTMLElement | null => {
+    for (const el of Array.from(root.querySelectorAll<HTMLElement>('*'))) {
+      if (el.matches(FOCUSABLE)) return el;
+      if (el.shadowRoot) {
+        const inner = search(el.shadowRoot);
+        if (inner) return inner;
+      }
+    }
+    return null;
+  };
+  for (const el of slot?.assignedElements({ flatten: true }) || []) {
+    if ((el as HTMLElement).matches(FOCUSABLE)) return el as HTMLElement;
+    const found = search(el) || ((el as HTMLElement).shadowRoot ? search((el as HTMLElement).shadowRoot!) : null);
+    if (found) return found;
+  }
+  return null;
+}
+
 export class UILayout extends ElementBase {
   static get observedAttributes() {
     return [
@@ -297,7 +465,10 @@ export class UILayout extends ElementBase {
       'collapsed',
       'headless',
       'sidebar-width',
-      'aside-width'
+      'aside-width',
+      'sidebar-open',
+      'mobile-sidebar',
+      'drawer-breakpoint'
     ];
   }
 
@@ -315,20 +486,175 @@ export class UILayout extends ElementBase {
   private _asideSlot: HTMLSlotElement | null = null;
   private _footerSlot: HTMLSlotElement | null = null;
   private _lastLayoutSignature = '';
+  private _media: MediaQueryList | null = null;
+  private _mediaQuery = '';
+  private _narrow = false;
+  private _restoreFocus: HTMLElement | null = null;
+  private _drawerWasOpen = false;
 
   constructor() {
     super();
     this._onSlotChange = this._onSlotChange.bind(this);
+    this._onMediaChange = this._onMediaChange.bind(this);
+    this._onHostKeyDown = this._onHostKeyDown.bind(this);
+    this._onMenuTrigger = this._onMenuTrigger.bind(this);
+    this._onRootClick = this._onRootClick.bind(this);
+    this._onSidebarActivate = this._onSidebarActivate.bind(this);
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this._watchViewport();
+    this.addEventListener('keydown', this._onHostKeyDown);
+    this.addEventListener('menu-trigger', this._onMenuTrigger);
+    this.addEventListener('select', this._onSidebarActivate);
+    this.addEventListener('click', this._onSidebarActivate);
+    this.root.addEventListener('click', this._onRootClick);
     queueMicrotask(() => this._syncShell({ emit: false }));
   }
 
   override disconnectedCallback(): void {
     this._detachSlotHandlers();
+    this._media?.removeEventListener?.('change', this._onMediaChange);
+    this._media = null;
+    this.removeEventListener('keydown', this._onHostKeyDown);
+    this.removeEventListener('menu-trigger', this._onMenuTrigger);
+    this.removeEventListener('select', this._onSidebarActivate);
+    this.removeEventListener('click', this._onSidebarActivate);
+    this.root.removeEventListener('click', this._onRootClick);
     super.disconnectedCallback();
+  }
+
+  /** True while the sidebar is an off-canvas drawer (narrow viewport and drawer behaviour on). */
+  get drawerActive(): boolean {
+    return this.hasAttribute('data-drawer');
+  }
+
+  get sidebarOpen(): boolean {
+    return this.hasAttribute('sidebar-open');
+  }
+
+  set sidebarOpen(value: boolean) {
+    this.toggleAttribute('sidebar-open', !!value);
+  }
+
+  openSidebar(): void {
+    this._setSidebarOpen(true, 'api');
+  }
+
+  closeSidebar(): void {
+    this._setSidebarOpen(false, 'api');
+  }
+
+  private _drawerWanted(): boolean {
+    const mobile = this.getAttribute('mobile-sidebar');
+    if (mobile === 'drawer') return true;
+    if (mobile === 'stack') return false;
+    return this.getAttribute('variant') === 'shell';
+  }
+
+  private _watchViewport(): void {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const raw = Number(this.getAttribute('drawer-breakpoint'));
+    const breakpoint = Number.isFinite(raw) && raw > 0 ? raw : 980;
+    const query = `(max-width: ${breakpoint}px)`;
+    if (this._media && this._mediaQuery === query) return;
+    this._media?.removeEventListener?.('change', this._onMediaChange);
+    this._mediaQuery = query;
+    this._media = window.matchMedia(query);
+    this._media.addEventListener?.('change', this._onMediaChange);
+    this._narrow = !!this._media.matches;
+  }
+
+  private _onMediaChange(): void {
+    this._narrow = !!this._media?.matches;
+    this._syncShell({ emit: true });
+  }
+
+  private _setSidebarOpen(open: boolean, source: string): void {
+    if (this.sidebarOpen === open) return;
+    this.toggleAttribute('sidebar-open', open);
+    this.dispatchEvent(new CustomEvent('sidebar-open-change', { detail: { open, source }, bubbles: true, composed: true }));
+  }
+
+  private _onMenuTrigger(): void {
+    if (!this.drawerActive) return;
+    this._setSidebarOpen(!this.sidebarOpen, 'menu');
+  }
+
+  private _onHostKeyDown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this.drawerActive || !this.sidebarOpen || event.defaultPrevented) return;
+    event.preventDefault();
+    this._setSidebarOpen(false, 'escape');
+  }
+
+  private _onRootClick(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (target?.classList?.contains('backdrop')) this._setSidebarOpen(false, 'backdrop');
+  }
+
+  // Picking a link or item in the drawer closes it, as navigation drawers do.
+  private _onSidebarActivate(event: Event): void {
+    if (!this.drawerActive || !this.sidebarOpen) return;
+    const inSidebar = event.composedPath().some((node) => node instanceof HTMLElement && node.getAttribute('slot') === 'sidebar' && node.parentElement === this);
+    if (!inSidebar) return;
+    if (event.type === 'click') {
+      const link = event.composedPath().find((node) => node instanceof HTMLAnchorElement && node.hasAttribute('href'));
+      if (!link) return;
+    }
+    this._setSidebarOpen(false, 'navigate');
+  }
+
+  private _syncDrawer(state: LayoutShellState): void {
+    const drawer = this._drawerWanted() && this._narrow && state.hasSidebarContent;
+    this.toggleAttribute('data-drawer', drawer);
+    if (!drawer && this.sidebarOpen) this._setSidebarOpen(false, 'viewport');
+    const open = drawer && this.sidebarOpen;
+    const panel = this._sidebarPanel;
+    if (panel) {
+      if (drawer) {
+        panel.hidden = false;
+        panel.setAttribute('role', 'dialog');
+        panel.setAttribute('aria-modal', 'true');
+        panel.setAttribute('aria-label', this.getAttribute('sidebar-label') || 'Navigation');
+        panel.setAttribute('tabindex', '-1');
+        if (!open) panel.setAttribute('inert', '');
+        else panel.removeAttribute('inert');
+      } else {
+        panel.removeAttribute('role');
+        panel.removeAttribute('aria-modal');
+        panel.removeAttribute('aria-label');
+        panel.removeAttribute('tabindex');
+        panel.removeAttribute('inert');
+      }
+    }
+    // While the drawer is open the rest of the shell is inert (a modal drawer).
+    [this._headerEl, this._contentPanel, this._asidePanel, this._footerEl].forEach((el) => {
+      if (!el) return;
+      if (open) el.setAttribute('inert', '');
+      else el.removeAttribute('inert');
+    });
+    // Tell menu buttons in the header whether the drawer is open (aria-expanded).
+    (this._headerSlot?.assignedElements({ flatten: true }) || []).forEach((el) => {
+      const headers = el.matches('ui-app-header') ? [el] : Array.from(el.querySelectorAll('ui-app-header'));
+      headers.forEach((header) => {
+        if (drawer) header.setAttribute('menu-expanded', open ? 'true' : 'false');
+        else header.removeAttribute('menu-expanded');
+      });
+    });
+
+    // Focus moves into the drawer when it opens and back to where it was when it closes.
+    if (open && !this._drawerWasOpen) {
+      const active = deepActiveElement();
+      this._restoreFocus = active && active !== document.body ? active : null;
+      const target = firstFocusable(this._sidebarSlot) || panel;
+      queueMicrotask(() => target?.focus({ preventScroll: true }));
+    } else if (!open && this._drawerWasOpen) {
+      const back = this._restoreFocus;
+      this._restoreFocus = null;
+      if (back?.isConnected) back.focus({ preventScroll: true });
+    }
+    this._drawerWasOpen = open;
   }
 
   collapse(): void {
@@ -340,6 +666,10 @@ export class UILayout extends ElementBase {
   }
 
   toggleSidebar(): void {
+    if (this.drawerActive) {
+      this._setSidebarOpen(!this.sidebarOpen, 'api');
+      return;
+    }
     if (this.collapsed) this.expand();
     else this.collapse();
   }
@@ -355,6 +685,7 @@ export class UILayout extends ElementBase {
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
+    if (name === 'drawer-breakpoint' && this.isConnected) this._watchViewport();
     if (name === 'variant' || name === 'density' || name === 'max-width' || name === 'headless') {
       super.attributeChangedCallback(name, oldValue, newValue);
       queueMicrotask(() => this._syncShell({ emit: false }));
@@ -466,7 +797,10 @@ export class UILayout extends ElementBase {
       bodyVisible,
       layout,
       stack,
-      sidebarTrack: sidebarVisible ? normalizeTrackSize(this.getAttribute('sidebar-width'), 'clamp(220px, 22vw, 320px)') : '0px',
+      // In the shell the column follows the sidebar's own width (no gap before the divider).
+      sidebarTrack: sidebarVisible
+        ? normalizeTrackSize(this.getAttribute('sidebar-width'), this.getAttribute('variant') === 'shell' ? 'auto' : 'clamp(220px, 22vw, 320px)')
+        : '0px',
       asideTrack: asideVisible ? normalizeTrackSize(this.getAttribute('aside-width'), 'clamp(240px, 26vw, 360px)') : '0px'
     };
   }
@@ -496,6 +830,8 @@ export class UILayout extends ElementBase {
       this._bodyEl.classList.remove('stack');
     }
 
+    this._syncDrawer(state);
+
     const signature = this._signature(state);
     if (options.emit && signature !== this._lastLayoutSignature) {
       this._emitLayoutChange(state);
@@ -522,6 +858,7 @@ export class UILayout extends ElementBase {
           <section class="panel sidebar-panel" part="sidebar">
             <slot name="sidebar"></slot>
           </section>
+          <div class="backdrop" part="backdrop" aria-hidden="true"></div>
           <section class="panel content-panel" part="content">
             <slot name="content"></slot>
             <slot></slot>

@@ -60,7 +60,26 @@ const CLOCK_ICON = `
   </svg>
 `;
 
+// The hour/minute/meridiem selects. Shared by the popover and the inline panel: the inline panel
+// used only the host stylesheet, which lacked these rules, so its selects were unstyled browser
+// defaults (19px tall, under the 24px WCAG 2.2 target size).
+const TIME_GRID_CSS = `
+  .time-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .time-grid[data-meridiem="true"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .time-grid label { font-size: 11px; color: var(--ui-dp-muted, #526175); font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
+  .time-grid select {
+    min-block-size: 34px;
+    border: 1px solid color-mix(in srgb, var(--ui-dtp-border, #cbd5e1) 84%, transparent);
+    border-radius: 8px;
+    padding: 0 8px;
+    background: color-mix(in srgb, var(--ui-dtp-bg, #fff) 95%, transparent);
+    color: var(--ui-dp-text, #0f172a);
+    font: 600 13px/1 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+`;
+
 const style = `
+${TIME_GRID_CSS}
   :host {
     --ui-dtp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-dtp-surface: linear-gradient(
@@ -430,18 +449,7 @@ const overlayStyle = `
     block-size: 16px;
     pointer-events: none;
   }
-  .time-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .time-grid[data-meridiem="true"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .time-grid label { font-size: 11px; color: var(--ui-dp-muted, #526175); font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
-  .time-grid select {
-    min-block-size: 34px;
-    border: 1px solid color-mix(in srgb, var(--ui-dtp-border, #cbd5e1) 84%, transparent);
-    border-radius: 8px;
-    padding: 0 8px;
-    background: color-mix(in srgb, var(--ui-dtp-bg, #fff) 95%, transparent);
-    color: var(--ui-dp-text, #0f172a);
-    font: 600 13px/1 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  }
+${TIME_GRID_CSS}
   .footer { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
   .footer[hidden] { display: none !important; }
   .action {

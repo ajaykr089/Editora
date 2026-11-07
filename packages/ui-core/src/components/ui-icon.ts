@@ -1,5 +1,5 @@
 import { ElementBase } from '../ElementBase';
-import { getIcon } from '../icons';
+import { getIcon, iconsLoaded, whenIconsLoaded } from '../icons';
 
 const style = `
   :host {
@@ -271,6 +271,8 @@ export class UIIcon extends ElementBase {
     else this.style.removeProperty('--ui-icon-stroke-width');
   }
 
+  private _waitingForIcons = false;
+
   protected override render(): void {
     this._syncDynamicVars();
 
@@ -297,6 +299,16 @@ export class UIIcon extends ElementBase {
         })
       : '';
     const hasIcon = !!iconMarkup;
+    // The built-in set is still loading: keep the icon's box empty (no fallback letter flashing)
+    // and render again when it arrives.
+    const pending = !!name && !hasIcon && !iconsLoaded();
+    if (pending && !this._waitingForIcons) {
+      this._waitingForIcons = true;
+      whenIconsLoaded(() => {
+        this._waitingForIcons = false;
+        if (this.isConnected) this.requestRender();
+      });
+    }
 
     const ariaAttrs = decorative
       ? 'aria-hidden="true" role="presentation"'
@@ -306,14 +318,14 @@ export class UIIcon extends ElementBase {
       <style>${style}</style>
       <span class="icon" part="icon" ${ariaAttrs}>
         <span class="glyph" part="glyph">
-          ${hasIcon ? iconMarkup : `<span class="fallback" part="fallback">${escapeHtml((name || '?').slice(0, 1).toUpperCase())}</span>`}
-          ${!hasIcon ? '<slot></slot>' : ''}
+          ${hasIcon ? iconMarkup : pending ? '' : `<span class="fallback" part="fallback">${escapeHtml((name || '?').slice(0, 1).toUpperCase())}</span>`}
+          ${!hasIcon && !pending ? '<slot></slot>' : ''}
         </span>
         ${this.hasAttribute('badge') ? '<span class="badge" part="badge" aria-hidden="true"></span>' : ''}
       </span>
     `);
 
-    if (name !== this._lastName) {
+    if (name !== this._lastName && !pending) {
       this.dispatchEvent(
         new CustomEvent('iconchange', {
           detail: { name, found: hasIcon },

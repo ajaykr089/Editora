@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/panel-group';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -45,7 +45,7 @@ export const PanelGroup = React.forwardRef<HTMLElement, PanelGroupProps>(functio
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -76,6 +76,7 @@ export const PanelGroup = React.forwardRef<HTMLElement, PanelGroupProps>(functio
     else el.removeAttribute('storage-key');
     if (autoSave) el.setAttribute('auto-save', '');
     else el.removeAttribute('auto-save');
+    flushElementRender(el);
   }, [orientation, storageKey, autoSave]);
 
   return createUIElement('ui-panel-group', { ref, ...rest }, children);
@@ -107,6 +108,7 @@ export const Panel = React.forwardRef<HTMLElement, PanelProps>(function Panel(
     syncAttr('min-size', minSize != null ? String(minSize) : null);
     syncAttr('max-size', maxSize != null ? String(maxSize) : null);
     syncAttr('collapsed-size', collapsedSize != null ? String(collapsedSize) : null);
+    flushElementRender(el);
   }, [collapsed, collapsedSize, maxSize, minSize, size]);
 
   return createUIElement('ui-panel', { ref, ...rest }, children);
@@ -128,6 +130,7 @@ export const Splitter = React.forwardRef<HTMLElement, SplitterProps>(function Sp
     else el.removeAttribute('orientation');
     if (ariaLabel) el.setAttribute('aria-label', ariaLabel);
     else el.removeAttribute('aria-label');
+    flushElementRender(el);
   }, [ariaLabel, disabled, orientation]);
 
   return createUIElement('ui-splitter', { ref, ...rest }, children);

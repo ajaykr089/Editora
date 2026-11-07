@@ -641,6 +641,7 @@ export class UITabs extends ElementBase {
   private _isSyncing = false;
   private _isSyncingSelectionAttributes = false;
   private _focusIndex = -1;
+  private _renderedSignature: string | null = null;
 
   constructor() {
     super();
@@ -657,6 +658,13 @@ export class UITabs extends ElementBase {
 
     this._observer = new MutationObserver(() => {
       if (this._isSyncing) return;
+      // Panel content re-renders all the time (React re-renders, live data). Rebuilding the tab
+      // buttons for those dropped keyboard focus to <body>, so only rebuild when the tabs
+      // themselves changed; anything else just re-syncs selection and panels.
+      if (this._renderedSignature != null && this._modelSignature(this._tabsModel()) === this._renderedSignature) {
+        this._syncSelectionUi();
+        return;
+      }
       this.requestRender();
     });
 
@@ -722,12 +730,18 @@ export class UITabs extends ElementBase {
     else this.setAttribute('selected', normalized);
   }
 
+  // Direct children only: a slot only takes the host's own children, and a descendant query also
+  // picked up the tabs and panels of a ui-tabs nested inside one of this element's panels.
   private _sourceTabs(): HTMLElement[] {
-    return Array.from(this.querySelectorAll('[slot="tab"]')) as HTMLElement[];
+    return Array.from(this.children).filter((node) => node.getAttribute('slot') === 'tab') as HTMLElement[];
   }
 
   private _sourcePanels(): HTMLElement[] {
-    return Array.from(this.querySelectorAll('[slot="panel"]')) as HTMLElement[];
+    return Array.from(this.children).filter((node) => node.getAttribute('slot') === 'panel') as HTMLElement[];
+  }
+
+  private _modelSignature(model: TabModel[]): string {
+    return JSON.stringify(model.map((tab) => [tab.value, tab.label, tab.icon, tab.disabled]));
   }
 
   private _tabsModel(): TabModel[] {
@@ -949,7 +963,8 @@ export class UITabs extends ElementBase {
         const tab = model[index];
         const active = index === selectedIndex;
 
-        panel.id = tab?.panelId || `${this._uid}-panel-${index}`;
+        // Keep an id the author gave the panel (links and tests target it); only fill in a missing one.
+        if (!panel.id || panel.id.startsWith(`${this._uid}-panel-`)) panel.id = tab?.panelId || `${this._uid}-panel-${index}`;
         panel.setAttribute('role', 'tabpanel');
         panel.setAttribute('tabindex', active ? '0' : '-1');
         panel.setAttribute('aria-hidden', active ? 'false' : 'true');
@@ -1110,6 +1125,9 @@ export class UITabs extends ElementBase {
 
   protected override render(): void {
     const model = this._tabsModel();
+    const activeTab = this.root.activeElement as HTMLElement | null;
+    const hadTabFocus = !!activeTab?.classList?.contains('tab');
+    this._renderedSignature = this._modelSignature(model);
     const selectedIndex = this._resolveSelectedIndex(model);
     const focusIndex = this._resolveFocusIndex(model, selectedIndex);
 
@@ -1164,6 +1182,12 @@ export class UITabs extends ElementBase {
 
     this._syncIndicator(selectedIndex);
     this._syncPanels(model, selectedIndex);
+
+    // The buttons were replaced: put focus back on the roving tab instead of letting it fall to <body>.
+    if (hadTabFocus) {
+      const next = this.root.querySelector(`.tab[data-index="${focusIndex}"]`) as HTMLElement | null;
+      next?.focus({ preventScroll: true });
+    }
   }
 }
 

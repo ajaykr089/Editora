@@ -1,0 +1,39 @@
+name: Update visual baselines
+
+# Run by hand after an intended visual change (or once, to create the first baselines). It renders
+# the e2e-ui showcase on the same Linux image CI compares on and uploads the screenshots: download
+# the "visual-baselines" artifact into e2e-ui/tests/visual.spec.ts-snapshots/ and commit them.
+on:
+  workflow_dispatch:
+
+jobs:
+  update:
+    # Must match the visual job in ci.yml (ubuntu-24.04).
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: e2e-ui/package-lock.json
+
+      - name: Install e2e-ui
+        run: npm ci --prefix e2e-ui
+
+      - name: Install Chromium
+        working-directory: e2e-ui
+        run: npx playwright install --with-deps chromium
+
+      - name: Render baselines
+        working-directory: e2e-ui
+        run: npm run update:visual
+
+      - name: Upload baselines
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: e2e-ui/tests/visual.spec.ts-snapshots/*-linux.png
+          retention-days: 30

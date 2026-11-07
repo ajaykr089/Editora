@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/timeline';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -57,6 +57,7 @@ export const Timeline = React.forwardRef<HTMLElement, TimelineProps>(function Ti
 
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [items, variant, headless]);
 
   return createUIElement('ui-timeline', { ref, ...rest }, children);

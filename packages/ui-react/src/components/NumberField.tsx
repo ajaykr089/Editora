@@ -9,6 +9,10 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useIsomorphicLayoutEffect,
+  flushElementRender,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type NumberFieldChangeDetail = {
@@ -17,8 +21,11 @@ type NumberFieldChangeDetail = {
   source: string;
 };
 
-type NumberFieldProps = React.HTMLAttributes<HTMLElement> & {
+type NumberFieldProps = Omit<React.HTMLAttributes<HTMLElement>, 'onInput'> & {
+  /** With onValueChange the field is controlled: a committed value the parent rejects is undone. */
   value?: string | number;
+  /** Starting value of an uncontrolled field (written once, on mount). */
+  defaultValue?: string | number;
   min?: string | number;
   max?: string | number;
   step?: string | number;
@@ -43,7 +50,10 @@ type NumberFieldProps = React.HTMLAttributes<HTMLElement> & {
   suffix?: React.ReactNode;
   incrementTrigger?: React.ReactNode;
   decrementTrigger?: React.ReactNode;
+  /** Committed value (blur, Enter, steppers). */
   onValueChange?: (detail: NumberFieldChangeDetail) => void;
+  /** Every keystroke: the raw text and its parsed number (null while it is not a number yet, e.g. "1."). */
+  onInput?: (detail: { rawValue: string; value: number | null }) => void;
   onInvalidValue?: (reason: string) => void;
 };
 
@@ -76,6 +86,8 @@ export const NumberField = React.forwardRef<HTMLElement, NumberFieldProps>(funct
     decrementTrigger,
     children,
     onValueChange,
+    onInput,
+    defaultValue,
     onInvalidValue,
     ...rest
   },
@@ -88,6 +100,30 @@ export const NumberField = React.forwardRef<HTMLElement, NumberFieldProps>(funct
     if (detail) onValueChange?.(detail);
   }, [onValueChange]);
 
+  const handleInput = React.useCallback((event: Event) => {
+    if (event.target !== event.currentTarget) return;
+    const detail = (event as CustomEvent<{ rawValue?: string; value?: number | null }>).detail;
+    if (detail && typeof detail.rawValue === 'string') onInput?.({ rawValue: detail.rawValue, value: detail.value ?? null });
+  }, [onInput]);
+
+  const defaultApplied = React.useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || defaultApplied.current) return;
+    defaultApplied.current = true;
+    if ((value == null || value === '') && defaultValue != null && defaultValue !== '') {
+      el.setAttribute('value', String(defaultValue));
+      flushElementRender(el);
+    }
+  }, []);
+
+  // Controlled on commit, not per keystroke: partial text such as "1." is not a number yet.
+  useControlledAttribute(ref, {
+    attribute: 'value',
+    value: whenHandled([onValueChange], value == null ? undefined : value === '' ? null : String(value)),
+    events: ['value-change']
+  });
+
   const handleInvalid = React.useCallback((event: Event) => {
     const detail = getCustomEventDetail<{ reason?: string }>(event);
     if (detail?.reason) onInvalidValue?.(detail.reason);
@@ -98,12 +134,14 @@ export const NumberField = React.forwardRef<HTMLElement, NumberFieldProps>(funct
     [
       { type: 'value-change', listener: handleValueChange },
       { type: 'invalid', listener: handleInvalid },
+      { type: 'input', listener: handleInput },
     ],
-    [handleValueChange, handleInvalid]
+    [handleValueChange, handleInvalid, handleInput]
   );
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value != null && value !== '' ? String(value) : null);
+    // Uncontrolled (no value prop): leave the value to the user and to defaultValue.
+    if (value != null) syncStringAttribute(el, 'value', value !== '' ? String(value) : null);
     syncStringAttribute(el, 'min', min != null ? String(min) : null);
     syncStringAttribute(el, 'max', max != null ? String(max) : null);
     syncStringAttribute(el, 'step', step != null ? String(step) : null);

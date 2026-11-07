@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import '@editora/ui-core/pagination';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -62,7 +62,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
 
   React.useImperativeHandle(forwardedRef, () => ref.current as PaginationElement);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -138,7 +138,12 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncAttr('aria-label', ariaLabel ?? null);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [page, count, size, variant, ariaLabel, headless]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'page', value: whenHandled([onPageChange, onChange, onFirst, onPrev, onNext, onLast], typeof page === 'number' && Number.isFinite(page) ? String(page) : undefined), events: ['change'] });
 
   return createUIElement('ui-pagination', { ref, ...rest }, children);
 });

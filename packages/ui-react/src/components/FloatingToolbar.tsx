@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useImperativeHandle } from '
 
 import '@editora/ui-core/floating-toolbar';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 type UIFloatingToolbarElement = HTMLElement & {
   showForAnchorId?: (anchorId: string) => void;
@@ -67,7 +67,7 @@ const FloatingToolbarRoot = React.forwardRef<HTMLElement, FloatingToolbarProps>(
     warnIfElementNotRegistered('ui-floating-toolbar', 'FloatingToolbar');
   }, []);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -146,6 +146,7 @@ const FloatingToolbarRoot = React.forwardRef<HTMLElement, FloatingToolbarProps>(
     }
 
     el.removeAttribute('open');
+    flushElementRender(el);
   }, [
     open,
     anchorId,

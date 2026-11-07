@@ -238,21 +238,33 @@ describe('ui-tabs', () => {
 });
 
 describe('ui-alert-dialog host', () => {
-  it('is hidden from assistive technology while closed, and named while open', async () => {
+  it('is hidden while closed and leaves the dialog role to its panel', async () => {
     const host = await mount('<ui-alert-dialog title="Delete this project?"></ui-alert-dialog>');
     const el = host.querySelector('ui-alert-dialog')!;
 
     expect(el.getAttribute('aria-hidden')).toBe('true');
+    expect(el.hasAttribute('role')).toBe(false);
 
     el.setAttribute('open', '');
     await flush();
     expect(el.hasAttribute('aria-hidden')).toBe(false);
-    expect(el.getAttribute('aria-label')).toBe('Delete this project?');
+    // One alert dialog in the tree: the panel, named by its title. The host is a plain container.
+    expect(el.hasAttribute('role')).toBe(false);
+    expect(el.hasAttribute('aria-label')).toBe(false);
+    const dialogs = el.shadowRoot!.querySelectorAll('[role="alertdialog"]');
+    expect(dialogs).toHaveLength(1);
 
     el.removeAttribute('open');
     await flush();
     expect(el.getAttribute('aria-hidden')).toBe('true');
-    expect(el.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('still names a host that carries a legacy role attribute', async () => {
+    const host = await mount('<ui-alert-dialog role="alertdialog" title="Delete this project?"></ui-alert-dialog>');
+    const el = host.querySelector('ui-alert-dialog')!;
+    el.setAttribute('open', '');
+    await flush();
+    expect(el.getAttribute('aria-label')).toBe('Delete this project?');
   });
 
   it('keeps an author-supplied aria-label', async () => {

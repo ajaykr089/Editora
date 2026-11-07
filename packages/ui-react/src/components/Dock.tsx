@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/dock';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type DockOrientation = 'horizontal' | 'vertical';
 export type DockVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -131,6 +131,7 @@ const DockRoot = React.forwardRef<DockElement, DockProps>(function Dock(
     syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
     syncAttr('radius', radius == null || radius === '' ? null : String(radius));
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
+    flushElementRender(el);
   }, [
     orientation,
     magnification,

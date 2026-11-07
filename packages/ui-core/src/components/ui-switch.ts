@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl, isRequired } from '../primitives/form-control';
 
 const style = `
   :host {
@@ -406,6 +407,18 @@ function hasInteractiveInPath(path: EventTarget[]): boolean {
 }
 
 export class UISwitch extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => (this.checked ? this.getAttribute('value') ?? 'on' : null),
+    getValidity: () => ({
+      valueMissing: isRequired(this) && !this.checked,
+      message: 'Please turn this on if you want to proceed.'
+    }),
+    defaultAttribute: 'checked',
+    onFormDisabled: () => this.requestRender()
+  });
+
   static get observedAttributes() {
     return [
       'checked',
@@ -436,8 +449,22 @@ export class UISwitch extends ElementBase {
     this._onSlotChange = this._onSlotChange.bind(this);
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
     this.root.addEventListener('click', this._onClick as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
@@ -445,6 +472,7 @@ export class UISwitch extends ElementBase {
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this.root.removeEventListener('click', this._onClick as EventListener);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
@@ -472,7 +500,7 @@ export class UISwitch extends ElementBase {
   }
 
   get disabled(): boolean {
-    return this.hasAttribute('disabled') || this.hasAttribute('loading');
+    return this.hasAttribute('disabled') || this.hasAttribute('loading') || !!this._formControl?.disabledByForm;
   }
 
   set disabled(next: boolean) {

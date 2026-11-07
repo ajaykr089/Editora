@@ -226,6 +226,10 @@ For users migrating from other UI libraries:
 - [Component Registry](./COMPONENT_REGISTRY.md) - Machine-readable component inventory
 - [UI React Overview](/docs/ui-react) - Canonical getting started guide
 
+## Testing
+
+Testing Library, Vitest/Jest with jsdom and Playwright setups, shadow-DOM queries and copy-in helpers: see [Testing with Editora UI](./testing.md).
+
 ## Examples
 
 Explore interactive examples in our [Live Playground](/docs/examples/live-examples).

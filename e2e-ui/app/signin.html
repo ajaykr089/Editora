@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:16px;font:14px system-ui;width:360px}</style></head><body>
+<form id="f">
+  <ui-input id="email" label="Email" description="Work address"><input slot="input" name="email" type="email" autocomplete="username"></ui-input>
+  <ui-password-field id="pw" label="Password"><input slot="input" name="password" autocomplete="current-password"></ui-password-field>
+  <button>Sign in</button>
+</form>
+<script type="module">
+await import('@editora/ui-core');
+window.submits = [];
+document.getElementById('f').addEventListener('submit', (e) => { e.preventDefault(); window.submits.push([...new FormData(e.target)].map(([k, v]) => k + '=' + v)); });
+window.ready = true;
+</script></body></html>

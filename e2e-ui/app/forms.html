@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body>
+<form id="f"><fieldset id="fs">
+  <ui-input name="email" value="a@b.c"></ui-input>
+  <ui-textarea name="notes" value="hello"></ui-textarea>
+  <ui-password-field name="pw" value="pw-test-value"></ui-password-field>
+  <ui-number-field name="qty" value="3"></ui-number-field>
+  <ui-select name="kind" value="b"><option value="a">A</option><option value="b">B</option></ui-select>
+  <ui-checkbox name="agree" checked>Agree</ui-checkbox>
+  <ui-checkbox name="news" value="yes">News</ui-checkbox>
+  <ui-switch name="notify" checked></ui-switch>
+  <ui-radio-group name="plan" value="pro"><ui-radio value="free">Free</ui-radio><ui-radio value="pro">Pro</ui-radio></ui-radio-group>
+  <ui-slider name="vol" value="40"></ui-slider>
+  <ui-multi-select name="tags" value='["x","y"]' options='[{"value":"x","label":"X"},{"value":"y","label":"Y"},{"value":"z","label":"Z"}]'></ui-multi-select>
+</fieldset></form>
+<form id="g"><ui-select name="r1" required><option value="">-</option><option value="a">A</option></ui-select><ui-checkbox name="r2" required>Must</ui-checkbox><ui-radio-group name="r3" required><ui-radio value="a">A</ui-radio></ui-radio-group><ui-multi-select name="r4" required options='[{"value":"x","label":"X"}]'></ui-multi-select><ui-textarea name="r5" required></ui-textarea></form>
+<script type="module">
+await import('@editora/ui-core');
+await new Promise((r) => setTimeout(r, 400));
+const f = document.getElementById('f');
+const entries = () => { const o = {}; for (const [k, v] of new FormData(f)) (o[k] ||= []).push(v); return o; };
+const out = { initial: entries() };
+const q = (s) => f.querySelector(s);
+q('ui-textarea').value = 'changed'; q('ui-select').value = 'a'; q('ui-checkbox[name=agree]').checked = false; q('ui-switch').checked = false; q('ui-radio-group').value = 'free'; q('ui-slider').value = 70; q('ui-number-field').value = '9'; q('ui-multi-select').value = ['z'];
+// mark them user-changed so reset restores the defaults
+for (const el of f.querySelectorAll('fieldset > *')) el.dispatchEvent(new CustomEvent('change', { bubbles: true }));
+await new Promise((r) => setTimeout(r, 50));
+out.changed = entries();
+f.reset();
+await new Promise((r) => setTimeout(r, 50));
+out.afterReset = entries();
+document.getElementById('fs').disabled = true;
+await new Promise((r) => setTimeout(r, 50));
+out.disabledViaFieldset = { formData: entries(), select: q('ui-select').disabled, checkbox: q('ui-checkbox').disabled, switch: q('ui-switch').disabled, radio: q('ui-radio-group').disabled, textareaInner: q('ui-textarea').shadowRoot.querySelector('textarea').disabled, pwInner: q('ui-password-field').shadowRoot.querySelector('input').disabled, numInner: q('ui-number-field').shadowRoot.querySelector('input').disabled };
+document.getElementById('fs').disabled = false;
+await new Promise((r) => setTimeout(r, 50));
+out.reenabled = { select: q('ui-select').disabled, checkbox: q('ui-checkbox').disabled, textareaInner: q('ui-textarea').shadowRoot.querySelector('textarea').disabled };
+const g = document.getElementById('g');
+out.requiredInvalid = [...g.children].map((el) => [el.tagName.toLowerCase(), el.matches(':invalid')]);
+out.formValid = g.checkValidity();
+window.result = out;
+</script></body></html>

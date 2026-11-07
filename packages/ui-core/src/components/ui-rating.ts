@@ -420,6 +420,7 @@ function createStarSVG(className?: string): string {
 
 export class UIRating extends ElementBase {
   private _autoAriaLabel = false;
+  private _settingAutoLabel = false;
   static get observedAttributes() {
     return [
       'value',
@@ -486,6 +487,10 @@ export class UIRating extends ElementBase {
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (oldValue === newValue) return;
+
+    // An aria-label that arrives after the element named itself (a framework sets it after mount)
+    // is the author's: without this, the next render took it for the automatic name and dropped it.
+    if (name === 'aria-label' && !this._settingAutoLabel) this._autoAriaLabel = false;
 
     if (name === 'value') {
       const next = Number(newValue);
@@ -914,7 +919,12 @@ export class UIRating extends ElementBase {
     if (ariaLabel) this.setAttribute('aria-label', ariaLabel);
     else if (ariaLabelledBy) this.removeAttribute('aria-label');
     else {
-      this.setAttribute('aria-label', (label || '').trim() || 'Rating');
+      this._settingAutoLabel = true;
+      try {
+        this.setAttribute('aria-label', (label || '').trim() || 'Rating');
+      } finally {
+        this._settingAutoLabel = false;
+      }
       this._autoAriaLabel = true;
     }
 

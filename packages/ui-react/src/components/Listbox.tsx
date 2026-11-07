@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/listbox';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -22,7 +22,7 @@ export const Listbox = React.forwardRef<HTMLElement, ListboxProps>(function List
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const handleCollectionChange = () => onCollectionChange?.();
@@ -45,6 +45,7 @@ export const Listbox = React.forwardRef<HTMLElement, ListboxProps>(function List
     else el.removeAttribute('active-attribute');
     el.container = container ?? null;
     el.items = items ?? null;
+    flushElementRender(el);
   }, [activeAttribute, container, directItemSelector, itemRole, itemSelector, items]);
 
   return createUIElement('ui-listbox', { ref, ...rest }, children);

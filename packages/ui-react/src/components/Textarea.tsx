@@ -9,6 +9,7 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useTextValue,
 } from './_internals';
 
 type TextareaDetail = {
@@ -27,7 +28,12 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'>
 
 export type TextareaProps = BaseProps & {
   value?: string;
+  /** Starting value of an uncontrolled field (written once, on mount). */
+  defaultValue?: string;
+  /** Every keystroke, like React's onChange on <input>. With `value`, the field is controlled. */
   onChange?: (value: string) => void;
+  /** The edit was committed (blur, or Enter in a single-line field). */
+  onCommit?: (value: string) => void;
   onInput?: (value: string) => void;
   onDebouncedInput?: (value: string) => void;
   onClear?: () => void;
@@ -50,6 +56,8 @@ export type TextareaProps = BaseProps & {
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
   description?: string;
+  /** Put the description under the field instead of under the label. */
+  descriptionPosition?: 'above' | 'below';
   autosize?: boolean;
   maxRows?: number;
   showCount?: boolean;
@@ -61,7 +69,9 @@ export type TextareaProps = BaseProps & {
 const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Textarea(
   {
     value,
+    defaultValue,
     onChange,
+    onCommit,
     onInput,
     onDebouncedInput,
     onClear,
@@ -84,6 +94,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     radius,
     label,
     description,
+    descriptionPosition,
     autosize,
     maxRows,
     showCount,
@@ -96,16 +107,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
   forwardedRef
 ) {
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
-
-  const inputHandler = React.useCallback((event: Event) => {
-    const detail = getCustomEventDetail<TextareaDetail>(event);
-    if (detail) onInput?.(detail.value);
-  }, [onInput]);
-
-  const changeHandler = React.useCallback((event: Event) => {
-    const detail = getCustomEventDetail<TextareaDetail>(event);
-    if (detail) onChange?.(detail.value);
-  }, [onChange]);
+  useTextValue(ref, { value, defaultValue, onChange, onInput, onCommit });
 
   const debouncedHandler = React.useCallback((event: Event) => {
     const detail = getCustomEventDetail<TextareaDetail>(event);
@@ -119,16 +121,15 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
   useElementEventListeners(
     ref,
     [
-      { type: 'input', listener: inputHandler },
-      { type: 'change', listener: changeHandler },
       { type: 'debounced-input', listener: debouncedHandler },
       { type: 'clear', listener: clearHandler as EventListener },
     ],
-    [inputHandler, changeHandler, debouncedHandler, clearHandler]
+    [debouncedHandler, clearHandler]
   );
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value != null ? String(value) : null);
+    // Uncontrolled (no value prop): leave the value to the user and to defaultValue.
+    if (value != null) syncStringAttribute(el, 'value', String(value));
     syncBooleanAttribute(el, 'clearable', clearable);
     syncBooleanAttribute(el, 'readonly', readOnly);
     syncBooleanAttribute(el, 'autofocus', autofocus);
@@ -151,6 +152,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     syncStringAttribute(el, 'radius', radius ? String(radius) : null);
     syncStringAttribute(el, 'label', label || null);
     syncStringAttribute(el, 'description', description || null);
+    syncStringAttribute(el, 'description-position', descriptionPosition === 'below' ? 'below' : null);
     syncNumberAttribute(el, 'max-rows', maxRows);
     syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
     syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
@@ -180,7 +182,8 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     showCount,
     density,
     tone,
-    headless
+    headless,
+    descriptionPosition
   ]);
 
   return createUIElement('ui-textarea', { ref, ...rest }, children);

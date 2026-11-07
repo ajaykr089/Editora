@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { hideCloneSource, revealClone } from '../primitives/clone-source';
 import { createPortalContainer } from '../portal';
 import { findTypeaheadMatch } from '../primitives/collection';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
@@ -887,6 +888,7 @@ export class UIMenubar extends ElementBase {
   private _syncStructure(): void {
     this._items = this._itemSlot ? (this._itemSlot.assignedElements({ flatten: true }) as MenubarItem[]) : [];
     this._contents = this._contentSlot ? (this._contentSlot.assignedElements({ flatten: true }) as HTMLElement[]) : [];
+    this._contents.forEach((source) => hideCloneSource(source));
 
     const selected = this._selectedIndex();
     const focusIndex = resolveRovingFocusIndex(this._items, {
@@ -1076,7 +1078,7 @@ export class UIMenubar extends ElementBase {
     this._applyPanelTokens(portal);
 
     if (source) {
-      const cloned = source.cloneNode(true) as HTMLElement;
+      const cloned = revealClone(source.cloneNode(true) as HTMLElement);
       cloned.setAttribute('slot', 'menu');
       panel.appendChild(cloned);
     }

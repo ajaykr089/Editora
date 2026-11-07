@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/inline-edit';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -26,7 +26,7 @@ export const InlineEdit = React.forwardRef<HTMLElement, InlineEditProps>(functio
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const handleChange = (event: Event) => {
@@ -64,6 +64,7 @@ export const InlineEdit = React.forwardRef<HTMLElement, InlineEditProps>(functio
     else el.removeAttribute('disabled');
     if (readOnly) el.setAttribute('readonly', '');
     else el.removeAttribute('readonly');
+    flushElementRender(el);
   }, [value, placeholder, name, editing, multiline, disabled, readOnly]);
 
   return createUIElement('ui-inline-edit', { ref, ...rest }, children);

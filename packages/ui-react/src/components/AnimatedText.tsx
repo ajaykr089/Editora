@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/animated-text';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type BuiltinAnimatedTextEffect =
   | 'fade-up'
@@ -161,6 +161,7 @@ const AnimatedTextRoot = React.forwardRef<AnimatedTextElement, AnimatedTextProps
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
     syncAttr('padding', normalizeLength(padding));
     syncAttr('align', align && align !== 'start' ? align : null);
+    flushElementRender(el);
   }, [
     text,
     effect,

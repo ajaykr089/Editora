@@ -418,7 +418,7 @@ function defaultToneIcon(tone: AlertTone): string {
 
 export class UIAlert extends ElementBase {
   static get observedAttributes() {
-    return ['title', 'description', 'dismissible', 'tone', 'variant', 'layout', 'headless', 'hidden', 'size', 'radius', 'elevation', 'indicator'];
+    return ['title', 'description', 'dismissible', 'tone', 'variant', 'layout', 'headless', 'hidden', 'size', 'radius', 'elevation', 'indicator', 'live'];
   }
 
   private _dismissBtn: HTMLButtonElement | null = null;
@@ -500,8 +500,12 @@ export class UIAlert extends ElementBase {
     const size = normalizeSize(this.getAttribute('size'));
     const elevation = normalizeElevation(this.getAttribute('elevation'));
     const indicator = normalizeIndicator(this.getAttribute('indicator'));
+    // live="false": a static banner that is part of the page, not news. alert/status with
+    // aria-live made every such banner announce itself when the page loaded.
+    const live = this.getAttribute('live') !== 'false';
     const role = tone === 'danger' || tone === 'warning' ? 'alert' : 'status';
     const ariaLive = role === 'alert' ? 'assertive' : 'polite';
+    const liveAttrs = live ? `role="${role}" aria-live="${ariaLive}" aria-atomic="true"` : '';
     const hasTitleSlot = hasSlottedChild(this, 'title');
     const hasDescriptionSlot = hasSlottedChild(this);
     const hasActions = hasSlottedChild(this, 'actions');
@@ -517,7 +521,7 @@ export class UIAlert extends ElementBase {
 
     this.setContent(`
       <style>${style}</style>
-      <section class="alert tone-${tone} variant-${variant} layout-${layout} size-${size} elevation-${elevation} indicator-${indicator}" part="base" role="${role}" aria-live="${ariaLive}" aria-atomic="true">
+      <section class="alert tone-${tone} variant-${variant} layout-${layout} size-${size} elevation-${elevation} indicator-${indicator}" part="base" ${liveAttrs}>
         <div class="row">
           <span class="icon-wrap" part="icon-wrap" aria-hidden="true">
             <span class="icon" part="icon">

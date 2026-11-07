@@ -21,18 +21,37 @@ export function useForwardedHostRef<T extends HTMLElement>(
   return ref;
 }
 
+/**
+ * Wraps a host-event listener so it only runs for events the element itself dispatched.
+ *
+ * Container elements (tabs, dialogs, drawers, menus, sidebars...) hold arbitrary children, and
+ * `change` / `open` / `close` / `select` from those children bubble up to the host: a checkbox in a
+ * tab panel fired the Tabs `onChange` with `undefined` and closed the panel, a dropdown closing
+ * inside a dialog fired the Dialog `onClose`. Events dispatched from inside the host's shadow root
+ * are retargeted to the host, so `target === currentTarget` keeps exactly the element's own events.
+ */
+export function hostOnly<E extends Event = Event>(listener: (event: E) => void): (event: Event) => void {
+  return (event: Event) => {
+    if (event.target !== event.currentTarget) return;
+    listener(event as E);
+  };
+}
+
 export function useElementEventListeners<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   listeners: ElementEventListener[],
-  dependencies: React.DependencyList
+  dependencies: React.DependencyList,
+  options: { hostOnly?: boolean } = {}
 ): void {
-  useEffect(() => {
+  // A layout effect, so the listeners are in place before the attribute-sync effect renders the
+  // element (an element may announce its initial state with an event during that render).
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const activeListeners = listeners.filter(
-      (entry): entry is { type: string; listener: EventListener } => typeof entry.listener === 'function'
-    );
+    const activeListeners = listeners
+      .filter((entry): entry is { type: string; listener: EventListener } => typeof entry.listener === 'function')
+      .map((entry) => (options.hostOnly ? { type: entry.type, listener: hostOnly(entry.listener) } : entry));
 
     activeListeners.forEach(({ type, listener }) => {
       el.addEventListener(type, listener);
@@ -46,6 +65,160 @@ export function useElementEventListeners<T extends HTMLElement>(
   }, [ref, ...dependencies]);
 }
 
+/**
+ * Renders the element now if attribute changes left a render queued for the next microtask. Call it
+ * at the end of a wrapper's attribute-sync layout effect: the element then shows the props on the
+ * same commit instead of its defaults for one tick.
+ */
+export function flushElementRender(el: Element | null | undefined): void {
+  const target = el as (Element & { flushPendingRender?: () => void }) | null | undefined;
+  if (target && typeof target.flushPendingRender === 'function') target.flushPendingRender();
+}
+
+export type ControlledAttribute = {
+  /** The host attribute the prop is written to. */
+  attribute: string;
+  /**
+   * The prop, already in attribute form: a string to write, `true`/`false` for a presence
+   * attribute, `null` for "attribute absent", or `undefined` when the prop was not passed
+   * (uncontrolled: the element keeps whatever the user did).
+   */
+  value: string | boolean | null | undefined;
+  /** Events the element dispatches when it changes that attribute itself. */
+  events: string[];
+};
+
+/**
+ * Makes a prop win over the element's own state, the way React treats `value` on an `<input>`.
+ *
+ * The elements update their own attributes when the user acts (a tab click sets `selected`, a pick
+ * sets `value`, Escape removes `open`) and then dispatch an event. If the parent accepts the change
+ * it re-renders with the new prop and nothing else happens. If it does not (no handler, or it
+ * rejected the value), the attribute used to stay at the element's value, so the UI drifted from
+ * React state. After each such event, once React has handled it, this writes the prop back.
+ */
+/**
+ * The controlled value only when the parent listens for changes. A prop with no handler is the
+ * initial value (the docs and stories use `<Tabs selected={1}>`, `<Switch checked>` that way), so
+ * holding the element to it would freeze the control.
+ */
+export function whenHandled<T>(handlers: unknown[], value: T): T | undefined {
+  return handlers.some((handler) => typeof handler === 'function') ? value : undefined;
+}
+
+export function useControlledAttribute<T extends HTMLElement>(
+  ref: React.RefObject<T | null>,
+  controlled: ControlledAttribute
+): void {
+  const latest = useRef(controlled);
+  useIsomorphicLayoutEffect(() => {
+    latest.current = controlled;
+  });
+
+  const eventKey = controlled.events.join(' ');
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let reconciling = false;
+
+    const reconcile = () => {
+      timer = undefined;
+      const { attribute, value } = latest.current;
+      if (value === undefined || !el.isConnected) return;
+      reconciling = true;
+      try {
+        if (typeof value === 'boolean') {
+          if (el.hasAttribute(attribute) !== value) el.toggleAttribute(attribute, value);
+        } else if (value === null) {
+          if (el.hasAttribute(attribute)) el.removeAttribute(attribute);
+        } else if (el.getAttribute(attribute) !== value) {
+          el.setAttribute(attribute, value);
+        }
+        flushElementRender(el);
+      } finally {
+        reconciling = false;
+      }
+    };
+
+    // A macrotask: by then React has run the onChange handlers and re-rendered with the new prop
+    // if the parent accepted it, so only a rejected change is undone.
+    const onSelfChange = hostOnly(() => {
+      if (reconciling || timer !== undefined) return;
+      timer = setTimeout(reconcile, 0);
+    });
+
+    const types = eventKey.split(' ').filter(Boolean);
+    types.forEach((type) => el.addEventListener(type, onSelfChange));
+    return () => {
+      types.forEach((type) => el.removeEventListener(type, onSelfChange));
+      if (timer !== undefined) clearTimeout(timer);
+    };
+  }, [ref, eventKey]);
+}
+
+export type TextValueProps = {
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  onInput?: (value: string) => void;
+  onCommit?: (value: string) => void;
+};
+
+/**
+ * Value handling for the text fields (Input, Textarea), following React's model for `<input>`:
+ * `onChange` fires on every keystroke (as `onInput` does), `onCommit` when the edit is committed
+ * (blur or Enter: the old meaning of `onChange`), `defaultValue` sets the starting value of an
+ * uncontrolled field, and `value` with a handler is controlled, so a change the parent does not
+ * accept is undone. `value` without any handler stays an initial value, as the docs use it.
+ */
+export function useTextValue<T extends HTMLElement>(ref: React.RefObject<T | null>, props: TextValueProps): void {
+  const { value, defaultValue, onChange, onInput, onCommit } = props;
+  const readValue = (event: Event) => getCustomEventDetail<{ value?: string }>(event)?.value;
+
+  useElementEventListeners(
+    ref,
+    [
+      {
+        type: 'input',
+        listener: (event: Event) => {
+          const next = readValue(event);
+          if (typeof next !== 'string') return;
+          onChange?.(next);
+          onInput?.(next);
+        }
+      },
+      {
+        type: 'change',
+        listener: (event: Event) => {
+          const next = readValue(event);
+          if (typeof next === 'string') onCommit?.(next);
+        }
+      }
+    ],
+    [onChange, onInput, onCommit],
+    { hostOnly: true }
+  );
+
+  // defaultValue: written once, on mount, only for an uncontrolled field.
+  const defaultApplied = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || defaultApplied.current) return;
+    defaultApplied.current = true;
+    if (value == null && defaultValue != null) {
+      el.setAttribute('value', defaultValue);
+      flushElementRender(el);
+    }
+  }, []);
+
+  useControlledAttribute(ref, {
+    attribute: 'value',
+    value: whenHandled([onChange, onInput], value == null ? undefined : String(value)),
+    events: ['input', 'change', 'clear']
+  });
+}
+
 export function useElementAttributes<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   sync: (element: T) => void,
@@ -56,6 +229,7 @@ export function useElementAttributes<T extends HTMLElement>(
     if (!el) return;
 
     sync(el);
+    flushElementRender(el);
   }, [ref, ...dependencies]);
 }
 

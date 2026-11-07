@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/combobox';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -10,7 +10,10 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' 
 };
 
 export type ComboboxProps = BaseProps & {
+  /** The selected value. With onChange/onSelect it is controlled: a pick the parent rejects is undone. */
   value?: string;
+  /** Starting value of an uncontrolled combobox (written once, on mount). */
+  defaultValue?: string;
   open?: boolean;
   state?: 'idle' | 'loading' | 'error' | 'success';
   stateText?: string;
@@ -55,6 +58,7 @@ type ComboboxComponent = React.ForwardRefExoticComponent<ComboboxProps & React.R
 const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combobox(
   {
     value,
+    defaultValue,
     open,
     state,
     stateText,
@@ -94,7 +98,7 @@ const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combo
 
   React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -194,6 +198,7 @@ const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combo
 
     if (value != null) el.setAttribute('value', value);
     else el.removeAttribute('value');
+    flushElementRender(el);
   }, [
     value,
     open,
@@ -218,6 +223,21 @@ const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combo
     noFilter,
     allowCustom
   ]);
+
+  const defaultApplied = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || defaultApplied.current) return;
+    defaultApplied.current = true;
+    if (value == null && defaultValue != null) {
+      el.setAttribute('value', defaultValue);
+      flushElementRender(el);
+    }
+  }, []);
+
+  // The selected value (typing changes the query, not the value), so it is held to the prop on
+  // selection, like Select.
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onChange, onSelect], value == null ? undefined : value), events: ['change', 'select', 'clear'] });
 
   return createUIElement('ui-combobox', { ref, ...rest }, children);
 });

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { hideCloneSource, revealClone } from '../primitives/clone-source';
 import { resolveTriggerControl } from '../primitives/trigger';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
@@ -400,6 +401,7 @@ export class UIMenu extends ElementBase {
     super.connectedCallback();
     this.addEventListener('click', this._onHostClick);
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
+    this._hideSources();
     this._syncOpenState();
     this._syncTriggerA11y();
   }
@@ -484,8 +486,14 @@ export class UIMenu extends ElementBase {
   }
 
   private _onSlotChange(): void {
+    this._hideSources();
     if (!this._isOpen) return;
     this._rebuildPortalContent();
+  }
+
+  private _hideSources(): void {
+    hideCloneSource(this._getContentSource());
+    this._getItemSources().forEach((source) => hideCloneSource(source));
   }
 
   private _syncTriggerA11y(): void {
@@ -669,7 +677,7 @@ export class UIMenu extends ElementBase {
   private _buildLegacyItems(container: HTMLElement): number {
     const items = this._getItemSources();
     items.forEach((source, index) => {
-      const clone = source.cloneNode(true) as HTMLElement;
+      const clone = revealClone(source.cloneNode(true) as HTMLElement);
       clone.removeAttribute('slot');
        if (!clone.getAttribute('role')) clone.setAttribute('role', 'menuitem');
        if (!clone.classList.contains('item')) clone.classList.add('item');
@@ -787,7 +795,7 @@ export class UIMenu extends ElementBase {
     const source = this._getContentSource();
     let itemCount = 0;
     if (source) {
-      const clone = source.cloneNode(true) as HTMLElement;
+      const clone = revealClone(source.cloneNode(true) as HTMLElement);
       clone.removeAttribute('slot');
       menu.appendChild(clone);
     } else {

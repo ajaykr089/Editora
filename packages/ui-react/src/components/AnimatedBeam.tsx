@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/animated-beam';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type AnimatedBeamVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
 export type AnimatedBeamTone = 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -207,6 +207,7 @@ const AnimatedBeamRoot = React.forwardRef<AnimatedBeamElement, AnimatedBeamProps
     syncAttr('color-end', colorEnd || null);
     syncAttr('trail-color', trailColor || null);
     syncAttr('curve', curve && curve !== 'auto' ? curve : null);
+    flushElementRender(el);
   }, [
     animation,
     variant,

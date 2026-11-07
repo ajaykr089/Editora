@@ -107,4 +107,33 @@ describe('Card wrapper', () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(card.getAttribute('aria-label')).toBe('Project summary Open to see details Last edited today');
   });
+
+  it('renders inset, header and body in the order they were written', async () => {
+    const order = (el: HTMLElement) =>
+      Array.from(el.shadowRoot?.querySelector('.card')?.children || [])
+        .filter((section) => !(section as HTMLElement).hidden)
+        .map((section) => (section as HTMLElement).getAttribute('part'));
+
+    const { container, rerender } = render(
+      <Card>
+        <Card.Header><Card.Title>Title</Card.Title></Card.Header>
+        <Card.Inset><table><tbody><tr><td>row</td></tr></tbody></table></Card.Inset>
+        <Card.Footer>Footer</Card.Footer>
+      </Card>
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const el = container.querySelector('ui-card') as HTMLElement;
+    expect(order(el)).toEqual(['header', 'inset', 'body', 'footer']);
+
+    rerender(
+      <Card>
+        <Card.Media>Media</Card.Media>
+        <Card.Inset>Inset</Card.Inset>
+        <Card.Header><Card.Title>Title</Card.Title></Card.Header>
+        <div>Body</div>
+      </Card>
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(order(el)).toEqual(['media', 'inset', 'header', 'body']);
+  });
 });

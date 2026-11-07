@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/orbiter';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type OrbiterDirection = 'clockwise' | 'counterclockwise' | 'alternate';
 export type OrbiterAnimation = 'calm' | 'smooth' | 'snappy' | 'bouncy';
@@ -165,6 +165,7 @@ const OrbiterRoot = React.forwardRef<OrbiterElement, OrbiterProps>(function Orbi
     syncBooleanAttr('pause-on-focus', pauseOnFocus);
     syncBooleanAttr('paused', paused);
     syncBooleanAttr('reverse', reverse);
+    flushElementRender(el);
   }, [
     duration,
     delay,

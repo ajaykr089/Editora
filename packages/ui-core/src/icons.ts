@@ -1,4 +1,58 @@
-import { hasIcon as hasCoreIcon, renderIconSvg, type IconRenderOptions, type IconVariant } from '@editora/icons';
+import type { IconRenderOptions, IconVariant } from '@editora/icons';
+
+// The built-in icon set (@editora/icons) is about 135 KB minified, and icons are looked up by name,
+// so a bundler cannot drop the ones an app does not use. A static import put the whole set into
+// every component that can show an icon (a Button entry was 55 KB gzipped, 80% of it icons). It is
+// loaded on first use instead: bundlers split it into its own chunk, components that never render a
+// built-in icon never load it, and icons render once it arrives. Custom icons (registerIcon) and
+// apps that call loadIcons() up front are unaffected.
+type CoreIcons = typeof import('@editora/icons');
+let core: CoreIcons | null = null;
+let loading: Promise<CoreIcons> | null = null;
+const loadListeners = new Set<() => void>();
+
+/** Loads the built-in icon set; resolves when every built-in icon can render synchronously. */
+export function loadIcons(): Promise<void> {
+  if (core) return Promise.resolve();
+  if (!loading) {
+    loading = import('@editora/icons').then((mod) => {
+      core = mod;
+      coreCache.clear();
+      const listeners = Array.from(loadListeners);
+      loadListeners.clear();
+      listeners.forEach((listener) => {
+        try { listener(); } catch { /* a listener's failure must not block the others */ }
+      });
+      return mod;
+    });
+    loading.catch(() => { loading = null; });
+  }
+  return loading.then(() => undefined);
+}
+
+/** True once the built-in icon set is available. */
+export function iconsLoaded(): boolean {
+  return !!core;
+}
+
+/** Runs `listener` once when the built-in icon set has loaded (immediately start loading it). */
+export function whenIconsLoaded(listener: () => void): () => void {
+  if (core) {
+    listener();
+    return () => {};
+  }
+  loadListeners.add(listener);
+  void loadIcons();
+  return () => loadListeners.delete(listener);
+}
+
+function hasCoreIcon(name: string): boolean {
+  if (!core) {
+    void loadIcons();
+    return false;
+  }
+  return core.hasIcon(name);
+}
 
 const customRegistry = new Map<string, string>();
 const coreCache = new Map<string, string>();
@@ -91,7 +145,8 @@ export function getIcon(name: string, options?: UIIconRenderOptions): string {
   const cached = coreCache.get(key);
   if (cached) return cached;
 
-  const svg = renderIconSvg(normalized, {
+  if (!core) return '';
+  const svg = core.renderIconSvg(normalized, {
     variant: options?.variant || 'outline',
     iconWeight: options?.iconWeight,
     secondaryColor: options?.secondaryColor,

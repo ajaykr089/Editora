@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl } from '../primitives/form-control';
 
 type SliderMark = { value: number; label?: string };
 
@@ -467,6 +468,9 @@ const style = `
 `;
 
 function parseNumber(raw: string | null, fallback: number): number {
+  // Number(null) and Number('') are 0, which made a missing max attribute mean max=0: a slider
+  // without min/max clamped every value to 0.
+  if (raw == null || raw.trim() === '') return fallback;
   const value = Number(raw);
   return Number.isFinite(value) ? value : fallback;
 }
@@ -561,6 +565,14 @@ const SLIDER_LIVE_ATTRS = new Set([
 ]);
 
 export class UISlider extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => (this._rangeMode ? [String(this._valueStart), String(this._valueEnd)] : String(this.value)),
+    defaultAttribute: 'value',
+    observe: ['value-start', 'value-end', 'range', 'min', 'max', 'step']
+  });
+
   static get observedAttributes() {
     return [
       'value',
@@ -602,13 +614,28 @@ export class UISlider extends ElementBase {
     this._onChange = this._onChange.bind(this);
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
+    this._formControl.connect();
     this.root.addEventListener('input', this._onInput as EventListener, true);
     this.root.addEventListener('change', this._onChange as EventListener, true);
   }
 
   override disconnectedCallback(): void {
+    this._formControl.disconnect();
     this.root.removeEventListener('input', this._onInput as EventListener, true);
     this.root.removeEventListener('change', this._onChange as EventListener, true);
     super.disconnectedCallback();

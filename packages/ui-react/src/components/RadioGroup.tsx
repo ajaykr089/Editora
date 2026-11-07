@@ -9,6 +9,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type RadioOption = {
@@ -79,7 +81,13 @@ export const RadioGroup = React.forwardRef<HTMLElement, RadioGroupProps>(functio
     syncJsonAttribute(el, 'options', options?.length ? options : null);
   }, [value, disabled, required, name, orientation, variant, size, tone, options]);
 
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onValueChange, (rest as { onChange?: unknown }).onChange], value == null ? undefined : value), events: ['change'] });
+
   return createUIElement('ui-radio-group', { ref, ...rest }, children);
 });
 
 RadioGroup.displayName = 'RadioGroup';
+
+export default RadioGroup;

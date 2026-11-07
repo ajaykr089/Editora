@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/popover';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -79,16 +79,16 @@ const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popo
     warnIfElementNotRegistered('ui-popover', 'Popover');
   }, []);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const handleOpen = () => onOpen?.();
-    const handleClose = () => onClose?.();
-    const handleOpenChange = (event: Event) => {
+    const handleOpen = hostOnly(() => onOpen?.());
+    const handleClose = hostOnly(() => onClose?.());
+    const handleOpenChange = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<PopoverOpenChangeDetail>).detail;
       if (detail) onOpenChange?.(detail);
-    };
+    });
 
     el.addEventListener('open', handleOpen as EventListener);
     el.addEventListener('close', handleClose as EventListener);
@@ -131,7 +131,12 @@ const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popo
       radius !== undefined
     );
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null, elevation !== undefined);
+    flushElementRender(el);
   }, [open, placement, offset, shift, flip, closeOnEscape, closeOnOutside, variant, tone, size, radius, elevation]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'open', value: whenHandled([onOpen, onClose, onOpenChange], typeof open === 'boolean' ? open : undefined), events: ['open', 'close', 'open-change'] });
 
   return createUIElement('ui-popover', { ref, ...rest }, children);
 });

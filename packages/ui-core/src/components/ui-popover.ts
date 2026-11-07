@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { hideCloneSource, revealClone } from '../primitives/clone-source';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
@@ -341,6 +342,7 @@ export class UIPopover extends ElementBase {
     super.connectedCallback();
     this.addEventListener('click', this._onHostClick);
     this._observeHost();
+    hideCloneSource(this.querySelector('[slot="content"]'));
     this._syncOpenState();
   }
 
@@ -403,7 +405,7 @@ export class UIPopover extends ElementBase {
     const source = this.querySelector('[slot="content"]');
     const content = document.createElement('div');
     content.className = 'content';
-    if (source) content.appendChild(source.cloneNode(true));
+    if (source) content.appendChild(revealClone(source.cloneNode(true) as Element));
     panel.appendChild(content);
     wrapper.appendChild(panel);
     return wrapper;
@@ -473,6 +475,7 @@ export class UIPopover extends ElementBase {
     this._contentObserver?.disconnect();
     this._contentObserver = null;
     const source = this._getContentSource();
+    hideCloneSource(source);
     if (!source || typeof MutationObserver === 'undefined') return;
 
     this._contentObserver = new MutationObserver(() => this._schedulePortalSync());

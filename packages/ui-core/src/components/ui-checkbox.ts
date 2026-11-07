@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { FormControl, isRequired } from '../primitives/form-control';
 
 const style = `
   :host {
@@ -339,6 +340,18 @@ function isInteractive(node: EventTarget): boolean {
 }
 
 export class UICheckbox extends ElementBase {
+  // Form-associated: part of a surrounding <form>'s FormData, reset and validation (see form-control.ts).
+  static formAssociated = true;
+  private _formControl: FormControl = new FormControl(this, {
+    getValue: () => (this.checked ? this.getAttribute('value') ?? 'on' : null),
+    getValidity: () => ({
+      valueMissing: isRequired(this) && !this.checked,
+      message: 'Please check this box if you want to proceed.'
+    }),
+    defaultAttribute: 'checked',
+    onFormDisabled: () => this.requestRender()
+  });
+
   private _uid = `ui-checkbox-${Math.random().toString(36).slice(2, 9)}`;
 
   static get observedAttributes() {
@@ -351,14 +364,29 @@ export class UICheckbox extends ElementBase {
     this._onKeyDown = this._onKeyDown.bind(this);
   }
 
+  formResetCallback(): void {
+    this._formControl.formResetCallback();
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formControl.formDisabledCallback(disabled);
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    return this._formControl.form;
+  }
+
   connectedCallback() {
     super.connectedCallback();
+    this._formControl.connect();
     this.addEventListener('click', this._onClick as EventListener);
     this.addEventListener('keydown', this._onKeyDown as EventListener);
     this._syncA11yState();
   }
 
   disconnectedCallback() {
+    this._formControl.disconnect();
     this.removeEventListener('click', this._onClick as EventListener);
     this.removeEventListener('keydown', this._onKeyDown as EventListener);
     super.disconnectedCallback();
@@ -396,7 +424,7 @@ export class UICheckbox extends ElementBase {
   }
 
   get disabled() {
-    return isTruthyAttr(this.getAttribute('disabled'));
+    return isTruthyAttr(this.getAttribute('disabled')) || !!this._formControl?.disabledByForm;
   }
 
   set disabled(value: boolean) {

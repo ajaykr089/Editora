@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/number-ticker';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type NumberTickerTone = 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type NumberTickerSize = 'sm' | 'md' | 'lg' | 'xl' | '1' | '2' | '3' | '4';
@@ -207,6 +207,7 @@ const NumberTickerRoot = React.forwardRef<NumberTickerElement, NumberTickerProps
     syncBooleanAttr('pause-on-hover', pauseOnHover);
     syncBooleanAttr('pause-on-focus', pauseOnFocus);
     el.formatter = formatter ?? null;
+    flushElementRender(el);
   }, [
     value,
     from,

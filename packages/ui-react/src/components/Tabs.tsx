@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tabs';
-import { createUIElement } from './_internals';
+import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -86,16 +86,16 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const handle = (event: Event) => {
+    const handle = hostOnly((event: Event) => {
       const detail = (event as CustomEvent<TabsDetail>).detail;
       if (!detail) return;
       onChange?.(detail.index);
       onTabChange?.(detail);
-    };
+    });
 
     el.addEventListener('change', handle as EventListener);
 
@@ -136,7 +136,13 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     syncBool('stretched', stretched);
     syncBool('bare', bare);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [selected, value, orientation, activation, variant, size, density, tone, stretched, shape, elevation, loop, bare, headless]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'selected', value: whenHandled([onChange, onTabChange], selected != null ? String(selected) : undefined), events: ['change'] });
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onChange, onTabChange], selected == null && value ? value : undefined), events: ['change'] });
 
   return createUIElement('ui-tabs', { ref, ...rest }, children);
 });

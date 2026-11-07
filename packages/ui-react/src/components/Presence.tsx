@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/presence';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -52,7 +52,7 @@ export const Presence = React.forwardRef<HTMLElement, PresenceProps>(function Pr
   const ref = useRef<HTMLElement | null>(null);
   React.useImperativeHandle(forwardedRef, () => ref.current as any);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const mapState = (event: Event): PresenceState => {
@@ -109,9 +109,12 @@ export const Presence = React.forwardRef<HTMLElement, PresenceProps>(function Pr
     else el.removeAttribute('exit-duration');
     if (typeof delay === 'number') el.setAttribute('delay', String(delay));
     else el.removeAttribute('delay');
+    flushElementRender(el);
   }, [present, headless, mode, size, variant, keepMounted, lazy, enterDuration, exitDuration, delay]);
 
   return createUIElement('ui-presence', { ref, ...rest }, children);
 });
 
 Presence.displayName = 'Presence';
+
+export default Presence;

@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from '
 
 import '@editora/ui-core/chart';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type ChartPoint = { label: string; value: number; tone?: string };
 export type ChartSeries = {
@@ -109,7 +109,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     warnIfElementNotRegistered('ui-chart', 'Chart');
   }, []);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el || !onPointSelect) return;
 
@@ -182,6 +182,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     syncAttr('aria-label', ariaLabel || null);
     syncBool('disabled', disabled);
     syncBool('headless', headless);
+    flushElementRender(el);
   }, [
     data,
     series,

@@ -206,6 +206,7 @@ describe('wrapper bridge helpers', () => {
         value="#336699"
         presets={['#336699', '#112233']}
         recent
+        mode="popover"
         open
         onValueChange={(value) => {
           latestValue = value;
@@ -531,9 +532,10 @@ describe('wrapper bridge helpers', () => {
       expect(host?.getAttribute('placeholder')).toBe('Search');
     });
 
+    // onChange fires per keystroke (the element's input event), as on a React <input>.
     fireEvent(
       host!,
-      new CustomEvent('change', {
+      new CustomEvent('input', {
         detail: { value: 'hello' },
         bubbles: true,
         composed: true,

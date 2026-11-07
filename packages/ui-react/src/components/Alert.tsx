@@ -19,6 +19,11 @@ export type AlertProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClose'> & {
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   radius?: number | string;
   elevation?: 'none' | 'low' | 'high';
+  /**
+   * `false` for a static page banner: no role=alert/status and no aria-live, so it is not announced
+   * when the page loads. Keep the default (true) for messages that appear in response to something.
+   */
+  live?: boolean;
   indicator?: 'line' | 'none';
   dismissible?: boolean;
   open?: boolean;
@@ -41,6 +46,7 @@ const Alert = React.forwardRef<HTMLElement, AlertProps>(function Alert(props, fo
     size,
     radius,
     elevation,
+    live,
     indicator,
     dismissible,
     open,
@@ -56,7 +62,7 @@ const Alert = React.forwardRef<HTMLElement, AlertProps>(function Alert(props, fo
     onClose?.();
   }, [onClose]);
 
-  useElementEventListeners(ref, [{ type: 'close', listener: onCloseHandler as EventListener }], [onCloseHandler]);
+  useElementEventListeners(ref, [{ type: 'close', listener: onCloseHandler as EventListener }], [onCloseHandler], { hostOnly: true });
 
   useElementAttributes(ref, (el) => {
     syncStringAttribute(el, 'title', title ?? null);
@@ -70,8 +76,9 @@ const Alert = React.forwardRef<HTMLElement, AlertProps>(function Alert(props, fo
     syncStringAttribute(el, 'indicator', indicator && indicator !== 'line' ? indicator : null);
     syncBooleanAttribute(el, 'dismissible', dismissible);
     syncBooleanAttribute(el, 'headless', headless);
+    syncStringAttribute(el, 'live', live === false ? 'false' : null);
     syncBooleanAttribute(el, 'hidden', typeof open === 'boolean' ? !open : undefined);
-  }, [title, description, tone, variant, layout, size, radius, elevation, indicator, dismissible, open, headless]);
+  }, [title, description, tone, variant, layout, size, radius, elevation, indicator, dismissible, open, headless, live]);
 
   return createUIElement('ui-alert', { ref, ...rest }, children);
 });

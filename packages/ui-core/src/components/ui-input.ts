@@ -1,4 +1,6 @@
 import { ElementBase } from '../ElementBase';
+import { findSlottedInput, nameSlottedInput } from '../primitives/slotted-input';
+import { scheduleImplicitSubmit } from '../primitives/implicit-submit';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
@@ -72,6 +74,28 @@ const style = `
     font-size: 12px;
     line-height: 1;
     transform: translateY(-0.5px);
+  }
+
+  /* description-position="below": the hint goes under the field (DOM order, and so what a
+     screen reader reads, stays label, description, field). */
+  :host([description-position="below"]) .meta:not([hidden]) {
+    display: contents;
+  }
+
+  :host([description-position="below"]) .label {
+    order: 0;
+  }
+
+  :host([description-position="below"]) .shell {
+    order: 1;
+  }
+
+  :host([description-position="below"]) .description {
+    order: 2;
+  }
+
+  :host([description-position="below"]) .footer {
+    order: 3;
   }
 
   .description {
@@ -200,6 +224,25 @@ const style = `
 
   input::placeholder {
     color: var(--ui-input-placeholder);
+  }
+
+  /* <input slot="input">: the author's own input (password managers, autofill), styled the same. */
+  ::slotted(input[slot="input"]) {
+    inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: 500 var(--ui-input-font-size)/var(--ui-default-line-height, var(--line-height-2, 20px)) var(--ui-font-family, var(--default-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif));
+    padding: var(--ui-input-padding);
+    min-block-size: calc(var(--ui-input-min-height) - 2px);
+    margin: 0;
+    outline: none;
+  }
+
+  .control[data-slotted-input] > input {
+    display: none;
   }
 
   input::-webkit-search-cancel-button {
@@ -527,6 +570,11 @@ function isKnownRadius(radius: string): boolean {
 }
 
 export class UIInput extends ElementBase {
+  // Form-associated: the value is part of a surrounding <form>'s FormData, a <fieldset disabled>
+  // disables it and form.reset() restores it. The real <input> is in the shadow root, so without
+  // this the form never saw the field at all.
+  static formAssociated = true;
+
   static get observedAttributes() {
     return [
       'value',
@@ -574,9 +622,20 @@ export class UIInput extends ElementBase {
   private _formUnregister: (() => void) | null = null;
   private _uid = Math.random().toString(36).slice(2, 9);
   private _autofocusApplied = false;
+  private _internals: ElementInternals | null = null;
+  private _defaultValue: string | null = null;
+  private _formDisabled = false;
+  private _slottedInput: HTMLInputElement | null = null;
+  private _dirty = false;
 
   constructor() {
     super();
+    try {
+      this._internals = typeof this.attachInternals === 'function' ? this.attachInternals() : null;
+    } catch {
+      this._internals = null;
+    }
+    this._onNativeKeyDown = this._onNativeKeyDown.bind(this);
     this._onNativeInput = this._onNativeInput.bind(this);
     this._onNativeChange = this._onNativeChange.bind(this);
     this._onClearClick = this._onClearClick.bind(this);
@@ -584,13 +643,63 @@ export class UIInput extends ElementBase {
   }
 
   override connectedCallback(): void {
+    if (!this._dirty) this._defaultValue = this.getAttribute('value') || '';
     super.connectedCallback();
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
+    this.root.addEventListener('click', this._onLabelClick);
     this._registerWithForm();
+  }
+
+  /** The `<form>` this field belongs to, if any. */
+  get form(): HTMLFormElement | null {
+    try {
+      return (this._internals as (ElementInternals & { form?: HTMLFormElement | null }) | null)?.form ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  formResetCallback(): void {
+    this._dirty = false;
+    this.value = this._defaultValue || '';
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this._formDisabled = disabled;
+    if (this._input) this._input.disabled = disabled || readBooleanHostAttribute(this, 'disabled');
+  }
+
+  private _syncFormState(): void {
+    const internals = this._internals as (ElementInternals & {
+      setFormValue?: (value: string) => void;
+      setValidity?: (flags: ValidityStateFlags, message?: string, anchor?: HTMLElement) => void;
+    }) | null;
+    if (!internals) return;
+    try {
+      if (this._slottedInput) {
+        // The author's native input is the form field; reporting the value too would submit it twice.
+        internals.setFormValue?.(null);
+        internals.setValidity?.({});
+        return;
+      }
+      internals.setFormValue?.(this.value);
+      const input = this._input;
+      if (input && typeof internals.setValidity === 'function') {
+        if (input.validity && !input.validity.valid) internals.setValidity(input.validity, input.validationMessage, input);
+        else internals.setValidity({});
+      }
+    } catch {
+      // Environments without full form-associated support (older jsdom) keep working without it.
+    }
+  }
+
+  private _onNativeKeyDown(event: KeyboardEvent): void {
+    scheduleImplicitSubmit(event, this, () => this.form);
   }
 
   override disconnectedCallback(): void {
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
+    this.root.removeEventListener('click', this._onLabelClick);
     this._detachListeners();
 
     if (this._debounceTimer) {
@@ -617,9 +726,47 @@ export class UIInput extends ElementBase {
     else this.style.removeProperty('--ui-input-border-radius');
   }
 
+  /** The control: the author's <input slot="input"> when there is one, else the inner input. */
+  private _bindInput(): void {
+    if (this._input) {
+      this._input.removeEventListener('input', this._onNativeInput);
+      this._input.removeEventListener('change', this._onNativeChange);
+      this._input.removeEventListener('keydown', this._onNativeKeyDown);
+    }
+    const slotted = findSlottedInput(this);
+    this._slottedInput = slotted;
+    const control = this.root.querySelector('.control');
+    if (slotted) control?.setAttribute('data-slotted-input', '');
+    else control?.removeAttribute('data-slotted-input');
+    this._input = slotted || (this.root.querySelector('.control > input') as HTMLInputElement | null);
+    if (slotted && !this.hasAttribute('value') && slotted.value) {
+      // Adopt what the author (or autofill) already put in their input.
+      this.setAttribute('value', slotted.value);
+    }
+    if (this._input) {
+      this._input.addEventListener('input', this._onNativeInput);
+      this._input.addEventListener('change', this._onNativeChange);
+      // A native input in the light DOM already submits its form on Enter.
+      if (!slotted) this._input.addEventListener('keydown', this._onNativeKeyDown);
+    }
+  }
+
+  // The author's input keeps its own type, name, autocomplete, placeholder...: only the states the
+  // host was given are passed on, so the component never undoes what password managers rely on.
+  private _syncSlottedInputAttrs(input: HTMLInputElement): void {
+    const disabled = readBooleanHostAttribute(this, 'disabled') || this._formDisabled;
+    if (this.hasAttribute('disabled') || this._formDisabled) input.disabled = disabled;
+    if (this.hasAttribute('required')) input.required = true;
+    if (this.hasAttribute('readonly')) input.readOnly = true;
+  }
+
   private _syncControlAttrs(): void {
     this._syncHostTokens();
     if (!this._input) return;
+    if (this._slottedInput) {
+      this._syncSlottedInputAttrs(this._slottedInput);
+      return;
+    }
 
     const input = this._input;
     const type = this.getAttribute('type') || 'text';
@@ -644,7 +791,7 @@ export class UIInput extends ElementBase {
       input.type = 'text';
     }
     input.placeholder = placeholder;
-    input.disabled = disabled;
+    input.disabled = disabled || this._formDisabled;
     input.required = required;
     input.readOnly = readOnly;
     input.name = name;
@@ -681,6 +828,9 @@ export class UIInput extends ElementBase {
     if (oldValue === newValue) return;
 
     if (name === 'value') {
+      // Until the user types, the value attribute is also the value form.reset() goes back to (a
+      // framework sets it after the element connected, so the connect-time value is not enough).
+      if (!this._dirty) this._defaultValue = newValue || '';
       this._syncInputValue(newValue || '');
       return;
     }
@@ -828,6 +978,7 @@ export class UIInput extends ElementBase {
     if (this._input) {
       this._input.removeEventListener('input', this._onNativeInput);
       this._input.removeEventListener('change', this._onNativeChange);
+      this._input.removeEventListener('keydown', this._onNativeKeyDown);
     }
     if (this._clearBtn) {
       this._clearBtn.removeEventListener('click', this._onClearClick);
@@ -839,6 +990,7 @@ export class UIInput extends ElementBase {
     if (this._input && this._input.value !== value) {
       this._input.value = value;
     }
+    this._syncFormState();
 
     if (this._clearBtn) {
       const canClear = readBooleanHostAttribute(this, 'clearable') && value.length > 0 && !readBooleanHostAttribute(this, 'disabled') && !this.hasAttribute('readonly');
@@ -859,7 +1011,20 @@ export class UIInput extends ElementBase {
     }
   }
 
-  private _onSlotChange(): void {
+  // The label sits in the shadow root and cannot point at the control with `for`, so clicking it
+  // focuses the control here (the inner input, or the author's slotted one).
+  private _onLabelClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest?.('.label')) return;
+    this._input?.focus();
+  };
+
+  private _onSlotChange(event?: Event): void {
+    if ((event?.target as HTMLSlotElement | null)?.name === 'input') {
+      this._bindInput();
+      this._syncControlAttrs();
+      this._syncInputValue(this.value);
+    }
     this._syncDerivedState();
   }
 
@@ -930,7 +1095,14 @@ export class UIInput extends ElementBase {
       else footerEl.setAttribute('hidden', '');
     }
 
-    if (this._input) {
+    if (this._slottedInput) {
+      const labelText = (this.getAttribute('label') || labelSlot?.assignedNodes({ flatten: true }).map((node) => node.textContent || '').join(' ') || this.getAttribute('aria-label') || '').trim();
+      const descriptionText = (this.getAttribute('description') || '').trim();
+      nameSlottedInput(this._slottedInput, labelText, descriptionText);
+      const invalid = this.getAttribute('validation') === 'error' || !!errorAttr;
+      if (invalid) this._slottedInput.setAttribute('aria-invalid', 'true');
+      else this._slottedInput.removeAttribute('aria-invalid');
+    } else if (this._input) {
       syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
       const describedBy: string[] = [];
@@ -950,6 +1122,7 @@ export class UIInput extends ElementBase {
 
   private _onNativeInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
+    this._dirty = true;
 
     if (this.getAttribute('value') !== value) {
       this.setAttribute('value', value);
@@ -1044,6 +1217,7 @@ export class UIInput extends ElementBase {
           <span class="prefix" part="prefix"><slot name="prefix"></slot></span>
 
           <div class="control" part="control">
+            <slot name="input"></slot>
             <input
               part="input"
               type="${escapeHtml(type)}"
@@ -1082,18 +1256,13 @@ export class UIInput extends ElementBase {
 
     this._detachListeners();
 
-    this._input = this.root.querySelector('input');
+    this._bindInput();
     this._clearBtn = this.root.querySelector('button.clear-btn') as HTMLButtonElement | null;
-
-    if (this._input) {
-      this._input.addEventListener('input', this._onNativeInput);
-      this._input.addEventListener('change', this._onNativeChange);
-    }
 
     this._clearBtn?.addEventListener('click', this._onClearClick);
 
     this._syncControlAttrs();
-    this._syncInputValue(value);
+    this._syncInputValue(this._slottedInput ? this.value : value);
     this._syncDerivedState();
 
     if (this.hasAttribute('autofocus') && !this._autofocusApplied) {

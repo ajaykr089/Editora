@@ -9,12 +9,18 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useTextValue,
 } from './_internals';
 
 export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   children?: React.ReactNode;
   value?: string;
+  /** Starting value of an uncontrolled field (written once, on mount). */
+  defaultValue?: string;
+  /** Every keystroke, like React's onChange on <input>. With `value`, the field is controlled. */
   onChange?: (value: string) => void;
+  /** The edit was committed (blur, or Enter in a single-line field). */
+  onCommit?: (value: string) => void;
   onInput?: (value: string) => void;
   onDebouncedInput?: (value: string) => void;
   onClear?: () => void;
@@ -49,6 +55,8 @@ export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
   description?: string;
+  /** Put the description under the field instead of under the label. */
+  descriptionPosition?: 'above' | 'below';
 };
 
 export type InputPrefixProps = React.HTMLAttributes<HTMLElement>;
@@ -60,7 +68,9 @@ export type InputErrorProps = React.HTMLAttributes<HTMLElement>;
 const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props, forwardedRef) {
   const {
     value,
+    defaultValue,
     onChange,
+    onCommit,
     onInput,
     onDebouncedInput,
     onClear,
@@ -95,21 +105,13 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     radius,
     label,
     description,
+    descriptionPosition,
     children,
     ...rest
   } = props;
 
   const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
-
-  const onInputHandler = React.useCallback((event: Event) => {
-    const detail = getCustomEventDetail<{ value?: string }>(event);
-    if (typeof detail?.value === 'string') onInput?.(detail.value);
-  }, [onInput]);
-
-  const onChangeHandler = React.useCallback((event: Event) => {
-    const detail = getCustomEventDetail<{ value?: string }>(event);
-    if (typeof detail?.value === 'string') onChange?.(detail.value);
-  }, [onChange]);
+  useTextValue(ref, { value, defaultValue, onChange, onInput, onCommit });
 
   const onDebouncedHandler = React.useCallback((event: Event) => {
     const detail = getCustomEventDetail<{ value?: string }>(event);
@@ -123,12 +125,10 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
   useElementEventListeners(
     ref,
     [
-      { type: 'input', listener: onInputHandler },
-      { type: 'change', listener: onChangeHandler },
       { type: 'debounced-input', listener: onDebouncedHandler },
       { type: 'clear', listener: onClearHandler as EventListener },
     ],
-    [onInputHandler, onChangeHandler, onDebouncedHandler, onClearHandler]
+    [onDebouncedHandler, onClearHandler]
   );
 
   useElementAttributes(ref, (el) => {
@@ -163,6 +163,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     syncStringAttribute(el, 'radius', radius ? String(radius) : null);
     syncStringAttribute(el, 'label', label ?? null);
     syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'description-position', descriptionPosition === 'below' ? 'below' : null);
   }, [
     clearable,
     debounce,
@@ -194,7 +195,8 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     color,
     radius,
     label,
-    description
+    description,
+    descriptionPosition
   ]);
 
   return createUIElement('ui-input', { ref, value: value ?? undefined, ...rest }, children);

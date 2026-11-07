@@ -8,6 +8,8 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  useControlledAttribute,
+  whenHandled,
 } from './_internals';
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
@@ -122,13 +124,21 @@ const SelectRoot = React.forwardRef<HTMLElement, SelectProps>(function Select(
   );
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value != null ? String(value) : null);
+    // Placeholder and required first: the element resolves `value` against its option list, and the
+    // placeholder adds the empty option. Syncing value first meant `value=""` found no match and fell
+    // back to the first real option.
+    syncStringAttribute(el, 'placeholder', placeholder ? placeholder : null);
+    syncBooleanAttribute(el, 'required', required);
+    if (value == null) {
+      syncStringAttribute(el, 'value', null);
+    } else if (el.getAttribute('value') !== String(value)) {
+      // Write `value=""` too: removing the attribute instead lets the element pick its first option.
+      el.setAttribute('value', String(value));
+    }
     syncBooleanAttribute(el, 'disabled', disabled);
     syncBooleanAttribute(el, 'loading', loading);
-    syncBooleanAttribute(el, 'required', required);
     syncBooleanAttribute(el, 'headless', headless);
     syncBooleanAttribute(el, 'invalid', invalid);
-    syncStringAttribute(el, 'placeholder', placeholder ? placeholder : null);
     syncStringAttribute(el, 'name', name ? name : null);
     syncStringAttribute(el, 'label', label ? label : null);
     syncStringAttribute(el, 'description', description ? description : null);
@@ -168,6 +178,10 @@ const SelectRoot = React.forwardRef<HTMLElement, SelectProps>(function Select(
     checkPlacement,
     validation
   ]);
+
+  // With a change handler the prop wins over the element's own state; without one it is the
+  // initial value, as the docs use it (see useControlledAttribute).
+  useControlledAttribute(ref, { attribute: 'value', value: whenHandled([onChange, onInput, onValueChange], value == null ? undefined : String(value)), events: ['change', 'input'] });
 
   return createUIElement('ui-select', { ref, ...rest }, children);
 });

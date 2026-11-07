@@ -75,7 +75,8 @@ const HoverCardRoot = React.forwardRef<HTMLElement, HoverCardProps>(function Hov
       { type: 'close', listener: handleClose as EventListener },
       { type: 'change', listener: handleChange },
     ],
-    [handleOpen, handleClose, handleChange]
+    [handleOpen, handleClose, handleChange],
+    { hostOnly: true }
   );
 
   useElementAttributes(ref, (el) => {

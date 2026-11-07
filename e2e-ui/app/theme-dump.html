@@ -1,0 +1,10 @@
+<!doctype html><html><body><script type="module">
+// The CSS variables ThemeProvider / applySystemTheme put on <html>, for injecting into Storybook
+// stories (Storybook itself applies no theme, so a sweep without this only sees fallback colours).
+import { applySystemTheme } from '@editora/ui-core';
+// Follows prefers-color-scheme (the a11y config runs light).
+applySystemTheme();
+await new Promise((resolve) => setTimeout(resolve, 50));
+window.themeStyle = document.documentElement.getAttribute('style') || '';
+window.themeMode = document.documentElement.getAttribute('data-ui-mode') || '';
+</script></body></html>

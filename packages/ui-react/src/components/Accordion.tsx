@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import '@editora/ui-core/accordion';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, hostOnly, flushElementRender } from './_internals';
 
 type OpenValue = number | number[];
 
@@ -67,6 +67,28 @@ const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordi
 
   useIsomorphicLayoutEffect(() => {
     const element = ref.current;
+    if (!element || (!onToggle && !onChangeOpen)) return;
+
+    const handleToggle = hostOnly((event: Event) => {
+      const next = readOpen(event);
+      if (next != null) onToggle?.(next);
+    });
+
+    const handleChange = hostOnly((event: Event) => {
+      const next = readOpen(event);
+      if (next != null) onChangeOpen?.(next);
+    });
+
+    element.addEventListener('toggle', handleToggle as EventListener);
+    element.addEventListener('change', handleChange as EventListener);
+    return () => {
+      element.removeEventListener('toggle', handleToggle as EventListener);
+      element.removeEventListener('change', handleChange as EventListener);
+    };
+  }, [onToggle, onChangeOpen]);
+
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
     if (!element) return;
 
     setBooleanAttribute(element, 'multiple', multiple);
@@ -82,29 +104,8 @@ const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordi
     setAttributeValue(element, 'indicator', indicator && indicator !== 'line' ? indicator : null);
     setAttributeValue(element, 'shape', shape && shape !== 'default' ? shape : null);
     setAttributeValue(element, 'elevation', elevation && elevation !== 'default' ? elevation : null);
+    flushElementRender(element);
   }, [multiple, collapsible, open, variant, size, radius, tone, indicator, shape, elevation]);
-
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element || (!onToggle && !onChangeOpen)) return;
-
-    const handleToggle = (event: Event) => {
-      const next = readOpen(event);
-      if (next != null) onToggle?.(next);
-    };
-
-    const handleChange = (event: Event) => {
-      const next = readOpen(event);
-      if (next != null) onChangeOpen?.(next);
-    };
-
-    element.addEventListener('toggle', handleToggle as EventListener);
-    element.addEventListener('change', handleChange as EventListener);
-    return () => {
-      element.removeEventListener('toggle', handleToggle as EventListener);
-      element.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onToggle, onChangeOpen]);
 
   return createUIElement('ui-accordion', { ref, ...rest }, children);
 });

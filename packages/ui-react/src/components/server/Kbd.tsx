@@ -1,4 +1,5 @@
 import React from 'react';
+import { toneColors } from './_tones';
 
 const SIZE_STYLES = {
   sm: { fontSize: 11, gap: 4, inset: '2px 6px' },
@@ -7,13 +8,13 @@ const SIZE_STYLES = {
 } as const;
 
 const TONE_STYLES = {
-  default: { background: '#f8fafc', border: '#cbd5e1', color: '#0f172a' },
-  neutral: { background: '#f8fafc', border: '#cbd5e1', color: '#0f172a' },
-  brand: { background: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8' },
-  info: { background: '#ecfeff', border: '#a5f3fc', color: '#0f766e' },
-  success: { background: '#f0fdf4', border: '#bbf7d0', color: '#15803d' },
-  warning: { background: '#fffbeb', border: '#fde68a', color: '#b45309' },
-  danger: { background: '#fef2f2', border: '#fecaca', color: '#b91c1c' },
+  default: toneColors('default'),
+  neutral: toneColors('neutral'),
+  brand: toneColors('brand'),
+  info: toneColors('info'),
+  success: toneColors('success'),
+  warning: toneColors('warning'),
+  danger: toneColors('danger'),
 } as const;
 
 export type KbdProps = React.HTMLAttributes<HTMLElement> & {

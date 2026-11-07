@@ -6,7 +6,7 @@ import React, {
 } from "react";
 
 import '@editora/ui-core/rating';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -80,7 +80,7 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
 
     useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       const el = ref.current;
       if (!el) return;
 
@@ -153,6 +153,7 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
         el.style.removeProperty("--ui-rating-radius");
         syncAttr("radius", null);
       }
+      flushElementRender(el);
     }, [
       value,
       max,

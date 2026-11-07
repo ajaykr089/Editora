@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import '@editora/ui-core/button';
-import { createUIElement, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
 export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
@@ -77,7 +77,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     warnIfElementNotRegistered('ui-button', 'Button');
   }, []);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el || !onClick) return;
 
@@ -123,6 +123,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     if (radius === 'full') el.style.setProperty('--ui-btn-radius', '999px');
     else el.style.removeProperty('--ui-btn-radius');
     setStringAttribute(el, 'scale', scale);
+    flushElementRender(el);
   }, [variant, size, recipe, radius, scale, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel]);
 
   const hostProps: Record<string, unknown> = {

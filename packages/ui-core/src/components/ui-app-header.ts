@@ -270,6 +270,18 @@ const style = `
     display: inline-flex;
   }
 
+  /* show-menu-button="narrow": only where ui-layout turns its sidebar into a drawer (980px, its
+     default drawer-breakpoint). */
+  :host([show-menu-button="narrow"]) .menu-btn {
+    display: none;
+  }
+
+  @media (max-width: 980px) {
+    :host([show-menu-button="narrow"]) .menu-btn {
+      display: inline-flex;
+    }
+  }
+
   .menu-btn svg {
     width: 16px;
     height: 16px;
@@ -349,6 +361,7 @@ export class UIAppHeader extends ElementBase {
       'dense',
       'headless',
       'show-menu-button',
+      'menu-expanded',
       'variant',
       'tone',
       'size',
@@ -387,9 +400,11 @@ export class UIAppHeader extends ElementBase {
     const menuBtn = target?.closest('.menu-btn');
     if (!menuBtn) return;
 
+    // Bubbles to a surrounding ui-layout, which opens its drawer sidebar on narrow screens.
     this.dispatchEvent(
       new CustomEvent('menu-trigger', {
         bubbles: true,
+        cancelable: true,
       })
     );
   }
@@ -399,7 +414,25 @@ export class UIAppHeader extends ElementBase {
     if (name === 'radius') {
       this.style.setProperty('--ui-app-header-radius', this._normalizeRadius(newValue));
     }
+    if (name === 'menu-expanded') {
+      this._syncMenuExpanded();
+      return;
+    }
     super.attributeChangedCallback(name, oldValue, newValue);
+  }
+
+  // ui-layout sets menu-expanded while its drawer is in use, so the button reports the state.
+  private _syncMenuExpanded(): void {
+    const button = this.root.querySelector('.menu-btn') as HTMLButtonElement | null;
+    if (!button) return;
+    const expanded = this.getAttribute('menu-expanded');
+    if (expanded === 'true' || expanded === 'false') {
+      button.setAttribute('aria-expanded', expanded);
+      button.setAttribute('aria-label', expanded === 'true' ? 'Close navigation' : 'Open navigation');
+    } else {
+      button.removeAttribute('aria-expanded');
+      button.setAttribute('aria-label', 'Open navigation');
+    }
   }
 
   protected render() {
@@ -434,6 +467,7 @@ export class UIAppHeader extends ElementBase {
         </div>
       </header>
     `);
+    this._syncMenuExpanded();
   }
 
   protected override shouldRenderOnAttributeChange(

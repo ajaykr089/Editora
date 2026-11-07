@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/gantt';
-import { createUIElement } from './_internals';
+import { createUIElement, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -289,6 +289,58 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     const el = ref.current;
     if (!el) return;
 
+    const handleTaskChange = (event: Event) => onTaskChange?.((event as CustomEvent<GanttTaskChangeDetail>).detail, event as CustomEvent<GanttTaskChangeDetail>);
+    const handleTaskSelect = (event: Event) => onTaskSelect?.((event as CustomEvent<{ id: string }>).detail, event as CustomEvent<{ id: string }>);
+    const handleTaskDelete = (event: Event) => onTaskDelete?.((event as CustomEvent<{ id: string }>).detail, event as CustomEvent<{ id: string }>);
+    const handleLinkSelect = (event: Event) => onLinkSelect?.((event as CustomEvent<GanttLinkSelectDetail>).detail, event as CustomEvent<GanttLinkSelectDetail>);
+    const handleZoomChange = (event: Event) => onZoomChange?.((event as CustomEvent<{ zoom: GanttZoom }>).detail, event as CustomEvent<{ zoom: GanttZoom }>);
+    const handleFilterChange = (event: Event) => onFilterChange?.((event as CustomEvent<{ filter: string }>).detail, event as CustomEvent<{ filter: string }>);
+    const handleSortChange = (event: Event) => onSortChange?.((event as CustomEvent<{ sort: GanttSort }>).detail, event as CustomEvent<{ sort: GanttSort }>);
+
+    el.addEventListener('taskchange', handleTaskChange);
+    el.addEventListener('taskselect', handleTaskSelect);
+    el.addEventListener('taskdelete', handleTaskDelete);
+    el.addEventListener('linkselect', handleLinkSelect);
+    el.addEventListener('zoomchange', handleZoomChange);
+    el.addEventListener('filterchange', handleFilterChange);
+    const handleGridResize = (event: Event) => onGridResize?.((event as CustomEvent<{ width: number }>).detail, event as CustomEvent<{ width: number }>);
+
+    el.addEventListener('sortchange', handleSortChange);
+    const handleTaskToggle = (event: Event) => onTaskToggle?.((event as CustomEvent<{ id: string; open: boolean }>).detail, event as CustomEvent<{ id: string; open: boolean }>);
+    el.addEventListener('gridresize', handleGridResize);
+    const handleBeforeTaskChange = (event: Event) => onBeforeTaskChange?.((event as CustomEvent<GanttBeforeTaskChangeDetail>).detail, event as CustomEvent<GanttBeforeTaskChangeDetail>);
+    el.addEventListener('tasktoggle', handleTaskToggle);
+    const handleTaskRename = (event: Event) => onTaskRename?.((event as CustomEvent<GanttTaskRenameDetail>).detail, event as CustomEvent<GanttTaskRenameDetail>);
+    const handleTaskCreate = (event: Event) => onTaskCreate?.((event as CustomEvent<GanttTaskCreateDetail>).detail, event as CustomEvent<GanttTaskCreateDetail>);
+    el.addEventListener('beforetaskchange', handleBeforeTaskChange);
+    el.addEventListener('taskrename', handleTaskRename);
+    const handleLinkCreate = (event: Event) => onLinkCreate?.((event as CustomEvent<GanttLinkCreateDetail>).detail, event as CustomEvent<GanttLinkCreateDetail>);
+    const handleLinkDelete = (event: Event) => onLinkDelete?.((event as CustomEvent<GanttLinkSelectDetail>).detail, event as CustomEvent<GanttLinkSelectDetail>);
+    el.addEventListener('taskcreate', handleTaskCreate);
+    el.addEventListener('linkcreate', handleLinkCreate);
+    el.addEventListener('linkdelete', handleLinkDelete);
+    return () => {
+      el.removeEventListener('linkcreate', handleLinkCreate);
+      el.removeEventListener('linkdelete', handleLinkDelete);
+      el.removeEventListener('taskrename', handleTaskRename);
+      el.removeEventListener('taskcreate', handleTaskCreate);
+      el.removeEventListener('beforetaskchange', handleBeforeTaskChange);
+      el.removeEventListener('tasktoggle', handleTaskToggle);
+      el.removeEventListener('gridresize', handleGridResize);
+      el.removeEventListener('taskchange', handleTaskChange);
+      el.removeEventListener('taskselect', handleTaskSelect);
+      el.removeEventListener('taskdelete', handleTaskDelete);
+      el.removeEventListener('linkselect', handleLinkSelect);
+      el.removeEventListener('zoomchange', handleZoomChange);
+      el.removeEventListener('filterchange', handleFilterChange);
+      el.removeEventListener('sortchange', handleSortChange);
+    };
+  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange, onTaskRename, onTaskCreate, onLinkCreate, onLinkDelete]);
+
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const syncAttr = (name: string, next: string | null) => {
       const current = el.getAttribute(name);
       if (next == null) {
@@ -339,59 +391,8 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
+    flushElementRender(el);
   }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule, criticalPath, linkable, nonWorkingDays, holidays]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const handleTaskChange = (event: Event) => onTaskChange?.((event as CustomEvent<GanttTaskChangeDetail>).detail, event as CustomEvent<GanttTaskChangeDetail>);
-    const handleTaskSelect = (event: Event) => onTaskSelect?.((event as CustomEvent<{ id: string }>).detail, event as CustomEvent<{ id: string }>);
-    const handleTaskDelete = (event: Event) => onTaskDelete?.((event as CustomEvent<{ id: string }>).detail, event as CustomEvent<{ id: string }>);
-    const handleLinkSelect = (event: Event) => onLinkSelect?.((event as CustomEvent<GanttLinkSelectDetail>).detail, event as CustomEvent<GanttLinkSelectDetail>);
-    const handleZoomChange = (event: Event) => onZoomChange?.((event as CustomEvent<{ zoom: GanttZoom }>).detail, event as CustomEvent<{ zoom: GanttZoom }>);
-    const handleFilterChange = (event: Event) => onFilterChange?.((event as CustomEvent<{ filter: string }>).detail, event as CustomEvent<{ filter: string }>);
-    const handleSortChange = (event: Event) => onSortChange?.((event as CustomEvent<{ sort: GanttSort }>).detail, event as CustomEvent<{ sort: GanttSort }>);
-
-    el.addEventListener('taskchange', handleTaskChange);
-    el.addEventListener('taskselect', handleTaskSelect);
-    el.addEventListener('taskdelete', handleTaskDelete);
-    el.addEventListener('linkselect', handleLinkSelect);
-    el.addEventListener('zoomchange', handleZoomChange);
-    el.addEventListener('filterchange', handleFilterChange);
-    const handleGridResize = (event: Event) => onGridResize?.((event as CustomEvent<{ width: number }>).detail, event as CustomEvent<{ width: number }>);
-
-    el.addEventListener('sortchange', handleSortChange);
-    const handleTaskToggle = (event: Event) => onTaskToggle?.((event as CustomEvent<{ id: string; open: boolean }>).detail, event as CustomEvent<{ id: string; open: boolean }>);
-    el.addEventListener('gridresize', handleGridResize);
-    const handleBeforeTaskChange = (event: Event) => onBeforeTaskChange?.((event as CustomEvent<GanttBeforeTaskChangeDetail>).detail, event as CustomEvent<GanttBeforeTaskChangeDetail>);
-    el.addEventListener('tasktoggle', handleTaskToggle);
-    const handleTaskRename = (event: Event) => onTaskRename?.((event as CustomEvent<GanttTaskRenameDetail>).detail, event as CustomEvent<GanttTaskRenameDetail>);
-    const handleTaskCreate = (event: Event) => onTaskCreate?.((event as CustomEvent<GanttTaskCreateDetail>).detail, event as CustomEvent<GanttTaskCreateDetail>);
-    el.addEventListener('beforetaskchange', handleBeforeTaskChange);
-    el.addEventListener('taskrename', handleTaskRename);
-    const handleLinkCreate = (event: Event) => onLinkCreate?.((event as CustomEvent<GanttLinkCreateDetail>).detail, event as CustomEvent<GanttLinkCreateDetail>);
-    const handleLinkDelete = (event: Event) => onLinkDelete?.((event as CustomEvent<GanttLinkSelectDetail>).detail, event as CustomEvent<GanttLinkSelectDetail>);
-    el.addEventListener('taskcreate', handleTaskCreate);
-    el.addEventListener('linkcreate', handleLinkCreate);
-    el.addEventListener('linkdelete', handleLinkDelete);
-    return () => {
-      el.removeEventListener('linkcreate', handleLinkCreate);
-      el.removeEventListener('linkdelete', handleLinkDelete);
-      el.removeEventListener('taskrename', handleTaskRename);
-      el.removeEventListener('taskcreate', handleTaskCreate);
-      el.removeEventListener('beforetaskchange', handleBeforeTaskChange);
-      el.removeEventListener('tasktoggle', handleTaskToggle);
-      el.removeEventListener('gridresize', handleGridResize);
-      el.removeEventListener('taskchange', handleTaskChange);
-      el.removeEventListener('taskselect', handleTaskSelect);
-      el.removeEventListener('taskdelete', handleTaskDelete);
-      el.removeEventListener('linkselect', handleLinkSelect);
-      el.removeEventListener('zoomchange', handleZoomChange);
-      el.removeEventListener('filterchange', handleFilterChange);
-      el.removeEventListener('sortchange', handleSortChange);
-    };
-  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange, onTaskRename, onTaskCreate, onLinkCreate, onLinkDelete]);
 
   return createUIElement('ui-gantt', { ref, ...rest }, children);
 });

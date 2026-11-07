@@ -41,6 +41,10 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      # Gzipped bytes each @editora/ui-react/<Name> entry loads up front, against ui-size-budgets.json.
+      - name: Check ui-react size budgets
+        run: npm run check:ui-size
+
       - name: Test release scripts
         run: npm run test:scripts
 
@@ -106,3 +110,118 @@ jobs:
 
       - name: Test ui-react against React 19
         run: npm test --prefix packages/ui-react
+
+  # Real-browser tests for ui-core / ui-react (e2e-ui/): a React 19 app built from the packages'
+  # source, driven by Playwright in Chromium, Firefox and WebKit. Covers what jsdom cannot:
+  # form association, focus and keyboard patterns, layout, server-rendered markup, icons.
+  browser-tests:
+    # Pinned: Playwright 1.58 does not support ubuntu-latest (26.04) yet, and screenshot
+    # baselines must come from the same image they are compared on.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: e2e-ui/package-lock.json
+
+      - name: Install e2e-ui
+        run: npm ci --prefix e2e-ui
+
+      - name: Install browsers
+        working-directory: e2e-ui
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Run browser tests
+        working-directory: e2e-ui
+        run: npx playwright test --project=chromium --project=firefox --project=webkit
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-tests-report
+          path: e2e-ui/playwright-report
+          retention-days: 7
+
+  # axe over every Storybook story, unthemed and with the real light theme.
+  a11y-stories:
+    # Pinned: Playwright 1.58 does not support ubuntu-latest (26.04) yet, and screenshot
+    # baselines must come from the same image they are compared on.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Build Storybook
+        run: npx storybook build --output-dir e2e-ui/storybook-static
+        env:
+          STORYBOOK_DISABLE_TELEMETRY: '1'
+
+      - name: Install e2e-ui
+        run: npm ci --prefix e2e-ui
+
+      - name: Install Chromium
+        working-directory: e2e-ui
+        run: npx playwright install --with-deps chromium
+
+      - name: Run axe over all stories
+        working-directory: e2e-ui
+        run: npm run test:a11y
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-stories-report
+          path: e2e-ui/playwright-report-a11y
+          retention-days: 7
+
+  # Screenshot comparisons per theme and density. Baselines are Linux-only and come from the
+  # "Update visual baselines" workflow; until they are committed these tests are skipped.
+  visual:
+    # Pinned: Playwright 1.58 does not support ubuntu-latest (26.04) yet, and screenshot
+    # baselines must come from the same image they are compared on.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: e2e-ui/package-lock.json
+
+      - name: Install e2e-ui
+        run: npm ci --prefix e2e-ui
+
+      - name: Install Chromium
+        working-directory: e2e-ui
+        run: npx playwright install --with-deps chromium
+
+      - name: Compare screenshots
+        working-directory: e2e-ui
+        run: npm run test:visual
+
+      - name: Upload diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: e2e-ui/test-results
+          retention-days: 7

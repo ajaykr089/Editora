@@ -81,7 +81,7 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
         onChange={onSearchChange}
         placeholder={searchPlaceholder || 'Search...'}
         style={{ flex: '1 1 240px', minInlineSize: 220 }}
-        value={search ?? ''}
+        value={search}
       />
 
       {showStatus ? (
