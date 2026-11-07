@@ -1,0 +1,85 @@
+{
+  "name": "@editora/ui-testing",
+  "version": "0.0.0",
+  "description": "Test helpers for apps built on Editora UI: jsdom setup and user-level actions (pick an option, open a menu, fill a field, read a field's error) that reach inside shadow roots, for Testing Library and Playwright.",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/ui-testing"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "keywords": [
+    "editora",
+    "testing",
+    "testing-library",
+    "playwright",
+    "shadow-dom",
+    "web-components",
+    "vitest",
+    "jest"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./playwright": {
+      "types": "./dist/playwright.d.ts",
+      "import": "./dist/playwright.js",
+      "require": "./dist/playwright.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@editora/ui-core": ">=0.3.0",
+    "@playwright/test": ">=1.40",
+    "@testing-library/dom": ">=9",
+    "@testing-library/user-event": ">=14",
+    "shadow-dom-testing-library": ">=1.11"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "@testing-library/dom": {
+      "optional": true
+    },
+    "@testing-library/user-event": {
+      "optional": true
+    },
+    "shadow-dom-testing-library": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@testing-library/user-event": "^14.6.8",
+    "shadow-dom-testing-library": "^1.14.2",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
