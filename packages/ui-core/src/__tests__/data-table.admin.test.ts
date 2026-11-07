@@ -74,10 +74,13 @@ describe('ui-data-table server-side', () => {
 describe('ui-data-table pagination-id', () => {
   it('binds a pager that comes after the table in the page', async () => {
     const el = await mount({ 'pagination-id': 'late-pager', 'page-size': '1' }, table([['A', 'a', '1'], ['B', 'b', '2'], ['C', 'c', '3']]));
+    // added well after the table's first render (a slow page, a lazily rendered pager)
+    await frame();
+    await frame();
     const pager = document.createElement('div');
     pager.id = 'late-pager';
     document.body.appendChild(pager);
-    await frame();
+    await tick();
     expect(pager.getAttribute('count')).toBe('3');
     pager.dispatchEvent(new CustomEvent('change', { detail: { page: 2 }, bubbles: true }));
     expect(bodyRows(el).map((row) => row.hidden)).toEqual([true, false, true]);

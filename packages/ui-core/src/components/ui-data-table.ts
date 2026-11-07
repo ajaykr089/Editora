@@ -787,6 +787,8 @@ export class UIDataTable extends ElementBase {
   private _filteredRows = 0;
   /** Where pagination-id is looked up and its change events are heard (the table's document or shadow root). */
   private _paginationRoot: Document | ShadowRoot | null = null;
+  /** Watches for a pagination-id pager that is not in the page yet. */
+  private _paginationWatcher: MutationObserver | null = null;
   private _resizeState: { columnIndex: number; startX: number; startWidth: number } | null = null;
   private _columnWidths = new Map<number, number>();
   private _frameEl: HTMLElement | null = null;
@@ -2334,6 +2336,8 @@ export class UIDataTable extends ElementBase {
   }
 
   private _detachPaginationListener() {
+    this._paginationWatcher?.disconnect();
+    this._paginationWatcher = null;
     if (!this._paginationRoot) return;
     this._paginationRoot.removeEventListener('change', this._onPaginationChange as EventListener, true);
     this._paginationRoot = null;
@@ -2353,8 +2357,18 @@ export class UIDataTable extends ElementBase {
     // Capture phase: a pager's change event is heard whether or not it bubbles.
     root.addEventListener('change', this._onPaginationChange as EventListener, true);
     this._syncPaginationElement();
-    // A pager after the table in the markup exists once the current parse or render finishes.
-    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => this._syncPaginationElement());
+  }
+
+  /**
+   * The pager may be added after the table (later in the markup, or rendered later): watch the
+   * root until it appears, then give it the page and count.
+   */
+  private _watchForPager() {
+    if (this._paginationWatcher || !this._paginationRoot || typeof MutationObserver === 'undefined') return;
+    this._paginationWatcher = new MutationObserver(() => {
+      if (this._paginationElement()) this._syncPaginationElement();
+    });
+    this._paginationWatcher.observe(this._paginationRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['id'] });
   }
 
   private _paginationElement(): HTMLElement | null {
@@ -2366,7 +2380,12 @@ export class UIDataTable extends ElementBase {
 
   private _syncPaginationElement() {
     const pager = this._paginationElement();
-    if (!pager) return;
+    if (!pager) {
+      this._watchForPager();
+      return;
+    }
+    this._paginationWatcher?.disconnect();
+    this._paginationWatcher = null;
     pager.setAttribute('count', String(this._pageCount || 1));
     pager.setAttribute('page', String(this._page || 1));
   }
