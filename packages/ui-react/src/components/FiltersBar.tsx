@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from './Button';
-import { DateRangePicker } from './DateRangePicker';
 import { Input } from './Input';
 import { Select } from './Select';
 
@@ -18,6 +17,10 @@ export type FiltersBarDateRangePreset = {
   /** The range, or a function that computes it when clicked (so "Last 7 days" stays current). */
   range: FiltersBarDateRange | (() => FiltersBarDateRange);
 };
+
+// The picker is large (about 27 KB gzipped) and most filter bars have no date range: load it only
+// when one is shown.
+const DateRangePicker = React.lazy(() => import('./DateRangePicker').then((module) => ({ default: module.DateRangePicker })));
 
 const isoDate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -165,6 +168,7 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
       ) : null}
 
       {showDateRange ? (
+        <React.Suspense fallback={<span aria-hidden="true" style={{ display: 'inline-block', minInlineSize: 240 }} />}>
         <DateRangePicker
           label={dateRangeLabel}
           clearable
@@ -172,6 +176,7 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
           onChange={(detail) => onDateRangeChange?.(detail.value ? { start: detail.value.start, end: detail.value.end } : null)}
           style={{ minInlineSize: 240 }}
         />
+        </React.Suspense>
       ) : null}
 
       {showDateRange && presetRanges.length ? (
