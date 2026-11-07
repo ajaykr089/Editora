@@ -183,7 +183,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
                 key={preset.label}
                 size="sm"
                 variant={active ? 'secondary' : 'ghost'}
-                aria-pressed={active}
+                // React 19 writes `true` on a custom element as an empty attribute.
+                aria-pressed={active ? 'true' : 'false'}
                 onClick={() => onDateRangeChange?.(resolvePreset(preset))}
               >
                 {preset.label}
