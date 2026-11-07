@@ -445,6 +445,7 @@ export class UISwitch extends ElementBase {
   constructor() {
     super();
     this._onClick = this._onClick.bind(this);
+    this._onHostClick = this._onHostClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
   }
@@ -466,6 +467,7 @@ export class UISwitch extends ElementBase {
     super.connectedCallback();
     this._formControl.connect();
     this.root.addEventListener('click', this._onClick as EventListener);
+    this.addEventListener('click', this._onHostClick as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
     this._syncAria();
@@ -474,6 +476,7 @@ export class UISwitch extends ElementBase {
   override disconnectedCallback(): void {
     this._formControl.disconnect();
     this.root.removeEventListener('click', this._onClick as EventListener);
+    this.removeEventListener('click', this._onHostClick as EventListener);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
     super.disconnectedCallback();
@@ -563,6 +566,17 @@ export class UISwitch extends ElementBase {
     if (this._control) {
       this._control.toggleAttribute('data-disabled', disabled);
     }
+  }
+
+  /**
+   * A click sent to the switch element itself: `element.click()`, or assistive technology
+   * activating the element that has role="switch". It never passes through the shadow root, so the
+   * handler there did not see it and the switch ignored it. Clicks that start inside are left to
+   * that handler.
+   */
+  private _onHostClick(event: MouseEvent): void {
+    if (event.composedPath()[0] !== this || this.disabled || event.defaultPrevented) return;
+    this.toggle();
   }
 
   private _onClick(event: MouseEvent): void {
