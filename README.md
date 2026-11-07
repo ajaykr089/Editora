@@ -19,6 +19,7 @@
     <a href="https://editora-ecosystem.netlify.app/">Docs</a> ·
     <a href="https://editora-free.netlify.app/">Web demo</a> ·
     <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+    <a href="https://github.com/ajaykr089/Editora/releases">Releases</a> ·
     <a href="https://www.npmjs.com/org/editora">npm</a>
   </p>
 

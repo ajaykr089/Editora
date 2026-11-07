@@ -1,195 +1,79 @@
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
-## 1.0.4 (2026-02-28)
-
-### Changed
-- Release preparation for `@editora/core`, `@editora/plugins`, `@editora/react`, and `@editora/themes`.
-- Updated publish metadata and declaration entrypoint alignment for npm consumers.
-
-## 1.0.2 (2026-02-13)
-
-**Note:** Version bump only for package editora
-
-
-
-
-
-## 1.0.1 (2026-02-12)
-
-**Note:** Version bump only for package editora
-
-
-
-
-
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Editora is a monorepo of separately versioned npm packages, so each package keeps its own changelog.
+Every release adds one entry per change, written when the change is made and published with that
+version.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+- **[GitHub Releases](https://github.com/ajaykr089/Editora/releases)**: one release per published
+  package version, with that version's changes as its notes. Watch the repository with
+  *Custom → Releases* to be notified of new versions.
+- **Per-package changelogs**: the table below. npm shows each package's README, which links back to
+  its changelog.
 
-## [Unreleased]
+## Packages
 
-### Added
-- Initial release preparation
-- Complete plugin system with 40+ plugins
-- React components and hooks
-- Theming system with light/dark mode
-- Comprehensive documentation
-- Example projects
-- CI/CD workflows
+### Editor
 
-## [1.0.1] - 2026-02-12
+| Package | Changelog |
+| --- | --- |
+| `@editora/core` | [packages/core/CHANGELOG.md](packages/core/CHANGELOG.md) |
+| `@editora/react` | [packages/react/CHANGELOG.md](packages/react/CHANGELOG.md) |
+| `@editora/plugins` | [packages/plugins/CHANGELOG.md](packages/plugins/CHANGELOG.md) |
+| `@editora/themes` | [packages/themes/CHANGELOG.md](packages/themes/CHANGELOG.md) |
+| `@editora/markdown-editor` | [packages/markdown-editor/CHANGELOG.md](packages/markdown-editor/CHANGELOG.md) |
+| `@editora/light-code-editor` | [packages/light-code-editor/CHANGELOG.md](packages/light-code-editor/CHANGELOG.md) |
+| `@editora/performance` | [packages/performance/CHANGELOG.md](packages/performance/CHANGELOG.md) |
+| `@editora/cli` | [packages/cli/CHANGELOG.md](packages/cli/CHANGELOG.md) |
 
-### Fixed
-- Corrected plugin import examples in README.md (changed `createBoldPlugin` to `BoldPlugin`)
-- Updated web component usage documentation with proper examples
-- Fixed package versions in example projects to match 1.0.1
+Individual plugin packages (`@editora/plugin-table`, `@editora/media-manager`, `@editora/comments`, ...)
+each have a `CHANGELOG.md` in their folder under [packages/plugins](packages/plugins).
 
-### Documentation
-- Added comprehensive web component usage section to main README
-- Updated examples README to reflect actual project structure
-- Updated version references in documentation website from 1.0.0 to 1.0.1
+### Content tools
 
-## [1.0.0] - 2026-02-02
+| Package | Changelog |
+| --- | --- |
+| `@editora/agent` | [packages/agent/CHANGELOG.md](packages/agent/CHANGELOG.md) |
+| `@editora/ai-review` | [packages/ai-review/CHANGELOG.md](packages/ai-review/CHANGELOG.md) |
+| `@editora/authorship` | [packages/authorship/CHANGELOG.md](packages/authorship/CHANGELOG.md) |
+| `@editora/content-a11y` | [packages/content-a11y/CHANGELOG.md](packages/content-a11y/CHANGELOG.md) |
+| `@editora/docx` | [packages/docx/CHANGELOG.md](packages/docx/CHANGELOG.md) |
+| `@editora/email-html` | [packages/email-html/CHANGELOG.md](packages/email-html/CHANGELOG.md) |
+| `@editora/paste-cleaner` | [packages/paste-cleaner/CHANGELOG.md](packages/paste-cleaner/CHANGELOG.md) |
+| `@editora/rich-text-convert` | [packages/rich-text-convert/CHANGELOG.md](packages/rich-text-convert/CHANGELOG.md) |
 
-### Added
+### UI kit
 
-#### Core Features
-- Framework-agnostic editor engine
-- Plugin architecture for extensibility
-- TypeScript support with full type definitions
-- XSS protection and content sanitization
-- Accessibility features (WCAG 2.1 compliant)
-- Multi-instance editor support
+| Package | Changelog |
+| --- | --- |
+| `@editora/ui-core` | [packages/ui-core/CHANGELOG.md](packages/ui-core/CHANGELOG.md) |
+| `@editora/ui-react` | [packages/ui-react/CHANGELOG.md](packages/ui-react/CHANGELOG.md) |
+| `@editora/ui-testing` | [packages/ui-testing/CHANGELOG.md](packages/ui-testing/CHANGELOG.md) |
+| `@editora/ui-editor` | [packages/ui-editor/CHANGELOG.md](packages/ui-editor/CHANGELOG.md) |
+| `@editora/ui-sortable` | [packages/ui-sortable/CHANGELOG.md](packages/ui-sortable/CHANGELOG.md) |
+| `@editora/icons` | [packages/icons/CHANGELOG.md](packages/icons/CHANGELOG.md) |
+| `@editora/react-icons` | [packages/react-icons/CHANGELOG.md](packages/react-icons/CHANGELOG.md) |
+| `@editora/toast` | [packages/editora-toast/CHANGELOG.md](packages/editora-toast/CHANGELOG.md) |
 
-#### React Package
-- `<EditoraEditor />` component
-- `useEditor` hook for editor management
-- `useEditorState` hook for state tracking
-- `useEditorCommands` hook for commands
-- `<Toolbar />` component
-- `<ToolbarButton />` component
-- SSR compatibility
+`@editora/ui-vue`, `@editora/ui-svelte` and `@editora/ui-angular` are deprecated; use `@editora/ui-core`
+directly.
 
-#### Plugins (40+)
-- **Text Formatting**: Bold, Italic, Underline, Strikethrough, Font Family, Font Size, Text Color, Background Color
-- **Block Elements**: Headings (H1-H6), Paragraphs, Blockquotes, Code Blocks, Horizontal Rules, Page Breaks
-- **Lists**: Bullet Lists, Numbered Lists, Checklists, Indent/Outdent
-- **Media**: Images (with upload), Videos, Audio, Embed IFrames, Media Manager
-- **Advanced**: Tables, Math Equations (LaTeX), Links, Anchors, Comments, Templates, Merge Tags
-- **Document Management**: Import/Export (Word, PDF, HTML), Document Manager
-- **Accessibility**: Spell Checker, Accessibility Checker
-- **Utilities**: History (Undo/Redo), Fullscreen, Line Height, Text Direction, Alignment, Capitalization
+## Adding an entry
 
-#### Themes
-- Light theme (default)
-- Dark theme
-- Auto theme (system preference detection)
-- Customizable via CSS variables
-- Responsive design
-- High contrast mode support
+Changes are recorded with [changesets](https://github.com/changesets/changesets): run
+`npx changeset` in the pull request that makes the change, pick the packages and the bump, and
+describe the change from the user's side. At release time the entries move into the packages'
+`CHANGELOG.md` files and the GitHub Releases. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-#### Documentation
-- Comprehensive README for each package
-- API documentation
-- Usage examples
-- Quick start guide
-- Contributing guidelines
-- Publishing guide
+## Before per-package changelogs
 
-#### Examples
-- Basic editor example
-- Advanced editor example
-- Blog post editor
-- Documentation editor
-- Form integration examples
+Until 1.0.4 (February 2026) `@editora/core`, `@editora/react`, `@editora/plugins` and
+`@editora/themes` were released together and recorded here.
 
-#### Developer Experience
-- Lerna monorepo setup
-- Automated build system
-- GitHub Actions CI/CD
-- Conventional commits
-- Automated changelog generation
-- Tree-shakeable bundles
-- Optimized bundle sizes
-
-### Changed
-- N/A (Initial release)
-
-### Deprecated
-- N/A (Initial release)
-
-### Removed
-- N/A (Initial release)
-
-### Fixed
-- N/A (Initial release)
-
-### Security
-- XSS protection enabled by default
-- Content sanitization
-- Secure file upload handling
-- Input validation
-
-## Package Versions
-
-All packages released at version 1.0.0:
-- `@editora/core@1.0.0`
-- `@editora/react@1.0.0`
-- `@editora/plugins@1.0.0`
-- `@editora/themes@1.0.0`
-
----
-
-## Release Notes
-
-### Version 1.0.0 - Initial Release
-
-This is the first stable release of Editora Rich Text Editor! 🎉
-
-**Highlights:**
-- 40+ production-ready plugins
-- Complete React integration
-- Comprehensive theming system
-- Full TypeScript support
-- Extensive documentation
-- Working examples
-
-**Installation:**
-```bash
-npm install @editora/react @editora/core @editora/plugins @editora/themes
-```
-
-**Quick Start:**
-```tsx
-import { EditoraEditor } from '@editora/react';
-import { createBoldPlugin, createItalicPlugin } from '@editora/plugins';
-
-import "@editora/themes/themes/default.css";
-
-function App() {
-  return (
-    <EditoraEditor
-      plugins={[createBoldPlugin(), createItalicPlugin()]}
-    />
-  );
-}
-```
-
-**Documentation:**
-- [Main README](./README.md)
-- [Quick Start Guide](./QUICKSTART.md)
-- [API Documentation](./packages/react/README.md)
-
----
-
-## Links
-
-- [GitHub Repository](https://github.com/ajaykr089/Editora)
-- [Issue Tracker](https://github.com/ajaykr089/Editora/issues)
-- [npm Packages](https://www.npmjs.com/search?q=%40editora)
+- **1.0.4** (2026-02-28): release preparation for the four packages; publish metadata and
+  declaration entry points aligned for npm consumers.
+- **1.0.2** (2026-02-13): version bump only.
+- **1.0.1** (2026-02-12): corrected the plugin import examples in the README (`BoldPlugin`, not
+  `createBoldPlugin`); web component usage documented; example projects updated to 1.0.1.
+- **1.0.0** (2026-02-02): first stable release: framework-agnostic core with a plugin
+  architecture, the React component and hooks, 40+ plugins, light/dark themes, XSS-safe
+  sanitization and TypeScript types.
