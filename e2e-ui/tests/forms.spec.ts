@@ -6,7 +6,7 @@ test.describe('form association (ElementInternals: jsdom cannot test this)', () 
     await page.waitForFunction(() => (window as any).result, null, { timeout: 15_000 });
     const r = await page.evaluate(() => (window as any).result);
     expect(r.initial).toMatchObject({
-      email: ['a@b.c'], notes: ['hello'], pw: ['secret'], qty: ['3'], kind: ['b'], agree: ['on'],
+      email: ['a@b.c'], notes: ['hello'], pw: ['pw-test-value'], qty: ['3'], kind: ['b'], agree: ['on'],
       notify: ['on'], plan: ['pro'], vol: ['40'], tags: ['x', 'y'],
     });
     expect(r.initial.news).toBeUndefined();
@@ -35,18 +35,21 @@ test.describe('form association (ElementInternals: jsdom cannot test this)', () 
   });
 });
 
+// A made-up value for the sign-in form in app/signin.html (not a credential for anything).
+const TEST_PASSWORD = 'example-test-value';
+
 test('sign-in fields: the author\'s slotted inputs are real form fields', async ({ page }) => {
   await page.goto('/signin.html');
   await page.waitForFunction(() => (window as any).ready);
   await page.locator('#email').evaluate((el) => (el.shadowRoot!.querySelector('.label') as HTMLElement).click());
   await expect(page.locator('input[name=email]')).toBeFocused();
   await page.keyboard.type('ann@acme.test');
-  await page.locator('input[name=password]').fill('s3cret');
+  await page.locator('input[name=password]').fill(TEST_PASSWORD);
   await page.locator('#pw').evaluate((el) => (el.shadowRoot!.querySelector('.toggle-btn') as HTMLElement).click());
   await expect(page.locator('input[name=password]')).toHaveAttribute('type', 'text');
   await page.locator('#pw').evaluate((el) => (el.shadowRoot!.querySelector('.toggle-btn') as HTMLElement).click());
   await page.locator('input[name=password]').press('Enter');
-  await expect.poll(() => page.evaluate(() => (window as any).submits)).toEqual([['email=ann@acme.test', 'password=s3cret']]);
+  await expect.poll(() => page.evaluate(() => (window as any).submits)).toEqual([['email=ann@acme.test', `password=${TEST_PASSWORD}`]]);
   await expect(page.locator('input[name=email]')).toHaveAttribute('autocomplete', 'username');
   await expect(page.getByRole('textbox', { name: 'Email' })).toHaveAttribute('name', 'email');
   await expect(page.getByLabel('Password', { exact: true })).toHaveAttribute('name', 'password');

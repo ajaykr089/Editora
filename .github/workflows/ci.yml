@@ -115,7 +115,9 @@ jobs:
   # source, driven by Playwright in Chromium, Firefox and WebKit. Covers what jsdom cannot:
   # form association, focus and keyboard patterns, layout, server-rendered markup, icons.
   browser-tests:
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.58 does not support ubuntu-latest (26.04) yet, and screenshot
+    # baselines must come from the same image they are compared on.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -147,7 +149,9 @@ jobs:
 
   # axe over every Storybook story, unthemed and with the real light theme.
   a11y-stories:
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.58 does not support ubuntu-latest (26.04) yet, and screenshot
+    # baselines must come from the same image they are compared on.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -190,7 +194,9 @@ jobs:
   # Screenshot comparisons per theme and density. Baselines are Linux-only and come from the
   # "Update visual baselines" workflow; until they are committed these tests are skipped.
   visual:
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.58 does not support ubuntu-latest (26.04) yet, and screenshot
+    # baselines must come from the same image they are compared on.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
