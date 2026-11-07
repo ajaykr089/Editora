@@ -57,15 +57,15 @@ describe('wrappers are correct on the first render', () => {
 
   // All of these showed their defaults (no label, no title) straight after render() before.
   it.each([
-    ['Meter', <Meter value={82} label="Reliability" showLabel />, 'ui-meter', 'Reliability'],
-    ['Alert', <Alert title="Saved" />, 'ui-alert', 'Saved'],
-    ['EmptyState', <EmptyState title="Nothing here" />, 'ui-empty-state', 'Nothing here'],
-    ['Input', <Input label="Email" />, 'ui-input', 'Email'],
-    ['Textarea', <Textarea label="Notes" />, 'ui-textarea', 'Notes'],
-    ['NumberField', <NumberField label="Qty" value={3} />, 'ui-number-field', 'Qty'],
-    ['Slider', <Slider label="Volume" value={30} />, 'ui-slider', 'Volume'],
-    ['Switch', <Switch label="Notify me" />, 'ui-switch', 'Notify me'],
-    ['Combobox', <Combobox label="City" />, 'ui-combobox', 'City'],
+    ['Meter', <Meter key="Meter" value={82} label="Reliability" showLabel />, 'ui-meter', 'Reliability'],
+    ['Alert', <Alert key="Alert" title="Saved" />, 'ui-alert', 'Saved'],
+    ['EmptyState', <EmptyState key="EmptyState" title="Nothing here" />, 'ui-empty-state', 'Nothing here'],
+    ['Input', <Input key="Input" label="Email" />, 'ui-input', 'Email'],
+    ['Textarea', <Textarea key="Textarea" label="Notes" />, 'ui-textarea', 'Notes'],
+    ['NumberField', <NumberField key="NumberField" label="Qty" value={3} />, 'ui-number-field', 'Qty'],
+    ['Slider', <Slider key="Slider" label="Volume" value={30} />, 'ui-slider', 'Volume'],
+    ['Switch', <Switch key="Switch" label="Notify me" />, 'ui-switch', 'Notify me'],
+    ['Combobox', <Combobox key="Combobox" label="City" />, 'ui-combobox', 'City'],
   ] as Array<[string, React.ReactElement, string, string]>)('%s renders its props', (_name, element, tag, text) => {
     const { container } = render(element);
     expect(container.querySelector(tag)!.shadowRoot!.innerHTML).toContain(text);
