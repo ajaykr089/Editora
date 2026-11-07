@@ -81,7 +81,8 @@ const style = `
     --ui-chart-warning-text: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-chart-warning) 74%, var(--ui-chart-text)));
     --ui-chart-warning: var(--ui-color-warning, #b45309);
     --ui-chart-danger: var(--ui-color-danger, #dc2626);
-    --ui-chart-radius: calc(var(--ui-radius, 6px) + 4px);
+    /* The same radius as Card and DataTable, so cards side by side match (--base-card-radius). */
+    --ui-chart-radius: var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px));
     --ui-chart-shadow: none;
     --ui-chart-plot-height: 220px;
     --ui-chart-plot-min-height: 188px;

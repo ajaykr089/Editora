@@ -8,7 +8,7 @@ const style = `
     /* A wide table scrolls inside its own frame. Without this a grid or flex parent grows to the table's width. */
     min-inline-size: 0;
     max-inline-size: 100%;
-    --ui-data-table-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-data-table-radius: var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px));
     --ui-data-table-border-color: var(--ui-color-line-subtle, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
     --ui-data-table-border: 1px solid var(--ui-data-table-border-color);
     --ui-data-table-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
