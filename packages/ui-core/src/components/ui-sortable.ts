@@ -2093,6 +2093,7 @@ export class UISortable extends ElementBase {
       this._applyLiveMessage();
       this._animateItemShellReflow(previousRects);
     });
+    this._syncScrollTabStops();
   }
 
   private _syncStateFromAttributes(): void {
@@ -2411,6 +2412,16 @@ export class UISortable extends ElementBase {
     }
   }
 
+  // A scrolling list with no item that is the tab stop (the single roving stop is in another
+  // list) could not be reached, and so not scrolled, from the keyboard: the list itself is then
+  // the tab stop.
+  private _syncScrollTabStops(): void {
+    this.root.querySelectorAll<HTMLElement>('.items[data-scroll="true"]').forEach((items) => {
+      if (items.querySelector('.item[tabindex="0"]')) items.removeAttribute('tabindex');
+      else items.setAttribute('tabindex', '0');
+    });
+  }
+
   private _syncSelectionVisualState(): void {
     const selectedIds = new Set(this._selection);
     const showSelectionBadge = this.getAttribute('show-selection-badge') !== 'false';
@@ -2432,6 +2443,7 @@ export class UISortable extends ElementBase {
         selectionBadge.textContent = visible ? this._t('badgeSelected') : '';
       }
     });
+    this._syncScrollTabStops();
 
     // A card drawn by a render function is told whether it is selected, so it is drawn again when that changes.
     if (reselected.size && this._renderItemFn) this._fillCustomTargets({ itemIds: reselected });
