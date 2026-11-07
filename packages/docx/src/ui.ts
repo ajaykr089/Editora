@@ -4,11 +4,11 @@
  * .docx. Framework-free; styles are injected once and can be themed with CSS
  * custom properties (--docx-ui-*), or left out with `injectStyles: false`.
  */
-import type { Doc } from './ast';
-import { readDocx, writeDocx } from './index';
-import type { ReadOptions } from './read';
-import type { WriteOptions } from './write';
-import { DocxError } from './zip';
+import type { Doc } from './ast.js';
+import { readDocx, writeDocx } from './index.js';
+import type { ReadOptions } from './read.js';
+import type { WriteOptions } from './write.js';
+import { DocxError } from './zip.js';
 
 export interface DocxUiLabels {
   dropHere: string;

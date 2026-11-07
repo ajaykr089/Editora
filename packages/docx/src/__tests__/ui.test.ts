@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { createDocxImport, showDocxReport, summarizeWarnings } from '../ui';
+import { createDocxImport, showDocxReport, summarizeWarnings } from '../ui.js';
 
 const fixture = (name: string) => new Uint8Array(readFileSync(join(__dirname, 'fixtures', name)));
 const docxFile = (name: string, bytes: Uint8Array) => new File([bytes as Uint8Array<ArrayBuffer>], name, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });

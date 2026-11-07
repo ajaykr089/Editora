@@ -1,5 +1,5 @@
-import type { Block, Doc } from '../ast';
-import { DocxError, readDocx, writeDocx } from '../index';
+import type { Block, Doc } from '../ast.js';
+import { DocxError, readDocx, writeDocx } from '../index.js';
 
 // A long report: 1,650 blocks, about 240,000 characters (some 100 pages) of paragraphs, lists and tables.
 function bigDocument(sections: number): Doc {

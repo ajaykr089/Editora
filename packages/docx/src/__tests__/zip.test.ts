@@ -1,5 +1,5 @@
-import { crc32, unzip, utf8, zip, fromUtf8 } from '../zip';
-import { parseXml, child, textContent } from '../xml';
+import { crc32, unzip, utf8, zip, fromUtf8 } from '../zip.js';
+import { parseXml, child, textContent } from '../xml.js';
 
 describe('zip', () => {
   it('round-trips files and is deterministic', async () => {
