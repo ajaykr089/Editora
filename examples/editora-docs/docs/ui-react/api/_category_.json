@@ -1,0 +1,9 @@
+{
+  "label": "API reference",
+  "position": 99,
+  "link": {
+    "type": "generated-index",
+    "title": "@editora/ui-react API reference",
+    "description": "Props, attributes and events of every @editora/ui-react component, generated from the source."
+  }
+}
