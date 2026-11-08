@@ -63,11 +63,15 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     animation,
     theme,
     type,
-    ariaLabel,
+    ariaLabel: ariaLabelProp,
     ...rest
   },
   forwardedRef
 ) {
+  // The standard `aria-label` attribute is the usual way to name an icon-only button. It used to
+  // be overwritten by the camelCase `ariaLabel` prop (undefined when not given), so the button had
+  // no name. Either spelling works; `ariaLabel` wins when both are given.
+  const ariaLabel = ariaLabelProp ?? ((rest as Record<string, unknown>)['aria-label'] as string | undefined);
   const ref = useRef<HTMLElement | null>(null);
   const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
