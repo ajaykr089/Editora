@@ -767,7 +767,7 @@ export class UIMultiSelect extends ElementBase {
       <style>${style}</style>
       <div class="root">
         <div class="meta" hidden>
-          <div class="label" hidden><span class="label-text" id="${this._uid}-label"></span><span class="required" hidden>*</span></div>
+          <div class="label" hidden><span class="label-text" id="${this._uid}-label"></span><span class="required" aria-hidden="true" hidden>*</span></div>
           <div class="description" id="${this._uid}-description" hidden></div>
         </div>
         <div class="shell" part="shell" data-open="false" data-invalid="false">

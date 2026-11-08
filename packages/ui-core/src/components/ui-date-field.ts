@@ -295,7 +295,7 @@ export class UIDateField extends ElementBase {
       <style>${style}</style>
       <div class="root">
         <div class="meta" hidden>
-          <div class="label" hidden><span class="label-text"></span><span class="required" hidden>*</span></div>
+          <div class="label" hidden><span class="label-text"></span><span class="required" aria-hidden="true" hidden>*</span></div>
           <div class="description" hidden></div>
         </div>
         <div class="shell" part="shell" data-focused="false" data-invalid="false">
