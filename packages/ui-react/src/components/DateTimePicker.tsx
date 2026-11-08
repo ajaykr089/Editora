@@ -10,6 +10,7 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  syncDefaultOnAttribute
 } from './_internals';
 
 export type DateTimePickerDetail = {
@@ -128,7 +129,8 @@ export const DateTimePicker = React.forwardRef<HTMLElement, DateTimePickerProps>
   );
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value ?? null);
+    // Only when controlled: writing null on every sync wiped an uncontrolled pick whenever another prop changed.
+    if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
     syncStringAttribute(el, 'default-value', defaultValue ?? null);
     if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
     else syncStringAttribute(el, 'open', null);
@@ -148,8 +150,8 @@ export const DateTimePicker = React.forwardRef<HTMLElement, DateTimePickerProps>
     syncBooleanAttribute(el, 'required', required);
     syncStringAttribute(el, 'name', name ?? null);
     syncBooleanAttribute(el, 'close-on-select', closeOnSelect);
-    syncBooleanAttribute(el, 'clearable', clearable);
-    syncBooleanAttribute(el, 'allow-input', allowInput);
+    syncDefaultOnAttribute(el, 'clearable', clearable);
+    syncDefaultOnAttribute(el, 'allow-input', allowInput);
     syncStringAttribute(el, 'mode', mode && mode !== 'popover' ? mode : null);
     syncStringAttribute(el, 'show-footer', typeof showFooter === 'boolean' ? String(showFooter) : null);
     syncStringAttribute(el, 'label', label ?? null);

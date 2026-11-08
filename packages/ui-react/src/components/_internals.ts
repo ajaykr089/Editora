@@ -302,6 +302,20 @@ export function syncBooleanAttribute(el: HTMLElement, name: string, next: boolea
   }
 }
 
+/**
+ * For attributes the element treats as on when absent (`clearable`, `allow-input`, ...): `false`
+ * has to be written as "false", because removing the attribute turns the feature back on.
+ * `undefined` leaves the element's default.
+ */
+export function syncDefaultOnAttribute(el: HTMLElement, name: string, next: boolean | undefined): void {
+  if (next === undefined) {
+    if (el.hasAttribute(name)) el.removeAttribute(name);
+    return;
+  }
+  const value = next ? '' : 'false';
+  if (el.getAttribute(name) !== value) el.setAttribute(name, value);
+}
+
 export function syncNumberAttribute(el: HTMLElement, name: string, next: number | undefined): void {
   syncStringAttribute(el, name, typeof next === 'number' ? String(next) : null);
 }

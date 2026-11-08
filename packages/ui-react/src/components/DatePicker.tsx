@@ -10,6 +10,7 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  syncDefaultOnAttribute
 } from './_internals';
 
 export type DatePickerDetail = {
@@ -143,7 +144,8 @@ export const DatePicker = React.forwardRef<HTMLElement, DatePickerProps>(functio
   );
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value ?? null);
+    // Only when controlled: writing null on every sync wiped an uncontrolled pick whenever another prop changed.
+    if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
     syncStringAttribute(el, 'default-value', defaultValue ?? null);
     if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
     else syncStringAttribute(el, 'open', null);
@@ -162,9 +164,9 @@ export const DatePicker = React.forwardRef<HTMLElement, DatePickerProps>(functio
     syncStringAttribute(el, 'label', label ?? null);
     syncStringAttribute(el, 'hint', hint ?? null);
     syncStringAttribute(el, 'error', error ?? null);
-    syncBooleanAttribute(el, 'clearable', clearable);
-    syncBooleanAttribute(el, 'allow-input', allowInput);
-    syncBooleanAttribute(el, 'close-on-select', closeOnSelect);
+    syncDefaultOnAttribute(el, 'clearable', clearable);
+    syncDefaultOnAttribute(el, 'allow-input', allowInput);
+    syncDefaultOnAttribute(el, 'close-on-select', closeOnSelect);
     syncStringAttribute(el, 'outside-click', outsideClick && outsideClick !== 'navigate' ? outsideClick : null);
     syncBooleanAttribute(el, 'disabled', disabled);
     syncBooleanAttribute(el, 'readonly', readOnly);
