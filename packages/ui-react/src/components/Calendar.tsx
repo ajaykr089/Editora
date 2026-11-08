@@ -146,7 +146,8 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
   useElementAttributes(ref, (el) => {
     syncNumberAttribute(el, 'year', typeof year === 'number' && Number.isFinite(year) ? year : undefined);
     syncNumberAttribute(el, 'month', typeof month === 'number' && Number.isFinite(month) ? month : undefined);
-    syncStringAttribute(el, 'value', value || null);
+    // Only when controlled: writing null on every sync wiped an uncontrolled pick whenever another prop changed.
+    if (value !== undefined) syncStringAttribute(el, 'value', value || null);
     syncStringAttribute(el, 'selection', selection && selection !== 'single' ? selection : null);
     syncStringAttribute(el, 'min', min || null);
     syncStringAttribute(el, 'max', max || null);

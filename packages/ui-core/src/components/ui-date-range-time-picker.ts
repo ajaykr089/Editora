@@ -717,6 +717,9 @@ export class UIDateRangeTimePicker extends ElementBase {
     if (name === 'default-value' && oldValue == null && newValue != null && this._isInitialized && !this.hasAttribute('value')) {
       name = 'value';
     }
+    if (name === 'default-open' && oldValue == null && this._isInitialized && !this.hasAttribute('open') && isTruthyAttr(newValue)) {
+      this.setAttribute('open', '');
+    }
     if (oldValue === newValue) return;
     if (name === 'value' && !this._syncing) {
       this._value = parseValue(newValue);

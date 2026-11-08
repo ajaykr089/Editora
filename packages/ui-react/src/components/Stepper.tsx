@@ -80,7 +80,8 @@ export const Stepper = React.forwardRef<HTMLElement, StepperProps>(function Step
 
   useElementAttributes(ref, (el) => {
     syncJsonAttribute(el, 'steps', steps?.length ? steps : null);
-    syncStringAttribute(el, 'value', value || null);
+    // Only when controlled: writing null on every sync sent an uncontrolled stepper back to its first step.
+    if (value !== undefined) syncStringAttribute(el, 'value', value || null);
     syncStringAttribute(el, 'orientation', orientation && orientation !== 'horizontal' ? orientation : null);
     syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
     syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
