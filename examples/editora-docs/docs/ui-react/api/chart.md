@@ -19,6 +19,7 @@ import { Chart } from '@editora/ui-react';
 | `ariaLabel` | `string` |   |
 | `data` | `ChartPoint[]` |   |
 | `disabled` | `boolean` |   |
+| `headingLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | The title's heading level (default 3), to fit the page's outline. |
 | `headless` | `boolean` |   |
 | `interactive` | `boolean` |   |
 | `labels` | `string[]` |   |
@@ -45,6 +46,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 | `ariaLabel` | `string` |   |
 | `data` | `ChartPoint[]` |   |
 | `disabled` | `boolean` |   |
+| `headingLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | The title's heading level (default 3), to fit the page's outline. |
 | `headless` | `boolean` |   |
 | `interactive` | `boolean` |   |
 | `labels` | `string[]` |   |
@@ -92,6 +94,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Chart renders the `ui-chart` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `aria-label`, `data`, `disabled`, `headless`, `interactive`, `labels`, `series`, `show-legend`, `show-summary`, `show-table`, `state`, `subtitle`, `title`, `type`, `value-prefix`, `value-suffix`, `values`, `variant`
+**Attributes:** `aria-label`, `data`, `disabled`, `heading-level`, `headless`, `interactive`, `labels`, `series`, `show-legend`, `show-summary`, `show-table`, `state`, `subtitle`, `title`, `type`, `value-prefix`, `value-suffix`, `values`, `variant`
 
 **Events:** `point-select`, `ui-point-select`
