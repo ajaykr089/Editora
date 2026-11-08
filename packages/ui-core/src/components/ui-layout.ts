@@ -742,7 +742,26 @@ export class UILayout extends ElementBase {
   }
 
   private _onSlotChange(): void {
+    this._syncLandmarks();
     this._syncShell({ emit: true });
+  }
+
+  /**
+   * The header and footer wrappers are the page's banner and contentinfo landmarks, unless what is
+   * slotted into them brings its own (an AppHeader, a <header>/<footer>, an explicit role): then
+   * the wrapper steps aside, so the page does not get two nested banners.
+   */
+  private _syncLandmarks(): void {
+    const pairs: Array<[HTMLElement | null, HTMLSlotElement | null, string]> = [
+      [this._headerEl, this._headerSlot, 'ui-app-header, header, [role="banner"]'],
+      [this._footerEl, this._footerSlot, 'footer, [role="contentinfo"]'],
+    ];
+    for (const [wrapper, slot, selector] of pairs) {
+      if (!wrapper || !slot) continue;
+      const own = slot.assignedElements({ flatten: true }).some((el) => el.matches(selector) || !!el.querySelector(selector));
+      if (own) wrapper.setAttribute('role', 'none');
+      else wrapper.removeAttribute('role');
+    }
   }
 
   private _emitLayoutChange(detail: LayoutShellState): void {
@@ -855,17 +874,19 @@ export class UILayout extends ElementBase {
           <slot name="header"></slot>
         </header>
         <div class="body" part="body" data-layout="content-only">
-          <section class="panel sidebar-panel" part="sidebar">
+          <!-- Plain boxes, not <section>s: an unnamed section is no landmark itself, yet it stops an
+               <aside> inside it (such as Sidebar's) from being one. -->
+          <div class="panel sidebar-panel" part="sidebar">
             <slot name="sidebar"></slot>
-          </section>
+          </div>
           <div class="backdrop" part="backdrop" aria-hidden="true"></div>
-          <section class="panel content-panel" part="content">
+          <div class="panel content-panel" part="content">
             <slot name="content"></slot>
             <slot></slot>
-          </section>
-          <section class="panel aside-panel" part="aside">
+          </div>
+          <div class="panel aside-panel" part="aside">
             <slot name="aside"></slot>
-          </section>
+          </div>
         </div>
         <footer class="footer" part="footer">
           <slot name="footer"></slot>
@@ -881,6 +902,7 @@ export class UILayout extends ElementBase {
     this._contentPanel = this.root.querySelector('.content-panel');
     this._asidePanel = this.root.querySelector('.aside-panel');
     this._attachSlotHandlers();
+    this._syncLandmarks();
     queueMicrotask(() => this._syncShell({ emit: false }));
   }
 }
