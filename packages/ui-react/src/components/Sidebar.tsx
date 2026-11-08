@@ -7,7 +7,6 @@ import React, {
   useRef
 } from 'react';
 import '@editora/ui-core/sidebar';
-import { renderToStaticMarkup } from 'react-dom/server';
 import { createUIElement, hostOnly, flushElementRender, useNavigateBridge } from './_internals';
 import { useNavigationContext } from './NavigationProvider';
 
@@ -332,6 +331,31 @@ function normalizeMetric(value: number | string | undefined): string | null {
   return typeof value === 'number' ? `${value}px` : String(value);
 }
 
+/**
+ * react-dom/server (about 120 KB gzipped) used to be imported statically to turn an icon element
+ * into HTML, so every app with a Sidebar shipped the server renderer. Only icons the small
+ * serializer below cannot handle (components that use hooks or context, such as
+ * @editora/react-icons) need it: it is loaded the first time one is seen, and the sidebars on the
+ * page render again when it arrives.
+ */
+type StaticRenderer = (node: React.ReactElement) => string;
+let staticRenderer: StaticRenderer | null = null;
+let staticRendererLoading = false;
+const staticRendererListeners = new Set<() => void>();
+
+function loadStaticRenderer(): void {
+  if (staticRenderer || staticRendererLoading) return;
+  staticRendererLoading = true;
+  import('react-dom/server')
+    .then((module) => {
+      staticRenderer = module.renderToStaticMarkup;
+      staticRendererListeners.forEach((listener) => listener());
+    })
+    .catch(() => {
+      staticRendererLoading = false;
+    });
+}
+
 function serializeSidebarIcon(icon: React.ReactNode | string | undefined): string | undefined {
   if (!icon || typeof icon === 'string') return undefined;
   if (!isValidElement(icon)) return undefined;
@@ -341,7 +365,11 @@ function serializeSidebarIcon(icon: React.ReactNode | string | undefined): strin
     'aria-hidden': true,
     focusable: 'false'
   });
-  const html = serializeReactNodeToHtml(node) || renderToStaticMarkup(node);
+  let html = serializeReactNodeToHtml(node);
+  if (!html) {
+    if (staticRenderer) html = staticRenderer(node);
+    else loadStaticRenderer();
+  }
   return html || undefined;
 }
 
@@ -514,6 +542,15 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
   },
   forwardedRef
 ) {
+  // Render again when the on-demand icon renderer arrives (see loadStaticRenderer).
+  const [iconRendererVersion, rerenderForIcons] = React.useReducer((count: number) => count + 1, 0);
+  useEffect(() => {
+    if (staticRenderer) return;
+    staticRendererListeners.add(rerenderForIcons);
+    return () => {
+      staticRendererListeners.delete(rerenderForIcons);
+    };
+  }, []);
   const ref = useRef<HTMLElement | null>(null);
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
@@ -643,6 +680,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     else syncAttr('show-badges', null);
     flushElementRender(el);
   }, [
+    iconRendererVersion,
     collapsed,
     collapsible,
     rail,

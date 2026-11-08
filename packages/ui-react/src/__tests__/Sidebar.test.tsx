@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import '../../../ui-core/src/components/ui-sidebar';
 import { DashboardIcon } from '@editora/react-icons';
@@ -16,7 +16,9 @@ import {
 } from '../components/Sidebar';
 
 describe('Sidebar wrapper', () => {
-  it('forwards nested items and visual props to the host element', () => {
+  // Icons from @editora/react-icons need react-dom/server, which Sidebar loads on demand: their
+  // HTML arrives a render later, so these tests wait for it.
+  it('forwards nested items and visual props to the host element', async () => {
     const items = [
       {
         value: 'library',
@@ -66,9 +68,9 @@ describe('Sidebar wrapper', () => {
     expect(el?.getAttribute('search-query')).toBe('books');
     expect(el?.getAttribute('elevation')).toBe('high');
     expect(el?.hasAttribute('resizable')).toBe(true);
+    await waitFor(() => expect(JSON.parse(el?.getAttribute('items') || '[]')[0].iconHtml).toContain('<svg'));
     const serialized = JSON.parse(el?.getAttribute('items') || '[]');
     expect(serialized[0].href).toBe('/library');
-    expect(serialized[0].iconHtml).toContain('<svg');
     expect(serialized[0].children[0].value).toBe('books');
   });
 
@@ -99,7 +101,7 @@ describe('Sidebar wrapper', () => {
     expect(slotHost?.querySelector('input[type="search"]')?.getAttribute('placeholder')).toBe('Search library');
   });
 
-  it('renders grouped sidebar items into slot=item data nodes', () => {
+  it('renders grouped sidebar items into slot=item data nodes', async () => {
     const { container } = render(
       <Sidebar>
         <SidebarContent>
@@ -114,6 +116,7 @@ describe('Sidebar wrapper', () => {
       </Sidebar>
     );
 
+    await waitFor(() => expect((container.querySelector('[slot="item"]') as HTMLElement | null)?.dataset.iconHtml).toContain('<svg'));
     const items = Array.from(container.querySelectorAll('[slot="item"]')) as HTMLElement[];
     expect(items).toHaveLength(2);
     expect(items[0]?.dataset.section).toBe('Library');
@@ -159,7 +162,7 @@ describe('Sidebar wrapper', () => {
     expect(item?.dataset.children).toBeUndefined();
   });
 
-  it('promotes a leading custom icon child into iconHtml for SidebarItem content markup', () => {
+  it('promotes a leading custom icon child into iconHtml for SidebarItem content markup', async () => {
     const { container } = render(
       <Sidebar>
         <SidebarContent>
@@ -174,8 +177,8 @@ describe('Sidebar wrapper', () => {
       </Sidebar>
     );
 
+    await waitFor(() => expect((container.querySelector('[slot="item"]') as HTMLElement | null)?.dataset.iconHtml).toContain('<svg'));
     const item = container.querySelector('[slot="item"]') as HTMLElement | null;
-    expect(item?.dataset.iconHtml).toContain('<svg');
     expect(item?.dataset.contentHtml).toContain('Guides');
     expect(item?.dataset.contentHtml).toContain('Patterns and implementation notes');
   });
