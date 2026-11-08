@@ -50,6 +50,8 @@ export type ChartProps = React.HTMLAttributes<HTMLElement> & {
   showSummary?: boolean;
   /** Show the chart's numbers as a table below it (always available to screen readers). */
   showTable?: boolean;
+  /** The title's heading level (default 3), to fit the page's outline. */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
   headless?: boolean;
   valuePrefix?: string;
   valueSuffix?: string;
@@ -94,6 +96,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     showLegend,
     showSummary,
     showTable,
+    headingLevel,
     headless,
     valuePrefix,
     valueSuffix,
@@ -181,6 +184,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     syncAttr('show-legend', typeof showLegend === 'boolean' ? (showLegend ? 'true' : 'false') : null);
     syncAttr('show-summary', typeof showSummary === 'boolean' ? (showSummary ? 'true' : 'false') : null);
     syncAttr('show-table', showTable ? '' : null);
+    syncAttr('heading-level', headingLevel ? String(headingLevel) : null);
     syncAttr('value-prefix', valuePrefix || null);
     syncAttr('value-suffix', valueSuffix || null);
     syncAttr('aria-label', ariaLabel || null);
@@ -202,6 +206,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     showLegend,
     showSummary,
     showTable,
+    headingLevel,
     headless,
     valuePrefix,
     valueSuffix,

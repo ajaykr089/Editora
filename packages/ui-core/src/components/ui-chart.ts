@@ -945,7 +945,8 @@ export class UIChart extends ElementBase {
       'value-prefix',
       'value-suffix',
       'aria-label',
-      'show-table'
+      'show-table',
+      'heading-level'
     ];
   }
 
@@ -1113,6 +1114,12 @@ export class UIChart extends ElementBase {
 
   private _seriesTone(series: NormalizedSeries, seriesIndex: number): string {
     return series.tone || palette[seriesIndex % palette.length] || 'var(--ui-chart-accent)';
+  }
+
+  /** The title's heading level: `heading-level` 1 to 6, default 3, so it fits the page's outline. */
+  private _headingLevel(): number {
+    const level = Number(this.getAttribute('heading-level'));
+    return Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3;
   }
 
   /**
@@ -1785,7 +1792,7 @@ export class UIChart extends ElementBase {
           </div>
           <header class="header" part="header" ${headerVisible ? '' : 'hidden'}>
             <div class="meta">
-              ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h3 class="title" part="title">${escapeHtml(title)}</h3>` : ''}
+              ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h${this._headingLevel()} class="title" part="title">${escapeHtml(title)}</h${this._headingLevel()}>` : ''}
               ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
             </div>
             <span class="status-pill" data-state="${state}">${statusText(state)}</span>
@@ -1866,7 +1873,7 @@ export class UIChart extends ElementBase {
 
         <header class="header" part="header" ${headerVisible ? '' : 'hidden'}>
           <div class="meta">
-            ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h3 class="title" part="title">${escapeHtml(title)}</h3>` : ''}
+            ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h${this._headingLevel()} class="title" part="title">${escapeHtml(title)}</h${this._headingLevel()}>` : ''}
             ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
           </div>
           <span class="status-pill" data-state="${state}">${statusText(state)}</span>

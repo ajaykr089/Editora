@@ -45,4 +45,12 @@ describe('ui-chart with a few points', () => {
     expect(text).toContain('$300 (75%)');
     expect(text).not.toContain('Range');
   });
+
+  it('uses the heading level it is given for its title (default 3)', async () => {
+    const plain = await chart({ title: 'Spend', values: '1,2', labels: 'a,b' });
+    expect(plain.querySelector('h3.title')!.textContent).toBe('Spend');
+    document.body.innerHTML = '';
+    const level2 = await chart({ title: 'Spend', values: '1,2', labels: 'a,b', 'heading-level': '2' });
+    expect(level2.querySelector('h2.title')!.textContent).toBe('Spend');
+  });
 });
