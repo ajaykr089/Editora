@@ -22,7 +22,7 @@ const style = `
   ${OVERLAY_MOTION_CSS}
 
   :host {
-    --ui-multi-select-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-multi-select-border-color: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
     --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
     --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
@@ -131,7 +131,7 @@ const style = `
   }
 
   .shell:hover:not(:focus-within):not([data-open="true"]) {
-    border-color: var(--ui-color-line-strong, var(--ui-multi-select-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-multi-select-border-color));
   }
 
   .shell[data-readonly="true"] {

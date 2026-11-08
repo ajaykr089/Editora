@@ -62,6 +62,7 @@ const style = `
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-surface-alt, #f8fafc))
     );
     --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-dp-field-border: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
@@ -113,7 +114,7 @@ const style = `
     align-items: center;
     gap: 8px;
     min-block-size: var(--ui-control-height-2, 32px);
-    border: 1px solid var(--ui-dp-border);
+    border: 1px solid var(--ui-dp-field-border);
     border-radius: var(--ui-dp-radius);
     padding: 0 10px 0 11px;
     background: var(--ui-dp-surface);
@@ -314,6 +315,7 @@ const style = `
   :host([variant="contrast"]) {
     --ui-dp-bg: #0f172a;
     --ui-dp-border: #334155;
+    --ui-dp-field-border: #334155;
     --ui-dp-text: #e2e8f0;
     --ui-dp-muted: #93a4bd;
     --ui-dp-accent: var(--ui-color-accent-on-dark, #93c5fd);

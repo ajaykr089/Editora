@@ -8,7 +8,7 @@ const style = `
     --ui-number-field-padding: var(--ui-padding, 0);
     --ui-number-field-pad-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
     --ui-number-field-font-size: var(--ui-control-font-size-2, 14px);
-    --ui-number-field-border-color: var(--ui-color-line, var(--ui-color-border, var(--ui-border-color, #cbd5e1)));
+    --ui-number-field-border-color: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-number-field-border-width: 1px;
     --ui-number-field-border-style: solid;
     --ui-number-field-border:
@@ -120,7 +120,7 @@ const style = `
   }
 
   .shell:hover:not(:focus-within) {
-    border-color: var(--ui-color-line-strong, var(--ui-number-field-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-number-field-border-color));
   }
 
   .prefix,

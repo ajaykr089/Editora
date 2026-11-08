@@ -31,7 +31,7 @@ const style = `
     --ui-input-padding: var(--ui-padding, 0);
     --ui-input-pad-x: calc(var(--ui-control-padding-inline-2, 12px) - 1px);
     --ui-input-font-size: var(--ui-control-font-size-2, 14px);
-    --ui-input-border-color: var(--ui-color-line, var(--ui-color-border, var(--ui-border-color, #cbd5e1)));
+    --ui-input-border-color: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-input-border-width: 1px;
     --ui-input-border-style: solid;
     --ui-input-border: var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color);
@@ -145,7 +145,7 @@ const style = `
   }
 
   .shell:hover:not(:focus-within) {
-    border-color: var(--ui-color-line-strong, var(--ui-input-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-input-border-color));
   }
 
   .prefix,

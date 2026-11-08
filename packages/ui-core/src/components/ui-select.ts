@@ -19,7 +19,7 @@ const style = `
     --ui-select-font-size: var(--ui-control-font-size-2, 14px);
 
     --ui-select-bg: var(--base-select-bg, var(--ui-color-surface, #ffffff));
-    --ui-select-border: var(--base-select-border, 1px solid var(--ui-color-line, var(--ui-color-border, #cbd5e1)));
+    --ui-select-border: var(--base-select-border, 1px solid var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff))));
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-border) 100%, transparent);
     --ui-select-text: var(--ui-color-text, #0f172a);
     --ui-select-muted: var(--ui-color-muted, #526175);
@@ -136,7 +136,7 @@ const style = `
   }
 
   .control:hover:not(:focus-within):not([data-open="true"]) {
-    border-color: var(--ui-color-line-strong, var(--ui-select-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-select-border-color));
   }
 
   .leading,

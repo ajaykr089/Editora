@@ -4,7 +4,7 @@ import { syncControlName, syncControlDescription } from '../primitives/control-n
 const style = `
   :host {
     --ui-tags-input-padding: 10px 12px;
-    --ui-tags-input-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-tags-input-border-color: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-tags-input-border: 1px solid var(--ui-tags-input-border-color);
     --ui-tags-input-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
     --ui-tags-input-bg: var(--ui-color-surface, #ffffff);
@@ -113,7 +113,7 @@ const style = `
   }
 
   .shell:hover:not([data-focused="true"]) {
-    border-color: var(--ui-color-line-strong, var(--ui-tags-input-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-tags-input-border-color));
   }
 
   .shell[data-invalid="true"] {

@@ -90,6 +90,7 @@ ${TIME_GRID_CSS}
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, var(--ui-color-surface-alt, #f8fafc))
     );
     --ui-dtp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-dtp-field-border: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dtp-accent: var(--ui-color-primary, #2563eb);
@@ -161,7 +162,7 @@ ${TIME_GRID_CSS}
     align-items: center;
     gap: 8px;
     min-block-size: var(--ui-dtp-hit);
-    border: 1px solid var(--ui-dtp-border);
+    border: 1px solid var(--ui-dtp-field-border);
     border-radius: var(--ui-dtp-radius);
     background: var(--ui-dtp-surface);
     padding: 0 10px;
@@ -312,6 +313,7 @@ ${TIME_GRID_CSS}
   :host([variant="contrast"]) {
     --ui-dtp-bg: #0f172a;
     --ui-dtp-border: #334155;
+    --ui-dtp-field-border: #334155;
     --ui-dp-text: #e2e8f0;
     --ui-dp-muted: #94a3b8;
     --ui-dtp-accent: var(--ui-color-accent-on-dark, #93c5fd);
