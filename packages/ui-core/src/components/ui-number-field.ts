@@ -513,7 +513,7 @@ export class UINumberField extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(name: string): boolean {
-    return name === 'label' || name === 'description' || name === 'data-error';
+    return name === 'label' || name === 'description';
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -528,6 +528,21 @@ export class UINumberField extends ElementBase {
     }
 
     if (name === 'name') this._registerWithForm();
+
+    // An error appearing or clearing (a server error cleared as the user types) updates the
+    // message in place. It used to re-render the whole field, replacing the <input> mid-edit: in
+    // Safari the text being typed went to the discarded input and the old value came back.
+    if (name === 'data-error') {
+      const slot = this.root.querySelector('slot[name="error"]');
+      if (!slot) {
+        this.requestRender();
+        return;
+      }
+      slot.textContent = newValue || '';
+      this._syncDerivedState();
+      this._syncAria();
+      return;
+    }
 
     if (
       name === 'min' ||
@@ -827,6 +842,18 @@ export class UINumberField extends ElementBase {
     this._emitValueEvent('value-change', committed, previousValue, source);
   }
 
+  /**
+   * The value commits when the field is left. Safari and Firefox do not move focus to a button
+   * that is clicked, so clicking Submit straight after typing never left the field and the form
+   * read the old (often empty) value. The form reads and validates through here, so pending text
+   * is committed first, as leaving the field would.
+   */
+  private _commitPendingInput(): void {
+    if (!this._input) return;
+    if (this._rawValue.trim() === (this.value || '')) return;
+    this._commitRaw('blur');
+  }
+
   private _commitRaw(source: NumberFieldSource): void {
     const trimmed = this._rawValue.trim();
     if (!trimmed) {
@@ -899,12 +926,16 @@ export class UINumberField extends ElementBase {
       if (parentForm && typeof (parentForm as any).registerField === 'function' && name) {
         this._formUnregister = (parentForm as any).registerField(name, {
           name,
-          getValue: () => this.value,
+          getValue: () => {
+            this._commitPendingInput();
+            return this.value;
+          },
           setValue: (next: any) => {
             if (next == null || next === '') this.removeAttribute('value');
             else this.setAttribute('value', String(next));
           },
           validate: async () => {
+            this._commitPendingInput();
             const value = this.valueAsNumber;
             const min = this._min();
             const max = this._max();
@@ -1085,7 +1116,7 @@ export class UINumberField extends ElementBase {
         <div class="meta">
           <label class="label" id="${this._uid}-label">
             <slot name="label">${escapeHtml(label)}</slot>
-            <span class="required" ${this.hasAttribute('required') ? '' : 'hidden'}>*</span>
+            <span class="required" aria-hidden="true" ${this.hasAttribute('required') ? '' : 'hidden'}>*</span>
           </label>
           <p class="description" id="${this._uid}-description">
             <slot name="description">${escapeHtml(description)}</slot>
