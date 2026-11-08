@@ -151,6 +151,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
       {showStatus ? (
         <Select
           label={statusLabel}
+          // Without a visible label the select would be announced as just "Select".
+          aria-label={statusLabel ? undefined : 'Status'}
           onChange={onStatusChange}
           style={{ minInlineSize: 170 }}
           value={status ?? ''}
