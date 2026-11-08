@@ -23,10 +23,12 @@ import { Chart } from '@editora/ui-react';
 | `headless` | `boolean` |   |
 | `interactive` | `boolean` |   |
 | `labels` | `string[]` |   |
+| `locale` | `string` | Locale for numbers (`en-IN` gives 1,00,000). Defaults to the nearest `lang` attribute, then the browser. |
 | `onPointSelect` | `(detail: ChartPointSelectDetail) => void` |   |
 | `series` | `ChartSeries[]` |   |
+| `showInsight` | `boolean` | The one-line readout under the plot (range and change, or the selected point). Defaults to `showSummary`. |
 | `showLegend` | `boolean` |   |
-| `showSummary` | `boolean` |   |
+| `showSummary` | `boolean` | The Total / Average / Peak / Delta row, and (unless `showInsight` says otherwise) the readout line under the plot. |
 | `showTable` | `boolean` | Show the chart's numbers as a table below it (always available to screen readers). |
 | `state` | `ChartState` |   |
 | `subtitle` | `string` |   |
@@ -50,10 +52,12 @@ Also accepts the standard HTML and React props of the element it renders (`class
 | `headless` | `boolean` |   |
 | `interactive` | `boolean` |   |
 | `labels` | `string[]` |   |
+| `locale` | `string` | Locale for numbers (`en-IN` gives 1,00,000). Defaults to the nearest `lang` attribute, then the browser. |
 | `onPointSelect` | `(detail: ChartPointSelectDetail) => void` |   |
 | `series` | `ChartSeries[]` |   |
+| `showInsight` | `boolean` | The one-line readout under the plot (range and change, or the selected point). Defaults to `showSummary`. |
 | `showLegend` | `boolean` |   |
-| `showSummary` | `boolean` |   |
+| `showSummary` | `boolean` | The Total / Average / Peak / Delta row, and (unless `showInsight` says otherwise) the readout line under the plot. |
 | `showTable` | `boolean` | Show the chart's numbers as a table below it (always available to screen readers). |
 | `state` | `ChartState` |   |
 | `subtitle` | `string` |   |
@@ -94,6 +98,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Chart renders the `ui-chart` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `aria-label`, `data`, `disabled`, `heading-level`, `headless`, `interactive`, `labels`, `series`, `show-legend`, `show-summary`, `show-table`, `state`, `subtitle`, `title`, `type`, `value-prefix`, `value-suffix`, `values`, `variant`
+**Attributes:** `aria-label`, `data`, `disabled`, `heading-level`, `headless`, `interactive`, `labels`, `locale`, `series`, `show-insight`, `show-legend`, `show-summary`, `show-table`, `state`, `subtitle`, `title`, `type`, `value-prefix`, `value-suffix`, `values`, `variant`
 
 **Events:** `point-select`, `ui-point-select`
