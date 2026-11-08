@@ -17,6 +17,7 @@
   <a href="https://editora-ecosystem.netlify.app/">Component catalog</a> ·
   <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
   <a href="https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main">CodeSandbox</a> ·
+  <a href="https://github.com/ajaykr089/Editora/blob/main/packages/ui-core/CHANGELOG.md">Changelog</a> ·
   <a href="https://github.com/ajaykr089/Editora">GitHub</a>
 </p>
 
@@ -36,6 +37,41 @@
 - **Positioning helpers** for menus, popovers and tooltips: flip, shift and fit to the viewport.
 - Typed, and every component is also available on its own, so you can ship only the ones you use
   ([measured below](#import-only-what-you-use)).
+
+## What's new
+
+**0.4.0** (2026-11-07)
+
+- `ui-form` shows errors from a server response: `setErrors({ email: 'Already registered' })`, `clearErrors()`,
+  `getErrors()`. The first field with an error is focused.
+- `ui-data-table` for server-driven screens: `server-side` with `total-rows`, `hidden-columns`, and rows with
+  `data-href` that open as links.
+- Charts include their data as a table for screen readers; `show-table` shows it on screen.
+- Fixes: `pagination-id` works when the pager comes after the table, a file's Retry button retries only that file
+  (new `retryUpload(file)`), focus stays on the first field with an error, and `ui-switch` toggles on
+  `element.click()` and assistive-technology activation.
+
+**0.3.0** (2026-11-07)
+
+- **Behaviour change:** Input, Textarea, Select, Checkbox, Switch, RadioGroup, PasswordField, NumberField, Slider and
+  MultiSelect are form-associated: their values are in the form's `FormData`, `form.reset()` restores them, and an
+  empty `required` field now blocks a native submit (add `novalidate` to validate in JavaScript). Enter in a text
+  field submits its form.
+- **Behaviour change:** built-in icons load on first use instead of being bundled into every component (a Button entry
+  went from 55.9 KB to 8.9 KB gzipped). Call `loadIcons()` at startup or in tests to have them ready, or register only
+  the icons you use with `addIcons()`.
+- `@editora/ui-core/preload.css` stops server-rendered pages from jumping while the components load.
+- One cancelable `navigate` event for Sidebar, Breadcrumb, Tabs and Pagination links; Tabs take `href`, Pagination
+  `href-template`.
+- `ui-layout variant="shell"` app frame with an off-canvas sidebar on narrow screens; app-wide `density` from the
+  theme; `description-position="below"`; your own `<input slot="input">` in Input and PasswordField for password
+  managers.
+- Fixes: focus traps in Dialog and Drawer reach the fields inside them, missing numeric attributes keep their defaults
+  (toasts showed 1 at a time, tooltips opened with no delay, textareas had 0 rows), sliders without `max` no longer
+  clamp to 0, Dialog puts a single dialog in the accessibility tree, and dark surfaces follow the brand colour.
+
+Every change, with details: [CHANGELOG.md](https://github.com/ajaykr089/Editora/blob/main/packages/ui-core/CHANGELOG.md)
+and [GitHub Releases](https://github.com/ajaykr089/Editora/releases).
 
 ## Install
 

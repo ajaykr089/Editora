@@ -1,0 +1,38 @@
+{
+  "name": "@editora/codemods",
+  "version": "0.1.0",
+  "description": "Codemods that update app code for breaking changes in Editora packages. Edits only what changed, keeping your formatting and comments.",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/codemods"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "keywords": ["editora", "codemod", "migration", "upgrade", "ui-react"],
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "editora-codemods": "bin/editora-codemods.js"
+  },
+  "files": ["bin", "src", "README.md", "LICENSE"],
+  "scripts": {
+    "test": "node --test test/codemods.test.js"
+  },
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
