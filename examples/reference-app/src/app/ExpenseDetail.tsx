@@ -77,7 +77,7 @@ export function ExpenseDetail({ id }: { id: string }) {
         <div className="detail-grid">
           <Card>
             <Card.Header>
-              <Card.Title>{money(expense.amount, expense.currency)}</Card.Title>
+              <Card.Title as="h2">{money(expense.amount, expense.currency)}</Card.Title>
               <Card.Description>
                 <Badge tone={STATUS_TONE[expense.status]} variant="soft" size="sm">{STATUS_LABEL[expense.status]}</Badge>
                 {expense.overPolicy ? <> <Badge tone="warning" variant="soft" size="sm">Over policy</Badge></> : null}
@@ -119,7 +119,7 @@ export function ExpenseDetail({ id }: { id: string }) {
           </Card>
           <Card>
             <Card.Header>
-              <Card.Title>Approval</Card.Title>
+              <Card.Title as="h2">Approval</Card.Title>
               <Card.Description>{expense.amount > 500 ? 'Rule: over $500 goes to the team lead and finance.' : 'Rule: up to $500 goes to the team lead.'}</Card.Description>
             </Card.Header>
             <p className="muted approval-note">

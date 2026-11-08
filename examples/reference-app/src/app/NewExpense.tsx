@@ -59,7 +59,7 @@ export function NewExpense() {
           </div>
           <div className="form-row">
             <NumberField name="amount" label="Amount" prefix="$" min={0} step={0.01} required />
-            <DatePicker name="date" label="Date" required />
+            <DatePicker name="date" label="Date" hint="Leave empty for today." />
           </div>
           <Textarea name="note" label="Note" description="Optional: what it was for, if it is not obvious." rows={3} />
           <div className="form-actions">

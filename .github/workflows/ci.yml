@@ -225,3 +225,47 @@ jobs:
           name: visual-diffs
           path: e2e-ui/test-results
           retention-days: 7
+
+  # The Tallyhawk reference app (examples/reference-app), built for production from the packages'
+  # source: its size budget, user journeys in three browsers, axe on every screen, and screenshots
+  # (compared once Linux baselines exist; see the "Update visual baselines" workflow).
+  reference-app:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: examples/reference-app/package-lock.json
+
+      - name: Install the reference app
+        run: npm ci --prefix examples/reference-app
+
+      - name: Install browsers
+        working-directory: examples/reference-app
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Build
+        working-directory: examples/reference-app
+        run: npm run build
+
+      - name: Check the size budget
+        working-directory: examples/reference-app
+        run: npm run check:size
+
+      - name: Journeys, accessibility and screenshots
+        working-directory: examples/reference-app
+        run: npx playwright test
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-app-report
+          path: |
+            examples/reference-app/playwright-report
+            examples/reference-app/test-results
+          retention-days: 7

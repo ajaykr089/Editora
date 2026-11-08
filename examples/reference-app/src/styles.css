@@ -577,9 +577,9 @@ a {
   line-height: 1.6;
 }
 
-.signup-form {
-  --ui-color-text: #f0fdfa;
-  --ui-color-muted: #ccfbf1;
+/* Only the label sits on the teal band; the field itself stays a normal light field. */
+.signup-form ui-input::part(label) {
+  color: #f0fdfa;
 }
 
 .signup-done {

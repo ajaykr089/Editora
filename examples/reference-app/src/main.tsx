@@ -1,3 +1,4 @@
+import './icons';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { AlertDialogProvider } from '@editora/ui-react/AlertDialogProvider';

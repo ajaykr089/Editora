@@ -1,4 +1,5 @@
-import { createThemeTokens, type ThemeMode } from '@editora/ui-core';
+// The runtime entry, not the package root: the root registers every component.
+import { createThemeTokens, type ThemeMode } from '@editora/ui-core/runtime';
 
 // Tallyhawk's brand: a deep teal (white text on it passes contrast), with a warm amber used only
 // for small highlights in the page's own CSS. A system font stack keeps screenshots stable in CI.

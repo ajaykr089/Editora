@@ -1,8 +1,9 @@
 name: Update visual baselines
 
 # Run by hand after an intended visual change (or once, to create the first baselines). It renders
-# the e2e-ui showcase on the same Linux image CI compares on and uploads the screenshots: download
-# the "visual-baselines" artifact into e2e-ui/tests/visual.spec.ts-snapshots/ and commit them.
+# the e2e-ui showcase and the reference app on the same Linux image CI compares on and uploads the
+# screenshots: download the "visual-baselines" artifact into the repository root (its paths are
+# e2e-ui/tests/... and examples/reference-app/tests/...) and commit them.
 on:
   workflow_dispatch:
 
@@ -18,7 +19,9 @@ jobs:
         with:
           node-version: '22.x'
           cache: 'npm'
-          cache-dependency-path: e2e-ui/package-lock.json
+          cache-dependency-path: |
+            e2e-ui/package-lock.json
+            examples/reference-app/package-lock.json
 
       - name: Install e2e-ui
         run: npm ci --prefix e2e-ui
@@ -31,9 +34,18 @@ jobs:
         working-directory: e2e-ui
         run: npm run update:visual
 
+      - name: Install the reference app
+        run: npm ci --prefix examples/reference-app
+
+      - name: Render reference app baselines
+        working-directory: examples/reference-app
+        run: npm run update:visual
+
       - name: Upload baselines
         uses: actions/upload-artifact@v4
         with:
           name: visual-baselines
-          path: e2e-ui/tests/visual.spec.ts-snapshots/*-linux.png
+          path: |
+            e2e-ui/tests/visual.spec.ts-snapshots/*-linux.png
+            examples/reference-app/tests/visual.spec.ts-snapshots/*-linux.png
           retention-days: 30

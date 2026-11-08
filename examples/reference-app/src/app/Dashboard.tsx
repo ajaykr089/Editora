@@ -55,6 +55,7 @@ export function Dashboard() {
       <div className="dash-grid">
         <Chart
           type="area"
+          headingLevel={2}
           title="Spend by week"
           subtitle="Last eight weeks, all teams"
           values={data ? data.weeks.map((week) => week.value) : []}
@@ -65,6 +66,7 @@ export function Dashboard() {
         />
         <Chart
           type="donut"
+          headingLevel={2}
           title="By category"
           subtitle="This month"
           data={data ? data.byCategory.map((point, index) => ({ ...point, tone: CATEGORY_TONES[index % CATEGORY_TONES.length] })) : []}
@@ -76,7 +78,7 @@ export function Dashboard() {
 
       <Card>
         <Card.Header>
-          <Card.Title>Waiting for you</Card.Title>
+          <Card.Title as="h2">Waiting for you</Card.Title>
           <Card.Description>Approve or reject; the person is told straight away.</Card.Description>
         </Card.Header>
         <ul className="queue">
