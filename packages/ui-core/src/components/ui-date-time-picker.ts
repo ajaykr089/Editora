@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { releaseFormField, syncFormField } from '../primitives/ui-form-field';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import './ui-calendar';
@@ -622,6 +623,7 @@ export class UIDateTimePicker extends ElementBase {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    syncFormField(this, { requiredMessage: 'Choose a date and time' });
     this.root.addEventListener('click', this._onRootClickBound);
     this.root.addEventListener('input', this._onRootInputBound);
     this.root.addEventListener('change', this._onRootChangeBound);
@@ -640,6 +642,7 @@ export class UIDateTimePicker extends ElementBase {
   }
 
   override disconnectedCallback(): void {
+    releaseFormField(this);
     this.root.removeEventListener('click', this._onRootClickBound);
     this.root.removeEventListener('input', this._onRootInputBound);
     this.root.removeEventListener('change', this._onRootChangeBound);
@@ -650,6 +653,7 @@ export class UIDateTimePicker extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (name === 'name') syncFormField(this, { requiredMessage: 'Choose a date and time' });
     if (oldValue === newValue) return;
     if (name === 'value' && !this._syncing) {
       this._value = parseState(newValue);
@@ -1607,7 +1611,7 @@ export class UIDateTimePicker extends ElementBase {
         <div class="root">
           <label class="label" part="label" id="${this._labelId}">
             <span class="label-text"></span>
-            <span class="required">*</span>
+            <span class="required" aria-hidden="true">*</span>
           </label>
           <div class="field" part="field input">
             <span class="icon" part="icon">${CALENDAR_ICON}</span>
