@@ -14,7 +14,8 @@ const style = `
     --ui-radio-size: 16px;
     --ui-radio-hit-area: 24px;
     --ui-radio-dot-size: 6px;
-    --ui-radio-border: 1px solid var(--ui-color-line-strong, var(--ui-color-border, #cbd5e1));
+    /* An unselected radio is only its outline: 3:1 against the page (was about 1.9:1). */
+    --ui-radio-border: 1px solid var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-radio-background: var(--ui-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-radio-accent: var(--ui-primary, var(--ui-color-primary, #2563eb));
     --ui-radio-dot-color: var(--ui-color-foreground-on-primary, #ffffff);

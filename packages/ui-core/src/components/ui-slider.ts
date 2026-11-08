@@ -12,7 +12,8 @@ const style = `
     --ui-slider-bg: transparent;
     --ui-slider-text: var(--ui-color-text, #0f172a);
     --ui-slider-muted: var(--ui-color-muted, #526175);
-    --ui-slider-track: var(--ui-color-fill-active, color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent));
+    /* The unfilled track shows the range: 3:1 against the page (was about 1.3:1). */
+    --ui-slider-track: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-slider-fill: var(--ui-color-primary, #2563eb);
     --ui-slider-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-slider-shadow:
