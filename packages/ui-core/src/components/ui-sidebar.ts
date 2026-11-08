@@ -52,6 +52,7 @@ const VISUAL_ONLY_ATTRIBUTES = new Set([
   'radius',
   'item-radius',
   'item-gap',
+  'row-gap',
   'item-padding-x',
   'item-padding-y',
   'item-height',
@@ -90,6 +91,7 @@ const template = (body: string) => `
       --ui-sidebar-item-padding-x: var(--base-sidebar-item-padding-x, 8px);
       --ui-sidebar-item-padding-y: var(--base-sidebar-item-padding-y, 4px);
       --ui-sidebar-item-gap: var(--base-sidebar-item-gap, 8px);
+      --ui-sidebar-row-gap: var(--base-sidebar-row-gap, 8px);
       --ui-sidebar-item-font-size: var(--base-sidebar-item-font-size, var(--ui-control-font-size-2, 14px));
       --ui-sidebar-item-line-height: var(--base-sidebar-item-line-height, 20px);
       --ui-sidebar-section-gap: var(--base-sidebar-section-gap, 12px);
@@ -393,7 +395,8 @@ const template = (body: string) => `
 
     .section-items {
       display: grid;
-      gap: 8px;
+      /* The space between rows (--ui-sidebar-item-gap is the space inside a row); was a fixed 8px. */
+      gap: var(--ui-sidebar-row-gap);
     }
 
     .item {
@@ -850,6 +853,7 @@ export class UISidebar extends ElementBase {
       'show-badges',
       'item-radius',
       'item-gap',
+      'row-gap',
       'item-padding-x',
       'item-padding-y',
       'item-height',
@@ -938,6 +942,7 @@ export class UISidebar extends ElementBase {
     if (
       name === 'item-radius' ||
       name === 'item-gap' ||
+      name === 'row-gap' ||
       name === 'item-padding-x' ||
       name === 'item-padding-y' ||
       name === 'item-height' ||
@@ -1395,6 +1400,7 @@ export class UISidebar extends ElementBase {
   private _applyItemMetrics(): void {
     const itemRadius = normalizeRadius(this.getAttribute('item-radius'));
     const itemGap = normalizeMetric(this.getAttribute('item-gap'));
+    const rowGap = normalizeMetric(this.getAttribute('row-gap'));
     const itemPaddingX = normalizeMetric(this.getAttribute('item-padding-x'));
     const itemPaddingY = normalizeMetric(this.getAttribute('item-padding-y'));
     const itemHeight = normalizeMetric(this.getAttribute('item-height'));
@@ -1403,6 +1409,7 @@ export class UISidebar extends ElementBase {
 
     this._setOptionalCssVar('--ui-sidebar-item-radius', itemRadius);
     this._setOptionalCssVar('--ui-sidebar-item-gap', itemGap);
+    this._setOptionalCssVar('--ui-sidebar-row-gap', rowGap);
     this._setOptionalCssVar('--ui-sidebar-item-padding-x', itemPaddingX);
     this._setOptionalCssVar('--ui-sidebar-item-padding-y', itemPaddingY);
     this._setOptionalCssVar('--ui-sidebar-item-height', itemHeight);

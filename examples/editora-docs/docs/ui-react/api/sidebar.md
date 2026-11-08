@@ -24,7 +24,7 @@ import { Sidebar } from '@editora/ui-react';
 | `elevation` | `'none' \| 'low' \| 'high'` |   |
 | `headless` | `boolean` |   |
 | `itemFontSize` | `number \| string` |   |
-| `itemGap` | `number \| string` |   |
+| `itemGap` | `number \| string` | Space between an item's icon, label and badge. |
 | `itemHeight` | `number \| string` |   |
 | `itemLineHeight` | `number \| string` |   |
 | `itemPaddingX` | `number \| string` |   |
@@ -45,6 +45,7 @@ import { Sidebar } from '@editora/ui-react';
 | `radius` | `number \| string` |   |
 | `rail` | `boolean` |   |
 | `resizable` | `boolean` |   |
+| `rowGap` | `number \| string` | Space between rows (default 8px). |
 | `searchQuery` | `string` |   |
 | `sectionLabelTransform` | `'uppercase' \| 'none' \| 'capitalize'` |   |
 | `showBadges` | `boolean` |   |
@@ -133,6 +134,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Sidebar renders the `ui-sidebar` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `auto-save`, `collapsed`, `collapsed-width`, `collapsible`, `density`, `elevation`, `headless`, `item-font-size`, `item-gap`, `item-height`, `item-line-height`, `item-padding-x`, `item-padding-y`, `item-radius`, `items`, `max-width`, `min-width`, `position`, `radius`, `rail`, `resizable`, `search-query`, `section-label-transform`, `show-badges`, `show-icons`, `size`, `storage-key`, `tone`, `value`, `variant`, `width`
+**Attributes:** `auto-save`, `collapsed`, `collapsed-width`, `collapsible`, `density`, `elevation`, `headless`, `item-font-size`, `item-gap`, `item-height`, `item-line-height`, `item-padding-x`, `item-padding-y`, `item-radius`, `items`, `max-width`, `min-width`, `position`, `radius`, `rail`, `resizable`, `row-gap`, `search-query`, `section-label-transform`, `show-badges`, `show-icons`, `size`, `storage-key`, `tone`, `value`, `variant`, `width`
 
 **Events:** `change`, `collapse-change`, `resize`, `resize-end`, `resize-start`, `search-change`, `select`, `toggle`, `width-change`
