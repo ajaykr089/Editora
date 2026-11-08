@@ -303,6 +303,12 @@ const shadowStyle = `
     --ui-context-menu-item-active-color: inherit;
   }
 
+  /* The in-element copy of the menu is hidden while the portal shows it; its display rule
+     used to beat the hidden attribute and leave an empty box. */
+  .surface[hidden] {
+    display: none !important;
+  }
+
   .surface {
     position: fixed;
     left: 0;

@@ -5,6 +5,7 @@ import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
 import { OVERLAY_MOTION_CSS, openOverlay, removeOverlay, retireOverlay } from '../primitives/overlay-motion';
+import { copyThemeToPortal } from '../primitives/portal-theme';
 
 const style = `
   ${OVERLAY_MOTION_CSS}
@@ -504,6 +505,7 @@ export class UIPopover extends ElementBase {
     if (!trigger) return;
     this._teardownPortal();
     this._portalEl = this._buildPortalContent();
+    copyThemeToPortal(this, this._portalEl);
     const root = createPortalContainer();
     if (!root) return;
     root.appendChild(this._portalEl);
