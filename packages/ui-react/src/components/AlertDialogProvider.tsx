@@ -1,4 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
+// The manager opens ui-alert-dialog elements: define them here. Its import of the component is for
+// types only and disappears in the build, so without this confirm() opened an undefined element
+// that never showed (unless something else happened to load the component).
+import '@editora/ui-core/alert-dialog';
 import {
   createAlertDialogManager,
   type AlertDialogAlertOptions,

@@ -1,3 +1,6 @@
+// The manager creates <ui-dialog> elements but does not define them, so that importing the runtime
+// entry does not pull in every dialog component: whoever uses the manager imports the element
+// (the React providers do; the package root defines every element).
 import {
   UIDialog,
   UIDialogCloseDetail,
