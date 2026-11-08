@@ -1,6 +1,7 @@
 import { ElementBase } from '../ElementBase';
 import { releaseFormField, syncFormField } from '../primitives/ui-form-field';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { createPickerLayer, type PickerLayer } from '../primitives/picker-layer';
 import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
   compareTimes,
@@ -173,14 +174,6 @@ const style = `
 `;
 
 const overlayStyle = `
-  .ui-time-picker-overlay-host {
-    --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
-    --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #526175);
-    --ui-dp-accent: var(--ui-color-primary, #2563eb);
-    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
-  }
   .overlay { position: fixed; z-index: var(--ui-dp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
@@ -188,9 +181,10 @@ const overlayStyle = `
     max-inline-size: min(320px, calc(100vw - 16px));
     border: 1px solid var(--ui-dp-border, #cbd5e1);
     border-radius: var(--ui-dp-radius, 12px);
-    background: var(--ui-dp-bg, #fff);
+    /* A floating panel is opaque: the page behind must not show through it. */
+    background: var(--ui-dp-panel-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     color: var(--ui-dp-text, #0f172a);
-    box-shadow: 0 20px 34px rgba(2, 6, 23, 0.16);
+    box-shadow: var(--ui-dp-popover-shadow, var(--shadow-5, 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08)));
     padding: 10px;
     display: grid;
     gap: 10px;
@@ -200,7 +194,7 @@ const overlayStyle = `
   .sheet {
     position: relative;
     pointer-events: auto;
-    background: var(--ui-dp-bg, #fff);
+    background: var(--ui-dp-panel-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     color: var(--ui-dp-text, #0f172a);
     border-radius: 16px 16px 0 0;
     border: 1px solid color-mix(in srgb, var(--ui-dp-border, #cbd5e1) 84%, transparent);
@@ -343,7 +337,8 @@ export class UITimePicker extends ElementBase {
   private _inlineError = '';
   private _open = false;
   private _syncing = false;
-  private _overlay: HTMLDivElement | null = null;
+  private _overlay: HTMLElement | null = null;
+  private _layer: PickerLayer | null = null;
   private _dismissableLayer: DismissableLayerHandle | null = null;
   private _releaseScrollLock: (() => void) | null = null;
   private _isInitialized = false;
@@ -418,6 +413,11 @@ export class UITimePicker extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    // Frameworks such as React set attributes after the element has connected and read its initial
+    // value, so a default value that arrives that way is applied as the starting value now.
+    if (name === 'default-value' && oldValue == null && newValue != null && this._isInitialized && !this.hasAttribute('value')) {
+      name = 'value';
+    }
     if (name === 'name') syncFormField(this, { requiredMessage: 'Choose a time' });
     if (oldValue === newValue) return;
     if (name === 'value' && !this._syncing) {
@@ -614,15 +614,10 @@ export class UITimePicker extends ElementBase {
 
   private _ensureOverlay(): void {
     if (this._overlay || typeof document === 'undefined') return;
-    const el = document.createElement('div');
-    el.className = 'ui-time-picker-overlay-host';
-    el.style.position = 'fixed';
-    el.style.left = '0';
-    el.style.top = '0';
-    el.style.pointerEvents = 'none';
+    this._layer = createPickerLayer(this.root, 'ui-time-picker-overlay-host');
+    const el = this._layer.container;
     el.addEventListener('click', this._onOverlayClickBound);
     el.addEventListener('change', this._onOverlayChangeBound);
-    document.body.appendChild(el);
     this._overlay = el;
     this._syncOverlayHostZIndex();
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
@@ -633,9 +628,9 @@ export class UITimePicker extends ElementBase {
   }
 
   private _syncOverlayHostZIndex(): void {
-    if (!this._overlay || typeof window === 'undefined') return;
+    if (!this._layer || typeof window === 'undefined') return;
     const resolved = window.getComputedStyle(this).getPropertyValue('--ui-dp-z').trim();
-    this._overlay.style.zIndex = resolved || '1600';
+    this._layer.host.style.zIndex = resolved || '1600';
   }
 
   private _destroyOverlay(): void {
@@ -649,7 +644,8 @@ export class UITimePicker extends ElementBase {
     window.removeEventListener('scroll', this._onWindowScrollBound, true);
     this._overlay.removeEventListener('click', this._onOverlayClickBound);
     this._overlay.removeEventListener('change', this._onOverlayChangeBound);
-    if (this._overlay.parentElement) this._overlay.parentElement.removeChild(this._overlay);
+    this._layer?.destroy();
+    this._layer = null;
     this._overlay = null;
     this._overlayKey = null;
     if (this._releaseScrollLock) {
@@ -754,7 +750,7 @@ export class UITimePicker extends ElementBase {
         ${pickerContent}
         <footer class="footer" part="footer">
           <button type="button" class="action" data-action="now">${escapeHtml(t.now)}</button>
-          <button type="button" class="action" data-action="clear" part="clear">${escapeHtml(t.clear)}</button>
+          <button type="button" class="action" data-action="clear" part="clear" ${this._clearable() ? '' : 'hidden'}>${escapeHtml(t.clear)}</button>
           <button type="button" class="action" data-action="cancel" part="cancel">${escapeHtml(t.cancel)}</button>
           <button type="button" class="action" data-action="apply" data-tone="primary" part="apply">${escapeHtml(t.apply)}</button>
         </footer>
@@ -801,6 +797,7 @@ export class UITimePicker extends ElementBase {
 
   private _syncOverlayState(): void {
     if (!this._overlay) return;
+    this._layer?.attach();
     this._syncOverlayHostZIndex();
     const sheet = this._isMobileSheet();
     this._ensureOverlayContent(sheet);

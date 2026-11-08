@@ -2,6 +2,7 @@ import { ElementBase } from '../ElementBase';
 import { releaseFormField, syncFormField } from '../primitives/ui-form-field';
 import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { createPickerLayer, type PickerLayer } from '../primitives/picker-layer';
 import { compareISO } from './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
@@ -443,27 +444,6 @@ const style = `
 `;
 
 const overlayStyle = `
-  .ui-date-picker-overlay-host {
-    --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-surface: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-surface-alt, #f8fafc))
-    );
-    --ui-dp-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
-    --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #526175);
-    --ui-dp-accent: var(--ui-color-primary, #2563eb);
-    --ui-dp-success: var(--ui-color-success, #15803d);
-    --ui-dp-radius: var(--ui-control-radius-2, var(--ui-radius, 6px));
-    --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
-    --ui-dp-field-error: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
-    --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
-    --ui-dp-sheet-backdrop: rgba(15, 23, 42, 0.52);
-    --ui-dp-sheet-bg: var(--ui-dp-bg);
-    --ui-dp-duration: 160ms;
-    --ui-dp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
-  }
   .overlay {
     position: fixed;
     z-index: var(--ui-dp-z, 1600);
@@ -474,14 +454,17 @@ const overlayStyle = `
     pointer-events: auto;
     border: 1px solid var(--ui-dp-border, #cbd5e1);
     border-radius: var(--ui-dp-panel-radius, 14px);
-    background: var(--ui-dp-surface, #fff);
+    /* A floating panel is opaque: the page behind must not show through it. */
+    background: var(--ui-dp-panel-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     color: var(--ui-dp-text, #0f172a);
-    box-shadow: var(--ui-dp-shadow);
+    box-shadow: var(--ui-dp-popover-shadow, var(--shadow-5, 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08)));
     padding: 10px;
     display: grid;
     gap: var(--ui-dp-gap, 12px);
-    inline-size: min(var(--ui-dp-panel-width, 20rem), calc(100vw - 16px));
+    /* At least the field's width, and never narrower than the calendar it holds. */
+    inline-size: max(var(--ui-dp-panel-width, 20rem), var(--ui-dp-panel-min-width, 18.5rem));
     max-inline-size: calc(100vw - 16px);
+    box-sizing: border-box;
     transform-origin: top;
     animation: ui-dp-pop-in var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1));
   }
@@ -512,7 +495,7 @@ const overlayStyle = `
   .sheet {
     position: relative;
     pointer-events: auto;
-    background: var(--ui-dp-sheet-bg, #fff);
+    background: var(--ui-dp-panel-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     color: var(--ui-dp-text, #0f172a);
     border-radius: 16px 16px 0 0;
     border: 1px solid color-mix(in srgb, var(--ui-dp-border, #cbd5e1) 84%, transparent);
@@ -523,6 +506,10 @@ const overlayStyle = `
     max-block-size: min(82vh, 620px);
     overflow: auto;
     animation: ui-dp-sheet-up var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1));
+  }
+
+  .header[hidden] {
+    display: none !important;
   }
 
   .header {
@@ -665,7 +652,8 @@ export class UIDatePicker extends ElementBase {
   private _inlineError = '';
   private _open = false;
   private _syncing = false;
-  private _overlay: HTMLDivElement | null = null;
+  private _overlay: HTMLElement | null = null;
+  private _layer: PickerLayer | null = null;
   private _dismissableLayer: DismissableLayerHandle | null = null;
   private _releaseScrollLock: (() => void) | null = null;
   private _lastOpenSource: DatePickerSource | 'attribute' = 'api';
@@ -740,6 +728,11 @@ export class UIDatePicker extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    // Frameworks such as React set attributes after the element has connected and read its initial
+    // value, so a default value that arrives that way is applied as the starting value now.
+    if (name === 'default-value' && oldValue == null && newValue != null && this._isInitialized && !this.hasAttribute('value')) {
+      name = 'value';
+    }
     if (name === 'name') syncFormField(this, { requiredMessage: 'Choose a date' });
     if (oldValue === newValue) return;
 
@@ -997,16 +990,11 @@ export class UIDatePicker extends ElementBase {
 
   private _ensureOverlay(): void {
     if (this._overlay || typeof document === 'undefined') return;
-    const el = document.createElement('div');
-    el.className = 'ui-date-picker-overlay-host';
-    el.style.position = 'fixed';
-    el.style.left = '0';
-    el.style.top = '0';
-    el.style.pointerEvents = 'none';
+    this._layer = createPickerLayer(this.root, 'ui-date-picker-overlay-host');
+    const el = this._layer.container;
     el.addEventListener('click', this._onOverlayClickBound);
     el.addEventListener('select', this._onOverlaySelectBound as EventListener);
     el.addEventListener('change', this._onOverlaySelectBound as EventListener);
-    document.body.appendChild(el);
     this._overlay = el;
     this._syncOverlayHostZIndex();
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
@@ -1019,9 +1007,9 @@ export class UIDatePicker extends ElementBase {
   }
 
   private _syncOverlayHostZIndex(): void {
-    if (!this._overlay || typeof window === 'undefined') return;
+    if (!this._layer || typeof window === 'undefined') return;
     const resolved = window.getComputedStyle(this).getPropertyValue('--ui-dp-z').trim();
-    this._overlay.style.zIndex = resolved || '1600';
+    this._layer.host.style.zIndex = resolved || '1600';
   }
 
   private _destroyOverlay(): void {
@@ -1036,7 +1024,8 @@ export class UIDatePicker extends ElementBase {
     this._overlay.removeEventListener('click', this._onOverlayClickBound);
     this._overlay.removeEventListener('select', this._onOverlaySelectBound as EventListener);
     this._overlay.removeEventListener('change', this._onOverlaySelectBound as EventListener);
-    if (this._overlay.parentElement) this._overlay.parentElement.removeChild(this._overlay);
+    this._layer?.destroy();
+    this._layer = null;
     this._overlay = null;
     this._overlayMode = null;
     if (this._releaseScrollLock) {
@@ -1114,14 +1103,15 @@ export class UIDatePicker extends ElementBase {
   private _renderPanelInner(isSheet: boolean): string {
     const t = this._translations();
     const label = (this.getAttribute('label') || '').trim();
-    const showHeader = !!label || isSheet;
+    // Next to its field the label would only repeat it; the phone sheet covers the field, so it keeps it.
+    const showHeader = isSheet;
     const shouldShowApply = !this._closeOnSelect() || isSheet;
     const panelClass = isSheet ? 'sheet' : 'panel';
     const ariaModal = isSheet ? 'true' : 'false';
     return `
       <style>${overlayStyle}</style>
       ${isSheet ? '<div class="sheet-backdrop" data-action="backdrop"></div>' : ''}
-      <section class="${panelClass}" id="${this._panelId}" part="${isSheet ? 'sheet' : 'popover'}" role="dialog" aria-modal="${ariaModal}" aria-labelledby="${this._panelTitleId}" aria-label="${escapeHtml(t.datePickerPanel)}">
+      <section class="${panelClass}" id="${this._panelId}" part="${isSheet ? 'sheet' : 'popover'}" role="dialog" aria-modal="${ariaModal}" aria-label="${escapeHtml(label || t.datePickerPanel)}">
         <header class="header" part="header" ${showHeader ? '' : 'hidden'}>
           <p class="title" id="${this._panelTitleId}" ${label ? '' : 'hidden'}>${escapeHtml(label)}</p>
           ${isSheet ? `<button type="button" class="action" data-action="cancel">${escapeHtml(t.cancel)}</button>` : ''}
@@ -1205,6 +1195,8 @@ export class UIDatePicker extends ElementBase {
     syncBool('readonly', this._isReadonly());
     syncBool('disabled', this._isInteractionBlocked());
     syncBool('bare', this._isBare());
+    // The footer has its own Today button; one is enough.
+    syncBool('hide-today', this._showFooter());
     syncAttr('tabindex', '-1');
     syncAttr('aria-label', this.getAttribute('label') || this._translations().selectDate);
   }
@@ -1221,6 +1213,7 @@ export class UIDatePicker extends ElementBase {
 
   private _syncOverlayState(): void {
     if (!this._overlay) return;
+    this._layer?.attach();
     this._syncOverlayHostZIndex();
     const sheet = this._isMobileSheet();
     if (sheet && !this._releaseScrollLock) {
@@ -1238,16 +1231,20 @@ export class UIDatePicker extends ElementBase {
     const t = this._translations();
     if (panel) panel.dataset.bare = this._isBare() ? 'true' : 'false';
     if (footer) footer.hidden = !this._showFooter();
-    if (header) header.hidden = !((this.getAttribute('label') || '').trim()) && !sheet;
+    if (header) header.hidden = !sheet;
     if (title) {
       const label = (this.getAttribute('label') || '').trim();
       title.textContent = label;
       title.hidden = !label;
     }
+    if (panel) panel.setAttribute('aria-label', (this.getAttribute('label') || '').trim() || t.datePickerPanel);
     const todayAction = this._overlay.querySelector('[data-action="today"]') as HTMLElement | null;
     if (todayAction) todayAction.textContent = t.today;
     const clearAction = this._overlay.querySelector('[data-action="clear"]') as HTMLElement | null;
-    if (clearAction) clearAction.textContent = t.clear;
+    if (clearAction) {
+      clearAction.textContent = t.clear;
+      clearAction.hidden = !this._clearable();
+    }
     const cancelAction = this._overlay.querySelector('[data-action="cancel"]') as HTMLElement | null;
     if (cancelAction) cancelAction.textContent = t.cancel;
     const applyAction = this._overlay.querySelector('[data-action="apply"]') as HTMLElement | null;
@@ -1415,7 +1412,7 @@ export class UIDatePicker extends ElementBase {
     if (!this._allowInput()) return;
     this._draftInput = target.value;
     const related = focusEvent.relatedTarget as Node | null;
-    if (related && this._overlay?.contains(related)) return;
+    if (related && this._layer?.contains(related)) return;
     if (this._open && !this._isInlineMode()) return;
     this._handleDraftCommit('blur');
   }
@@ -1630,6 +1627,7 @@ export class UIDatePicker extends ElementBase {
       hiddenInput.value = this._value || '';
     }
     if (inlinePanel) {
+      this._syncInlineCalendarPresence(inlinePanel, isInline);
       inlinePanel.hidden = !isInline;
       inlinePanel.id = this._panelId;
       inlinePanel.dataset.bare = this._isBare() ? 'true' : 'false';
@@ -1639,7 +1637,10 @@ export class UIDatePicker extends ElementBase {
     }
     if (inlineFooter) inlineFooter.hidden = !this._showFooter();
     if (inlineToday) inlineToday.textContent = t.today;
-    if (inlineClear) inlineClear.textContent = t.clear;
+    if (inlineClear) {
+      inlineClear.textContent = t.clear;
+      inlineClear.hidden = !this._clearable();
+    }
     if (inlineApply) inlineApply.textContent = t.apply;
 
     if (isInline) {
@@ -1649,6 +1650,22 @@ export class UIDatePicker extends ElementBase {
     }
 
     if (this._open) this._syncOverlayState();
+  }
+
+  /**
+   * The inline calendar exists only in inline mode. A popover picker builds its calendar when it
+   * opens, so a closed date field costs a handful of elements instead of a whole month grid.
+   */
+  private _syncInlineCalendarPresence(inlinePanel: HTMLElement, isInline: boolean): void {
+    const existing = inlinePanel.querySelector('.inline-calendar');
+    if (isInline && !existing) {
+      const calendar = document.createElement('ui-calendar');
+      calendar.className = 'inline-calendar';
+      calendar.setAttribute('part', 'calendar');
+      inlinePanel.insertBefore(calendar, inlinePanel.firstChild);
+    } else if (!isInline && existing) {
+      existing.remove();
+    }
   }
 
   protected override render(): void {
@@ -1673,7 +1690,6 @@ export class UIDatePicker extends ElementBase {
           <div class="error" id="${this._errorId}" part="error" role="alert"></div>
           <input class="hidden-input" type="hidden" disabled />
           <section class="inline-panel" id="${this._panelId}" part="popover" hidden>
-            <ui-calendar class="inline-calendar" part="calendar"></ui-calendar>
             <footer class="footer" part="footer">
               <button type="button" class="action" data-action="today" part="presets"></button>
               <button type="button" class="action" data-action="clear" part="clear"></button>
