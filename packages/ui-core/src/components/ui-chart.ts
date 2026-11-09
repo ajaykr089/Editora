@@ -966,6 +966,22 @@ function normalizeState(raw: string | null): ChartState {
   return 'idle';
 }
 
+
+/** A round step that splits [min, max] into four gridline intervals covering the whole range. */
+function niceTickStep(min: number, max: number): number {
+  const span = max - min;
+  if (!(span > 0) || !Number.isFinite(span)) return 0;
+  const raw = span / 4;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const factor of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]) {
+    const step = factor * magnitude;
+    // The step must still cover the range once the low end is snapped down to a multiple of it.
+    const low = Math.floor(min / step + 1e-9) * step;
+    if (low + step * 4 >= max - span * 1e-9) return step;
+  }
+  return raw;
+}
+
 export class UIChart extends ElementBase {
   static get observedAttributes() {
     return [
@@ -1112,7 +1128,7 @@ export class UIChart extends ElementBase {
   private _valueDomain(
     points: ChartPoint[],
     options?: { includeZero?: boolean; fitPadding?: number }
-  ): { min: number; max: number; span: number; zeroInDomain: boolean } {
+  ): { min: number; max: number; span: number; zeroInDomain: boolean; step: number } {
     const includeZero = !!options?.includeZero;
     const fitPadding = options?.fitPadding ?? 0.14;
 
@@ -1152,8 +1168,22 @@ export class UIChart extends ElementBase {
     if (max <= min) max = min + 1;
     span = max - min;
 
+    // Snap the axis to round steps (1, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 x 10^n) so the gridlines read $0,
+    // $15,000, $30,000... instead of $13,565, $27,130.
+    const step = niceTickStep(min, max);
+    if (step > 0) {
+      if (dataMax <= 0 && dataMin < 0) {
+        max = Math.ceil(max / step - 1e-9) * step;
+        min = max - step * 4;
+      } else {
+        min = Math.max(dataMin >= 0 ? 0 : -Infinity, Math.floor(min / step + 1e-9) * step);
+        max = min + step * 4;
+      }
+      span = max - min;
+    }
+
     const zeroInDomain = min <= 0 && max >= 0;
-    return { min, max, span, zeroInDomain };
+    return { min, max, span, zeroInDomain, step };
   }
 
   /**
@@ -1409,7 +1439,14 @@ export class UIChart extends ElementBase {
   }
 
   private _buildCartesianTicks(min: number, max: number): string[] {
-    return [1, 0.75, 0.5, 0.25, 0].map((ratio) => this._formatValue(min + (max - min) * ratio));
+    // As many decimals as the step needs (0.25 shows as 0.25, not 0.3), and no more.
+    const step = (max - min) / 4;
+    const decimals = step > 0 && step < 1 ? Math.min(4, (String(Number(step.toPrecision(6))).split('.')[1] || '').length) : 0;
+    const options = step >= 1 ? { maximumFractionDigits: 0 } : { maximumFractionDigits: decimals, minimumFractionDigits: 0 };
+    return [1, 0.75, 0.5, 0.25, 0].map((ratio) => {
+      const value = min + (max - min) * ratio;
+      return this._formatValue(Math.abs(value) < step * 1e-6 ? 0 : value, options);
+    });
   }
 
   private _plotCartesian(
