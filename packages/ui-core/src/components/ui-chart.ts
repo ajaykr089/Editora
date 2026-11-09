@@ -571,6 +571,23 @@ const style = `
     background: color-mix(in srgb, var(--ui-chart-surface) 95%, transparent);
   }
 
+  .empty[data-loading="true"] {
+    display: grid;
+    place-items: center;
+    min-block-size: var(--ui-chart-plot-min-height);
+    block-size: var(--ui-chart-plot-height);
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: transparent;
+    background:
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--ui-chart-surface) 88%, var(--ui-chart-grid)) 0%,
+        color-mix(in srgb, var(--ui-chart-surface) 60%, var(--ui-chart-grid)) 50%,
+        color-mix(in srgb, var(--ui-chart-surface) 88%, var(--ui-chart-grid)) 100%);
+    background-size: 220% 100%;
+    animation: ui-chart-shimmer 1.1s linear infinite;
+  }
+
   .message[data-tone="error"] {
     color: var(--ui-chart-danger-text);
     border-color: color-mix(in srgb, var(--ui-chart-danger) 30%, var(--ui-chart-border));
@@ -659,7 +676,8 @@ const style = `
   @media (prefers-reduced-motion: reduce) {
     .legend-item,
     .plot-hit::after,
-    .loading-overlay {
+    .loading-overlay,
+    .empty[data-loading="true"] {
       transition: none !important;
       animation: none !important;
     }
@@ -1896,7 +1914,10 @@ export class UIChart extends ElementBase {
     const statusPill = state === 'idle' ? '' : `<span class="status-pill" data-state="${state}">${statusText(state)}</span>`;
 
     if (!primary || !data.labels.length) {
-      const message = state === 'error' ? 'Chart data failed to load' : 'No series data available';
+      // Loading with no data yet: hold the plot's height with a shimmer, so the card does not
+      // claim "no data" and then jump when the data arrives.
+      const loadingEmpty = state === 'loading';
+      const message = state === 'error' ? 'Chart data failed to load' : loadingEmpty ? 'Loading chart data' : 'No series data available';
       this.setContent(`
         <style>${style}</style>
         <section class="frame" part="frame" data-state="${state}" data-disabled="${disabled ? 'true' : 'false'}" aria-disabled="${disabled ? 'true' : 'false'}">
@@ -1910,7 +1931,7 @@ export class UIChart extends ElementBase {
             </div>
             ${statusPill}
           </header>
-          <div class="empty" part="empty">${escapeHtml(message)}</div>
+          <div class="empty" part="empty" ${loadingEmpty ? 'data-loading="true" role="status"' : ''}>${escapeHtml(message)}</div>
         </section>
       `);
       return;
