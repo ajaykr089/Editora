@@ -88,6 +88,21 @@ const style = `
     display: none;
   }
 
+  /* While loading, the overlay over the rows already says so: the bar stays for screen readers
+     only, instead of a second copy of the same words above the table. */
+  .statebar[data-state="loading"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .state-dot {
     width: 8px;
     height: 8px;
@@ -1027,10 +1042,17 @@ export class UIDataTable extends ElementBase {
   private _stateText(state: DataTableState): string {
     const explicit = (this.getAttribute('state-text') || '').trim();
     if (explicit) return explicit;
-    if (state === 'loading') return 'Refreshing table data';
+    // "Refreshing" only when there are rows to refresh; the first load is "Loading".
+    if (state === 'loading') return this._hasDataRows() ? 'Refreshing table data' : 'Loading table data';
     if (state === 'error') return 'Table data could not be loaded';
     if (state === 'success') return 'Table data is up to date';
     return '';
+  }
+
+  private _hasDataRows(): boolean {
+    const body = this._table?.tBodies?.[0];
+    if (!body) return false;
+    return Array.from(body.rows).some((row) => row !== this._virtualTopSpacer && row !== this._virtualBottomSpacer && row.cells.length > 0);
   }
 
   private _syncStateBar() {

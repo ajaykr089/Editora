@@ -169,3 +169,26 @@ describe('ui-data-table row links', () => {
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('ui-data-table loading text', () => {
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('says Loading on the first load and Refreshing once there are rows', async () => {
+    const el = document.createElement('ui-data-table');
+    el.setAttribute('state', 'loading');
+    el.innerHTML = '<table><thead><tr><th>Name</th><th>Total</th></tr></thead><tbody></tbody></table>';
+    document.body.appendChild(el);
+    await settle();
+    const bar = el.shadowRoot!.querySelector('.statebar')!;
+    expect(bar.textContent).toContain('Loading table data');
+    expect(bar.getAttribute('data-state')).toBe('loading');
+
+    el.querySelector('tbody')!.innerHTML = '<tr><td>Ada</td><td>3</td></tr>';
+    el.setAttribute('state', 'idle');
+    await settle();
+    el.setAttribute('state', 'loading');
+    await settle();
+    expect(bar.textContent).toContain('Refreshing table data');
+    el.remove();
+  });
+});
