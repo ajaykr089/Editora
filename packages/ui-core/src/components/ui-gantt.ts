@@ -229,7 +229,8 @@ const style = `
   }
 
   /* fill: the chart takes the height of its container (which needs one): the toolbar keeps its height and the
-     scroll area takes the rest, however tall. */
+     scroll area takes the rest, however tall. In a container without a height (a card, a page section) the scroll
+     area used to collapse to 0px and only the toolbar showed: it now keeps --ui-gantt-fill-min-height. */
   :host([fill]) {
     block-size: 100%;
   }
@@ -246,7 +247,7 @@ const style = `
 
   :host([fill]) .viewport {
     flex: 1 1 0;
-    min-block-size: 0;
+    min-block-size: var(--ui-gantt-fill-min-height, 240px);
     max-block-size: none;
   }
 
