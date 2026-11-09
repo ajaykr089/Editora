@@ -192,3 +192,21 @@ describe('ui-data-table loading text', () => {
     el.remove();
   });
 });
+
+describe('ui-data-table row selection ids', () => {
+  it('passes the data-id of the selected rows', async () => {
+    const el = document.createElement('ui-data-table');
+    el.setAttribute('selectable', '');
+    el.setAttribute('multi-select', '');
+    el.innerHTML = '<table><thead><tr><th>Name</th></tr></thead><tbody><tr data-id="c-1"><td>Ada</td></tr><tr data-id="c-2"><td>Lin</td></tr></tbody></table>';
+    document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const events: any[] = [];
+    el.addEventListener('row-select', (event) => events.push((event as CustomEvent).detail));
+    el.querySelectorAll<HTMLElement>('tbody td')[1].click();
+    el.querySelectorAll<HTMLElement>('tbody td')[0].click();
+    expect(events[0].id).toBe('c-2');
+    expect(events[1].ids).toEqual(['c-1', 'c-2']);
+    el.remove();
+  });
+});

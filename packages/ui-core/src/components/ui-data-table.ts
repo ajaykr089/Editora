@@ -2307,6 +2307,8 @@ export class UIDataTable extends ElementBase {
     const rows = this._bodyRows();
     const selectedIndices = rows.flatMap((r, index) => (this._selectedRows.has(r) ? [index] : []));
     const selectedRows = rows.filter((r) => this._selectedRows.has(r)).map((r) => this._rowValues(r));
+    // The app's own ids (data-id on each row), so it can act on the records, not on cell text.
+    const selectedIds = rows.filter((r) => this._selectedRows.has(r)).map((r) => r.getAttribute('data-id') || '').filter(Boolean);
 
     this.dispatchEvent(
       new CustomEvent('row-select', {
@@ -2315,6 +2317,8 @@ export class UIDataTable extends ElementBase {
           selected: this._selectedRows.has(row),
           indices: selectedIndices,
           rows: selectedRows,
+          ids: selectedIds,
+          id: row.getAttribute('data-id') || undefined,
           page: this._page
         },
         bubbles: true

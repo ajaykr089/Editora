@@ -25,6 +25,10 @@ export type DataTableRowSelectDetail = {
   selected: boolean;
   indices: number[];
   rows: Record<string, string>[];
+  /** `data-id` of each selected row (rows without one are left out). */
+  ids: string[];
+  /** `data-id` of the row that was clicked. */
+  id?: string;
   page: number;
 };
 
