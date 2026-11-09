@@ -341,6 +341,8 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           value={config.value}
           readonly={config.readonly}
           placeholder={config.placeholder}
+          ariaLabel={props.ariaLabel}
+          ariaLabelledBy={props.ariaLabelledBy}
           onChange={handleContentChange}
           pasteConfig={config.paste}
           contentConfig={config.content}

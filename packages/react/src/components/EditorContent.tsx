@@ -229,6 +229,8 @@ interface EditorContentProps {
   value?: string;
   readonly?: boolean;
   placeholder?: string;
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
   onChange?: (html: string) => void;
   pasteConfig?: {
     clean?: boolean;
@@ -280,6 +282,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   value,
   readonly = false,
   placeholder,
+  ariaLabel,
+  ariaLabelledBy,
   onChange,
   pasteConfig,
   contentConfig,
@@ -408,14 +412,21 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.setAttribute('aria-disabled', readonly ? 'true' : 'false');
       // A textbox needs an accessible name: the placeholder when there is one, otherwise a
       // generic label so the surface is never announced as unnamed.
-      el.setAttribute('aria-label', placeholder?.trim() || 'Rich text editor');
+      if (ariaLabelledBy) {
+        el.setAttribute('aria-labelledby', ariaLabelledBy);
+        el.removeAttribute('aria-label');
+      } else {
+        el.removeAttribute('aria-labelledby');
+        el.setAttribute('aria-label', ariaLabel?.trim() || placeholder?.trim() || 'Rich text editor');
+      }
     } else {
       el.removeAttribute('role');
       el.removeAttribute('aria-multiline');
       el.removeAttribute('aria-label');
+      el.removeAttribute('aria-labelledby');
       el.removeAttribute('aria-disabled');
     }
-  }, [accessibilityConfig?.enableARIA, placeholder, readonly]);
+  }, [accessibilityConfig?.enableARIA, placeholder, readonly, ariaLabel, ariaLabelledBy]);
 
   useEffect(() => {
     syncAutoHeight(contentRef.current);

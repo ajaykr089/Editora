@@ -36,3 +36,14 @@ describe('typing into an empty editor', () => {
     expect(content.innerHTML).toBe('<p>Already here</p>');
   });
 });
+
+describe('editor accessible name', () => {
+  it('uses ariaLabel, or a visible label by id', async () => {
+    const { container, rerender } = render(<EditoraEditor value="" placeholder="Write…" ariaLabel="Message" plugins={[]} />);
+    const content = container.querySelector('.rte-content') as HTMLElement;
+    expect(content.getAttribute('aria-label')).toBe('Message');
+    rerender(<EditoraEditor value="" placeholder="Write…" ariaLabelledBy="body-label" plugins={[]} />);
+    expect(content.getAttribute('aria-labelledby')).toBe('body-label');
+    expect(content.hasAttribute('aria-label')).toBe(false);
+  });
+});
