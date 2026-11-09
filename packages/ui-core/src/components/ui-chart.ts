@@ -173,18 +173,18 @@ const style = `
     gap: 4px;
   }
 
+  /* Same type as a Card's title and description, so a chart reads as one of the cards beside it. */
   .title {
-    font-size: 15px;
-    line-height: 1.35;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-size: var(--ui-chart-title-size, 18px);
+    line-height: var(--ui-chart-title-line-height, 24px);
+    font-weight: 700;
     margin: 0;
   }
 
   .subtitle {
     margin: 0;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--ui-chart-subtitle-size, 14px);
+    line-height: var(--ui-chart-subtitle-line-height, 20px);
     color: var(--ui-chart-muted);
   }
 
