@@ -53,6 +53,10 @@ const style = `
     letter-spacing: 0.01em;
   }
 
+  .description[hidden] {
+    display: none;
+  }
+
   .description {
     margin: 0;
     color: var(--ui-empty-description);
@@ -205,7 +209,10 @@ export class UIEmptyState extends ElementBase {
     }
 
     const title = this.getAttribute('title') || 'No results found';
-    const description = this.getAttribute('description') || 'Try adjusting your filters or creating a new record.';
+    // No made-up description: "Try adjusting your filters..." read wrong on pages without filters
+    // (an empty inbox, a free day). Without one the line is left out.
+    const description = this.getAttribute('description') || '';
+    const hasDescription = !!description || !!this.querySelector('[slot="description"]');
     const actionLabel = this.getAttribute('action-label') || '';
 
     this.setContent(`
@@ -217,7 +224,7 @@ export class UIEmptyState extends ElementBase {
         <h3 class="title" part="title">
           <slot name="title">${escapeHtml(title)}</slot>
         </h3>
-        <p class="description" part="description">
+        <p class="description" part="description"${hasDescription ? '' : ' hidden'}>
           <slot name="description">${escapeHtml(description)}</slot>
         </p>
         <div class="actions" part="actions">
