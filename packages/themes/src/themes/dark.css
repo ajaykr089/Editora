@@ -3,7 +3,8 @@
 /* Override CSS Custom Properties for Dark Theme */
 :is([data-theme="dark"], .dark, .editora-theme-dark) {
   /* Colors */
-  --rte-color-primary: #58a6ff;
+  /* With Editora UI tokens on the page (ThemeProvider), the editor takes the app's dark palette. */
+  --rte-color-primary: var(--ui-color-primary, #58a6ff);
   --rte-color-primary-hover: #4b9cf8;
   --rte-color-secondary: #9aa4b2;
   --rte-color-success: #4ecb71;
@@ -12,10 +13,10 @@
   --rte-color-info: #58a6ff;
 
   /* Text Colors */
-  --rte-color-text-primary: #ecf3ff;
+  --rte-color-text-primary: var(--ui-color-text, #ecf3ff);
   --rte-color-text-secondary: #c5d0df;
-  --rte-color-text-muted: #8f9bb0;
-  --rte-color-text-inverse: #0f1722;
+  --rte-color-text-muted: var(--ui-color-muted, #8f9bb0);
+  --rte-color-text-inverse: var(--ui-color-foreground-on-primary, #0f1722);
 
   /* Background Colors */
   --rte-color-bg-primary: #1d242d;
@@ -25,7 +26,7 @@
   --rte-color-bg-active: #556277;
 
   /* Border Colors */
-  --rte-color-border: #475263;
+  --rte-color-border: var(--ui-color-border, #475263);
   --rte-color-border-light: #3c4656;
   --rte-color-border-focus: #58a6ff;
 
@@ -36,21 +37,21 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-editor {
-  background: linear-gradient(180deg, #1b2330 0%, #1c2430 100%);
+  background: var(--ui-color-surface, linear-gradient(180deg, #1b2330 0%, #1c2430 100%));
   border-color: var(--rte-color-border);
   color: var(--rte-color-text-primary);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar {
-  background: linear-gradient(180deg, #353d48 0%, #2d3540 100%);
+  background: var(--ui-color-surface-alt, linear-gradient(180deg, #353d48 0%, #2d3540 100%));
   border-color: var(--rte-color-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button {
-  background: linear-gradient(180deg, #46505f 0%, #3b4553 100%);
-  border-color: #566275;
-  color: #d0dae8;
+  background: var(--ui-color-surface, linear-gradient(180deg, #46505f 0%, #3b4553 100%));
+  border-color: var(--ui-color-border, #566275);
+  color: var(--ui-color-text, #d0dae8);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 
@@ -323,7 +324,7 @@
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content {
   color: var(--rte-color-text-primary);
-  background: linear-gradient(180deg, #1f2732 0%, #1c232e 100%);
+  background: var(--ui-color-surface, linear-gradient(180deg, #1f2732 0%, #1c232e 100%));
   border-color: var(--rte-color-border) !important;
 }
 
@@ -404,13 +405,13 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar {
-  background: linear-gradient(180deg, #2c3440 0%, #252d37 100%);
-  border-top-color: #3f4a5b;
-  color: #c5cfdf;
+  background: var(--ui-color-surface-alt, linear-gradient(180deg, #2c3440 0%, #252d37 100%));
+  border-top-color: var(--ui-color-border, #3f4a5b);
+  color: var(--ui-color-muted, #c5cfdf);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-item {
-  color: #d7deea;
+  color: var(--ui-color-muted, #d7deea);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-separator {
@@ -422,8 +423,8 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-bottom {
-  border-left-color: #3f4a5b;
-  border-right-color: #3f4a5b;
+  border-left-color: var(--ui-color-border, #3f4a5b);
+  border-right-color: var(--ui-color-border, #3f4a5b);
 }
 
 

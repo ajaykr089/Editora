@@ -705,8 +705,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({
           : "100%",
         padding: "16px",
         outline: "none",
-        border: "1px solid #ddd",
-        borderRadius: roundBottomCorners ? "0px 0px 4px 4px" : "0px",
+        // Editora UI tokens when the app has them (see @editora/themes default.css).
+        border: "1px solid var(--ui-color-border, #ddd)",
+        borderRadius: roundBottomCorners ? "0px 0px var(--ui-radius, 4px) var(--ui-radius, 4px)" : "0px",
         fontSize: "14px",
         lineHeight: "1.5",
         overflow: autoHeightEnabled ? (maxEditorHeight > 0 ? "auto" : "hidden") : "auto",
