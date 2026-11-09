@@ -874,6 +874,13 @@ export class UICombobox extends ElementBase {
 
   private _renderList() {
     if (!this._panel) return;
+    // The option list is built when the panel opens (_applyOpenState renders it then): a closed
+    // combobox keeps only its field instead of every option.
+    if (!this.open) {
+      if (this._panel.firstChild) this._panel.replaceChildren();
+      this._listStructureFingerprint = '';
+      return;
+    }
 
     const stateRow = this._renderStateRow();
     const emptyText = this.getAttribute('empty-text') || 'No matches found';

@@ -1667,7 +1667,8 @@ export class UISelect extends ElementBase {
       externalNow.html === this._renderedExternalHtml
     ) {
       this._syncOptionsData();
-      this._renderMenu();
+      // The option list is built when the menu opens: a closed select keeps only its trigger.
+      if (this._open) this._renderMenu();
       if (!this._open && this._panelEl) this._panelEl.hidden = true;
       this._syncControlState();
       return;
@@ -1759,7 +1760,8 @@ export class UISelect extends ElementBase {
     this._menuRenderFingerprint = '';
 
     this._syncOptionsData();
-    this._renderMenu();
+    // The option list is built when the menu opens: a closed select keeps only its trigger.
+    if (this._open) this._renderMenu();
     if (!this._open && this._panelEl) this._panelEl.hidden = true;
     this._syncControlState();
   }
