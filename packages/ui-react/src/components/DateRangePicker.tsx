@@ -9,6 +9,7 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  syncDefaultOnAttribute
 } from './_internals';
 
 export type DateRangePickerDetail = {
@@ -137,10 +138,11 @@ export const DateRangePicker = React.forwardRef<HTMLElement, DateRangePickerProp
   );
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value ?? null);
+    // Only when controlled: writing null on every sync wiped an uncontrolled pick whenever another prop changed.
+    if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
     syncStringAttribute(el, 'default-value', defaultValue ?? null);
     if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
-    else syncStringAttribute(el, 'open', null);
+    // Uncontrolled (defaultOpen or the user opened it): leave the element's own open state alone.
     syncBooleanAttribute(el, 'default-open', defaultOpen);
     syncStringAttribute(el, 'min', min ?? null);
     syncStringAttribute(el, 'max', max ?? null);
@@ -156,10 +158,10 @@ export const DateRangePicker = React.forwardRef<HTMLElement, DateRangePickerProp
     syncStringAttribute(el, 'label', label ?? null);
     syncStringAttribute(el, 'hint', hint ?? null);
     syncStringAttribute(el, 'error', error ?? null);
-    syncBooleanAttribute(el, 'allow-same-day', allowSameDay);
-    syncBooleanAttribute(el, 'allow-partial', allowPartial);
+    syncDefaultOnAttribute(el, 'allow-same-day', allowSameDay);
+    syncDefaultOnAttribute(el, 'allow-partial', allowPartial);
     syncBooleanAttribute(el, 'close-on-select', closeOnSelect);
-    syncBooleanAttribute(el, 'clearable', clearable);
+    syncDefaultOnAttribute(el, 'clearable', clearable);
     syncBooleanAttribute(el, 'disabled', disabled);
     syncBooleanAttribute(el, 'readonly', readOnly);
     syncBooleanAttribute(el, 'required', required);

@@ -283,6 +283,14 @@ const style = `
   :host([variant="shell"]) .sidebar-panel ::slotted(*),
   :host([variant="shell"]) .aside-panel ::slotted(*) {
     block-size: 100%;
+    /* The panel's divider takes 1px of the column: a sidebar sized to the full column would
+       overflow by that pixel and show a horizontal scrollbar. */
+    max-inline-size: 100%;
+  }
+
+  :host([variant="shell"]) .sidebar-panel,
+  :host([variant="shell"]) .aside-panel {
+    overflow-x: hidden;
   }
 
   /* Off-canvas sidebar on narrow screens (variant="shell", or mobile-sidebar="drawer"). */

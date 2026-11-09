@@ -5,6 +5,7 @@ import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle } from '../primitives/positioner';
 import { OVERLAY_MOTION_CSS, openOverlay, removeOverlay, retireOverlay } from '../primitives/overlay-motion';
+import { copyThemeToPortal } from '../primitives/portal-theme';
 import { createSharedMenuItemCss } from './menu-item-styles';
 
 type MenuPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -700,6 +701,7 @@ export class UIMenu extends ElementBase {
   }
 
   private _applyPortalTokens(menu: HTMLElement): void {
+    copyThemeToPortal(this, menu);
     const computed = window.getComputedStyle(this);
     MENU_TOKEN_NAMES.forEach((name) => {
       const value = computed.getPropertyValue(name).trim();

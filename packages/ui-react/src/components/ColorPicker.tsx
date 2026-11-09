@@ -8,6 +8,7 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  syncDefaultOnAttribute,
 } from './_internals'
 import { createUIElement } from './_internals';
 
@@ -155,7 +156,8 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
   )
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value ?? null)
+    // Only when controlled: writing null on every sync wiped an uncontrolled pick whenever another prop changed.
+    if (value !== undefined) syncStringAttribute(el, 'value', value ?? null)
     syncStringAttribute(el, 'format', format && format !== 'hex' ? format : null)
     syncBooleanAttribute(el, 'alpha', alpha)
     syncBooleanAttribute(el, 'disabled', disabled)
@@ -169,7 +171,7 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
     else syncStringAttribute(el, 'open', null)
     syncStringAttribute(el, 'close-on-escape', typeof closeOnEscape === 'boolean' ? (closeOnEscape ? 'true' : 'false') : null)
     syncStringAttribute(el, 'placeholder', placeholder ?? null)
-    syncBooleanAttribute(el, 'recent', recent)
+    syncDefaultOnAttribute(el, 'recent', recent)
     syncStringAttribute(el, 'max-recent', typeof maxRecent === 'number' ? String(maxRecent) : null)
     syncBooleanAttribute(el, 'persist', persist)
     syncJsonAttribute(el, 'presets', presets && presets.length > 0 ? presets : null)

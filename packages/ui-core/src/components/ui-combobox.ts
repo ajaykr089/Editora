@@ -51,7 +51,7 @@ const style = `
     --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-combobox-text: var(--ui-color-text, #0f172a);
     --ui-combobox-muted: var(--ui-color-muted, #526175);
-    --ui-combobox-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-combobox-border-color: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-combobox-border: 1px solid var(--ui-combobox-border-color);
     --ui-combobox-shadow: none;
     --ui-combobox-shadow-hover: none;
@@ -131,7 +131,7 @@ const style = `
   }
 
   .control:hover {
-    border-color: var(--ui-color-line-strong, var(--ui-combobox-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-combobox-border-color));
     box-shadow: none;
   }
 
@@ -874,6 +874,13 @@ export class UICombobox extends ElementBase {
 
   private _renderList() {
     if (!this._panel) return;
+    // The option list is built when the panel opens (_applyOpenState renders it then): a closed
+    // combobox keeps only its field instead of every option.
+    if (!this.open) {
+      if (this._panel.firstChild) this._panel.replaceChildren();
+      this._listStructureFingerprint = '';
+      return;
+    }
 
     const stateRow = this._renderStateRow();
     const emptyText = this.getAttribute('empty-text') || 'No matches found';

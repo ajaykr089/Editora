@@ -137,6 +137,17 @@ const style = `
     inset-inline-end: calc(100% + var(--ui-dropdown-gap));
   }
 
+  /* align="end": the menu lines up with the trigger's end edge (and grows towards the start). */
+  .panel[data-align="end"]:is([data-placement="bottom"], [data-placement="top"]) {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+  }
+
+  .panel[data-align="end"]:is([data-placement="left"], [data-placement="right"]) {
+    inset-block-start: auto;
+    inset-block-end: 0;
+  }
+
   .menu {
     position: relative;
     display: flex;
@@ -692,6 +703,7 @@ export class UIDropdown extends ElementBase {
       'open',
       'disabled',
       'placement',
+      'align',
       'variant',
       'size',
       'density',
@@ -766,7 +778,7 @@ export class UIDropdown extends ElementBase {
       return;
     }
 
-    if (this._isOpen && (name === 'placement' || DROPDOWN_VISUAL_ATTRS.has(name))) {
+    if (this._isOpen && (name === 'placement' || name === 'align' || DROPDOWN_VISUAL_ATTRS.has(name))) {
       this._syncMenuPresentation();
       this._schedulePanelSync();
       return;
@@ -1144,6 +1156,7 @@ export class UIDropdown extends ElementBase {
 
     this._placement = this._resolvePlacement();
     panel.setAttribute('data-placement', this._placement);
+    panel.setAttribute('data-align', this._resolveAlign(panel));
     this.style.setProperty('--ui-dropdown-available-width', `${Math.max(0, Math.floor(this._availableWidth(this._placement)))}px`);
     this.style.setProperty('--ui-dropdown-available-height', `${Math.max(0, Math.floor(this._availableHeight(this._placement)))}px`);
   }
@@ -1165,6 +1178,31 @@ export class UIDropdown extends ElementBase {
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
     if (placement === 'top') return rect.top - 12;
     return viewportHeight - rect.bottom - 12;
+  }
+
+  /**
+   * `align="start"` or `"end"` lines the menu up with that edge of the trigger. Without it the
+   * menu starts at the trigger's start edge, unless it would then run off the window and fits
+   * the other way (a menu button at the right of a header).
+   */
+  private _resolveAlign(panel: HTMLElement): 'start' | 'end' {
+    const raw = (this.getAttribute('align') || '').trim().toLowerCase();
+    if (raw === 'end') return 'end';
+    if (raw === 'start') return 'start';
+    const trigger = this._getTrigger();
+    if (!trigger || !isBrowser()) return 'start';
+    const vertical = this._placement === 'left' || this._placement === 'right';
+    panel.setAttribute('data-align', 'start');
+    const rect = trigger.getBoundingClientRect();
+    const box = panel.getBoundingClientRect();
+    if (vertical) {
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      return box.bottom > viewportHeight - 8 && rect.bottom - box.height >= 8 ? 'end' : 'start';
+    }
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const rtl = getComputedStyle(this).direction === 'rtl';
+    if (rtl) return box.left < 8 && rect.left + box.width <= viewportWidth - 8 ? 'end' : 'start';
+    return box.right > viewportWidth - 8 && rect.right - box.width >= 8 ? 'end' : 'start';
   }
 
   private _resolvePlacement(): DropdownPlacement {

@@ -75,7 +75,10 @@ type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSele
   tone?: SidebarTone;
   radius?: number | string;
   itemRadius?: number | string;
+  /** Space between an item's icon, label and badge. */
   itemGap?: number | string;
+  /** Space between rows (default 8px). */
+  rowGap?: number | string;
   itemPaddingX?: number | string;
   itemPaddingY?: number | string;
   itemHeight?: number | string;
@@ -514,6 +517,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     radius,
     itemRadius,
     itemGap,
+    rowGap,
     itemPaddingX,
     itemPaddingY,
       itemHeight,
@@ -662,6 +666,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     syncAttr('radius', radius == null || radius === '' ? null : String(radius));
     syncAttr('item-radius', normalizeMetric(itemRadius));
     syncAttr('item-gap', normalizeMetric(itemGap));
+    syncAttr('row-gap', normalizeMetric(rowGap));
     syncAttr('item-padding-x', normalizeMetric(itemPaddingX));
     syncAttr('item-padding-y', normalizeMetric(itemPaddingY));
     syncAttr('item-height', normalizeMetric(itemHeight));
@@ -702,6 +707,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     radius,
     itemRadius,
     itemGap,
+    rowGap,
     itemPaddingX,
     itemPaddingY,
     itemHeight,

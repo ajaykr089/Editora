@@ -4,11 +4,13 @@ import '@editora/ui-core/chart';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { createUIElement, warnIfElementNotRegistered, flushElementRender } from './_internals';
 
-export type ChartPoint = { label: string; value: number; tone?: string };
+/** A tone: a theme tone name (`success`, `danger`, `warning`, `info`, `primary`, `neutral`, ...) or any CSS colour. */
+export type ChartTone = 'primary' | 'accent' | 'info' | 'success' | 'warning' | 'danger' | 'neutral' | (string & Record<never, never>);
+export type ChartPoint = { label: string; value: number; tone?: ChartTone };
 export type ChartSeries = {
   name: string;
   data: ChartPoint[];
-  tone?: string;
+  tone?: ChartTone;
   fill?: boolean;
   dash?: string;
   strokeWidth?: number;
@@ -47,7 +49,12 @@ export type ChartProps = React.HTMLAttributes<HTMLElement> & {
   disabled?: boolean;
   interactive?: boolean;
   showLegend?: boolean;
+  /** The Total / Average / Peak / Delta row, and (unless `showInsight` says otherwise) the readout line under the plot. */
   showSummary?: boolean;
+  /** The one-line readout under the plot (range and change, or the selected point). Defaults to `showSummary`. */
+  showInsight?: boolean;
+  /** Locale for numbers (`en-IN` gives 1,00,000). Defaults to the nearest `lang` attribute, then the browser. */
+  locale?: string;
   /** Show the chart's numbers as a table below it (always available to screen readers). */
   showTable?: boolean;
   /** The title's heading level (default 3), to fit the page's outline. */
@@ -95,6 +102,8 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     interactive,
     showLegend,
     showSummary,
+    showInsight,
+    locale,
     showTable,
     headingLevel,
     headless,
@@ -183,6 +192,8 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     syncAttr('interactive', interactive === false ? 'false' : null);
     syncAttr('show-legend', typeof showLegend === 'boolean' ? (showLegend ? 'true' : 'false') : null);
     syncAttr('show-summary', typeof showSummary === 'boolean' ? (showSummary ? 'true' : 'false') : null);
+    syncAttr('show-insight', typeof showInsight === 'boolean' ? (showInsight ? 'true' : 'false') : null);
+    syncAttr('locale', locale || null);
     syncAttr('show-table', showTable ? '' : null);
     syncAttr('heading-level', headingLevel ? String(headingLevel) : null);
     syncAttr('value-prefix', valuePrefix || null);
@@ -205,6 +216,8 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     interactive,
     showLegend,
     showSummary,
+    showInsight,
+    locale,
     showTable,
     headingLevel,
     headless,

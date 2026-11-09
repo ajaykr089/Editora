@@ -16,6 +16,7 @@ import { Dropdown } from '@editora/ui-react';
 
 | Prop | Type | Description |
 | --- | --- | --- |
+| `align` | `'start' \| 'end'` | Which trigger edge the menu lines up with. Unset: the start edge, or the end edge when the menu would otherwise run off the window. |
 | `children` | `React.ReactNode` |   |
 | `closeOnSelect` | `boolean` |   |
 | `density` | `'default' \| 'compact' \| 'comfortable'` |   |
@@ -81,6 +82,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Dropdown renders the `ui-dropdown` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `aria-describedby`, `aria-label`, `aria-labelledby`, `close-on-scroll`, `close-on-select`, `density`, `disabled`, `elevation`, `open`, `placement`, `radius`, `shape`, `size`, `tone`, `typeahead`, `variant`
+**Attributes:** `align`, `aria-describedby`, `aria-label`, `aria-labelledby`, `close-on-scroll`, `close-on-select`, `density`, `disabled`, `elevation`, `open`, `placement`, `radius`, `shape`, `size`, `tone`, `typeahead`, `variant`
 
 **Events:** `change`, `close`, `open`, `request-close`, `select`, `ui-request-close`

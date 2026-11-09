@@ -3,6 +3,7 @@ import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle } from '../primitives/positioner';
 import { liftToTopLayer } from '../primitives/overlay-motion';
+import { copyThemeToPortal } from '../primitives/portal-theme';
 import './ui-listbox';
 import type { UIListbox } from './ui-listbox';
 
@@ -664,6 +665,7 @@ export class UISplitButton extends ElementBase {
   }
 
   private _applyPortalTokens(menu: HTMLElement): void {
+    copyThemeToPortal(this, menu);
     const computed = window.getComputedStyle(this);
     SPLIT_BUTTON_MENU_TOKEN_NAMES.forEach((name) => {
       const value = computed.getPropertyValue(name).trim();

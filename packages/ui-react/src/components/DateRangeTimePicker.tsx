@@ -10,6 +10,7 @@ import {
   useElementAttributes,
   useElementEventListeners,
   useForwardedHostRef,
+  syncDefaultOnAttribute
 } from './_internals';
 
 export type DateRangeTimePickerDetail = {
@@ -129,10 +130,11 @@ export const DateRangeTimePicker = React.forwardRef<HTMLElement, DateRangeTimePi
     );
 
     useElementAttributes(ref, (el) => {
-      syncStringAttribute(el, 'value', value ?? null);
+      // Only when controlled: writing null on every sync wiped an uncontrolled pick whenever another prop changed.
+      if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
       syncStringAttribute(el, 'default-value', defaultValue ?? null);
       if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
-      else syncStringAttribute(el, 'open', null);
+      // Uncontrolled (defaultOpen or the user opened it): leave the element's own open state alone.
       syncBooleanAttribute(el, 'default-open', defaultOpen);
       syncStringAttribute(el, 'min', min ?? null);
       syncStringAttribute(el, 'max', max ?? null);
@@ -143,14 +145,14 @@ export const DateRangeTimePicker = React.forwardRef<HTMLElement, DateRangeTimePi
       syncBooleanAttribute(el, 'bare', bare);
       syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
       syncNumberAttribute(el, 'step', step);
-      syncBooleanAttribute(el, 'auto-normalize', autoNormalize);
-      syncBooleanAttribute(el, 'allow-partial', allowPartial);
+      syncDefaultOnAttribute(el, 'auto-normalize', autoNormalize);
+      syncDefaultOnAttribute(el, 'allow-partial', allowPartial);
       syncBooleanAttribute(el, 'disabled', disabled);
       syncBooleanAttribute(el, 'readonly', readOnly);
       syncBooleanAttribute(el, 'required', required);
       syncStringAttribute(el, 'name', name ?? null);
       syncBooleanAttribute(el, 'close-on-select', closeOnSelect);
-      syncBooleanAttribute(el, 'clearable', clearable);
+      syncDefaultOnAttribute(el, 'clearable', clearable);
       syncStringAttribute(el, 'mode', mode && mode !== 'popover' ? mode : null);
       syncStringAttribute(el, 'show-footer', typeof showFooter === 'boolean' ? String(showFooter) : null);
       syncStringAttribute(el, 'label', label ?? null);

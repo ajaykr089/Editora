@@ -86,7 +86,8 @@ const style = `
     --ui-chart-shadow: none;
     --ui-chart-plot-height: 220px;
     --ui-chart-plot-min-height: 188px;
-    --ui-chart-plot-min-width: 420px;
+    /* 0: the plot fits its card. Set a width to keep dense data legible and scroll instead. */
+    --ui-chart-plot-min-width: 0px;
 
     display: block;
     min-inline-size: 0;
@@ -156,6 +157,8 @@ const style = `
     background: color-mix(in srgb, var(--ui-chart-surface) 96%, transparent);
   }
 
+  /* .header's display: flex would otherwise beat the hidden attribute. */
+  .header[hidden],
   .toolbar[hidden] {
     display: none;
   }
@@ -299,6 +302,10 @@ const style = `
     grid-template-columns: minmax(32px, auto) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) auto;
     inline-size: 100%;
+    /* Room for half a hit target (22px) past the last point, which otherwise stuck out of the
+       plot and gave a chart that fits its card a 7px horizontal scrollbar. */
+    box-sizing: border-box;
+    padding-inline-end: 11px;
     /* Dense data keeps the minimum width (and scrolls); a few points fit a narrow card. */
     min-inline-size: calc(min(var(--ui-chart-plot-min-width), var(--ui-chart-fit-width, var(--ui-chart-plot-min-width))) + 38px);
     block-size: 100%;
@@ -637,7 +644,6 @@ const style = `
     :host {
       --ui-chart-plot-height: 188px;
       --ui-chart-plot-min-height: 168px;
-      --ui-chart-plot-min-width: 320px;
     }
 
     .frame {
@@ -717,6 +723,25 @@ const style = `
     }
   }
 `;
+
+const TONE_COLORS: Record<string, string> = {
+  primary: 'var(--ui-color-primary, #2563eb)',
+  accent: 'var(--ui-color-accent, #7c3aed)',
+  brand: 'var(--ui-color-primary, #2563eb)',
+  info: 'var(--ui-color-info, #0e7490)',
+  success: 'var(--ui-color-success, #15803d)',
+  warning: 'var(--ui-color-warning, #b45309)',
+  danger: 'var(--ui-color-danger, #dc2626)',
+  error: 'var(--ui-color-danger, #dc2626)',
+  neutral: 'var(--ui-color-muted, #64748b)',
+  muted: 'var(--ui-color-muted, #64748b)'
+};
+
+/** A series or point tone: a theme tone name (success, danger, ...) or any CSS colour. */
+function resolveTone(tone: string | undefined): string | undefined {
+  if (!tone) return undefined;
+  return TONE_COLORS[tone.trim().toLowerCase()] || tone;
+}
 
 const palette = [
   'var(--ui-color-primary, #2563eb)',
@@ -866,7 +891,7 @@ function normalizeSeries(
   const sourceSeries: ChartSeries[] = rawSeries.length
     ? rawSeries
     : fallbackPoints.length
-      ? [{ name: 'Series 1', data: fallbackPoints }]
+      ? [{ name: 'Value', data: fallbackPoints }]
       : [];
 
   const normalizedSeries = sourceSeries
@@ -946,7 +971,9 @@ export class UIChart extends ElementBase {
       'value-suffix',
       'aria-label',
       'show-table',
-      'heading-level'
+      'heading-level',
+      'locale',
+      'show-insight'
     ];
   }
 
@@ -1034,6 +1061,14 @@ export class UIChart extends ElementBase {
     return raw !== 'false' && raw !== '0' && raw !== 'off';
   }
 
+  /** The one-line readout under the plot (range and change, or the selected point): `show-insight`, else `show-summary`. */
+  private _showInsight(): boolean {
+    const raw = this.getAttribute('show-insight');
+    if (raw == null) return this._showSummary();
+    const value = raw.trim().toLowerCase();
+    return value !== 'false' && value !== '0' && value !== 'off';
+  }
+
   private _primarySeries(data: NormalizedChartData): NormalizedSeries | null {
     return data.series[0] || null;
   }
@@ -1074,6 +1109,8 @@ export class UIChart extends ElementBase {
       max = Math.max(0, max);
     }
 
+    const dataMin = min;
+    const dataMax = max;
     let span = max - min;
     if (span <= 0) {
       const pad = Math.max(Math.abs(max) * 0.12, 1);
@@ -1092,16 +1129,37 @@ export class UIChart extends ElementBase {
       }
       span = max - min;
     }
+    // Padding never pushes the axis across zero: values that are all 0 or more start at 0,
+    // not at -230.
+    if (dataMin >= 0 && min < 0) min = 0;
+    if (dataMax <= 0 && max > 0) max = 0;
+    if (max <= min) max = min + 1;
+    span = max - min;
 
     const zeroInDomain = min <= 0 && max >= 0;
     return { min, max, span, zeroInDomain };
+  }
+
+  /**
+   * Number formatting follows `locale`, else the nearest `lang` (so `<html lang="en-IN">` gives
+   * 1,00,000), else the browser's language.
+   */
+  private _numberLocale(): string | undefined {
+    const own = (this.getAttribute('locale') || '').trim();
+    const lang = own || (this.closest('[lang]')?.getAttribute('lang') || '').trim();
+    if (!lang) return undefined;
+    try {
+      return Intl.NumberFormat.supportedLocalesOf([lang]).length ? lang : undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   private _formatValue(value: number, options?: Intl.NumberFormatOptions): string {
     const prefix = this._valuePrefix();
     const suffix = this._valueSuffix();
     try {
-      const formatted = new Intl.NumberFormat(undefined, {
+      const formatted = new Intl.NumberFormat(this._numberLocale(), {
         maximumFractionDigits: Math.abs(value) >= 100 ? 0 : 1,
         ...options
       }).format(Math.abs(value));
@@ -1113,7 +1171,7 @@ export class UIChart extends ElementBase {
   }
 
   private _seriesTone(series: NormalizedSeries, seriesIndex: number): string {
-    return series.tone || palette[seriesIndex % palette.length] || 'var(--ui-chart-accent)';
+    return resolveTone(series.tone) || palette[seriesIndex % palette.length] || 'var(--ui-chart-accent)';
   }
 
   /** The title's heading level: `heading-level` 1 to 6, default 3, so it fits the page's outline. */
@@ -1146,7 +1204,7 @@ export class UIChart extends ElementBase {
   }
 
   private _pointTone(point: ChartPoint, index: number, fallback?: string): string {
-    return point.tone || fallback || palette[index % palette.length] || 'var(--ui-chart-accent)';
+    return resolveTone(point.tone) || fallback || palette[index % palette.length] || 'var(--ui-chart-accent)';
   }
 
   private _seriesValueDetails(labels: string[], series: NormalizedSeries[], index: number): SeriesValueDetail[] {
@@ -1156,7 +1214,7 @@ export class UIChart extends ElementBase {
       return {
         series: entry.name,
         value: point?.value ?? null,
-        tone: point?.tone || this._seriesTone(entry, seriesIndex)
+        tone: resolveTone(point?.tone) || this._seriesTone(entry, seriesIndex)
       };
     });
   }
@@ -1174,7 +1232,7 @@ export class UIChart extends ElementBase {
       index,
       label,
       value: point.value,
-      tone: point.tone || this._seriesTone(primary, 0),
+      tone: resolveTone(point.tone) || this._seriesTone(primary, 0),
       series: primary.name,
       seriesValues,
       type,
@@ -1709,7 +1767,7 @@ export class UIChart extends ElementBase {
               (entry) => `
                 <div class="tooltip-row">
                   <span class="tooltip-dot" style="--dot:${escapeHtml(entry.tone || 'var(--ui-chart-accent)')};"></span>
-                  <span class="tooltip-series">${escapeHtml(entry.series)}</span>
+                  ${data.series.length > 1 ? `<span class="tooltip-series">${escapeHtml(entry.series)}</span>` : ''}
                   <span class="tooltip-value">${escapeHtml(this._formatValue(entry.value || 0))}</span>
                 </div>
               `
@@ -1732,7 +1790,7 @@ export class UIChart extends ElementBase {
         const total = primary.data.reduce((sum, point) => sum + Math.max(0, point.value), 0);
         const largest = primary.data.reduce((best, point) => (point.value > best.value ? point : best), primary.data[0]);
         if (!largest || total <= 0) return '';
-        const share = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format((largest.value / total) * 100);
+        const share = new Intl.NumberFormat(this._numberLocale(), { maximumFractionDigits: 0 }).format((largest.value / total) * 100);
         return `
         <div class="insight" part="insight">
           <span>Largest <strong>${escapeHtml(largest.label)}</strong></span>
@@ -1743,7 +1801,7 @@ export class UIChart extends ElementBase {
       const stats = this._resolveStats(primary.data);
       const trendTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
       // The percentage is not in the chart's unit: no value prefix or suffix ($24.3% before).
-      const pct = stats.deltaPct == null ? '' : new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(Math.abs(stats.deltaPct));
+      const pct = stats.deltaPct == null ? '' : new Intl.NumberFormat(this._numberLocale(), { maximumFractionDigits: 1 }).format(Math.abs(stats.deltaPct));
       const trend = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}${
         stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : '-'}${pct}%)`
       }`;
@@ -1781,6 +1839,8 @@ export class UIChart extends ElementBase {
     const hasTitleSlot = this._hasSlot('title');
     const hasSubtitleSlot = this._hasSlot('subtitle');
     const headerVisible = hasTitleSlot || hasSubtitleSlot || !!title || !!subtitle || state !== 'idle';
+    // Only a real status gets a pill: idle used to say "Live", which no data source had claimed.
+    const statusPill = state === 'idle' ? '' : `<span class="status-pill" data-state="${state}">${statusText(state)}</span>`;
 
     if (!primary || !data.labels.length) {
       const message = state === 'error' ? 'Chart data failed to load' : 'No series data available';
@@ -1795,7 +1855,7 @@ export class UIChart extends ElementBase {
               ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h${this._headingLevel()} class="title" part="title">${escapeHtml(title)}</h${this._headingLevel()}>` : ''}
               ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
             </div>
-            <span class="status-pill" data-state="${state}">${statusText(state)}</span>
+            ${statusPill}
           </header>
           <div class="empty" part="empty">${escapeHtml(message)}</div>
         </section>
@@ -1865,7 +1925,7 @@ export class UIChart extends ElementBase {
         aria-disabled="${disabled ? 'true' : 'false'}"
         ${type === 'donut' || type === 'radial' ? '' : `style="--ui-chart-fit-width: ${data.labels.length * 28}px"`}
       >
-        <div class="sr-only" aria-live="polite">${escapeHtml(title)} ${escapeHtml(statusText(state))}</div>
+        <div class="sr-only" aria-live="polite">${state === 'idle' ? '' : `${escapeHtml(title)} ${escapeHtml(statusText(state))}`}</div>
 
         <div class="toolbar" part="toolbar" ${hasToolbar ? '' : 'hidden'}>
           <slot name="header"></slot>
@@ -1876,7 +1936,7 @@ export class UIChart extends ElementBase {
             ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h${this._headingLevel()} class="title" part="title">${escapeHtml(title)}</h${this._headingLevel()}>` : ''}
             ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
           </div>
-          <span class="status-pill" data-state="${state}">${statusText(state)}</span>
+          ${statusPill}
         </header>
 
         ${showSummary ? `
@@ -1925,7 +1985,7 @@ export class UIChart extends ElementBase {
           </div>
         </section>
 
-        ${this._activeInsight(data)}
+        ${this._showInsight() ? this._activeInsight(data) : ''}
 
         ${showLegend ? `<section class="legend" part="legend">${legend}</section>` : ''}
 

@@ -22,7 +22,7 @@ const style = `
   ${OVERLAY_MOTION_CSS}
 
   :host {
-    --ui-multi-select-border-color: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-multi-select-border-color: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
     --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
     --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
@@ -131,7 +131,7 @@ const style = `
   }
 
   .shell:hover:not(:focus-within):not([data-open="true"]) {
-    border-color: var(--ui-color-line-strong, var(--ui-multi-select-border-color));
+    border-color: var(--ui-color-field-border-hover, var(--ui-multi-select-border-color));
   }
 
   .shell[data-readonly="true"] {
@@ -1182,6 +1182,13 @@ export class UIMultiSelect extends ElementBase {
       const visibleOptions = filtered.slice(0, renderLimit);
       const truncated = filtered.length > visibleOptions.length;
       setPanelOpen(this._panelEl, this.open, 'bottom');
+      // The option list is built when the panel opens: a closed multi-select keeps only its field
+      // and chips instead of every option.
+      if (!this.open) {
+        if (this._panelEl.firstChild) this._panelEl.replaceChildren();
+        this._inputEl.removeAttribute('aria-activedescendant');
+        return;
+      }
       // a listbox that is still loading carries no options yet: aria-busy says so (and satisfies the required children)
       if (loading) this._panelEl.setAttribute('aria-busy', 'true');
       else this._panelEl.removeAttribute('aria-busy');

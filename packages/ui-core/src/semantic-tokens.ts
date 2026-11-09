@@ -61,6 +61,12 @@ export function deriveSemanticTokens(tokens: ThemeTokens): SemanticTokenMap {
   put('--ui-color-line-strong', gray['8']);
   put('--ui-color-text-secondary', gray['11'] || c.muted);
   put('--ui-color-text-strong', gray['12'] || c.text);
+  // Field outlines (inputs, selects, text areas, pickers) are the only visible edge of the control,
+  // so they need 3:1 against the surface (WCAG 1.4.11); --ui-color-line is a divider, about 1.6:1.
+  // Half the text colour into the surface gives about 3.4:1 on white and more in dark themes.
+  const fieldSurface = c.surface || c.background;
+  put('--ui-color-field-border', c.text && fieldSurface ? `color-mix(in srgb, ${c.text} 52%, ${fieldSurface})` : undefined);
+  put('--ui-color-field-border-hover', c.text && fieldSurface ? `color-mix(in srgb, ${c.text} 66%, ${fieldSurface})` : undefined);
 
   // Accent roles.
   // (`--ui-color-accent` itself is left alone: ui-chart reads it as a second series colour.)

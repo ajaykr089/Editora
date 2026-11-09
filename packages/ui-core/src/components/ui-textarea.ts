@@ -14,7 +14,7 @@ const style = `
     --ui-textarea-bg: var(--base-input-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-textarea-text: var(--ui-color-text, #0f172a);
     --ui-textarea-muted: var(--ui-color-muted, #526175);
-    --ui-textarea-border: var(--ui-color-line, var(--ui-color-border, #cbd5e1));
+    --ui-textarea-border: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-textarea-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-textarea-accent: var(--ui-color-primary, #2563eb);
     --ui-textarea-danger: var(--ui-color-danger-text, var(--ui-color-danger, #dc2626));
@@ -107,7 +107,7 @@ const style = `
   }
 
   .field:hover:not(:focus-within) {
-    border-color: var(--ui-color-line-strong, var(--ui-textarea-border));
+    border-color: var(--ui-color-field-border-hover, var(--ui-textarea-border));
   }
 
   textarea {

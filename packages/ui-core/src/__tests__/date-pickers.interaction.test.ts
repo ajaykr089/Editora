@@ -6,6 +6,21 @@ import '../components/ui-time-picker';
 import '../components/ui-date-time-picker';
 import '../components/ui-date-range-time-picker';
 
+const PICKER_TAGS = 'ui-date-picker, ui-date-range-picker, ui-time-picker, ui-date-time-picker, ui-date-range-time-picker';
+
+/** Pickers open their panel in a layer inside their own shadow root (see primitives/picker-layer). */
+function queryPickerLayer(selector: string): Element | null {
+  const direct = document.querySelector(selector);
+  if (direct) return direct;
+  for (const picker of Array.from(document.querySelectorAll(PICKER_TAGS))) {
+    for (const layer of Array.from(picker.shadowRoot?.querySelectorAll('[data-picker-layer]') || [])) {
+      const found = layer.shadowRoot?.querySelector(selector);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 function createElement(tagName: string, attrs: Record<string, string | boolean> = {}) {
   const el = document.createElement(tagName) as HTMLElement;
   Object.entries(attrs).forEach(([name, value]) => {
@@ -99,7 +114,7 @@ describe('date/time pickers interaction flows', () => {
     el.setAttribute('open', '');
     await settle();
 
-    const calendar = document.querySelector('.ui-date-picker-overlay-host ui-calendar') as HTMLElement | null;
+    const calendar = queryPickerLayer('.ui-date-picker-overlay-host ui-calendar') as HTMLElement | null;
     expect(calendar).toBeTruthy();
 
     calendar!.dispatchEvent(
@@ -140,7 +155,7 @@ describe('date/time pickers interaction flows', () => {
     });
 
     const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
-    const overlayCalendar = document.querySelector('.ui-date-picker-overlay-host ui-calendar') as HTMLElement | null;
+    const overlayCalendar = queryPickerLayer('.ui-date-picker-overlay-host ui-calendar') as HTMLElement | null;
     expect(input).toBeTruthy();
     expect(overlayCalendar).toBeTruthy();
 
@@ -249,7 +264,7 @@ describe('date/time pickers interaction flows', () => {
     });
 
     const startInput = el.shadowRoot?.querySelector('.start') as HTMLInputElement | null;
-    const overlayCalendar = document.querySelector('.ui-date-range-picker-overlay-host ui-calendar') as HTMLElement | null;
+    const overlayCalendar = queryPickerLayer('.ui-date-range-picker-overlay-host ui-calendar') as HTMLElement | null;
     expect(startInput).toBeTruthy();
     expect(overlayCalendar).toBeTruthy();
 
@@ -289,9 +304,9 @@ describe('date/time pickers interaction flows', () => {
     el.setAttribute('open', '');
     await settle();
 
-    const hour = document.querySelector('select[data-segment="hours"]') as HTMLSelectElement | null;
-    const minute = document.querySelector('select[data-segment="minutes"]') as HTMLSelectElement | null;
-    const apply = document.querySelector('[data-action="apply"]') as HTMLButtonElement | null;
+    const hour = queryPickerLayer('select[data-segment="hours"]') as HTMLSelectElement | null;
+    const minute = queryPickerLayer('select[data-segment="minutes"]') as HTMLSelectElement | null;
+    const apply = queryPickerLayer('[data-action="apply"]') as HTMLButtonElement | null;
     expect(hour).toBeTruthy();
     expect(minute).toBeTruthy();
     expect(apply).toBeTruthy();
@@ -328,7 +343,7 @@ describe('date/time pickers interaction flows', () => {
     el.setAttribute('open', '');
     await settle();
 
-    const calendar = document.querySelector('.dt-calendar') as HTMLElement | null;
+    const calendar = queryPickerLayer('.dt-calendar') as HTMLElement | null;
     expect(calendar).toBeTruthy();
 
     calendar!.dispatchEvent(
@@ -340,9 +355,9 @@ describe('date/time pickers interaction flows', () => {
     );
 
     await settle();
-    const hour = document.querySelector('select[data-segment="hours"]') as HTMLSelectElement | null;
-    const minute = document.querySelector('select[data-segment="minutes"]') as HTMLSelectElement | null;
-    const apply = document.querySelector('[data-action="apply"]') as HTMLButtonElement | null;
+    const hour = queryPickerLayer('select[data-segment="hours"]') as HTMLSelectElement | null;
+    const minute = queryPickerLayer('select[data-segment="minutes"]') as HTMLSelectElement | null;
+    const apply = queryPickerLayer('[data-action="apply"]') as HTMLButtonElement | null;
     expect(hour).toBeTruthy();
     expect(minute).toBeTruthy();
     expect(apply).toBeTruthy();
@@ -378,7 +393,7 @@ describe('date/time pickers interaction flows', () => {
     el.setAttribute('open', '');
     await settle();
 
-    const calendar = document.querySelector('.drtp-calendar') as HTMLElement | null;
+    const calendar = queryPickerLayer('.drtp-calendar') as HTMLElement | null;
     expect(calendar).toBeTruthy();
     calendar!.dispatchEvent(
       new CustomEvent('change', {
@@ -389,11 +404,11 @@ describe('date/time pickers interaction flows', () => {
     );
 
     await settle();
-    const startHour = document.querySelector('select[data-time="start"][data-segment="hours"]') as HTMLSelectElement | null;
-    const startMinute = document.querySelector('select[data-time="start"][data-segment="minutes"]') as HTMLSelectElement | null;
-    const endHour = document.querySelector('select[data-time="end"][data-segment="hours"]') as HTMLSelectElement | null;
-    const endMinute = document.querySelector('select[data-time="end"][data-segment="minutes"]') as HTMLSelectElement | null;
-    const apply = document.querySelector('[data-action="apply"]') as HTMLButtonElement | null;
+    const startHour = queryPickerLayer('select[data-time="start"][data-segment="hours"]') as HTMLSelectElement | null;
+    const startMinute = queryPickerLayer('select[data-time="start"][data-segment="minutes"]') as HTMLSelectElement | null;
+    const endHour = queryPickerLayer('select[data-time="end"][data-segment="hours"]') as HTMLSelectElement | null;
+    const endMinute = queryPickerLayer('select[data-time="end"][data-segment="minutes"]') as HTMLSelectElement | null;
+    const apply = queryPickerLayer('[data-action="apply"]') as HTMLButtonElement | null;
     expect(startHour && startMinute && endHour && endMinute && apply).toBeTruthy();
 
     startHour!.value = '10';

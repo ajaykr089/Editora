@@ -14,6 +14,8 @@ type DropdownItemRole = 'menuitem' | 'menuitemcheckbox' | 'menuitemradio';
 export type DropdownProps = BaseProps & {
   open?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right';
+  /** Which trigger edge the menu lines up with. Unset: the start edge, or the end edge when the menu would otherwise run off the window. */
+  align?: 'start' | 'end';
   variant?:
     | 'default'
     | 'surface'
@@ -80,6 +82,7 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
     children,
     open,
     placement,
+    align,
     variant,
     size,
     density,
@@ -170,6 +173,7 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
 
     syncBooleanish('open', open);
     syncAttr('placement', placement || null);
+    syncAttr('align', align || null);
     syncAttr('variant', variant && variant !== 'default' && variant !== 'surface' ? variant : null);
     syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
     syncAttr('density', density && density !== 'default' ? density : null);
@@ -180,7 +184,7 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
     syncBooleanish('close-on-select', closeOnSelect, 'value');
     syncBooleanish('typeahead', typeahead, 'value');
     flushElementRender(el);
-  }, [open, placement, variant, size, density, radius, shape, elevation, tone, closeOnSelect, typeahead]);
+  }, [open, placement, align, variant, size, density, radius, shape, elevation, tone, closeOnSelect, typeahead]);
 
   // With a change handler the prop wins over the element's own state; without one it is the
   // initial value, as the docs use it (see useControlledAttribute).

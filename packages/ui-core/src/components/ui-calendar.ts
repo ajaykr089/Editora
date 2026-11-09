@@ -101,10 +101,16 @@ const style = `
     --ui-calendar-control-height: 30px;
 
     display: block;
-    min-inline-size: 280px;
+    min-inline-size: var(--ui-calendar-min-width, 280px);
     max-inline-size: 100%;
     color-scheme: light dark;
     font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Focusing the calendar moves focus to a day (see focus()); the host never draws a ring of its own,
+     which would otherwise be the browser's default (the macOS accent colour), not the theme's. */
+  :host(:focus) {
+    outline: none;
   }
 
   :host([tone="neutral"]) {
@@ -311,7 +317,7 @@ const style = `
   .picker-month:focus-visible,
   .picker-year-btn:focus-visible,
   .day:focus-visible {
-    outline: 2px solid var(--ui-calendar-accent);
+    outline: var(--ui-ring-width, 2px) solid var(--ui-calendar-focus-ring, var(--ui-ring-color, var(--ui-color-focus-ring, var(--ui-calendar-accent))));
     outline-offset: 1px;
   }
 
@@ -1053,6 +1059,9 @@ export class UICalendar extends ElementBase {
     if (name === 'value' && !this._syncingValueAttribute) {
       this._rangeKeyboardAnchor = null;
       this._valueRawCache = null;
+      // A value set from outside (a picker passing its date on) moves the focus day to it;
+      // otherwise a calendar created before its value arrived kept focusing today.
+      this._focusedIso = '';
     }
 
     if (name === 'selection') {
@@ -1073,6 +1082,19 @@ export class UICalendar extends ElementBase {
     if (!this.isConnected) return;
     this._syncDocumentListener();
     this.requestRender();
+  }
+
+  /**
+   * Focusing the calendar focuses its current day (the selected one, else today), so arrow keys
+   * work straight away and the ring is the day's themed :focus-visible ring.
+   */
+  override focus(options?: FocusOptions): void {
+    const day = this.root.querySelector('.day[tabindex="0"]') as HTMLElement | null;
+    if (day) {
+      day.focus(options);
+      return;
+    }
+    super.focus(options);
   }
 
   focusDate(iso: string): void {
@@ -1741,7 +1763,10 @@ export class UICalendar extends ElementBase {
       this._focusedIso = iso;
       if (this._resolveSelectionMode() === 'range') {
         const selection = this._normalizeValueForMode('range') as RangeSelection;
-        if (selection.start && !selection.end) {
+        // Only when the preview changes: the mouse already set it on pointerover, and re-rendering on
+        // the focus that mousedown causes replaced the day button before mouseup, so the click that
+        // should pick the end date never fired.
+        if (selection.start && !selection.end && this._hoverIso !== iso) {
           this._hoverIso = iso;
           this.requestRender();
         }
