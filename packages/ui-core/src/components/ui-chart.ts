@@ -765,6 +765,24 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+/**
+ * `values` and `labels` take a JSON array (`[1, 2, 3]`, `["Jan 1, 2026", "Feb 1, 2026"]`, which
+ * may contain commas) or comma-separated text (`1,2,3`).
+ */
+function parseList(raw: string | null): string[] {
+  const text = (raw || '').trim();
+  if (!text) return [];
+  if (text.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed.map((entry) => (entry == null ? '' : String(entry)));
+    } catch {
+      // Not JSON after all: fall back to commas.
+    }
+  }
+  return text.split(',');
+}
+
 function parsePoints(rawData: string | null, rawValues: string | null, rawLabels: string | null): ChartPoint[] {
   if (rawData) {
     try {
@@ -796,13 +814,11 @@ function parsePoints(rawData: string | null, rawValues: string | null, rawLabels
     }
   }
 
-  const values = (rawValues || '')
-    .split(',')
+  const values = parseList(rawValues)
     .map((entry) => Number(entry.trim()))
     .filter((entry) => Number.isFinite(entry));
 
-  const labels = (rawLabels || '')
-    .split(',')
+  const labels = parseList(rawLabels)
     .map((entry) => entry.trim())
     .filter(Boolean);
 

@@ -178,10 +178,10 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
       syncAttr('series', null);
     }
 
-    if (values && values.length) syncAttr('values', values.join(','));
+    if (values && values.length) syncAttr('values', JSON.stringify(values));
     else syncAttr('values', null);
 
-    if (labels && labels.length) syncAttr('labels', labels.join(','));
+    if (labels && labels.length) syncAttr('labels', JSON.stringify(labels));
     else syncAttr('labels', null);
 
     syncAttr('type', type && type !== 'line' ? type : null);
