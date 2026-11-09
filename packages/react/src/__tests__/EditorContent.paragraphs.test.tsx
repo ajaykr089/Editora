@@ -1,6 +1,6 @@
 import React from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, render } from '@testing-library/react';
 import { EditoraEditor } from '../index';
 
 afterEach(cleanup);
@@ -45,5 +45,25 @@ describe('editor accessible name', () => {
     rerender(<EditoraEditor value="" placeholder="Write…" ariaLabelledBy="body-label" plugins={[]} />);
     expect(content.getAttribute('aria-labelledby')).toBe('body-label');
     expect(content.hasAttribute('aria-label')).toBe(false);
+  });
+});
+
+describe('controlled editor and its debounced onChange', () => {
+  it('does not write its own (older) report back over newer typing', async () => {
+    vi.useFakeTimers();
+    function Controlled() {
+      const [html, setHtml] = React.useState('');
+      return <EditoraEditor value={html} onChange={setHtml} plugins={[]} />;
+    }
+    const { container } = render(<Controlled />);
+    const content = container.querySelector('.rte-content') as HTMLElement;
+    content.innerHTML = '<p>Hello t</p>';
+    content.dispatchEvent(new Event('input', { bubbles: true }));
+    // The user keeps typing before the 100ms report fires...
+    content.innerHTML = '<p>Hello there</p>';
+    // ...then the report of "Hello t" arrives and comes back as value.
+    await act(async () => { vi.advanceTimersByTime(150); });
+    expect(content.innerHTML).toBe('<p>Hello there</p>');
+    vi.useRealTimers();
   });
 });

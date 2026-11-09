@@ -298,6 +298,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+  // The last HTML this editor reported through onChange. When it comes back as `value`, it is our
+  // own echo: the DOM may already be ahead of it (the report is debounced), so it must not be
+  // written back, or the newer characters are lost and the caret jumps to the start.
+  const lastEmittedRef = useRef<string | null>(null);
   const pendingHistorySnapshotRef = useRef<{ beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null>(null);
   const autoHeightEnabled = contentConfig?.autoHeight === true;
   const minEditorHeight = typeof contentConfig?.minHeight === 'number' ? contentConfig.minHeight : 200;
@@ -355,6 +359,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
     if (restoredContent && onChange) {
       // Notify parent of restored content (as sanitised, i.e. what the editor now holds)
+      lastEmittedRef.current = initialContent;
       onChange(initialContent);
     }
   }, []); // Only run on mount
@@ -366,6 +371,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     // Compare against the DOM as onChange reports it (minus editing-only handles), otherwise a
     // value we just emitted while the caret is in a table never matches and would be written
     // back, wiping the handles and the caret on every keystroke.
+    if (value === lastEmittedRef.current) {
+      setPlaceholderVisualState(contentRef.current, placeholder);
+      return;
+    }
     const currentHtml = getCleanEditorHTML(contentRef.current);
     if (value !== currentHtml) {
       const safeValue = sanitizeInputHTML(value, contentConfig, securityConfig);
@@ -535,9 +544,11 @@ export const EditorContent: React.FC<EditorContentProps> = ({
           clearTimeout(debounceTimerRef.current);
         }
         debounceTimerRef.current = setTimeout(() => {
+          lastEmittedRef.current = outputHtml;
           onChange(outputHtml);
         }, performanceConfig.debounceInputMs);
       } else {
+        lastEmittedRef.current = outputHtml;
         onChange(outputHtml);
       }
     };
