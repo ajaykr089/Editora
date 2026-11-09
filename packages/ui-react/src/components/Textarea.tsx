@@ -55,6 +55,8 @@ export type TextareaProps = BaseProps & {
   color?: string;
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
+  /** An error message to show under the field (marks it invalid). Leave it out to let a surrounding Form manage errors. */
+  error?: string;
   description?: string;
   /** Put the description under the field instead of under the label. */
   descriptionPosition?: 'above' | 'below';
@@ -78,6 +80,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     clearable,
     debounce,
     validation,
+    error,
     size,
     minlength,
     maxlength,
@@ -140,6 +143,10 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     syncBooleanAttribute(el, 'headless', headless);
     syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
     syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
+    if (error !== undefined) {
+      syncStringAttribute(el, 'data-error', error || null);
+      if (!validation || validation === 'none') syncStringAttribute(el, 'validation', error ? 'error' : null);
+    }
     syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? String(size) : null);
     syncNumberAttribute(el, 'minlength', minlength);
     syncNumberAttribute(el, 'maxlength', maxlength);
@@ -161,6 +168,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     clearable,
     debounce,
     validation,
+    error,
     size,
     minlength,
     maxlength,

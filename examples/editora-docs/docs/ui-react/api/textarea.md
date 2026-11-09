@@ -27,6 +27,7 @@ import { Textarea } from '@editora/ui-react';
 | `description` | `string` |   |
 | `descriptionPosition` | `'above' \| 'below'` | Put the description under the field instead of under the label. |
 | `disabled` | `boolean` |   |
+| `error` | `string` | An error message to show under the field (marks it invalid). Leave it out to let a surrounding Form manage errors. |
 | `headless` | `boolean` |   |
 | `label` | `string` |   |
 | `maxlength` | `number` |   |
