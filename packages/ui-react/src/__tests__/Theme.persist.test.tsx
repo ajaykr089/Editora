@@ -42,4 +42,25 @@ describe('ThemeProvider persistence', () => {
     fireEvent.click(getByTestId('btn'));
     expect(localStorage.getItem('editora.theme.tokens')).toBeNull();
   });
+
+  it('uses the tokens prop over a saved theme from the first render', () => {
+    localStorage.setItem('test.theme.tokens', JSON.stringify({ colors: { primary: '#ff0000' } }));
+    let seen = '';
+    function Child() {
+      seen = document.documentElement.style.getPropertyValue('--ui-color-primary').trim();
+      return null;
+    }
+    render(
+      <ThemeProvider storageKey="test.theme.tokens" tokens={{ colors: { primary: '#5b21b6' } } as any}>
+        <Child />
+      </ThemeProvider>
+    );
+    expect(seen).toBe('#5b21b6');
+  });
+
+  it('restores the saved theme when the app passes no tokens', () => {
+    localStorage.setItem('test.theme.tokens', JSON.stringify({ colors: { primary: '#ff0000' } }));
+    render(<ThemeProvider storageKey="test.theme.tokens"><span /></ThemeProvider>);
+    expect(document.documentElement.style.getPropertyValue('--ui-color-primary').trim()).toBe('#ff0000');
+  });
 });

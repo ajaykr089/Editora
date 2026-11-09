@@ -134,6 +134,13 @@ export function ThemeProvider({ tokens, density, children, storageKey = 'editora
   );
   const explicitTokens = withDensity && Object.keys(withDensity).length ? withDensity : null;
   const computeInitial = () => {
+    // Tokens the app passes win: a theme saved under storageKey (from an earlier setTokens) is
+    // only for when the app does not choose one. It used to win the first render, so an app
+    // switching to dark (tokens prop) showed the saved light theme until an effect replaced it.
+    if (explicitTokens) {
+      return mergeThemeTokens(defaultTokens, explicitTokens);
+    }
+
     if (typeof window !== 'undefined' && storageKey) {
       try {
         const raw = localStorage.getItem(storageKey);
