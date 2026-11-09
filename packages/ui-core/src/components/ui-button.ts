@@ -718,6 +718,21 @@ export class UIButton extends ElementBase {
     }
   }
 
+  /**
+   * `button.click()` from a script or a test acts like a click on a native button: it submits or
+   * resets the form for type="submit" / "reset", and does nothing while disabled. It used to
+   * dispatch a click on the host only, which the form action (listening inside) never saw.
+   */
+  click(): void {
+    const inner = this.root.querySelector('button[data-ui-button="true"]') as HTMLButtonElement | null;
+    if (!inner) {
+      super.click();
+      return;
+    }
+    if (inner.disabled) return;
+    inner.click();
+  }
+
   private _onRootClick(event: Event) {
     const target = event.target as HTMLElement | null;
     const button = target?.closest('button[data-ui-button="true"]') as HTMLButtonElement | null;
