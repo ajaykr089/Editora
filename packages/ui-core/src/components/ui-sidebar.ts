@@ -450,6 +450,11 @@ const template = (body: string) => `
       border-color: var(--ui-sidebar-item-border);
     }
 
+    /* A closed group that holds the current page shows it in its label. */
+    .item-button[data-has-active="true"] {
+      color: var(--ui-sidebar-item-active-color);
+    }
+
     .item-button[aria-disabled="true"] {
       opacity: 0.48;
       cursor: not-allowed;
@@ -879,6 +884,9 @@ export class UISidebar extends ElementBase {
   private _responsiveAutoCollapsed = false;
   private _userCollapsePreference = false;
   private _expanded = new Set<string>();
+  /** The value whose parent groups were last opened for it (each new value opens them once). */
+  private _autoExpandedFor: string | null = null;
+  private _autoExpandPending = false;
   private _dragging = false;
   private _lastExpandedWidth = 0;
   private _handleSearchInput = (event: Event): void => {
@@ -1001,7 +1009,16 @@ export class UISidebar extends ElementBase {
   }
 
   protected render(): void {
+    // When the current item sits inside a group, open the group once for that value, so the
+    // reader can see where they are. The user can still close it afterwards.
+    // It only counts as done once the value is among the items: frameworks often set `value`
+    // before `items`.
+    this._autoExpandPending = !!this.value && this.value !== this._autoExpandedFor;
     const sections = this._buildSections();
+    if (this._autoExpandPending && this._flattenItems(this._collectItems()).some((item) => item.value === this.value)) {
+      this._autoExpandedFor = this.value;
+    }
+    this._autoExpandPending = false;
     const headerHidden = !this.querySelector('[slot="header"]');
     const searchHidden = !this.querySelector('[slot="search"]');
     const footerHidden = !this.querySelector('[slot="footer"]');
@@ -1078,6 +1095,8 @@ export class UISidebar extends ElementBase {
   private _renderItem(item: NormalizedSidebarItem, fallbackId: string): string {
     const id = item.id || fallbackId;
     const isActive = this.value ? this.value === item.value : !!item.active;
+    const containsActive = !!item.children.length && !!this.value && this._containsValue(item.children, this.value);
+    if (containsActive && this._autoExpandPending && !this.hasAttribute('collapsed')) this._expanded.add(id);
     const isExpanded = this._expanded.has(id);
     const showIcons = this.getAttribute('show-icons') !== 'false';
     const showBadges = this.getAttribute('show-badges') !== 'false';
@@ -1098,7 +1117,10 @@ export class UISidebar extends ElementBase {
       : '';
     const end = badge || arrow ? `<span class="end-wrap">${badge ? `<span class="meta">${badge}</span>` : ''}${arrow}</span>` : '';
     const isLink = !!item.href && !item.children.length;
-    const activeAttrs = isActive ? ' aria-current="page" data-active="true"' : '';
+    const activeAttrs = isActive
+      ? ' aria-current="page" data-active="true"'
+      : containsActive ? ' data-has-active="true"' : '';
+    const expandedAttr = item.children.length ? ` aria-expanded="${isExpanded && !this.hasAttribute('collapsed') ? 'true' : 'false'}"` : '';
     const disabledAttrs = item.disabled ? ' aria-disabled="true"' : ' aria-disabled="false"';
     const toneAttr = item.tone && item.tone !== 'default' ? ` data-tone="${escapeHtml(item.tone)}"` : '';
     const hrefAttr = isLink ? ` href="${escapeHtml(item.href || '')}"` : '';
@@ -1125,6 +1147,7 @@ export class UISidebar extends ElementBase {
           ${targetAttr}
           ${relAttr}
           ${activeAttrs}
+          ${expandedAttr}
           ${disabledAttrs}
           ${toneAttr}
         >
@@ -1328,7 +1351,13 @@ export class UISidebar extends ElementBase {
       const expanded = this._expanded.has(id) && !this.hasAttribute('collapsed');
       if (expanded) item.setAttribute('data-expanded', 'true');
       else item.removeAttribute('data-expanded');
+      const toggle = item.querySelector<HTMLElement>(':scope > .item-button[data-action="toggle"]');
+      if (toggle) toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     });
+  }
+
+  private _containsValue(items: NormalizedSidebarItem[], value: string): boolean {
+    return items.some((item) => item.value === value || this._containsValue(item.children, value));
   }
 
   private _selectValue(value: string): void {
@@ -1358,6 +1387,20 @@ export class UISidebar extends ElementBase {
         button.removeAttribute('aria-current');
       }
     });
+    // Groups holding the current item: mark them, and open them once for a new value.
+    const openForValue = !!current && current !== this._autoExpandedFor && !this.hasAttribute('collapsed');
+    if (current && Array.from(this.root.querySelectorAll<HTMLElement>('.item-button')).some((b) => b.dataset.value === current)) {
+      this._autoExpandedFor = current;
+    }
+    this.root.querySelectorAll<HTMLElement>('.item').forEach((item) => {
+      const toggle = item.querySelector<HTMLElement>(':scope > .item-button[data-action="toggle"]');
+      if (!toggle) return;
+      const holds = !!current && Array.from(item.querySelectorAll<HTMLElement>(':scope > .submenu .item-button')).some((b) => b.dataset.value === current);
+      if (holds) toggle.setAttribute('data-has-active', 'true');
+      else toggle.removeAttribute('data-has-active');
+      if (holds && openForValue) this._expanded.add(item.dataset.itemId || '');
+    });
+    if (openForValue) this._syncExpandedDom();
   }
 
   private _flattenItems(items: NormalizedSidebarItem[]): NormalizedSidebarItem[] {
