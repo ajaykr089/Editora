@@ -162,6 +162,16 @@ export function ThemeProvider({ tokens, density, children, storageKey = 'editora
 
   const [current, setCurrent] = useState<ThemeTokens>(() => computeInitial());
 
+  // Write the tokens to the document during the first client render, before any child element
+  // connects. Waiting for the layout effect let elements compute their colours from the default
+  // palette first (a child that measures layout forces that), and their transitions then faded
+  // the default blue into the brand colour on every page load.
+  const appliedFirstRef = useRef(false);
+  if (!appliedFirstRef.current && typeof document !== 'undefined') {
+    appliedFirstRef.current = true;
+    applyTheme(current, document);
+  }
+
   useEffect(() => {
     if (!explicitTokens) return;
     setCurrent((prev) => {
