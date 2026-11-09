@@ -194,7 +194,12 @@ const style = `
     --ui-data-table-shadow: 0 18px 46px rgba(15, 23, 42, 0.16);
   }
 
+  /* The bar comes up when rows are selected; it sticks to the bottom of the window while the
+     table is in view, so selecting a row near the top of a long table visibly does something. */
   .bulk {
+    position: sticky;
+    bottom: var(--ui-data-table-bulk-offset, 16px);
+    z-index: 3;
     margin-top: 12px;
     border: var(--ui-data-table-border);
     border-radius: 14px;
