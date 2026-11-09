@@ -15,19 +15,6 @@ import { useTitle } from '../lib/router';
 const PRIORITY_TONE = { low: 'neutral', medium: 'info', high: 'danger' } as const;
 const LISTS = BOARD_COLUMNS.map((column) => ({ id: column.id, label: column.label, emptyLabel: 'Drop cards here' }));
 
-// renderItem content is drawn inside the Sortable's shadow root, so page CSS classes do not reach
-// it: style it inline (or with Editora components, which style themselves).
-const S = {
-  head: { display: 'flex', alignItems: 'center', gap: 8, width: '100%' } as React.CSSProperties,
-  headLabel: { flex: 1, fontWeight: 600 } as React.CSSProperties,
-  count: { fontSize: 12, color: 'var(--ui-color-muted)', fontVariantNumeric: 'tabular-nums' } as React.CSSProperties,
-  card: { display: 'grid', gap: 8, fontSize: 14, lineHeight: 1.35 } as React.CSSProperties,
-  row: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' } as React.CSSProperties,
-  title: { fontWeight: 600 } as React.CSSProperties,
-  meta: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 } as React.CSSProperties,
-  due: (overdue: boolean) => ({ fontSize: 12, color: overdue ? 'var(--ui-color-warning-text, #b45309)' : 'var(--ui-color-muted)' }) as React.CSSProperties,
-};
-
 const toItems = (cards: BoardCard[]): SortableItem[] =>
   cards.map((card, order) => ({ id: card.id, label: card.title, listId: card.column, order, data: card }));
 
@@ -67,13 +54,16 @@ export function Kanban() {
           lists={LISTS}
           items={items}
           hideToolbar
+          // The cards below are drawn in the sortable's shadow root: pageStyles lets this app's
+          // CSS classes (.lk-board-card...) reach them.
+          pageStyles
           dropzoneStyle="container"
           listGap="md"
           onItemsChange={persist}
           renderListHeader={(list) => (
-            <div style={S.head}>
-              <span style={S.headLabel}>{list.label}</span>
-              <span style={S.count} aria-label={`${items.filter((item) => item.listId === list.id).length} cards`}>{items.filter((item) => item.listId === list.id).length}</span>
+            <div className="lk-board-head">
+              <span className="cell-title">{list.label}</span>
+              <span className="cell-sub" aria-label={`${items.filter((item) => item.listId === list.id).length} cards`}>{items.filter((item) => item.listId === list.id).length}</span>
               <Button variant="ghost" size="sm" icon="plus" aria-label={`Add a card to ${list.label}`} onClick={() => setAdding(list.id)} />
             </div>
           )}
@@ -81,15 +71,15 @@ export function Kanban() {
             const card = item.data as BoardCard;
             const overdue = !!card.due && card.due < TODAY && item.listId !== 'done';
             return (
-              <div style={S.card}>
-                <div style={S.row}>
+              <div className="lk-board-card">
+                <div className="lk-row">
                   <Badge size="sm" variant="outline" tone="neutral">{card.tag}</Badge>
                   <Badge size="sm" variant="soft" tone={PRIORITY_TONE[card.priority]}>{card.priority}</Badge>
                 </div>
-                <span style={S.title}>{card.title}</span>
-                <div style={S.meta}>
+                <span className="cell-title">{card.title}</span>
+                <div className="lk-row lk-board-meta">
                   <Avatar initials={initials(card.assignee)} size="sm" alt={card.assignee} variant="soft" tone="neutral" />
-                  {card.due ? <span style={S.due(overdue)}>{overdue ? 'Overdue · ' : 'Due '}{shortDate(card.due)}</span> : null}
+                  {card.due ? <span className={overdue ? 'cell-sub cell-warn' : 'cell-sub'}>{overdue ? 'Overdue · ' : 'Due '}{shortDate(card.due)}</span> : null}
                 </div>
               </div>
             );

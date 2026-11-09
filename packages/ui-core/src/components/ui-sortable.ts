@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { adoptPageStyles } from '../primitives/page-styles';
 import { edgeScrollDelta, findScrollParent } from '../primitives/auto-scroll';
 
 export type UISortableListOrientation = 'vertical' | 'horizontal';
@@ -1642,6 +1643,7 @@ function buildRenderRecords(
 export class UISortable extends ElementBase {
   static get observedAttributes() {
     return [
+      'page-styles',
       'lists',
       'items',
       'selection',
@@ -1729,6 +1731,10 @@ export class UISortable extends ElementBase {
   override attributeChangedCallback(name?: string, oldValue?: string | null, newValue?: string | null): void {
     if (oldValue === newValue) return;
     if (!this.isConnected) return;
+    if (name === 'page-styles') {
+      this._syncPageStyles();
+      return;
+    }
 
     if (name === 'selection' && !this._suppressAttributeRender && this._canSyncInteractiveStateInPlace()) {
       this._syncSelectionFromAttribute(newValue ?? null);
@@ -1760,6 +1766,19 @@ export class UISortable extends ElementBase {
     this.ownerDocument?.addEventListener('pointermove', this._onPointerMove as EventListener, true);
     this.ownerDocument?.addEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.addEventListener('pointercancel', this._onPointerCancel as EventListener, true);
+    this._syncPageStyles();
+  }
+
+  private _releasePageStyles: (() => void) | null = null;
+
+  /** page-styles: the app's stylesheets also apply to custom item and header content (see primitives/page-styles). */
+  private _syncPageStyles(): void {
+    const wanted = this.hasAttribute('page-styles') && this.isConnected;
+    if (wanted && !this._releasePageStyles) this._releasePageStyles = adoptPageStyles(this.root as ShadowRoot);
+    if (!wanted && this._releasePageStyles) {
+      this._releasePageStyles();
+      this._releasePageStyles = null;
+    }
   }
 
   override disconnectedCallback(): void {
@@ -1783,6 +1802,8 @@ export class UISortable extends ElementBase {
     UISortable._instances.delete(this);
     this._setExternal(null);
     this._showExternalTarget(null);
+    this._releasePageStyles?.();
+    this._releasePageStyles = null;
     super.disconnectedCallback();
   }
 

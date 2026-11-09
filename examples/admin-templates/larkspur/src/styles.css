@@ -210,7 +210,8 @@ a.cell-title:hover { text-decoration: underline; }
 .lk-board { --ui-sortable-list-min-width: 240px; }
 .lk-board-head { display: flex; align-items: center; gap: 8px; }
 .lk-board-head .cell-title { flex: 1; }
-.lk-board-card { display: grid; gap: 8px; }
+.lk-board-card { display: grid; gap: 8px; font-size: 14px; line-height: 1.35; }
+.lk-board-card .cell-sub { white-space: normal; }
 .lk-board-card .lk-row { gap: 6px; }
 .lk-board-meta { justify-content: space-between; }
 

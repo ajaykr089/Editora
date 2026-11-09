@@ -85,6 +85,11 @@ building the templates.
 - React: create the plugins once, outside the component. HTML: list plugins and toolbar as attributes and set
   content after `editor-ready`.
 
+**Sortable (kanban)**
+
+- `renderItem` / `renderListHeader` content is drawn inside the sortable's shadow root. Pass `pageStyles` so your
+  CSS classes reach it (see `apps/Kanban.tsx`); they never override the sortable's own look.
+
 **Charts**
 
 - `values` / `labels` attributes take JSON arrays (`values="[12, 18, 9]"`). Bars and areas start at zero.
@@ -93,6 +98,4 @@ building the templates.
 
 **Known limits**
 
-- `Sortable` `renderItem` content lives in the component's shadow root: your CSS classes do not reach it. Style it
-  inline or with Editora components (see `apps/Kanban.tsx`).
 - `Stat`, `PageHeader` and `MetricCard` are React-only; Copperline builds its stat cards from `ui-card`.
