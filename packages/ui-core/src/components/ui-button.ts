@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { requestNavigate } from '../primitives/navigate';
 import './ui-icon';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
@@ -183,6 +184,17 @@ const style = `
     --ui-btn-font-size: var(--ui-control-font-size-4, 18px);
     --ui-btn-radius: var(--ui-control-radius-4, var(--ui-radius, 6px));
     --ui-btn-gap: 10px;
+  }
+
+  a.btn {
+    text-decoration: none;
+  }
+
+  a.btn[aria-disabled="true"] {
+    opacity: 0.56;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none !important;
   }
 
   .btn {
@@ -660,6 +672,10 @@ export class UIButton extends ElementBase {
       'aria-expanded',
       'aria-haspopup',
       'aria-pressed',
+      'href',
+      'target',
+      'rel',
+      'download',
     ];
   }
 
@@ -724,17 +740,30 @@ export class UIButton extends ElementBase {
    * dispatch a click on the host only, which the form action (listening inside) never saw.
    */
   click(): void {
-    const inner = this.root.querySelector('button[data-ui-button="true"]') as HTMLButtonElement | null;
+    const inner = this.root.querySelector('[data-ui-button="true"]') as HTMLElement | null;
     if (!inner) {
       super.click();
       return;
     }
-    if (inner.disabled) return;
+    if ((inner as HTMLButtonElement).disabled || inner.getAttribute('aria-disabled') === 'true') return;
     inner.click();
   }
 
   private _onRootClick(event: Event) {
     const target = event.target as HTMLElement | null;
+    // A link button: same navigate contract as Sidebar and Breadcrumb links (an app router can
+    // keep the page); a disabled link does nothing.
+    const link = target?.closest('a[data-ui-button="true"]') as HTMLAnchorElement | null;
+    if (link) {
+      if (link.getAttribute('aria-disabled') === 'true') {
+        event.preventDefault();
+        return;
+      }
+      if (requestNavigate(this, { href: link.getAttribute('href') || '' }, event, link.getAttribute('target') || '')) {
+        event.preventDefault();
+      }
+      return;
+    }
     const button = target?.closest('button[data-ui-button="true"]') as HTMLButtonElement | null;
     if (!button || button.disabled) return;
 
@@ -859,23 +888,37 @@ export class UIButton extends ElementBase {
       ? `<span class="slot slot--suffix" part="suffix"><slot name="suffix"></slot></span>`
       : '';
 
+    // href makes it a link that looks like a button: a real <a>, so it opens in a new tab,
+    // shows its address and is announced as a link. A disabled link keeps no href.
+    const href = readHostString(this, 'href');
+    const isLink = !!href;
+    const linkAttrs = isLink
+      ? [
+          buttonDisabled ? 'aria-disabled="true" role="link"' : `href="${escapeAttr(href || '')}"`,
+          readHostString(this, 'target') ? `target="${escapeAttr(readHostString(this, 'target') || '')}"` : '',
+          readHostString(this, 'rel') ? `rel="${escapeAttr(readHostString(this, 'rel') || '')}"` : readHostString(this, 'target') === '_blank' ? 'rel="noopener noreferrer"' : '',
+          this.hasAttribute('download') ? `download="${escapeAttr(this.getAttribute('download') || '')}"` : '',
+        ].filter(Boolean).join(' ')
+      : '';
+    const tag = isLink ? 'a' : 'button';
+
     this.setContent(`
       <style>${style}</style>
-      <button
+      <${tag}
         class="btn btn--${variant}${variant === 'secondary' || variant === 'ghost' ? '' : ' btn--solid'}"
         part="button"
-        type="button"
+        ${isLink ? linkAttrs : 'type="button"'}
         data-ui-button="true"
         data-request-type="${buttonType}"
         aria-busy="${loading ? 'true' : 'false'}"
         ${buttonLabel ? `aria-label="${escapeAttr(buttonLabel)}"` : ''}
-        ${buttonDisabled ? 'disabled' : ''}
+        ${buttonDisabled && !isLink ? 'disabled' : ''}
       >
         ${prefixMarkup}
         <span class="slot slot--label" part="label"><slot></slot></span>
         ${suffixMarkup}
         ${loading ? `<span class="sr-only">${escapeAttr(loadingLabel)}</span>` : ''}
-      </button>
+      </${tag}>
     `);
 
     this._syncForwardedState();

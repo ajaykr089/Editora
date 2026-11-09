@@ -10,7 +10,7 @@ import { Stat } from '@editora/ui-react/Stat';
 import { ToggleGroup } from '@editora/ui-react/ToggleGroup';
 import { commerceSummary, money, orderId, shortDate, wholeMoney } from '../../../shared/data';
 import { change, OrderBadge, Swatch, useLoad } from '../lib/ui';
-import { navigate, useTitle } from '../lib/router';
+import { useTitle } from '../lib/router';
 
 const CATEGORY_TONES = ['#5b21b6', '#0891b2', '#f59e0b', '#db2777', '#16a34a', '#64748b'];
 
@@ -28,7 +28,7 @@ export function Commerce() {
         actions={
           <>
             <Button variant="secondary" icon="download" onClick={() => window.print()}>Export</Button>
-            <Button icon="plus" onClick={() => navigate('/products?new=1')}>Add product</Button>
+            <Button icon="plus" href="#/products?new=1">Add product</Button>
           </>
         }
       />
@@ -92,7 +92,7 @@ export function Commerce() {
                 <Card.Title as="h2">Recent orders</Card.Title>
                 <Card.Description>The six newest orders across every channel.</Card.Description>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/orders')}>View all</Button>
+              <Button variant="ghost" size="sm" href="#/orders">View all</Button>
             </div>
           </Card.Header>
           <DataTable hover aria-label="Recent orders" hideSummary state={data ? 'idle' : 'loading'} elevation="none" variant="flat">

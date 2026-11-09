@@ -1,6 +1,7 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import '@editora/ui-core/button';
-import { createUIElement, useElementAttributes, warnIfElementNotRegistered } from './_internals';
+import { createUIElement, useElementAttributes, useNavigateBridge, warnIfElementNotRegistered, type ComponentNavigateDetail } from './_internals';
+import { useNavigationContext } from './NavigationProvider';
 
 export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
@@ -23,6 +24,13 @@ export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & 
   theme?: 'default' | 'dark' | 'brand';
   type?: 'button' | 'submit' | 'reset';
   ariaLabel?: string;
+  /** Makes it a link that looks like a button (a real <a>: new tab, address on hover, announced as a link). Goes through NavigationProvider like Sidebar and Breadcrumb links. */
+  href?: string;
+  target?: string;
+  rel?: string;
+  download?: string | boolean;
+  /** Runs before a link button is followed; `detail.preventDefault()` keeps the page. */
+  onNavigate?: (detail: ComponentNavigateDetail<{ href: string }>) => void;
 };
 
 function setBooleanAttribute(el: HTMLElement, name: string, value: boolean | undefined) {
@@ -64,6 +72,11 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     theme,
     type,
     ariaLabel: ariaLabelProp,
+    href,
+    target,
+    rel,
+    download,
+    onNavigate,
     ...rest
   },
   forwardedRef
@@ -76,6 +89,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
   const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  useNavigateBridge(ref, onNavigate, useNavigationContext());
 
   useEffect(() => {
     warnIfElementNotRegistered('ui-button', 'Button');
@@ -125,7 +139,12 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     if (radius === 'full') el.style.setProperty('--ui-btn-radius', '999px');
     else el.style.removeProperty('--ui-btn-radius');
     setStringAttribute(el, 'scale', scale);
-  }, [variant, size, recipe, radius, scale, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel]);
+    setStringAttribute(el, 'href', href);
+    setStringAttribute(el, 'target', target);
+    setStringAttribute(el, 'rel', rel);
+    if (download === true) el.setAttribute('download', '');
+    else setStringAttribute(el, 'download', typeof download === 'string' ? download : undefined);
+  }, [variant, size, recipe, radius, scale, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel, href, target, rel, download]);
 
   const hostProps: Record<string, unknown> = {
     ref,
@@ -147,6 +166,10 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     state: state && state !== 'idle' ? state : undefined,
     'loading-label': loadingLabel,
     'aria-label': ariaLabel,
+    href,
+    target,
+    rel,
+    download: download === true ? '' : download || undefined,
   };
 
   const prefix = startIcon == null ? null : React.createElement('span', { slot: 'prefix', 'aria-hidden': 'true' }, startIcon);

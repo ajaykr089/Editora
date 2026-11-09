@@ -57,6 +57,11 @@ building the templates.
 - Icons by name (`icon="wallet"`) need the icon registered: `addIcons(walletIcon, ...)` from
   `@editora/icons/glyphs`. The full set is never downloaded.
 
+**Links**
+
+- A link that looks like a button: `<Button href="/orders">` / `<ui-button href="./orders.html">`. It is a real
+  link (new tab, announced as a link) and goes through `NavigationProvider` like Sidebar links.
+
 **Data tables**
 
 - `ui-data-table` wraps an ordinary `<table>`. Columns share the width equally unless you give the `<th>`s widths
@@ -87,6 +92,5 @@ building the templates.
 
 - `Sortable` `renderItem` content lives in the component's shadow root: your CSS classes do not reach it. Style it
   inline or with Editora components (see `apps/Kanban.tsx`).
-- `ui-button` has no `href`; for a link that looks like a button, use a click handler or style an `<a>`.
 - `DataTable` selection is click-to-select; there is no checkbox column or select-all yet.
 - `Stat`, `PageHeader` and `MetricCard` are React-only; Copperline builds its stat cards from `ui-card`.

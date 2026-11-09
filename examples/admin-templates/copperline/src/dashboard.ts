@@ -6,7 +6,6 @@ import { commerceSummary, money, orderId, ORDER_STATUS_LABEL, ORDER_STATUS_TONE,
 const pct = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(Math.round(v * 1000) / 10)}% vs previous 30 days`;
 const TONES = ['#b4531f', '#0f766e', '#4338ca', '#a16207', '#be123c', '#475569'];
 
-$('#write').addEventListener('click', () => { location.href = './editor.html'; });
 $('#export').addEventListener('click', () => window.print());
 
 const data = await commerceSummary();
