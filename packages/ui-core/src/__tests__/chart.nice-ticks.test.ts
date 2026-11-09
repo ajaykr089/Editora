@@ -39,3 +39,12 @@ describe('ui-chart axis ticks', () => {
     expect(await ticksFor([-120, -340, -80], { type: 'bar' })).toEqual(['0', '-100', '-200', '-300', '-400']);
   });
 });
+
+describe('ui-chart area baseline', () => {
+  it('starts an area at zero, like bars; lines keep a fitted axis', async () => {
+    const area = await ticksFor([12000, 9100, 12100, 11000, 16800], { type: 'area' });
+    expect(area[area.length - 1]).toBe('0');
+    const line = await ticksFor([12000, 9100, 12100, 11000, 16800], { type: 'line' });
+    expect(line[line.length - 1]).not.toBe('0');
+  });
+});

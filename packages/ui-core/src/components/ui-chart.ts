@@ -1482,7 +1482,9 @@ export class UIChart extends ElementBase {
     const axisH = height - padT - padB;
     const labels = data.labels;
     const series = data.series;
-    const includeZero = type === 'bar';
+    // Bars and areas show amounts by their size, so they start at zero; a line or scatter is read
+    // by its shape and keeps a fitted axis. (An area on a $4,000 baseline made a 40% dip look like 90%.)
+    const includeZero = type === 'bar' || type === 'area';
     const values = series.flatMap((entry) => entry.data.map((point) => point.value));
     const domain = this._valueDomain(values.map((value, index) => ({ label: String(index), value })), { includeZero });
     const min = domain.min;
