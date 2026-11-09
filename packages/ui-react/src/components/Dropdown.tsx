@@ -1,5 +1,14 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-import { Icon } from './Icon';
+// The tag only: the ui-icon element is defined on demand (below), so menus without icon names
+// do not carry the icon renderer in their bundle.
+import { Icon } from './server/Icon';
+
+function useIconElement(icon: unknown) {
+  React.useEffect(() => {
+    if (typeof icon !== 'string' || typeof customElements === 'undefined' || customElements.get('ui-icon')) return;
+    void import('@editora/ui-core/icon');
+  }, [icon]);
+}
 
 import '@editora/ui-core/dropdown';
 import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
@@ -232,6 +241,7 @@ export const DropdownItem = React.forwardRef<HTMLDivElement, DropdownItemProps>(
   },
   ref
 ) {
+  useIconElement(icon);
   const classes = ['item', className].filter(Boolean).join(' ');
   const selectionIcon =
     role === 'menuitemcheckbox' || role === 'menuitemradio' ? (
