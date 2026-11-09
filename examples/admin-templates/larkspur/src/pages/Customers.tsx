@@ -2,6 +2,7 @@ import React from 'react';
 import { Avatar } from '@editora/ui-react/Avatar';
 import { Badge } from '@editora/ui-react/Badge';
 import { Button } from '@editora/ui-react/Button';
+import { Checkbox } from '@editora/ui-react/Checkbox';
 import { DataTable } from '@editora/ui-react/DataTable';
 import { FiltersBar } from '@editora/ui-react/FiltersBar';
 import { PageHeader } from '@editora/ui-react/PageHeader';
@@ -54,7 +55,7 @@ export function Customers() {
     <div className="lk-screen">
       <PageHeader
         title="Customers"
-        subtitle="Click rows to select them; open a customer from their name."
+        subtitle="Tick customers to act on several at once; open one from their name."
         actions={<Button icon="user-plus" onClick={() => toastApi.info('Customers are created when they first order.')}>Add customer</Button>}
       />
 
@@ -96,6 +97,7 @@ export function Customers() {
         <table>
           <thead>
             <tr>
+              <th style={{ width: '44px' }}><Checkbox data-select-all aria-label="Select all customers on this page" /></th>
               <th data-key="name" style={{ width: '27%' }}>Customer</th>
               <th data-key="company" style={{ width: '21%' }}>Company</th>
               <th data-key="orders" data-align="end" style={{ width: '11%' }}>Orders</th>
@@ -107,6 +109,7 @@ export function Customers() {
           <tbody>
             {(data?.rows || []).map((customer) => (
               <tr key={customer.id} data-id={customer.id}>
+                <td><Checkbox data-row-select aria-label={`Select ${customer.name}`} /></td>
                 <td>
                   <span className="lk-person">
                     <Avatar initials={initials(customer.name)} size="sm" alt="" variant="soft" tone="neutral" />

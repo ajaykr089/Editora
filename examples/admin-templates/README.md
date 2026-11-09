@@ -68,6 +68,9 @@ building the templates.
   (`style="width: 30%"`). Right-align numbers with `data-align="end"` on the `<th>` and `<td>`.
 - Server-side: `serverSide`, `totalRows`, `page`, `pageSize`, and handle `onSortChange` / `onPageChange` by
   fetching. Put `data-id` on rows: selection reports `ids`, and `data-href` makes the row a link.
+- A checkbox column: put `<Checkbox data-row-select>` in each row and `<Checkbox data-select-all>` in its header
+  (or plain `<input type="checkbox">`). The table keeps them in step with the selection (select-all is
+  indeterminate for some) and never sorts by that column; `data-sort="false"` turns sorting off for any column.
 
 **Forms**
 
@@ -92,5 +95,4 @@ building the templates.
 
 - `Sortable` `renderItem` content lives in the component's shadow root: your CSS classes do not reach it. Style it
   inline or with Editora components (see `apps/Kanban.tsx`).
-- `DataTable` selection is click-to-select; there is no checkbox column or select-all yet.
 - `Stat`, `PageHeader` and `MetricCard` are React-only; Copperline builds its stat cards from `ui-card`.
