@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found · Copperline</title>
+    <meta name="description" content="Copperline: an admin template in plain HTML, built with Editora UI web components and the Editora rich-text editor." />
+  </head>
+  <body>
+    <ui-layout variant="shell" sidebar-label="Main navigation">
+      <ui-app-header slot="header" bordered show-menu-button="narrow">
+        <a slot="start" class="cl-brand" href="./" aria-label="Copperline, dashboard">
+          <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+          <span>Copperline</span>
+        </a>
+        <div slot="end" class="cl-actions">
+          <ui-button variant="ghost" size="sm" data-action="toggle-theme" aria-label="Use dark theme"><ui-icon name="moon" decorative></ui-icon></ui-button>
+          <ui-button variant="ghost" size="sm" aria-label="Notifications"><ui-icon name="bell" decorative></ui-icon></ui-button>
+          <ui-avatar initials="SL" size="sm" alt="Sana Lindqvist" variant="soft"></ui-avatar>
+        </div>
+      </ui-app-header>
+      <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
+      <main slot="content" class="cl-content" id="main">
+        <div class="cl-page cl-narrow cl-center">
+          <p class="cl-404" aria-hidden="true">404</p>
+          <h1 class="cl-sr">Page not found</h1>
+          <ui-empty-state title="This page does not exist" description="The link may be old, or there is a typo in the address."></ui-empty-state>
+          <div class="cl-actions" style="justify-content:center"><ui-button href="./">Back to the dashboard</ui-button></div>
+        </div>
+      </main>
+    </ui-layout>
+    <script type="module" src="./src/notfound.ts"></script>
+  </body>
+</html>

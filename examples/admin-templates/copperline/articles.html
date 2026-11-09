@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Help centre · Copperline</title>
+    <meta name="description" content="Copperline: an admin template in plain HTML, built with Editora UI web components and the Editora rich-text editor." />
+  </head>
+  <body>
+    <ui-layout variant="shell" sidebar-label="Main navigation">
+      <ui-app-header slot="header" bordered show-menu-button="narrow">
+        <a slot="start" class="cl-brand" href="./" aria-label="Copperline, dashboard">
+          <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+          <span>Copperline</span>
+        </a>
+        <div slot="end" class="cl-actions">
+          <ui-button variant="ghost" size="sm" data-action="toggle-theme" aria-label="Use dark theme"><ui-icon name="moon" decorative></ui-icon></ui-button>
+          <ui-button variant="ghost" size="sm" aria-label="Notifications"><ui-icon name="bell" decorative></ui-icon></ui-button>
+          <ui-avatar initials="SL" size="sm" alt="Sana Lindqvist" variant="soft"></ui-avatar>
+        </div>
+      </ui-app-header>
+      <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
+      <main slot="content" class="cl-content" id="main">
+        <div class="cl-page">
+          <div class="cl-head">
+            <div><h1>Help centre</h1><p>Articles customers read before they write to support.</p></div>
+            <div class="cl-actions"><ui-button icon="plus" id="new-article">New article</ui-button></div>
+          </div>
+          <ui-tabs id="article-tabs" variant="underline" aria-label="Article status">
+            <div slot="tab" data-value="">All</div><div slot="panel"></div>
+            <div slot="tab" data-value="published">Published</div><div slot="panel"></div>
+            <div slot="tab" data-value="review">In review</div><div slot="panel"></div>
+            <div slot="tab" data-value="draft">Drafts</div><div slot="panel"></div>
+          </ui-tabs>
+          <ui-data-table id="articles" sortable hover state="loading" aria-label="Articles" empty-text="No articles here yet.">
+            <table>
+              <thead><tr><th data-key="title" style="width:44%">Article</th><th data-key="category" style="width:16%">Category</th><th data-key="updated" style="width:14%">Updated</th><th data-key="views" data-align="end" style="width:12%">Views</th><th data-key="status" style="width:14%">Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </ui-data-table>
+        </div>
+      </main>
+    </ui-layout>
+    <script type="module" src="./src/articles.ts"></script>
+  </body>
+</html>

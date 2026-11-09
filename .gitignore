@@ -70,3 +70,8 @@ examples/reference-app/playwright-report/
 examples/reference-app/tests/*-snapshots/*-darwin.png
 examples/reference-app/tests/*-snapshots/*-win32.png
 examples/reference-app/screenshots-review/
+
+# Admin templates (examples/admin-templates): own lockfile, test output
+!examples/admin-templates/package-lock.json
+examples/admin-templates/test-results/
+examples/admin-templates/playwright-report/
