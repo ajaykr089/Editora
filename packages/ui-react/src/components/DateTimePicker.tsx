@@ -136,7 +136,7 @@ export const DateTimePicker = React.forwardRef<HTMLElement, DateTimePickerProps>
     if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
     syncStringAttribute(el, 'default-value', defaultValue ?? null);
     if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
-    else syncStringAttribute(el, 'open', null);
+    // Uncontrolled (defaultOpen or the user opened it): leave the element's own open state alone.
     syncBooleanAttribute(el, 'default-open', defaultOpen);
     syncStringAttribute(el, 'min', min ?? null);
     syncStringAttribute(el, 'max', max ?? null);

@@ -2,6 +2,7 @@ import { ElementBase } from '../ElementBase';
 import { numberAttribute } from '../primitives/number-attribute';
 import { showPortalFor } from '../portal';
 import { liftToTopLayer } from '../primitives/overlay-motion';
+import { copyThemeToPortal } from '../primitives/portal-theme';
 
 type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
 
@@ -469,6 +470,7 @@ export class UITooltip extends ElementBase {
       this._portalEl.classList.remove('closing');
       this._portalEl.classList.add('show');
       this._portalEl.setAttribute('data-state', 'open');
+      copyThemeToPortal(this, this._portalEl);
       liftToTopLayer(this._portalEl);
       this.setAttribute('aria-describedby', this._id);
     }

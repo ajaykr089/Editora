@@ -37,7 +37,8 @@ const style = `
     --ui-radio-bg-hover: var(--ui-color-fill-hover, color-mix(in srgb, currentColor 6%, transparent));
     --ui-radio-bg-selected: transparent;
     --ui-radio-border: transparent;
-    --ui-radio-line: var(--ui-color-line, #cbd5e1);
+    /* An unselected radio is only its outline: 3:1 against the page (was about 1.9:1). */
+    --ui-radio-line: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-radio-border-selected: var(--ui-color-primary, #2563eb);
     --ui-radio-text: var(--ui-color-text, #0f172a);
     --ui-radio-muted: var(--ui-color-text-secondary, #526175);
@@ -119,7 +120,7 @@ const style = `
     inline-size: var(--ui-radio-control-size);
     block-size: var(--ui-radio-control-size);
     border-radius: 999px;
-    border: 1px solid var(--ui-color-line-strong, var(--ui-radio-line));
+    border: 1px solid var(--ui-radio-line);
     background: var(--ui-color-surface, #ffffff);
     display: grid;
     place-items: center;

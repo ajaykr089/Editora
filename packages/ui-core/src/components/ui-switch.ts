@@ -10,7 +10,8 @@ const style = `
     --ui-switch-gap: 12px;
     --ui-switch-track-bg: var(--ui-color-fill-active, #cbd5e1);
     --ui-switch-track-hover: var(--ui-color-line-subtle, color-mix(in srgb, var(--ui-switch-track-bg) 84%, var(--ui-color-muted, #526175)));
-    --ui-switch-track-border: transparent;
+    /* The off track's edge needs 3:1 against the page; its light fill alone was about 1.3:1. */
+    --ui-switch-track-border: var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-switch-thumb-bg: #ffffff;
     --ui-switch-thumb-color: var(--ui-color-muted, #526175);
     --ui-switch-label: var(--ui-color-text, #0f172a);

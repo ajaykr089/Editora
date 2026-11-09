@@ -50,7 +50,8 @@ export const DateField = React.forwardRef<HTMLElement, BaseDateFieldProps>(funct
   useFieldChangeBridge(ref, onChange, onValueChange);
 
   useElementAttributes(ref, (el) => {
-    syncStringAttribute(el, 'value', value ?? null);
+    // Only when controlled: writing null on every sync wiped an uncontrolled date whenever another prop changed.
+    if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
     syncStringAttribute(el, 'min', min ?? null);
     syncStringAttribute(el, 'max', max ?? null);
     syncStringAttribute(el, 'locale', locale ?? null);
@@ -75,7 +76,8 @@ export const TimeField = React.forwardRef<HTMLElement, BaseDateFieldProps & { fo
     useFieldChangeBridge(ref, onChange, onValueChange);
 
     useElementAttributes(ref, (el) => {
-      syncStringAttribute(el, 'value', value ?? null);
+      // Only when controlled: writing null on every sync wiped an uncontrolled date whenever another prop changed.
+      if (value !== undefined) syncStringAttribute(el, 'value', value ?? null);
       syncStringAttribute(el, 'min', min ?? null);
       syncStringAttribute(el, 'max', max ?? null);
       syncStringAttribute(el, 'locale', locale ?? null);

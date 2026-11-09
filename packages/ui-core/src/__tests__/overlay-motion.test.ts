@@ -153,8 +153,29 @@ describe('top layer', () => {
     liftToTopLayer(el);
     expect(el.getAttribute('popover')).toBe('manual');
     expect(show).toHaveBeenCalledTimes(1);
-    expect(el.style.margin).toBe('0px');
-    expect(el.style.padding).toBe('0px');
+    // The reset is a zero-specificity rule, not inline style: inline style beat the component's
+    // own CSS and erased the background, border and padding of tooltips and menus.
+    expect(el.hasAttribute('data-ui-top-layer')).toBe(true);
+    expect(el.style.padding).toBe('');
+    expect(el.style.background).toBe('');
+    const reset = document.querySelector('style#ui-top-layer-reset');
+    expect(reset?.textContent).toMatch(/:where\(\[data-ui-top-layer\]\)/);
+    liftToTopLayer(surface());
+    expect(document.querySelectorAll('style#ui-top-layer-reset')).toHaveLength(1);
+  });
+
+  it('lets the surface keep its own background, border and padding', () => {
+    (HTMLElement.prototype as { showPopover?: unknown }).showPopover = vi.fn();
+    const style = document.createElement('style');
+    style.textContent = '.bubble { background: rgb(1, 2, 3); padding: 7px; border: 1px solid rgb(4, 5, 6); }';
+    document.head.append(style);
+    const el = surface();
+    el.className = 'bubble';
+    liftToTopLayer(el);
+    const cs = getComputedStyle(el);
+    expect(cs.backgroundColor).toBe('rgb(1, 2, 3)');
+    expect(cs.paddingTop).toBe('7px');
+    style.remove();
   });
 
   it('leaves the box alone when the surface styles itself', () => {

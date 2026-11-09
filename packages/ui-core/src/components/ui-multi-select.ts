@@ -1182,6 +1182,13 @@ export class UIMultiSelect extends ElementBase {
       const visibleOptions = filtered.slice(0, renderLimit);
       const truncated = filtered.length > visibleOptions.length;
       setPanelOpen(this._panelEl, this.open, 'bottom');
+      // The option list is built when the panel opens: a closed multi-select keeps only its field
+      // and chips instead of every option.
+      if (!this.open) {
+        if (this._panelEl.firstChild) this._panelEl.replaceChildren();
+        this._inputEl.removeAttribute('aria-activedescendant');
+        return;
+      }
       // a listbox that is still loading carries no options yet: aria-busy says so (and satisfies the required children)
       if (loading) this._panelEl.setAttribute('aria-busy', 'true');
       else this._panelEl.removeAttribute('aria-busy');

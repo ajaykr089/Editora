@@ -676,6 +676,9 @@ export class UIDateTimePicker extends ElementBase {
     if (name === 'default-value' && oldValue == null && newValue != null && this._isInitialized && !this.hasAttribute('value')) {
       name = 'value';
     }
+    if (name === 'default-open' && oldValue == null && this._isInitialized && !this.hasAttribute('open') && isTruthyAttr(newValue)) {
+      this.setAttribute('open', '');
+    }
     if (name === 'name') syncFormField(this, { requiredMessage: 'Choose a date and time' });
     if (oldValue === newValue) return;
     if (name === 'value' && !this._syncing) {

@@ -57,3 +57,46 @@ describe('uncontrolled pickers', () => {
     expect(host.hasAttribute('value')).toBe(false);
   });
 });
+
+describe('more wrappers that wiped an uncontrolled value', () => {
+  it('ColorPicker, Calendar, DateField and Stepper keep the value the element set', async () => {
+    const { ColorPicker } = await import('../components/ColorPicker');
+    const { Calendar } = await import('../components/Calendar');
+    const { DateField } = await import('../components/DateField');
+    const { Stepper } = await import('../components/Stepper');
+    const steps = [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }];
+    const cases: Array<[string, (label: string) => React.ReactElement, string]> = [
+      ['ui-color-picker', (label) => <ColorPicker aria-label={label} />, '#ff0000'],
+      ['ui-calendar', (label) => <Calendar aria-label={label} />, '2026-11-12'],
+      ['ui-date-field', (label) => <DateField label={label} />, '2026-11-12'],
+      ['ui-stepper', (label) => <Stepper aria-label={label} steps={steps} />, 'b']
+    ];
+    for (const [tag, make, picked] of cases) {
+      const { container, rerender, unmount } = render(make('one'));
+      const host = container.querySelector(tag)!;
+      host.setAttribute('value', picked);
+      rerender(make('two'));
+      expect(host.getAttribute('value'), tag).toBe(picked);
+      unmount();
+    }
+  });
+
+  it('ColorPicker recent={false} turns recent colours off', async () => {
+    const { ColorPicker } = await import('../components/ColorPicker');
+    const { container } = render(<ColorPicker recent={false} />);
+    expect(container.querySelector('ui-color-picker')!.getAttribute('recent')).toBe('false');
+  });
+});
+
+describe('picker defaultOpen', () => {
+  it('opens the picker and leaves it open when another prop changes', async () => {
+    const { container, rerender } = render(<DatePicker defaultOpen label="From" />);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const host = container.querySelector('ui-date-picker')!;
+    expect(host.hasAttribute('open')).toBe(true);
+    rerender(<DatePicker defaultOpen label="Start" />);
+    expect(host.hasAttribute('open')).toBe(true);
+    rerender(<DatePicker defaultOpen label="Start" open={false} />);
+    expect(host.hasAttribute('open')).toBe(false);
+  });
+});

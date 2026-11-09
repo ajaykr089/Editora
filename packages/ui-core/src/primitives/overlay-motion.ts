@@ -70,6 +70,30 @@ const supportsPopover = (): boolean =>
  * must already be in the document. Browsers without the Popover API keep their z-index stacking.
  * `popover="manual"` adds no light dismiss or Escape handling; the component keeps its own.
  */
+const TOP_LAYER_RESET_ID = 'ui-top-layer-reset';
+/**
+ * Clears what the browser's popover style adds (centring inset, margin, border, padding, Canvas
+ * background). It is an author rule with zero specificity: it beats the browser's style, and every
+ * rule of the component's own loses nothing to it. It used to be inline style, which beat the
+ * component too and erased the surface of tooltips and menus (no background, border or padding).
+ */
+const TOP_LAYER_RESET_CSS = `:where([data-ui-top-layer]) { inset: auto; margin: 0; border: 0; padding: 0; overflow: visible; background: transparent; color: inherit; }`;
+
+function ensureTopLayerReset(el: HTMLElement): void {
+  const root = el.getRootNode() as Document | ShadowRoot;
+  const scope: ParentNode | null = root instanceof Document ? root.head || root.documentElement : root instanceof ShadowRoot ? root : null;
+  if (!scope || scope.querySelector(`style#${TOP_LAYER_RESET_ID}`)) return;
+  const style = document.createElement('style');
+  style.id = TOP_LAYER_RESET_ID;
+  style.textContent = TOP_LAYER_RESET_CSS;
+  scope.insertBefore(style, scope.firstChild);
+}
+
+/**
+ * Promote the surface to the browser's top layer, above every z-index on the page. The surface
+ * must already be in the document. Browsers without the Popover API keep their z-index stacking.
+ * `popover="manual"` adds no light dismiss or Escape handling; the component keeps its own.
+ */
 export function liftToTopLayer(el: HTMLElement, options: { resetBox?: boolean } = {}): void {
   if (!supportsPopover() || !el.isConnected) return;
   try {
@@ -77,14 +101,8 @@ export function liftToTopLayer(el: HTMLElement, options: { resetBox?: boolean } 
     // The popover UA style centres and pads the box; the positioner owns left and top. A surface
     // that styles its own box (a dialog overlay) passes resetBox: false and handles this in CSS.
     if (options.resetBox !== false) {
-      el.style.setProperty('right', 'auto');
-      el.style.setProperty('bottom', 'auto');
-      el.style.setProperty('margin', '0');
-      el.style.setProperty('border', '0');
-      el.style.setProperty('padding', '0');
-      el.style.setProperty('overflow', 'visible');
-      el.style.setProperty('background', 'transparent');
-      el.style.setProperty('color', 'inherit');
+      el.setAttribute('data-ui-top-layer', '');
+      ensureTopLayerReset(el);
     }
     if (!el.matches(':popover-open')) (el as HTMLElement & { showPopover(): void }).showPopover();
   } catch {

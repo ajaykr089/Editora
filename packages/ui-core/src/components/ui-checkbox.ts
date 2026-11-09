@@ -6,7 +6,8 @@ const style = `
     --ui-checkbox-size: 16px;
     --ui-checkbox-hit-area: 24px;
     --ui-checkbox-radius: calc(var(--ui-radius, 6px) - 2px);
-    --ui-checkbox-border: 1px solid var(--ui-color-line-strong, var(--ui-color-border, #cbd5e1));
+    /* An unchecked box is only its outline: 3:1 against the page (was about 1.9:1). */
+    --ui-checkbox-border: 1px solid var(--ui-color-field-border, color-mix(in srgb, var(--ui-color-text, #0f172a) 52%, var(--ui-color-surface, #ffffff)));
     --ui-checkbox-background: var(--ui-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-checkbox-check-color: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-checkbox-checked-background: var(--ui-primary, var(--ui-color-primary, #2563eb));
