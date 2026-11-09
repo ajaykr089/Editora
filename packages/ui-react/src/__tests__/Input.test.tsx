@@ -25,3 +25,10 @@ describe('Input and Textarea error prop', () => {
     expect(input.getAttribute('data-error')).toBe('From the form');
   });
 });
+
+describe('Textarea counter', () => {
+  it('counter shows the character count, as on Input', () => {
+    const { container } = render(<Textarea label="Note" counter />);
+    expect(container.querySelector('ui-textarea')!.hasAttribute('show-count')).toBe(true);
+  });
+});

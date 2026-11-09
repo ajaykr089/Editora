@@ -63,6 +63,8 @@ export type TextareaProps = BaseProps & {
   autosize?: boolean;
   maxRows?: number;
   showCount?: boolean;
+  /** Same as showCount, named like Input's prop. */
+  counter?: boolean;
   density?: 'compact' | 'default' | 'comfortable';
   tone?: 'brand' | 'success' | 'warning' | 'danger';
   headless?: boolean;
@@ -101,6 +103,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     autosize,
     maxRows,
     showCount,
+    counter,
     density,
     tone,
     headless,
@@ -139,7 +142,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     syncBooleanAttribute(el, 'disabled', disabled);
     syncBooleanAttribute(el, 'required', required);
     syncBooleanAttribute(el, 'autosize', autosize);
-    syncBooleanAttribute(el, 'show-count', showCount);
+    syncBooleanAttribute(el, 'show-count', showCount ?? counter);
     syncBooleanAttribute(el, 'headless', headless);
     syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
     syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
@@ -188,6 +191,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     autosize,
     maxRows,
     showCount,
+    counter,
     density,
     tone,
     headless,

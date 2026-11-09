@@ -401,6 +401,7 @@ export class UITextarea extends ElementBase {
       'autosize',
       'max-rows',
       'show-count',
+      'counter',
       'density',
       'tone',
       'headless',
@@ -487,6 +488,7 @@ export class UITextarea extends ElementBase {
       'name',
       'validation',
       'show-count',
+      'counter',
       'clearable',
       'autosize',
       'max-rows',
@@ -630,7 +632,7 @@ export class UITextarea extends ElementBase {
 
     if (hasDescription) describedBy.push(`${this._uid}-description`);
     if (hasError) describedBy.push(`${this._uid}-error`);
-    if (this.hasAttribute('show-count') || parseLength(this.getAttribute('maxlength')) !== null) describedBy.push(`${this._uid}-count`);
+    if (this._showsCount() || parseLength(this.getAttribute('maxlength')) !== null) describedBy.push(`${this._uid}-count`);
 
     const hasLabel = !!(this.getAttribute('label') || this.querySelector('[slot="label"]'));
     syncControlName(this._textarea, this, hasLabel ? `${this._uid}-label` : null);
@@ -652,7 +654,7 @@ export class UITextarea extends ElementBase {
     }
 
     if (this._countEl) {
-      const shouldShow = this.hasAttribute('show-count') || maxLength !== null;
+      const shouldShow = this._showsCount() || maxLength !== null;
       if (!shouldShow) {
         this._countEl.setAttribute('hidden', '');
       } else {
@@ -752,6 +754,11 @@ export class UITextarea extends ElementBase {
     this._emit('input', '');
     this._emit('change', '');
     this.dispatchEvent(new CustomEvent('clear', { bubbles: true, composed: true }));
+  }
+
+  /** `counter` (as on ui-input) or `show-count` shows the character count. */
+  private _showsCount(): boolean {
+    return this.hasAttribute('show-count') || this.hasAttribute('counter');
   }
 
   protected override render(): void {
