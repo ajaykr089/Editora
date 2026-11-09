@@ -49,10 +49,12 @@ export type ChartProps = React.HTMLAttributes<HTMLElement> & {
   disabled?: boolean;
   interactive?: boolean;
   showLegend?: boolean;
-  /** The Total / Average / Peak / Delta row, and (unless `showInsight` says otherwise) the readout line under the plot. */
+  /** The Total / Average / Peak / Change row, and (unless `showInsight` says otherwise) the readout line under the plot. */
   showSummary?: boolean;
   /** The one-line readout under the plot (range and change, or the selected point). Defaults to `showSummary`. */
   showInsight?: boolean;
+  /** `false` for categories (stages, devices) rather than a sequence: shows the lowest value instead of a first-to-last change. */
+  showChange?: boolean;
   /** Locale for numbers (`en-IN` gives 1,00,000). Defaults to the nearest `lang` attribute, then the browser. */
   locale?: string;
   /** Show the chart's numbers as a table below it (always available to screen readers). */
@@ -103,6 +105,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     showLegend,
     showSummary,
     showInsight,
+    showChange,
     locale,
     showTable,
     headingLevel,
@@ -193,6 +196,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     syncAttr('show-legend', typeof showLegend === 'boolean' ? (showLegend ? 'true' : 'false') : null);
     syncAttr('show-summary', typeof showSummary === 'boolean' ? (showSummary ? 'true' : 'false') : null);
     syncAttr('show-insight', typeof showInsight === 'boolean' ? (showInsight ? 'true' : 'false') : null);
+    syncAttr('show-change', showChange === false ? 'false' : null);
     syncAttr('locale', locale || null);
     syncAttr('show-table', showTable ? '' : null);
     syncAttr('heading-level', headingLevel ? String(headingLevel) : null);
@@ -217,6 +221,7 @@ const ChartRoot = React.forwardRef<HTMLElement, ChartProps>(function Chart(
     showLegend,
     showSummary,
     showInsight,
+    showChange,
     locale,
     showTable,
     headingLevel,

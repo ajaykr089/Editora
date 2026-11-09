@@ -48,3 +48,33 @@ describe('ui-chart area baseline', () => {
     expect(line[line.length - 1]).not.toBe('0');
   });
 });
+
+describe('ui-chart summary', () => {
+  it('names the series it describes when there are several', async () => {
+    const el = document.createElement('ui-chart');
+    el.setAttribute('type', 'line');
+    el.setAttribute('series', JSON.stringify([
+      { name: 'Sessions', data: [{ label: 'a', value: 10 }, { label: 'b', value: 20 }] },
+      { name: 'Visitors', data: [{ label: 'a', value: 5 }, { label: 'b', value: 8 }] },
+    ]));
+    document.body.appendChild(el);
+    await tick();
+    expect(el.shadowRoot!.querySelector('.summary-series')!.textContent).toBe('Sessions');
+    expect(el.shadowRoot!.querySelector('.insight')!.textContent).toContain('Sessions:');
+    el.remove();
+  });
+
+  it('show-change="false" swaps the change for the lowest value', async () => {
+    const el = document.createElement('ui-chart');
+    el.setAttribute('type', 'bar');
+    el.setAttribute('show-change', 'false');
+    el.setAttribute('values', '[400, 900, 300]');
+    el.setAttribute('labels', '["Lead", "Proposal", "Won"]');
+    document.body.appendChild(el);
+    await tick();
+    const labels = Array.from(el.shadowRoot!.querySelectorAll('.metric-label')).map((n) => n.textContent);
+    expect(labels).toEqual(['Total', 'Average', 'Peak', 'Lowest']);
+    expect(el.shadowRoot!.querySelector('.insight [data-tone]')).toBeNull();
+    el.remove();
+  });
+});

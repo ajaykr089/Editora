@@ -85,8 +85,8 @@ building the templates.
 **Charts**
 
 - `values` / `labels` attributes take JSON arrays (`values="[12, 18, 9]"`). Bars and areas start at zero.
-- For categories (stages, devices), turn the summary off (`showSummary={false}`): its first-to-last change means
-  nothing there.
+- For categories (stages, devices), pass `showChange={false}` (`show-change="false"`): a first-to-last change means
+  nothing there, so the summary shows the lowest value instead.
 
 **Known limits**
 

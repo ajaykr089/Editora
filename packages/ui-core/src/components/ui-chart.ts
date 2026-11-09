@@ -492,6 +492,14 @@ const style = `
     white-space: nowrap;
   }
 
+  .summary-series {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ui-chart-muted);
+  }
+
   .insight {
     display: flex;
     align-items: center;
@@ -1023,7 +1031,8 @@ export class UIChart extends ElementBase {
       'show-table',
       'heading-level',
       'locale',
-      'show-insight'
+      'show-insight',
+      'show-change'
     ];
   }
 
@@ -1109,6 +1118,12 @@ export class UIChart extends ElementBase {
     const raw = (this.getAttribute('show-summary') || '').trim().toLowerCase();
     if (!raw) return true;
     return raw !== 'false' && raw !== '0' && raw !== 'off';
+  }
+
+  /** `show-change="false"`: the values are categories (stages, devices), not a sequence, so a first-to-last change means nothing. */
+  private _showChange(): boolean {
+    const raw = (this.getAttribute('show-change') || '').trim().toLowerCase();
+    return !(raw === 'false' || raw === '0' || raw === 'off');
   }
 
   /** The one-line readout under the plot (range and change, or the selected point): `show-insight`, else `show-summary`. */
@@ -1878,10 +1893,11 @@ export class UIChart extends ElementBase {
       const trend = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}${
         stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : '-'}${pct}%)`
       }`;
+      const named = data.series.length > 1 ? `${escapeHtml(primary.name)}: ` : '';
       return `
         <div class="insight" part="insight">
-          <span>Range <strong>${this._formatValue(stats.min)}</strong> to <strong>${this._formatValue(stats.max)}</strong></span>
-          <strong data-tone="${trendTone}">${escapeHtml(trend)}</strong>
+          <span>${named}Range <strong>${this._formatValue(stats.min)}</strong> to <strong>${this._formatValue(stats.max)}</strong></span>
+          ${this._showChange() ? `<strong data-tone="${trendTone}">${escapeHtml(trend)}</strong>` : ''}
         </div>
       `;
     }
@@ -1982,6 +1998,8 @@ export class UIChart extends ElementBase {
           .join('');
 
     const deltaTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
+    // With several series the figures describe the first one: say which.
+    const summaryName = data.series.length > 1 ? primary.name : '';
     const deltaText = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}`;
 
     const stateMessage =
@@ -2016,7 +2034,8 @@ export class UIChart extends ElementBase {
         </header>
 
         ${showSummary ? `
-          <section class="summary" part="summary">
+          <section class="summary" part="summary"${summaryName ? ` aria-label="${escapeHtml(summaryName)}"` : ''}>
+            ${summaryName ? `<p class="summary-series" part="summary-series">${escapeHtml(summaryName)}</p>` : ''}
             <div class="metric" part="metric">
               <span class="metric-label">Total</span>
               <span class="metric-value">${escapeHtml(this._formatValue(stats.total))}</span>
@@ -2029,10 +2048,15 @@ export class UIChart extends ElementBase {
               <span class="metric-label">Peak</span>
               <span class="metric-value">${escapeHtml(this._formatValue(stats.max))}</span>
             </div>
+            ${this._showChange() ? `
             <div class="metric" part="metric">
-              <span class="metric-label">Delta</span>
+              <span class="metric-label">Change</span>
               <span class="metric-value" data-tone="${deltaTone}">${escapeHtml(deltaText)}</span>
-            </div>
+            </div>` : `
+            <div class="metric" part="metric">
+              <span class="metric-label">Lowest</span>
+              <span class="metric-value">${escapeHtml(this._formatValue(stats.min))}</span>
+            </div>`}
           </section>
         ` : ''}
 
