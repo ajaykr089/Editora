@@ -210,3 +210,17 @@ describe('ui-data-table row selection ids', () => {
     el.remove();
   });
 });
+
+describe('ui-data-table column alignment', () => {
+  it('aligns th and td with data-align, ahead of the default header style', async () => {
+    const el = document.createElement('ui-data-table');
+    el.setAttribute('sortable', '');
+    el.innerHTML = '<table><thead><tr><th>Name</th><th data-align="end">Total</th></tr></thead><tbody><tr><td>Ada</td><td data-align="end">$3.00</td></tr></tbody></table>';
+    document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // jsdom does not cascade :is(), so check the rule (the browser cascade is checked in the admin templates).
+    const css = Array.from(document.querySelectorAll('style')).map((node) => node.textContent).join('\n');
+    expect(css).toMatch(/ui-data-table:not\(\[headless\]\) > table :is\(th, td\)\[data-align="end"\] \{\s*text-align: end;/);
+    el.remove();
+  });
+});

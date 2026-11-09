@@ -416,6 +416,16 @@ const lightDomStyle = `
     table-layout: fixed;
   }
 
+  /* Numbers line up on the right: put data-align="end" on the column's th and td (or "center"). */
+  ui-data-table:not([headless]) > table :is(th, td)[data-align="end"] {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ui-data-table:not([headless]) > table :is(th, td)[data-align="center"] {
+    text-align: center;
+  }
+
   ui-data-table:not([headless]) > table caption {
     caption-side: bottom;
     padding: 10px 14px 0;
