@@ -417,7 +417,25 @@ const style = `
     --ui-calendar-events-h: 10px;
   }
 
-  .day-cell[data-events="badges"] { --ui-calendar-events-h: 15px; }
+  .day-cell[data-events="badges"] { --ui-calendar-events-h: 15px; container-type: inline-size; }
+
+  /* A day too narrow for a readable label ("Sup…", "S… P…") shows each badge as a dot instead;
+     the title still names the event. */
+  @container (max-width: 84px) {
+    .day-cell .event-badge {
+      inline-size: 7px;
+      block-size: 7px;
+      padding: 0;
+      font-size: 0;
+      background: var(--event-tone, var(--ui-calendar-accent));
+    }
+
+    .day-cell[data-selected="true"] .day-cell .event-badge,
+    .day-cell[data-selected="true"] .event-badge.event-badge {
+      background: var(--ui-calendar-selected-color);
+      box-shadow: none;
+    }
+  }
   .day-cell[data-events="count"] { --ui-calendar-events-h: 16px; }
 
   .day-cell > .day {
