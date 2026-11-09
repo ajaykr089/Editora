@@ -36,12 +36,22 @@ function supportsStableScrollbarGutter(): boolean {
     && CSS.supports('scrollbar-gutter: stable');
 }
 
-function composeScrollbarCompensation(existingPaddingRight: string): string {
+function composeScrollbarCompensation(existingPaddingRight: string, scrollbarWidth: number): string {
   const trimmed = existingPaddingRight.trim();
-  if (!trimmed || trimmed === '0' || trimmed === '0px') {
-    return 'calc(100vw - 100%)';
-  }
-  return `calc(${trimmed} + (100vw - 100%))`;
+  if (!trimmed || trimmed === '0' || trimmed === '0px') return `${scrollbarWidth}px`;
+  if (/^\d+(\.\d+)?px$/.test(trimmed)) return `${parseFloat(trimmed) + scrollbarWidth}px`;
+  return `calc(${trimmed} + ${scrollbarWidth}px)`;
+}
+
+/**
+ * The width of the page's own vertical scrollbar: 0 when the page does not scroll, or the
+ * browser draws overlay scrollbars. Read once, when the first lock is taken.
+ */
+function pageScrollbarWidth(): number {
+  const width = window.innerWidth - document.documentElement.clientWidth;
+  // Scrollbars are a few pixels wide; anything else is a layout we cannot read (jsdom gives 0
+  // for clientWidth), so do not compensate.
+  return width > 0 && width < 100 ? width : 0;
 }
 
 export function acquireBodyScrollLock(): () => void {
@@ -60,11 +70,13 @@ export function acquireBodyScrollLock(): () => void {
     state.htmlScrollbarGutter = html.style.scrollbarGutter;
     state.bodyScrollbarGutter = body.style.scrollbarGutter;
 
-    if (supportsStableScrollbarGutter()) {
-      html.style.scrollbarGutter = 'stable';
-      body.style.scrollbarGutter = 'stable';
-    } else {
-      body.style.paddingRight = composeScrollbarCompensation(state.bodyPaddingRight);
+    // Keep the content where it is when the scrollbar goes away, and only then: reserving a
+    // gutter on a page that had no scrollbar pushed everything sideways when a dialog opened.
+    // The gutter goes on <html>, the element that scrolls; one on <body> as well added a second.
+    const scrollbarWidth = pageScrollbarWidth();
+    if (scrollbarWidth > 0) {
+      if (supportsStableScrollbarGutter()) html.style.scrollbarGutter = 'stable';
+      else body.style.paddingRight = composeScrollbarCompensation(state.bodyPaddingRight, scrollbarWidth);
     }
 
     body.style.overflow = 'hidden';
