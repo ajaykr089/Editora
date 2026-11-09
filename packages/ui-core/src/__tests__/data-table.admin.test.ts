@@ -169,3 +169,58 @@ describe('ui-data-table row links', () => {
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('ui-data-table loading text', () => {
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('says Loading on the first load and Refreshing once there are rows', async () => {
+    const el = document.createElement('ui-data-table');
+    el.setAttribute('state', 'loading');
+    el.innerHTML = '<table><thead><tr><th>Name</th><th>Total</th></tr></thead><tbody></tbody></table>';
+    document.body.appendChild(el);
+    await settle();
+    const bar = el.shadowRoot!.querySelector('.statebar')!;
+    expect(bar.textContent).toContain('Loading table data');
+    expect(bar.getAttribute('data-state')).toBe('loading');
+
+    el.querySelector('tbody')!.innerHTML = '<tr><td>Ada</td><td>3</td></tr>';
+    el.setAttribute('state', 'idle');
+    await settle();
+    el.setAttribute('state', 'loading');
+    await settle();
+    expect(bar.textContent).toContain('Refreshing table data');
+    el.remove();
+  });
+});
+
+describe('ui-data-table row selection ids', () => {
+  it('passes the data-id of the selected rows', async () => {
+    const el = document.createElement('ui-data-table');
+    el.setAttribute('selectable', '');
+    el.setAttribute('multi-select', '');
+    el.innerHTML = '<table><thead><tr><th>Name</th></tr></thead><tbody><tr data-id="c-1"><td>Ada</td></tr><tr data-id="c-2"><td>Lin</td></tr></tbody></table>';
+    document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const events: any[] = [];
+    el.addEventListener('row-select', (event) => events.push((event as CustomEvent).detail));
+    el.querySelectorAll<HTMLElement>('tbody td')[1].click();
+    el.querySelectorAll<HTMLElement>('tbody td')[0].click();
+    expect(events[0].id).toBe('c-2');
+    expect(events[1].ids).toEqual(['c-1', 'c-2']);
+    el.remove();
+  });
+});
+
+describe('ui-data-table column alignment', () => {
+  it('aligns th and td with data-align, ahead of the default header style', async () => {
+    const el = document.createElement('ui-data-table');
+    el.setAttribute('sortable', '');
+    el.innerHTML = '<table><thead><tr><th>Name</th><th data-align="end">Total</th></tr></thead><tbody><tr><td>Ada</td><td data-align="end">$3.00</td></tr></tbody></table>';
+    document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // jsdom does not cascade :is(), so check the rule (the browser cascade is checked in the admin templates).
+    const css = Array.from(document.querySelectorAll('style')).map((node) => node.textContent).join('\n');
+    expect(css).toMatch(/ui-data-table:not\(\[headless\]\) > table :is\(th, td\)\[data-align="end"\] \{\s*text-align: end;/);
+    el.remove();
+  });
+});

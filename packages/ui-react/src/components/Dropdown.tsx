@@ -1,4 +1,14 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
+// The tag only: the ui-icon element is defined on demand (below), so menus without icon names
+// do not carry the icon renderer in their bundle.
+import { Icon } from './server/Icon';
+
+function useIconElement(icon: unknown) {
+  React.useEffect(() => {
+    if (typeof icon !== 'string' || typeof customElements === 'undefined' || customElements.get('ui-icon')) return;
+    void import('@editora/ui-core/icon');
+  }, [icon]);
+}
 
 import '@editora/ui-core/dropdown';
 import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
@@ -53,6 +63,7 @@ export type DropdownContentProps = React.HTMLAttributes<HTMLDivElement> & {
 
 export type DropdownItemProps = React.HTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
+  /** An Editora icon name ("settings"), or your own element. */
   icon?: React.ReactNode;
   shortcut?: React.ReactNode;
   caption?: React.ReactNode;
@@ -230,6 +241,7 @@ export const DropdownItem = React.forwardRef<HTMLDivElement, DropdownItemProps>(
   },
   ref
 ) {
+  useIconElement(icon);
   const classes = ['item', className].filter(Boolean).join(' ');
   const selectionIcon =
     role === 'menuitemcheckbox' || role === 'menuitemradio' ? (
@@ -256,7 +268,7 @@ export const DropdownItem = React.forwardRef<HTMLDivElement, DropdownItemProps>(
       data-menu-item="true"
     >
       {selectionIcon}
-      {icon ? <span className="icon" aria-hidden="true">{icon}</span> : null}
+      {icon ? <span className="icon" aria-hidden="true">{typeof icon === 'string' ? <Icon name={icon} size={16} decorative /> : icon}</span> : null}
       <span className="label">
         <span className="text">{children}</span>
         {caption ? <span className="caption">{caption}</span> : null}

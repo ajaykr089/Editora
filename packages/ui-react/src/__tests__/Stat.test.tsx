@@ -24,6 +24,13 @@ describe('Stat surfaces', () => {
     expect(screen.getByText('Updated in the last 24 hours')).toBeTruthy();
   });
 
+  it('draws an icon name as an Editora icon, not as text', () => {
+    const { container } = render(<Stat label="Revenue" value="$1" icon="wallet" />);
+    const icon = container.querySelector('ui-icon');
+    expect(icon?.getAttribute('name')).toBe('wallet');
+    expect(container.textContent).not.toContain('wallet');
+  });
+
   it('supports the MetricCard wrapper as the card-styled alias', () => {
     const { container } = render(
       <MetricCard

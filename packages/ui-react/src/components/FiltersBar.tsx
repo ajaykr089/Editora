@@ -60,6 +60,34 @@ export const commonDateRangePresets: FiltersBarDateRangePreset[] = [
 
 const resolvePreset = (preset: FiltersBarDateRangePreset) => (typeof preset.range === 'function' ? preset.range() : preset.range);
 
+/**
+ * Shown while the date range picker's code loads (it is split out to keep FiltersBar small): an
+ * inert copy of the empty field, so the field does not appear from nothing a moment after the bar.
+ */
+function DateRangeStandIn({ label }: { label?: string }) {
+  return (
+    <span aria-hidden="true" style={{ display: 'inline-grid', gap: 6, minInlineSize: 240 }}>
+      {label ? <span style={{ fontSize: 14, fontWeight: 600, lineHeight: '20px' }}>{label}</span> : null}
+      <span
+        style={{
+          alignItems: 'center',
+          border: '1px solid var(--ui-color-field-border, var(--ui-color-border, #cbd5e1))',
+          borderRadius: 'var(--ui-radius, 8px)',
+          boxSizing: 'border-box',
+          color: 'var(--ui-color-muted, #64748b)',
+          display: 'flex',
+          fontSize: 14,
+          gap: 10,
+          minBlockSize: 'var(--ui-control-height-2, 36px)',
+          paddingInline: 12,
+        }}
+      >
+        Start date — End date
+      </span>
+    </span>
+  );
+}
+
 export type FiltersBarProps = React.HTMLAttributes<HTMLDivElement> & {
   search?: string;
   onSearchChange?: (value: string) => void;
@@ -125,7 +153,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
       ref={forwardedRef}
       className={className}
       style={{
-        alignItems: 'center',
+        // Fields line up on their input boxes, whether or not each one shows a label above it.
+        alignItems: 'flex-end',
         background: 'var(--ui-color-surface, #ffffff)',
         border: '1px solid var(--ui-color-border, #cbd5e1)',
         // The same radius as the cards around it (Card, DataTable).
@@ -141,6 +170,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
         clearable={searchClearable}
         debounce={searchDebounce}
         label={searchLabel}
+        // A placeholder is not a name: without a visible label the field is announced as "Search".
+        aria-label={searchLabel ? undefined : 'Search'}
         name={searchName}
         onChange={onSearchChange}
         placeholder={searchPlaceholder || 'Search...'}
@@ -171,7 +202,7 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
       ) : null}
 
       {showDateRange ? (
-        <React.Suspense fallback={<span aria-hidden="true" style={{ display: 'inline-block', minInlineSize: 240 }} />}>
+        <React.Suspense fallback={<DateRangeStandIn label={dateRangeLabel} />}>
         <DateRangePicker
           label={dateRangeLabel}
           clearable

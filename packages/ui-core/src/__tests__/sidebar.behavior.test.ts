@@ -301,3 +301,54 @@ describe('ui-sidebar behavior', () => {
     window.matchMedia = originalMatchMedia;
   });
 });
+
+describe('ui-sidebar groups and the current item', () => {
+  const items = [
+    { value: 'home', label: 'Home', href: '#/' },
+    { value: 'reports', label: 'Reports', children: [{ value: 'sales', label: 'Sales', href: '#/sales' }, { value: 'traffic', label: 'Traffic', href: '#/traffic' }] },
+  ];
+  const group = (el: HTMLElement) => el.shadowRoot!.querySelector<HTMLElement>('.item[data-value="reports"]')!;
+  const toggle = (el: HTMLElement) => group(el).querySelector<HTMLElement>(':scope > .item-button')!;
+
+  it('opens the group that holds the current item, and says so with aria-expanded', async () => {
+    const el = document.createElement('ui-sidebar') as HTMLElement;
+    el.setAttribute('items', JSON.stringify(items));
+    el.setAttribute('value', 'traffic');
+    document.body.appendChild(el);
+    await flushMicrotask();
+    expect(group(el).getAttribute('data-expanded')).toBe('true');
+    expect(toggle(el).getAttribute('aria-expanded')).toBe('true');
+    expect(toggle(el).getAttribute('data-has-active')).toBe('true');
+
+    toggle(el).click();
+    await flushMicrotask();
+    expect(toggle(el).getAttribute('aria-expanded')).toBe('false');
+    // the user's choice holds while the value stays the same
+    el.setAttribute('variant', 'soft');
+    await flushMicrotask();
+    expect(group(el).hasAttribute('data-expanded')).toBe(false);
+  });
+
+  it('leaves groups closed when the current item is outside them', async () => {
+    const el = document.createElement('ui-sidebar') as HTMLElement;
+    el.setAttribute('items', JSON.stringify(items));
+    el.setAttribute('value', 'home');
+    document.body.appendChild(el);
+    await flushMicrotask();
+    expect(group(el).hasAttribute('data-expanded')).toBe(false);
+    expect(toggle(el).getAttribute('aria-expanded')).toBe('false');
+    el.setAttribute('value', 'sales');
+    await flushMicrotask();
+    expect(group(el).getAttribute('data-expanded')).toBe('true');
+  });
+
+  it('opens the group when the value is set before the items (as frameworks do)', async () => {
+    const el = document.createElement('ui-sidebar') as HTMLElement;
+    el.setAttribute('value', 'traffic');
+    document.body.appendChild(el);
+    await flushMicrotask();
+    el.setAttribute('items', JSON.stringify(items));
+    await flushMicrotask();
+    expect(group(el).getAttribute('data-expanded')).toBe('true');
+  });
+});

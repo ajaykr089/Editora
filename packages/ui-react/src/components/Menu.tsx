@@ -1,4 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
+// The tag only: the ui-icon element is defined on demand (below), so menus without icon names
+// do not carry the icon renderer in their bundle.
+import { Icon } from './server/Icon';
+
+function useIconElement(icon: unknown) {
+  React.useEffect(() => {
+    if (typeof icon !== 'string' || typeof customElements === 'undefined' || customElements.get('ui-icon')) return;
+    void import('@editora/ui-core/icon');
+  }, [icon]);
+}
 
 import '@editora/ui-core/menu';
 import { createUIElement, hostOnly, flushElementRender } from './_internals';
@@ -40,6 +50,7 @@ type MenuProps = Props & {
 
 type MenuItemProps = React.HTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
+  /** An Editora icon name ("settings"), or your own element. */
   icon?: React.ReactNode;
   shortcut?: React.ReactNode;
   caption?: React.ReactNode;
@@ -247,6 +258,7 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(function
   { children, icon, shortcut, caption, tone, role = 'menuitem', checked, className, ...rest },
   ref
 ) {
+  useIconElement(icon);
   const classes = ['item', className].filter(Boolean).join(' ');
   const selectionIcon =
     role === 'menuitemcheckbox' || role === 'menuitemradio' ? (
@@ -270,7 +282,7 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(function
       }
     >
       {selectionIcon}
-      {icon ? <span className="icon" aria-hidden="true">{icon}</span> : null}
+      {icon ? <span className="icon" aria-hidden="true">{typeof icon === 'string' ? <Icon name={icon} size={16} decorative /> : icon}</span> : null}
       <span className="label">
         <span className="text">{children}</span>
         {caption ? <span className="caption">{caption}</span> : null}

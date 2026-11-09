@@ -65,58 +65,52 @@ describe('OverlayManager lock-count API', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
-  it('uses scrollbar-gutter when supported to avoid padding measurement work', () => {
+  function withScrollbar(width: number) {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
+    Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, get: () => 1024 - width });
+  }
+  function withCss(supportsGutter: boolean) {
     const originalCss = globalThis.CSS;
-    const supports = vi.fn((query: string) => query === 'scrollbar-gutter: stable');
     Object.defineProperty(globalThis, 'CSS', {
       configurable: true,
-      value: { ...(originalCss || {}), supports }
+      value: { ...(originalCss || {}), supports: (query: string) => supportsGutter && query === 'scrollbar-gutter: stable' }
     });
+    return () => Object.defineProperty(globalThis, 'CSS', { configurable: true, value: originalCss });
+  }
 
+  it('keeps the scrollbar gutter on the html element when the page has a scrollbar', () => {
+    const restore = withCss(true);
+    withScrollbar(15);
     OverlayManager.acquireLock();
-
     expect(document.documentElement.style.scrollbarGutter).toBe('stable');
-    expect(document.body.style.scrollbarGutter).toBe('stable');
-
-    OverlayManager.releaseLock();
-
-    expect(document.documentElement.style.scrollbarGutter).toBe('');
+    // a second gutter on body would push the content again
     expect(document.body.style.scrollbarGutter).toBe('');
-
-    Object.defineProperty(globalThis, 'CSS', {
-      configurable: true,
-      value: originalCss
-    });
+    OverlayManager.releaseLock();
+    expect(document.documentElement.style.scrollbarGutter).toBe('');
+    restore();
   });
 
-  it('uses CSS scrollbar compensation without reading layout when scrollbar-gutter is unsupported', () => {
-    const originalCss = globalThis.CSS;
-    let clientWidthReads = 0;
-    Object.defineProperty(globalThis, 'CSS', {
-      configurable: true,
-      value: { ...(originalCss || {}), supports: () => false }
-    });
-
-    Object.defineProperty(document.documentElement, 'clientWidth', {
-      configurable: true,
-      get() {
-        clientWidthReads += 1;
-        throw new Error('layout read should not happen');
-      }
-    });
-
-    document.body.style.paddingRight = '12px';
-
-    expect(() => OverlayManager.acquireLock()).not.toThrow();
-    expect(clientWidthReads).toBe(0);
+  it('leaves a page without a scrollbar where it is (no gutter, no padding)', () => {
+    const restore = withCss(true);
+    withScrollbar(0);
+    OverlayManager.acquireLock();
+    expect(document.documentElement.style.scrollbarGutter).toBe('');
+    expect(document.body.style.scrollbarGutter).toBe('');
+    expect(document.body.style.paddingRight).toBe('');
     expect(document.body.style.overflow).toBe('hidden');
+    OverlayManager.releaseLock();
+    restore();
+  });
 
+  it('pads the body by the scrollbar width where scrollbar-gutter is unsupported', () => {
+    const restore = withCss(false);
+    withScrollbar(15);
+    document.body.style.paddingRight = '12px';
+    OverlayManager.acquireLock();
+    expect(document.body.style.paddingRight).toBe('27px');
     OverlayManager.releaseLock();
     expect(document.body.style.paddingRight).toBe('12px');
-
-    Object.defineProperty(globalThis, 'CSS', {
-      configurable: true,
-      value: originalCss
-    });
+    document.body.style.removeProperty('padding-right');
+    restore();
   });
 });

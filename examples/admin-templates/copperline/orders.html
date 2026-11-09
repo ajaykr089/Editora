@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orders · Copperline</title>
+    <meta name="description" content="Copperline: an admin template in plain HTML, built with Editora UI web components and the Editora rich-text editor." />
+  </head>
+  <body>
+    <ui-layout variant="shell" sidebar-label="Main navigation">
+      <ui-app-header slot="header" bordered show-menu-button="narrow">
+        <a slot="start" class="cl-brand" href="./" aria-label="Copperline, dashboard">
+          <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+          <span>Copperline</span>
+        </a>
+        <div slot="end" class="cl-actions">
+          <ui-button variant="ghost" size="sm" data-action="toggle-theme" aria-label="Use dark theme"><ui-icon name="moon" decorative></ui-icon></ui-button>
+          <ui-button variant="ghost" size="sm" aria-label="Notifications"><ui-icon name="bell" decorative></ui-icon></ui-button>
+          <ui-avatar initials="SL" size="sm" alt="Sana Lindqvist" variant="soft"></ui-avatar>
+        </div>
+      </ui-app-header>
+      <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
+      <main slot="content" class="cl-content" id="main">
+        <div class="cl-page">
+          <div class="cl-head">
+            <div><h1>Orders</h1><p>Search, filter and sort. Click a row to open the order.</p></div>
+          </div>
+          <ui-card>
+            <div class="cl-toolbar">
+              <ui-input id="search" placeholder="Order number, customer or email" aria-label="Search orders" clearable debounce="200"></ui-input>
+              <ui-select id="status" aria-label="Status" value="">
+                <option value="">Any status</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="refunded">Refunded</option>
+                <option value="cancelled">Cancelled</option>
+              </ui-select>
+            </div>
+          </ui-card>
+          <ui-data-table id="orders" server-side sortable hover page="1" page-size="15" pagination-id="orders-pager" state="loading" aria-label="Orders" empty-text="No orders match.">
+            <table>
+              <thead><tr><th data-key="id" style="width:14%">Order</th><th data-key="customer" style="width:30%">Customer</th><th data-key="date" style="width:14%">Date</th><th data-key="channel" style="width:14%">Channel</th><th data-key="total" data-align="end" style="width:14%">Total</th><th data-key="status" style="width:14%">Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </ui-data-table>
+          <div class="cl-actions" style="justify-content:flex-end"><ui-pagination id="orders-pager" page="1" count="1"></ui-pagination></div>
+        </div>
+      </main>
+    </ui-layout>
+    <script type="module" src="./src/orders.ts"></script>
+  </body>
+</html>

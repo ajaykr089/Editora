@@ -55,12 +55,16 @@ export type TextareaProps = BaseProps & {
   color?: string;
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
+  /** An error message to show under the field (marks it invalid). Leave it out to let a surrounding Form manage errors. */
+  error?: string;
   description?: string;
   /** Put the description under the field instead of under the label. */
   descriptionPosition?: 'above' | 'below';
   autosize?: boolean;
   maxRows?: number;
   showCount?: boolean;
+  /** Same as showCount, named like Input's prop. */
+  counter?: boolean;
   density?: 'compact' | 'default' | 'comfortable';
   tone?: 'brand' | 'success' | 'warning' | 'danger';
   headless?: boolean;
@@ -78,6 +82,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     clearable,
     debounce,
     validation,
+    error,
     size,
     minlength,
     maxlength,
@@ -98,6 +103,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     autosize,
     maxRows,
     showCount,
+    counter,
     density,
     tone,
     headless,
@@ -136,10 +142,14 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     syncBooleanAttribute(el, 'disabled', disabled);
     syncBooleanAttribute(el, 'required', required);
     syncBooleanAttribute(el, 'autosize', autosize);
-    syncBooleanAttribute(el, 'show-count', showCount);
+    syncBooleanAttribute(el, 'show-count', showCount ?? counter);
     syncBooleanAttribute(el, 'headless', headless);
     syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
     syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
+    if (error !== undefined) {
+      syncStringAttribute(el, 'data-error', error || null);
+      if (!validation || validation === 'none') syncStringAttribute(el, 'validation', error ? 'error' : null);
+    }
     syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? String(size) : null);
     syncNumberAttribute(el, 'minlength', minlength);
     syncNumberAttribute(el, 'maxlength', maxlength);
@@ -161,6 +171,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     clearable,
     debounce,
     validation,
+    error,
     size,
     minlength,
     maxlength,
@@ -180,6 +191,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     autosize,
     maxRows,
     showCount,
+    counter,
     density,
     tone,
     headless,

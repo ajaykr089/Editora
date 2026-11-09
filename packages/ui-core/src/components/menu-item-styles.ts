@@ -61,6 +61,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   return `
   ${sectionLabel} {
     padding: 6px 10px 4px;
+    text-align: start;
     color: color-mix(in srgb, var(${prefix}-color, #0f172a) 72%, transparent);
     font: 600 11px/1.4 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     letter-spacing: 0.04em;
@@ -77,6 +78,8 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   ${items} {
     position: relative;
     display: flex;
+    /* Menus often open from right-aligned toolbars and headers: do not inherit their text-align. */
+    text-align: start;
     align-items: center;
     gap: var(${prefix}-item-gap, 10px);
     inline-size: 100%;

@@ -54,6 +54,8 @@ export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   color?: string;
   radius?: 'none' | 'large' | 'full' | string;
   label?: string;
+  /** An error message to show under the field (marks it invalid). Leave it out to let a surrounding Form manage errors. */
+  error?: string;
   description?: string;
   /** Put the description under the field instead of under the label. */
   descriptionPosition?: 'above' | 'below';
@@ -77,6 +79,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     clearable,
     debounce,
     validation,
+    error,
     size,
     minlength,
     maxlength,
@@ -135,6 +138,10 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     syncBooleanAttribute(el, 'clearable', clearable);
     syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
     syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
+    if (error !== undefined) {
+      syncStringAttribute(el, 'data-error', error || null);
+      if (!validation || validation === 'none') syncStringAttribute(el, 'validation', error ? 'error' : null);
+    }
     syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? String(size) : null);
     syncNumberAttribute(el, 'minlength', minlength);
     syncNumberAttribute(el, 'maxlength', maxlength);
@@ -168,6 +175,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     clearable,
     debounce,
     validation,
+    error,
     size,
     minlength,
     maxlength,

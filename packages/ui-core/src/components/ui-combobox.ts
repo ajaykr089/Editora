@@ -173,6 +173,8 @@ const style = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    /* No UA button padding: it left 12px of a 24px button for the icon, so both icons shrank. */
+    padding: 0;
     cursor: pointer;
     margin-inline-end: 2px;
     transition:
@@ -182,6 +184,7 @@ const style = `
   }
 
   .icon-btn svg {
+    flex: none;
     inline-size: 14px;
     block-size: 14px;
     pointer-events: none;
@@ -206,8 +209,25 @@ const style = `
     cursor: not-allowed;
   }
 
+  /* Same chevron as ui-select and the pickers: 16px, the field's muted colour, no hover box. */
+  .toggle-btn {
+    color: color-mix(in srgb, var(--ui-combobox-text) 58%, transparent);
+    transition: transform 160ms ease, color 160ms ease;
+  }
+
+  .toggle-btn svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+
+  .toggle-btn:hover {
+    background: transparent;
+    color: var(--ui-combobox-text);
+  }
+
   .toggle-btn[data-open="true"] {
     transform: rotate(180deg);
+    color: var(--ui-combobox-focus);
   }
 
   .panel {

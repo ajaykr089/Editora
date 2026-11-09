@@ -21,12 +21,14 @@ import { Textarea } from '@editora/ui-react';
 | `children` | `React.ReactNode` |   |
 | `clearable` | `boolean` |   |
 | `color` | `string` |   |
+| `counter` | `boolean` | Same as showCount, named like Input's prop. |
 | `debounce` | `number` |   |
 | `defaultValue` | `string` | Starting value of an uncontrolled field (written once, on mount). |
 | `density` | `'compact' \| 'default' \| 'comfortable'` |   |
 | `description` | `string` |   |
 | `descriptionPosition` | `'above' \| 'below'` | Put the description under the field instead of under the label. |
 | `disabled` | `boolean` |   |
+| `error` | `string` | An error message to show under the field (marks it invalid). Leave it out to let a surrounding Form manage errors. |
 | `headless` | `boolean` |   |
 | `label` | `string` |   |
 | `maxlength` | `number` |   |
@@ -69,6 +71,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Textarea renders the `ui-textarea` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `aria-describedby`, `aria-description`, `aria-label`, `autofocus`, `autosize`, `clearable`, `color`, `data-error`, `debounce`, `density`, `description`, `disabled`, `headless`, `label`, `max-rows`, `maxlength`, `minlength`, `name`, `placeholder`, `radius`, `readonly`, `required`, `resize`, `rows`, `show-count`, `size`, `tone`, `validation`, `value`, `variant`
+**Attributes:** `aria-describedby`, `aria-description`, `aria-label`, `autofocus`, `autosize`, `clearable`, `color`, `counter`, `data-error`, `debounce`, `density`, `description`, `disabled`, `headless`, `label`, `max-rows`, `maxlength`, `minlength`, `name`, `placeholder`, `radius`, `readonly`, `required`, `resize`, `rows`, `show-count`, `size`, `tone`, `validation`, `value`, `variant`
 
 **Events:** `change`, `clear`, `debounced-input`, `input`

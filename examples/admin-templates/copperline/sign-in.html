@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in · Copperline</title>
+  </head>
+  <body>
+    <main class="cl-auth">
+      <a class="cl-brand" href="./" style="justify-self:center">
+        <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+        <span>Copperline</span>
+      </a>
+      <ui-card>
+        <h1 class="cl-card-title">Sign in</h1>
+        <p class="cl-muted">Use sana@example.com and the password copperline-demo.</p>
+        <ui-form id="sign-in" aria-label="Sign in">
+          <div class="cl-stack" style="margin-top:16px">
+            <ui-input name="email" type="email" label="Email" autocomplete="email" value="sana@example.com" required></ui-input>
+            <ui-password-field name="password" label="Password" autocomplete="current-password" required></ui-password-field>
+            <ui-checkbox name="remember" checked>Keep me signed in</ui-checkbox>
+            <ui-button type="submit" id="submit">Sign in</ui-button>
+          </div>
+        </ui-form>
+      </ui-card>
+      <p class="cl-muted cl-center">A demo: nothing you type leaves this page.</p>
+    </main>
+    <script type="module" src="./src/sign-in.ts"></script>
+  </body>
+</html>

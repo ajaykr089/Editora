@@ -59,7 +59,18 @@ describe('ui-app-header', () => {
     const styleText = el.shadowRoot?.querySelector('style')?.textContent ?? '';
     expect(styleText).toContain('--ui-app-header-surface-backdrop: none;');
     expect(styleText).toContain('backdrop-filter: var(--ui-app-header-surface-backdrop);');
-    expect(styleText).toContain('contain: paint;');
     expect(styleText).toContain('transform: translateZ(0);');
+  });
+
+  it('lets its menus open over the page: its own layer, and nothing that clips them', async () => {
+    const el = document.createElement('ui-app-header');
+    el.setAttribute('sticky', '');
+    document.body.appendChild(el);
+    await flushMicrotask();
+    const styleText = el.shadowRoot?.querySelector('style')?.textContent ?? '';
+    // contain: paint cut account / notification menus off at the header's bottom edge
+    expect(styleText).not.toMatch(/contain:\s*paint/);
+    // the blurred header is a stacking context: without a z-index its menus went under the page
+    expect(styleText).toMatch(/header \{\s*position: relative;\s*z-index: var\(--ui-app-header-z\);/);
   });
 });

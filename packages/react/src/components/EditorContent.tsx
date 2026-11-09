@@ -10,6 +10,27 @@ const isStructurallyEmpty = (el: HTMLElement): boolean => {
   return !el.querySelector('img, video, table, iframe, hr, pre, blockquote, ul, ol');
 };
 
+
+/**
+ * When the editor holds no block yet (empty, or only whitespace/<br>), put an empty paragraph in
+ * it and the caret inside, so the next insertion lands in a <p>. Leaves real content alone.
+ */
+const ensureParagraphForTyping = (root: HTMLElement): void => {
+  const hasBlock = Array.from(root.childNodes).some((node) => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName !== 'BR');
+  if (hasBlock) return;
+  if ((root.textContent || '').replace(/\u200B/g, '').trim()) return;
+  const paragraph = document.createElement('p');
+  paragraph.appendChild(document.createElement('br'));
+  root.replaceChildren(paragraph);
+  const selection = window.getSelection();
+  if (!selection) return;
+  const range = document.createRange();
+  range.setStart(paragraph, 0);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+};
+
 const setPlaceholderVisualState = (el: HTMLElement, placeholder?: string): void => {
   const hasPlaceholder = Boolean(placeholder);
   const shouldShowPlaceholder = hasPlaceholder && isStructurallyEmpty(el);
@@ -208,6 +229,8 @@ interface EditorContentProps {
   value?: string;
   readonly?: boolean;
   placeholder?: string;
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
   onChange?: (html: string) => void;
   pasteConfig?: {
     clean?: boolean;
@@ -259,6 +282,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   value,
   readonly = false,
   placeholder,
+  ariaLabel,
+  ariaLabelledBy,
   onChange,
   pasteConfig,
   contentConfig,
@@ -273,6 +298,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+  // The last HTML this editor reported through onChange. When it comes back as `value`, it is our
+  // own echo: the DOM may already be ahead of it (the report is debounced), so it must not be
+  // written back, or the newer characters are lost and the caret jumps to the start.
+  const lastEmittedRef = useRef<string | null>(null);
   const pendingHistorySnapshotRef = useRef<{ beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null>(null);
   const autoHeightEnabled = contentConfig?.autoHeight === true;
   const minEditorHeight = typeof contentConfig?.minHeight === 'number' ? contentConfig.minHeight : 200;
@@ -330,6 +359,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
     if (restoredContent && onChange) {
       // Notify parent of restored content (as sanitised, i.e. what the editor now holds)
+      lastEmittedRef.current = initialContent;
       onChange(initialContent);
     }
   }, []); // Only run on mount
@@ -341,6 +371,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     // Compare against the DOM as onChange reports it (minus editing-only handles), otherwise a
     // value we just emitted while the caret is in a table never matches and would be written
     // back, wiping the handles and the caret on every keystroke.
+    if (value === lastEmittedRef.current) {
+      setPlaceholderVisualState(contentRef.current, placeholder);
+      return;
+    }
     const currentHtml = getCleanEditorHTML(contentRef.current);
     if (value !== currentHtml) {
       const safeValue = sanitizeInputHTML(value, contentConfig, securityConfig);
@@ -387,14 +421,21 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.setAttribute('aria-disabled', readonly ? 'true' : 'false');
       // A textbox needs an accessible name: the placeholder when there is one, otherwise a
       // generic label so the surface is never announced as unnamed.
-      el.setAttribute('aria-label', placeholder?.trim() || 'Rich text editor');
+      if (ariaLabelledBy) {
+        el.setAttribute('aria-labelledby', ariaLabelledBy);
+        el.removeAttribute('aria-label');
+      } else {
+        el.removeAttribute('aria-labelledby');
+        el.setAttribute('aria-label', ariaLabel?.trim() || placeholder?.trim() || 'Rich text editor');
+      }
     } else {
       el.removeAttribute('role');
       el.removeAttribute('aria-multiline');
       el.removeAttribute('aria-label');
+      el.removeAttribute('aria-labelledby');
       el.removeAttribute('aria-disabled');
     }
-  }, [accessibilityConfig?.enableARIA, placeholder, readonly]);
+  }, [accessibilityConfig?.enableARIA, placeholder, readonly, ariaLabel, ariaLabelledBy]);
 
   useEffect(() => {
     syncAutoHeight(contentRef.current);
@@ -424,6 +465,12 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       if (!contentRef.current || readonly) return;
 
       const inputType = event.inputType || null;
+      // Typing into an empty editor (kept empty so the placeholder shows) put bare text at the
+      // root, and Enter then added <div>s: "Hello<div>Second line</div>". Start a paragraph
+      // first, with the caret in it, so the browser types into <p>.
+      if (inputType && /^insert(Text|Paragraph|LineBreak|ReplacementText|CompositionText)$/.test(inputType)) {
+        ensureParagraphForTyping(contentRef.current);
+      }
       if (inputType === 'historyUndo' || inputType === 'historyRedo') {
         pendingHistorySnapshotRef.current = null;
         return;
@@ -497,9 +544,11 @@ export const EditorContent: React.FC<EditorContentProps> = ({
           clearTimeout(debounceTimerRef.current);
         }
         debounceTimerRef.current = setTimeout(() => {
+          lastEmittedRef.current = outputHtml;
           onChange(outputHtml);
         }, performanceConfig.debounceInputMs);
       } else {
+        lastEmittedRef.current = outputHtml;
         onChange(outputHtml);
       }
     };
@@ -582,6 +631,11 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     };
 
     const el = contentRef.current;
+    // Enter makes <p>, not the browser's default <div> (the web component does the same).
+    const setParagraphSeparator = () => {
+      try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { /* unsupported */ }
+    };
+    el.addEventListener('focus', setParagraphSeparator);
     el.addEventListener('beforeinput', handleBeforeInput as EventListener);
     el.addEventListener('input', handleInput);
     el.addEventListener('paste', handlePaste);
@@ -593,6 +647,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      el.removeEventListener('focus', setParagraphSeparator);
       el.removeEventListener('beforeinput', handleBeforeInput as EventListener);
       el.removeEventListener('input', handleInput);
       el.removeEventListener('paste', handlePaste);
@@ -661,8 +716,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({
           : "100%",
         padding: "16px",
         outline: "none",
-        border: "1px solid #ddd",
-        borderRadius: roundBottomCorners ? "0px 0px 4px 4px" : "0px",
+        // Editora UI tokens when the app has them (see @editora/themes default.css).
+        border: "1px solid var(--ui-color-border, #ddd)",
+        borderRadius: roundBottomCorners ? "0px 0px var(--ui-radius, 4px) var(--ui-radius, 4px)" : "0px",
         fontSize: "14px",
         lineHeight: "1.5",
         overflow: autoHeightEnabled ? (maxEditorHeight > 0 ? "auto" : "hidden") : "auto",

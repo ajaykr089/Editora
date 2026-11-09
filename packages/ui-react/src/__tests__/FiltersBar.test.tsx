@@ -57,4 +57,16 @@ describe('FiltersBar', () => {
     expect(onStatusChange).toHaveBeenCalledWith('archived');
     expect(onClear).toHaveBeenCalledTimes(1);
   });
+
+  it('names the search field without a visible label, and lines fields up on their boxes', () => {
+    const { container } = render(<FiltersBar onSearchChange={() => {}} statusLabel="Category" statusOptions={[{ value: 'a', label: 'A' }]} />);
+    expect(document.querySelector('ui-input')?.getAttribute('aria-label')).toBe('Search');
+    expect((container.firstElementChild as HTMLElement).style.alignItems).toBe('flex-end');
+  });
+
+  it('leaves the name to a visible search label', () => {
+    render(<FiltersBar onSearchChange={() => {}} searchLabel="Find orders" />);
+    expect(document.querySelector('ui-input')?.hasAttribute('aria-label')).toBe(false);
+  });
 });
+

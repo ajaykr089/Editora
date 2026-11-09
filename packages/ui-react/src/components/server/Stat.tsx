@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from './Icon';
 
 // Theme tokens first (contrast-checked text steps from ThemeProvider / applyTheme, then the raw
 // tone colour), the old fixed colours only as the last fallback. They were hard-coded, so a custom
@@ -22,6 +23,7 @@ export type StatProps = Omit<React.HTMLAttributes<HTMLElement>, 'label'> & {
   as?: keyof JSX.IntrinsicElements;
   label: React.ReactNode;
   value: React.ReactNode;
+  /** An Editora icon name ("wallet"), or your own element. */
   icon?: React.ReactNode;
   meta?: React.ReactNode;
   trend?: React.ReactNode;
@@ -91,7 +93,8 @@ export const Stat = React.forwardRef<HTMLElement, StatProps>(function Stat(
             minWidth: sizing.icon + 12,
           }}
         >
-          {icon}
+          {/* A string is an Editora icon name, as on Button and Sidebar items. */}
+          {typeof icon === 'string' ? <Icon name={icon} size={sizing.icon} decorative /> : icon}
         </div>
       ) : null}
     </div>,

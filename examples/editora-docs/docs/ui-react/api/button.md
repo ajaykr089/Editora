@@ -21,17 +21,22 @@ import { Button } from '@editora/ui-react';
 | `block` | `boolean` |   |
 | `children` | `React.ReactNode` |   |
 | `disabled` | `boolean` |   |
+| `download` | `string \| boolean` |   |
 | `endIcon` | `React.ReactNode` |   |
 | `headless` | `boolean` |   |
+| `href` | `string` | Makes it a link that looks like a button (a real &lt;a&gt;: new tab, address on hover, announced as a link). Goes through NavigationProvider like Sidebar and Breadcrumb links. |
 | `icon` | `string` |   |
 | `loading` | `boolean` |   |
 | `loadingLabel` | `string` |   |
+| `onNavigate` | `(detail: ComponentNavigateDetail<{ href: string }>) => void` | Runs before a link button is followed; `detail.preventDefault()` keeps the page. |
 | `radius` | `number \| string` |   |
 | `recipe` | `'classic' \| 'solid' \| 'soft' \| 'surface' \| 'outline' \| 'ghost'` |   |
+| `rel` | `string` |   |
 | `scale` | `'1' \| '2' \| '3' \| '4'` |   |
 | `size` | `'sm' \| 'md' \| 'lg'` |   |
 | `startIcon` | `React.ReactNode` |   |
 | `state` | `'idle' \| 'loading' \| 'error' \| 'success'` |   |
+| `target` | `string` |   |
 | `theme` | `'default' \| 'dark' \| 'brand'` |   |
 | `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
 | `type` | `'button' \| 'submit' \| 'reset'` |   |
@@ -43,6 +48,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Button renders the `ui-button` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `animation`, `aria-expanded`, `aria-haspopup`, `aria-label`, `aria-pressed`, `block`, `disabled`, `headless`, `icon`, `loading`, `loading-label`, `radius`, `recipe`, `scale`, `shape`, `size`, `state`, `theme`, `tone`, `type`, `variant`
+**Attributes:** `animation`, `aria-expanded`, `aria-haspopup`, `aria-label`, `aria-pressed`, `block`, `disabled`, `download`, `headless`, `href`, `icon`, `loading`, `loading-label`, `radius`, `recipe`, `rel`, `scale`, `shape`, `size`, `state`, `target`, `theme`, `tone`, `type`, `variant`
 
 **Events:** `submit`

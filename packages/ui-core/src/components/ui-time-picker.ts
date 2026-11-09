@@ -34,8 +34,8 @@ const CLEAR_ICON = `
 `;
 
 const CHEVRON_ICON = `
-  <svg viewBox="0 0 20 20" class="icon-svg" aria-hidden="true" focusable="false">
-    <path d="m5.6 7.6 4.4 4.6 4.4-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <svg viewBox="0 0 16 16" class="icon-svg toggle-chevron" aria-hidden="true" focusable="false">
+    <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
 `;
 
@@ -121,6 +121,35 @@ const style = `
     place-items: center;
     transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
   }
+  /* The open/close toggle reads like Select's indicator: a thin chevron in the field's muted
+     colour that turns over while the panel is open, not a grey button inside the field. */
+  .btn[data-action="toggle"] {
+    color: color-mix(in srgb, var(--ui-dp-text) 58%, transparent);
+  }
+
+  .btn[data-action="toggle"]:hover {
+    background: transparent;
+    color: var(--ui-dp-text);
+  }
+
+  .btn[data-action="toggle"] .toggle-chevron {
+    inline-size: 16px;
+    block-size: 16px;
+    transition: transform var(--ui-dp-duration, 160ms) var(--ui-dp-ease, ease);
+  }
+
+  .btn[data-action="toggle"][aria-expanded="true"] {
+    color: var(--ui-dp-accent);
+  }
+
+  .btn[data-action="toggle"][aria-expanded="true"] .toggle-chevron {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn[data-action="toggle"] .toggle-chevron { transition: none; }
+  }
+
   .btn:hover { background: color-mix(in srgb, var(--ui-dp-text) 10%, transparent); color: var(--ui-dp-text); }
   .btn:active { transform: translateY(1px); }
   .btn:focus-visible {

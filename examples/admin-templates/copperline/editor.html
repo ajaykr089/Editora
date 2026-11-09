@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Write an article · Copperline</title>
+    <meta name="description" content="Copperline: an admin template in plain HTML, built with Editora UI web components and the Editora rich-text editor." />
+  </head>
+  <body>
+    <ui-layout variant="shell" sidebar-label="Main navigation">
+      <ui-app-header slot="header" bordered show-menu-button="narrow">
+        <a slot="start" class="cl-brand" href="./" aria-label="Copperline, dashboard">
+          <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+          <span>Copperline</span>
+        </a>
+        <div slot="end" class="cl-actions">
+          <ui-button variant="ghost" size="sm" data-action="toggle-theme" aria-label="Use dark theme"><ui-icon name="moon" decorative></ui-icon></ui-button>
+          <ui-button variant="ghost" size="sm" aria-label="Notifications"><ui-icon name="bell" decorative></ui-icon></ui-button>
+          <ui-avatar initials="SL" size="sm" alt="Sana Lindqvist" variant="soft"></ui-avatar>
+        </div>
+      </ui-app-header>
+      <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
+      <main slot="content" class="cl-content" id="main">
+        <div class="cl-page">
+          <ui-breadcrumb>
+            <div class="item" data-href="./articles.html">Help centre</div>
+            <div class="item" id="crumb">New article</div>
+          </ui-breadcrumb>
+          <div class="cl-head">
+            <div><h1 id="heading">New article</h1><p id="status-line">Draft</p></div>
+            <div class="cl-actions">
+              <ui-button variant="secondary" id="save-draft">Save draft</ui-button>
+              <ui-button icon="send" id="publish">Publish</ui-button>
+            </div>
+          </div>
+          <div class="cl-aside">
+            <div class="cl-stack">
+              <ui-input id="title" label="Title" placeholder="How to track your order" size="lg"></ui-input>
+              <div class="cl-stack" style="gap:6px">
+                <span class="cl-strong" id="body-label">Body</span>
+                <!-- The Editora rich-text editor as a web component: plugins and toolbar are attributes. -->
+                <editora-editor
+                  id="body"
+                  aria-labelledby="body-label"
+                  height="420"
+                  placeholder="Write the article…"
+                  plugins="heading bold italic underline strikethrough link list checklist blockquote table textAlignment clearFormatting history"
+                  toolbar="undo redo | heading | bold italic underline strikethrough | link blockquote table | bullist numlist checklist | textAlignment | clearFormatting"
+                ></editora-editor>
+                <span class="cl-sub" id="body-error" role="alert"></span>
+              </div>
+            </div>
+            <div class="cl-stack">
+              <ui-card>
+                <h2 class="cl-card-title">Article settings</h2>
+                <div class="cl-stack">
+                  <ui-input id="slug" label="URL" placeholder="made-from-the-title"><span slot="prefix">/help/</span></ui-input>
+                  <ui-select id="category" label="Category" value="Shipping">
+                    <option>Shipping</option><option>Returns</option><option>Product care</option><option>Payments</option><option>Wholesale</option>
+                  </ui-select>
+                  <ui-switch id="featured" label="Feature on the help home page"></ui-switch>
+                </div>
+              </ui-card>
+              <ui-card>
+                <h2 class="cl-card-title">Word count</h2>
+                <p class="cl-muted" id="count">0 words</p>
+              </ui-card>
+            </div>
+          </div>
+        </div>
+      </main>
+    </ui-layout>
+    <script type="module" src="./src/editor.ts"></script>
+  </body>
+</html>

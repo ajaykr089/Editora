@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@editora/ui-react/*": ["../../packages/ui-react/src/components/*"],
+      "@editora/ui-core/runtime": ["../../packages/ui-core/src/runtime.ts"],
+      "@editora/ui-core/add-icons": ["../../packages/ui-core/src/standalone/add-icons.ts"],
+      "@editora/ui-core/*": ["../../packages/ui-core/src/standalone/*"],
+      "@editora/core/webcomponent": ["../../packages/core/src/webcomponent/standalone.native.ts"],
+      "@editora/toast": ["../../packages/editora-toast/src/index.ts"],
+      "@editora/icons/glyphs": ["../../packages/icons/src/glyphs.ts"],
+      "@editora/react": ["../../packages/react/src/index.ts"],
+      "@editora/plugins/lite": ["../../packages/plugins/src/lite.ts"],
+      "react": ["../../node_modules/@types/react"],
+      "react/jsx-runtime": ["../../node_modules/@types/react/jsx-runtime"]
+    }
+  },
+  "include": ["larkspur/src", "copperline/src", "shared", "vite-env.d.ts"]
+}

@@ -22,9 +22,11 @@ import { CopyButton } from '@editora/ui-react';
 | `copiedIcon` | `React.ReactNode` |   |
 | `copiedLabel` | `React.ReactNode` |   |
 | `disabled` | `boolean` |   |
+| `download` | `string \| boolean` |   |
 | `failedIcon` | `React.ReactNode` |   |
 | `failedLabel` | `React.ReactNode` |   |
 | `headless` | `boolean` |   |
+| `href` | `string` | Makes it a link that looks like a button (a real &lt;a&gt;: new tab, address on hover, announced as a link). Goes through NavigationProvider like Sidebar and Breadcrumb links. |
 | `icon` | `string` |   |
 | `iconOnly` | `boolean` |   |
 | `iconPosition` | `'start' \| 'end'` |   |
@@ -32,12 +34,15 @@ import { CopyButton } from '@editora/ui-react';
 | `loading` | `boolean` |   |
 | `loadingLabel` | `string` |   |
 | `onCopy` | `(detail: { value: string; success: boolean }) => void` |   |
+| `onNavigate` | `(detail: ComponentNavigateDetail<{ href: string }>) => void` | Runs before a link button is followed; `detail.preventDefault()` keeps the page. |
 | `radius` | `number \| string` |   |
 | `recipe` | `'classic' \| 'solid' \| 'soft' \| 'surface' \| 'outline' \| 'ghost'` |   |
+| `rel` | `string` |   |
 | `resetAfter` | `number` |   |
 | `scale` | `'1' \| '2' \| '3' \| '4'` |   |
 | `size` | `'sm' \| 'md' \| 'lg'` |   |
 | `state` | `'idle' \| 'loading' \| 'error' \| 'success'` |   |
+| `target` | `string` |   |
 | `theme` | `'default' \| 'dark' \| 'brand'` |   |
 | `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
 | `type` | `'button' \| 'submit' \| 'reset'` |   |

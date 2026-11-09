@@ -134,6 +134,13 @@ export function ThemeProvider({ tokens, density, children, storageKey = 'editora
   );
   const explicitTokens = withDensity && Object.keys(withDensity).length ? withDensity : null;
   const computeInitial = () => {
+    // Tokens the app passes win: a theme saved under storageKey (from an earlier setTokens) is
+    // only for when the app does not choose one. It used to win the first render, so an app
+    // switching to dark (tokens prop) showed the saved light theme until an effect replaced it.
+    if (explicitTokens) {
+      return mergeThemeTokens(defaultTokens, explicitTokens);
+    }
+
     if (typeof window !== 'undefined' && storageKey) {
       try {
         const raw = localStorage.getItem(storageKey);
@@ -161,6 +168,16 @@ export function ThemeProvider({ tokens, density, children, storageKey = 'editora
   };
 
   const [current, setCurrent] = useState<ThemeTokens>(() => computeInitial());
+
+  // Write the tokens to the document during the first client render, before any child element
+  // connects. Waiting for the layout effect let elements compute their colours from the default
+  // palette first (a child that measures layout forces that), and their transitions then faded
+  // the default blue into the brand colour on every page load.
+  const appliedFirstRef = useRef(false);
+  if (!appliedFirstRef.current && typeof document !== 'undefined') {
+    appliedFirstRef.current = true;
+    applyTheme(current, document);
+  }
 
   useEffect(() => {
     if (!explicitTokens) return;

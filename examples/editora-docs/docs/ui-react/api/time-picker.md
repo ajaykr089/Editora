@@ -20,6 +20,7 @@ import { TimePicker } from '@editora/ui-react';
 | `clearable` | `boolean` |   |
 | `defaultOpen` | `boolean` |   |
 | `defaultValue` | `string` |   |
+| `description` | `string` | Helper text under the label: the same as `hint`, named like the other fields' prop. |
 | `disabled` | `boolean` |   |
 | `error` | `string` |   |
 | `format` | `'24h' \| '12h'` |   |

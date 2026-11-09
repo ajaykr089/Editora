@@ -88,6 +88,21 @@ const style = `
     display: none;
   }
 
+  /* While loading, the overlay over the rows already says so: the bar stays for screen readers
+     only, instead of a second copy of the same words above the table. */
+  .statebar[data-state="loading"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .state-dot {
     width: 8px;
     height: 8px;
@@ -179,7 +194,12 @@ const style = `
     --ui-data-table-shadow: 0 18px 46px rgba(15, 23, 42, 0.16);
   }
 
+  /* The bar comes up when rows are selected; it sticks to the bottom of the window while the
+     table is in view, so selecting a row near the top of a long table visibly does something. */
   .bulk {
+    position: sticky;
+    bottom: var(--ui-data-table-bulk-offset, 16px);
+    z-index: 3;
     margin-top: 12px;
     border: var(--ui-data-table-border);
     border-radius: 14px;
@@ -394,6 +414,16 @@ const lightDomStyle = `
     /* Wide tables keep a minimum width and scroll; a table with a few columns fits a narrow card. */
     min-width: min(680px, var(--ui-data-table-fit-width, 680px));
     table-layout: fixed;
+  }
+
+  /* Numbers line up on the right: put data-align="end" on the column's th and td (or "center"). */
+  ui-data-table:not([headless]) > table :is(th, td)[data-align="end"] {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ui-data-table:not([headless]) > table :is(th, td)[data-align="center"] {
+    text-align: center;
   }
 
   ui-data-table:not([headless]) > table caption {
@@ -1027,10 +1057,17 @@ export class UIDataTable extends ElementBase {
   private _stateText(state: DataTableState): string {
     const explicit = (this.getAttribute('state-text') || '').trim();
     if (explicit) return explicit;
-    if (state === 'loading') return 'Refreshing table data';
+    // "Refreshing" only when there are rows to refresh; the first load is "Loading".
+    if (state === 'loading') return this._hasDataRows() ? 'Refreshing table data' : 'Loading table data';
     if (state === 'error') return 'Table data could not be loaded';
     if (state === 'success') return 'Table data is up to date';
     return '';
+  }
+
+  private _hasDataRows(): boolean {
+    const body = this._table?.tBodies?.[0];
+    if (!body) return false;
+    return Array.from(body.rows).some((row) => row !== this._virtualTopSpacer && row !== this._virtualBottomSpacer && row.cells.length > 0);
   }
 
   private _syncStateBar() {
@@ -1590,7 +1627,9 @@ export class UIDataTable extends ElementBase {
       if (sortable || draggable) th.setAttribute('aria-keyshortcuts', headerShortcuts);
       else th.removeAttribute('aria-keyshortcuts');
 
-      if (sortable) {
+      // A column can opt out with data-sort="false"; the select-all checkbox's column always does.
+      const columnSortable = sortable && th.getAttribute('data-sort') !== 'false' && !th.querySelector('[data-select-all]');
+      if (columnSortable) {
         th.setAttribute('data-sortable', 'true');
       } else {
         th.removeAttribute('data-sortable');
@@ -2266,10 +2305,35 @@ export class UIDataTable extends ElementBase {
         if (row.getAttribute('tabindex') === '0') row.removeAttribute('tabindex');
       }
     });
+    this._syncSelectionControls();
   }
 
-  private _toggleRowSelection(row: HTMLTableRowElement) {
-    const multiSelect = this.hasAttribute('multi-select');
+  /** Keeps the app's data-row-select / data-select-all checkboxes in step with the selection. */
+  private _syncSelectionControls() {
+    if (!this._table) return;
+    const setChecked = (control: Element, checked: boolean, indeterminate = false) => {
+      if (control instanceof HTMLInputElement) {
+        control.checked = checked;
+        control.indeterminate = indeterminate;
+      } else {
+        control.toggleAttribute('checked', checked);
+        control.toggleAttribute('indeterminate', indeterminate);
+      }
+    };
+    this._bodyRows().forEach((row) => {
+      const control = row.querySelector('[data-row-select]');
+      if (control) setChecked(control, this._selectedRows.has(row));
+    });
+    const all = this._table.querySelector('thead [data-select-all]');
+    if (all) {
+      const rows = this._selectableRows();
+      const count = rows.filter((row) => this._selectedRows.has(row)).length;
+      setChecked(all, rows.length > 0 && count === rows.length, count > 0 && count < rows.length);
+    }
+  }
+
+  private _toggleRowSelection(row: HTMLTableRowElement, additive = false) {
+    const multiSelect = additive || this.hasAttribute('multi-select');
     const wasSelected = this._selectedRows.has(row);
 
     if (!multiSelect) {
@@ -2281,18 +2345,39 @@ export class UIDataTable extends ElementBase {
 
     this._syncRowSelectionState();
     this._updateBulkActions();
+    this._emitRowSelect(row);
+  }
 
+  /** The rows a select-all checkbox covers: those shown on this page. */
+  private _selectableRows(): HTMLTableRowElement[] {
+    return this._bodyRows().filter((row) => !row.hidden && !this._isVirtualSpacerRow(row));
+  }
+
+  private _toggleAllRows() {
+    const rows = this._selectableRows();
+    const allSelected = rows.length > 0 && rows.every((row) => this._selectedRows.has(row));
+    rows.forEach((row) => (allSelected ? this._selectedRows.delete(row) : this._selectedRows.add(row)));
+    this._syncRowSelectionState();
+    this._updateBulkActions();
+    this._emitRowSelect(null);
+  }
+
+  private _emitRowSelect(row: HTMLTableRowElement | null) {
     const rows = this._bodyRows();
     const selectedIndices = rows.flatMap((r, index) => (this._selectedRows.has(r) ? [index] : []));
     const selectedRows = rows.filter((r) => this._selectedRows.has(r)).map((r) => this._rowValues(r));
+    // The app's own ids (data-id on each row), so it can act on the records, not on cell text.
+    const selectedIds = rows.filter((r) => this._selectedRows.has(r)).map((r) => r.getAttribute('data-id') || '').filter(Boolean);
 
     this.dispatchEvent(
       new CustomEvent('row-select', {
         detail: {
-          index: rows.indexOf(row),
-          selected: this._selectedRows.has(row),
+          index: row ? rows.indexOf(row) : -1,
+          selected: row ? this._selectedRows.has(row) : this._selectedRows.size > 0,
           indices: selectedIndices,
           rows: selectedRows,
+          ids: selectedIds,
+          id: row?.getAttribute('data-id') || undefined,
           page: this._page
         },
         bubbles: true
@@ -2302,6 +2387,7 @@ export class UIDataTable extends ElementBase {
 
   private _sortByColumn(columnIndex: number, header: HTMLTableCellElement) {
     if (!this._table) return;
+    if (header.getAttribute('data-sortable') !== 'true') return;
     const tbody = this._table.tBodies[0];
     if (!tbody) return;
 
@@ -2441,6 +2527,22 @@ export class UIDataTable extends ElementBase {
     if (target.closest('.resize-handle')) return;
     if (target.closest('th') && Date.now() < this._ignoreHeaderClickUntil) return;
     if (this._isInteractionBlocked()) return;
+
+    // Checkboxes the app puts in its table: data-row-select in a row toggles that row (adding to
+    // the selection), data-select-all in the header selects or clears the rows on the page.
+    if (this.hasAttribute('selectable')) {
+      const rowCheck = target.closest('[data-row-select]');
+      if (rowCheck && this._table.contains(rowCheck)) {
+        const row = rowCheck.closest('tbody tr') as HTMLTableRowElement | null;
+        if (row && !row.hidden) this._toggleRowSelection(row, true);
+        return;
+      }
+      const allCheck = target.closest('[data-select-all]');
+      if (allCheck && this._table.contains(allCheck)) {
+        this._toggleAllRows();
+        return;
+      }
+    }
 
     if (this.hasAttribute('sortable')) {
       const th = target.closest('th');

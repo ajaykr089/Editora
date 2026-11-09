@@ -318,6 +318,9 @@ const style = `
     display: grid;
     gap: 10px;
     min-inline-size: 0;
+    /* The layout follows the room the list has, not the window: in a narrow card on a wide
+       screen the three columns were squeezed to a few characters each. */
+    container-type: inline-size;
   }
 
   .label,
@@ -652,7 +655,7 @@ const style = `
     pointer-events: none;
   }
 
-  @media (max-width: 760px) {
+  @container (max-width: 560px) {
     .shell {
       grid-template-columns: minmax(0, 1fr);
     }

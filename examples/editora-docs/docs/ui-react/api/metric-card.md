@@ -18,7 +18,7 @@ import { MetricCard } from '@editora/ui-react';
 | --- | --- | --- |
 | `as` | `keyof JSX.IntrinsicElements` |   |
 | `description` | `React.ReactNode` |   |
-| `icon` | `React.ReactNode` |   |
+| `icon` | `React.ReactNode` | An Editora icon name ("wallet"), or your own element. |
 | `label` (required) | `React.ReactNode` |   |
 | `meta` | `React.ReactNode` |   |
 | `size` | `keyof typeof SIZE_STYLES` |   |
