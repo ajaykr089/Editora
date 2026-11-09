@@ -55,6 +55,19 @@ const style = `
     align-items: stretch;
   }
 
+  /* Plain radios sit side by side at their own width and wrap when they run out of room. A
+     160px column each (right for cards) put "Standard / Express / Pick up" one per line in a
+     narrow form column, though they were asked to be horizontal. */
+  :host([orientation="horizontal"]:not([variant="card"]):not([variant="segmented"])) .root {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: calc(var(--ui-radio-gap) * 2);
+  }
+
+  :host([orientation="horizontal"]:not([variant="card"]):not([variant="segmented"])) .option {
+    width: auto;
+  }
+
   .option {
     all: unset;
     box-sizing: border-box;
