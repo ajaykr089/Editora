@@ -40,6 +40,8 @@ export type DateRangePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onCh
   rangeVariant?: 'two-fields' | 'single-field';
   label?: string;
   hint?: string;
+  /** Helper text under the label: the same as `hint`, named like the other fields' prop. */
+  description?: string;
   error?: string;
   allowSameDay?: boolean;
   allowPartial?: boolean;
@@ -80,6 +82,7 @@ export const DateRangePicker = React.forwardRef<HTMLElement, DateRangePickerProp
     rangeVariant,
     label,
     hint,
+    description,
     error,
     allowSameDay,
     allowPartial,
@@ -156,7 +159,7 @@ export const DateRangePicker = React.forwardRef<HTMLElement, DateRangePickerProp
     syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
     syncStringAttribute(el, 'range-variant', rangeVariant && rangeVariant !== 'two-fields' ? rangeVariant : null);
     syncStringAttribute(el, 'label', label ?? null);
-    syncStringAttribute(el, 'hint', hint ?? null);
+    syncStringAttribute(el, 'hint', hint ?? description ?? null);
     syncStringAttribute(el, 'error', error ?? null);
     syncDefaultOnAttribute(el, 'allow-same-day', allowSameDay);
     syncDefaultOnAttribute(el, 'allow-partial', allowPartial);
@@ -188,6 +191,7 @@ export const DateRangePicker = React.forwardRef<HTMLElement, DateRangePickerProp
     rangeVariant,
     label,
     hint,
+    description,
     error,
     allowSameDay,
     allowPartial,

@@ -39,6 +39,8 @@ export type TimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'
   mode?: 'popover' | 'inline';
   label?: string;
   hint?: string;
+  /** Helper text under the label: the same as `hint`, named like the other fields' prop. */
+  description?: string;
   error?: string;
   locale?: string;
   translations?: Record<string, string> | string;
@@ -72,6 +74,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     mode,
     label,
     hint,
+    description,
     error,
     locale,
     translations,
@@ -141,7 +144,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     syncDefaultOnAttribute(el, 'allow-input', allowInput);
     syncStringAttribute(el, 'mode', mode && mode !== 'popover' ? mode : null);
     syncStringAttribute(el, 'label', label ?? null);
-    syncStringAttribute(el, 'hint', hint ?? null);
+    syncStringAttribute(el, 'hint', hint ?? description ?? null);
     syncStringAttribute(el, 'error', error ?? null);
     syncStringAttribute(el, 'locale', locale ?? null);
     syncStringAttribute(el, 'translations', serializeTranslations(translations));
@@ -166,6 +169,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     mode,
     label,
     hint,
+    description,
     error,
     locale,
     translations,

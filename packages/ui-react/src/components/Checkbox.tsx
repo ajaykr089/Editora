@@ -11,6 +11,7 @@ import {
   warnIfElementNotRegistered,
   useControlledAttribute,
   whenHandled,
+  useIsomorphicLayoutEffect,
 } from './_internals';
 
 type CheckedDetail = {
@@ -20,6 +21,13 @@ type CheckedDetail = {
 
 export interface CheckboxProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> {
   checked?: boolean;
+  /** Checked at first, then left to the user (uncontrolled). */
+  defaultChecked?: boolean;
+  /** Form field name: the checkbox takes part in <form> and ui-form submissions. */
+  name?: string;
+  /** Submitted value when checked (default "on"). */
+  value?: string;
+  required?: boolean;
   disabled?: boolean;
   indeterminate?: boolean;
   loading?: boolean;
@@ -35,6 +43,7 @@ export interface CheckboxProps extends Omit<React.HTMLAttributes<HTMLElement>, '
 export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Checkbox(
   {
     checked,
+    defaultChecked,
     disabled,
     indeterminate,
     loading,
@@ -56,8 +65,17 @@ export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Ch
     warnIfElementNotRegistered('ui-checkbox', 'Checkbox');
   }, []);
 
+  // defaultChecked: set once, before the first sync, and never again (React would otherwise write
+  // an unknown "defaultchecked" attribute that the element ignores).
+  const defaultAppliedRef = React.useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    if (defaultAppliedRef.current) return;
+    defaultAppliedRef.current = true;
+    if (checked === undefined && defaultChecked && ref.current) ref.current.setAttribute('checked', '');
+  }, []);
+
   useElementAttributes(ref, (element) => {
-    syncBooleanAttribute(element, 'checked', checked);
+    if (checked !== undefined) syncBooleanAttribute(element, 'checked', checked);
     syncBooleanAttribute(element, 'disabled', disabled);
     syncBooleanAttribute(element, 'indeterminate', indeterminate);
     syncBooleanAttribute(element, 'loading', loading);

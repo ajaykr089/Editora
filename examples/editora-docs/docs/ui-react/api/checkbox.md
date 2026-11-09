@@ -17,16 +17,20 @@ import { Checkbox } from '@editora/ui-react';
 | Prop | Type | Description |
 | --- | --- | --- |
 | `checked` | `boolean` |   |
+| `defaultChecked` | `boolean` | Checked at first, then left to the user (uncontrolled). |
 | `density` | `'default' \| 'compact' \| 'comfortable'` |   |
 | `disabled` | `boolean` |   |
 | `headless` | `boolean` |   |
 | `indeterminate` | `boolean` |   |
 | `invalid` | `boolean` |   |
 | `loading` | `boolean` |   |
+| `name` | `string` | Form field name: the checkbox takes part in &lt;form&gt; and ui-form submissions. |
 | `onChange` | `(event: CustomEvent<CheckedDetail>) => void` |   |
 | `onCheckedChange` | `(checked: boolean, detail: CheckedDetail) => void` |   |
 | `onInput` | `(event: CustomEvent<CheckedDetail>) => void` |   |
 | `preset` | `'default' \| 'admin'` |   |
+| `required` | `boolean` |   |
+| `value` | `string` | Submitted value when checked (default "on"). |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

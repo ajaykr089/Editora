@@ -47,6 +47,8 @@ export type DateRangeTimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, '
   showFooter?: boolean;
   label?: string;
   hint?: string;
+  /** Helper text under the label: the same as `hint`, named like the other fields' prop. */
+  description?: string;
   error?: string;
   onInput?: (detail: DateRangeTimePickerDetail) => void;
   onChange?: (detail: DateRangeTimePickerDetail) => void;
@@ -84,6 +86,7 @@ export const DateRangeTimePicker = React.forwardRef<HTMLElement, DateRangeTimePi
       showFooter,
       label,
       hint,
+      description,
       error,
       onInput,
       onChange,
@@ -156,7 +159,7 @@ export const DateRangeTimePicker = React.forwardRef<HTMLElement, DateRangeTimePi
       syncStringAttribute(el, 'mode', mode && mode !== 'popover' ? mode : null);
       syncStringAttribute(el, 'show-footer', typeof showFooter === 'boolean' ? String(showFooter) : null);
       syncStringAttribute(el, 'label', label ?? null);
-      syncStringAttribute(el, 'hint', hint ?? null);
+      syncStringAttribute(el, 'hint', hint ?? description ?? null);
       syncStringAttribute(el, 'error', error ?? null);
     }, [
       value,
@@ -184,6 +187,7 @@ export const DateRangeTimePicker = React.forwardRef<HTMLElement, DateRangeTimePi
       showFooter,
       label,
       hint,
+      description,
       error
     ]);
 
