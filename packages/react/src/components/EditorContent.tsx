@@ -10,6 +10,27 @@ const isStructurallyEmpty = (el: HTMLElement): boolean => {
   return !el.querySelector('img, video, table, iframe, hr, pre, blockquote, ul, ol');
 };
 
+
+/**
+ * When the editor holds no block yet (empty, or only whitespace/<br>), put an empty paragraph in
+ * it and the caret inside, so the next insertion lands in a <p>. Leaves real content alone.
+ */
+const ensureParagraphForTyping = (root: HTMLElement): void => {
+  const hasBlock = Array.from(root.childNodes).some((node) => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName !== 'BR');
+  if (hasBlock) return;
+  if ((root.textContent || '').replace(/\u200B/g, '').trim()) return;
+  const paragraph = document.createElement('p');
+  paragraph.appendChild(document.createElement('br'));
+  root.replaceChildren(paragraph);
+  const selection = window.getSelection();
+  if (!selection) return;
+  const range = document.createRange();
+  range.setStart(paragraph, 0);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+};
+
 const setPlaceholderVisualState = (el: HTMLElement, placeholder?: string): void => {
   const hasPlaceholder = Boolean(placeholder);
   const shouldShowPlaceholder = hasPlaceholder && isStructurallyEmpty(el);
@@ -424,6 +445,12 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       if (!contentRef.current || readonly) return;
 
       const inputType = event.inputType || null;
+      // Typing into an empty editor (kept empty so the placeholder shows) put bare text at the
+      // root, and Enter then added <div>s: "Hello<div>Second line</div>". Start a paragraph
+      // first, with the caret in it, so the browser types into <p>.
+      if (inputType && /^insert(Text|Paragraph|LineBreak|ReplacementText|CompositionText)$/.test(inputType)) {
+        ensureParagraphForTyping(contentRef.current);
+      }
       if (inputType === 'historyUndo' || inputType === 'historyRedo') {
         pendingHistorySnapshotRef.current = null;
         return;
@@ -582,6 +609,11 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     };
 
     const el = contentRef.current;
+    // Enter makes <p>, not the browser's default <div> (the web component does the same).
+    const setParagraphSeparator = () => {
+      try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { /* unsupported */ }
+    };
+    el.addEventListener('focus', setParagraphSeparator);
     el.addEventListener('beforeinput', handleBeforeInput as EventListener);
     el.addEventListener('input', handleInput);
     el.addEventListener('paste', handlePaste);
@@ -593,6 +625,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      el.removeEventListener('focus', setParagraphSeparator);
       el.removeEventListener('beforeinput', handleBeforeInput as EventListener);
       el.removeEventListener('input', handleInput);
       el.removeEventListener('paste', handlePaste);
