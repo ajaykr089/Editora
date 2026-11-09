@@ -1366,7 +1366,12 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       ...base.colors,
       ...(accentPatch?.colors || {}),
       ...(overrides?.colors || {}),
-      ...deriveForegroundOnPrimary(overrides)
+      ...deriveForegroundOnPrimary(overrides),
+      // A new brand colour brings its focus ring with it: keeping the baseline's amber ring put a
+      // gold outline on every focused field of a violet (or teal, or copper) app.
+      ...(overrides?.colors?.primary && !overrides.colors.focusRing && !accentPatch
+        ? { focusRing: overrides.colors.primary }
+        : {})
     },
     palette: {
       ...(base.palette || {}),
