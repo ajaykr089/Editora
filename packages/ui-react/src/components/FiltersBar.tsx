@@ -125,7 +125,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
       ref={forwardedRef}
       className={className}
       style={{
-        alignItems: 'center',
+        // Fields line up on their input boxes, whether or not each one shows a label above it.
+        alignItems: 'flex-end',
         background: 'var(--ui-color-surface, #ffffff)',
         border: '1px solid var(--ui-color-border, #cbd5e1)',
         // The same radius as the cards around it (Card, DataTable).
@@ -141,6 +142,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
         clearable={searchClearable}
         debounce={searchDebounce}
         label={searchLabel}
+        // A placeholder is not a name: without a visible label the field is announced as "Search".
+        aria-label={searchLabel ? undefined : 'Search'}
         name={searchName}
         onChange={onSearchChange}
         placeholder={searchPlaceholder || 'Search...'}
