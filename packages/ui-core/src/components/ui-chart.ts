@@ -81,7 +81,8 @@ const style = `
     --ui-chart-warning-text: var(--ui-color-warning-text, color-mix(in srgb, var(--ui-chart-warning) 74%, var(--ui-chart-text)));
     --ui-chart-warning: var(--ui-color-warning, #b45309);
     --ui-chart-danger: var(--ui-color-danger, #dc2626);
-    --ui-chart-radius: calc(var(--ui-radius, 6px) + 4px);
+    /* The same radius as Card and DataTable, so cards side by side match (--base-card-radius). */
+    --ui-chart-radius: var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px));
     --ui-chart-shadow: none;
     --ui-chart-plot-height: 220px;
     --ui-chart-plot-min-height: 188px;
@@ -298,7 +299,8 @@ const style = `
     grid-template-columns: minmax(32px, auto) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) auto;
     inline-size: 100%;
-    min-inline-size: calc(var(--ui-chart-plot-min-width) + 38px);
+    /* Dense data keeps the minimum width (and scrolls); a few points fit a narrow card. */
+    min-inline-size: calc(min(var(--ui-chart-plot-min-width), var(--ui-chart-fit-width, var(--ui-chart-plot-min-width))) + 38px);
     block-size: 100%;
     min-block-size: 0;
   }
@@ -355,7 +357,7 @@ const style = `
     position: relative;
     grid-column: 2;
     grid-row: 1;
-    min-inline-size: var(--ui-chart-plot-min-width);
+    min-inline-size: min(var(--ui-chart-plot-min-width), var(--ui-chart-fit-width, var(--ui-chart-plot-min-width)));
     min-block-size: 0;
   }
 
@@ -943,7 +945,8 @@ export class UIChart extends ElementBase {
       'value-prefix',
       'value-suffix',
       'aria-label',
-      'show-table'
+      'show-table',
+      'heading-level'
     ];
   }
 
@@ -1080,8 +1083,9 @@ export class UIChart extends ElementBase {
     } else {
       const pad = span * fitPadding;
       if (includeZero) {
-        min -= pad * 0.25;
-        max += pad;
+        // Pad only the sides that have values: all-positive bars start at 0, not below it.
+        if (min < 0) min -= max > 0 ? pad * 0.25 : pad;
+        if (max > 0) max += pad;
       } else {
         min -= pad;
         max += pad;
@@ -1100,15 +1104,22 @@ export class UIChart extends ElementBase {
       const formatted = new Intl.NumberFormat(undefined, {
         maximumFractionDigits: Math.abs(value) >= 100 ? 0 : 1,
         ...options
-      }).format(value);
-      return `${prefix}${formatted}${suffix}`;
+      }).format(Math.abs(value));
+      // The sign goes before the prefix: -$1,990, not $-1,990.
+      return `${value < 0 ? '-' : ''}${prefix}${formatted}${suffix}`;
     } catch {
-      return `${prefix}${value.toFixed(Math.abs(value) >= 100 ? 0 : 1)}${suffix}`;
+      return `${value < 0 ? '-' : ''}${prefix}${Math.abs(value).toFixed(Math.abs(value) >= 100 ? 0 : 1)}${suffix}`;
     }
   }
 
   private _seriesTone(series: NormalizedSeries, seriesIndex: number): string {
     return series.tone || palette[seriesIndex % palette.length] || 'var(--ui-chart-accent)';
+  }
+
+  /** The title's heading level: `heading-level` 1 to 6, default 3, so it fits the page's outline. */
+  private _headingLevel(): number {
+    const level = Number(this.getAttribute('heading-level'));
+    return Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3;
   }
 
   /**
@@ -1714,10 +1725,27 @@ export class UIChart extends ElementBase {
     if (!primary) return '';
     const idx = this._activeIndex;
     if (idx == null || !data.labels[idx]) {
+      // Slices of a whole have no order, so a first-to-last change means nothing: show the
+      // largest share instead.
+      const type = this._type();
+      if (type === 'donut' || type === 'radial') {
+        const total = primary.data.reduce((sum, point) => sum + Math.max(0, point.value), 0);
+        const largest = primary.data.reduce((best, point) => (point.value > best.value ? point : best), primary.data[0]);
+        if (!largest || total <= 0) return '';
+        const share = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format((largest.value / total) * 100);
+        return `
+        <div class="insight" part="insight">
+          <span>Largest <strong>${escapeHtml(largest.label)}</strong></span>
+          <strong>${escapeHtml(`${this._formatValue(largest.value)} (${share}%)`)}</strong>
+        </div>
+      `;
+      }
       const stats = this._resolveStats(primary.data);
       const trendTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
+      // The percentage is not in the chart's unit: no value prefix or suffix ($24.3% before).
+      const pct = stats.deltaPct == null ? '' : new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(Math.abs(stats.deltaPct));
       const trend = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}${
-        stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : ''}${this._formatValue(stats.deltaPct, { maximumFractionDigits: 1 })}%)`
+        stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : '-'}${pct}%)`
       }`;
       return `
         <div class="insight" part="insight">
@@ -1764,7 +1792,7 @@ export class UIChart extends ElementBase {
           </div>
           <header class="header" part="header" ${headerVisible ? '' : 'hidden'}>
             <div class="meta">
-              ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h3 class="title" part="title">${escapeHtml(title)}</h3>` : ''}
+              ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h${this._headingLevel()} class="title" part="title">${escapeHtml(title)}</h${this._headingLevel()}>` : ''}
               ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
             </div>
             <span class="status-pill" data-state="${state}">${statusText(state)}</span>
@@ -1835,6 +1863,7 @@ export class UIChart extends ElementBase {
         data-state="${state}"
         data-disabled="${disabled ? 'true' : 'false'}"
         aria-disabled="${disabled ? 'true' : 'false'}"
+        ${type === 'donut' || type === 'radial' ? '' : `style="--ui-chart-fit-width: ${data.labels.length * 28}px"`}
       >
         <div class="sr-only" aria-live="polite">${escapeHtml(title)} ${escapeHtml(statusText(state))}</div>
 
@@ -1844,7 +1873,7 @@ export class UIChart extends ElementBase {
 
         <header class="header" part="header" ${headerVisible ? '' : 'hidden'}>
           <div class="meta">
-            ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h3 class="title" part="title">${escapeHtml(title)}</h3>` : ''}
+            ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h${this._headingLevel()} class="title" part="title">${escapeHtml(title)}</h${this._headingLevel()}>` : ''}
             ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
           </div>
           <span class="status-pill" data-state="${state}">${statusText(state)}</span>

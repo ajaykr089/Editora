@@ -62,7 +62,8 @@ export const Stat = React.forwardRef<HTMLElement, StatProps>(function Stat(
       style: {
         background: variant === 'card' ? 'var(--ui-color-surface, #ffffff)' : 'transparent',
         border: variant === 'card' ? '1px solid var(--ui-color-border, #dbe4ef)' : 'none',
-        borderRadius: variant === 'card' ? 'var(--ui-radius-lg, 16px)' : 0,
+        // --ui-radius-lg was never defined, so this was always 16px; follow Card's radius instead.
+        borderRadius: variant === 'card' ? 'var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px))' : 0,
         display: 'grid',
         gap: sizing.gap,
         minWidth: 0,

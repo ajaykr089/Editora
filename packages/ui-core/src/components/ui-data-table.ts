@@ -8,7 +8,7 @@ const style = `
     /* A wide table scrolls inside its own frame. Without this a grid or flex parent grows to the table's width. */
     min-inline-size: 0;
     max-inline-size: 100%;
-    --ui-data-table-radius: calc(var(--ui-radius, 6px) + 2px);
+    --ui-data-table-radius: var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px));
     --ui-data-table-border-color: var(--ui-color-line-subtle, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
     --ui-data-table-border: 1px solid var(--ui-data-table-border-color);
     --ui-data-table-bg: var(--color-panel-solid, var(--ui-color-surface, #ffffff));
@@ -391,7 +391,8 @@ const lightDomStyle = `
     border-spacing: 0;
     font-size: 13px;
     color: var(--ui-data-table-text, #0f172a);
-    min-width: 680px;
+    /* Wide tables keep a minimum width and scroll; a table with a few columns fits a narrow card. */
+    min-width: min(680px, var(--ui-data-table-fit-width, 680px));
     table-layout: fixed;
   }
 
@@ -637,7 +638,7 @@ const lightDomStyle = `
 
   @media (max-width: 800px) {
     ui-data-table:not([headless]) > table {
-      min-width: 620px;
+      min-width: min(620px, var(--ui-data-table-fit-width, 620px));
       font-size: 12px;
     }
 
@@ -1467,7 +1468,23 @@ export class UIDataTable extends ElementBase {
    * A frame that scrolls but holds nothing focusable (a loading or read-only table in a narrow
    * container) cannot be scrolled from the keyboard. Make it a focusable, named region while that is true.
    */
+  /**
+   * About 100px per visible column, so the fixed minimum width (680px, 620px on small screens)
+   * only applies to tables wide enough to need it. Columns hidden by hidden-columns or by the
+   * page's own CSS (a media query) do not count; this runs again when the frame resizes.
+   */
+  private _syncFitWidth() {
+    if (!this._table) return;
+    const visible = this._headerCells().filter((th) => !th.hidden && getComputedStyle(th).display !== 'none').length;
+    const next = visible ? `${visible * 100}px` : '';
+    if (this._table.style.getPropertyValue('--ui-data-table-fit-width') !== next) {
+      if (next) this._table.style.setProperty('--ui-data-table-fit-width', next);
+      else this._table.style.removeProperty('--ui-data-table-fit-width');
+    }
+  }
+
   private _syncScrollRegion() {
+    this._syncFitWidth();
     const frame = this._frameEl;
     if (!frame) return;
     const scrolls = frame.scrollWidth > frame.clientWidth + 1 || frame.scrollHeight > frame.clientHeight + 1;
@@ -1536,6 +1553,7 @@ export class UIDataTable extends ElementBase {
 
       this._applyColumnOrder();
       this._applyHiddenColumns();
+      this._syncFitWidth();
       this._syncHeaderState();
       this._applyPinnedColumns();
       this._table.setAttribute('aria-colcount', String(this._headerCells().length || 0));

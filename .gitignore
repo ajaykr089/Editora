@@ -62,3 +62,11 @@ e2e-ui/playwright-report-a11y/
 e2e-ui/tests/*-snapshots/*-darwin.png
 e2e-ui/tests/*-snapshots/*-win32.png
 !e2e-ui/package-lock.json
+!examples/reference-app/package-lock.json
+
+# Reference app: test output, local (non-Linux) screenshot baselines and review screenshots
+examples/reference-app/test-results/
+examples/reference-app/playwright-report/
+examples/reference-app/tests/*-snapshots/*-darwin.png
+examples/reference-app/tests/*-snapshots/*-win32.png
+examples/reference-app/screenshots-review/

@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { requestNavigate } from '../primitives/navigate';
+import './ui-icon';
 
 type SidebarTone = 'default' | 'brand' | 'success' | 'warning' | 'danger';
 
@@ -1185,6 +1186,11 @@ export class UISidebar extends ElementBase {
     if (html) return html;
     const value = String(item.icon || '').trim();
     if (!value) return '';
+    // An icon name ('receipt', 'chart-pie') is an Editora icon, as in every other component;
+    // anything else (an emoji, a letter) is shown as text, as before.
+    if (/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(value) && value.length > 1) {
+      return `<ui-icon name="${escapeHtml(value)}" size="16" decorative></ui-icon>`;
+    }
     return escapeHtml(value);
   }
 

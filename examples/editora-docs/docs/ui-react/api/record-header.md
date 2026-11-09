@@ -23,6 +23,7 @@ import { RecordHeader } from '@editora/ui-react';
 | `details` | `readonly RecordHeaderDetail[] \| React.ReactNode` |   |
 | `eyebrow` | `React.ReactNode` |   |
 | `footer` | `React.ReactNode` |   |
+| `headingLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | The title is a heading of this level (default 1: a page header's title is the page's main heading). Use 2 or lower when the page already has its own h1. |
 | `statusChip` | `PageHeaderStatusChip` |   |
 | `subtitle` | `React.ReactNode` |   |
 | `title` (required) | `React.ReactNode` |   |

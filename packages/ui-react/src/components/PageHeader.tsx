@@ -27,6 +27,11 @@ export type PageHeaderAction = Pick<
 export type PageHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, 'title'> & {
   as?: keyof JSX.IntrinsicElements;
   title: React.ReactNode;
+  /**
+   * The title is a heading of this level (default 1: a page header's title is the page's main
+   * heading). Use 2 or lower when the page already has its own h1.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
   subtitle?: React.ReactNode;
   eyebrow?: React.ReactNode;
   statusChip?: PageHeaderStatusChip;
@@ -65,6 +70,7 @@ export const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(functio
   {
     as = 'section',
     title,
+    headingLevel = 1,
     subtitle,
     eyebrow,
     statusChip,
@@ -120,9 +126,12 @@ export const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(functio
         ) : null}
 
         <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: 8, minWidth: 0 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1, minWidth: 0 }}>
-            {title}
-          </div>
+          {/* A heading, so the page has one and screen readers can jump to it (it was a <div>). */}
+          {React.createElement(
+            `h${headingLevel}`,
+            { style: { margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1, minWidth: 0 } },
+            title
+          )}
           {statusChip ? (
             <Badge
               pill={statusChip.pill}

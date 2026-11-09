@@ -128,7 +128,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
         alignItems: 'center',
         background: 'var(--ui-color-surface, #ffffff)',
         border: '1px solid var(--ui-color-border, #cbd5e1)',
-        borderRadius: 'var(--ui-radius, 12px)',
+        // The same radius as the cards around it (Card, DataTable).
+        borderRadius: 'var(--base-card-radius, calc(var(--ui-radius, 6px) + 2px))',
         display: 'flex',
         flexWrap: 'wrap',
         gap: 8,
@@ -150,6 +151,8 @@ export const FiltersBar = React.forwardRef<HTMLDivElement, FiltersBarProps>(func
       {showStatus ? (
         <Select
           label={statusLabel}
+          // Without a visible label the select would be announced as just "Select".
+          aria-label={statusLabel ? undefined : 'Status'}
           onChange={onStatusChange}
           style={{ minInlineSize: 170 }}
           value={status ?? ''}

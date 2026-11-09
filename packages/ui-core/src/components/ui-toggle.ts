@@ -54,6 +54,24 @@ const style = `
       box-shadow 150ms ease;
   }
 
+  /* Inside a ToggleGroup track: no frame of its own (the track has it), corners inside the
+     track's (its radius minus its 3px padding); the pressed toggle is the highlighted segment. */
+  :host([data-in-track][data-in-track]) {
+    --ui-toggle-radius: max(2px, calc(var(--ui-toggle-group-radius, 6px) - 3px));
+  }
+
+  :host([data-in-track][data-in-track]:not([pressed])) {
+    --ui-toggle-border: transparent;
+    --ui-toggle-bg: transparent;
+  }
+
+  /* The pressed segment is a fill with a soft lift, not a second outline inside the track's. */
+  :host([data-in-track][data-in-track][pressed]) {
+    --ui-toggle-active-border: transparent;
+    --ui-toggle-pressed-bg: var(--ui-color-surface, #ffffff);
+    --ui-toggle-shadow: 0 1px 2px rgba(15, 23, 42, 0.14), 0 0 0 1px color-mix(in srgb, var(--ui-color-border, #cbd5e1) 55%, transparent);
+  }
+
   .control:hover {
     background: var(--ui-color-fill, color-mix(in srgb, var(--ui-toggle-active-bg) 8%, var(--ui-toggle-bg)));
   }

@@ -1676,7 +1676,7 @@ export class UIDateRangeTimePicker extends ElementBase {
         <div class="root">
           <label class="label" part="label" id="${this._labelId}">
             <span class="label-text"></span>
-            <span class="required">*</span>
+            <span class="required" aria-hidden="true">*</span>
           </label>
           <div class="field" part="field input">
             <span class="icon" part="icon">${CALENDAR_ICON}</span>
