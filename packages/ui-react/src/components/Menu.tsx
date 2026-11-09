@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import { Icon } from './Icon';
 
 import '@editora/ui-core/menu';
 import { createUIElement, hostOnly, flushElementRender } from './_internals';
@@ -40,6 +41,7 @@ type MenuProps = Props & {
 
 type MenuItemProps = React.HTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
+  /** An Editora icon name ("settings"), or your own element. */
   icon?: React.ReactNode;
   shortcut?: React.ReactNode;
   caption?: React.ReactNode;
@@ -270,7 +272,7 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(function
       }
     >
       {selectionIcon}
-      {icon ? <span className="icon" aria-hidden="true">{icon}</span> : null}
+      {icon ? <span className="icon" aria-hidden="true">{typeof icon === 'string' ? <Icon name={icon} size={16} decorative /> : icon}</span> : null}
       <span className="label">
         <span className="text">{children}</span>
         {caption ? <span className="caption">{caption}</span> : null}
