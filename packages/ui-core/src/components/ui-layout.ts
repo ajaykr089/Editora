@@ -295,7 +295,7 @@ const style = `
 
   /* Inset shell: header and sidebar sit on a softly tinted canvas with no dividers, and the
      content is a raised card beside them (as in Linear or the shadcn sidebar-inset). Pair it with
-     <ui-sidebar variant="inset">. On narrow screens the card goes back to full width. */
+     a ui-sidebar with variant="inset". On narrow screens the card goes back to full width. */
   :host([variant="shell"][inset]) .layout {
     background: var(--ui-layout-inset-canvas, color-mix(in srgb, var(--ui-color-text, #0f172a) 3.5%, var(--ui-color-background, #ffffff)));
   }

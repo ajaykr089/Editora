@@ -192,6 +192,7 @@ for (const file of reactFiles) {
 const uiCoreComponentsDir = path.join(srcDir, 'components');
 const reExportRe = /(?:^|\n)\s*export\s+(?:\*|\{[^}]*\})\s+from\s+['"]([^'"]+)['"]/g;
 const specifierRe = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]/g;
+const dynamicImportRe = /\bimport\(\s*['"]([^'"]+)['"]/g;
 const typeOnlyRe = /(?:^|\n)\s*(?:import|export)\s+type\s[^;]*?from\s*['"][^'"]+['"];?/g;
 const renderedTagRe = /(?:create(?:UI)?Element|warnIfElementNotRegistered)\(\s*['"](ui-[a-z0-9-]+)['"]|<(ui-[a-z0-9-]+)[\s/>]/g;
 
@@ -232,7 +233,9 @@ function reactWrapperGraph(wrapper) {
     if (visited.has(current)) continue;
     visited.add(current);
     const content = fs.readFileSync(current, 'utf8').replace(typeOnlyRe, '');
-    for (const m of content.matchAll(specifierRe)) {
+    // A dynamic import() counts: Dropdown and Menu load ui-icon only when an item uses an icon name.
+    const specifiers = [...content.matchAll(specifierRe), ...content.matchAll(dynamicImportRe)];
+    for (const m of specifiers) {
       const specifier = m[1];
       if (specifier.startsWith('.')) {
         const resolved = resolveImport(current, specifier);

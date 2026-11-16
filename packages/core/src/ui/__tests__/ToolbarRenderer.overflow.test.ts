@@ -43,7 +43,7 @@ describe('toolbar overflow', () => {
     // Six 40px buttons in three groups need 6*44 + 2*30 = 324px. 300px of toolbar holds four
     // buttons by width (176px) but the group gaps put the fourth at 8+30+3*44+30... measured.
     layout(host, 300);
-    observerCallback?.();
+    (observerCallback as (() => void) | null)?.();
     const visible = Array.from(host.querySelectorAll<HTMLElement>('.editora-toolbar-items-container button[data-command]')).map((b) => b.dataset.command);
     const items = (host.querySelector('.editora-toolbar-items-container') as HTMLElement).getBoundingClientRect();
     // Every button left in the row ends inside it, short of the "more" button.
@@ -64,7 +64,7 @@ describe('toolbar overflow', () => {
     renderer.setCommandHandler(() => {});
     renderer.render(host);
     layout(host, 400);
-    observerCallback?.();
+    (observerCallback as (() => void) | null)?.();
     expect(host.querySelectorAll('.editora-toolbar-items-container button[data-command]')).toHaveLength(6);
     expect((host.querySelector('.editora-toolbar-more-button') as HTMLElement).style.display).toBe('none');
     renderer.destroy?.();
