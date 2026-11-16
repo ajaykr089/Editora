@@ -18,9 +18,10 @@ import { Sidebar } from '@editora/ui-react';
 | --- | --- | --- |
 | `autoSave` | `boolean` |   |
 | `collapseButton` | `boolean` | With `collapsible`: a chevron button in the header row that collapses / expands the sidebar. |
-| `collapsed` | `boolean` |   |
+| `collapsed` | `boolean` | Controlled: the sidebar is collapsed while this is true. Update it from `onCollapseChange`, or the collapse button and responsive collapsing will be undone on your next change of this prop. |
 | `collapsedWidth` | `string` |   |
 | `collapsible` | `boolean` |   |
+| `defaultCollapsed` | `boolean` | Uncontrolled: start collapsed, then let the sidebar (collapse button, rail clicks, small screens) keep its own state. Read changes with `onCollapseChange`. Ignored when `collapsed` is set. |
 | `density` | `'compact' \| 'default' \| 'comfortable'` |   |
 | `elevation` | `'none' \| 'low' \| 'high'` |   |
 | `headless` | `boolean` |   |

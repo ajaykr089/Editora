@@ -62,7 +62,16 @@ export type SidebarNavigateDetail = SidebarSelectDetail & {
 };
 
 type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onToggle'> & {
+  /**
+   * Controlled: the sidebar is collapsed while this is true. Update it from `onCollapseChange`, or the
+   * collapse button and responsive collapsing will be undone on your next change of this prop.
+   */
   collapsed?: boolean;
+  /**
+   * Uncontrolled: start collapsed, then let the sidebar (collapse button, rail clicks, small screens)
+   * keep its own state. Read changes with `onCollapseChange`. Ignored when `collapsed` is set.
+   */
+  defaultCollapsed?: boolean;
   collapsible?: boolean;
   /** With `collapsible`: a chevron button in the header row that collapses / expands the sidebar. */
   collapseButton?: boolean;
@@ -530,6 +539,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
   {
     children,
     collapsed,
+    defaultCollapsed,
     collapsible,
     collapseButton,
     rail,
@@ -770,7 +780,12 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       : child
   );
 
-  return createUIElement('ui-sidebar', { ref, ...rest }, resolvedChildren);
+  // defaultCollapsed is an initial attribute (so it is right in the first paint and on the server).
+  // React never changes it again, so the element keeps whatever the user does afterwards.
+  const startCollapsed = useRef(collapsed == null && !!defaultCollapsed).current;
+  const initial = startCollapsed ? { collapsed: '' } : {};
+
+  return createUIElement('ui-sidebar', { ref, ...initial, ...rest }, resolvedChildren);
 });
 
 SidebarRoot.displayName = 'Sidebar';

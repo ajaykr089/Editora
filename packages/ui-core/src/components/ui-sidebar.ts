@@ -518,6 +518,15 @@ const template = (body: string) => `
       transform: none;
     }
 
+    /* Right to left: the chevron mirrors (it points towards the edge the sidebar folds into). */
+    :host(:dir(rtl):not([position="right"]):not([collapsed])) .collapse-btn svg {
+      transform: scaleX(-1);
+    }
+
+    :host(:dir(rtl):not([position="right"])[collapsed]) .collapse-btn svg {
+      transform: none;
+    }
+
     :host([collapsed]) .collapse-btn {
       margin-inline: auto;
     }
@@ -573,7 +582,8 @@ const template = (body: string) => `
       padding: 6px 10px 4px;
       font-size: 12px;
       font-weight: 600;
-      color: color-mix(in srgb, var(--ui-color-text, #111827) 60%, transparent);
+      /* 72%: at 60% it was 4.3:1, under the 4.5:1 minimum */
+      color: color-mix(in srgb, var(--ui-color-text, #111827) 72%, transparent);
     }
 
     .flyout .item-button {
@@ -1225,7 +1235,10 @@ const template = (body: string) => `
     @media (prefers-reduced-motion: reduce) {
       :host,
       .item-button,
-      .arrow-wrap {
+      .arrow-wrap,
+      .collapse-btn,
+      .collapse-btn svg,
+      .rail .icon-wrap {
         transition: none !important;
       }
     }
@@ -1661,17 +1674,25 @@ export class UISidebar extends ElementBase {
     const label = button.querySelector('.item-label')?.textContent || button.textContent?.trim() || '';
     if (!tip || !label) return;
     const rect = button.getBoundingClientRect();
-    const right = this.getAttribute('position') === 'right';
+    const right = this._opensLeft();
     tip.textContent = label;
     tip.hidden = false;
+    // Beside the sidebar's edge (the button sits inside its padding), clear of the scrollbar.
+    const edge = this.getBoundingClientRect();
     tip.style.top = `${rect.top + rect.height / 2}px`;
     if (right) {
       tip.style.left = '';
-      tip.style.right = `${window.innerWidth - rect.left + 10}px`;
+      tip.style.right = `${document.documentElement.clientWidth - edge.left + 8}px`;
     } else {
       tip.style.right = '';
-      tip.style.left = `${rect.right + 10}px`;
+      tip.style.left = `${edge.right + 8}px`;
     }
+  }
+
+  /** Tooltips and flyouts open towards the content: left for an end sidebar (position="right" in LTR, the default in RTL). */
+  private _opensLeft(): boolean {
+    const rtl = getComputedStyle(this).direction === 'rtl';
+    return (this.getAttribute('position') === 'right') !== rtl;
   }
 
   private _hideTip(): void {
@@ -1725,11 +1746,12 @@ export class UISidebar extends ElementBase {
     if (focusFirst) this._flyoutPinned = true;
     flyout.hidden = false;
     const rect = button.getBoundingClientRect();
-    const right = this.getAttribute('position') === 'right';
+    const right = this._opensLeft();
     const top = Math.max(8, Math.min(rect.top - 6, window.innerHeight - flyout.offsetHeight - 8));
+    const edge = this.getBoundingClientRect();
     flyout.style.top = `${top}px`;
-    flyout.style.left = right ? '' : `${rect.right + 8}px`;
-    flyout.style.right = right ? `${window.innerWidth - rect.left + 8}px` : '';
+    flyout.style.left = right ? '' : `${edge.right + 6}px`;
+    flyout.style.right = right ? `${document.documentElement.clientWidth - edge.left + 6}px` : '';
     if (focusFirst) flyout.querySelector<HTMLElement>('.item-button')?.focus();
   }
 
