@@ -18,7 +18,7 @@ async function undefinedElements(page: Page) {
 
 const LARKSPUR = ['/', '/analytics', '/crm', '/projects', '/orders', '/orders/48300', '/customers', '/customers/C-1003', '/products',
   '/invoices', '/invoices/INV-2026-0139', '/mail', '/calendar', '/kanban', '/journal', '/journal/A-1', '/journal/new', '/profile',
-  '/settings', '/settings/security', '/pricing', '/ui', '/auth/sign-in', '/auth/sign-up', '/does-not-exist'];
+  '/settings', '/settings/security', '/pricing', '/ui', '/ui/sidebars', '/auth/sign-in', '/auth/sign-up', '/does-not-exist'];
 
 for (const route of LARKSPUR) {
   test(`larkspur ${route}`, async ({ page }) => {
