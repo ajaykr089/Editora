@@ -99,7 +99,6 @@ function DualFrame() {
 }
 
 function Frame({ variant, title, note, collapsed }: (typeof STYLES)[number]) {
-  const [isCollapsed, setCollapsed] = React.useState(!!collapsed);
   return (
     <figure className={`lk-sb-frame is-${variant}${collapsed ? ' is-collapsed' : ''}`}>
       <div className="lk-sb-app" aria-hidden="false">
@@ -110,8 +109,7 @@ function Frame({ variant, title, note, collapsed }: (typeof STYLES)[number]) {
           width="220px"
           collapsible
           collapseButton={collapsed}
-          collapsed={collapsed ? isCollapsed : undefined}
-          onCollapseChange={collapsed ? setCollapsed : undefined}
+          defaultCollapsed={collapsed}
           aria-label={`${title} sidebar example`}
           className="lk-sb-sidebar"
         >

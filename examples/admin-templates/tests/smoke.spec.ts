@@ -90,3 +90,32 @@ test('larkspur: the collapsed sidebar names icons and opens groups in a flyout',
   await expect(sidebar.locator('.flyout')).toBeHidden();
   expect(errors).toEqual([]);
 });
+
+test('larkspur: collapsed group flyout works from the keyboard', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/larkspur/?latency=0&sidebar=solid#/orders');
+  const sidebar = page.locator('ui-sidebar').first();
+  await sidebar.locator('.collapse-btn').click();
+  const group = sidebar.getByRole('button', { name: 'Dashboards' });
+  await group.focus();
+  await page.keyboard.press('Enter');
+  await expect(sidebar.locator('.flyout').getByRole('link', { name: 'eCommerce' })).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(sidebar.locator('.flyout').getByRole('link', { name: 'Analytics' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(sidebar.locator('.flyout')).toBeHidden();
+  await expect(group).toBeFocused();
+});
+
+test('larkspur: right to left, the flyout opens towards the content', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/larkspur/?latency=0&sidebar=solid#/orders');
+  await page.evaluate(() => document.documentElement.setAttribute('dir', 'rtl'));
+  const sidebar = page.locator('ui-sidebar').first();
+  await sidebar.locator('.collapse-btn').click();
+  await page.waitForTimeout(300);
+  await sidebar.getByRole('button', { name: 'Dashboards' }).click();
+  const flyout = await sidebar.locator('.flyout').boundingBox();
+  const edge = await sidebar.evaluate((el) => el.getBoundingClientRect().left);
+  expect(flyout!.x + flyout!.width).toBeLessThanOrEqual(edge);
+});
