@@ -32,7 +32,8 @@ npm i @editora/core
 ```
 
 List the plugins you want in `plugins`: only those are loaded. Leave the attribute out and every plugin in the bundle
-is loaded, including ones that need setup (the `collaboration` plugin, for example, needs your own server).
+is loaded except `collaboration`, which sends the document to a server: it loads only when you name it (or configure it
+under `pluginConfig`), and then stays off until you give it your own `websocketUrl` or a `provider`.
 
 
 ## Usage

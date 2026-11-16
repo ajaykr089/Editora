@@ -37,6 +37,9 @@ vi.mock('y-websocket', async () => {
   return { WebsocketProvider: FakeWebsocketProvider };
 });
 
+// The plugin only connects to a server it was told about; the transport itself is faked above.
+const TEST_SERVER = 'ws://localhost:1234';
+
 async function freshPluginModule() {
   vi.resetModules();
   return import('../CollaborationPlugin.native');
@@ -74,7 +77,7 @@ describe('room name', () => {
   ])('uses the right room for %s', async (_label, id, roomName, expected) => {
     const { CollaborationPlugin } = await freshPluginModule();
     makeEditor(id);
-    const plugin = CollaborationPlugin(roomName ? { roomName } : {});
+    const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER, ...(roomName ? { roomName } : {}) });
     (plugin.init as () => void)();
     await tick();
 
@@ -86,7 +89,7 @@ describe('room name', () => {
   it('falls back to the default room when roomName is an empty string', async () => {
     const { CollaborationPlugin } = await freshPluginModule();
     makeEditor();
-    const plugin = CollaborationPlugin({ roomName: '' });
+    const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: '' });
     (plugin.init as () => void)();
     await tick();
 
@@ -95,37 +98,218 @@ describe('room name', () => {
   });
 });
 
-describe('public demo server', () => {
-  it('warns once, naming the room, when no websocketUrl is configured', async () => {
+describe('without a configured server', () => {
+  const PUBLIC_DEMO = 'wss://demos.yjs.dev';
+  const presenceBars = () => document.querySelectorAll('.editora-collab-presence');
+
+  it('does not open a connection when neither websocketUrl nor provider is given', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { CollaborationPlugin } = await freshPluginModule();
+    const content = makeEditor('private-notes');
+
+    const plugin = CollaborationPlugin({});
+    (plugin.init as () => void)();
+    await tick();
+
+    expect(providers()).toHaveLength(0);
+    expect(presenceBars()).toHaveLength(0);
+    expect(content.textContent).toBe('seed');
+    plugin.destroy?.();
+  });
+
+  it('says why, once, and names the options that turn it on', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const { CollaborationPlugin } = await freshPluginModule();
     makeEditor('shared-doc');
-    makeEditor('other-doc');
 
     const a = CollaborationPlugin({});
     const b = CollaborationPlugin({});
     (a.init as () => void)();
+    (a.init as () => void)(); // core calls init() twice per mount
     (b.init as () => void)();
     await tick();
 
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(String(warn.mock.calls[0][0])).toContain('shared-doc');
-    expect(String(warn.mock.calls[0][0])).toContain('websocketUrl');
-    a.destroy?.();
+    const message = String(warn.mock.calls[0][0]);
+    expect(message).toContain('websocketUrl');
+    expect(message).toContain('provider');
+    expect(message).toContain('allowPublicDemoServer');
+    expect(providers()).toHaveLength(0);
   });
 
-  it('stays quiet when the caller supplies their own server', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  it.each([['an empty string', ''], ['blank space', '   ']])('treats %s as no websocketUrl', async (_label, websocketUrl) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const { CollaborationPlugin } = await freshPluginModule();
-    makeEditor('private-doc');
+    makeEditor('blank-url');
 
-    const plugin = CollaborationPlugin({ websocketUrl: 'wss://collab.internal.example' });
+    const plugin = CollaborationPlugin({ websocketUrl });
     (plugin.init as () => void)();
     await tick();
 
-    expect(warn).not.toHaveBeenCalled();
-    expect(providers()[0].url).toBe('wss://collab.internal.example');
-    plugin.destroy?.();
+    expect(providers()).toHaveLength(0);
+  });
+
+  it('ignores a websocketUrl that is not a string instead of throwing', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { CollaborationPlugin } = await freshPluginModule();
+    makeEditor('odd-url');
+
+    // Declarative config is JSON or attributes; a number there must not reach a string method.
+    const plugin: ReturnType<typeof CollaborationPlugin> & { __pluginConfig?: object } = CollaborationPlugin();
+    plugin.__pluginConfig = { websocketUrl: 1234 };
+    expect(() => (plugin.init as () => void)()).not.toThrow();
+    await tick();
+
+    expect(providers()).toHaveLength(0);
+  });
+
+  it('stays off when only a doc, room, user or colour is given', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { CollaborationPlugin } = await freshPluginModule();
+    makeEditor('doc-only');
+
+    const plugin = CollaborationPlugin({ doc: new Y.Doc(), roomName: 'team', userName: 'Ava', userColor: '#f97316' });
+    (plugin.init as () => void)();
+    await tick();
+
+    expect(providers()).toHaveLength(0);
+  });
+
+  it('reads the declarative config the web component attaches after construction', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { CollaborationPlugin } = await freshPluginModule();
+    makeEditor('declarative-off');
+
+    // PluginLoader.load() calls the factory with no arguments, then stashes the consumer's config.
+    const unconfigured: ReturnType<typeof CollaborationPlugin> & { __pluginConfig?: object } = CollaborationPlugin();
+    unconfigured.__pluginConfig = { roomName: 'team' };
+    (unconfigured.init as () => void)();
+    await tick();
+    expect(providers()).toHaveLength(0);
+
+    const configured: ReturnType<typeof CollaborationPlugin> & { __pluginConfig?: object } = CollaborationPlugin();
+    configured.__pluginConfig = { websocketUrl: TEST_SERVER, roomName: 'team' };
+    (configured.init as () => void)();
+    await tick();
+    expect(providers()).toHaveLength(1);
+    expect(providers()[0].url).toBe(TEST_SERVER);
+    configured.destroy?.();
+  });
+
+  it('does not take an editor away from a plugin that is configured', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { CollaborationPlugin } = await freshPluginModule();
+
+    // The unconfigured plugin is constructed first, so a claim it left behind would win the editor.
+    const idle = CollaborationPlugin({});
+    const live = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'live-room' });
+    (idle.init as () => void)();
+    (live.init as () => void)();
+    makeEditor('only-editor');
+    await tick();
+
+    expect(providers()).toHaveLength(1);
+    expect(providers()[0].room).toBe('live-room');
+    expect(presenceBars()).toHaveLength(1);
+    live.destroy?.();
+  });
+
+  describe('opting in', () => {
+    it('connects to the server it was given, without a warning', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { CollaborationPlugin } = await freshPluginModule();
+      makeEditor('private-doc');
+
+      const plugin = CollaborationPlugin({ websocketUrl: 'wss://collab.internal.example' });
+      (plugin.init as () => void)();
+      await tick();
+
+      expect(warn).not.toHaveBeenCalled();
+      expect(providers()).toHaveLength(1);
+      expect(providers()[0].url).toBe('wss://collab.internal.example');
+      plugin.destroy?.();
+    });
+
+    it('does not create a connection of its own when a provider is supplied', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { CollaborationPlugin } = await freshPluginModule();
+      const content = makeEditor('provider-doc');
+      const doc = new Y.Doc();
+      const provider = { doc, synced: true, wsconnected: true, awareness: new (await import('y-protocols/awareness')).Awareness(doc), on() {}, off() {}, destroy() {} };
+
+      const plugin = CollaborationPlugin({ provider: provider as never });
+      (plugin.init as () => void)();
+      await tick();
+
+      expect(warn).not.toHaveBeenCalled();
+      expect(providers()).toHaveLength(0);
+      expect(presenceBars()).toHaveLength(1);
+      expect(doc.getXmlFragment('editora-content').length).toBeGreaterThan(0);
+      expect(content.textContent).toBe('seed');
+      plugin.destroy?.();
+    });
+
+    it('allowPublicDemoServer: true uses the public demo server and warns once, naming the room', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { CollaborationPlugin } = await freshPluginModule();
+      makeEditor('shared-doc');
+      makeEditor('other-doc');
+
+      const a = CollaborationPlugin({ allowPublicDemoServer: true });
+      const b = CollaborationPlugin({ allowPublicDemoServer: true });
+      (a.init as () => void)();
+      (b.init as () => void)();
+      await tick();
+
+      expect(providers().map((p) => p.url)).toEqual([PUBLIC_DEMO, PUBLIC_DEMO]);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(String(warn.mock.calls[0][0])).toContain('shared-doc');
+      expect(String(warn.mock.calls[0][0])).toContain('websocketUrl');
+      a.destroy?.();
+    });
+
+    it('only a real boolean true counts for allowPublicDemoServer', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { CollaborationPlugin } = await freshPluginModule();
+      makeEditor('string-flag');
+
+      // Declarative config can carry strings; "false" is truthy and must not switch the demo server on.
+      const plugin: ReturnType<typeof CollaborationPlugin> & { __pluginConfig?: object } = CollaborationPlugin();
+      plugin.__pluginConfig = { allowPublicDemoServer: 'false' };
+      (plugin.init as () => void)();
+      await tick();
+
+      expect(providers()).toHaveLength(0);
+    });
+
+    it('prefers a configured websocketUrl over the demo server even with the flag set', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { CollaborationPlugin } = await freshPluginModule();
+      makeEditor('both-set');
+
+      const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER, allowPublicDemoServer: true });
+      (plugin.init as () => void)();
+      await tick();
+
+      expect(providers().map((p) => p.url)).toEqual([TEST_SERVER]);
+      expect(warn).not.toHaveBeenCalled();
+      plugin.destroy?.();
+    });
+
+    it('still warns when websocketUrl names the public demo server by hand', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { CollaborationPlugin } = await freshPluginModule();
+      makeEditor('typed-by-hand');
+
+      const plugin = CollaborationPlugin({ websocketUrl: `${PUBLIC_DEMO}/` });
+      (plugin.init as () => void)();
+      await tick();
+
+      expect(providers()).toHaveLength(1);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(String(warn.mock.calls[0][0])).toContain('typed-by-hand');
+      plugin.destroy?.();
+    });
   });
 });
 
@@ -134,7 +318,7 @@ describe('presence indicator', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const { CollaborationPlugin } = await freshPluginModule();
     const content = makeEditor('presence-doc');
-    const plugin = CollaborationPlugin({});
+    const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER });
     (plugin.init as () => void)();
     await tick();
 
@@ -174,7 +358,7 @@ describe('teardown with caller-supplied objects', () => {
       destroyed = true;
     });
 
-    const plugin = CollaborationPlugin({ doc });
+    const plugin = CollaborationPlugin({ doc, websocketUrl: TEST_SERVER });
     (plugin.init as () => void)();
     await tick();
     expect(content.textContent).toBe('seed');

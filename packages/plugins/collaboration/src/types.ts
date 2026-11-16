@@ -18,8 +18,17 @@ export interface CursorState {
 }
 
 export interface CollaborationPluginOptions {
-  /** y-websocket server URL, e.g. "wss://demos.yjs.dev". */
+  /**
+   * y-websocket server URL, e.g. "wss://collab.example.com". There is no default: without this,
+   * a `provider` or `allowPublicDemoServer` the plugin does not connect to anything.
+   */
   websocketUrl?: string;
+  /**
+   * Set to `true` to sync through the public Yjs demo server (wss://demos.yjs.dev) when no
+   * `websocketUrl` or `provider` is given. Anyone who knows the room name can read and edit the
+   * document there, so use it for demos only. Ignored when `websocketUrl` or `provider` is set.
+   */
+  allowPublicDemoServer?: boolean;
   /**
    * Room name shared by every client editing the same document. Accepts a
    * static string or a function of the editor's DOM id, so a single plugin

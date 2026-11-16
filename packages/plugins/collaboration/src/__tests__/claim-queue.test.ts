@@ -39,6 +39,9 @@ vi.mock('y-websocket', () => {
   return { WebsocketProvider: FakeWebsocketProvider };
 });
 
+// The plugin only connects to a server it was told about; the transport itself is faked above.
+const TEST_SERVER = 'ws://localhost:1234';
+
 async function freshPluginModule() {
   vi.resetModules();
   return import('../CollaborationPlugin.native');
@@ -64,7 +67,7 @@ describe('CollaborationPlugin bootstrap (claim-queue scanner)', () => {
     const { CollaborationPlugin } = await freshPluginModule();
     const content = makeEditorRoot('react-like');
 
-    const plugin = CollaborationPlugin({ roomName: 'room-a', provider: undefined });
+    const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-a', provider: undefined });
     // React's PluginManager.register(p) calls plugin.init(pluginConfig) with
     // no element - simulate exactly that.
     (plugin.init as (ctx?: unknown) => void)(undefined);
@@ -78,7 +81,7 @@ describe('CollaborationPlugin bootstrap (claim-queue scanner)', () => {
     const contentA = makeEditorRoot('editor-a');
     const contentB = makeEditorRoot('editor-b');
 
-    const pluginA = CollaborationPlugin({ roomName: 'room-a' });
+    const pluginA = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-a' });
     // Simulate RichTextEditorElement's loop, then EditorEngine's separate
     // PluginManager.register() - both fire init() on the *same* instance.
     (pluginA.init as (ctx?: unknown) => void)({ editorElement: contentA });
@@ -89,7 +92,7 @@ describe('CollaborationPlugin bootstrap (claim-queue scanner)', () => {
     // A second, independent plugin instance for a second editor must still
     // claim its own element, not get starved by a phantom leftover claim
     // from the first instance's duplicate init() call.
-    const pluginB = CollaborationPlugin({ roomName: 'room-b' });
+    const pluginB = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-b' });
     (pluginB.init as (ctx?: unknown) => void)({ editorElement: contentB });
     await new Promise((r) => setTimeout(r, 0));
 
@@ -102,8 +105,8 @@ describe('CollaborationPlugin bootstrap (claim-queue scanner)', () => {
     const contentA = makeEditorRoot('multi-a');
     const contentB = makeEditorRoot('multi-b');
 
-    const pluginA = CollaborationPlugin({ roomName: 'room-multi-a' });
-    const pluginB = CollaborationPlugin({ roomName: 'room-multi-b' });
+    const pluginA = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-multi-a' });
+    const pluginB = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-multi-b' });
     (pluginA.init as (ctx?: unknown) => void)(undefined);
     (pluginB.init as (ctx?: unknown) => void)(undefined);
 
@@ -119,7 +122,7 @@ describe('CollaborationPlugin bootstrap (claim-queue scanner)', () => {
     // usual ordering, which the scanner's immediate scan-on-enqueue covers.
     const content = makeEditorRoot('pre-existing');
 
-    const plugin = CollaborationPlugin({ roomName: 'room-pre-existing' });
+    const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-pre-existing' });
     (plugin.init as (ctx?: unknown) => void)(undefined);
 
     await new Promise((r) => setTimeout(r, 0));
@@ -130,7 +133,7 @@ describe('CollaborationPlugin bootstrap (claim-queue scanner)', () => {
     const { CollaborationPlugin } = await freshPluginModule();
     const content = makeEditorRoot('destroy-me');
 
-    const plugin = CollaborationPlugin({ roomName: 'room-destroy' });
+    const plugin = CollaborationPlugin({ websocketUrl: TEST_SERVER, roomName: 'room-destroy' });
     (plugin.init as (ctx?: unknown) => void)(undefined);
     await new Promise((r) => setTimeout(r, 0));
     expect(content.previousElementSibling?.className).toBe('editora-collab-presence');
