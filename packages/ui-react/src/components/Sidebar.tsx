@@ -69,7 +69,8 @@ type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSele
   position?: 'left' | 'right';
   value?: string;
   items?: SidebarItemInput[];
-  variant?: 'surface' | 'soft' | 'floating' | 'contrast' | 'minimal' | 'split';
+  /** Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`. */
+  variant?: 'surface' | 'soft' | 'floating' | 'contrast' | 'minimal' | 'split' | 'inset' | 'indicator' | 'pill';
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   density?: 'compact' | 'default' | 'comfortable';
   tone?: SidebarTone;

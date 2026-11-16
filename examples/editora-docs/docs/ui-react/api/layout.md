@@ -22,6 +22,7 @@ import { Layout } from '@editora/ui-react';
 | `density` | `LayoutDensity` |   |
 | `drawerBreakpoint` | `number` | Viewport width (px) at and below which the drawer is used. Default 980. |
 | `headless` | `boolean` |   |
+| `inset` | `boolean` | variant="shell" only: header and sidebar on a tinted canvas, the content on a raised card. Pair with Sidebar variant="inset". |
 | `maxWidth` | `LayoutMaxWidth` |   |
 | `mobileSidebar` | `'drawer' \| 'stack'` | Narrow screens: `drawer` turns the sidebar into an off-canvas drawer with a backdrop, opened by AppHeader's menu button or `sidebarOpen`; `stack` puts it above the content. Defaults to `drawer` for variant="shell" and `stack` otherwise. |
 | `mode` | `LayoutMode` |   |
@@ -59,6 +60,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Layout renders the `ui-layout` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `aside-width`, `collapsed`, `density`, `drawer-breakpoint`, `headless`, `max-width`, `mobile-sidebar`, `mode`, `sidebar-open`, `sidebar-side`, `sidebar-width`, `variant`
+**Attributes:** `aside-width`, `collapsed`, `density`, `drawer-breakpoint`, `headless`, `inset`, `max-width`, `mobile-sidebar`, `mode`, `sidebar-open`, `sidebar-side`, `sidebar-width`, `variant`
 
 **Events:** `layoutchange`, `sidebar-open-change`

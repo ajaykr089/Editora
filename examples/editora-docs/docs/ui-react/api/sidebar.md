@@ -54,7 +54,7 @@ import { Sidebar } from '@editora/ui-react';
 | `storageKey` | `string` |   |
 | `tone` | `SidebarTone` |   |
 | `value` | `string` |   |
-| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split'` |   |
+| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split' \| 'inset' \| 'indicator' \| 'pill'` | Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`. |
 | `width` | `string` |   |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).

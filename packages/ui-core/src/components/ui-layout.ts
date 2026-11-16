@@ -293,6 +293,37 @@ const style = `
     overflow-x: hidden;
   }
 
+  /* Inset shell: header and sidebar sit on a softly tinted canvas with no dividers, and the
+     content is a raised card beside them (as in Linear or the shadcn sidebar-inset). Pair it with
+     <ui-sidebar variant="inset">. On narrow screens the card goes back to full width. */
+  :host([variant="shell"][inset]) .layout {
+    background: var(--ui-layout-inset-canvas, color-mix(in srgb, var(--ui-color-text, #0f172a) 3.5%, var(--ui-color-background, #ffffff)));
+  }
+
+  :host([variant="shell"][inset]) .header {
+    border-block-end: 0;
+    --base-app-header-bg: transparent;
+    --base-app-header-sticky-bg: transparent;
+    --base-app-header-shadow: none;
+  }
+
+  :host([variant="shell"][inset]) .sidebar-panel {
+    border-inline-end: 0;
+    --base-sidebar-bg: transparent;
+  }
+
+  :host([variant="shell"][inset]:not([data-drawer])) .content-panel {
+    margin: 0 var(--ui-layout-inset-gap, 8px) var(--ui-layout-inset-gap, 8px) 0;
+    border: 1px solid color-mix(in srgb, var(--ui-color-text, #0f172a) 8%, transparent);
+    border-radius: calc(var(--ui-radius, 8px) + 4px);
+    background: var(--ui-color-background, #ffffff);
+    box-shadow: 0 1px 2px color-mix(in srgb, #000 6%, transparent);
+  }
+
+  :host([variant="shell"][inset][sidebar-side="end"]:not([data-drawer])) .content-panel {
+    margin: 0 0 var(--ui-layout-inset-gap, 8px) var(--ui-layout-inset-gap, 8px);
+  }
+
   /* Off-canvas sidebar on narrow screens (variant="shell", or mobile-sidebar="drawer"). */
   .backdrop {
     display: none;
@@ -476,7 +507,8 @@ export class UILayout extends ElementBase {
       'aside-width',
       'sidebar-open',
       'mobile-sidebar',
-      'drawer-breakpoint'
+      'drawer-breakpoint',
+      'inset'
     ];
   }
 

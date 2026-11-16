@@ -88,15 +88,19 @@ const template = (body: string) => `
       --ui-sidebar-header-padding: var(--base-sidebar-header-padding, 4px 4px 10px);
       --ui-sidebar-item-radius: var(--base-sidebar-item-radius, var(--ui-control-radius-2, var(--ui-radius, 6px)));
       --ui-sidebar-item-height: var(--base-sidebar-item-height, var(--ui-control-height-2, 32px));
-      --ui-sidebar-item-padding-x: var(--base-sidebar-item-padding-x, 8px);
+      --ui-sidebar-item-padding-x: var(--base-sidebar-item-padding-x, 10px);
       --ui-sidebar-item-padding-y: var(--base-sidebar-item-padding-y, 4px);
       --ui-sidebar-item-gap: var(--base-sidebar-item-gap, 8px);
-      --ui-sidebar-row-gap: var(--base-sidebar-row-gap, 8px);
+      --ui-sidebar-row-gap: var(--base-sidebar-row-gap, 2px);
       --ui-sidebar-item-font-size: var(--base-sidebar-item-font-size, var(--ui-control-font-size-2, 14px));
       --ui-sidebar-item-line-height: var(--base-sidebar-item-line-height, 20px);
-      --ui-sidebar-section-gap: var(--base-sidebar-section-gap, 12px);
+      --ui-sidebar-section-gap: var(--base-sidebar-section-gap, 4px);
+      --ui-sidebar-item-font-weight: var(--base-sidebar-item-font-weight, 500);
+      --ui-sidebar-item-active-font-weight: var(--base-sidebar-item-active-font-weight, 600);
+      --ui-sidebar-icon-color: var(--base-sidebar-icon-color, color-mix(in srgb, var(--ui-sidebar-color) 62%, transparent));
+      --ui-sidebar-indicator: var(--base-sidebar-indicator, transparent);
       --ui-sidebar-section-label-size: var(--base-sidebar-section-label-size, 12px);
-      --ui-sidebar-section-label-spacing: var(--base-sidebar-section-label-spacing, 0.06em);
+      --ui-sidebar-section-label-spacing: var(--base-sidebar-section-label-spacing, 0.01em);
       --ui-sidebar-section-label-transform: var(--base-sidebar-section-label-transform, none);
       --ui-sidebar-section-label-color: var(--base-sidebar-section-label-color, var(--ui-sidebar-muted));
       --ui-sidebar-submenu-indent: var(--base-sidebar-submenu-indent, 20px);
@@ -104,14 +108,14 @@ const template = (body: string) => `
       --ui-sidebar-promo-padding: var(--base-sidebar-promo-padding, 20px);
       --ui-sidebar-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
       --ui-sidebar-accent-contrast: var(--ui-color-foreground-on-primary, var(--ui-foreground, #ffffff));
-      --ui-sidebar-item-hover: var(--ui-color-fill, color-mix(in srgb, var(--ui-sidebar-accent) 10%, transparent));
-      --ui-sidebar-item-active-bg: var(--ui-color-accent-fill, color-mix(in srgb, var(--ui-sidebar-accent) 14%, var(--ui-sidebar-bg)));
+      --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-color) 6%, transparent);
+      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 11%, transparent);
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
       --ui-sidebar-item-border: transparent;
       --ui-sidebar-control-bg: color-mix(in srgb, var(--ui-sidebar-bg) 88%, transparent);
       --ui-sidebar-control-hover: color-mix(in srgb, var(--ui-sidebar-accent) 10%, var(--ui-sidebar-bg));
-      --ui-sidebar-promo-bg: linear-gradient(140deg, color-mix(in srgb, var(--ui-sidebar-accent) 92%, #0f172a 8%), color-mix(in srgb, var(--ui-sidebar-accent) 36%, #ffffff 64%));
-      --ui-sidebar-promo-color: var(--ui-sidebar-accent-contrast);
+      --ui-sidebar-promo-bg: color-mix(in srgb, var(--ui-sidebar-accent) 9%, var(--ui-sidebar-bg-solid, var(--ui-color-surface, #ffffff)));
+      --ui-sidebar-promo-color: var(--ui-sidebar-color);
       --ui-sidebar-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
       --ui-sidebar-width: 236px;
       --ui-sidebar-current-width: 236px;
@@ -175,7 +179,7 @@ const template = (body: string) => `
       --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 10%, transparent);
       --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 14%, var(--base-sidebar-bg, var(--color-panel-solid, #ffffff)));
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
-      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-accent) 18%, transparent);
+      --ui-sidebar-item-border: transparent;
     }
 
     :host([variant="soft"]) {
@@ -183,7 +187,7 @@ const template = (body: string) => `
       --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 12%, transparent);
       --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 18%, var(--base-sidebar-bg, var(--color-panel-solid, #ffffff)));
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
-      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-accent) 18%, transparent);
+      --ui-sidebar-item-border: transparent;
       --ui-sidebar-shadow: none;
     }
 
@@ -192,34 +196,82 @@ const template = (body: string) => `
       --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 10%, transparent);
       --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 16%, var(--base-sidebar-bg, var(--color-panel-solid, #ffffff)));
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
-      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-accent) 20%, transparent);
+      --ui-sidebar-item-border: transparent;
       --ui-sidebar-shadow: 0 24px 44px rgba(15, 23, 42, 0.16);
       --ui-sidebar-border: 1px solid color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 72%, transparent);
     }
 
+    /* A dark sidebar beside a light page: neutral near-black, the brand only on the current item. */
     :host([variant="contrast"]) {
-      --ui-sidebar-bg: linear-gradient(180deg, color-mix(in srgb, #07162d 92%, var(--ui-sidebar-accent) 8%), color-mix(in srgb, #0f2d57 82%, var(--ui-sidebar-accent) 18%));
-      --ui-sidebar-color: #f8fbff;
-      --ui-sidebar-muted: color-mix(in srgb, #f8fbff 72%, transparent);
-      --ui-sidebar-border: 1px solid color-mix(in srgb, #9ec5ff 14%, transparent);
-      --ui-sidebar-item-hover: color-mix(in srgb, #ffffff 8%, transparent);
-      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 50%, #0b4cb4 50%);
+      --ui-sidebar-bg: #141416;
+      --ui-sidebar-bg-solid: #141416;
+      --ui-sidebar-color: #ededef;
+      --ui-sidebar-muted: color-mix(in srgb, #ededef 64%, transparent);
+      --ui-sidebar-icon-color: color-mix(in srgb, #ededef 56%, transparent);
+      --ui-sidebar-border: 1px solid #26262b;
+      --ui-sidebar-item-hover: color-mix(in srgb, #ffffff 7%, transparent);
+      --ui-sidebar-item-active-bg: color-mix(in srgb, #ffffff 10%, transparent);
       --ui-sidebar-item-active-color: #ffffff;
-      --ui-sidebar-control-bg: color-mix(in srgb, #ffffff 7%, transparent);
-      --ui-sidebar-control-hover: color-mix(in srgb, #ffffff 12%, transparent);
-      --ui-sidebar-shadow: 0 30px 60px rgba(2, 6, 23, 0.34);
-      --ui-sidebar-promo-bg: linear-gradient(140deg, color-mix(in srgb, var(--ui-sidebar-accent) 92%, #1d4ed8 8%), color-mix(in srgb, var(--ui-sidebar-accent) 24%, #ffffff 76%));
-      --ui-sidebar-promo-color: #ffffff;
+      /* the brand lifted towards white, so a dark brand colour still shows on the near-black */
+      --ui-sidebar-indicator: color-mix(in srgb, var(--ui-sidebar-accent) 62%, #ffffff);
+      --ui-sidebar-control-bg: color-mix(in srgb, #ffffff 6%, transparent);
+      --ui-sidebar-control-hover: color-mix(in srgb, #ffffff 10%, transparent);
+      --ui-sidebar-shadow: none;
+      --ui-sidebar-promo-bg: color-mix(in srgb, #ffffff 6%, transparent);
+      --ui-sidebar-promo-color: #ededef;
+      --ui-sidebar-focus-ring: color-mix(in srgb, var(--ui-sidebar-accent) 70%, #ffffff);
+    }
+
+    /* Blends into the page canvas; with Layout variant="shell" inset the content sits on a raised card. */
+    :host([variant="inset"]) {
+      --base-sidebar-outline: none;
+      --ui-sidebar-bg: transparent;
+      --ui-sidebar-border: none;
+      --ui-sidebar-shadow: none;
+      --ui-sidebar-radius: 0px;
+      --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-color) 7%, transparent);
+      --ui-sidebar-item-active-bg: var(--ui-color-surface, #ffffff);
+      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-color) 9%, transparent);
+    }
+
+    :host([variant="inset"]) .item-button[aria-current="page"],
+    :host([variant="inset"]) .item-button[data-active="true"] {
+      box-shadow: 0 1px 2px color-mix(in srgb, #000 8%, transparent);
+    }
+
+    /* The current item is marked by a bar in the brand colour (as on GitHub or Vercel). */
+    :host([variant="indicator"]) {
+      --base-sidebar-outline: none;
+      --ui-sidebar-bg: transparent;
+      --ui-sidebar-border: none;
+      --ui-sidebar-shadow: none;
+      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 7%, transparent);
+      --ui-sidebar-item-active-color: var(--ui-color-accent-text, var(--ui-sidebar-accent));
+      --ui-sidebar-indicator: var(--ui-sidebar-accent);
+    }
+
+    /* Rounded pills, filled with the brand tint when current (as in Material 3). */
+    :host([variant="pill"]) {
+      --base-sidebar-outline: none;
+      --ui-sidebar-bg: transparent;
+      --ui-sidebar-border: none;
+      --ui-sidebar-shadow: none;
+      --ui-sidebar-item-radius: 999px;
+      --ui-sidebar-item-height: calc(var(--ui-control-height-2, 32px) + 4px);
+      --ui-sidebar-item-padding-x: 14px;
+      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 16%, transparent);
+      --ui-sidebar-item-active-color: var(--ui-color-accent-text, var(--ui-sidebar-color));
     }
 
     :host([variant="minimal"]) {
+      --base-sidebar-outline: none;
       --ui-sidebar-bg: transparent;
       --ui-sidebar-border: none;
       --ui-sidebar-shadow: none;
       --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 8%, transparent);
       --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 14%, transparent);
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
-      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-accent) 18%, transparent);
+      --ui-sidebar-item-border: transparent;
     }
 
     :host([variant="split"]) {
@@ -229,7 +281,7 @@ const template = (body: string) => `
       --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 8%, transparent);
       --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 12%, transparent);
       --ui-sidebar-item-active-color: var(--ui-sidebar-color);
-      --ui-sidebar-item-border: color-mix(in srgb, var(--ui-sidebar-accent) 16%, transparent);
+      --ui-sidebar-item-border: transparent;
       border-inline-end: 1px solid color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 82%, transparent);
     }
 
@@ -388,8 +440,9 @@ const template = (body: string) => `
       font-size: var(--ui-sidebar-section-label-size);
       letter-spacing: var(--ui-sidebar-section-label-spacing);
       line-height: 1.4;
-      font-weight: 600;
+      font-weight: 500;
       text-transform: var(--ui-sidebar-section-label-transform);
+      margin-block-end: 2px;
       color: var(--ui-sidebar-section-label-color);
     }
 
@@ -424,8 +477,9 @@ const template = (body: string) => `
       font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
       font-size: var(--ui-sidebar-item-font-size);
       line-height: var(--ui-sidebar-item-line-height);
-      font-weight: 600;
+      font-weight: var(--ui-sidebar-item-font-weight);
       letter-spacing: var(--ui-default-letter-spacing, 0em);
+      position: relative;
       transition:
         background-color 140ms ease,
         border-color 140ms ease,
@@ -448,6 +502,26 @@ const template = (body: string) => `
       background: var(--ui-sidebar-item-active-bg);
       color: var(--ui-sidebar-item-active-color);
       border-color: var(--ui-sidebar-item-border);
+      font-weight: var(--ui-sidebar-item-active-font-weight);
+    }
+
+    /* The bar beside the current item (transparent unless a variant sets --ui-sidebar-indicator). */
+    .item-button[aria-current="page"]::before,
+    .item-button[data-active="true"]::before {
+      content: '';
+      position: absolute;
+      inset-block: 7px;
+      inset-inline-start: 0;
+      inline-size: 3px;
+      border-radius: 999px;
+      background: var(--ui-sidebar-indicator);
+    }
+
+    .item-button:hover .icon-wrap,
+    .item-button[aria-current="page"] .icon-wrap,
+    .item-button[data-active="true"] .icon-wrap,
+    .item-button[data-has-active="true"] .icon-wrap {
+      color: currentColor;
     }
 
     /* A closed group that holds the current page shows it in its label. */
@@ -473,7 +547,8 @@ const template = (body: string) => `
       inline-size: 20px;
       block-size: 20px;
       flex: 0 0 20px;
-      color: color-mix(in srgb, currentColor 82%, transparent);
+      color: var(--ui-sidebar-icon-color);
+      transition: color 140ms ease;
     }
 
     .arrow-wrap {
@@ -503,8 +578,8 @@ const template = (body: string) => `
     }
 
     .icon :is(svg) {
-      inline-size: 18px;
-      block-size: 18px;
+      inline-size: 17px;
+      block-size: 17px;
       display: block;
     }
 
@@ -528,7 +603,7 @@ const template = (body: string) => `
       font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
       font-size: var(--ui-sidebar-item-font-size);
       line-height: var(--ui-sidebar-item-line-height);
-      font-weight: 600;
+      font-weight: inherit;
       letter-spacing: var(--ui-default-letter-spacing, 0em);
       color: inherit;
     }
@@ -552,7 +627,7 @@ const template = (body: string) => `
       font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
       font-size: var(--ui-sidebar-item-font-size);
       line-height: var(--ui-sidebar-item-line-height);
-      font-weight: 600;
+      font-weight: inherit;
       letter-spacing: var(--ui-default-letter-spacing, 0em);
       color: inherit;
     }
@@ -589,23 +664,24 @@ const template = (body: string) => `
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-inline-size: 22px;
-      min-block-size: 22px;
-      padding-inline: 7px;
+      min-inline-size: 20px;
+      min-block-size: 18px;
+      padding-inline: 6px;
       border-radius: 999px;
-      background: color-mix(in srgb, currentColor 12%, transparent);
+      background: color-mix(in srgb, currentColor 9%, transparent);
       color: inherit;
-      font-size: calc(var(--ui-sidebar-item-font-size) - 4px);
+      font-size: 11px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
       line-height: 1;
-      letter-spacing: 0.02em;
     }
 
     .submenu {
       display: grid;
       grid-template-rows: 0fr;
-      margin-inline-start: calc(var(--ui-sidebar-submenu-indent) + 6px);
-      padding-inline-start: 12px;
-      border-inline-start: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+      margin-inline-start: calc(var(--ui-sidebar-item-padding-x) + 9px);
+      padding-inline-start: 8px;
+      border-inline-start: 1px solid color-mix(in srgb, currentColor 13%, transparent);
       opacity: 0;
       transform: translateY(-4px);
       pointer-events: none;
@@ -619,7 +695,7 @@ const template = (body: string) => `
       min-height: 0;
       overflow: hidden;
       display: grid;
-      gap: 6px;
+      gap: var(--ui-sidebar-row-gap);
       padding-block: 0;
       transition: padding-block 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
