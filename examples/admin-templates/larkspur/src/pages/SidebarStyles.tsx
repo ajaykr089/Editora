@@ -1,0 +1,75 @@
+import React from 'react';
+import { Badge } from '@editora/ui-react/Badge';
+import { PageHeader } from '@editora/ui-react/PageHeader';
+import { Sidebar, type SidebarItemInput } from '@editora/ui-react/Sidebar';
+import { useTitle } from '../lib/router';
+
+// The same navigation in every frame, so the styles compare like for like.
+const ITEMS: SidebarItemInput[] = [
+  { value: 'home', label: 'Overview', icon: 'dashboard', section: 'Workspace' },
+  { value: 'orders', label: 'Orders', icon: 'cart', section: 'Workspace', badge: '12' },
+  { value: 'customers', label: 'Customers', icon: 'users', section: 'Workspace' },
+  {
+    value: 'reports', label: 'Reports', icon: 'chart-line', section: 'Workspace',
+    children: [
+      { value: 'sales', label: 'Sales' },
+      { value: 'traffic', label: 'Traffic' },
+      { value: 'cohorts', label: 'Cohorts' },
+    ],
+  },
+  { value: 'mail', label: 'Mail', icon: 'mail', section: 'Apps', badge: '3' },
+  { value: 'calendar', label: 'Calendar', icon: 'calendar', section: 'Apps' },
+  { value: 'settings', label: 'Settings', icon: 'settings', section: 'Account' },
+];
+
+const STYLES: Array<{ variant: 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast' | 'split' | 'floating'; title: string; note: string }> = [
+  { variant: 'inset', title: 'Inset', note: 'Sidebar on a soft canvas, content on a raised card. Layout inset + Sidebar variant="inset".' },
+  { variant: 'indicator', title: 'Indicator bar', note: 'A brand-colour bar marks the current page; the rest stays quiet.' },
+  { variant: 'pill', title: 'Pills', note: 'Rounded, roomier rows; the current page is a brand-tinted pill.' },
+  { variant: 'minimal', title: 'Minimal', note: 'No frame; a subtle tint for the current page.' },
+  { variant: 'contrast', title: 'Dark', note: 'Neutral near-black beside a light page; brand only on the current item.' },
+  { variant: 'split', title: 'Split', note: 'Flat panel with one divider, for dense back-office tools.' },
+];
+
+function Frame({ variant, title, note }: (typeof STYLES)[number]) {
+  return (
+    <figure className={`lk-sb-frame${variant === 'inset' ? ' is-inset' : ''}`}>
+      <div className="lk-sb-app" aria-hidden="false">
+        <Sidebar variant={variant} value="sales" items={ITEMS} width="220px" aria-label={`${title} sidebar example`} className="lk-sb-sidebar">
+          <Sidebar.Footer>
+            <div className="lk-sb-user">
+              <span className="lk-sb-avatar" aria-hidden="true">MC</span>
+              <span><strong>Maya Chen</strong><br />Owner</span>
+            </div>
+          </Sidebar.Footer>
+        </Sidebar>
+        <div className="lk-sb-main">
+          <div className="lk-sb-line w60" />
+          <div className="lk-sb-line w40" />
+          <div className="lk-sb-cards"><div /><div /><div /></div>
+          <div className="lk-sb-block" />
+        </div>
+      </div>
+      <figcaption>
+        <strong>{title}</strong> <Badge size="sm" variant="outline" tone="neutral">variant="{variant}"</Badge>
+        <span className="cell-sub">{note}</span>
+      </figcaption>
+    </figure>
+  );
+}
+
+/** Every sidebar style side by side. The account menu (top right) switches the real one. */
+export function SidebarStyles() {
+  useTitle('Sidebar styles');
+  return (
+    <div className="lk-screen lk-screen-wide">
+      <PageHeader
+        title="Sidebar styles"
+        subtitle="The same navigation in each style. Switch the app's own sidebar from the account menu (top right), and compare in dark mode too."
+      />
+      <div className="lk-sb-grid">
+        {STYLES.map((style) => <Frame key={style.variant} {...style} />)}
+      </div>
+    </div>
+  );
+}

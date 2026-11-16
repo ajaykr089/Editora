@@ -22,6 +22,7 @@ import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { Pricing } from './pages/Pricing';
 import { UiKit } from './pages/UiKit';
+import { SidebarStyles } from './pages/SidebarStyles';
 import { NotFound } from './pages/NotFound';
 import { Mail } from './apps/Mail';
 import { CalendarApp } from './apps/Calendar';
@@ -51,7 +52,7 @@ function screenFor(route: Route): React.ReactNode {
     case 'profile': return <Profile />;
     case 'settings': return <Settings tab={second} />;
     case 'pricing': return <Pricing />;
-    case 'ui': return <UiKit />;
+    case 'ui': return second === 'sidebars' ? <SidebarStyles /> : <UiKit />;
     default: return <NotFound path={route.path} />;
   }
 }

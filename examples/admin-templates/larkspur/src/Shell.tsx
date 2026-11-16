@@ -54,12 +54,13 @@ function navItems(): SidebarItemInput[] {
       ],
     },
     { value: '/ui', label: 'UI elements', href: '#/ui', icon: 'grid', section: 'Pages' },
+    { value: '/ui/sidebars', label: 'Sidebar styles', href: '#/ui/sidebars', icon: 'layout', section: 'Pages' },
   ];
 }
 
 /** The sidebar entry for a route: the first path segment, or the dashboard path itself. */
 function activeValue(route: Route) {
-  if (['/', '/analytics', '/crm', '/projects'].includes(route.path)) return route.path;
+  if (['/', '/analytics', '/crm', '/projects', '/ui/sidebars'].includes(route.path)) return route.path;
   return `/${route.parts[0] || ''}`;
 }
 
@@ -82,7 +83,33 @@ const COMMANDS = [
   { value: '#/profile', label: 'Your profile', keywords: 'account me' },
 ];
 
+export type SidebarStyle = 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast';
+export const SIDEBAR_STYLES: Array<{ value: SidebarStyle; label: string }> = [
+  { value: 'inset', label: 'Inset' },
+  { value: 'indicator', label: 'Indicator bar' },
+  { value: 'pill', label: 'Pills' },
+  { value: 'minimal', label: 'Minimal' },
+  { value: 'contrast', label: 'Dark' },
+];
+
+/** ?sidebar=pill wins (screenshots), then the saved choice, then inset. */
+function initialSidebarStyle(): SidebarStyle {
+  const asked = new URLSearchParams(window.location.search).get('sidebar');
+  const known = (value: string | null): value is SidebarStyle => SIDEBAR_STYLES.some((style) => style.value === value);
+  if (known(asked)) return asked;
+  try {
+    const saved = localStorage.getItem('larkspur-sidebar');
+    if (known(saved)) return saved;
+  } catch { /* storage blocked */ }
+  return 'inset';
+}
+
 export function Shell({ route, mode, density, onToggleMode, onDensity, children }: Props) {
+  const [sidebarStyle, setSidebarStyle] = React.useState<SidebarStyle>(initialSidebarStyle);
+  const chooseSidebar = (value: SidebarStyle) => {
+    setSidebarStyle(value);
+    try { localStorage.setItem('larkspur-sidebar', value); } catch { /* storage blocked */ }
+  };
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [notifications, setNotifications] = React.useState(NOTIFICATIONS);
@@ -101,7 +128,7 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
   }, []);
 
   return (
-    <Layout variant="shell" sidebarLabel="Main navigation">
+    <Layout variant="shell" inset={sidebarStyle === 'inset'} sidebarLabel="Main navigation">
       <AppHeader slot="header" bordered showMenuButton="narrow">
         <AppHeader.Start>
           <a className="lk-brand" href="#/" aria-label="Larkspur, eCommerce dashboard">
@@ -170,13 +197,20 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
                 </Dropdown.Item>
               ))}
               <Dropdown.Separator />
+              <Dropdown.SectionLabel>Sidebar style</Dropdown.SectionLabel>
+              {SIDEBAR_STYLES.map((style) => (
+                <Dropdown.Item key={style.value} role="menuitemradio" data-group="sidebar" value={style.value} checked={sidebarStyle === style.value} onClick={() => chooseSidebar(style.value)}>
+                  {style.label}
+                </Dropdown.Item>
+              ))}
+              <Dropdown.Separator />
               <Dropdown.Item value="sign-out" icon="logout" onClick={() => navigate('/auth/sign-in')}>Sign out</Dropdown.Item>
             </Dropdown.Content>
           </Dropdown>
         </AppHeader.End>
       </AppHeader>
 
-      <Sidebar slot="sidebar" value={activeValue(route)} items={navItems()} variant="minimal" aria-label="Main navigation">
+      <Sidebar slot="sidebar" value={activeValue(route)} items={navItems()} variant={sidebarStyle} aria-label="Main navigation">
         <Sidebar.Footer>
           <div className="lk-plan">
             <Badge tone="brand" variant="soft" size="sm">Pro plan</Badge>

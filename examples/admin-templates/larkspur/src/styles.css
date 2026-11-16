@@ -243,3 +243,22 @@ a.cell-title:hover { text-decoration: underline; }
 .lk-auth-card > * + * { margin-top: 16px; }
 .lk-auth-card .lk-h1 { margin-bottom: 4px; }
 .lk-auth-foot { text-align: center; font-size: 13px; }
+
+/* Sidebar styles gallery */
+.lk-sb-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); }
+.lk-sb-frame { margin: 0; display: grid; gap: 10px; }
+.lk-sb-frame figcaption { display: grid; gap: 4px; font-size: 14px; }
+.lk-sb-frame figcaption .cell-sub { white-space: normal; }
+.lk-sb-app { display: grid; grid-template-columns: 220px 1fr; height: 540px; overflow: hidden; border: 1px solid var(--ui-color-border); border-radius: 12px; background: var(--ui-color-background); }
+.lk-sb-frame.is-inset .lk-sb-app { background: color-mix(in srgb, var(--ui-color-text) 3.5%, var(--ui-color-background)); }
+.lk-sb-sidebar { height: 100%; }
+.lk-sb-main { display: grid; align-content: start; gap: 10px; padding: 18px; min-width: 0; }
+.lk-sb-frame.is-inset .lk-sb-main { margin: 8px 8px 8px 0; border: 1px solid color-mix(in srgb, var(--ui-color-text) 8%, transparent); border-radius: 12px; background: var(--ui-color-background); box-shadow: 0 1px 2px rgb(0 0 0 / 0.06); }
+.lk-sb-line { height: 10px; border-radius: 6px; background: color-mix(in srgb, var(--ui-color-text) 10%, transparent); }
+.lk-sb-line.w60 { width: 60%; height: 14px; }
+.lk-sb-line.w40 { width: 40%; }
+.lk-sb-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+.lk-sb-cards > div, .lk-sb-block { height: 64px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--ui-color-text) 8%, transparent); background: color-mix(in srgb, var(--ui-color-text) 2.5%, transparent); }
+.lk-sb-block { height: 150px; }
+.lk-sb-user { display: flex; align-items: center; gap: 10px; font-size: 12px; line-height: 1.35; }
+.lk-sb-avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: color-mix(in srgb, var(--ui-color-primary) 16%, transparent); color: var(--ui-color-text); font-weight: 700; font-size: 11px; }
