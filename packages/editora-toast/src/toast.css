@@ -7,6 +7,8 @@
 
 /* ── Design tokens ─────────────────────────────────────────── */
 :root {
+  /* Tells the toast code this stylesheet is loaded, however it was bundled. */
+  --editora-toast-stylesheet: 1;
   /* Surface */
   --et-bg:            #ffffff;
   --et-bg-subtle:     #f6f6f5;

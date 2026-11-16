@@ -17,9 +17,11 @@ import { Sidebar } from '@editora/ui-react';
 | Prop | Type | Description |
 | --- | --- | --- |
 | `autoSave` | `boolean` |   |
-| `collapsed` | `boolean` |   |
+| `collapseButton` | `boolean` | With `collapsible`: a chevron button in the header row that collapses / expands the sidebar. |
+| `collapsed` | `boolean` | Controlled: the sidebar is collapsed while this is true. Update it from `onCollapseChange`, or the collapse button and responsive collapsing will be undone on your next change of this prop. |
 | `collapsedWidth` | `string` |   |
 | `collapsible` | `boolean` |   |
+| `defaultCollapsed` | `boolean` | Uncontrolled: start collapsed, then let the sidebar (collapse button, rail clicks, small screens) keep its own state. Read changes with `onCollapseChange`. Ignored when `collapsed` is set. |
 | `density` | `'compact' \| 'default' \| 'comfortable'` |   |
 | `elevation` | `'none' \| 'low' \| 'high'` |   |
 | `headless` | `boolean` |   |
@@ -31,9 +33,11 @@ import { Sidebar } from '@editora/ui-react';
 | `itemPaddingY` | `number \| string` |   |
 | `itemRadius` | `number \| string` |   |
 | `items` | `SidebarItemInput[]` |   |
+| `layout` | `'list' \| 'dual'` | `dual`: the top-level items become an icon rail and the open one's `children` fill a panel beside it (as in Slack or Supabase). `collapsed` then hides the panel and keeps the rail; `width` sizes the panel. Put a logo or avatar on the rail with `Sidebar.RailStart` / `Sidebar.RailEnd`. |
 | `maxWidth` | `string` |   |
 | `minWidth` | `string` |   |
 | `navigation` | `'native' \| 'client'` | `client` always keeps the page on link clicks (route from `onSelect`/`onNavigate`). |
+| `onAreaChange` | `(value: string) => void` | layout="dual": a rail click opened another area (its value). The current page is unchanged. |
 | `onChange` | `(detail: SidebarSelectDetail) => void` |   |
 | `onCollapseChange` | `(collapsed: boolean) => void` |   |
 | `onNavigate` | `(detail: SidebarNavigateDetail) => void` | Fires before a link item (`href`) is followed. Call `detail.preventDefault()` to route in the app instead of a full page load. Clicks that open a new tab are never intercepted. |
@@ -54,7 +58,7 @@ import { Sidebar } from '@editora/ui-react';
 | `storageKey` | `string` |   |
 | `tone` | `SidebarTone` |   |
 | `value` | `string` |   |
-| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split'` |   |
+| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split' \| 'inset' \| 'indicator' \| 'pill' \| 'solid' \| 'gradient' \| 'glass'` | Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `solid` (the current item filled with the brand colour), `gradient` (deep brand gradient), `glass` (frosted, for a photo or gradient behind it), `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`. |
 | `width` | `string` |   |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
@@ -130,10 +134,26 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
+## Sidebar.RailStart props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
+## Sidebar.RailEnd props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `React.ReactNode` |   |
+
+Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
+
 ## Element: `<ui-sidebar>`
 
 Sidebar renders the `ui-sidebar` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `auto-save`, `collapsed`, `collapsed-width`, `collapsible`, `density`, `elevation`, `headless`, `item-font-size`, `item-gap`, `item-height`, `item-line-height`, `item-padding-x`, `item-padding-y`, `item-radius`, `items`, `max-width`, `min-width`, `position`, `radius`, `rail`, `resizable`, `row-gap`, `search-query`, `section-label-transform`, `show-badges`, `show-icons`, `size`, `storage-key`, `tone`, `value`, `variant`, `width`
+**Attributes:** `auto-save`, `collapse-button`, `collapsed`, `collapsed-width`, `collapsible`, `density`, `elevation`, `headless`, `item-font-size`, `item-gap`, `item-height`, `item-line-height`, `item-padding-x`, `item-padding-y`, `item-radius`, `items`, `layout`, `max-width`, `min-width`, `position`, `radius`, `rail`, `resizable`, `row-gap`, `search-query`, `section-label-transform`, `show-badges`, `show-icons`, `size`, `storage-key`, `tone`, `value`, `variant`, `width`
 
-**Events:** `change`, `collapse-change`, `resize`, `resize-end`, `resize-start`, `search-change`, `select`, `toggle`, `width-change`
+**Events:** `area-change`, `change`, `collapse-change`, `resize`, `resize-end`, `resize-start`, `search-change`, `select`, `toggle`, `width-change`

@@ -420,7 +420,7 @@ Beta are the handles `linkable` adds.
   shade those days behind the rows (not at month scales and wider, where a day is a few pixels) and mute them in the day header. They are shown, not scheduled
   around: task lengths are calendar days.
 - Size: by default the chart grows with its rows up to 620px (`max-height="60vh"` or the `--ui-gantt-max-height` variable change that); add
-  `fill` and give the element a height (or a flex/grid cell) and it fills it, with the rows scrolling inside. Below 640px of width only the
+  `fill` and give the element a height (or a flex/grid cell) and it fills it, with the rows scrolling inside (never shorter than `--ui-gantt-fill-min-height`, 240px). Below 640px of width only the
   name column is kept. Large task sets (over 240 rows) are virtualized automatically; `virtualized="false"` turns that off.
 - Dates are calendar days (`YYYY-MM-DD`). A time or offset after the day (`2026-03-02T23:30:00Z`) is ignored, so a task never moves a
   day with the viewer's time zone; `taskchange` reports plain `YYYY-MM-DD`.

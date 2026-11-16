@@ -28,6 +28,7 @@ import { Input } from '@editora/ui-react';
 | `description` | `string` |   |
 | `descriptionPosition` | `'above' \| 'below'` | Put the description under the field instead of under the label. |
 | `disabled` | `boolean` |   |
+| `error` | `string` | An error message to show under the field (marks it invalid). Leave it out to let a surrounding Form manage errors. |
 | `floatingLabel` | `boolean` |   |
 | `headless` | `boolean` |   |
 | `inputMode` | `string` | Hints at the type of data that might be entered by the user while editing the element or its contents |

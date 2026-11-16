@@ -47,6 +47,8 @@ export type DateTimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onCha
   showFooter?: boolean;
   label?: string;
   hint?: string;
+  /** Helper text under the label: the same as `hint`, named like the other fields' prop. */
+  description?: string;
   error?: string;
   onInput?: (detail: DateTimePickerDetail) => void;
   onChange?: (detail: DateTimePickerDetail) => void;
@@ -83,6 +85,7 @@ export const DateTimePicker = React.forwardRef<HTMLElement, DateTimePickerProps>
     showFooter,
     label,
     hint,
+    description,
     error,
     onInput,
     onChange,
@@ -155,7 +158,7 @@ export const DateTimePicker = React.forwardRef<HTMLElement, DateTimePickerProps>
     syncStringAttribute(el, 'mode', mode && mode !== 'popover' ? mode : null);
     syncStringAttribute(el, 'show-footer', typeof showFooter === 'boolean' ? String(showFooter) : null);
     syncStringAttribute(el, 'label', label ?? null);
-    syncStringAttribute(el, 'hint', hint ?? null);
+    syncStringAttribute(el, 'hint', hint ?? description ?? null);
     syncStringAttribute(el, 'error', error ?? null);
   }, [
     value,
@@ -183,6 +186,7 @@ export const DateTimePicker = React.forwardRef<HTMLElement, DateTimePickerProps>
     showFooter,
     label,
     hint,
+    description,
     error
   ]);
 

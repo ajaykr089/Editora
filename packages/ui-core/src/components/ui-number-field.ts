@@ -153,7 +153,9 @@ const style = `
     min-block-size: calc(var(--ui-number-field-min-height) - 2px);
     margin: 0;
     outline: none;
-    text-align: var(--ui-number-field-align, right);
+    /* Start-aligned like every other field, so a prefix ("$") and the number read together;
+       --ui-number-field-align: right lines numbers up in a column of fields. */
+    text-align: var(--ui-number-field-align, start);
   }
 
   input::placeholder {
@@ -223,8 +225,8 @@ const style = `
 
   .stepper-icon {
     display: block;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     user-select: none;
     pointer-events: none;
   }
@@ -279,8 +281,8 @@ const style = `
   }
 
   :host([size="sm"]) .stepper-icon {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
   }
 
   :host([size="lg"]) {
@@ -296,8 +298,8 @@ const style = `
   }
 
   :host([size="lg"]) .stepper-icon {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
   }
 
   :host([variant="surface"]) {
@@ -660,9 +662,12 @@ export class UINumberField extends ElementBase {
   private _formatNumber(value: number): string {
     const precision = this._effectivePrecision();
     const useGrouping = this.getAttribute('format') !== 'plain';
+    // An explicit precision pads (precision="2": 24.00). Decimals that only come from step round
+    // but do not pad: step="0.5" showed 24 as "24.0".
+    const padded = this._precision() != null;
     return new Intl.NumberFormat(this._locale(), {
       useGrouping,
-      minimumFractionDigits: precision ?? 0,
+      minimumFractionDigits: padded ? precision ?? 0 : 0,
       maximumFractionDigits: precision ?? 20
     }).format(value);
   }
@@ -1131,12 +1136,12 @@ export class UINumberField extends ElementBase {
           <div class="steppers">
             <span class="stepper-slot">
               <slot name="decrement-trigger">
-                <button class="stepper-btn" type="button" data-step-action="down" aria-label="Decrease value"><span class="stepper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8.5L2.5 5h7L6 8.5z"/></svg></span></button>
+                <button class="stepper-btn" type="button" data-step-action="down" aria-label="Decrease value"><span class="stepper-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 7h8"/></svg></span></button>
               </slot>
             </span>
             <span class="stepper-slot">
               <slot name="increment-trigger">
-                <button class="stepper-btn" type="button" data-step-action="up" aria-label="Increase value"><span class="stepper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 3.5L9.5 7H2.5L6 3.5z"/></svg></span></button>
+                <button class="stepper-btn" type="button" data-step-action="up" aria-label="Increase value"><span class="stepper-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 7h8M7 3v8"/></svg></span></button>
               </slot>
             </span>
           </div>

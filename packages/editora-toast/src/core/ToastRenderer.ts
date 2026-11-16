@@ -861,13 +861,20 @@ export class ToastRenderer {
   private injectCSS(): void {
     if (this.cssInjected || typeof document === 'undefined') return;
 
-    // Try to find existing CSS
-    const existing = Array.from(document.styleSheets).find(s =>
+    // toast.css sets --editora-toast-stylesheet on :root, which also finds it inside a bundled
+    // stylesheet (app.css, index-1a2b.css) where neither the file name nor a <style> tag shows it.
+    const marked = getComputedStyle(document.documentElement).getPropertyValue('--editora-toast-stylesheet').trim() !== '';
+    const existing = marked || Array.from(document.styleSheets).some(s =>
       (s.ownerNode as any)?.href?.includes('toast.css') ||
       (s.ownerNode as any)?.textContent?.includes('editora-toast')
     );
 
     if (!existing) {
+      // Say so once: without it toasts work but look bare (no icon row, no tones, no dark theme).
+      console.warn(
+        "[@editora/toast] toast.css is not loaded, so toasts use a minimal fallback style. " +
+          "Import '@editora/toast/toast.css' once in your app (or link @editora/toast/dist/toast.css)."
+      );
       const style = document.createElement('style');
       style.setAttribute('data-editora-toast-fallback', 'true');
       // Enough to lay the toasts out and show them when toast.css was not loaded; the real look is in toast.css.

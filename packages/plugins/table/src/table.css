@@ -5,7 +5,7 @@
 }
 
 .rte-table,
-table {
+:where(.rte-content, .editora-content) table {
   border-collapse: collapse;
   width: 100%;
   margin: 1rem 0;
@@ -17,8 +17,8 @@ table {
 
 .rte-table td,
 .rte-table th,
-table td,
-table th {
+:where(.rte-content, .editora-content) table td,
+:where(.rte-content, .editora-content) table th {
   border: 1px solid #ddd;
   padding: 8px 12px;
   min-width: 80px;
@@ -28,34 +28,34 @@ table th {
 
 .rte-table td:focus,
 .rte-table th:focus,
-table td:focus,
-table th:focus {
+:where(.rte-content, .editora-content) table td:focus,
+:where(.rte-content, .editora-content) table th:focus {
   outline: 2px solid #007acc;
   outline-offset: -2px;
 }
 
 .rte-table th,
-table th {
+:where(.rte-content, .editora-content) table th {
   background-color: #f8f9fa;
   font-weight: 600;
   text-align: left;
 }
 
 .rte-table td p,
-table td p {
+:where(.rte-content, .editora-content) table td p {
   margin: 0;
   padding: 0;
 }
 
 .rte-table td p:empty::before,
-table td p:empty::before {
+:where(.rte-content, .editora-content) table td p:empty::before {
   content: '\200B'; /* Zero-width space to maintain height */
   display: inline-block;
 }
 
 /* Table cell content editing */
 .rte-table td[contenteditable]:empty::before,
-table td[contenteditable]:empty::before {
+:where(.rte-content, .editora-content) table td[contenteditable]:empty::before {
   content: 'Type here...';
   color: #999;
   font-style: italic;
@@ -64,13 +64,13 @@ table td[contenteditable]:empty::before {
 
 /* Table hover effects */
 .rte-table tr:hover,
-table tr:hover {
+:where(.rte-content, .editora-content) table tr:hover {
   background-color: #f8f9fa;
 }
 
 /* Table selection styles */
 .rte-table td.selected,
-table td.selected {
+:where(.rte-content, .editora-content) table td.selected {
   background-color: #e3f2fd;
   border-color: #2196f3;
 }
@@ -226,7 +226,7 @@ th:hover > .resize-handle {
 }
 
 .rte-table:hover .table-resize-handle::after,
-table:hover .table-resize-handle::after {
+:where(.rte-content, .editora-content) table:hover .table-resize-handle::after {
   opacity: 1;
 }
 
@@ -234,32 +234,32 @@ table:hover .table-resize-handle::after {
    DARK THEME TABLE STYLES
    ============================================ */
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table, table) {
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table, :where(.rte-content, .editora-content) table) {
   border-color: #607088;
   background: #24303c;
   color: #e6eefb;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td, .rte-table th, table td, table th) {
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td, .rte-table th, :where(.rte-content, .editora-content) table td, :where(.rte-content, .editora-content) table th) {
   border-color: #607088;
   color: #e6eefb;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table th, table th) {
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table th, :where(.rte-content, .editora-content) table th) {
   background: linear-gradient(180deg, #3b4553 0%, #333d4a 100%);
   color: #f3f8ff;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table tr:hover, table tr:hover) {
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table tr:hover, :where(.rte-content, .editora-content) table tr:hover) {
   background-color: rgba(88, 166, 255, 0.12);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td.selected, table td.selected) {
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td.selected, :where(.rte-content, .editora-content) table td.selected) {
   background-color: rgba(88, 166, 255, 0.28);
   border-color: #79beff;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td[contenteditable]:empty::before, table td[contenteditable]:empty::before) {
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td[contenteditable]:empty::before, :where(.rte-content, .editora-content) table td[contenteditable]:empty::before) {
   color: #94a3b8;
 }
 
@@ -365,14 +365,14 @@ table:hover .table-resize-handle::after {
 
 /* Responsive table */
 @media (max-width: 768px) {
-  .rte-table, table {
+  .rte-table, :where(.rte-content, .editora-content) table {
     font-size: 12px;
   }
 
   .rte-table td,
   .rte-table th,
-  table td,
-  table th {
+  :where(.rte-content, .editora-content) table td,
+  :where(.rte-content, .editora-content) table th {
     padding: 4px 6px;
     min-width: 60px;
   }
@@ -396,14 +396,14 @@ table:hover .table-resize-handle::after {
 
 /* Print styles */
 @media print {
-  .rte-table, table {
+  .rte-table, :where(.rte-content, .editora-content) table {
     border: 1px solid #000;
   }
 
   .rte-table td,
   .rte-table th,
-  table td,
-  table th {
+  :where(.rte-content, .editora-content) table td,
+  :where(.rte-content, .editora-content) table th {
     border: 1px solid #000;
     padding: 4px;
   }

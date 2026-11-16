@@ -22,6 +22,7 @@ import { DatePicker } from '@editora/ui-react';
 | `closeOnSelect` | `boolean` |   |
 | `defaultOpen` | `boolean` |   |
 | `defaultValue` | `string` |   |
+| `description` | `string` | Helper text under the label: the same as `hint`, named like the other fields' prop. |
 | `disabled` | `boolean` |   |
 | `displayFormat` | `string` |   |
 | `error` | `string` |   |

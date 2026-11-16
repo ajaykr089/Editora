@@ -163,3 +163,17 @@ describe('ui-breadcrumb', () => {
     expect(el.style.getPropertyValue('--ui-breadcrumb-radius')).toBe('12px');
   });
 });
+
+describe('ui-breadcrumb item changes in place', () => {
+  it('shows new text when an item changes after mount (data loaded)', async () => {
+    const el = document.createElement('ui-breadcrumb');
+    el.innerHTML = '<div class="item" data-href="#/customers">Customers</div><div class="item">C-1003</div>';
+    document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    el.querySelectorAll('.item')[1].textContent = 'Ines Kim';
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(el.shadowRoot!.querySelector('[aria-current="page"]')!.textContent).toBe('Ines Kim');
+    el.remove();
+  });
+});

@@ -42,6 +42,7 @@ import { Sortable } from '@editora/ui-react';
 | `onItemsChange` | `(items: SortableItem[]) => void` |   |
 | `onPersistRequest` | `(detail: SortableChangeDetail) => void` |   |
 | `onSelectionChange` | `(detail: SortableSelectionChangeDetail) => void` |   |
+| `pageStyles` | `boolean` | renderItem / renderListHeader content is drawn inside the sortable's shadow root, where your CSS classes do not reach. `pageStyles` lets the page's stylesheets style it (they never override the sortable's own look). |
 | `persistKey` | `string` |   |
 | `renderEmptyState` | `(list: SortableList, context: SortableRenderEmptyStateContext) => React.ReactNode` |   |
 | `renderItem` | `(item: SortableItem, context: SortableRenderItemContext) => React.ReactNode` |   |
@@ -57,6 +58,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Sortable renders the `ui-sortable` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `allow-filtered-drag`, `allow-nesting`, `custom-item-rendering`, `disabled`, `drag-handle-mode`, `drag-handle-selector`, `drag-preview-size`, `drop-indicator-visibility`, `dropzone-style`, `filter-query`, `group`, `hide-toolbar`, `items`, `labels`, `list-max-height`, `lists`, `nest-trigger`, `persist-key`, `selection`, `show-selection-badge`, `sort`, `touch-hold-delay`
+**Attributes:** `allow-filtered-drag`, `allow-nesting`, `custom-item-rendering`, `disabled`, `drag-handle-mode`, `drag-handle-selector`, `drag-preview-size`, `drop-indicator-visibility`, `dropzone-style`, `filter-query`, `group`, `hide-toolbar`, `items`, `labels`, `list-max-height`, `lists`, `nest-trigger`, `page-styles`, `persist-key`, `selection`, `show-selection-badge`, `sort`, `touch-hold-delay`
 
 **Events:** `before-change`, `change`, `persist-request`, `selection-change`

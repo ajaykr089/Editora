@@ -390,6 +390,10 @@ export class RichTextEditorElement extends HTMLElement {
       this.classList.add(`editora-theme-${this.config.theme}`);
     }
     
+    // Plugins load on demand, which can take a moment: say so instead of showing an empty box.
+    this.setAttribute('data-loading', 'true');
+    this.setAttribute('aria-busy', 'true');
+
     // Load plugins
     const plugins = await this.loadPlugins();
     // A newer build started, or the editor was destroyed or removed, while plugins were loading.
@@ -444,6 +448,8 @@ export class RichTextEditorElement extends HTMLElement {
     
     // Mark as initialized
     this.isInitialized = true;
+    this.removeAttribute('data-loading');
+    this.removeAttribute('aria-busy');
     
     // Emit ready event
     this.dispatchEvent(new CustomEvent('editor-ready', {

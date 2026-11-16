@@ -43,7 +43,7 @@ describe('ui-gantt height', () => {
 
     expect(css).toMatch(/:host\(\[fill\]\) \{\s*block-size: 100%;/);
     expect(css).toMatch(/:host\(\[fill\]\) \.frame \{[^}]*display: flex;[^}]*flex-direction: column;[^}]*block-size: 100%;/);
-    expect(css).toMatch(/:host\(\[fill\]\) \.viewport \{[^}]*flex: 1 1 0;[^}]*min-block-size: 0;[^}]*max-block-size: none;/);
+    expect(css).toMatch(/:host\(\[fill\]\) \.viewport \{[^}]*flex: 1 1 0;[^}]*min-block-size: var\(--ui-gantt-fill-min-height, 240px\);[^}]*max-block-size: none;/);
   });
 
   it('keeps the 620px cap without fill, and lets max-height change it', async () => {

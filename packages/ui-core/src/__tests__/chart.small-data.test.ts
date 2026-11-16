@@ -54,3 +54,21 @@ describe('ui-chart with a few points', () => {
     expect(level2.querySelector('h2.title')!.textContent).toBe('Spend');
   });
 });
+
+describe('ui-chart loading with no data yet', () => {
+  it('says it is loading, not that there is no data, and keeps the plot height', async () => {
+    const el = document.createElement('ui-chart');
+    el.setAttribute('state', 'loading');
+    el.setAttribute('title', 'Revenue');
+    document.body.appendChild(el);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const empty = el.shadowRoot!.querySelector('.empty')!;
+    expect(empty.textContent).toBe('Loading chart data');
+    expect(empty.getAttribute('data-loading')).toBe('true');
+    expect(empty.getAttribute('role')).toBe('status');
+    el.removeAttribute('state');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(el.shadowRoot!.querySelector('.empty')!.textContent).toBe('No series data available');
+    el.remove();
+  });
+});

@@ -1186,3 +1186,51 @@
     background: #4a5568;
   }
 }
+
+/* While plugins load (data-loading): a toolbar-shaped shimmer and a quiet line, instead of an
+   empty box. The editor clears both once it is built. */
+editora-editor[data-loading] {
+  display: block;
+  position: relative;
+  min-height: 160px;
+  border: 1px solid var(--ui-color-border, #ddd);
+  border-radius: var(--ui-radius, 4px);
+  background: var(--ui-color-surface, #fff);
+}
+
+editora-editor[data-loading]::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 46px;
+  border-bottom: 1px solid var(--ui-color-border, #ddd);
+  border-radius: var(--ui-radius, 4px) var(--ui-radius, 4px) 0 0;
+  background: linear-gradient(90deg,
+    var(--ui-color-surface-alt, #f5f5f5) 0%,
+    color-mix(in srgb, var(--ui-color-surface-alt, #f5f5f5) 70%, var(--ui-color-border, #ddd)) 50%,
+    var(--ui-color-surface-alt, #f5f5f5) 100%);
+  background-size: 220% 100%;
+  animation: editora-loading-shimmer 1.2s linear infinite;
+}
+
+editora-editor[data-loading]::after {
+  content: 'Loading editor…';
+  position: absolute;
+  top: 62px;
+  left: 16px;
+  font: 14px/1.4 var(--ui-font-family, system-ui, sans-serif);
+  color: var(--ui-color-muted, #6b7280);
+}
+
+/* The original markup waits, unseen, until the editor takes it over. */
+editora-editor[data-loading] > * {
+  visibility: hidden;
+}
+
+@keyframes editora-loading-shimmer {
+  to { background-position: -220% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  editora-editor[data-loading]::before { animation: none; }
+}

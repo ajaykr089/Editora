@@ -173,18 +173,18 @@ const style = `
     gap: 4px;
   }
 
+  /* Same type as a Card's title and description, so a chart reads as one of the cards beside it. */
   .title {
-    font-size: 15px;
-    line-height: 1.35;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-size: var(--ui-chart-title-size, 18px);
+    line-height: var(--ui-chart-title-line-height, 24px);
+    font-weight: 700;
     margin: 0;
   }
 
   .subtitle {
     margin: 0;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--ui-chart-subtitle-size, 14px);
+    line-height: var(--ui-chart-subtitle-line-height, 20px);
     color: var(--ui-chart-muted);
   }
 
@@ -492,6 +492,14 @@ const style = `
     white-space: nowrap;
   }
 
+  .summary-series {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ui-chart-muted);
+  }
+
   .insight {
     display: flex;
     align-items: center;
@@ -569,6 +577,23 @@ const style = `
     font-size: 12px;
     color: var(--ui-chart-muted);
     background: color-mix(in srgb, var(--ui-chart-surface) 95%, transparent);
+  }
+
+  .empty[data-loading="true"] {
+    display: grid;
+    place-items: center;
+    min-block-size: var(--ui-chart-plot-min-height);
+    block-size: var(--ui-chart-plot-height);
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: transparent;
+    background:
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--ui-chart-surface) 88%, var(--ui-chart-grid)) 0%,
+        color-mix(in srgb, var(--ui-chart-surface) 60%, var(--ui-chart-grid)) 50%,
+        color-mix(in srgb, var(--ui-chart-surface) 88%, var(--ui-chart-grid)) 100%);
+    background-size: 220% 100%;
+    animation: ui-chart-shimmer 1.1s linear infinite;
   }
 
   .message[data-tone="error"] {
@@ -659,7 +684,8 @@ const style = `
   @media (prefers-reduced-motion: reduce) {
     .legend-item,
     .plot-hit::after,
-    .loading-overlay {
+    .loading-overlay,
+    .empty[data-loading="true"] {
       transition: none !important;
       animation: none !important;
     }
@@ -765,6 +791,24 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+/**
+ * `values` and `labels` take a JSON array (`[1, 2, 3]`, `["Jan 1, 2026", "Feb 1, 2026"]`, which
+ * may contain commas) or comma-separated text (`1,2,3`).
+ */
+function parseList(raw: string | null): string[] {
+  const text = (raw || '').trim();
+  if (!text) return [];
+  if (text.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed.map((entry) => (entry == null ? '' : String(entry)));
+    } catch {
+      // Not JSON after all: fall back to commas.
+    }
+  }
+  return text.split(',');
+}
+
 function parsePoints(rawData: string | null, rawValues: string | null, rawLabels: string | null): ChartPoint[] {
   if (rawData) {
     try {
@@ -796,13 +840,11 @@ function parsePoints(rawData: string | null, rawValues: string | null, rawLabels
     }
   }
 
-  const values = (rawValues || '')
-    .split(',')
+  const values = parseList(rawValues)
     .map((entry) => Number(entry.trim()))
     .filter((entry) => Number.isFinite(entry));
 
-  const labels = (rawLabels || '')
-    .split(',')
+  const labels = parseList(rawLabels)
     .map((entry) => entry.trim())
     .filter(Boolean);
 
@@ -950,6 +992,22 @@ function normalizeState(raw: string | null): ChartState {
   return 'idle';
 }
 
+
+/** A round step that splits [min, max] into four gridline intervals covering the whole range. */
+function niceTickStep(min: number, max: number): number {
+  const span = max - min;
+  if (!(span > 0) || !Number.isFinite(span)) return 0;
+  const raw = span / 4;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const factor of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]) {
+    const step = factor * magnitude;
+    // The step must still cover the range once the low end is snapped down to a multiple of it.
+    const low = Math.floor(min / step + 1e-9) * step;
+    if (low + step * 4 >= max - span * 1e-9) return step;
+  }
+  return raw;
+}
+
 export class UIChart extends ElementBase {
   static get observedAttributes() {
     return [
@@ -973,7 +1031,8 @@ export class UIChart extends ElementBase {
       'show-table',
       'heading-level',
       'locale',
-      'show-insight'
+      'show-insight',
+      'show-change'
     ];
   }
 
@@ -1061,6 +1120,12 @@ export class UIChart extends ElementBase {
     return raw !== 'false' && raw !== '0' && raw !== 'off';
   }
 
+  /** `show-change="false"`: the values are categories (stages, devices), not a sequence, so a first-to-last change means nothing. */
+  private _showChange(): boolean {
+    const raw = (this.getAttribute('show-change') || '').trim().toLowerCase();
+    return !(raw === 'false' || raw === '0' || raw === 'off');
+  }
+
   /** The one-line readout under the plot (range and change, or the selected point): `show-insight`, else `show-summary`. */
   private _showInsight(): boolean {
     const raw = this.getAttribute('show-insight');
@@ -1096,7 +1161,7 @@ export class UIChart extends ElementBase {
   private _valueDomain(
     points: ChartPoint[],
     options?: { includeZero?: boolean; fitPadding?: number }
-  ): { min: number; max: number; span: number; zeroInDomain: boolean } {
+  ): { min: number; max: number; span: number; zeroInDomain: boolean; step: number } {
     const includeZero = !!options?.includeZero;
     const fitPadding = options?.fitPadding ?? 0.14;
 
@@ -1136,8 +1201,22 @@ export class UIChart extends ElementBase {
     if (max <= min) max = min + 1;
     span = max - min;
 
+    // Snap the axis to round steps (1, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 x 10^n) so the gridlines read $0,
+    // $15,000, $30,000... instead of $13,565, $27,130.
+    const step = niceTickStep(min, max);
+    if (step > 0) {
+      if (dataMax <= 0 && dataMin < 0) {
+        max = Math.ceil(max / step - 1e-9) * step;
+        min = max - step * 4;
+      } else {
+        min = Math.max(dataMin >= 0 ? 0 : -Infinity, Math.floor(min / step + 1e-9) * step);
+        max = min + step * 4;
+      }
+      span = max - min;
+    }
+
     const zeroInDomain = min <= 0 && max >= 0;
-    return { min, max, span, zeroInDomain };
+    return { min, max, span, zeroInDomain, step };
   }
 
   /**
@@ -1393,7 +1472,14 @@ export class UIChart extends ElementBase {
   }
 
   private _buildCartesianTicks(min: number, max: number): string[] {
-    return [1, 0.75, 0.5, 0.25, 0].map((ratio) => this._formatValue(min + (max - min) * ratio));
+    // As many decimals as the step needs (0.25 shows as 0.25, not 0.3), and no more.
+    const step = (max - min) / 4;
+    const decimals = step > 0 && step < 1 ? Math.min(4, (String(Number(step.toPrecision(6))).split('.')[1] || '').length) : 0;
+    const options = step >= 1 ? { maximumFractionDigits: 0 } : { maximumFractionDigits: decimals, minimumFractionDigits: 0 };
+    return [1, 0.75, 0.5, 0.25, 0].map((ratio) => {
+      const value = min + (max - min) * ratio;
+      return this._formatValue(Math.abs(value) < step * 1e-6 ? 0 : value, options);
+    });
   }
 
   private _plotCartesian(
@@ -1411,7 +1497,9 @@ export class UIChart extends ElementBase {
     const axisH = height - padT - padB;
     const labels = data.labels;
     const series = data.series;
-    const includeZero = type === 'bar';
+    // Bars and areas show amounts by their size, so they start at zero; a line or scatter is read
+    // by its shape and keeps a fitted axis. (An area on a $4,000 baseline made a 40% dip look like 90%.)
+    const includeZero = type === 'bar' || type === 'area';
     const values = series.flatMap((entry) => entry.data.map((point) => point.value));
     const domain = this._valueDomain(values.map((value, index) => ({ label: String(index), value })), { includeZero });
     const min = domain.min;
@@ -1805,10 +1893,11 @@ export class UIChart extends ElementBase {
       const trend = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}${
         stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : '-'}${pct}%)`
       }`;
+      const named = data.series.length > 1 ? `${escapeHtml(primary.name)}: ` : '';
       return `
         <div class="insight" part="insight">
-          <span>Range <strong>${this._formatValue(stats.min)}</strong> to <strong>${this._formatValue(stats.max)}</strong></span>
-          <strong data-tone="${trendTone}">${escapeHtml(trend)}</strong>
+          <span>${named}Range <strong>${this._formatValue(stats.min)}</strong> to <strong>${this._formatValue(stats.max)}</strong></span>
+          ${this._showChange() ? `<strong data-tone="${trendTone}">${escapeHtml(trend)}</strong>` : ''}
         </div>
       `;
     }
@@ -1843,7 +1932,10 @@ export class UIChart extends ElementBase {
     const statusPill = state === 'idle' ? '' : `<span class="status-pill" data-state="${state}">${statusText(state)}</span>`;
 
     if (!primary || !data.labels.length) {
-      const message = state === 'error' ? 'Chart data failed to load' : 'No series data available';
+      // Loading with no data yet: hold the plot's height with a shimmer, so the card does not
+      // claim "no data" and then jump when the data arrives.
+      const loadingEmpty = state === 'loading';
+      const message = state === 'error' ? 'Chart data failed to load' : loadingEmpty ? 'Loading chart data' : 'No series data available';
       this.setContent(`
         <style>${style}</style>
         <section class="frame" part="frame" data-state="${state}" data-disabled="${disabled ? 'true' : 'false'}" aria-disabled="${disabled ? 'true' : 'false'}">
@@ -1857,7 +1949,7 @@ export class UIChart extends ElementBase {
             </div>
             ${statusPill}
           </header>
-          <div class="empty" part="empty">${escapeHtml(message)}</div>
+          <div class="empty" part="empty" ${loadingEmpty ? 'data-loading="true" role="status"' : ''}>${escapeHtml(message)}</div>
         </section>
       `);
       return;
@@ -1906,6 +1998,8 @@ export class UIChart extends ElementBase {
           .join('');
 
     const deltaTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
+    // With several series the figures describe the first one: say which.
+    const summaryName = data.series.length > 1 ? primary.name : '';
     const deltaText = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}`;
 
     const stateMessage =
@@ -1940,7 +2034,8 @@ export class UIChart extends ElementBase {
         </header>
 
         ${showSummary ? `
-          <section class="summary" part="summary">
+          <section class="summary" part="summary"${summaryName ? ` aria-label="${escapeHtml(summaryName)}"` : ''}>
+            ${summaryName ? `<p class="summary-series" part="summary-series">${escapeHtml(summaryName)}</p>` : ''}
             <div class="metric" part="metric">
               <span class="metric-label">Total</span>
               <span class="metric-value">${escapeHtml(this._formatValue(stats.total))}</span>
@@ -1953,10 +2048,15 @@ export class UIChart extends ElementBase {
               <span class="metric-label">Peak</span>
               <span class="metric-value">${escapeHtml(this._formatValue(stats.max))}</span>
             </div>
+            ${this._showChange() ? `
             <div class="metric" part="metric">
-              <span class="metric-label">Delta</span>
+              <span class="metric-label">Change</span>
               <span class="metric-value" data-tone="${deltaTone}">${escapeHtml(deltaText)}</span>
-            </div>
+            </div>` : `
+            <div class="metric" part="metric">
+              <span class="metric-label">Lowest</span>
+              <span class="metric-value">${escapeHtml(this._formatValue(stats.min))}</span>
+            </div>`}
           </section>
         ` : ''}
 

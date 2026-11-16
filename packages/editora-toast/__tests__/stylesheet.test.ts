@@ -63,3 +63,9 @@ describe('toast.css', () => {
     expect(forced).toMatch(/\.editora-toast-action\.primary \{[^}]*Highlight/);
   });
 });
+
+describe('toast.css loaded check', () => {
+  it('marks itself on :root, so a bundled copy is still found', () => {
+    expect(rule(':root')).toMatch(/--editora-toast-stylesheet:\s*1/);
+  });
+});

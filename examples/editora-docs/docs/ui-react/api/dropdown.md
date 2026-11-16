@@ -57,7 +57,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 | `caption` | `React.ReactNode` |   |
 | `checked` | `boolean` |   |
 | `children` | `React.ReactNode` |   |
-| `icon` | `React.ReactNode` |   |
+| `icon` | `React.ReactNode` | An Editora icon name ("settings"), or your own element. |
 | `label` | `string` |   |
 | `role` | `DropdownItemRole` |   |
 | `shortcut` | `React.ReactNode` |   |

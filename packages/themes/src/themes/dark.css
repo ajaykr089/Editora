@@ -1,9 +1,23 @@
 /* Rich Text Editor - Dark Theme */
 
+/* When the whole page is dark (an Editora UI app in dark mode), the dark editor takes the app's palette.
+   A dark editor on a light page keeps its own: the page's --ui tokens are light there (dark text on the
+   dark input failed contrast). --rte-page-* stay undefined elsewhere, so each rule uses its fallback. */
+:is(html, body):is([data-theme="dark"], .dark, .editora-theme-dark),
+[data-ui-mode="dark"] {
+  --rte-page-border: var(--ui-color-border);
+  --rte-page-foreground-on-primary: var(--ui-color-foreground-on-primary);
+  --rte-page-muted: var(--ui-color-muted);
+  --rte-page-primary: var(--ui-color-primary);
+  --rte-page-surface: var(--ui-color-surface);
+  --rte-page-surface-alt: var(--ui-color-surface-alt);
+  --rte-page-text: var(--ui-color-text);
+}
+
 /* Override CSS Custom Properties for Dark Theme */
 :is([data-theme="dark"], .dark, .editora-theme-dark) {
   /* Colors */
-  --rte-color-primary: #58a6ff;
+  --rte-color-primary: var(--rte-page-primary, #58a6ff);
   --rte-color-primary-hover: #4b9cf8;
   --rte-color-secondary: #9aa4b2;
   --rte-color-success: #4ecb71;
@@ -12,10 +26,10 @@
   --rte-color-info: #58a6ff;
 
   /* Text Colors */
-  --rte-color-text-primary: #ecf3ff;
+  --rte-color-text-primary: var(--rte-page-text, #ecf3ff);
   --rte-color-text-secondary: #c5d0df;
-  --rte-color-text-muted: #8f9bb0;
-  --rte-color-text-inverse: #0f1722;
+  --rte-color-text-muted: var(--rte-page-muted, #8f9bb0);
+  --rte-color-text-inverse: var(--rte-page-foreground-on-primary, #0f1722);
 
   /* Background Colors */
   --rte-color-bg-primary: #1d242d;
@@ -25,7 +39,7 @@
   --rte-color-bg-active: #556277;
 
   /* Border Colors */
-  --rte-color-border: #475263;
+  --rte-color-border: var(--rte-page-border, #475263);
   --rte-color-border-light: #3c4656;
   --rte-color-border-focus: #58a6ff;
 
@@ -36,21 +50,21 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-editor {
-  background: linear-gradient(180deg, #1b2330 0%, #1c2430 100%);
+  background: var(--rte-page-surface, linear-gradient(180deg, #1b2330 0%, #1c2430 100%));
   border-color: var(--rte-color-border);
   color: var(--rte-color-text-primary);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar {
-  background: linear-gradient(180deg, #353d48 0%, #2d3540 100%);
+  background: var(--rte-page-surface-alt, linear-gradient(180deg, #353d48 0%, #2d3540 100%));
   border-color: var(--rte-color-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button {
-  background: linear-gradient(180deg, #46505f 0%, #3b4553 100%);
-  border-color: #566275;
-  color: #d0dae8;
+  background: var(--rte-page-surface, linear-gradient(180deg, #46505f 0%, #3b4553 100%));
+  border-color: var(--rte-page-border, #566275);
+  color: var(--rte-page-text, #d0dae8);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 
@@ -323,7 +337,7 @@
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content {
   color: var(--rte-color-text-primary);
-  background: linear-gradient(180deg, #1f2732 0%, #1c232e 100%);
+  background: var(--rte-page-surface, linear-gradient(180deg, #1f2732 0%, #1c232e 100%));
   border-color: var(--rte-color-border) !important;
 }
 
@@ -404,13 +418,13 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar {
-  background: linear-gradient(180deg, #2c3440 0%, #252d37 100%);
-  border-top-color: #3f4a5b;
-  color: #c5cfdf;
+  background: var(--rte-page-surface-alt, linear-gradient(180deg, #2c3440 0%, #252d37 100%));
+  border-top-color: var(--rte-page-border, #3f4a5b);
+  color: var(--rte-page-muted, #c5cfdf);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-item {
-  color: #d7deea;
+  color: var(--rte-page-muted, #d7deea);
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-separator {
@@ -422,8 +436,8 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-bottom {
-  border-left-color: #3f4a5b;
-  border-right-color: #3f4a5b;
+  border-left-color: var(--rte-page-border, #3f4a5b);
+  border-right-color: var(--rte-page-border, #3f4a5b);
 }
 
 

@@ -42,8 +42,8 @@ const CALENDAR_ICON = `
 `;
 
 const CHEVRON_ICON = `
-  <svg viewBox="0 0 20 20" class="icon-svg" aria-hidden="true" focusable="false">
-    <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.12l3.71-3.9a.75.75 0 1 1 1.08 1.04l-4.25 4.47a.75.75 0 0 1-1.08 0L5.2 8.27a.75.75 0 0 1 .02-1.06Z" fill="currentColor"/>
+  <svg viewBox="0 0 16 16" class="icon-svg toggle-chevron" aria-hidden="true" focusable="false">
+    <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
 `;
 
@@ -202,6 +202,35 @@ const style = `
     display: inline-grid;
     place-items: center;
     transition: background-color var(--ui-dp-duration) var(--ui-dp-ease), color var(--ui-dp-duration) var(--ui-dp-ease), transform var(--ui-dp-duration) var(--ui-dp-ease);
+  }
+
+  /* The open/close toggle reads like Select's indicator: a thin chevron in the field's muted
+     colour that turns over while the panel is open, not a grey button inside the field. */
+  .btn[data-action="toggle"] {
+    color: color-mix(in srgb, var(--ui-dp-text) 58%, transparent);
+  }
+
+  .btn[data-action="toggle"]:hover {
+    background: transparent;
+    color: var(--ui-dp-text);
+  }
+
+  .btn[data-action="toggle"] .toggle-chevron {
+    inline-size: 16px;
+    block-size: 16px;
+    transition: transform var(--ui-dp-duration, 160ms) var(--ui-dp-ease, ease);
+  }
+
+  .btn[data-action="toggle"][aria-expanded="true"] {
+    color: var(--ui-dp-accent);
+  }
+
+  .btn[data-action="toggle"][aria-expanded="true"] .toggle-chevron {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn[data-action="toggle"] .toggle-chevron { transition: none; }
   }
 
   .btn:hover { background: color-mix(in srgb, var(--ui-dp-text) 10%, transparent); color: var(--ui-dp-text); }

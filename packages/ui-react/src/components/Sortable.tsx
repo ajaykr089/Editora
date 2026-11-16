@@ -247,6 +247,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   showSelectionBadge?: boolean;
   labels?: SortableLabels;
   hideToolbar?: boolean;
+  /** renderItem / renderListHeader content is drawn inside the sortable's shadow root, where your CSS classes do not reach. `pageStyles` lets the page's stylesheets style it (they never override the sortable's own look). */
+  pageStyles?: boolean;
   disabled?: boolean;
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
@@ -341,6 +343,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     showSelectionBadge,
     labels,
     hideToolbar,
+    pageStyles,
     disabled,
     renderItem,
     renderListHeader,
@@ -465,10 +468,11 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       element.canDrop = canDrop ?? null;
       syncJsonAttribute(element, 'labels', labels && Object.keys(labels).length ? labels : null);
       syncBooleanAttribute(element, 'hide-toolbar', hideToolbar);
+      syncBooleanAttribute(element, 'page-styles', pageStyles);
 
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, group, touchHoldDelay, listMaxHeight, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, group, touchHoldDelay, listMaxHeight, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, pageStyles, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

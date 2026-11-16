@@ -32,6 +32,8 @@ export type LayoutProps = React.HTMLAttributes<HTMLElement> & {
   mobileSidebar?: 'drawer' | 'stack';
   /** Viewport width (px) at and below which the drawer is used. Default 980. */
   drawerBreakpoint?: number;
+  /** variant="shell" only: header and sidebar on a tinted canvas, the content on a raised card. Pair with Sidebar variant="inset". */
+  inset?: boolean;
   /** The drawer is open. With onSidebarOpenChange it is controlled. */
   sidebarOpen?: boolean;
   onSidebarOpenChange?: (open: boolean, detail: { source: string }) => void;
@@ -54,6 +56,7 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
     onLayoutChange,
     mobileSidebar,
     drawerBreakpoint,
+    inset,
     sidebarOpen,
     onSidebarOpenChange,
     sidebarLabel,
@@ -119,13 +122,15 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
 
     if (typeof drawerBreakpoint === 'number') el.setAttribute('drawer-breakpoint', String(drawerBreakpoint));
     else el.removeAttribute('drawer-breakpoint');
+    if (inset) el.setAttribute('inset', '');
+    else el.removeAttribute('inset');
 
     if (sidebarLabel) el.setAttribute('sidebar-label', sidebarLabel);
     else el.removeAttribute('sidebar-label');
 
     if (typeof sidebarOpen === 'boolean') el.toggleAttribute('sidebar-open', sidebarOpen);
     flushElementRender(el);
-  }, [mode, variant, density, maxWidth, sidebarSide, collapsed, headless, sidebarWidth, asideWidth, mobileSidebar, drawerBreakpoint, sidebarLabel, sidebarOpen]);
+  }, [mode, variant, density, maxWidth, sidebarSide, collapsed, headless, sidebarWidth, asideWidth, mobileSidebar, drawerBreakpoint, sidebarLabel, sidebarOpen, inset]);
 
   useControlledAttribute(ref, {
     attribute: 'sidebar-open',

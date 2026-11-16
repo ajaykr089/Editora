@@ -62,6 +62,10 @@ export interface RichTextEditorProps {
   defaultValue?: string;
   readonly?: boolean;
   placeholder?: string;
+  /** Accessible name of the editing area (what a screen reader announces). Without it, the placeholder or "Rich text editor" is used. */
+  ariaLabel?: string;
+  /** Id of a visible label for the editing area; wins over ariaLabel. */
+  ariaLabelledBy?: string;
   onChange?: (html: string) => void;
   onInit?: (editor: EditorAPI) => void;
   onDestroy?: () => void;
@@ -192,7 +196,7 @@ export interface RichTextEditorProps {
 /**
  * Internal merged configuration (after defaults applied)
  */
-export interface EditorConfig extends Required<Omit<RichTextEditorProps, 'id' | 'className' | 'value' | 'defaultValue' | 'onChange' | 'onInit' | 'onDestroy' | 'plugins' | 'pluginConfig' | 'floatingToolbar' | 'mediaConfig'>> {
+export interface EditorConfig extends Required<Omit<RichTextEditorProps, 'id' | 'className' | 'ariaLabel' | 'ariaLabelledBy' | 'value' | 'defaultValue' | 'onChange' | 'onInit' | 'onDestroy' | 'plugins' | 'pluginConfig' | 'floatingToolbar' | 'mediaConfig'>> {
   id?: string;
   className?: string;
   value?: string;

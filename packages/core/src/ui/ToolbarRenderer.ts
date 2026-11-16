@@ -355,17 +355,27 @@ export class ToolbarRenderer {
       const padding = 16;
       const moreButtonWidth = 40;
       const gap = 4;
-      const availableWidth = Math.max(0, toolbarWidth - padding - moreButtonWidth - gap);
+      const fullWidth = Math.max(0, toolbarWidth - padding);
+      const availableWidth = Math.max(0, fullWidth - moreButtonWidth - gap);
 
-      let accumulated = 0;
+      // Measure where each button really ends, from the start of the items row. Adding up button
+      // widths left out the space between `|` groups (group gaps, separators), so the last button
+      // counted as fitting was cut in half by the row's overflow: hidden.
+      const rtl = getComputedStyle(container).direction === "rtl";
+      const origin = itemsContainer.getBoundingClientRect();
+      const extent = (unit: HTMLElement) => {
+        const rect = unit.getBoundingClientRect();
+        return rtl ? origin.right - rect.left : rect.right - origin.left;
+      };
+
       let visibleCount = 0;
-      for (const unit of units) {
-        const width = unit.getBoundingClientRect().width + gap;
-        if (accumulated + width <= availableWidth) {
-          accumulated += width;
-          visibleCount++;
-        } else {
-          break;
+      if (extent(units[units.length - 1]) <= fullWidth) {
+        // Everything fits without a "more" button.
+        visibleCount = units.length;
+      } else {
+        for (const unit of units) {
+          if (extent(unit) <= availableWidth) visibleCount++;
+          else break;
         }
       }
       visibleCount = Math.max(1, Math.min(visibleCount, units.length));

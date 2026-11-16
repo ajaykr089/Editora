@@ -40,6 +40,8 @@ export type DatePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'
   placeholder?: string;
   label?: string;
   hint?: string;
+  /** Helper text under the label: the same as `hint`, named like the other fields' prop. */
+  description?: string;
   error?: string;
   clearable?: boolean;
   allowInput?: boolean;
@@ -83,6 +85,7 @@ export const DatePicker = React.forwardRef<HTMLElement, DatePickerProps>(functio
     placeholder,
     label,
     hint,
+    description,
     error,
     clearable,
     allowInput,
@@ -162,7 +165,7 @@ export const DatePicker = React.forwardRef<HTMLElement, DatePickerProps>(functio
     syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
     syncStringAttribute(el, 'placeholder', placeholder ?? null);
     syncStringAttribute(el, 'label', label ?? null);
-    syncStringAttribute(el, 'hint', hint ?? null);
+    syncStringAttribute(el, 'hint', hint ?? description ?? null);
     syncStringAttribute(el, 'error', error ?? null);
     syncDefaultOnAttribute(el, 'clearable', clearable);
     syncDefaultOnAttribute(el, 'allow-input', allowInput);
@@ -197,6 +200,7 @@ export const DatePicker = React.forwardRef<HTMLElement, DatePickerProps>(functio
     placeholder,
     label,
     hint,
+    description,
     error,
     clearable,
     allowInput,

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Settings · Copperline</title>
+    <meta name="description" content="Copperline: an admin template in plain HTML, built with Editora UI web components and the Editora rich-text editor." />
+  </head>
+  <body>
+    <ui-layout variant="shell" sidebar-label="Main navigation">
+      <ui-app-header slot="header" bordered show-menu-button="narrow">
+        <a slot="start" class="cl-brand" href="./" aria-label="Copperline, dashboard">
+          <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+          <span>Copperline</span>
+        </a>
+        <div slot="end" class="cl-actions">
+          <ui-button variant="ghost" size="sm" data-action="toggle-theme" aria-label="Use dark theme"><ui-icon name="moon" decorative></ui-icon></ui-button>
+          <ui-button variant="ghost" size="sm" aria-label="Notifications"><ui-icon name="bell" decorative></ui-icon></ui-button>
+          <ui-avatar initials="SL" size="sm" alt="Sana Lindqvist" variant="soft"></ui-avatar>
+        </div>
+      </ui-app-header>
+      <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
+      <main slot="content" class="cl-content" id="main">
+        <div class="cl-page cl-narrow">
+          <div class="cl-head"><div><h1>Settings</h1><p>The account and how Copperline talks to you.</p></div></div>
+          <ui-tabs variant="underline" aria-label="Settings sections">
+            <div slot="tab">Profile</div>
+            <div slot="panel">
+              <ui-card>
+                <ui-form id="profile-form" aria-label="Profile">
+                  <div class="cl-stack">
+                    <ui-input name="name" label="Full name" value="Sana Lindqvist" required></ui-input>
+                    <ui-input name="email" type="email" label="Email" value="sana.lindqvist@example.com" required description="Try one ending in @taken.example to see a server error."></ui-input>
+                    <ui-select name="timezone" label="Time zone" value="Europe/Stockholm">
+                      <option>Europe/Stockholm</option><option>Europe/Lisbon</option><option>America/New_York</option><option>Asia/Tokyo</option>
+                    </ui-select>
+                    <ui-textarea name="signature" label="Email signature" rows="3" value="Sana, Copperline support"></ui-textarea>
+                    <div class="cl-actions"><ui-button type="submit">Save changes</ui-button></div>
+                  </div>
+                </ui-form>
+              </ui-card>
+            </div>
+            <div slot="tab">Notifications</div>
+            <div slot="panel">
+              <ui-card>
+                <div class="cl-stack">
+                  <ui-switch label="New orders" description="One email per order." checked></ui-switch>
+                  <ui-switch label="Articles waiting for review" checked></ui-switch>
+                  <ui-switch label="Weekly summary" description="Mondays at 8:00."></ui-switch>
+                  <div class="cl-actions"><ui-button id="save-notifications">Save</ui-button></div>
+                </div>
+              </ui-card>
+            </div>
+            <div slot="tab">Security</div>
+            <div slot="panel">
+              <ui-card>
+                <div class="cl-stack">
+                  <ui-password-field label="Current password" autocomplete="current-password"></ui-password-field>
+                  <ui-password-field label="New password" autocomplete="new-password" description="At least 12 characters."></ui-password-field>
+                  <div class="cl-actions"><ui-button id="change-password">Change password</ui-button></div>
+                </div>
+              </ui-card>
+            </div>
+          </ui-tabs>
+        </div>
+      </main>
+    </ui-layout>
+    <script type="module" src="./src/settings.ts"></script>
+  </body>
+</html>

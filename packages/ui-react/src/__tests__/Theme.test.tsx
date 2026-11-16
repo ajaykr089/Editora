@@ -95,3 +95,21 @@ describe('ThemeProvider (React)', () => {
     expect(root().getPropertyValue('--ui-color-foreground-on-primary').trim()).toBe('#ffffff');
   });
 });
+
+describe('ThemeProvider first paint', () => {
+  it('has written the brand colour to the document before its children mount', () => {
+    document.documentElement.style.removeProperty('--ui-color-primary');
+    let seen = '';
+    function Child() {
+      // A child that reads styles during render (as one that measures layout would) sees the brand.
+      seen = document.documentElement.style.getPropertyValue('--ui-color-primary');
+      return null;
+    }
+    render(
+      <ThemeProvider tokens={{ colors: { primary: '#5b21b6' } } as any} storageKey={null}>
+        <Child />
+      </ThemeProvider>
+    );
+    expect(seen.trim()).toBe('#5b21b6');
+  });
+});

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard · Copperline</title>
+    <meta name="description" content="Copperline: an admin template in plain HTML, built with Editora UI web components and the Editora rich-text editor." />
+  </head>
+  <body>
+    <ui-layout variant="shell" sidebar-label="Main navigation">
+      <ui-app-header slot="header" bordered show-menu-button="narrow">
+        <a slot="start" class="cl-brand" href="./" aria-label="Copperline, dashboard">
+          <svg class="cl-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ui-color-primary)" /><path d="M21 11.5a7 7 0 1 0 0 9" fill="none" stroke="var(--ui-color-foreground-on-primary, #fff)" stroke-width="2.6" stroke-linecap="round" /></svg>
+          <span>Copperline</span>
+        </a>
+        <div slot="end" class="cl-actions">
+          <ui-button variant="ghost" size="sm" data-action="toggle-theme" aria-label="Use dark theme"><ui-icon name="moon" decorative></ui-icon></ui-button>
+          <ui-button variant="ghost" size="sm" aria-label="Notifications"><ui-icon name="bell" decorative></ui-icon></ui-button>
+          <ui-avatar initials="SL" size="sm" alt="Sana Lindqvist" variant="soft"></ui-avatar>
+        </div>
+      </ui-app-header>
+      <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
+      <main slot="content" class="cl-content" id="main">
+        <div class="cl-page">
+          <div class="cl-head">
+            <div><h1>Dashboard</h1><p>Orders, revenue and the help centre at a glance.</p></div>
+            <div class="cl-actions"><ui-button variant="secondary" icon="download" id="export">Export</ui-button><ui-button icon="pencil" href="./editor.html" id="write">Write an article</ui-button></div>
+          </div>
+          <div class="cl-stats" id="stats">
+            <ui-card><div class="cl-stat"><span class="label">Revenue, 30 days</span><span class="value" data-stat="revenue">…</span><span class="trend" data-stat="revenue-trend"></span></div></ui-card>
+            <ui-card><div class="cl-stat"><span class="label">Orders, 30 days</span><span class="value" data-stat="orders">…</span><span class="trend" data-stat="orders-trend"></span></div></ui-card>
+            <ui-card><div class="cl-stat"><span class="label">Average order</span><span class="value" data-stat="aov">…</span><span class="trend cl-muted">Free shipping over $150</span></div></ui-card>
+            <ui-card><div class="cl-stat"><span class="label">New customers</span><span class="value" data-stat="customers">…</span><span class="trend cl-muted">Joined in 30 days</span></div></ui-card>
+          </div>
+          <div class="cl-grid-2">
+            <ui-chart id="revenue-chart" type="area" title="Revenue by month" subtitle="Six months, cancelled orders left out" value-prefix="$" show-legend="false" state="loading" heading-level="2"></ui-chart>
+            <ui-chart id="category-chart" type="donut" title="Sales by category" subtitle="Last 30 days" value-prefix="$" show-summary="false" state="loading" heading-level="2"></ui-chart>
+          </div>
+          <ui-card>
+            <div class="cl-head"><div><h2 class="cl-card-title">Recent orders</h2><p class="cl-muted">The newest orders on every channel.</p></div><a href="./orders.html">All orders</a></div>
+            <ui-data-table id="recent" hover hide-summary state="loading" aria-label="Recent orders">
+              <table>
+                <thead><tr><th style="width:18%">Order</th><th>Customer</th><th style="width:16%">Date</th><th data-align="end" style="width:16%">Total</th><th style="width:16%">Status</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </ui-data-table>
+          </ui-card>
+        </div>
+      </main>
+    </ui-layout>
+    <script type="module" src="./src/dashboard.ts"></script>
+  </body>
+</html>

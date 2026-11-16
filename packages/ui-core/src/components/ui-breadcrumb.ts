@@ -354,6 +354,9 @@ export class UIBreadcrumb extends ElementBase {
   }
 
   private _slots: HTMLSlotElement[] = [];
+  // slotchange only reports items added or removed; a framework that changes an item's text or
+  // link in place ("C-1003" -> "Ines Kim" once data loads) would otherwise leave the old crumb.
+  private _itemObserver: MutationObserver | null = null;
 
   constructor() {
     super();
@@ -366,6 +369,11 @@ export class UIBreadcrumb extends ElementBase {
     super.connectedCallback();
     this.root.addEventListener('click', this._onRootClick as EventListener);
     this.root.addEventListener('keydown', this._onRootKeyDown as EventListener);
+    if (typeof MutationObserver !== 'undefined') {
+      this._itemObserver?.disconnect();
+      this._itemObserver = new MutationObserver(() => this.requestRender());
+      this._itemObserver.observe(this, { subtree: true, characterData: true, childList: true, attributes: true, attributeFilter: ['href', 'data-href', 'data-current', 'aria-current'] });
+    }
     this._syncBusyState();
     this._syncDisabledState();
     this._syncSizeState();
@@ -377,6 +385,8 @@ export class UIBreadcrumb extends ElementBase {
     this.root.removeEventListener('click', this._onRootClick as EventListener);
     this.root.removeEventListener('keydown', this._onRootKeyDown as EventListener);
     this._detachSlotListeners();
+    this._itemObserver?.disconnect();
+    this._itemObserver = null;
     super.disconnectedCallback();
   }
 

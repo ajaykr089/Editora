@@ -126,7 +126,6 @@ const style = `
     z-index: var(--ui-app-header-z);
     --ui-app-header-surface-bg: var(--ui-app-header-sticky-bg-base);
     --ui-app-header-surface-backdrop: none;
-    contain: paint;
   }
 
   :host([sticky][variant='soft']) {
@@ -142,8 +141,13 @@ const style = `
     backface-visibility: hidden;
   }
 
+  /* The header holds menus (account, notifications) that open over the page. Its frosted
+     backdrop-filter makes it a stacking context, so without a z-index of its own those menus
+     painted under later page content that is itself layered (tabs, cards). Sticky headers also
+     used paint containment, which cut the menus off at the bottom edge of the header. */
   header {
     position: relative;
+    z-index: var(--ui-app-header-z);
     min-height: var(--ui-app-header-height);
     display: grid;
     grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
