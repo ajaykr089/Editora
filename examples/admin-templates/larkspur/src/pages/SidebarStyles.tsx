@@ -50,13 +50,22 @@ const DUAL_ITEMS: SidebarItemInput[] = [
   { value: 'settings', label: 'Settings', icon: 'settings', section: 'Account' },
 ];
 
-const STYLES: Array<{ variant: 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast' | 'split' | 'floating'; title: string; note: string }> = [
+type Variant = 'inset' | 'indicator' | 'pill' | 'solid' | 'gradient' | 'glass' | 'minimal' | 'contrast' | 'split' | 'floating';
+
+const STYLES: Array<{ variant: Variant; title: string; note: string; collapsed?: boolean }> = [
   { variant: 'inset', title: 'Inset', note: 'Sidebar on a soft canvas, content on a raised card. Layout inset + Sidebar variant="inset".' },
   { variant: 'indicator', title: 'Indicator bar', note: 'A brand-colour bar marks the current page; the rest stays quiet.' },
   { variant: 'pill', title: 'Pills', note: 'Rounded, roomier rows; the current page is a brand-tinted pill.' },
+  { variant: 'solid', title: 'Solid', note: 'The current page filled with the brand colour, white text.' },
+  { variant: 'gradient', title: 'Gradient', note: 'A deep brand gradient with a bright current item, for AI and creative tools.' },
+  { variant: 'glass', title: 'Glass', note: 'Frosted over a photo or colour mesh. Give it something behind to blur.' },
   { variant: 'minimal', title: 'Minimal', note: 'No frame; a subtle tint for the current page.' },
   { variant: 'contrast', title: 'Dark', note: 'Neutral near-black beside a light page; brand only on the current item.' },
   { variant: 'split', title: 'Split', note: 'Flat panel with one divider, for dense back-office tools.' },
+  {
+    variant: 'solid', title: 'Icon only', collapsed: true,
+    note: 'collapsed: hover or focus an icon for its name; a group (Reports) opens its pages in a flyout. The chevron toggles it (collapseButton).',
+  },
 ];
 
 function DualFrame() {
@@ -89,11 +98,23 @@ function DualFrame() {
   );
 }
 
-function Frame({ variant, title, note }: (typeof STYLES)[number]) {
+function Frame({ variant, title, note, collapsed }: (typeof STYLES)[number]) {
+  const [isCollapsed, setCollapsed] = React.useState(!!collapsed);
   return (
-    <figure className={`lk-sb-frame${variant === 'inset' ? ' is-inset' : ''}`}>
+    <figure className={`lk-sb-frame is-${variant}${collapsed ? ' is-collapsed' : ''}`}>
       <div className="lk-sb-app" aria-hidden="false">
-        <Sidebar variant={variant} value="sales" items={ITEMS} width="220px" aria-label={`${title} sidebar example`} className="lk-sb-sidebar">
+        <Sidebar
+          variant={variant}
+          value="sales"
+          items={ITEMS}
+          width="220px"
+          collapsible
+          collapseButton={collapsed}
+          collapsed={collapsed ? isCollapsed : undefined}
+          onCollapseChange={collapsed ? setCollapsed : undefined}
+          aria-label={`${title} sidebar example`}
+          className="lk-sb-sidebar"
+        >
           <Sidebar.Footer>
             <div className="lk-sb-user">
               <span className="lk-sb-avatar" aria-hidden="true">MC</span>
@@ -109,7 +130,8 @@ function Frame({ variant, title, note }: (typeof STYLES)[number]) {
         </div>
       </div>
       <figcaption>
-        <strong>{title}</strong> <Badge size="sm" variant="outline" tone="neutral">variant="{variant}"</Badge>
+        <strong>{title}</strong>{' '}
+        <Badge size="sm" variant="outline" tone="neutral">{collapsed ? 'collapsed' : `variant="${variant}"`}</Badge>
         <span className="cell-sub">{note}</span>
       </figcaption>
     </figure>
@@ -126,7 +148,7 @@ export function SidebarStyles() {
         subtitle="The same navigation in each style. Switch the app's own sidebar from the account menu (top right), and compare in dark mode too."
       />
       <div className="lk-sb-grid">
-        {STYLES.map((style) => <Frame key={style.variant} {...style} />)}
+        {STYLES.map((style) => <Frame key={style.title} {...style} />)}
         <DualFrame />
       </div>
     </div>

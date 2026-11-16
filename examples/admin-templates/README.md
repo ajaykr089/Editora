@@ -87,8 +87,11 @@ building the templates.
 
 **Sidebar**
 
-- Pick a look with `variant` (`inset` with `<Layout variant="shell" inset>`, `indicator`, `pill`, `minimal`,
-  `contrast`). See `#/ui/sidebars`, or switch the live one from the account menu (or `?sidebar=dual`).
+- Pick a look with `variant` (`inset` with `<Layout variant="shell" inset>`, `indicator`, `pill`, `solid`,
+  `gradient`, `glass`, `minimal`, `contrast`). `glass` needs something behind it to blur (`Shell.tsx` puts a colour
+  mesh on the inset canvas).
+- `collapsible collapseButton` adds a chevron that collapses the sidebar to icons. Icons then show their name on
+  hover, and groups open in a flyout. See `#/ui/sidebars`, or switch the live one from the account menu (or `?sidebar=dual`).
 - For a large app, `layout="dual"`: the top-level items are an icon rail and each one's `children` fill a panel.
   Group your pages into areas first (`Shell.tsx`, `dualNavItems`); `collapsed` then keeps the rail.
 

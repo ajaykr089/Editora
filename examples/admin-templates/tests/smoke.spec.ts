@@ -71,3 +71,22 @@ test('larkspur: the icon rail + panel sidebar follows the route and opens areas'
   await expect(sidebar).toHaveAttribute('collapsed', '');
   expect(errors).toEqual([]);
 });
+
+test('larkspur: the collapsed sidebar names icons and opens groups in a flyout', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const errors = watch(page);
+  await page.goto('/larkspur/?latency=0&sidebar=solid#/orders');
+  const sidebar = page.locator('ui-sidebar').first();
+  await sidebar.locator('.collapse-btn').click();
+  await expect(sidebar).toHaveAttribute('collapsed', '');
+  // the icon still has its name for screen readers
+  await expect(sidebar.getByRole('link', { name: 'Customers' })).toBeVisible();
+  await sidebar.getByRole('link', { name: 'Customers' }).hover();
+  await expect(sidebar.locator('.tip')).toHaveText('Customers');
+  await sidebar.getByRole('button', { name: 'Dashboards' }).click();
+  await expect(sidebar.locator('.flyout')).toBeVisible();
+  await sidebar.locator('.flyout').getByRole('link', { name: 'Analytics' }).click();
+  await expect(page).toHaveURL(/#\/analytics/);
+  await expect(sidebar.locator('.flyout')).toBeHidden();
+  expect(errors).toEqual([]);
+});

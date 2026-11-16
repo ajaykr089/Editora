@@ -101,11 +101,14 @@ const COMMANDS = [
   { value: '#/profile', label: 'Your profile', keywords: 'account me' },
 ];
 
-export type SidebarStyle = 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast' | 'dual';
+export type SidebarStyle = 'inset' | 'indicator' | 'pill' | 'solid' | 'gradient' | 'glass' | 'minimal' | 'contrast' | 'dual';
 export const SIDEBAR_STYLES: Array<{ value: SidebarStyle; label: string }> = [
   { value: 'inset', label: 'Inset' },
   { value: 'indicator', label: 'Indicator bar' },
   { value: 'pill', label: 'Pills' },
+  { value: 'solid', label: 'Solid' },
+  { value: 'gradient', label: 'Gradient' },
+  { value: 'glass', label: 'Glass' },
   { value: 'minimal', label: 'Minimal' },
   { value: 'contrast', label: 'Dark' },
   { value: 'dual', label: 'Icon rail + panel' },
@@ -148,7 +151,12 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
   }, []);
 
   return (
-    <Layout variant="shell" inset={sidebarStyle === 'inset' || sidebarStyle === 'dual'} sidebarLabel="Main navigation">
+    <Layout
+      variant="shell"
+      inset={sidebarStyle === 'inset' || sidebarStyle === 'dual' || sidebarStyle === 'glass'}
+      className={sidebarStyle === 'glass' ? 'lk-shell-glass' : undefined}
+      sidebarLabel="Main navigation"
+    >
       <AppHeader slot="header" bordered showMenuButton="narrow">
         <AppHeader.Start>
           <a className="lk-brand" href="#/" aria-label="Larkspur, eCommerce dashboard">
@@ -236,7 +244,8 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
         items={dual ? dualNavItems() : navItems()}
         layout={dual ? 'dual' : 'list'}
         variant={dual ? 'inset' : sidebarStyle}
-        collapsible={dual}
+        collapsible
+        collapseButton={!dual}
         aria-label="Main navigation"
       >
         {dual && (
@@ -252,6 +261,14 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
             <p>8 of 10 seats used. Renews July 1.</p>
             <a href="#/pricing">Compare plans</a>
           </div>
+          <a className="lk-sidebar-user" href="#/profile">
+            <Avatar initials="MC" size="sm" alt="" tone="neutral" variant="soft" status="online" />
+            <span className="lk-sidebar-user-text">
+              <strong>Maya Chen</strong>
+              <span>maya@larkspur.example</span>
+            </span>
+            <Icon name="chevron-right" decorative />
+          </a>
         </Sidebar.Footer>
       </Sidebar>
 
