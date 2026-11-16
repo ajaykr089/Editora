@@ -17,6 +17,7 @@ import { Sidebar } from '@editora/ui-react';
 | Prop | Type | Description |
 | --- | --- | --- |
 | `autoSave` | `boolean` |   |
+| `collapseButton` | `boolean` | With `collapsible`: a chevron button in the header row that collapses / expands the sidebar. |
 | `collapsed` | `boolean` |   |
 | `collapsedWidth` | `string` |   |
 | `collapsible` | `boolean` |   |
@@ -56,7 +57,7 @@ import { Sidebar } from '@editora/ui-react';
 | `storageKey` | `string` |   |
 | `tone` | `SidebarTone` |   |
 | `value` | `string` |   |
-| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split' \| 'inset' \| 'indicator' \| 'pill'` | Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`. |
+| `variant` | `'surface' \| 'soft' \| 'floating' \| 'contrast' \| 'minimal' \| 'split' \| 'inset' \| 'indicator' \| 'pill' \| 'solid' \| 'gradient' \| 'glass'` | Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `solid` (the current item filled with the brand colour), `gradient` (deep brand gradient), `glass` (frosted, for a photo or gradient behind it), `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`. |
 | `width` | `string` |   |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
@@ -152,6 +153,6 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 Sidebar renders the `ui-sidebar` custom element from `@editora/ui-core`, which can also be used without React.
 
-**Attributes:** `auto-save`, `collapsed`, `collapsed-width`, `collapsible`, `density`, `elevation`, `headless`, `item-font-size`, `item-gap`, `item-height`, `item-line-height`, `item-padding-x`, `item-padding-y`, `item-radius`, `items`, `layout`, `max-width`, `min-width`, `position`, `radius`, `rail`, `resizable`, `row-gap`, `search-query`, `section-label-transform`, `show-badges`, `show-icons`, `size`, `storage-key`, `tone`, `value`, `variant`, `width`
+**Attributes:** `auto-save`, `collapse-button`, `collapsed`, `collapsed-width`, `collapsible`, `density`, `elevation`, `headless`, `item-font-size`, `item-gap`, `item-height`, `item-line-height`, `item-padding-x`, `item-padding-y`, `item-radius`, `items`, `layout`, `max-width`, `min-width`, `position`, `radius`, `rail`, `resizable`, `row-gap`, `search-query`, `section-label-transform`, `show-badges`, `show-icons`, `size`, `storage-key`, `tone`, `value`, `variant`, `width`
 
 **Events:** `area-change`, `change`, `collapse-change`, `resize`, `resize-end`, `resize-start`, `search-change`, `select`, `toggle`, `width-change`

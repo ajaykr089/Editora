@@ -285,6 +285,72 @@ const template = (body: string) => `
       border-inline-end: 1px solid color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 82%, transparent);
     }
 
+    /* The current page filled with the brand colour (white text), as in most product dashboards. */
+    :host([variant="solid"]) {
+      --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-sidebar-accent) 8%, transparent);
+      --ui-sidebar-item-active-bg: var(--ui-sidebar-accent);
+      --ui-sidebar-item-active-color: var(--ui-sidebar-accent-contrast);
+      --ui-sidebar-item-border: transparent;
+    }
+
+    /* A deep brand gradient, the current page a bright brand fill (for AI and creative tools). */
+    :host([variant="gradient"]) {
+      --base-sidebar-outline: none;
+      --ui-sidebar-bg: linear-gradient(180deg, color-mix(in srgb, var(--ui-sidebar-accent) 34%, #0e0b22) 0%, color-mix(in srgb, var(--ui-sidebar-accent) 12%, #0b0a17) 100%);
+      --ui-sidebar-bg-solid: #120f26;
+      --ui-sidebar-color: #f1efff;
+      --ui-sidebar-muted: color-mix(in srgb, #f1efff 66%, transparent);
+      --ui-sidebar-icon-color: color-mix(in srgb, #f1efff 64%, transparent);
+      --ui-sidebar-border: 1px solid color-mix(in srgb, #ffffff 8%, transparent);
+      --ui-sidebar-item-hover: color-mix(in srgb, #ffffff 8%, transparent);
+      --ui-sidebar-item-active-bg: linear-gradient(135deg, color-mix(in srgb, var(--ui-sidebar-accent) 88%, #ffffff), var(--ui-sidebar-accent));
+      --ui-sidebar-item-active-color: #ffffff;
+      --ui-sidebar-item-border: transparent;
+      --ui-sidebar-control-bg: color-mix(in srgb, #ffffff 7%, transparent);
+      --ui-sidebar-control-hover: color-mix(in srgb, #ffffff 12%, transparent);
+      --ui-sidebar-promo-bg: color-mix(in srgb, #ffffff 7%, transparent);
+      --ui-sidebar-promo-color: #f1efff;
+      --ui-sidebar-rail-bg: color-mix(in srgb, #000000 18%, transparent);
+      --ui-sidebar-rail-border: color-mix(in srgb, #ffffff 8%, transparent);
+      --ui-sidebar-focus-ring: color-mix(in srgb, var(--ui-sidebar-accent) 60%, #ffffff);
+      --ui-sidebar-shadow: none;
+    }
+
+    :host([variant="solid"]) .item-button[aria-current="page"],
+    :host([variant="gradient"]) .item-button[aria-current="page"] {
+      box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--ui-sidebar-accent) 80%, transparent);
+    }
+
+    /* On a brand fill the "holds the current page" text must not turn white. */
+    :host([variant="solid"]) .item-button[data-has-active="true"]:not([aria-current="page"]),
+    :host([variant="gradient"]) .item-button[data-has-active="true"]:not([aria-current="page"]) {
+      color: var(--ui-sidebar-color);
+    }
+
+    /* Frosted glass over whatever is behind it (a photo, a gradient canvas). */
+    :host([variant="glass"]) {
+      --base-sidebar-outline: inset 0 1px 0 color-mix(in srgb, #ffffff 50%, transparent);
+      --ui-sidebar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 52%, transparent);
+      --ui-sidebar-border: 1px solid color-mix(in srgb, #ffffff 42%, transparent);
+      --ui-sidebar-radius: 18px;
+      --ui-sidebar-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.28);
+      --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-color-surface, #ffffff) 40%, transparent);
+      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 82%, transparent);
+      --ui-sidebar-item-border: color-mix(in srgb, #ffffff 60%, transparent);
+      --ui-sidebar-control-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 40%, transparent);
+      --ui-sidebar-promo-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 45%, transparent);
+      --ui-sidebar-rail-bg: transparent;
+    }
+
+    :host([variant="glass"]) .shell {
+      backdrop-filter: blur(22px) saturate(1.5);
+      -webkit-backdrop-filter: blur(22px) saturate(1.5);
+    }
+
+    :host([variant="glass"]) .item-button[aria-current="page"] {
+      box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.14);
+    }
+
     :host([tone="success"]) {
       --ui-sidebar-accent: var(--ui-color-success, #15803d);
     }
@@ -360,6 +426,8 @@ const template = (body: string) => `
       flex-direction: column;
       min-inline-size: 0;
       min-block-size: 100%;
+      /* In a sized slot (a layout shell) the list scrolls inside, instead of the sidebar outgrowing it. */
+      max-block-size: 100%;
       inline-size: var(--ui-sidebar-current-width);
       padding: var(--ui-sidebar-padding);
       gap: var(--ui-sidebar-gap);
@@ -387,6 +455,8 @@ const template = (body: string) => `
     .footer-wrap,
     .promo-wrap {
       min-inline-size: 0;
+      /* only the list gives up height when space is short */
+      flex-shrink: 0;
     }
 
     .header-wrap[hidden],
@@ -397,7 +467,117 @@ const template = (body: string) => `
     }
 
     .header-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: var(--ui-sidebar-header-padding);
+    }
+
+    .header-wrap ::slotted(*) {
+      flex: 1 1 auto;
+    }
+
+    .collapse-btn {
+      flex: 0 0 auto;
+      display: inline-grid;
+      place-items: center;
+      inline-size: 28px;
+      block-size: 28px;
+      margin-inline-start: auto;
+      padding: 0;
+      border: 1px solid color-mix(in srgb, var(--ui-sidebar-color) 10%, transparent);
+      border-radius: 8px;
+      background: var(--ui-sidebar-control-bg);
+      color: var(--ui-sidebar-muted);
+      cursor: pointer;
+      transition: background-color 140ms ease, color 140ms ease;
+    }
+
+    .collapse-btn:hover {
+      background: var(--ui-sidebar-item-hover);
+      color: var(--ui-sidebar-color);
+    }
+
+    .collapse-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-sidebar-focus-ring));
+    }
+
+    .collapse-btn svg {
+      inline-size: 14px;
+      block-size: 14px;
+      transition: transform 180ms ease;
+    }
+
+    :host([collapsed]) .collapse-btn svg,
+    :host([position="right"]:not([collapsed])) .collapse-btn svg {
+      transform: scaleX(-1);
+    }
+
+    :host([position="right"][collapsed]) .collapse-btn svg {
+      transform: none;
+    }
+
+    :host([collapsed]) .collapse-btn {
+      margin-inline: auto;
+    }
+
+    /* Icon only: the label beside the hovered item, and a small menu for a group. */
+    .tip,
+    .flyout {
+      position: fixed;
+      z-index: 1000;
+      color: var(--ui-color-text, #111827);
+      font-family: var(--ui-font-family, Inter, system-ui, sans-serif);
+    }
+
+    .tip {
+      padding: 5px 9px;
+      border-radius: 7px;
+      background: var(--ui-sidebar-tip-bg, #18181b);
+      color: var(--ui-sidebar-tip-color, #fafafa);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      transform: translateY(-50%);
+      box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.35);
+    }
+
+    .flyout {
+      min-inline-size: 200px;
+      max-inline-size: 280px;
+      display: grid;
+      gap: 2px;
+      padding: 6px;
+      border: 1px solid var(--ui-color-line-subtle, rgba(15, 23, 42, 0.1));
+      border-radius: 12px;
+      background: var(--ui-color-surface, #ffffff);
+      box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.28);
+      --ui-sidebar-color: var(--ui-color-text, #111827);
+      --ui-sidebar-icon-color: color-mix(in srgb, var(--ui-color-text, #111827) 62%, transparent);
+      --ui-sidebar-item-hover: color-mix(in srgb, var(--ui-color-text, #111827) 6%, transparent);
+      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 12%, transparent);
+      --ui-sidebar-item-active-color: var(--ui-color-text, #111827);
+      --ui-sidebar-item-border: transparent;
+      --ui-sidebar-indicator: transparent;
+    }
+
+    .tip[hidden],
+    .flyout[hidden] {
+      display: none;
+    }
+
+    .flyout-title {
+      padding: 6px 10px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: color-mix(in srgb, var(--ui-color-text, #111827) 60%, transparent);
+    }
+
+    .flyout .item-button {
+      box-shadow: none;
     }
 
     .header-wrap ::slotted(*) {
@@ -416,6 +596,7 @@ const template = (body: string) => `
       flex-direction: column;
       gap: var(--ui-sidebar-gap);
       flex: 1 1 auto;
+      min-block-size: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding-inline-end: 2px;
@@ -771,24 +952,33 @@ const template = (body: string) => `
       display: none;
     }
 
-    :host([collapsed]) .section-label,
-    :host([collapsed]) .item-description,
-    :host([collapsed]) .meta,
-    :host([collapsed]) .end-wrap,
-    :host([collapsed]) .copy,
+    :host([collapsed]) .nav .section-label,
+    :host([collapsed]) .nav .item-description,
+    :host([collapsed]) .nav .meta,
+    :host([collapsed]) .nav .end-wrap,
     :host([collapsed]) .search-wrap,
     :host([collapsed]) .promo-wrap,
     :host([collapsed]) .footer-wrap {
       display: none;
     }
 
+    /* Icon only: the label stays for screen readers (it was display: none, so items had no name). */
+    :host([collapsed]) .nav .copy {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
     :host([collapsed]) .header-wrap {
       padding-inline: 0;
-      display: flex;
+      flex-direction: column;
       justify-content: center;
     }
 
-    :host([collapsed]) .item-button {
+    :host([collapsed]) .nav .item-button {
       grid-template-columns: 1fr;
       justify-items: center;
       padding: 0;
@@ -797,8 +987,8 @@ const template = (body: string) => `
       min-inline-size: var(--ui-sidebar-item-height);
     }
 
-    :host([collapsed]) .arrow-wrap,
-    :host([collapsed]) .submenu {
+    :host([collapsed]) .nav .arrow-wrap,
+    :host([collapsed]) .nav .submenu {
       display: none;
     }
 
@@ -1159,6 +1349,7 @@ export class UISidebar extends ElementBase {
       'tone',
       'show-icons',
       'show-badges',
+      'collapse-button',
       'item-radius',
       'item-gap',
       'row-gap',
@@ -1193,6 +1384,14 @@ export class UISidebar extends ElementBase {
   private _dragging = false;
   /** layout="dual": the value of the top-level item whose pages fill the panel. */
   private _area: string | null = null;
+  private _flyoutFor: string | null = null;
+  /** Opened by click or keyboard: it stays until dismissed (a hover-opened one closes on leave). */
+  private _flyoutPinned = false;
+  private _flyoutCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private _delegated = false;
+  private _handleDocumentPointer = (event: PointerEvent): void => {
+    if (this._flyoutFor && !event.composedPath().includes(this)) this._closeFlyout();
+  };
   private _lastExpandedWidth = 0;
   private _handleSearchInput = (event: Event): void => {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
@@ -1207,6 +1406,8 @@ export class UISidebar extends ElementBase {
 
   connectedCallback() {
     super.connectedCallback();
+    this._bindIconOnlyHelp();
+    document.addEventListener('pointerdown', this._handleDocumentPointer, true);
     this._observeLightDom();
     this._bindResponsiveCollapse();
     this.addEventListener('input', this._handleSearchInput as EventListener, true);
@@ -1214,6 +1415,8 @@ export class UISidebar extends ElementBase {
   }
 
   disconnectedCallback() {
+    document.removeEventListener('pointerdown', this._handleDocumentPointer, true);
+    this._closeFlyout();
     this._observer?.disconnect();
     this._observer = null;
     this._resizeCleanup?.();
@@ -1267,6 +1470,13 @@ export class UISidebar extends ElementBase {
     }
     if (VISUAL_ONLY_ATTRIBUTES.has(name)) return;
     if (name === 'collapsed') {
+      this._closeFlyout();
+      this._hideTip();
+      const collapseBtn = this.root.querySelector<HTMLElement>('.collapse-btn');
+      if (collapseBtn) {
+        collapseBtn.setAttribute('aria-label', this.hasAttribute('collapsed') ? 'Expand sidebar' : 'Collapse sidebar');
+        collapseBtn.setAttribute('aria-expanded', this.hasAttribute('collapsed') ? 'false' : 'true');
+      }
       if (this.hasAttribute('collapsed')) this._expanded.clear();
       if (this._isDual()) {
         const collapsed = this.hasAttribute('collapsed');
@@ -1328,6 +1538,8 @@ export class UISidebar extends ElementBase {
   }
 
   protected render(): void {
+    this._flyoutFor = null;
+    this._flyoutPinned = false;
     // When the current item sits inside a group, open the group once for that value, so the
     // reader can see where they are. The user can still close it afterwards.
     // It only counts as done once the value is among the items: frameworks often set `value`
@@ -1350,7 +1562,7 @@ export class UISidebar extends ElementBase {
 
     const body = `
       <aside class="shell" part="shell">
-        <div class="header-wrap" part="header" ${headerHidden ? 'hidden' : ''}><slot name="header"></slot></div>
+        <div class="header-wrap" part="header" ${headerHidden && !this._hasCollapseButton() ? 'hidden' : ''}><slot name="header"></slot>${this._collapseButton()}</div>
         <div class="search-wrap" part="search" ${searchHidden ? 'hidden' : ''}><slot name="search"></slot></div>
         <nav class="nav" part="nav" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Sidebar')}">
           ${sections}
@@ -1359,6 +1571,8 @@ export class UISidebar extends ElementBase {
         <div class="footer-wrap" part="footer" ${footerHidden ? 'hidden' : ''}><slot name="footer"></slot></div>
         <button class="resize-handle" part="resize-handle" type="button" aria-label="Resize sidebar"></button>
       </aside>
+      <div class="tip" part="tooltip" aria-hidden="true" hidden></div>
+      <div class="flyout" part="flyout" id="flyout" role="group" hidden></div>
     `;
 
     this.setContent(template(body));
@@ -1383,6 +1597,169 @@ export class UISidebar extends ElementBase {
       attributes: true,
       attributeFilter: ['slot', 'data-value', 'data-href', 'data-target', 'data-rel', 'data-section', 'data-active', 'data-badge', 'data-description', 'data-content-html', 'data-icon', 'data-tone', 'data-disabled']
     });
+  }
+
+  private _hasCollapseButton(): boolean {
+    return this.hasAttribute('collapse-button') && this.hasAttribute('collapsible');
+  }
+
+  private _collapseButton(): string {
+    if (!this._hasCollapseButton()) return '';
+    const collapsed = this.hasAttribute('collapsed');
+    return `<button class="collapse-btn" part="collapse-button" type="button" aria-label="${collapsed ? 'Expand sidebar' : 'Collapse sidebar'}" aria-expanded="${collapsed ? 'false' : 'true'}"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M10 3.75 5.75 8 10 12.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  }
+
+  /** The classic list collapsed to icons (the dual rail keeps its labels). */
+  private _iconOnly(): boolean {
+    return this.hasAttribute('collapsed') && !this._isDual();
+  }
+
+  /** Icon only: a label on hover/focus, and a group's pages in a flyout. Bound once on the shadow root. */
+  private _bindIconOnlyHelp(): void {
+    if (this._delegated) return;
+    this._delegated = true;
+    const navButton = (event: Event) => {
+      const button = (event.target as HTMLElement | null)?.closest?.('.item-button') as HTMLElement | null;
+      return button && button.closest('.nav') ? button : null;
+    };
+    const show = (event: Event) => {
+      const button = navButton(event);
+      if (!button || !this._iconOnly()) return;
+      if (button.dataset.action === 'toggle') {
+        this._hideTip();
+        if (event.type === 'pointerover') this._openFlyout(button, false);
+        return;
+      }
+      if (event.type === 'pointerover' && this._flyoutFor) this._scheduleFlyoutClose();
+      this._showTip(button);
+    };
+    const hide = (event: Event) => {
+      const button = navButton(event);
+      if (!button) return;
+      const next = (event as PointerEvent | FocusEvent).relatedTarget as Node | null;
+      if (next && button.contains(next)) return;
+      this._hideTip();
+      if (button.dataset.action === 'toggle' && event.type === 'pointerout') this._scheduleFlyoutClose();
+    };
+    this.root.addEventListener('pointerover', show);
+    this.root.addEventListener('focusin', show);
+    this.root.addEventListener('pointerout', hide);
+    this.root.addEventListener('focusout', hide);
+    this.root.addEventListener('scroll', () => { this._hideTip(); this._closeFlyout(); }, true);
+    this.root.addEventListener('pointerover', (event) => {
+      if ((event.target as HTMLElement | null)?.closest?.('.flyout')) this._cancelFlyoutClose();
+    });
+    this.root.addEventListener('pointerout', (event) => {
+      const from = (event.target as HTMLElement | null)?.closest?.('.flyout');
+      const to = (event as PointerEvent).relatedTarget as HTMLElement | null;
+      if (from && !(to && from.contains(to))) this._scheduleFlyoutClose();
+    });
+  }
+
+  private _showTip(button: HTMLElement): void {
+    const tip = this.root.querySelector<HTMLElement>('.tip');
+    const label = button.querySelector('.item-label')?.textContent || button.textContent?.trim() || '';
+    if (!tip || !label) return;
+    const rect = button.getBoundingClientRect();
+    const right = this.getAttribute('position') === 'right';
+    tip.textContent = label;
+    tip.hidden = false;
+    tip.style.top = `${rect.top + rect.height / 2}px`;
+    if (right) {
+      tip.style.left = '';
+      tip.style.right = `${window.innerWidth - rect.left + 10}px`;
+    } else {
+      tip.style.right = '';
+      tip.style.left = `${rect.right + 10}px`;
+    }
+  }
+
+  private _hideTip(): void {
+    const tip = this.root.querySelector<HTMLElement>('.tip');
+    if (tip) tip.hidden = true;
+  }
+
+  private _toggleFlyout(button: HTMLElement): void {
+    if (this._flyoutFor === button.dataset.itemId && this._flyoutPinned) this._closeFlyout();
+    else this._openFlyout(button, true);
+  }
+
+  private _openFlyout(button: HTMLElement, focusFirst: boolean): void {
+    this._cancelFlyoutClose();
+    const flyout = this.root.querySelector<HTMLElement>('.flyout');
+    const id = button.dataset.itemId || '';
+    const group = this._flattenItems(this._collectItems()).find((item) => item.id === id);
+    if (!flyout || !group) return;
+    if (this._flyoutFor !== id) {
+      this._closeFlyout();
+      const rows = group.children
+        .flatMap((child) =>
+          child.children.length
+            ? [`<div class="flyout-title">${escapeHtml(child.label)}</div>`, ...child.children.map((leaf) => this._renderItem({ ...leaf, children: [] }, leaf.id))]
+            : [this._renderItem({ ...child, children: [] }, child.id)]
+        )
+        .join('');
+      flyout.innerHTML = `<div class="flyout-title" id="flyout-title">${escapeHtml(group.label)}</div>${rows}`;
+      flyout.setAttribute('aria-labelledby', 'flyout-title');
+      this._flyoutFor = id;
+      button.setAttribute('aria-expanded', 'true');
+      button.setAttribute('aria-controls', 'flyout');
+      this._bindInteractions();
+      this._syncActiveDom();
+      flyout.onkeydown = (event) => {
+        const items = Array.from(flyout.querySelectorAll<HTMLElement>('.item-button'));
+        const index = items.indexOf(event.target as HTMLElement);
+        if (event.key === 'Escape' || event.key === 'ArrowLeft') {
+          event.preventDefault();
+          event.stopPropagation();
+          this._closeFlyout(true);
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          items[(index + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length]?.focus();
+        } else if (event.key === 'Tab') {
+          this._closeFlyout();
+        }
+      };
+    }
+    this._hideTip();
+    if (focusFirst) this._flyoutPinned = true;
+    flyout.hidden = false;
+    const rect = button.getBoundingClientRect();
+    const right = this.getAttribute('position') === 'right';
+    const top = Math.max(8, Math.min(rect.top - 6, window.innerHeight - flyout.offsetHeight - 8));
+    flyout.style.top = `${top}px`;
+    flyout.style.left = right ? '' : `${rect.right + 8}px`;
+    flyout.style.right = right ? `${window.innerWidth - rect.left + 8}px` : '';
+    if (focusFirst) flyout.querySelector<HTMLElement>('.item-button')?.focus();
+  }
+
+  private _scheduleFlyoutClose(): void {
+    if (this._flyoutPinned) return;
+    this._cancelFlyoutClose();
+    this._flyoutCloseTimer = setTimeout(() => this._closeFlyout(), 180);
+  }
+
+  private _cancelFlyoutClose(): void {
+    if (this._flyoutCloseTimer) clearTimeout(this._flyoutCloseTimer);
+    this._flyoutCloseTimer = null;
+  }
+
+  private _closeFlyout(returnFocus = false): void {
+    this._cancelFlyoutClose();
+    const id = this._flyoutFor;
+    this._flyoutPinned = false;
+    if (!id) return;
+    this._flyoutFor = null;
+    const flyout = this.root?.querySelector<HTMLElement>('.flyout');
+    if (flyout) {
+      flyout.hidden = true;
+      flyout.innerHTML = '';
+    }
+    const button = Array.from(this.root?.querySelectorAll<HTMLElement>('.nav .item-button') || []).find((b) => b.dataset.itemId === id);
+    if (button) {
+      button.setAttribute('aria-expanded', 'false');
+      if (returnFocus) button.focus();
+    }
   }
 
   private _isDual(): boolean {
@@ -1446,7 +1823,7 @@ export class UISidebar extends ElementBase {
           <div class="rail-end" part="rail-end" ${has('rail-end') ? '' : 'hidden'}><slot name="rail-end"></slot></div>
         </nav>
         <div class="panel" part="panel" id="panel">
-          <div class="header-wrap" part="header" ${has('header') ? '' : 'hidden'}><slot name="header"></slot></div>
+          <div class="header-wrap" part="header" ${has('header') || this._hasCollapseButton() ? '' : 'hidden'}><slot name="header"></slot>${this._collapseButton()}</div>
           ${area ? `<div class="panel-title" part="panel-title"><span class="panel-title-label" id="panel-title">${escapeHtml(area.label)}</span>${description}</div>` : ''}
           <div class="search-wrap" part="search" ${has('search') ? '' : 'hidden'}><slot name="search"></slot></div>
           <nav class="nav" part="nav" aria-labelledby="panel-title">${panelBody}</nav>
@@ -1455,6 +1832,8 @@ export class UISidebar extends ElementBase {
         </div>
         <button class="resize-handle" part="resize-handle" type="button" aria-label="Resize sidebar"></button>
       </aside>
+      <div class="tip" part="tooltip" aria-hidden="true" hidden></div>
+      <div class="flyout" part="flyout" id="flyout" role="group" hidden></div>
     `;
 
     this.setContent(template(body));
@@ -1749,7 +2128,8 @@ export class UISidebar extends ElementBase {
         }
         if (action === 'toggle') {
           event.preventDefault();
-          this._toggleExpanded(id);
+          if (this._iconOnly()) this._toggleFlyout(target);
+          else this._toggleExpanded(id);
           return;
         }
         if (action === 'navigate') {
@@ -1764,7 +2144,10 @@ export class UISidebar extends ElementBase {
         const target = event.currentTarget as HTMLElement;
         const id = target.dataset.itemId || '';
         const value = target.dataset.value || '';
-        if (event.key === 'ArrowRight' && target.dataset.action === 'toggle') {
+        if (event.key === 'ArrowRight' && target.dataset.action === 'toggle' && this._iconOnly()) {
+          event.preventDefault();
+          this._openFlyout(target, true);
+        } else if (event.key === 'ArrowRight' && target.dataset.action === 'toggle') {
           event.preventDefault();
           this._expanded.add(id);
           this._syncExpandedDom();
@@ -1791,12 +2174,16 @@ export class UISidebar extends ElementBase {
         } else if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           if (target.dataset.action === 'area') this._openArea(value);
+          else if (target.dataset.action === 'toggle' && this._iconOnly()) this._openFlyout(target, true);
           else if (target.dataset.action === 'toggle') this._toggleExpanded(id);
           else if (target.dataset.action === 'navigate') target.click();
           else this._selectValue(value);
         }
       };
     });
+
+    const collapseBtn = this.root.querySelector<HTMLElement>('.collapse-btn');
+    if (collapseBtn) collapseBtn.onclick = () => this.toggle();
 
     const handle = this.root.querySelector<HTMLElement>('.resize-handle');
     if (!handle) return;
@@ -1838,6 +2225,7 @@ export class UISidebar extends ElementBase {
   }
 
   private _selectValue(value: string): void {
+    this._closeFlyout();
     this.value = value;
     const items = this._flattenItems(this._collectItems());
     const index = items.findIndex((item) => item.value === value);

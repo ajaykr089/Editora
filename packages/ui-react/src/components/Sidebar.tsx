@@ -64,6 +64,8 @@ export type SidebarNavigateDetail = SidebarSelectDetail & {
 type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onToggle'> & {
   collapsed?: boolean;
   collapsible?: boolean;
+  /** With `collapsible`: a chevron button in the header row that collapses / expands the sidebar. */
+  collapseButton?: boolean;
   rail?: boolean;
   /**
    * `dual`: the top-level items become an icon rail and the open one's `children` fill a panel beside
@@ -75,8 +77,12 @@ type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSele
   position?: 'left' | 'right';
   value?: string;
   items?: SidebarItemInput[];
-  /** Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`. */
-  variant?: 'surface' | 'soft' | 'floating' | 'contrast' | 'minimal' | 'split' | 'inset' | 'indicator' | 'pill';
+  /**
+   * Look: `inset` (with Layout inset), `indicator` (a brand bar on the current item), `pill`, `solid` (the
+   * current item filled with the brand colour), `gradient` (deep brand gradient), `glass` (frosted, for a
+   * photo or gradient behind it), `contrast` (dark), `minimal`, `split`, `surface`, `soft`, `floating`.
+   */
+  variant?: 'surface' | 'soft' | 'floating' | 'contrast' | 'minimal' | 'split' | 'inset' | 'indicator' | 'pill' | 'solid' | 'gradient' | 'glass';
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   density?: 'compact' | 'default' | 'comfortable';
   tone?: SidebarTone;
@@ -525,6 +531,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     children,
     collapsed,
     collapsible,
+    collapseButton,
     rail,
     layout,
     resizable,
@@ -691,6 +698,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
 
     syncAttr('variant', variant && variant !== 'surface' ? variant : null);
     syncAttr('layout', layout && layout !== 'list' ? layout : null);
+    syncBool('collapse-button', collapseButton);
     syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
     syncAttr('density', density && density !== 'default' ? density : null);
     syncAttr('tone', tone && tone !== 'default' ? tone : null);
@@ -719,6 +727,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     iconRendererVersion,
     collapsed,
     collapsible,
+    collapseButton,
     rail,
     layout,
     resizable,
