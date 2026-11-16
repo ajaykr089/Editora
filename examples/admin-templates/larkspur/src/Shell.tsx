@@ -58,6 +58,24 @@ function navItems(): SidebarItemInput[] {
   ];
 }
 
+/** The same pages for layout="dual": one rail area per section, its pages in the panel. */
+function dualNavItems(): SidebarItemInput[] {
+  const items = navItems();
+  const area = (value: string, label: string, icon: string, description: string): SidebarItemInput => {
+    const children = items
+      .filter((item) => item.section === label || (label === 'Overview' && item.value === 'dashboards'))
+      .flatMap((item) => (item.children?.length ? item.children : [{ ...item, section: undefined }]));
+    const badge = children.find((child) => child.badge)?.badge;
+    return { value, label, icon, description, badge, children };
+  };
+  return [
+    area('area-overview', 'Overview', 'dashboard', 'Dashboards'),
+    area('area-store', 'Store', 'store', 'Orders, products and billing'),
+    area('area-apps', 'Apps', 'app-grid', 'Mail, calendar and boards'),
+    area('area-pages', 'Pages', 'layers', 'Account and reference pages'),
+  ];
+}
+
 /** The sidebar entry for a route: the first path segment, or the dashboard path itself. */
 function activeValue(route: Route) {
   if (['/', '/analytics', '/crm', '/projects', '/ui/sidebars'].includes(route.path)) return route.path;
@@ -83,13 +101,14 @@ const COMMANDS = [
   { value: '#/profile', label: 'Your profile', keywords: 'account me' },
 ];
 
-export type SidebarStyle = 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast';
+export type SidebarStyle = 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast' | 'dual';
 export const SIDEBAR_STYLES: Array<{ value: SidebarStyle; label: string }> = [
   { value: 'inset', label: 'Inset' },
   { value: 'indicator', label: 'Indicator bar' },
   { value: 'pill', label: 'Pills' },
   { value: 'minimal', label: 'Minimal' },
   { value: 'contrast', label: 'Dark' },
+  { value: 'dual', label: 'Icon rail + panel' },
 ];
 
 /** ?sidebar=pill wins (screenshots), then the saved choice, then inset. */
@@ -110,6 +129,7 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
     setSidebarStyle(value);
     try { localStorage.setItem('larkspur-sidebar', value); } catch { /* storage blocked */ }
   };
+  const dual = sidebarStyle === 'dual';
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [notifications, setNotifications] = React.useState(NOTIFICATIONS);
@@ -128,7 +148,7 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
   }, []);
 
   return (
-    <Layout variant="shell" inset={sidebarStyle === 'inset'} sidebarLabel="Main navigation">
+    <Layout variant="shell" inset={sidebarStyle === 'inset' || sidebarStyle === 'dual'} sidebarLabel="Main navigation">
       <AppHeader slot="header" bordered showMenuButton="narrow">
         <AppHeader.Start>
           <a className="lk-brand" href="#/" aria-label="Larkspur, eCommerce dashboard">
@@ -210,7 +230,22 @@ export function Shell({ route, mode, density, onToggleMode, onDensity, children 
         </AppHeader.End>
       </AppHeader>
 
-      <Sidebar slot="sidebar" value={activeValue(route)} items={navItems()} variant={sidebarStyle} aria-label="Main navigation">
+      <Sidebar
+        slot="sidebar"
+        value={activeValue(route)}
+        items={dual ? dualNavItems() : navItems()}
+        layout={dual ? 'dual' : 'list'}
+        variant={dual ? 'inset' : sidebarStyle}
+        collapsible={dual}
+        aria-label="Main navigation"
+      >
+        {dual && (
+          <Sidebar.RailEnd>
+            <Button variant="ghost" size="sm" href="#/settings" aria-label="Settings" title="Settings">
+              <Icon name="settings" decorative />
+            </Button>
+          </Sidebar.RailEnd>
+        )}
         <Sidebar.Footer>
           <div className="lk-plan">
             <Badge tone="brand" variant="soft" size="sm">Pro plan</Badge>

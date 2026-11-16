@@ -22,6 +22,34 @@ const ITEMS: SidebarItemInput[] = [
   { value: 'settings', label: 'Settings', icon: 'settings', section: 'Account' },
 ];
 
+// layout="dual": each top-level item is a rail area, its children fill the panel.
+const DUAL_ITEMS: SidebarItemInput[] = [
+  { value: 'home', label: 'Home', icon: 'home' },
+  {
+    value: 'commerce', label: 'Commerce', icon: 'store', description: 'Orders, customers and reports', badge: '12',
+    children: [
+      { value: 'orders', label: 'Orders', icon: 'cart', badge: '12' },
+      { value: 'customers', label: 'Customers', icon: 'users' },
+      {
+        value: 'reports', label: 'Reports', icon: 'chart-line', section: 'Insights',
+        children: [
+          { value: 'sales', label: 'Sales' },
+          { value: 'traffic', label: 'Traffic' },
+          { value: 'cohorts', label: 'Cohorts' },
+        ],
+      },
+    ],
+  },
+  {
+    value: 'apps', label: 'Apps', icon: 'app-grid', description: 'Mail and calendar',
+    children: [
+      { value: 'mail', label: 'Mail', icon: 'mail', badge: '3' },
+      { value: 'calendar', label: 'Calendar', icon: 'calendar' },
+    ],
+  },
+  { value: 'settings', label: 'Settings', icon: 'settings', section: 'Account' },
+];
+
 const STYLES: Array<{ variant: 'inset' | 'indicator' | 'pill' | 'minimal' | 'contrast' | 'split' | 'floating'; title: string; note: string }> = [
   { variant: 'inset', title: 'Inset', note: 'Sidebar on a soft canvas, content on a raised card. Layout inset + Sidebar variant="inset".' },
   { variant: 'indicator', title: 'Indicator bar', note: 'A brand-colour bar marks the current page; the rest stays quiet.' },
@@ -30,6 +58,36 @@ const STYLES: Array<{ variant: 'inset' | 'indicator' | 'pill' | 'minimal' | 'con
   { variant: 'contrast', title: 'Dark', note: 'Neutral near-black beside a light page; brand only on the current item.' },
   { variant: 'split', title: 'Split', note: 'Flat panel with one divider, for dense back-office tools.' },
 ];
+
+function DualFrame() {
+  return (
+    <figure className="lk-sb-frame is-inset is-dual">
+      <div className="lk-sb-app">
+        <Sidebar layout="dual" variant="inset" value="sales" items={DUAL_ITEMS} width="200px" collapsible aria-label="Icon rail and panel sidebar example" className="lk-sb-sidebar">
+          <Sidebar.RailStart>
+            <span className="lk-sb-avatar" aria-hidden="true">L</span>
+          </Sidebar.RailStart>
+          <Sidebar.RailEnd>
+            <span className="lk-sb-avatar" aria-hidden="true">MC</span>
+          </Sidebar.RailEnd>
+        </Sidebar>
+        <div className="lk-sb-main">
+          <div className="lk-sb-line w60" />
+          <div className="lk-sb-line w40" />
+          <div className="lk-sb-cards"><div /><div /><div /></div>
+          <div className="lk-sb-block" />
+        </div>
+      </div>
+      <figcaption>
+        <strong>Icon rail + panel</strong> <Badge size="sm" variant="outline" tone="neutral">layout="dual"</Badge>
+        <span className="cell-sub">
+          Top-level items become a rail; the open area's pages fill the panel (as in Slack or Supabase). Click
+          the open area again to fold the panel away. Works with every variant.
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
 
 function Frame({ variant, title, note }: (typeof STYLES)[number]) {
   return (
@@ -69,6 +127,7 @@ export function SidebarStyles() {
       />
       <div className="lk-sb-grid">
         {STYLES.map((style) => <Frame key={style.variant} {...style} />)}
+        <DualFrame />
       </div>
     </div>
   );

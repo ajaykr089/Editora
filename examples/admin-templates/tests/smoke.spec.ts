@@ -53,3 +53,21 @@ test('larkspur: typing into an empty editor makes paragraphs', async ({ page }) 
   await page.keyboard.type('Second line');
   await expect.poll(() => editor.innerHTML()).toBe('<p>Hello there</p><p>Second line</p>');
 });
+
+test('larkspur: the icon rail + panel sidebar follows the route and opens areas', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const errors = watch(page);
+  await page.goto('/larkspur/?latency=0&sidebar=dual#/orders');
+  const sidebar = page.locator('ui-sidebar[layout="dual"]').first();
+  await expect(sidebar.locator('.panel-title-label')).toHaveText('Store');
+  await expect(sidebar.locator('.panel [aria-current="page"]')).toContainText('Orders');
+  await sidebar.locator('.rail .item-button', { hasText: 'Apps' }).click();
+  await expect(sidebar.locator('.panel-title-label')).toHaveText('Apps');
+  await sidebar.locator('.panel .item-button', { hasText: 'Calendar' }).click();
+  await expect(page).toHaveURL(/#\/calendar/);
+  await expect(sidebar.locator('.panel [aria-current="page"]')).toContainText('Calendar');
+  // the open area folds the panel away
+  await sidebar.locator('.rail .item-button', { hasText: 'Apps' }).click();
+  await expect(sidebar).toHaveAttribute('collapsed', '');
+  expect(errors).toEqual([]);
+});

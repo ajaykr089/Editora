@@ -252,6 +252,7 @@ a.cell-title:hover { text-decoration: underline; }
 .lk-sb-app { display: grid; grid-template-columns: 220px 1fr; height: 540px; overflow: hidden; border: 1px solid var(--ui-color-border); border-radius: 12px; background: var(--ui-color-background); }
 .lk-sb-frame.is-inset .lk-sb-app { background: color-mix(in srgb, var(--ui-color-text) 3.5%, var(--ui-color-background)); }
 .lk-sb-sidebar { height: 100%; }
+.lk-sb-frame.is-dual .lk-sb-app { grid-template-columns: auto 1fr; }
 .lk-sb-main { display: grid; align-content: start; gap: 10px; padding: 18px; min-width: 0; }
 .lk-sb-frame.is-inset .lk-sb-main { margin: 8px 8px 8px 0; border: 1px solid color-mix(in srgb, var(--ui-color-text) 8%, transparent); border-radius: 12px; background: var(--ui-color-background); box-shadow: 0 1px 2px rgb(0 0 0 / 0.06); }
 .lk-sb-line { height: 10px; border-radius: 6px; background: color-mix(in srgb, var(--ui-color-text) 10%, transparent); }

@@ -85,6 +85,13 @@ building the templates.
 - React: create the plugins once, outside the component. HTML: list plugins and toolbar as attributes and set
   content after `editor-ready`.
 
+**Sidebar**
+
+- Pick a look with `variant` (`inset` with `<Layout variant="shell" inset>`, `indicator`, `pill`, `minimal`,
+  `contrast`). See `#/ui/sidebars`, or switch the live one from the account menu (or `?sidebar=dual`).
+- For a large app, `layout="dual"`: the top-level items are an icon rail and each one's `children` fill a panel.
+  Group your pages into areas first (`Shell.tsx`, `dualNavItems`); `collapsed` then keeps the rail.
+
 **Sortable (kanban)**
 
 - `renderItem` / `renderListHeader` content is drawn inside the sortable's shadow root. Pass `pageStyles` so your
