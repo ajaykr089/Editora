@@ -65,6 +65,12 @@ type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSele
   collapsed?: boolean;
   collapsible?: boolean;
   rail?: boolean;
+  /**
+   * `dual`: the top-level items become an icon rail and the open one's `children` fill a panel beside
+   * it (as in Slack or Supabase). `collapsed` then hides the panel and keeps the rail; `width` sizes
+   * the panel. Put a logo or avatar on the rail with `Sidebar.RailStart` / `Sidebar.RailEnd`.
+   */
+  layout?: 'list' | 'dual';
   resizable?: boolean;
   position?: 'left' | 'right';
   value?: string;
@@ -103,6 +109,8 @@ type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSele
   onCollapseChange?: (collapsed: boolean) => void;
   onWidthChange?: (detail: { width: number; collapsedWidth: number; minWidth: number; maxWidth: number; source: string }) => void;
   onSearchChange?: (query: string) => void;
+  /** layout="dual": a rail click opened another area (its value). The current page is unchanged. */
+  onAreaChange?: (value: string) => void;
   /**
    * Fires before a link item (`href`) is followed. Call `detail.preventDefault()` to route in the
    * app instead of a full page load. Clicks that open a new tab are never intercepted.
@@ -492,6 +500,18 @@ const SidebarFooter: React.FC<SidebarSlotProps> = ({ children, ...rest }) => (
   </div>
 );
 
+const SidebarRailStart: React.FC<SidebarSlotProps> = ({ children, ...rest }) => (
+  <div slot="rail-start" {...rest}>
+    {children}
+  </div>
+);
+
+const SidebarRailEnd: React.FC<SidebarSlotProps> = ({ children, ...rest }) => (
+  <div slot="rail-end" {...rest}>
+    {children}
+  </div>
+);
+
 const SidebarGroup: SidebarMarkerComponent<SidebarGroupProps> = ({ children }) => <>{children}</>;
 SidebarGroup.__sidebarMarker = SIDEBAR_GROUP_MARKER;
 
@@ -506,6 +526,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     collapsed,
     collapsible,
     rail,
+    layout,
     resizable,
     position,
     value,
@@ -541,6 +562,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     onCollapseChange,
     onWidthChange,
     onSearchChange,
+    onAreaChange,
     onNavigate,
     navigation,
     ...rest
@@ -594,12 +616,18 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       if (typeof query === 'string') onSearchChange?.(query);
     });
 
+    const handleAreaChange = hostOnly((event: Event) => {
+      const next = (event as CustomEvent<{ value?: string }>).detail?.value;
+      if (typeof next === 'string') onAreaChange?.(next);
+    });
+
     el.addEventListener('select', handleSelect as EventListener);
     el.addEventListener('change', handleChange as EventListener);
     el.addEventListener('toggle', handleToggle as EventListener);
     el.addEventListener('collapse-change', handleCollapseChange as EventListener);
     el.addEventListener('width-change', handleWidthChange as EventListener);
     el.addEventListener('search-change', handleSearchChange as EventListener);
+    el.addEventListener('area-change', handleAreaChange as EventListener);
 
     return () => {
       el.removeEventListener('select', handleSelect as EventListener);
@@ -608,8 +636,9 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
       el.removeEventListener('collapse-change', handleCollapseChange as EventListener);
       el.removeEventListener('width-change', handleWidthChange as EventListener);
       el.removeEventListener('search-change', handleSearchChange as EventListener);
+      el.removeEventListener('area-change', handleAreaChange as EventListener);
     };
-  }, [onSelect, onChange, onToggle, onCollapseChange, onWidthChange, onSearchChange]);
+  }, [onSelect, onChange, onToggle, onCollapseChange, onWidthChange, onSearchChange, onAreaChange]);
 
   // Links: onNavigate, then a surrounding NavigationProvider (shared link contract).
   useNavigateBridge(ref, onNavigate as any, useNavigationContext());
@@ -661,6 +690,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     }
 
     syncAttr('variant', variant && variant !== 'surface' ? variant : null);
+    syncAttr('layout', layout && layout !== 'list' ? layout : null);
     syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
     syncAttr('density', density && density !== 'default' ? density : null);
     syncAttr('tone', tone && tone !== 'default' ? tone : null);
@@ -690,6 +720,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     collapsed,
     collapsible,
     rail,
+    layout,
     resizable,
     headless,
     autoSave,
@@ -742,6 +773,8 @@ SidebarGroup.displayName = 'Sidebar.Group';
 SidebarItem.displayName = 'Sidebar.Item';
 SidebarPromo.displayName = 'Sidebar.Promo';
 SidebarFooter.displayName = 'Sidebar.Footer';
+SidebarRailStart.displayName = 'Sidebar.RailStart';
+SidebarRailEnd.displayName = 'Sidebar.RailEnd';
 
 export type {
   SidebarProps,
@@ -762,6 +795,8 @@ export {
   SidebarItem,
   SidebarPromo,
   SidebarFooter,
+  SidebarRailStart,
+  SidebarRailEnd,
 };
 
 export const Sidebar = Object.assign(SidebarRoot, {
@@ -773,6 +808,8 @@ export const Sidebar = Object.assign(SidebarRoot, {
   Item: SidebarItem,
   Promo: SidebarPromo,
   Footer: SidebarFooter,
+  RailStart: SidebarRailStart,
+  RailEnd: SidebarRailEnd,
 });
 
 export default Sidebar;

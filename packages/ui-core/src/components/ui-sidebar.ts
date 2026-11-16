@@ -806,6 +806,232 @@ const template = (body: string) => `
       padding-inline: max(10px, calc(var(--ui-sidebar-padding) - 4px));
     }
 
+
+    /* layout="dual": the top-level items as an icon rail, the open area's pages in a panel beside it. */
+    :host([layout="dual"]) {
+      --ui-sidebar-rail-width: var(--base-sidebar-rail-width, 72px);
+      --ui-sidebar-rail-bg: var(--base-sidebar-rail-bg, color-mix(in srgb, var(--ui-sidebar-color) 3%, transparent));
+      --ui-sidebar-rail-border: color-mix(in srgb, var(--ui-sidebar-color) 9%, transparent);
+      inline-size: calc(var(--ui-sidebar-rail-width) + var(--ui-sidebar-current-width));
+    }
+
+    :host([layout="dual"][collapsed]),
+    :host([layout="dual"][data-panel-empty]) {
+      inline-size: var(--ui-sidebar-rail-width);
+    }
+
+    :host([layout="dual"]) .shell {
+      flex-direction: row;
+      padding: 0;
+      gap: 0;
+      inline-size: 100%;
+    }
+
+    :host([layout="dual"][position="right"]) .shell {
+      flex-direction: row-reverse;
+    }
+
+    .rail {
+      flex: 0 0 var(--ui-sidebar-rail-width);
+      inline-size: var(--ui-sidebar-rail-width);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 4px;
+      box-sizing: border-box;
+      background: var(--ui-sidebar-rail-bg);
+      border-inline-end: 1px solid var(--ui-sidebar-rail-border);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    :host([position="right"]) .rail {
+      border-inline-end: none;
+      border-inline-start: 1px solid var(--ui-sidebar-rail-border);
+    }
+
+    :host([layout="dual"][collapsed]) .rail,
+    :host([layout="dual"][data-panel-empty]) .rail {
+      border-inline: none;
+    }
+
+    .rail-start,
+    .rail-end {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rail-start[hidden],
+    .rail-end[hidden] {
+      display: none;
+    }
+
+    .rail-start {
+      padding-block-end: 6px;
+    }
+
+    .rail-end {
+      margin-block-start: auto;
+      padding-block-start: 8px;
+    }
+
+    .rail-items {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2px;
+      inline-size: 100%;
+    }
+
+    .rail-divider {
+      block-size: 1px;
+      margin: 6px 10px;
+      background: var(--ui-sidebar-rail-border);
+    }
+
+    :host([layout="dual"]) .rail .item-button,
+    :host([layout="dual"][collapsed]) .rail .item-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      inline-size: 100%;
+      min-inline-size: 0;
+      min-block-size: 52px;
+      padding: 6px 0;
+      border-radius: calc(var(--ui-sidebar-item-radius) + 2px);
+      text-align: center;
+    }
+
+    .rail .item-button::before {
+      inset-block: 12px;
+      inset-inline-start: -4px;
+    }
+
+    /* The rail marks hover and the open area on the icon pill, not the whole tile (as in Material 3). */
+    :host([layout="dual"]) .rail .item-button,
+    :host([layout="dual"]) .rail .item-button:hover,
+    :host([layout="dual"]) .rail .item-button[aria-current="page"],
+    :host([layout="dual"]) .rail .item-button[aria-expanded="true"] {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    :host([layout="dual"]) .rail .item-button:focus-visible {
+      box-shadow: 0 0 0 2px var(--ui-ring-color, var(--ui-sidebar-focus-ring));
+    }
+
+    .rail .icon-wrap {
+      position: relative;
+      inline-size: 44px;
+      block-size: 30px;
+      flex: 0 0 auto;
+      box-sizing: border-box;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+    }
+
+    .rail .item-button:hover .icon-wrap {
+      background: var(--ui-sidebar-item-hover);
+    }
+
+    .rail .item-button[aria-current="page"] .icon-wrap,
+    .rail .item-button[aria-expanded="true"] .icon-wrap,
+    :host([collapsed]) .rail .item-button[data-has-active="true"] .icon-wrap {
+      background: var(--ui-sidebar-item-active-bg);
+      border-color: var(--ui-sidebar-item-border);
+      color: var(--ui-sidebar-item-active-color);
+    }
+
+    :host([variant="inset"]) .rail .item-button[aria-current="page"] .icon-wrap,
+    :host([variant="inset"]) .rail .item-button[aria-expanded="true"] .icon-wrap,
+    :host([variant="inset"][collapsed]) .rail .item-button[data-has-active="true"] .icon-wrap {
+      box-shadow: 0 1px 2px color-mix(in srgb, #000 8%, transparent);
+    }
+
+    .rail-label {
+      max-inline-size: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+      line-height: 14px;
+      font-weight: 500;
+      color: var(--ui-sidebar-muted);
+    }
+
+    .rail .item-button:hover .rail-label,
+    .rail .item-button[aria-current="page"] .rail-label,
+    .rail .item-button[aria-expanded="true"] .rail-label,
+    .rail .item-button[data-has-active="true"] .rail-label {
+      color: var(--ui-sidebar-color);
+    }
+
+    .rail .item-button[aria-expanded="true"] .rail-label,
+    .rail .item-button[aria-current="page"] .rail-label {
+      font-weight: 600;
+    }
+
+    .rail .badge {
+      position: absolute;
+      inset-block-start: -5px;
+      inset-inline-end: -4px;
+      min-inline-size: 16px;
+      min-block-size: 16px;
+      padding-inline: 4px;
+      font-size: 10px;
+      background: var(--ui-sidebar-accent);
+      color: var(--ui-sidebar-accent-contrast);
+    }
+
+    .panel {
+      flex: 1 1 auto;
+      min-inline-size: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--ui-sidebar-gap);
+      padding: var(--ui-sidebar-padding);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    :host([layout="dual"][collapsed]) .panel,
+    :host([layout="dual"][data-panel-empty]) .panel {
+      display: none;
+    }
+
+    .panel-title {
+      display: grid;
+      gap: 2px;
+      padding: 6px 10px 2px;
+    }
+
+    .panel-title-label {
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ui-sidebar-color);
+    }
+
+    .panel-title-description {
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--ui-sidebar-muted);
+    }
+
+    /* The panel is never in icon-only mode, whatever "collapsed" does to the classic list. */
+    :host([layout="dual"]) .panel .copy {
+      display: grid;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       :host,
       .item-button,
@@ -926,6 +1152,7 @@ export class UISidebar extends ElementBase {
       'position',
       'value',
       'items',
+      'layout',
       'variant',
       'size',
       'density',
@@ -964,6 +1191,8 @@ export class UISidebar extends ElementBase {
   private _autoExpandedFor: string | null = null;
   private _autoExpandPending = false;
   private _dragging = false;
+  /** layout="dual": the value of the top-level item whose pages fill the panel. */
+  private _area: string | null = null;
   private _lastExpandedWidth = 0;
   private _handleSearchInput = (event: Event): void => {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
@@ -1039,11 +1268,25 @@ export class UISidebar extends ElementBase {
     if (VISUAL_ONLY_ATTRIBUTES.has(name)) return;
     if (name === 'collapsed') {
       if (this.hasAttribute('collapsed')) this._expanded.clear();
+      if (this._isDual()) {
+        const collapsed = this.hasAttribute('collapsed');
+        this.root.querySelectorAll<HTMLElement>('.rail .item-button[data-action="area"]').forEach((button) => {
+          button.setAttribute('aria-expanded', !collapsed && button.dataset.value === this._area ? 'true' : 'false');
+        });
+      }
       this._applySizing();
       this._syncExpandedDom();
       return;
     }
     if (name === 'value') {
+      if (this._isDual()) {
+        const area = this._areaFor(this.value);
+        if (area && area.value !== this._area) {
+          this._area = area.value;
+          this.requestRender();
+          return;
+        }
+      }
       this._syncActiveDom();
       return;
     }
@@ -1090,6 +1333,11 @@ export class UISidebar extends ElementBase {
     // It only counts as done once the value is among the items: frameworks often set `value`
     // before `items`.
     this._autoExpandPending = !!this.value && this.value !== this._autoExpandedFor;
+    if (this._isDual()) {
+      this._renderDual();
+      return;
+    }
+    this.removeAttribute('data-panel-empty');
     const sections = this._buildSections();
     if (this._autoExpandPending && this._flattenItems(this._collectItems()).some((item) => item.value === this.value)) {
       this._autoExpandedFor = this.value;
@@ -1135,6 +1383,140 @@ export class UISidebar extends ElementBase {
       attributes: true,
       attributeFilter: ['slot', 'data-value', 'data-href', 'data-target', 'data-rel', 'data-section', 'data-active', 'data-badge', 'data-description', 'data-content-html', 'data-icon', 'data-tone', 'data-disabled']
     });
+  }
+
+  private _isDual(): boolean {
+    return this.getAttribute('layout') === 'dual';
+  }
+
+  /** The top-level item that is, or holds, `value`. */
+  private _areaFor(value: string, items = this._collectItems()): NormalizedSidebarItem | undefined {
+    if (!value) return undefined;
+    return items.find((item) => item.children.length && (item.value === value || this._containsValue(item.children, value)));
+  }
+
+  private _renderDual(): void {
+    const items = this._collectItems();
+    const areas = items.filter((item) => item.children.length);
+    let area = areas.find((item) => item.value === this._area);
+    if (!area) area = this._areaFor(this.value, items) || areas[0];
+    this._area = area ? area.value : null;
+    if (this.value && this._flattenItems(items).some((item) => item.value === this.value)) {
+      this._autoExpandedFor = this.value;
+    }
+    if (area) this.removeAttribute('data-panel-empty');
+    else this.setAttribute('data-panel-empty', '');
+
+    const label = this.getAttribute('aria-label') || 'Sidebar';
+    const rail = items
+      .map((item, index) => {
+        const divider = index > 0 && item.section !== items[index - 1].section ? '<div class="rail-divider" role="presentation"></div>' : '';
+        return divider + this._renderRailItem(item, area);
+      })
+      .join('');
+
+    let panelBody = '';
+    if (area) {
+      const query = this.getAttribute('search-query') || '';
+      const children = this._filterItems(area.children, query).map((child) => ({
+        ...child,
+        // Children inherit the area's section: only a section of their own labels a group.
+        section: child.section === area!.section ? '' : child.section
+      }));
+      const groups = this._groupItems(children);
+      panelBody = groups.length
+        ? groups
+            .map(({ label: sectionLabel, items: groupItems }) => `
+              <section class="section" part="section">
+                ${sectionLabel ? `<div class="section-label" part="section-label">${escapeHtml(sectionLabel)}</div>` : ''}
+                <div class="section-items">${groupItems.map((item, index) => this._renderItem(item, `${area!.id}-${index}`)).join('')}</div>
+              </section>`)
+            .join('')
+        : `<section class="section" part="section"><div class="section-items"><div class="item"><div class="item-button" aria-disabled="true"><span class="copy"><span class="item-label">No matches found</span><span class="item-description">Try a different search term.</span></span></div></div></div></section>`;
+    }
+    this._autoExpandPending = false;
+
+    const has = (slot: string) => !!this.querySelector(`[slot="${slot}"]`);
+    const description = area?.description ? `<span class="panel-title-description">${escapeHtml(area.description)}</span>` : '';
+    const body = `
+      <aside class="shell" part="shell">
+        <nav class="rail" part="rail" aria-label="${escapeHtml(label)}">
+          <div class="rail-start" part="rail-start" ${has('rail-start') ? '' : 'hidden'}><slot name="rail-start"></slot></div>
+          <div class="rail-items">${rail}</div>
+          <div class="rail-end" part="rail-end" ${has('rail-end') ? '' : 'hidden'}><slot name="rail-end"></slot></div>
+        </nav>
+        <div class="panel" part="panel" id="panel">
+          <div class="header-wrap" part="header" ${has('header') ? '' : 'hidden'}><slot name="header"></slot></div>
+          ${area ? `<div class="panel-title" part="panel-title"><span class="panel-title-label" id="panel-title">${escapeHtml(area.label)}</span>${description}</div>` : ''}
+          <div class="search-wrap" part="search" ${has('search') ? '' : 'hidden'}><slot name="search"></slot></div>
+          <nav class="nav" part="nav" aria-labelledby="panel-title">${panelBody}</nav>
+          <div class="promo-wrap" part="promo" ${has('promo') ? '' : 'hidden'}><slot name="promo"></slot></div>
+          <div class="footer-wrap" part="footer" ${has('footer') ? '' : 'hidden'}><slot name="footer"></slot></div>
+        </div>
+        <button class="resize-handle" part="resize-handle" type="button" aria-label="Resize sidebar"></button>
+      </aside>
+    `;
+
+    this.setContent(template(body));
+    this._applyItemMetrics();
+    this._applyRadius();
+    this._applySizing();
+    this._bindInteractions();
+    this._syncActiveDom();
+    this._syncExpandedDom();
+  }
+
+  private _renderRailItem(item: NormalizedSidebarItem, area: NormalizedSidebarItem | undefined): string {
+    const isArea = !!item.children.length;
+    const isOpen = isArea && !!area && area.value === item.value && !this.hasAttribute('collapsed');
+    const holdsActive = isArea && !!this.value && this._containsValue(item.children, this.value);
+    const isActive = !isArea && (this.value ? this.value === item.value : !!item.active);
+    const isLink = !isArea && !!item.href;
+    const tag = isLink ? 'a' : 'button';
+    const icon = this._renderIcon(item, 20) || `<span aria-hidden="true">${escapeHtml(item.label.charAt(0).toUpperCase())}</span>`;
+    const badge = item.badge && this.getAttribute('show-badges') !== 'false' ? `<span class="badge" part="badge">${escapeHtml(item.badge)}</span>` : '';
+    const attrs = [
+      isLink ? `href="${escapeHtml(item.href || '')}"` : 'type="button"',
+      isLink && item.target ? `target="${escapeHtml(item.target)}"` : '',
+      isLink && item.rel ? `rel="${escapeHtml(item.rel)}"` : '',
+      `data-action="${isArea ? 'area' : isLink ? 'navigate' : 'select'}"`,
+      `data-item-id="${escapeHtml(item.id)}"`,
+      `data-value="${escapeHtml(item.value)}"`,
+      isArea ? `aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="panel"` : '',
+      isActive ? 'aria-current="page" data-active="true"' : '',
+      holdsActive ? 'data-has-active="true"' : '',
+      `aria-disabled="${item.disabled ? 'true' : 'false'}"`,
+      item.description ? `title="${escapeHtml(item.description)}"` : ''
+    ].filter(Boolean).join(' ');
+    return `
+      <div class="item rail-item" data-item-id="${escapeHtml(item.id)}" data-value="${escapeHtml(item.value)}">
+        <${tag} class="item-button" part="item rail-item" ${attrs}>
+          <span class="icon-wrap" part="icon"><span class="icon">${icon}</span>${badge}</span>
+          <span class="rail-label">${escapeHtml(item.label)}</span>
+        </${tag}>
+      </div>`;
+  }
+
+  /** Rail click on an area: open its pages; on the open one, fold the panel away (when collapsible). */
+  private _openArea(value: string): void {
+    const collapsed = this.hasAttribute('collapsed');
+    if (value === this._area && !collapsed) {
+      if (this.hasAttribute('collapsible')) this.collapse();
+      return;
+    }
+    const changed = value !== this._area;
+    this._area = value;
+    if (collapsed) {
+      this._userCollapsePreference = true;
+      this.removeAttribute('collapsed');
+      this.dispatchEvent(new CustomEvent('toggle', { detail: { collapsed: false }, bubbles: true }));
+      this.dispatchEvent(new CustomEvent('collapse-change', { detail: { collapsed: false }, bubbles: true }));
+    }
+    if (changed || collapsed) {
+      this.render();
+      Array.from(this.root.querySelectorAll<HTMLElement>('.rail .item-button')).find((button) => button.dataset.value === value)?.focus();
+    }
+    this.dispatchEvent(new CustomEvent('area-change', { detail: { value }, bubbles: true }));
   }
 
   private _buildSections(): string {
@@ -1285,7 +1667,7 @@ export class UISidebar extends ElementBase {
     };
   }
 
-  private _renderIcon(item: Pick<SidebarItemInput, 'icon' | 'iconHtml'>): string {
+  private _renderIcon(item: Pick<SidebarItemInput, 'icon' | 'iconHtml'>, size = 16): string {
     const html = String(item.iconHtml || '').trim();
     if (html) return html;
     const value = String(item.icon || '').trim();
@@ -1293,7 +1675,7 @@ export class UISidebar extends ElementBase {
     // An icon name ('receipt', 'chart-pie') is an Editora icon, as in every other component;
     // anything else (an emoji, a letter) is shown as text, as before.
     if (/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(value) && value.length > 1) {
-      return `<ui-icon name="${escapeHtml(value)}" size="16" decorative></ui-icon>`;
+      return `<ui-icon name="${escapeHtml(value)}" size="${size}" decorative></ui-icon>`;
     }
     return escapeHtml(value);
   }
@@ -1360,6 +1742,11 @@ export class UISidebar extends ElementBase {
         const id = target.dataset.itemId || '';
         const value = target.dataset.value || '';
         if (target.getAttribute('aria-disabled') === 'true') return;
+        if (action === 'area') {
+          event.preventDefault();
+          this._openArea(value);
+          return;
+        }
         if (action === 'toggle') {
           event.preventDefault();
           this._toggleExpanded(id);
@@ -1381,6 +1768,19 @@ export class UISidebar extends ElementBase {
           event.preventDefault();
           this._expanded.add(id);
           this._syncExpandedDom();
+        } else if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && target.closest('.rail')) {
+          // The rail is one stop in the tab order's eyes, but arrows walk it (as in a toolbar).
+          event.preventDefault();
+          const buttons = Array.from(this.root.querySelectorAll<HTMLElement>('.rail .item-button'));
+          const next = buttons[(buttons.indexOf(target) + (event.key === 'ArrowDown' ? 1 : buttons.length - 1)) % buttons.length];
+          next?.focus();
+        } else if (event.key === 'ArrowRight' && target.dataset.action === 'area') {
+          event.preventDefault();
+          if (target.getAttribute('aria-expanded') !== 'true') this._openArea(value);
+          this.root.querySelector<HTMLElement>('.panel .item-button:not([aria-disabled="true"])')?.focus();
+        } else if (event.key === 'ArrowLeft' && target.closest('.panel') && !target.closest('.submenu') && target.dataset.action !== 'toggle') {
+          event.preventDefault();
+          this.root.querySelector<HTMLElement>('.rail .item-button[aria-expanded="true"]')?.focus();
         } else if (event.key === 'ArrowLeft') {
           event.preventDefault();
           this._expanded.delete(id);
@@ -1390,7 +1790,8 @@ export class UISidebar extends ElementBase {
           // Preventing it here meant a keyboard user could never follow a link item.
         } else if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          if (target.dataset.action === 'toggle') this._toggleExpanded(id);
+          if (target.dataset.action === 'area') this._openArea(value);
+          else if (target.dataset.action === 'toggle') this._toggleExpanded(id);
           else if (target.dataset.action === 'navigate') target.click();
           else this._selectValue(value);
         }
@@ -1477,6 +1878,11 @@ export class UISidebar extends ElementBase {
       if (holds && openForValue) this._expanded.add(item.dataset.itemId || '');
     });
     if (openForValue) this._syncExpandedDom();
+    this.root.querySelectorAll<HTMLElement>('.rail .item-button[data-action="area"]').forEach((button) => {
+      const area = current ? this._areaFor(current) : undefined;
+      if (area && area.value === button.dataset.value) button.setAttribute('data-has-active', 'true');
+      else button.removeAttribute('data-has-active');
+    });
   }
 
   private _flattenItems(items: NormalizedSidebarItem[]): NormalizedSidebarItem[] {
@@ -1498,7 +1904,10 @@ export class UISidebar extends ElementBase {
     this.style.setProperty('--ui-sidebar-max-width', `${max}px`);
     this.style.setProperty('--ui-sidebar-collapsed-width', `${collapsed}px`);
     this.style.setProperty('--ui-sidebar-current-width', `${currentWidth}px`);
-    this.style.setProperty('inline-size', `${currentWidth}px`);
+    if (!this._isDual()) this.style.setProperty('inline-size', `${currentWidth}px`);
+    else if (this.hasAttribute('collapsed') || this.hasAttribute('data-panel-empty')) this.style.setProperty('inline-size', 'var(--ui-sidebar-rail-width)');
+    // Dual: the rail plus the panel (width / min-width / max-width size the panel).
+    else this.style.setProperty('inline-size', `calc(var(--ui-sidebar-rail-width) + ${expandedWidth}px)`);
   }
 
   private _applyRadius(): void {
@@ -1640,7 +2049,7 @@ export class UISidebar extends ElementBase {
     this.style.setProperty('--ui-sidebar-width', `${next}px`);
     if (!this.hasAttribute('collapsed')) {
       this.style.setProperty('--ui-sidebar-current-width', `${next}px`);
-      this.style.setProperty('inline-size', `${next}px`);
+      this.style.setProperty('inline-size', this._isDual() ? `calc(var(--ui-sidebar-rail-width) + ${next}px)` : `${next}px`);
     }
     this._persistWidth(next);
     this._emitWidthChange('keyboard');
@@ -1664,7 +2073,7 @@ export class UISidebar extends ElementBase {
       this.style.setProperty('--ui-sidebar-width', `${next}px`);
       if (!this.hasAttribute('collapsed')) {
         this.style.setProperty('--ui-sidebar-current-width', `${next}px`);
-        this.style.setProperty('inline-size', `${next}px`);
+        this.style.setProperty('inline-size', this._isDual() ? `calc(var(--ui-sidebar-rail-width) + ${next}px)` : `${next}px`);
       }
       this.dispatchEvent(new CustomEvent('resize', { detail: { width: next }, bubbles: true }));
     };
