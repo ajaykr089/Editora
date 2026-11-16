@@ -117,6 +117,7 @@ const template = (body: string) => `
       --ui-sidebar-promo-bg: color-mix(in srgb, var(--ui-sidebar-accent) 9%, var(--ui-sidebar-bg-solid, var(--ui-color-surface, #ffffff)));
       --ui-sidebar-promo-color: var(--ui-sidebar-color);
       --ui-sidebar-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
+      --ui-sidebar-danger-text: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 84%, var(--ui-color-text, #0f172a)));
       --ui-sidebar-width: 236px;
       --ui-sidebar-current-width: 236px;
       --ui-sidebar-min-width: 180px;
@@ -220,6 +221,8 @@ const template = (body: string) => `
       --ui-sidebar-promo-bg: color-mix(in srgb, #ffffff 6%, transparent);
       --ui-sidebar-promo-color: #ededef;
       --ui-sidebar-focus-ring: color-mix(in srgb, var(--ui-sidebar-accent) 70%, #ffffff);
+      /* the page's danger text is dark: lift it towards white to read on the dark sidebar */
+      --ui-sidebar-danger-text: color-mix(in srgb, var(--ui-color-danger, #dc2626) 55%, #ffffff);
     }
 
     /* Blends into the page canvas; with Layout variant="shell" inset the content sits on a raised card. */
@@ -314,6 +317,8 @@ const template = (body: string) => `
       --ui-sidebar-rail-border: color-mix(in srgb, #ffffff 8%, transparent);
       --ui-sidebar-focus-ring: color-mix(in srgb, var(--ui-sidebar-accent) 60%, #ffffff);
       --ui-sidebar-shadow: none;
+      /* the page's danger text is dark: lift it towards white to read on the dark sidebar */
+      --ui-sidebar-danger-text: color-mix(in srgb, var(--ui-color-danger, #dc2626) 55%, #ffffff);
     }
 
     :host([variant="solid"]) .item-button[aria-current="page"],
@@ -571,6 +576,7 @@ const template = (body: string) => `
       --ui-sidebar-item-active-color: var(--ui-color-text, #111827);
       --ui-sidebar-item-border: transparent;
       --ui-sidebar-indicator: transparent;
+      --ui-sidebar-danger-text: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 84%, var(--ui-color-text, #0f172a)));
     }
 
     .tip[hidden],
@@ -728,7 +734,7 @@ const template = (body: string) => `
 
     .item-button[data-tone="danger"] .item-label,
     .item-button[data-tone="danger"] .meta {
-      color: var(--ui-color-danger-text, color-mix(in srgb, var(--ui-color-danger, #dc2626) 84%, var(--ui-color-text, #0f172a)));
+      color: var(--ui-sidebar-danger-text);
     }
 
     .icon-wrap,
