@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- a2c681c: The editor follows the app's Editora UI theme. Inside an app themed with `ThemeProvider` (or `applyTheme`), the toolbar, buttons, borders, radius, font, status bar and dark mode take the `--ui-*` tokens (`--ui-color-surface`, `--ui-color-border`, `--ui-color-primary`, `--ui-radius`, `--ui-font-family`...), so the editor no longer looks like a different product next to the form fields around it; its dark theme no longer brings its own blue-slate palette. Without those tokens nothing changes: every value falls back to the previous one.
+
+### Patch Changes
+
+- ad3d5ac: - Themes: a dark editor on a light page (an editor-only dark area) took the page's light `--ui` text colour, so its toolbar inputs had dark text on a dark field. The dark theme now takes the Editora UI palette only when the page itself is dark (`data-ui-mode="dark"`, or a dark marker on `html` / `body`); otherwise it keeps its own dark colours.
+  - `ui-sidebar`: danger-toned items read on the dark `contrast` and `gradient` variants (new `--ui-sidebar-danger-text` token, lifted towards white there).
+
 ## 1.0.20
 
 ### Patch Changes

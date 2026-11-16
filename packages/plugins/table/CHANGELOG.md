@@ -1,5 +1,14 @@
 # @editora/plugin-table
 
+## 1.0.11
+
+### Patch Changes
+
+- 9723e95: The table plugin's stylesheet (part of `@editora/plugins/styles.css`) only styles tables inside an Editora editor. Its bare `table`, `th` and `td` selectors restyled every table on the page: a data table next to the editor got a 16px margin, a second border, cell borders and an 80px minimum cell width, and in dark mode the editor's table background.
+- Updated dependencies [e3468d8]
+- Updated dependencies [63b4054]
+  - @editora/core@1.0.29
+
 ## 1.0.10
 
 ### Patch Changes

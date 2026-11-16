@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.0.31
+
+### Patch Changes
+
+- 9f66dfb: `EditoraEditor` takes `ariaLabel` and `ariaLabelledBy` for the editing area's accessible name. Its name was always the placeholder ("Write your message…") or "Rich text editor", so a form could not give the editor the label it shows next to it.
+- 1141586: A controlled `EditoraEditor` (`value={html} onChange={setHtml}`) no longer loses characters when you type quickly. `onChange` is reported after a short pause (100ms by default); when that report came back as `value` while you had typed more, the editor wrote the older HTML back, dropping the newer characters and moving the caret to the start. The editor now recognises its own report and leaves the content alone; a different `value` from outside still replaces it.
+- e3a6d57: Typing into an empty editor writes paragraphs. With `value=""` (or after clearing everything) the first characters went straight into the editing area and Enter added `<div>`s, so `onChange` gave `Hello<div>Second line</div>` instead of `<p>Hello</p><p>Second line</p>`. The editor now starts a paragraph before the first insertion and makes Enter create `<p>`, as the web component already did. The placeholder still shows while it is empty.
+- a2c681c: The editor follows the app's Editora UI theme. Inside an app themed with `ThemeProvider` (or `applyTheme`), the toolbar, buttons, borders, radius, font, status bar and dark mode take the `--ui-*` tokens (`--ui-color-surface`, `--ui-color-border`, `--ui-color-primary`, `--ui-radius`, `--ui-font-family`...), so the editor no longer looks like a different product next to the form fields around it; its dark theme no longer brings its own blue-slate palette. Without those tokens nothing changes: every value falls back to the previous one.
+- Updated dependencies [e3468d8]
+- Updated dependencies [63b4054]
+- Updated dependencies [ad3d5ac]
+- Updated dependencies [9723e95]
+- Updated dependencies [a2c681c]
+  - @editora/core@1.0.29
+  - @editora/themes@1.1.0
+  - @editora/plugins@1.2.3
+
 ## 1.0.30
 
 ### Patch Changes

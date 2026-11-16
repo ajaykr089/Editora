@@ -1,5 +1,145 @@
 # Change Log
 
+## 0.4.0
+
+### Minor Changes
+
+- a69e637: `ui-button` / `Button` take `href` (with `target`, `rel`, `download`) for a link that looks like a button. It renders a real `<a>`, so it opens in a new tab with a modifier key, shows its address and is announced as a link, and it follows the same `navigate` contract as Sidebar and Breadcrumb links: React `onNavigate`, or `NavigationProvider` routes it through the app's router. A disabled link button has no `href` and does nothing.
+- 98e723f: React `Sidebar` gets `defaultCollapsed`: start collapsed, then let the sidebar keep its own state (collapse button, rail clicks, small screens). It is in the first paint and in server HTML. `collapsed` stays the controlled prop and wins when both are set.
+
+  `ui-sidebar` fixes found by checking Chromium, Firefox and WebKit:
+
+  - Right to left: icon-only tooltips and group flyouts opened over the sidebar. They now open towards the content, and the collapse chevron is mirrored.
+  - Tooltips and flyouts now line up with the sidebar's edge, not the icon inside it, and ignore the page scrollbar (with `position="right"` they overlapped the sidebar).
+  - The collapse chevron and rail transitions honour `prefers-reduced-motion`.
+  - The flyout's group title had 4.3:1 contrast; it is now above 4.5:1.
+
+- 84edd8f: `ui-sidebar layout="dual"` (React `<Sidebar layout="dual">`): an icon rail plus a panel, as in Slack or Supabase.
+
+  - Top-level items become the rail (icon with a short label; a top-level item's `section` change draws a divider). An item with `children` is an area: clicking it shows its pages in the panel, under its label and `description`. A top-level item without children is a link or button on the rail.
+  - The panel follows `value`: it opens the area holding the current page. A rail click only changes the panel, not the value, and fires `area-change` (React `onAreaChange`).
+  - `collapsed` hides the panel and keeps the rail (the area holding the current page stays marked). With `collapsible`, a click on the open area folds the panel away and any area click opens it again.
+  - `width`, `min-width`, `max-width` and resizing size the panel; `--ui-sidebar-rail-width` (72px) sizes the rail. Header, search, promo and footer slots sit in the panel; new `rail-start` / `rail-end` slots (React `Sidebar.RailStart` / `Sidebar.RailEnd`) hold a logo or avatar on the rail.
+  - Keyboard: Up/Down walk the rail, Right moves into the panel, Left goes back to the rail. Works with every `variant`.
+
+- 647a63e: `ui-sidebar`: a usable icon-only mode, a collapse button and three new looks.
+
+  - Fix: collapsed (icon-only) items had no accessible name, because their labels were `display: none`. The labels are now visually hidden, so screen readers still read them.
+  - Fix: a group could not be opened while collapsed (its pages were unreachable). Hovering it opens its pages in a flyout beside the rail. A click, Enter or Right arrow opens the flyout and keeps it open. Escape or Left closes it and returns focus. Choosing a page or clicking outside closes it too.
+  - Collapsed items show their name in a tooltip on hover and focus.
+  - `collapse-button` (React `collapseButton`), with `collapsible`: a chevron in the header row that collapses and expands the sidebar.
+  - New variants: `solid` (the current item filled with the brand colour), `gradient` (a deep brand gradient with a bright current item) and `glass` (frosted, for a photo or colour mesh behind it).
+  - Fix: in a sized slot (such as a layout shell), the sidebar now stays inside the slot and its list scrolls. Before, a tall footer pushed the sidebar past the window and scrolled the whole panel. The header, search, promo and footer no longer shrink.
+
+- 83869a0: A modern look for `ui-sidebar`, and new styles to choose from.
+
+  - Every variant: medium-weight labels (the current page semibold), muted icons that brighten on hover and for the current page, the current item marked by a quiet fill with no tinted border, tighter rows, a guide line for nested items, quieter section labels, smaller badges and a soft promo panel.
+  - New variants: `inset` (on the page canvas, the current item raised like a card; pair it with `ui-layout variant="shell" inset`, React `<Layout variant="shell" inset>`, which puts the content on a raised card), `indicator` (a brand-colour bar on the current item), and `pill` (rounded, roomier rows).
+  - `contrast` is now a neutral near-black with the brand only on the current item, instead of a navy gradient.
+  - New tokens: `--ui-sidebar-item-font-weight`, `--ui-sidebar-item-active-font-weight`, `--ui-sidebar-icon-color`, `--ui-sidebar-indicator`, and `--ui-layout-inset-canvas` / `--ui-layout-inset-gap` on the layout.
+
+- 29e7ae8: `ui-sortable` `page-styles` (React `Sortable` `pageStyles`): your page's stylesheets also apply to `renderItem` / `renderListHeader` content, which is drawn inside the sortable's shadow root where app CSS classes did not reach (kanban cards had to be styled inline). The page's CSS is adopted in a cascade layer, so it styles your markup but never overrides the sortable's own look, and it follows stylesheets added later. The primitive behind it, `adoptPageStyles`, lives in `primitives/page-styles`.
+
+### Patch Changes
+
+- 2733cb4: Chart, DataTable and Stat (`variant="card"`) frames use the same corner radius as Card: `--base-card-radius`, falling back to `--ui-radius` + 2px. Side by side they used three different radii (Chart `--ui-radius` + 4px, Stat a fixed 16px from an undefined `--ui-radius-lg`), and a theme could not set one card radius for all of them.
+- 95df4c7: `ui-chart` (React `Chart`):
+
+  - `show-summary="false"` also hides the readout line under the plot (range and change, or the selected point). `show-insight` (React `showInsight`) shows or hides that line on its own.
+  - No status pill while the state is idle: it said "Live" on every chart, title or not. An empty header is hidden (its `display: flex` beat the `hidden` attribute).
+  - The plot fits its card by default: `--ui-chart-plot-min-width` is now `0px` (set a width to keep dense data legible and scroll instead), and the last point's hit target no longer sticks out and adds a 7px scrollbar.
+  - Series and point `tone` accepts theme tone names (`success`, `danger`, `warning`, `info`, `primary`, `accent`, `neutral`) as well as colours; names used to draw black.
+  - A single dataset is no longer called "Series 1" in the tooltip.
+  - The value axis no longer crosses zero when no value does (₹-230 under data that is all 0 or more).
+  - Numbers follow `locale` (React `locale`), else the nearest `lang` attribute, so `en-IN` gives 1,00,000.
+
+- bffe35d: `ui-chart` takes `heading-level` (React: `headingLevel`) for its title, default 3, so a chart under an `<h1>` page title can use level 2 and keep the heading order valid.
+- 27951e7: `ui-chart`: the `values` and `labels` attributes take a JSON array (`values="[12, 18, 9]"`, `labels='["Jan 1, 2026", "Feb 1, 2026"]'`) as well as comma-separated text. A JSON array used to lose its first and last value without a word (`[12` and `9]` are not numbers), and a label with a comma in it was split in two. The React `Chart` now passes `values` and `labels` as JSON, so labels such as "Jun 1, 2026" work.
+- 1bdfc32: `ui-chart`: with several series, the summary row and the readout under the plot say which series their figures describe (they always used the first one, unnamed). New `show-change="false"` (React `showChange={false}`) for charts of categories, such as deal stages or devices: the summary shows the lowest value instead of a first-to-last change, which means nothing there. The "Delta" label now reads "Change".
+- b0cc0e2: `ui-data-table`: the `row-select` event (React `onRowSelect`) carries `ids`, the `data-id` of every selected row, and `id`, the clicked row's. Apps could only get positions and cell text before, so acting on the selected records (delete, export) meant mapping text back to records.
+- 3700275: `AlertDialogProvider` and `DialogProvider` define the dialog elements they open. The managers import the components for types only, which the build removes, so in a production bundle `confirm()` created an undefined `ui-alert-dialog` and nothing appeared (in development something else usually loaded it).
+- 9bb78e9: `ui-dropdown` takes `align="start" | "end"` (React `align`) to line the menu up with that edge of the trigger. Without it the menu starts at the trigger's start edge, and lines up with the end edge when it would otherwise run off the window (a menu button at the right of a header).
+- e05e6ef: `FiltersBar` uses the card radius (`--base-card-radius`) so it matches the DataTable or Card below it.
+- 9d536a2: `Button` keeps the standard `aria-label` attribute. The host props overwrote it with the camelCase `ariaLabel` prop (undefined unless given), so an icon-only `<Button aria-label="Close">` had no accessible name.
+- 9e0b889: Form fields take the same props across components. `Checkbox` has `name`, `value`, `required` and `defaultChecked` (it already took part in forms; `defaultChecked` used to be written as an attribute the element ignores, so the box stayed unticked). The date, time and range pickers take `description` like `Input`, `Select` and `Textarea` (it is their `hint`, which still works).
+- 4add34f: `FiltersBar`: fields line up on their input boxes, so giving one filter a visible label (`statusLabel="Category"`) no longer pushes it below the search field. The search field is announced as "Search" when it has no `searchLabel`; it had only its placeholder, which is not an accessible name.
+- a4b40a7: `FiltersBar`: while the date range picker's code loads, an inert copy of the empty field holds its place (same height, border, radius and label), instead of an invisible gap that the field appeared in a moment later.
+- 46216ba: `Input` and `Textarea` take an `error` message, as `Select` already did: it shows under the field and marks it invalid. Without the prop, a surrounding `Form` manages the field's errors as before. Showing a server error on a field outside a `Form` used to need an `<Input.Error>` child plus `validation="error"`.
+- f772088: `Dropdown.Item` and `Menu.Item` draw a string `icon` as an Editora icon (`icon="settings"`), as `Button`, `Sidebar` and `Stat` do. The name used to be printed as text in front of the label ("settings Settings").
+- 1a108c9: `PageHeader` renders its title as a real heading (`<h1>` by default, `headingLevel` to change it), so screen-reader users can find the page title by heading. `FiltersBar`'s status select gets the accessible name "Status" when no `statusLabel` is given.
+- 8f0c2d8: Pickers: `clearable={false}`, `allowInput={false}` and the other props whose element default is on (`closeOnSelect` on DatePicker, `allowPartial`, `allowSameDay`, `autoNormalize`) now turn the feature off; the wrapper used to remove the attribute, which the element reads as on. An uncontrolled picker (no `value` prop) keeps the date the user picked when another prop changes; the wrapper used to clear it.
+- c573de6: `Sidebar` no longer puts `react-dom/server` (about 120 KB gzipped) in every app that uses it. It was imported to turn icon elements into HTML; it is now loaded on demand, only for icons the built-in serializer cannot handle (components that use hooks or context, such as `@editora/react-icons`), and those icons appear a render later.
+- f87932a: `Stat`: `icon` takes an Editora icon name (`icon="wallet"`), as `Button` and `Sidebar` items do. A string used to be printed as text in the icon bubble.
+- 3ffea5d: `Stat` and `MetricCard` load `ui-icon` themselves (as a separate chunk, on the client), so an icon name shows when they are imported on their own. Before, it rendered nothing unless something else had loaded the icon element. The lazy icon import in `Dropdown` and `Menu` no longer breaks a declarations-only build (`TS2307` for `@editora/ui-core/icon`).
+- 273f234: `ThemeProvider` writes its tokens to the document during its first render in the browser, before the components inside it mount. Apps with their own brand colour saw the default blue on every page load, fading into the brand colour over about 300ms: a component that measured layout made the browser compute styles before the tokens were applied, and the buttons' colour transition did the rest.
+- 7587fb7: `ThemeProvider`: the `tokens` you pass win over a theme saved under `storageKey`, from the first render. The saved theme was applied first and replaced a moment later, so an app passing a dark theme showed the saved light one on load. The saved theme still applies when no `tokens` are passed.
+- 590a6ef: ColorPicker, Calendar, DateField and Stepper keep an uncontrolled value when another prop changes. ColorPicker `recent={false}` turns recent colours off. Picker `defaultOpen` opens the picker, and an open picker is no longer closed by an unrelated prop change.
+- 0e3c827: README: a "What's new" section summarising the 0.3 and 0.4 (ui-core) and 0.2 and 0.3 (ui-react) changes, including the behaviour changes to check when upgrading, and a link to the changelog. No code changes.
+- edf8a80: `ui-sidebar`: the space between rows was a fixed 8px. It is now `--ui-sidebar-row-gap` (or `--base-sidebar-row-gap` from a wrapper), attribute `row-gap`, React `rowGap`. `itemGap` stays the space inside a row.
+- 48c41ca: `ui-textarea` takes `counter` (as `ui-input` does) as well as `show-count`, and React `Textarea` takes `counter` as well as `showCount`. The same character count had a different name on the two fields.
+- Updated dependencies [ad3d5ac]
+- Updated dependencies [5b8a4ea]
+- Updated dependencies [607fb54]
+- Updated dependencies [0d12323]
+- Updated dependencies [f930497]
+- Updated dependencies [a69e637]
+- Updated dependencies [221623d]
+- Updated dependencies [a41f734]
+- Updated dependencies [fba4051]
+- Updated dependencies [2733cb4]
+- Updated dependencies [23213a0]
+- Updated dependencies [de66cc9]
+- Updated dependencies [95df4c7]
+- Updated dependencies [bffe35d]
+- Updated dependencies [5658cdf]
+- Updated dependencies [27951e7]
+- Updated dependencies [f2242ac]
+- Updated dependencies [2382831]
+- Updated dependencies [278a0b7]
+- Updated dependencies [1bdfc32]
+- Updated dependencies [2c3a8d8]
+- Updated dependencies [baf3202]
+- Updated dependencies [c09ba5f]
+- Updated dependencies [857e8e4]
+- Updated dependencies [17aa80c]
+- Updated dependencies [a179786]
+- Updated dependencies [d3fcdc4]
+- Updated dependencies [b0cc0e2]
+- Updated dependencies [8a28491]
+- Updated dependencies [9bb78e9]
+- Updated dependencies [6d61b37]
+- Updated dependencies [f055ee4]
+- Updated dependencies [9bec255]
+- Updated dependencies [724bbb3]
+- Updated dependencies [eed5448]
+- Updated dependencies [8333a1d]
+- Updated dependencies [e5ec922]
+- Updated dependencies [0d61f0a]
+- Updated dependencies [fe4a85a]
+- Updated dependencies [c73698b]
+- Updated dependencies [67c9252]
+- Updated dependencies [fc212ed]
+- Updated dependencies [c5ad082]
+- Updated dependencies [590a6ef]
+- Updated dependencies [0e3c827]
+- Updated dependencies [bfc158c]
+- Updated dependencies [bd3b91b]
+- Updated dependencies [98e723f]
+- Updated dependencies [84edd8f]
+- Updated dependencies [21cdb6c]
+- Updated dependencies [647a63e]
+- Updated dependencies [83869a0]
+- Updated dependencies [8dfa855]
+- Updated dependencies [edf8a80]
+- Updated dependencies [29e7ae8]
+- Updated dependencies [48c41ca]
+- Updated dependencies [048fc0d]
+- Updated dependencies [e764187]
+- Updated dependencies [b1cb04b]
+- Updated dependencies [a37e9f9]
+  - @editora/ui-core@0.5.0
+  - @editora/toast@2.1.2
+
 ## 0.3.0
 
 ### Minor Changes
