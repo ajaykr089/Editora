@@ -58,6 +58,12 @@ function polygon(points: string, attrs?: IconNode["attrs"]): IconNode {
   return node("polygon", { points, ...attrs });
 }
 
+// Icons drawn on the 24 grid with the usual 2..22 live area, shrunk to the 4..20 area the rest of the set fills (most
+// icons were drawn on a 15 grid and scaled up), so new and old icons look the same size side by side.
+function fit(nodes: IconNode[]): IconNode[] {
+  return [node("g", { transform: "matrix(0.8 0 0 0.8 2.4 2.4)" }, nodes)];
+}
+
 function scaleLegacyNodes(nodes: IconNode[], viewBox?: string): IconNode[] {
   if (viewBox && viewBox !== LEGACY_ICON_VIEWBOX) return nodes;
 
@@ -318,9 +324,9 @@ export const iconDefinitions: IconDefinition[] = [
     categories: ["arrows", "actions"],
     aliases: ["open-in-new"] },
   ),
-  icon("undo", [polyline("4.4 3.4 1.9 5.6 4.4 7.8"), p("M2.2 5.6h5a3.8 3.8 0 1 1 0 7.6H4.7")], { tags: ["back", "revert"],
+  icon("undo", fit([polyline("3 7 3 13 9 13"), p("M21 17a9 9 0 0 0-15-6.7L3 13")]), { viewBox: "0 0 24 24", tags: ["back", "revert"],
   categories: ["arrows", "actions"] }),
-  icon("redo", [polyline("10.6 3.4 13.1 5.6 10.6 7.8"), p("M12.8 5.6h-5a3.8 3.8 0 1 0 0 7.6h2.5")], { tags: ["again"],
+  icon("redo", fit([polyline("21 7 21 13 15 13"), p("M3 17a9 9 0 0 1 15-6.7l3 2.7")]), { viewBox: "0 0 24 24", tags: ["again"],
   categories: ["arrows", "actions"] }),
 
   icon("menu", [l(3, 4.5, 12, 4.5), l(3, 7.5, 12, 7.5), l(3, 10.5, 12, 10.5)], {
@@ -443,19 +449,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "settings",
-    [
-      c(7.5, 7.5, 2.1),
-      l(7.5, 2.8, 7.5, 4.1),
-      l(7.5, 10.9, 7.5, 12.2),
-      l(2.8, 7.5, 4.1, 7.5),
-      l(10.9, 7.5, 12.2, 7.5),
-      l(4.15, 4.15, 5.05, 5.05),
-      l(9.95, 9.95, 10.85, 10.85),
-      l(10.85, 4.15, 9.95, 5.05),
-      l(5.05, 9.95, 4.15, 10.85),
-    ],
+    fit([p("M10.17 4.62L10.36 2.14L13.64 2.14L13.83 4.62L15.92 5.49L17.81 3.86L20.14 6.19L18.51 8.08L19.38 10.17L21.86 10.36L21.86 13.64L19.38 13.83L18.51 15.92L20.14 17.81L17.81 20.14L15.92 18.51L13.83 19.38L13.64 21.86L10.36 21.86L10.17 19.38L8.08 18.51L6.19 20.14L3.86 17.81L5.49 15.92L4.62 13.83L2.14 13.64L2.14 10.36L4.62 10.17L5.49 8.08L3.86 6.19L6.19 3.86L8.08 5.49Z"), c(12, 12, 3)]),
     {
-      tags: ["gear", "preferences", "options", "configuration"],
+      viewBox: "0 0 24 24", tags: ["gear", "preferences", "options", "configuration"],
       categories: ["actions"],
       aliases: ["cog", "settings-2", "settings-3"],
     },
@@ -696,28 +692,8 @@ export const iconDefinitions: IconDefinition[] = [
     l(3, 9, 12, 9),
     l(3, 11.5, 12, 11.5),
   ], { categories: ["typography", "alignment"] }),
-  icon("indent", [
-    l(3.2, 3.5, 3.2, 12),
-    l(5.3, 4, 12, 4),
-    l(5.3, 6.5, 10.9, 6.5),
-    l(5.3, 9, 12, 9),
-    l(5.3, 11.5, 10.9, 11.5),
-    polygon("4.5,7.5 6.9,5.7 6.9,9.3", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-  ], { categories: ["typography"] }),
-  icon("outdent", [
-    l(3.2, 3.5, 3.2, 12),
-    l(5.3, 4, 12, 4),
-    l(5.3, 6.5, 10.9, 6.5),
-    l(5.3, 9, 12, 9),
-    l(5.3, 11.5, 10.9, 11.5),
-    polygon("6.8,7.5 4.4,5.7 4.4,9.3", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-  ], { categories: ["typography"] }),
+  icon("indent", fit([l(3, 5, 21, 5), l(11, 10, 21, 10), l(11, 14, 21, 14), l(3, 19, 21, 19), polyline("3 9 6 12 3 15")]), { viewBox: "0 0 24 24", categories: ["typography"] }),
+  icon("outdent", fit([l(3, 5, 21, 5), l(11, 10, 21, 10), l(11, 14, 21, 14), l(3, 19, 21, 19), polyline("7 9 4 12 7 15")]), { viewBox: "0 0 24 24", categories: ["typography"] }),
 
   icon(
     "folder",
@@ -908,13 +884,7 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "file-audio",
-    [
-      p(
-        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
-      ),
-      p("M8.5 2.9v2.35h2.35"),
-      p("M8.7 6.7v2.7a1.2 1.2 0 1 1-.75-1.1V7.05l1.95-.45v2.15a1.2 1.2 0 1 1-.75-1.1V6.2z"),
-    ],
+    [p("M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z"), p("M8.5 2.9v2.35h2.35"), c(6.4, 9.9, 1.05), p("M7.45 9.9V6.9l1.9-.5")],
     { categories: commonTags.files },
   ),
   icon(
@@ -989,13 +959,8 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "paste",
-    [
-      r(4, 4.1, 7, 8.4, { rx: 1 }),
-      r(5.2, 2.4, 4.6, 2.2, { rx: 0.8 }),
-      l(9.7, 9.1, 11.8, 9.1),
-      l(10.75, 8.1, 10.75, 10.1),
-    ],
-    { tags: ["clipboard"],
+    fit([r(8, 2, 8, 4, { rx: 1 }), p("M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"), l(12, 9, 12, 17), polyline("9 14 12 17 15 14")]),
+    { viewBox: "0 0 24 24", tags: ["clipboard"],
     categories: ["file", "actions"] },
   ),
   icon(
@@ -1042,11 +1007,8 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "edit",
-    [
-      r(2.8, 9.6, 5.1, 2.6, { rx: 0.8 }),
-      p("M5.3 10.9 10.7 5.5l1.8 1.8-5.4 5.4-2.4.6z"),
-    ],
-    { tags: ["modify", "write", "change"],
+    fit([p("M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"), p("M18.4 2.6a2 2 0 0 1 2.9 2.9L12 14.8 8 16l1.2-4z")]),
+    { viewBox: "0 0 24 24", tags: ["modify", "write", "change"],
     categories: ["actions"],
     aliases: ["pen"] },
   ),
@@ -1059,33 +1021,21 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "link",
-    [
-      p(
-        "M5.5 8.9 4.3 10.1a2.25 2.25 0 1 1-3.2-3.2L2.3 5.7a2.25 2.25 0 0 1 3.2 0",
-      ),
-      p(
-        "M9.5 6.1 10.7 4.9a2.25 2.25 0 0 1 3.2 3.2l-1.2 1.2a2.25 2.25 0 0 1-3.2 0",
-      ),
-      l(5.9, 9.1, 9.1, 5.9),
-    ],
-    { tags: ["url", "hyperlink"],
+    fit([p("M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"), p("M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71")]),
+    { viewBox: "0 0 24 24", tags: ["url", "hyperlink"],
     categories: ["actions"],
     aliases: ["chain", "affiliate", "affiliate-link"] },
   ),
   icon(
     "unlink",
-    [
-      p("M5.4 9 4.2 10.2a2.25 2.25 0 1 1-3.18-3.18L2.2 5.8"),
-      p("M9.6 6 10.8 4.8a2.25 2.25 0 1 1 3.18 3.18L12.8 9.2"),
-      l(4.5, 4.5, 10.5, 10.5),
-    ],
-    { categories: ["actions"],
+    fit([p("M9 17H7A5 5 0 0 1 7 7h2"), p("M15 7h2a5 5 0 1 1 0 10h-2"), l(8, 2, 8, 4.5), l(2, 8, 4.5, 8), l(16, 19.5, 16, 22), l(19.5, 16, 22, 16)]),
+    { viewBox: "0 0 24 24", categories: ["actions"],
     aliases: ["link-off"] },
   ),
   icon(
     "paperclip",
-    [p("M9.8 4.9 5.25 9.45a2.15 2.15 0 1 1-3.05-3.05l4.95-4.95a2.95 2.95 0 1 1 4.18 4.18l-5.55 5.55a1.45 1.45 0 0 1-2.05-2.05l5.05-5.05")],
-    { tags: ["attach", "file"],
+    fit([p("M21.4 11.1l-8.9 8.9a5.5 5.5 0 0 1-7.8-7.8l8.9-8.9a3.7 3.7 0 0 1 5.2 5.2l-8.9 8.9a1.8 1.8 0 0 1-2.6-2.6l8.2-8.2")]),
+    { viewBox: "0 0 24 24", tags: ["attach", "file"],
     categories: ["actions"],
     aliases: ["attachment"] },
   ),
@@ -1097,13 +1047,7 @@ export const iconDefinitions: IconDefinition[] = [
     l(4, 8, 10.5, 10.3),
   ], { tags: ["send"],
   categories: ["actions", "communication"] }),
-  icon("share-2", [
-    c(3.4, 7.5, 0.9),
-    c(11.2, 4.3, 0.9),
-    c(11.2, 10.7, 0.9),
-    polyline("4.2 7.05 10.2 4.8"),
-    polyline("4.2 7.95 10.2 10.2"),
-  ], { categories: ["actions", "communication"],
+  icon("share-2", fit([p("M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"), polyline("16 6 12 2 8 6"), l(12, 2, 12, 15)]), { viewBox: "0 0 24 24", categories: ["actions", "communication"],
   aliases: ["referral", "referral-code"] }),
   icon(
     "send",
@@ -1117,20 +1061,15 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "reply",
-    [l(11.2, 5.1, 6.5, 5.1), polyline("8.2 3.3 6.4 5.1 8.2 6.9"), p("M6.5 5.1c-2.1 0-3.45 1-4.35 2.95")],
-    { tags: ["respond", "answer"],
+    fit([polyline("9 17 4 12 9 7"), p("M20 18v-2a4 4 0 0 0-4-4H4")]),
+    { viewBox: "0 0 24 24", tags: ["respond", "answer"],
     categories: ["actions", "communication"],
     rtlMirror: true },
   ),
   icon(
     "reply-all",
-    [
-      l(11.4, 5.15, 7.3, 5.15),
-      polyline("8.95 3.35 7.15 5.15 8.95 6.95"),
-      polyline("5.95 3.35 4.15 5.15 5.95 6.95"),
-      p("M7.3 5.15c-2.15 0-3.65 1-4.95 2.95"),
-    ],
-    { categories: ["actions", "communication"],
+    fit([polyline("7 17 2 12 7 7"), polyline("12 17 7 12 12 7"), p("M22 18v-2a4 4 0 0 0-4-4H7")]),
+    { viewBox: "0 0 24 24", categories: ["actions", "communication"],
     rtlMirror: true },
   ),
 
@@ -1319,12 +1258,7 @@ export const iconDefinitions: IconDefinition[] = [
     l(5.8, 3.2, 5.8, 10.5),
     l(9.2, 4.5, 9.2, 11.8),
   ], { categories: ["maps-location"] }),
-  icon("location-arrow", [
-    polygon("3.2,3.2 12.1,7.4 8.2,8.3 7.3,12.2 3.2,3.2", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-  ], { categories: ["navigation", "maps-location"] }),
+  icon("location-arrow", fit([polygon("3 11 22 2 13 21 11 13 3 11")]), { viewBox: "0 0 24 24", categories: ["navigation", "maps-location"] }),
   icon(
     "compass",
     [
@@ -1689,22 +1623,11 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "bookmark-plus",
-    [
-      p(
-        "M4.2 2.8h6.1a.8.8 0 0 1 .8.8V12l-3.85-2.2L3.4 12V3.6a.8.8 0 0 1 .8-.8z",
-      ),
-      l(10.9, 4.9, 10.9, 7.3),
-      l(9.7, 6.1, 12.1, 6.1),
-    ], { categories: ["symbols"] },
+    fit([p("M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"), l(12, 7, 12, 13), l(9, 10, 15, 10)]), { viewBox: "0 0 24 24", categories: ["symbols"] },
   ),
   icon(
     "bookmark-minus",
-    [
-      p(
-        "M4.2 2.8h6.1a.8.8 0 0 1 .8.8V12l-3.85-2.2L3.4 12V3.6a.8.8 0 0 1 .8-.8z",
-      ),
-      l(9.7, 6.1, 12.1, 6.1),
-    ], { categories: ["symbols"] },
+    fit([p("M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"), l(9, 10, 15, 10)]), { viewBox: "0 0 24 24", categories: ["symbols"] },
   ),
   icon("tag", [
     p(
@@ -1750,12 +1673,7 @@ export const iconDefinitions: IconDefinition[] = [
       "milestone-product",
     ],
   }),
-  icon("tags", [
-    p("M8.6 3h3.3v3.3L6.7 11.5a1 1 0 0 1-1.4 0L3.5 9.7a1 1 0 0 1 0-1.4z"),
-    p("M5.8 5.8h3.3v3.3L3.9 14.3a1 1 0 0 1-1.4 0L.7 12.5a1 1 0 0 1 0-1.4z", {
-      transform: "translate(2 0)",
-    }),
-  ], { categories: ["commerce", "symbols"],
+  icon("tags", fit([p("M3 5v5.6a1 1 0 0 0 .3.7l8.4 8.4a2 2 0 0 0 2.8 0l4.2-4.2a2 2 0 0 0 0-2.8L10.3 4.3A1 1 0 0 0 9.6 4H4a1 1 0 0 0-1 1z"), c(7.5, 8.5, 1.1, { fill: "currentColor", stroke: "none" }), p("M14 4l7.3 7.3a2 2 0 0 1 0 2.8L17 18.4")]), { viewBox: "0 0 24 24", categories: ["commerce", "symbols"],
   aliases: ["pricing-tier", "category"] }),
 
   icon(
@@ -1842,21 +1760,14 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "badge-check",
-    [
-      polygon("7.5,2.8 9.15,3.35 10.95,3.15 11.75,4.8 12.2,6.45 11.75,8.2 10.95,9.85 9.15,9.65 7.5,12.2 5.85,9.65 4.05,9.85 3.25,8.2 2.8,6.45 3.25,4.8 4.05,3.15 5.85,3.35"),
-      p("M5.65 6.6 7.05 8 9.55 5.5"),
-    ],
-    { aliases: ["approval", "badge"],
+    fit([p("M12 2L14.15 3.98L17 3.34L17.87 6.13L20.66 7L20.02 9.85L22 12L20.02 14.15L20.66 17L17.87 17.87L17 20.66L14.15 20.02L12 22L9.85 20.02L7 20.66L6.13 17.87L3.34 17L3.98 14.15L2 12L3.98 9.85L3.34 7L6.13 6.13L7 3.34L9.85 3.98Z"), polyline("8.5 12 11 14.5 15.5 9.5")]),
+    { viewBox: "0 0 24 24", aliases: ["approval", "badge"],
     categories: commonTags.status },
   ),
   icon(
     "badge-alert",
-    [
-      polygon("7.5,2.8 9.15,3.35 10.95,3.15 11.75,4.8 12.2,6.45 11.75,8.2 10.95,9.85 9.15,9.65 7.5,12.2 5.85,9.65 4.05,9.85 3.25,8.2 2.8,6.45 3.25,4.8 4.05,3.15 5.85,3.35"),
-      l(7.5, 5.4, 7.5, 7.9),
-      c(7.5, 9.55, 0.38, { fill: "currentColor", stroke: "none" }),
-    ],
-    { categories: commonTags.status },
+    fit([p("M12 2L14.15 3.98L17 3.34L17.87 6.13L20.66 7L20.02 9.85L22 12L20.02 14.15L20.66 17L17.87 17.87L17 20.66L14.15 20.02L12 22L9.85 20.02L7 20.66L6.13 17.87L3.34 17L3.98 14.15L2 12L3.98 9.85L3.34 7L6.13 6.13L7 3.34L9.85 3.98Z"), l(12, 7.5, 12, 12.5), c(12, 16, 1.1, { fill: "currentColor", stroke: "none" })]),
+    { viewBox: "0 0 24 24", categories: commonTags.status },
   ),
 
   icon(
@@ -1977,13 +1888,8 @@ export const iconDefinitions: IconDefinition[] = [
 
   icon(
     "play",
-    [
-      polygon("5.4 4.6 11 7.5 5.4 10.4", {
-        fill: "currentColor",
-        stroke: "none",
-      }),
-    ],
-    { tags: ["start", "run"],
+    fit([polygon("7 4 20 12 7 20")]),
+    { viewBox: "0 0 24 24", solid: fit([polygon("7 4 20 12 7 20", { fill: "currentColor", stroke: "currentColor" })]), tags: ["start", "run"],
     categories: commonTags.media },
   ),
   icon("play-circle", [
@@ -1995,11 +1901,8 @@ export const iconDefinitions: IconDefinition[] = [
   ], { categories: ["media"] }),
   icon(
     "pause",
-    [
-      r(4.7, 4.2, 2.1, 6.6, { rx: 0.5, fill: "currentColor", stroke: "none" }),
-      r(8.2, 4.2, 2.1, 6.6, { rx: 0.5, fill: "currentColor", stroke: "none" }),
-    ],
-    { categories: commonTags.media },
+    fit([r(6, 4, 4, 16, { rx: 1 }), r(14, 4, 4, 16, { rx: 1 })]),
+    { viewBox: "0 0 24 24", solid: fit([r(6, 4, 4, 16, { rx: 1, fill: "currentColor", stroke: "currentColor" }), r(14, 4, 4, 16, { rx: 1, fill: "currentColor", stroke: "currentColor" })]), categories: commonTags.media },
   ),
   icon("pause-circle", [
     c(7.5, 7.5, 4.8),
@@ -2010,45 +1913,10 @@ export const iconDefinitions: IconDefinition[] = [
     c(7.5, 7.5, 4.8),
     r(5.7, 5.7, 3.6, 3.6, { rx: 0.5, fill: "currentColor", stroke: "none" }),
   ], { categories: ["media"] }),
-  icon("forward", [
-    polygon("4.7,5.1 8,7.5 4.7,9.9", { fill: "currentColor", stroke: "none" }),
-    polygon("8.1,5.1 11.4,7.5 8.1,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-  ], { categories: ["arrows", "media"] }),
-  icon("rewind", [
-    polygon("10.3,5.1 7,7.5 10.3,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-    polygon("6.9,5.1 3.6,7.5 6.9,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-  ], { categories: ["arrows", "media"] }),
-  icon("skip-next", [
-    polygon("4.7,5.1 8.1,7.5 4.7,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-    polygon("8.2,5.1 11.6,7.5 8.2,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-    l(11.9, 5.1, 11.9, 9.9),
-  ], { categories: ["media"] }),
-  icon("skip-previous", [
-    polygon("10.3,5.1 6.9,7.5 10.3,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-    polygon("6.8,5.1 3.4,7.5 6.8,9.9", {
-      fill: "currentColor",
-      stroke: "none",
-    }),
-    l(3.1, 5.1, 3.1, 9.9),
-  ], { categories: ["media"] }),
+  icon("forward", fit([polygon("13 19 22 12 13 5"), polygon("2 19 11 12 2 5")]), { viewBox: "0 0 24 24", solid: fit([polygon("13 19 22 12 13 5", { fill: "currentColor", stroke: "currentColor" }), polygon("2 19 11 12 2 5", { fill: "currentColor", stroke: "currentColor" })]), categories: ["arrows", "media"] }),
+  icon("rewind", fit([polygon("11 19 2 12 11 5"), polygon("22 19 13 12 22 5")]), { viewBox: "0 0 24 24", solid: fit([polygon("11 19 2 12 11 5", { fill: "currentColor", stroke: "currentColor" }), polygon("22 19 13 12 22 5", { fill: "currentColor", stroke: "currentColor" })]), categories: ["arrows", "media"] }),
+  icon("skip-next", fit([polygon("5 4 15 12 5 20"), l(19, 5, 19, 19)]), { viewBox: "0 0 24 24", solid: fit([polygon("5 4 15 12 5 20", { fill: "currentColor", stroke: "currentColor" }), l(19, 5, 19, 19)]), categories: ["media"] }),
+  icon("skip-previous", fit([polygon("19 20 9 12 19 4"), l(5, 19, 5, 5)]), { viewBox: "0 0 24 24", solid: fit([polygon("19 20 9 12 19 4", { fill: "currentColor", stroke: "currentColor" }), l(5, 19, 5, 5)]), categories: ["media"] }),
   icon("shuffle", [
     p("M3.2 4.8h1.8c1.15 0 1.8.35 2.45 1.2l2.55 3.2c.55.72 1.15 1.05 2.15 1.05h.95"),
     p("M3.2 10.2h1.8c1.05 0 1.7-.32 2.25-.98l.7-.85"),
@@ -2056,12 +1924,7 @@ export const iconDefinitions: IconDefinition[] = [
     polyline("11.1 3.6 12.3 4.8 11.1 6"),
     polyline("11.1 9 12.3 10.2 11.1 11.4"),
   ], { categories: ["arrows", "media"] }),
-  icon("repeat", [
-    p("M3.4 5.1h6.9c.85 0 1.45.2 2 .8"),
-    polyline("10.9 3.55 12.25 4.9 10.9 6.25"),
-    p("M11.6 9.9H4.7c-.85 0-1.45-.2-2-.8"),
-    polyline("4.1 8.75 2.75 10.1 4.1 11.45"),
-  ], { categories: ["arrows", "media"],
+  icon("repeat", fit([polyline("17 2 21 6 17 10"), p("M3 11v-1a4 4 0 0 1 4-4h14"), polyline("7 22 3 18 7 14"), p("M21 13v1a4 4 0 0 1-4 4H3")]), { viewBox: "0 0 24 24", categories: ["arrows", "media"],
   aliases: ["recurring-order"] }),
   icon(
     "volume",
@@ -2156,30 +2019,22 @@ export const iconDefinitions: IconDefinition[] = [
     l(7.5, 6.7, 7.5, 10.1),
     polyline("6.2 8.8 7.5 10.1 8.8 8.8"),
   ], { categories: ["connectivity", "development"] }),
-  icon("cloud-sync", [
-    p(
-      "M4.8 11.5h5.5a2.25 2.25 0 0 0 .2-4.5A3.15 3.15 0 0 0 4.5 7.6 2 2 0 0 0 4.8 11.5z",
-    ),
-    p("M6 9a1.75 1.75 0 0 0 2.7 1.35"),
-    polyline("8.9 10.35 8.8 9.15 7.65 9.2"),
-    p("M9 8a1.75 1.75 0 0 0-2.7-1.35"),
-    polyline("6.1 6.65 6.2 7.85 7.35 7.8"),
-  ], { categories: ["connectivity", "development"],
+  icon("cloud-sync", fit([p("M7 19a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.75 4.75 0 0 1-.5 9.5Z"), p("M9.5 15a2.5 2.5 0 0 1 4.27-1.77l.73.77"), polyline("14.5 12 14.5 14 12.5 14"), p("M14.5 15a2.5 2.5 0 0 1-4.27 1.77l-.73-.77"), polyline("9.5 18 9.5 16 11.5 16")]), { viewBox: "0 0 24 24", categories: ["connectivity", "development"],
   aliases: ["data-sync"] }),
   icon(
     "refresh-cw",
-    [p("M11.5 5.5V3.3H9.3"), p("M11.3 3.7a4.6 4.6 0 1 0 1 5.8")],
+    fit([p("M3 12a9 9 0 0 1 15.36-6.36L21 8"), polyline("21 3 21 8 16 8"), p("M21 12a9 9 0 0 1-15.36 6.36L3 16"), polyline("3 21 3 16 8 16")]),
     {
-      categories: ["arrows", "actions"],
+      viewBox: "0 0 24 24", categories: ["arrows", "actions"],
       aliases: ["reload", "refresh", "sync", "rotate", "rotate-right", "data-refresh"],
       tags: ["action", "command", "again", "reload-page"],
     },
   ),
   icon(
     "refresh-ccw",
-    [p("M3.5 9.5v2.2h2.2"), p("M3.7 11.3a4.6 4.6 0 1 0-1-5.8")],
+    fit([p("M21 12a9 9 0 0 0-15.36-6.36L3 8"), polyline("3 3 3 8 8 8"), p("M3 12a9 9 0 0 0 15.36 6.36L21 16"), polyline("21 21 21 16 16 16")]),
     {
-      categories: ["arrows", "actions"],
+      viewBox: "0 0 24 24", categories: ["arrows", "actions"],
       aliases: ["rotate-left"],
       tags: commonTags.actions,
     },
@@ -2321,24 +2176,14 @@ export const iconDefinitions: IconDefinition[] = [
       aliases: ["key-alt", "permission", "authorization"],
     },
   ),
-  icon("fingerprint", [
-    p("M7.5 3.3a4.2 4.2 0 0 1 4.2 4.2v1.2"),
-    p("M7.5 4.9a2.6 2.6 0 0 1 2.6 2.6v1.6"),
-    p("M7.5 6.4a1.1 1.1 0 0 1 1.1 1.1v1.9"),
-    p("M4.1 8.9V7.5a3.4 3.4 0 1 1 6.8 0v2.2a3.4 3.4 0 0 1-6.8 0V7.5"),
-  ], { tags: ["biometric", "identity"],
+  icon("fingerprint", fit([p("M4.5 15.5A10 10 0 0 0 5 12a7 7 0 0 1 12.6-4.2"), p("M19 11.3V12a19 19 0 0 1-.6 4.8"), p("M8 19.3a12 12 0 0 0 1-4.3V12a3 3 0 0 1 6 0v1.5"), p("M15 17a17 17 0 0 1-1.2 4.5"), p("M12 12v3a14.5 14.5 0 0 1-2.2 7"), p("M5.8 5.8A9 9 0 0 1 21 9")]), { viewBox: "0 0 24 24", tags: ["biometric", "identity"],
   categories: ["security"],
   aliases: ["authentication", "biometric-payment", "touch-id"] }),
   icon(
     "dislike",
-    [
-      r(2.7, 5.7, 2, 5.1, { rx: 0.45 }),
-      p(
-        "M4.7 10.2h5.7a1.15 1.15 0 0 0 1.1-.83l.65-2.1a1.1 1.1 0 0 0-1.05-1.43H9.9V3.6a1.1 1.1 0 0 0-2.08-.5L6.4 5.85H4.7",
-      ),
-    ],
+    fit([r(17, 3, 4, 11, { rx: 1 }), p("M17 14l-4 7.5a2.2 2.2 0 0 1-2.3-2.8l.8-3.7H5.4a2 2 0 0 1-2-2.4l1.5-7.8A2.2 2.2 0 0 1 7 3h10")]),
     {
-      categories: ["symbols"],
+      viewBox: "0 0 24 24", categories: ["symbols"],
       aliases: ["thumbs-down"],
     },
   ),
@@ -2380,12 +2225,9 @@ export const iconDefinitions: IconDefinition[] = [
   aliases: ["claim-rejected"] }),
   icon(
     "stop",
-    [
-      r(3.2, 3.2, 8.6, 8.6, { rx: 1.1 }),
-      r(5.4, 5.4, 4.2, 4.2, { rx: 0.65, fill: "currentColor", stroke: "none" }),
-    ],
+    fit([r(5, 5, 14, 14, { rx: 2 })]),
     {
-      categories: ["actions", "media"],
+      viewBox: "0 0 24 24", solid: fit([r(5, 5, 14, 14, { rx: 2, fill: "currentColor", stroke: "currentColor" })]), categories: ["actions", "media"],
       aliases: ["stop-square"],
     },
   ),
@@ -2396,42 +2238,22 @@ export const iconDefinitions: IconDefinition[] = [
     l(6.2, 2.8, 6.2, 4.1),
     l(8.8, 10.9, 8.8, 12.2),
   ], { categories: ["actions", "design"] }),
-  icon("flip-horizontal", [
-    l(7.5, 2.8, 7.5, 12.2),
-    p("M3.1 4.2h2.8l1.2 1.2v4.2l-1.2 1.2H3.1z"),
-    p("M12 4.2H9.2L8 5.4v4.2l1.2 1.2H12z"),
-  ], { categories: ["actions", "design"] }),
-  icon("flip-vertical", [
-    l(2.8, 7.5, 12.2, 7.5),
-    p("M4.2 3.1v2.8l1.2 1.2h4.2l1.2-1.2V3.1z"),
-    p("M4.2 12v-2.8l1.2-1.2h4.2l1.2 1.2V12z"),
-  ], { categories: ["actions", "design"] }),
+  icon("flip-horizontal", fit([p("M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"), p("M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"), l(12, 2, 12, 4), l(12, 8, 12, 10), l(12, 14, 12, 16), l(12, 20, 12, 22)]), { viewBox: "0 0 24 24", categories: ["actions", "design"] }),
+  icon("flip-vertical", fit([p("M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"), p("M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"), l(2, 12, 4, 12), l(8, 12, 10, 12), l(14, 12, 16, 12), l(20, 12, 22, 12)]), { viewBox: "0 0 24 24", categories: ["actions", "design"] }),
   icon(
     "maximize",
-    [
-      r(3, 3, 9, 9, { rx: 1.1 }),
-      polyline("5.4 7.1 5.4 5.4 7.1 5.4"),
-      polyline("9.6 7.1 9.6 5.4 7.9 5.4"),
-      polyline("5.4 7.9 5.4 9.6 7.1 9.6"),
-      polyline("9.6 7.9 9.6 9.6 7.9 9.6"),
-    ],
+    fit([p("M8 3H5a2 2 0 0 0-2 2v3"), p("M21 8V5a2 2 0 0 0-2-2h-3"), p("M3 16v3a2 2 0 0 0 2 2h3"), p("M16 21h3a2 2 0 0 0 2-2v-3")]),
     {
-      tags: ["enlarge", "expand"],
+      viewBox: "0 0 24 24", tags: ["enlarge", "expand"],
       categories: ["actions", "layout"],
       aliases: ["fullscreen", "expand"],
     },
   ),
   icon(
     "minimize",
-    [
-      r(3, 3, 9, 9, { rx: 1.1 }),
-      polyline("6.8 6.2 5.4 6.2 5.4 4.8"),
-      polyline("8.2 6.2 9.6 6.2 9.6 4.8"),
-      polyline("6.8 8.8 5.4 8.8 5.4 10.2"),
-      polyline("8.2 8.8 9.6 8.8 9.6 10.2"),
-    ],
+    fit([p("M8 3v3a2 2 0 0 1-2 2H3"), p("M21 8h-3a2 2 0 0 1-2-2V3"), p("M3 16h3a2 2 0 0 1 2 2v3"), p("M16 21v-3a2 2 0 0 1 2-2h3")]),
     {
-      tags: ["shrink", "collapse"],
+      viewBox: "0 0 24 24", tags: ["shrink", "collapse"],
       categories: ["actions", "layout"],
       aliases: ["fullscreen-exit", "collapse"],
     },
@@ -2442,16 +2264,7 @@ export const iconDefinitions: IconDefinition[] = [
   ], { categories: ["actions"],
   aliases: ["task-admin", "task-productivity", "task-complete"] }),
 
-  icon("bug", [
-    c(7.5, 7.8, 2.4),
-    l(7.5, 3, 7.5, 5.2),
-    l(5.1, 4.8, 3.4, 3.8),
-    l(9.9, 4.8, 11.6, 3.8),
-    l(4.8, 7.1, 2.9, 7.1),
-    l(10.2, 7.1, 12.1, 7.1),
-    l(5.1, 10.3, 3.4, 11.3),
-    l(9.9, 10.3, 11.6, 11.3),
-  ], { tags: ["issue", "defect", "error"],
+  icon("bug", fit([r(8, 7, 8, 13, { rx: 4 }), p("M9 7.5a3 3 0 0 1 6 0"), l(12, 11, 12, 20), l(8, 11, 4.5, 9), l(16, 11, 19.5, 9), l(8, 14.5, 4, 14.5), l(16, 14.5, 20, 14.5), l(8, 18, 4.5, 20), l(16, 18, 19.5, 20), l(10, 4.6, 8.5, 3), l(14, 4.6, 15.5, 3)]), { viewBox: "0 0 24 24", tags: ["issue", "defect", "error"],
   categories: ["development"],
   aliases: ["debug"] }),
   icon(
@@ -2524,21 +2337,8 @@ export const iconDefinitions: IconDefinition[] = [
       ],
     },
   ),
-  icon("database-add", [
-    p(
-      "M3.1 4.4c0-1.3 1.95-2.3 4.4-2.3s4.4 1 4.4 2.3-1.95 2.3-4.4 2.3-4.4-1-4.4-2.3z",
-    ),
-    p("M3.1 4.4v2.7c0 1.3 1.95 2.3 4.4 2.3 1.1 0 2.1-.2 2.9-.55"),
-    l(10.5, 8.9, 10.5, 12.1),
-    l(8.9, 10.5, 12.1, 10.5),
-  ], { categories: ["development"] }),
-  icon("database-remove", [
-    p(
-      "M3.1 4.4c0-1.3 1.95-2.3 4.4-2.3s4.4 1 4.4 2.3-1.95 2.3-4.4 2.3-4.4-1-4.4-2.3z",
-    ),
-    p("M3.1 4.4v2.7c0 1.3 1.95 2.3 4.4 2.3 1.1 0 2.1-.2 2.9-.55"),
-    l(8.9, 10.5, 12.1, 10.5),
-  ], { categories: ["development"] }),
+  icon("database-add", fit([p("M3 5a9 3 0 1 0 18 0 9 3 0 1 0-18 0"), p("M3 5v14c0 1.66 4 3 9 3"), p("M21 5v7"), p("M3 12c0 1.66 4 3 9 3"), l(18, 15, 18, 21), l(15, 18, 21, 18)]), { viewBox: "0 0 24 24", categories: ["development"] }),
+  icon("database-remove", fit([p("M3 5a9 3 0 1 0 18 0 9 3 0 1 0-18 0"), p("M3 5v14c0 1.66 4 3 9 3"), p("M21 5v7"), p("M3 12c0 1.66 4 3 9 3"), l(15, 18, 21, 18)]), { viewBox: "0 0 24 24", categories: ["development"] }),
   icon(
     "hard-drive",
     [
@@ -2745,35 +2545,15 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "airplane",
-    [
-      polygon(
-        "2.6,8.2 12.4,3.9 9.6,7.5 12.4,9.2 11.4,10.2 8.6,8.8 7,11.8 6,10.8 6.9,8.1 4,7.3",
-        { fill: "none" },
-      ),
-    ],
+    fit([p("M12 2c.8 0 1.5 1 1.5 2.5V9l8 5v2l-8-2.5V18l2.5 2v1.5L12 20.5l-4 1V20l2.5-2v-4.5l-8 2.5v-2l8-5V4.5C10.5 3 11.2 2 12 2Z")]),
     {
-      categories: ["symbols"],
+      viewBox: "0 0 24 24", categories: ["symbols"],
       aliases: ["airplan"],
     },
   ),
 
-  icon("cloud-sun", [
-    c(4.6, 5.5, 1.5),
-    p("M4.6 2.8v1.1"),
-    p("M2.7 5.5h1.1"),
-    p("M6.5 5.5h1.1"),
-    p("M3.3 4.2l.8.8"),
-    p("M5.9 4.2l-.8.8"),
-    p(
-      "M5.4 11.3h4.6a1.95 1.95 0 0 0 .2-3.9 2.75 2.75 0 0 0-5.35.55 1.6 1.6 0 0 0 .5 3.35z",
-    ),
-  ], { categories: ["weather"] }),
-  icon("cloud-moon", [
-    p("M5.2 3.7a2 2 0 1 0 2.2 2.8A2.6 2.6 0 0 1 5.2 3.7z"),
-    p(
-      "M5.3 11.3h4.7a2 2 0 0 0 .2-4 2.8 2.8 0 0 0-5.45.55 1.65 1.65 0 0 0 .55 3.45z",
-    ),
-  ], { categories: ["weather"] }),
+  icon("cloud-sun", fit([p("M5.3 11.2A3.5 3.5 0 1 1 11.6 8"), l(8, 2, 8, 3), l(2, 8, 3, 8), l(3.76, 3.76, 4.46, 4.46), l(12.24, 3.76, 11.54, 4.46), p("M10 21a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 20 12.5a4.25 4.25 0 0 1-.5 8.5Z")]), { viewBox: "0 0 24 24", categories: ["weather"] }),
+  icon("cloud-moon", fit([p("M12 7.5A4.5 4.5 0 0 1 6.5 2.2a5 5 0 0 0-1.3 9.3"), p("M10 21a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 20 12.5a4.25 4.25 0 0 1-.5 8.5Z")]), { viewBox: "0 0 24 24", categories: ["weather"] }),
   icon("rain", [
     p(
       "M4.6 10.1h5.3a2 2 0 0 0 .2-4 2.8 2.8 0 0 0-5.45.55 1.65 1.65 0 0 0-.05 3.45z",
@@ -2957,13 +2737,7 @@ export const iconDefinitions: IconDefinition[] = [
     },
   ),
 
-  icon("printer", [
-    r(3.1, 4, 8.8, 3.2, { rx: 0.7 }),
-    r(4.2, 2.8, 6.6, 2.2, { rx: 0.5 }),
-    r(4.2, 8.6, 6.6, 3.6, { rx: 0.5 }),
-    c(10, 5.6, 0.45, { fill: "currentColor", stroke: "none" }),
-    l(5.2, 10, 9, 10),
-  ], { tags: ["print"],
+  icon("printer", fit([p("M6 9V3h12v6"), p("M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"), r(6, 14, 12, 7, { rx: 1 })]), { viewBox: "0 0 24 24", tags: ["print"],
   categories: ["actions", "devices"],
   aliases: ["invoice-print"] }),
   icon(
@@ -3004,12 +2778,7 @@ export const iconDefinitions: IconDefinition[] = [
   aliases: ["responsive-mobile", "mobile-commerce"] }),
   icon(
     "cast",
-    [
-      r(2.8, 3.2, 9.4, 6.8, { rx: 0.9 }),
-      p("M3.5 10.5a2.6 2.6 0 0 1 2.6-2.6"),
-      p("M3.5 8.6a4.5 4.5 0 0 1 4.5 4.5"),
-      c(3.7, 10.3, 0.45, { fill: "currentColor", stroke: "none" }),
-    ], { categories: ["media", "devices", "connectivity"] },
+    fit([p("M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"), p("M2 12a8 8 0 0 1 8 8"), p("M2 16a4 4 0 0 1 4 4"), c(2.5, 20, 1.1, { fill: "currentColor", stroke: "none" })]), { viewBox: "0 0 24 24", categories: ["media", "devices", "connectivity"] },
   ),
   icon(
     "router",
@@ -3124,16 +2893,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "book",
-    [
-      p(
-        "M3.6 3.2h6.6a1.2 1.2 0 0 1 1.2 1.2v7.4H4.2A1.2 1.2 0 0 0 3 13V4.4a1.2 1.2 0 0 1 1.2-1.2z",
-      ),
-      l(4.2, 5.2, 9.7, 5.2),
-      l(4.2, 7, 9.7, 7),
-      l(4.2, 8.8, 8.6, 8.8),
-    ],
+    fit([p("M2 4.5h6a4 4 0 0 1 4 4V20a3 3 0 0 0-3-3H2z"), p("M22 4.5h-6a4 4 0 0 0-4 4V20a3 3 0 0 1 3-3h7z")]),
     {
-      tags: ["read", "docs", "documentation"],
+      viewBox: "0 0 24 24", tags: ["read", "docs", "documentation"],
       categories: ["file", "symbols"],
       aliases: ["book-open", "library", "ledger", "ledger-entry", "journal", "ledger-fintech"],
     },
@@ -3153,13 +2915,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "brain",
-    [
-      p(
-        "M5.4 4a1.9 1.9 0 0 1 3.2-1.4A1.9 1.9 0 0 1 11 5v4.6a1.9 1.9 0 0 1-1.9 1.9 1.9 1.9 0 0 1-1.6-.9 1.9 1.9 0 0 1-3.5-1V5.9A1.9 1.9 0 0 1 5.4 4z",
-      ),
-    ],
+    fit([p("M12 5.5A3 3 0 0 0 6.6 4.8 3.2 3.2 0 0 0 4 8.5a3.5 3.5 0 0 0-.6 5.4A3.4 3.4 0 0 0 6.5 19a3 3 0 0 0 5.5 1"), p("M12 5.5a3 3 0 0 1 5.4-.7A3.2 3.2 0 0 1 20 8.5a3.5 3.5 0 0 1 .6 5.4 3.4 3.4 0 0 1-3.1 5.1 3 3 0 0 1-5.5 1"), l(12, 5.5, 12, 20), p("M8.5 9.5a2.5 2.5 0 0 1 3.5 0"), p("M15.5 9.5a2.5 2.5 0 0 0-3.5 0"), p("M7 14a2.5 2.5 0 0 0 3.5 1"), p("M17 14a2.5 2.5 0 0 1-3.5 1")]),
     {
-      tags: ["ai", "smart", "think", "mind"],
+      viewBox: "0 0 24 24", tags: ["ai", "smart", "think", "mind"],
       categories: ["symbols"],
       aliases: ["idea", "idea-board", "brainstorming", "ai-model", "ai-training", "bot-training"],
     },
@@ -3257,23 +3015,9 @@ export const iconDefinitions: IconDefinition[] = [
   ], { categories: ["ui-components"] }),
   icon(
     "drag",
-    [
-      c(5.2, 5.2, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(7.5, 5.2, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(9.8, 5.2, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(5.2, 7.5, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(7.5, 7.5, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(9.8, 7.5, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(5.2, 9.8, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(7.5, 9.8, 0.55, { fill: "currentColor", stroke: "none" }),
-      c(9.8, 9.8, 0.55, { fill: "currentColor", stroke: "none" }),
-      l(7.5, 2.8, 7.5, 4.1),
-      l(7.5, 10.9, 7.5, 12.2),
-      l(2.8, 7.5, 4.1, 7.5),
-      l(10.9, 7.5, 12.2, 7.5),
-    ],
+    fit([l(12, 2, 12, 22), l(2, 12, 22, 12), polyline("9 5 12 2 15 5"), polyline("9 19 12 22 15 19"), polyline("5 9 2 12 5 15"), polyline("19 9 22 12 19 15")]),
     {
-      categories: ["actions", "ui-components"],
+      viewBox: "0 0 24 24", categories: ["actions", "ui-components"],
       aliases: [
         "move",
         "cursor-drag",
@@ -3434,25 +3178,14 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "strikethrough",
-    [
-      l(3.6, 7.5, 11.4, 7.5),
-      p("M4.6 5.4a2 2 0 0 1 2-2h1.8a2 2 0 0 1 2 2"),
-      p("M10.4 9.6a2 2 0 0 1-2 2H6.6a2 2 0 0 1-2-2"),
-    ], { tags: ["format", "text", "cross-out"],
+    fit([p("M16 4H9a3 3 0 0 0-2.83 4"), p("M14 12a4 4 0 0 1 0 8H6"), l(4, 12, 20, 12)]), { viewBox: "0 0 24 24", tags: ["format", "text", "cross-out"],
     categories: ["typography"] },
   ),
   icon(
     "list-ordered",
-    [
-      l(6.2, 4.3, 11.8, 4.3),
-      l(6.2, 7.5, 11.8, 7.5),
-      l(6.2, 10.7, 11.8, 10.7),
-      p("M2.8 4h1V6"),
-      p("M2.8 7.2h1"),
-      p("M2.8 8.3h1a.5.5 0 0 1 .5.5v.4a.5.5 0 0 1-.5.5h-1"),
-    ],
+    fit([l(10, 6, 21, 6), l(10, 12, 21, 12), l(10, 18, 21, 18), p("M4 4.5 5.5 3.5V9"), l(4, 9, 7, 9), p("M4 14.5a1.5 1.5 0 0 1 3 .2c0 1.3-3 2.3-3 4.3h3")]),
     {
-      tags: ["numbered"],
+      viewBox: "0 0 24 24", tags: ["numbered"],
       categories: ["typography"],
       aliases: ["waitlist"],
     },
@@ -3471,19 +3204,12 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "quote",
-    [
-      p("M4.3 5.2h2.3v2.1H5.1v1.4h1.5v2.1H4.3A1.3 1.3 0 0 1 3 9.5V6.5a1.3 1.3 0 0 1 1.3-1.3z"),
-      p("M8.4 5.2h2.3v2.1H9.2v1.4h1.5v2.1H8.4a1.3 1.3 0 0 1-1.3-1.3V6.5a1.3 1.3 0 0 1 1.3-1.3z"),
-    ], { tags: ["citation", "blockquote"],
+    fit([p("M10 11H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5c0 3-2 5-5 6"), p("M19 11h-4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5c0 3-2 5-5 6")]), { viewBox: "0 0 24 24", tags: ["citation", "blockquote"],
     categories: ["typography"] },
   ),
   icon(
     "at-sign",
-    [
-      c(7.3, 7.4, 4.4),
-      p("M9.75 5.7V9.4a1.2 1.2 0 1 0 2.4 0V7.4a4.85 4.85 0 1 0-1.65 3.64"),
-      c(7.25, 7.35, 1.75),
-    ], { categories: ["typography", "communication"] },
+    fit([c(12, 12, 4), p("M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94")]), { viewBox: "0 0 24 24", categories: ["typography", "communication"] },
   ),
   icon(
     "keyboard",
@@ -3531,15 +3257,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "accessibility",
-    [
-      c(7.5, 4, 1),
-      l(7.5, 5.2, 7.5, 9.8),
-      l(4.8, 6.7, 10.2, 6.7),
-      l(5.1, 12, 7.5, 9.8),
-      l(9.9, 12, 7.5, 9.8),
-    ],
+    fit([c(12, 4.5, 1.8), p("M5 8.5l7 1.5 7-1.5"), l(12, 10, 12, 14.5), p("M9 21l3-6.5 3 6.5")]),
     {
-      categories: ["accessibility"],
+      viewBox: "0 0 24 24", categories: ["accessibility"],
       aliases: [
         "accessibility-alt",
         "accessibility-font",
@@ -3565,17 +3285,9 @@ export const iconDefinitions: IconDefinition[] = [
   }),
   icon(
     "palette",
-    [
-      c(7.5, 7.5, 4.7),
-      c(5.2, 6.1, 0.65, { fill: "currentColor", stroke: "none" }),
-      c(7.4, 5.1, 0.65, { fill: "currentColor", stroke: "none" }),
-      c(9.6, 6.1, 0.65, { fill: "currentColor", stroke: "none" }),
-      p(
-        "M10.4 9.9c.6 0 1.1.5 1.1 1.1A1.9 1.9 0 0 1 9.6 13c-2.9 0-6.8-1.9-6.8-5.5A4.7 4.7 0 0 1 7.5 2.8",
-      ),
-    ],
+    fit([p("M12 22a10 10 0 1 1 10-10c0 2.5-2 4-4.5 4H15a2 2 0 0 0-1.5 3.3A1.6 1.6 0 0 1 12 22z"), c(7.5, 11, 1.1, { fill: "currentColor", stroke: "none" }), c(10, 6.8, 1.1, { fill: "currentColor", stroke: "none" }), c(14.5, 6.8, 1.1, { fill: "currentColor", stroke: "none" }), c(17, 10.5, 1.1, { fill: "currentColor", stroke: "none" })]),
     {
-      tags: ["color", "colour", "theme", "paint"],
+      viewBox: "0 0 24 24", tags: ["color", "colour", "theme", "paint"],
       categories: ["design"],
       aliases: ["palette-alt"],
     },
@@ -3603,12 +3315,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "shadow",
-    [
-      r(3.2, 3.2, 7.2, 7.2, { rx: 0.8 }),
-      p("M4.8 11.9h6.8a2.2 2.2 0 0 0-2.2-2.2H2.6a2.2 2.2 0 0 0 2.2 2.2z"),
-    ],
+    fit([r(3, 3, 13, 13, { rx: 2 }), p("M19 8h.5A1.5 1.5 0 0 1 21 9.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 8 19.5V19")]),
     {
-      categories: ["design"],
+      viewBox: "0 0 24 24", categories: ["design"],
       aliases: [
         "shadow-sm",
         "shadow-md",
@@ -3622,9 +3331,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "spinner",
-    [p("M7.5 2.8a4.7 4.7 0 1 0 4.7 4.7"), l(7.5, 2.8, 7.5, 4.4)],
+    fit([l(12, 2, 12, 6), l(12, 18, 12, 22), l(4.93, 4.93, 7.76, 7.76), l(16.24, 16.24, 19.07, 19.07), l(2, 12, 6, 12), l(18, 12, 22, 12), l(4.93, 19.07, 7.76, 16.24), l(16.24, 7.76, 19.07, 4.93)]),
     {
-      tags: ["wait", "busy"],
+      viewBox: "0 0 24 24", tags: ["wait", "busy"],
       categories: ["status", "ui-components"],
       aliases: [
         "loading",
@@ -3936,9 +3645,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "anchor",
-    [l(7.5, 3, 7.5, 11.8), c(7.5, 3, 1), p("M3.6 8.2h7.8a2.4 2.4 0 0 1-4.8 0")],
+    fit([c(12, 5, 3), l(12, 8, 12, 22), l(8, 11, 16, 11), p("M5 13H3a9 9 0 0 0 18 0h-2")]),
     {
-      categories: ["ui-components"],
+      viewBox: "0 0 24 24", categories: ["ui-components"],
       aliases: ["anchor-link", "anchor-broken", "hotspot"],
     },
   ),
@@ -4134,13 +3843,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "abstract-blob",
-    [
-      p(
-        "M3.4 7.6c0-2.3 1.6-4.3 4-4.3 2.7 0 4.2 1.9 4.2 4 0 2.4-1.7 4.4-4.1 4.4-2.5 0-4.1-1.7-4.1-4.1z",
-      ),
-    ],
+    fit([p("M12 3c3.5 0 7.5 1.8 8.4 5.4.9 3.7-1.3 6.2-3 8.6C15.7 19.4 14 21 11.2 21 7.6 21 3.6 18.6 3.1 14.6 2.6 10.5 5 7.6 7 5.4 8.4 3.9 10 3 12 3Z")]),
     {
-      categories: ["abstract"],
+      viewBox: "0 0 24 24", categories: ["abstract"],
     },
   ),
   icon(
@@ -4640,20 +4345,16 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "logo-message-circle",
-    [
-      r(3, 3.5, 9, 8, { rx: 2 }),
-      p("M6 7h8v5c0 1-1 2-2 2l-2-.5-2 .5c-1 0-2-1-2-2V7z"),
-      c(10, 5.5, 0.8, { fill: "currentColor", stroke: "none" }),
-    ],
+    fit([p("M7.9 20A9 9 0 1 0 4 16.1L2 22Z")]),
     {
-      categories: ["communication"],
+      viewBox: "0 0 24 24", categories: ["communication"],
     },
   ),
   icon(
     "logo-message-square",
-    [r(3, 3, 9, 9, { rx: 1.5 }), p("M5.5 6h7v5h-7z"), l(5.5, 8, 8.5, 8)],
+    fit([p("M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z")]),
     {
-      categories: ["communication"],
+      viewBox: "0 0 24 24", categories: ["communication"],
     },
   ),
 
@@ -4688,37 +4389,7 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "logo-podcast",
-    [
-      c(12, 8.1, 2.15, {
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.7,
-      }),
-      p("M12 10.25v4.7", {
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.7,
-        strokeLinecap: "round",
-      }),
-      p("M10.9 18.35h2.2", {
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.7,
-        strokeLinecap: "round",
-      }),
-      p("M7.45 12.1a6.25 6.25 0 0 1 9.1 0", {
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.7,
-        strokeLinecap: "round",
-      }),
-      p("M5.25 9.45a9.35 9.35 0 0 1 13.5 0", {
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.7,
-        strokeLinecap: "round",
-      }),
-    ],
+    fit([p("M16.85 18.58a9 9 0 1 0-9.7 0"), p("M8 14a5 5 0 1 1 8 0"), c(12, 11, 1), p("M13 17a1 1 0 1 0-2 0l.5 4.5a.5.5 0 0 0 1 0Z")]),
     {
       viewBox: "0 0 24 24",
       categories: ["media"],
@@ -4942,24 +4613,16 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "arrow-circle-cw",
-    [
-      c(7.5, 7.5, 4.7),
-      p("M7.5 4.1a3.4 3.4 0 1 1-2.4 1"),
-      polyline("4.1 4.2 5.8 4.2 5.8 2.5"),
-    ],
+    fit([p("M21 12a9 9 0 1 1-2.64-6.36L21 8"), polyline("21 3 21 8 16 8")]),
     {
-      categories: ["arrows"],
+      viewBox: "0 0 24 24", categories: ["arrows"],
     },
   ),
   icon(
     "arrow-circle-ccw",
-    [
-      c(7.5, 7.5, 4.7),
-      p("M7.5 4.1a3.4 3.4 0 1 0 2.4 1"),
-      polyline("10.9 4.2 9.2 4.2 9.2 2.5"),
-    ],
+    fit([p("M3 12a9 9 0 1 0 2.64-6.36L3 8"), polyline("3 3 3 8 8 8")]),
     {
-      categories: ["arrows"],
+      viewBox: "0 0 24 24", categories: ["arrows"],
     },
   ),
 
@@ -5031,16 +4694,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "design-ruler-tool",
-    [
-      r(3.1, 4.8, 8.8, 5.4, { rx: 0.8 }),
-      l(4.4, 6.1, 4.4, 8.8),
-      l(5.7, 6.1, 5.7, 7.8),
-      l(7, 6.1, 7, 8.8),
-      l(8.3, 6.1, 8.3, 7.8),
-      l(9.6, 6.1, 9.6, 8.8),
-    ],
+    fit([p("M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"), l(7.5, 10.5, 9.5, 8.5), l(10.5, 13.5, 12.5, 11.5), l(13.5, 16.5, 15.5, 14.5)]),
     {
-      aliases: ["ruler", "ruler-horizontal", "ruler-vertical"],
+      viewBox: "0 0 24 24", aliases: ["ruler", "ruler-horizontal", "ruler-vertical"],
       categories: ["design"],
     },
   ),
@@ -5074,36 +4730,23 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "type-lowercase",
-    [
-      p("M3.8 11.9V7.7a2.1 2.1 0 0 1 4.2 0v4.2"),
-      p("M9 8.7h2.6a1.6 1.6 0 1 1 0 3.2H9V6.4"),
-    ],
+    fit([c(7.5, 15, 3), l(10.5, 12, 10.5, 18), l(14, 6, 14, 18), c(17, 15, 3)]),
     {
-      categories: ["typography"],
+      viewBox: "0 0 24 24", categories: ["typography"],
     },
   ),
   icon(
     "type-superscript",
-    [
-      p("M3.4 11.9 6 7.7"),
-      l(3.4, 7.7, 6, 11.9),
-      p("M8.7 5.2h2.7"),
-      p("M10.05 5.2V2.8"),
-    ],
+    fit([l(4, 8, 12, 19), l(12, 8, 4, 19), p("M16 4.5a1.75 1.75 0 0 1 3.5 0c0 1.5-3.5 2.5-3.5 4.5h3.5")]),
     {
-      categories: ["typography"],
+      viewBox: "0 0 24 24", categories: ["typography"],
     },
   ),
   icon(
     "type-subscript",
-    [
-      p("M3.4 10.8 6 6.6"),
-      l(3.4, 6.6, 6, 10.8),
-      p("M8.6 10.2h2.8"),
-      p("M9.2 12.1h2.2"),
-    ],
+    fit([l(4, 5, 12, 16), l(12, 5, 4, 16), p("M16 17.5a1.75 1.75 0 0 1 3.5 0c0 1.5-3.5 2.5-3.5 4.5h3.5")]),
     {
-      categories: ["typography"],
+      viewBox: "0 0 24 24", categories: ["typography"],
     },
   ),
   icon(
@@ -5291,15 +4934,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "forecast",
-    [
-      c(4.5, 9.1, 0.8, { fill: "currentColor", stroke: "none" }),
-      c(7.5, 6.8, 0.8, { fill: "currentColor", stroke: "none" }),
-      c(10.5, 4.9, 0.8, { fill: "currentColor", stroke: "none" }),
-      l(4.5, 9.1, 7.5, 6.8),
-      l(7.5, 6.8, 10.5, 4.9),
-    ],
+    fit([p("M3 3v18h18"), polyline("7 16 10.5 12 13.5 14"), p("M13.5 14 19 8.5", { strokeDasharray: "1.5 2.5" }), polyline("16 8 19.5 8 19.5 11.5")]),
     {
-      categories: ["business", "analytics"],
+      viewBox: "0 0 24 24", categories: ["business", "analytics"],
       aliases: [
         "forecast-up",
         "forecast-down",
@@ -5457,17 +5094,9 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "maintenance",
-    [
-      c(7.5, 7.5, 2.4),
-      l(7.5, 2.8, 7.5, 4.1),
-      l(7.5, 10.9, 7.5, 12.2),
-      l(2.8, 7.5, 4.1, 7.5),
-      l(10.9, 7.5, 12.2, 7.5),
-      l(4.2, 4.2, 5.1, 5.1),
-      l(9.9, 9.9, 10.8, 10.8),
-    ],
+    fit([p("M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z")]),
     {
-      categories: ["development"],
+      viewBox: "0 0 24 24", categories: ["development"],
       aliases: [
         "maintenance-mode",
       ],
@@ -5869,19 +5498,11 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "link-2",
-    [
-      polyline("5.5 9 4.25 10.25 2.95 8.95 4.2 7.7"),
-      polyline("9.5 6 10.75 4.75 12.05 6.05 10.8 7.3"),
-      l(5.9, 9.1, 9.1, 5.9),
-    ],
-    { categories: ["actions"],
+    fit([p("M9 17H7A5 5 0 0 1 7 7h2"), p("M15 7h2a5 5 0 1 1 0 10h-2"), l(8, 12, 16, 12)]),
+    { viewBox: "0 0 24 24", categories: ["actions"],
     aliases: ["chain-link"] },
   ),
-  icon("command", [
-    p(
-      "M5.1 5.1a1.6 1.6 0 1 1 0-3.2h1.2v4.4H5.1a1.6 1.6 0 1 1 0-3.2h4.8a1.6 1.6 0 1 1 0 3.2H8.7v4.4h1.2a1.6 1.6 0 1 1 0 3.2H8.7V9.5H6.3v1.2H5.1a1.6 1.6 0 1 1 0 3.2h1.2V9.5H5.1a1.6 1.6 0 1 1 0-3.2",
-    ),
-  ], { categories: ["actions", "development"] }),
+  icon("command", fit([p("M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3")]), { viewBox: "0 0 24 24", categories: ["actions", "development"] }),
 ];
 
 export const iconNameList = Array.from(

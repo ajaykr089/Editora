@@ -35,7 +35,7 @@
 - **Accessible by default.** An icon is hidden from screen readers unless you give it a title or a label.
 - **Inline SVG** that follows `currentColor`, so icons take the colour of the text, in light and dark themes alike.
   They render to markup on the server too.
-- Outline for every icon, solid for <!-- solid:21 -->21 of them and duotone for <!-- duotone:2 -->2, three weights, rotate, flip and right-to-left mirroring.
+- Outline for every icon, solid for <!-- solid:28 -->28 of them and duotone for <!-- duotone:2 -->2, three weights, rotate, flip and right-to-left mirroring.
 - Written in TypeScript. Components forward their `ref` to the `<svg>` and accept any SVG prop.
 
 ## Install
