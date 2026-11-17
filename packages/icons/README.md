@@ -198,7 +198,7 @@ Every option of `renderIconSvg(name, options)` and `iconToDataUri(name, options)
 
 ## Variants
 
-Every icon has an outline. Solid and duotone are drawn for few of them: <!-- solid:21 -->21 have a solid variant
+Every icon has an outline. Solid and duotone are drawn for few of them: <!-- solid:28 -->28 have a solid variant
 (`check`, `x`, `bell`, `heart`, `star`, `home`, `lock`, `trash`, `folder`... ) and <!-- duotone:2 -->2 have a duotone one
 (<!-- duotone-names:chart-pie, shield -->`chart-pie` and `shield`). Asking for a variant an icon does not have draws
 its outline, and `resolveIcon(name, variant)` tells you which one you got.
