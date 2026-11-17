@@ -431,6 +431,44 @@ function readState(raw: string | null): FormStateTone {
   return 'default';
 }
 
+/** What `ui-form` sends with each of its events (`event.detail`). */
+export type UIFormValues = Record<string, any>;
+export type UIFormErrors = Record<string, string | undefined>;
+export type UIFormSubmitDetail = { values: UIFormValues };
+export type UIFormInvalidDetail = { errors: UIFormErrors; values: UIFormValues };
+export type UIFormValidateDetail = { valid: boolean; errors: UIFormErrors };
+export type UIFormDirtyChangeDetail = { dirty: boolean; values: UIFormValues };
+export type UIFormAutosaveDetail = { values: UIFormValues; dirty: boolean };
+
+/**
+ * The form's own events. `submit` and `invalid` share their names with the browser's form events but
+ * are CustomEvents carrying `detail`: without this map TypeScript typed a `submit` listener's event as
+ * a SubmitEvent, so `event.detail.values` did not compile.
+ */
+export interface UIFormEventMap extends Omit<HTMLElementEventMap, 'submit' | 'invalid'> {
+  submit: CustomEvent<UIFormSubmitDetail>;
+  invalid: CustomEvent<UIFormInvalidDetail>;
+  validate: CustomEvent<UIFormValidateDetail>;
+  'dirty-change': CustomEvent<UIFormDirtyChangeDetail>;
+  autosave: CustomEvent<UIFormAutosaveDetail>;
+}
+
+// Typed listeners (merged into the class below).
+export interface UIForm {
+  addEventListener<K extends keyof UIFormEventMap>(
+    type: K,
+    listener: (this: UIForm, ev: UIFormEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof UIFormEventMap>(
+    type: K,
+    listener: (this: UIForm, ev: UIFormEventMap[K]) => any,
+    options?: boolean | EventListenerOptions
+  ): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
 export class UIForm extends ElementBase {
   static get observedAttributes() {
     return [
@@ -1276,4 +1314,10 @@ export class UIForm extends ElementBase {
 
 if (typeof customElements !== 'undefined' && !customElements.get('ui-form')) {
   customElements.define('ui-form', UIForm);
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'ui-form': UIForm;
+  }
 }
