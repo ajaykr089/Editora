@@ -102,6 +102,8 @@ interface PendingClaim {
   id: number;
   options: CollaborationPluginOptions;
   claimed: boolean;
+  // The content element this claim was matched to, once it has been.
+  element?: HTMLElement;
 }
 
 let nextClaimId = 1;
@@ -133,6 +135,7 @@ function processClaimQueue(): void {
     const claim = pendingClaims.find((c) => !c.claimed);
     if (!claim) break;
     claim.claimed = true;
+    claim.element = root;
     setupCollaboration(root, claim.options);
   }
   // Drop satisfied claims so a later, unrelated mutation batch doesn't
@@ -140,9 +143,23 @@ function processClaimQueue(): void {
   while (pendingClaims.length && pendingClaims[0].claimed) pendingClaims.shift();
 }
 
+// <editora-editor> rebuilds itself (attribute change, setConfig(), a move in the DOM) by emptying
+// its children, without calling this plugin's destroy(). A binding whose content element has left
+// the document would otherwise keep its provider - and its WebSocket - open forever, and the
+// rebuilt editor's new content element gets a second connection to the same room.
+function releaseDetachedEditors(): void {
+  const bound = new Set([...trackedContentElements, ...pendingContentElements]);
+  bound.forEach((el) => {
+    if (!el.isConnected) teardownCollaboration(el);
+  });
+}
+
 function ensureScanner(): void {
   if (scannerObserver || typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
-  scannerObserver = new MutationObserver(() => processClaimQueue());
+  scannerObserver = new MutationObserver(() => {
+    releaseDetachedEditors();
+    processClaimQueue();
+  });
   scannerObserver.observe(document.body, { childList: true, subtree: true });
 }
 
@@ -377,22 +394,38 @@ export const CollaborationPlugin = (options: CollaborationPluginOptions = {}): P
   // web-component mount, from two separate, independent registration paths
   // (RichTextEditorElement's own loop, and EditorEngine's parallel
   // PluginManager.register()) - guard so this instance only ever enqueues
-  // one claim, or a stray second claim would sit in the queue and
+  // one claim per editor, or a stray second claim would sit in the queue and
   // incorrectly grab a later, unrelated editor's slot.
-  let hasEnqueued = false;
+  //
+  // The web component also keeps this instance across a rebuild of the same
+  // editor (its loader caches instances by name) and runs init() again on it
+  // once the old content element is gone. That init() must claim the new
+  // content element, after closing the old one's connection.
+  let claim: PendingClaim | null = null;
+  let warnedNoTransport = false;
   const plugin: Plugin & { __pluginConfig?: CollaborationPluginOptions } = {
     name: 'collaboration',
 
     init: () => {
-      if (hasEnqueued) return;
-      hasEnqueued = true;
+      if (claim) {
+        // Still waiting for its editor to mount: this is the same mount's second init().
+        if (!claim.claimed) return;
+        const el = claim.element;
+        // Still bound to a live editor: nothing to do.
+        if (el && el.isConnected && (stateByContent.has(el) || pendingContentElements.has(el))) return;
+        // Its editor was rebuilt or removed; the scanner may not have run yet.
+        if (el) teardownCollaboration(el);
+        claim = null;
+      }
+      if (warnedNoTransport) return;
       const resolved = { ...options, ...(plugin.__pluginConfig ?? {}) };
       // Without a server there is nothing to connect to: no claim on an editor, no presence bar.
       if (!hasConfiguredTransport(resolved)) {
+        warnedNoTransport = true;
         warnAboutMissingServer();
         return;
       }
-      enqueueClaim(resolved);
+      claim = enqueueClaim(resolved);
     },
 
     commands: {},
