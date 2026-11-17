@@ -1,5 +1,35 @@
 # Change Log
 
+## 0.2.0
+
+### Minor Changes
+
+- 9f96fdc: `searchIcons` and `listIconCategories` (with the `IconSearchResult`, `IconSearchOptions` and `IconSearchField` types) are
+  re-exported from `@editora/icons`, so a React icon picker needs one import: search, then draw each result with
+  `<Icon name>`. The README has a picker example.
+- 2143246: Named icons are tree-shakeable: each component is built from its own glyph in `@editora/icons/glyphs`, so
+  `<CheckIcon />` alone adds about 2.5 KB gzipped instead of the whole catalog (about 50 KB). New `defineIcon(definition,
+displayName?)` makes a component from an icon definition without registering it. `<Icon name>` now autocompletes
+  built-in names. A built-in icon replaced with `registerIcon` is still drawn by its named component. `<Icon name>`,
+  `createIcon`, `icons` and `getIconComponent` still look names up and bring the whole catalog.
+
+### Patch Changes
+
+- 7d2a229: 71 icons are redrawn so they look like what they name, on the 24 px grid and at the same size as the rest of the set:
+  `refresh-cw`, `refresh-ccw`, `arrow-circle-cw` and `arrow-circle-ccw` have arrowheads, `spinner` is a loader,
+  `settings` is a gear and `maintenance` a wrench (both were sun-like shapes), `dislike` is a thumbs-down (it was a thumbs-up),
+  `bug`, `brain`, `book`, `command`, `at-sign`, `anchor`, `cast`, `link`, `link-2`, `unlink`, `quote`, `strikethrough`,
+  `paperclip`, `printer`, `paste`, `edit`, `drag` (now four-way arrows), `fingerprint`, `airplane`, `accessibility` and the
+  cloud weather icons are redrawn, the plus and minus of `bookmark-plus`/`-minus` and `database-add`/`-remove` no longer
+  spill over the shape, and `share-2` (identical to `share`) is now a share-sheet arrow. The media controls (`play`,
+  `pause`, `stop`, `forward`, `rewind`, `skip-next`, `skip-previous`) are outlines like every other icon, and gain a filled
+  `solid` variant for the old look (`variant: 'solid'`). Names, aliases and every other icon are unchanged.
+- Updated dependencies [5fd049a]
+- Updated dependencies [7d2a229]
+- Updated dependencies [d812360]
+- Updated dependencies [8d7a928]
+  - @editora/icons@0.3.0
+
 ## 0.1.13
 
 ### Patch Changes

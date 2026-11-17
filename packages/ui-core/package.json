@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-core",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Framework-agnostic Web Components and primitives for the Editora UI ecosystem",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -55,7 +55,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@editora/icons": "^0.2.0"
+    "@editora/icons": "^0.3.0"
   },
   "keywords": [
     "editora",

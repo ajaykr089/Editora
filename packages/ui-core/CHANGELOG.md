@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [5fd049a]
+- Updated dependencies [7d2a229]
+- Updated dependencies [d812360]
+- Updated dependencies [8d7a928]
+  - @editora/icons@0.3.0
+
 ## 0.6.0
 
 ### Minor Changes

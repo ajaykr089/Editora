@@ -1,5 +1,42 @@
 # Change Log
 
+## 0.3.0
+
+### Minor Changes
+
+- 5fd049a: Aliases now name what the icon draws. Some icons had collected dozens of unrelated names: `semantic-business`, a small
+  chart, answered to 69 (`export`, `payroll`, `chatbot`, ...), and `pizza` drew a coffee cup. Of the 1139 aliases, 408 now
+  point at a dedicated icon (`github` is `logo-github`, `export` is `download`, `import` is `upload`, `avatar` is
+  `user-circle`, `line-height` is `type-line-height`, `coupon` is `tag`), 204 that no icon draws are removed, and 527
+  are unchanged; every icon draws exactly as before. A removed alias makes `hasIcon` return false and `renderIconSvg`
+  return an empty string: pick an icon from `listIcons()`, or register your own under that name. `listIconAliases()`
+  lists where every remaining alias points.
+
+  Removed: `accordion-close`, `accordion-open`, `accordion`, `acquisition-cost`, `adobe`, `alert-banner`, `api-limit`, `apple`, `arrears`, `attribution-model`, `attribution`, `auto-spacing`, `backdrop-blur`, `backdrop-opacity`, `backorder`, `badge-dot`, `badge-number`, `banner`, `bike`, `blockchain`, `blur`, `bounce-rate`, `breadcrumb-separator`, `breadcrumb`, `burger`, `bus`, `cake`, `cash-register`, `category-add`, `chatbot-admin`, `chip-filled`, `chip-outline`, `churn-rate`, `clipping-mask`, `collapse-horizontal`, `collapse-vertical`, `commission-rate`, `commission`, `container-fluid`, `controller`, `credit-score`, `cross-sell`, `customs`, `demand`, `docking`, `downtime-alert`, `downtime`, `drawer`, `dunning`, `duty`, `dynamic-pricing`, `easing-in-out`, `easing-in`, `easing-out`, `easing`, `export-sales`, `face-id`, `fill`, `focus-trap`, `font-color`, `font-size`, `fuel`, `gamepad`, `gantt`, `gateway-razorpay`, `gateway`, `gesture-pinch`, `gesture-swipe`, `gesture-tap`, `gesture-zoom`, `gesture`, `glass-effect`, `glass`, `google-cloud`, `gradient-conic`, `gradient-linear`, `gradient-radial`, `gradient`, `gratuity`, `guide-horizontal`, `guide-vertical`, `guide`, `habit-track`, `habit`, `hand-release`, `hand`, `heatmap-analytics`, `heatmap`, `ice-cream`, `icon-bold`, `icon-duotone`, `icon-filled`, `icon-outline`, `icon-rounded`, `icon-sharp`, `icon-thin`, `import-products`, `interest-rate`, `interest`, `lightbulb`, `lighthouse`, `limit-exceeded`, `limit`, `live-commerce`, `mapping-field`, `mapping`, `mask-inverse`, `mask`, `microinteraction`, `mining`, `modal-close`, `modal-open`, `modal`, `motion`, `negotiation`, `nft-marketplace`, `nft`, `omnichannel`, `opacity`, `optimization-auto`, `optimization-manual-admin`, `optimization`, `otp`, `overflow-hidden`, `overflow-scroll`, `overflow`, `pagination`, `panel`, `paragraph-spacing`, `paragraph`, `parking`, `path-exclude`, `path-intersect`, `path-merge`, `path-subtract`, `permission-add`, `permission-remove`, `pizza`, `plan-downgrade`, `plan-upgrade`, `plan`, `plug`, `preorder`, `procurement`, `progress-bar`, `progress-step`, `quota`, `rate-limit`, `reconciliation`, `retention-rate`, `rss`, `safe-area`, `scooter`, `ship`, `skeleton-avatar`, `skeleton-text`, `skeleton`, `sketch`, `sla-breach`, `snackbar`, `snapping-grid`, `snapping-object`, `snapping`, `social-commerce`, `source-organic`, `source-paid`, `source`, `staking`, `stepper-horizontal`, `stepper-vertical`, `stepper`, `stroke-width`, `stroke`, `supplier-add`, `supply`, `tab-active`, `tab-add`, `tab-inactive`, `tab-order`, `tab`, `tenant-add`, `tenant-switch`, `text-rotate`, `text-truncate`, `text-vertical`, `text-wrap`, `throttle`, `tip`, `toast`, `traffic-light`, `train`, `transformation-rule`, `transformation`, `transparency`, `unwrap`, `upsell`, `usb`, `variant-alt`, `variant`, `whiteboard`, `wholesale`, `wizard-step`, `wizard`, `wrap`.
+
+- 7d2a229: 71 icons are redrawn so they look like what they name, on the 24 px grid and at the same size as the rest of the set:
+  `refresh-cw`, `refresh-ccw`, `arrow-circle-cw` and `arrow-circle-ccw` have arrowheads, `spinner` is a loader,
+  `settings` is a gear and `maintenance` a wrench (both were sun-like shapes), `dislike` is a thumbs-down (it was a thumbs-up),
+  `bug`, `brain`, `book`, `command`, `at-sign`, `anchor`, `cast`, `link`, `link-2`, `unlink`, `quote`, `strikethrough`,
+  `paperclip`, `printer`, `paste`, `edit`, `drag` (now four-way arrows), `fingerprint`, `airplane`, `accessibility` and the
+  cloud weather icons are redrawn, the plus and minus of `bookmark-plus`/`-minus` and `database-add`/`-remove` no longer
+  spill over the shape, and `share-2` (identical to `share`) is now a share-sheet arrow. The media controls (`play`,
+  `pause`, `stop`, `forward`, `rewind`, `skip-next`, `skip-previous`) are outlines like every other icon, and gain a filled
+  `solid` variant for the old look (`variant: 'solid'`). Names, aliases and every other icon are unchanged.
+- d812360: New `searchIcons(query, { category?, limit? })` finds icons best match first, by name, alias (`delete` finds `trash`),
+  tag (`bin` finds `trash`, `ai` finds `sparkles`) and category (`weather`). Every word of the query has to match, and when
+  no icon matches them all, the icons that match the most words come back instead of nothing. Each result says what matched
+  (`{ name, score, matchedBy, matched }`), and icons added with `registerIcon` are searched too. New `listIconCategories()`
+  returns every category with its icon count, for picker filters. Every built-in icon now has at least one category (341 had
+  none; existing categories are unchanged, and all brand icons are also in `logos`), and 123 common icons gain search tags
+  for the words people type (`gear`, `bin`, `photo`, `email`, `ai`).
+- 8d7a928: Names are typed: every function that takes an icon name accepts `IconName` (the union of the 504 built-in names, so
+  they autocomplete) or any other string, and `IconName` is exported for typing names kept in your own data, where a
+  typo becomes a compile error. `renderIconDefinition` is now also exported from the package root, and
+  `getRegisteredIcon(name)` (root and `@editora/icons/renderer`) returns the icon `registerIcon` added or replaced under
+  a name. The `glyphs` and `renderer` subpaths now resolve in tools that ignore `exports` (Jest 27, webpack 4,
+  TypeScript's `node` resolution).
+
 ## 0.2.0
 
 ### Minor Changes
