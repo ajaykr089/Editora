@@ -1483,6 +1483,26 @@
       }
     },
     {
+      "id": "ui-core:ui-page-header",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "page-header",
+      "tagName": "ui-page-header",
+      "source": "packages/ui-core/src/components/ui-page-header.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-page-header--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-pagination",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -2071,6 +2091,26 @@
       "source": "packages/ui-core/src/components/ui-splitter.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-splitter--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-stat",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "stat",
+      "tagName": "ui-stat",
+      "source": "packages/ui-core/src/components/ui-stat.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-stat--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -3720,8 +3760,7 @@
       "source": "packages/ui-react/src/components/Stat.tsx",
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-stat--playground",
-      "wrapperFor": null,
-      "notes": "React-only component"
+      "wrapperFor": "ui-stat"
     },
     {
       "id": "ui-react:Stepper",

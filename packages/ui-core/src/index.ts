@@ -39,6 +39,8 @@ import './components/ui-alert-dialog';
 import './components/ui-aspect-ratio';
 import './components/ui-avatar';
 import './components/ui-badge';
+import './components/ui-stat';
+import './components/ui-page-header';
 import './components/ui-table';
 import './components/ui-navigation-menu';
 import './components/ui-menubar';
@@ -196,6 +198,8 @@ export type {
 export { UIAspectRatio } from './components/ui-aspect-ratio';
 export { UIAvatar } from './components/ui-avatar';
 export { UIBadge } from './components/ui-badge';
+export { UIStat, UIMetricCard } from './components/ui-stat';
+export { UIPageHeader } from './components/ui-page-header';
 export { UITable } from './components/ui-table';
 export { UINavigationMenu } from './components/ui-navigation-menu';
 export { UIMenubar } from './components/ui-menubar';

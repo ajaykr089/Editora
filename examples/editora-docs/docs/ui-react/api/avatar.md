@@ -35,7 +35,7 @@ import { Avatar } from '@editora/ui-react';
 | `src` | `string` |   |
 | `state` | `'idle' \| 'loading' \| 'error' \| 'success'` |   |
 | `status` | `'online' \| 'offline' \| 'busy' \| 'away'` |   |
-| `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
+| `tone` | `'neutral' \| 'brand' \| 'info' \| 'success' \| 'warning' \| 'danger'` | `brand` uses the theme's primary colour (as on Badge). |
 | `variant` | `'surface' \| 'soft' \| 'solid' \| 'outline'` |   |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
