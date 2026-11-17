@@ -39,7 +39,7 @@ npm and none of the aliases are needed.
 | Charts | `pages/Commerce.tsx`, `pages/Analytics.tsx` | `copperline/src/dashboard.ts` |
 | Kanban (Sortable) | `apps/Kanban.tsx` | |
 | Calendar with events | `apps/Calendar.tsx` | |
-| Page header and stat tiles | `pages/Commerce.tsx` | `copperline/index.html` |
+| Page header and stat tiles | `pages/Orders.tsx` | `copperline/index.html` |
 | Every component family | `pages/UiKit.tsx` (`#/ui`) | |
 
 ## Rules that save time
