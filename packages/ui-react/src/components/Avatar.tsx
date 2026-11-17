@@ -22,7 +22,8 @@ export interface AvatarProps extends Omit<React.HTMLAttributes<HTMLElement>, 'on
   radius?: number | string;
   fontWeight?: number | string;
   shape?: 'circle' | 'rounded' | 'square';
-  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  /** `brand` uses the theme's primary colour (as on Badge). */
+  tone?: 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
   variant?: 'surface' | 'soft' | 'solid' | 'outline';
   elevation?: 'none' | 'low' | 'high';
   status?: 'online' | 'offline' | 'busy' | 'away';

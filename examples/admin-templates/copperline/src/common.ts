@@ -17,7 +17,7 @@ import {
   archiveIcon, bellIcon, bookIcon, cartIcon, chartLineIcon, checkIcon, chevronDownIcon, dashboardIcon, downloadIcon,
   editIcon, eyeIcon, fileTextIcon, homeIcon, inboxIcon, lockIcon, logoutIcon, mailIcon, moonIcon, packageIcon,
   pencilIcon, plusIcon, printerIcon, searchIcon, sendIcon, settingsIcon, sunIcon, trashIcon, truckIcon, userIcon,
-  usersIcon, walletIcon, xIcon, creditCardIcon, alertTriangleIcon, refreshCwIcon,
+  usersIcon, walletIcon, receiptIcon, xIcon, creditCardIcon, alertTriangleIcon, refreshCwIcon,
 } from '@editora/icons/glyphs';
 import '@editora/toast/toast.css';
 import './copperline.css';
@@ -26,7 +26,7 @@ addIcons(
   archiveIcon, bellIcon, bookIcon, cartIcon, chartLineIcon, checkIcon, chevronDownIcon, dashboardIcon, downloadIcon,
   editIcon, eyeIcon, fileTextIcon, homeIcon, inboxIcon, lockIcon, logoutIcon, mailIcon, moonIcon, packageIcon,
   pencilIcon, plusIcon, printerIcon, searchIcon, sendIcon, settingsIcon, sunIcon, trashIcon, truckIcon, userIcon,
-  usersIcon, walletIcon, xIcon, creditCardIcon, alertTriangleIcon, refreshCwIcon,
+  usersIcon, walletIcon, receiptIcon, xIcon, creditCardIcon, alertTriangleIcon, refreshCwIcon,
 );
 
 // 2. The theme: Copperline's copper brand, light or dark. applyTheme writes the --ui-* tokens

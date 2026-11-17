@@ -22,15 +22,15 @@
       <ui-sidebar slot="sidebar" variant="minimal" aria-label="Main navigation"></ui-sidebar>
       <main slot="content" class="cl-content" id="main">
         <div class="cl-page">
-          <div class="cl-head">
-            <div><h1>Dashboard</h1><p>Orders, revenue and the help centre at a glance.</p></div>
-            <div class="cl-actions"><ui-button variant="secondary" icon="download" id="export">Export</ui-button><ui-button icon="pencil" href="./editor.html" id="write">Write an article</ui-button></div>
-          </div>
+          <ui-page-header heading="Dashboard" subtitle="Orders, revenue and the help centre at a glance.">
+            <ui-button slot="actions" variant="secondary" icon="download" id="export">Export</ui-button>
+            <ui-button slot="actions" icon="pencil" href="./editor.html" id="write">Write an article</ui-button>
+          </ui-page-header>
           <div class="cl-stats" id="stats">
-            <ui-card><div class="cl-stat"><span class="label">Revenue, 30 days</span><span class="value" data-stat="revenue">…</span><span class="trend" data-stat="revenue-trend"></span></div></ui-card>
-            <ui-card><div class="cl-stat"><span class="label">Orders, 30 days</span><span class="value" data-stat="orders">…</span><span class="trend" data-stat="orders-trend"></span></div></ui-card>
-            <ui-card><div class="cl-stat"><span class="label">Average order</span><span class="value" data-stat="aov">…</span><span class="trend cl-muted">Free shipping over $150</span></div></ui-card>
-            <ui-card><div class="cl-stat"><span class="label">New customers</span><span class="value" data-stat="customers">…</span><span class="trend cl-muted">Joined in 30 days</span></div></ui-card>
+            <ui-metric-card id="stat-revenue" label="Revenue, 30 days" value="…" icon="wallet" tone="brand"></ui-metric-card>
+            <ui-metric-card id="stat-orders" label="Orders, 30 days" value="…" icon="cart" tone="brand"></ui-metric-card>
+            <ui-metric-card id="stat-aov" label="Average order" value="…" meta="Free shipping over $150" icon="receipt"></ui-metric-card>
+            <ui-metric-card id="stat-customers" label="New customers" value="…" meta="Joined in 30 days" icon="users"></ui-metric-card>
           </div>
           <div class="cl-grid-2">
             <ui-chart id="revenue-chart" type="area" title="Revenue by month" subtitle="Six months, cancelled orders left out" value-prefix="$" show-legend="false" state="loading" heading-level="2"></ui-chart>

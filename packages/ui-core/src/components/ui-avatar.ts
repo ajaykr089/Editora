@@ -42,6 +42,8 @@ const style = `
     --ui-avatar-status-size: 13px;
   }
 
+  /* brand: the theme's primary colour, as on Badge (info has always used it too). */
+  :host([tone="brand"]),
   :host([tone="info"]) {
     --ui-avatar-accent: var(--ui-color-primary, #2563eb);
   }

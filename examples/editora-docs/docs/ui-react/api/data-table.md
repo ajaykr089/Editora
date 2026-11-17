@@ -32,6 +32,7 @@ import { DataTable } from '@editora/ui-react';
 | `hiddenColumns` | `Array<string \| number>` | Columns to hide, by key (`data-key` or header text) or 0-based index. |
 | `hideSummary` | `boolean` |   |
 | `hover` | `boolean` |   |
+| `layout` | `'fixed' \| 'auto'` | `auto`: columns take the width their content needs instead of an equal share (the default, `fixed`). Ignored with resizable columns or virtualized rows, which need fixed widths. |
 | `loading` | `boolean` |   |
 | `multiSelect` | `boolean` |   |
 | `onBulkClear` | `(detail: DataTableBulkClearDetail) => void` |   |

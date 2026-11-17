@@ -10,6 +10,14 @@ afterEach(() => {
 });
 
 describe('ui-avatar', () => {
+  it('has a brand tone that uses the theme primary colour, like Badge', async () => {
+    const el = document.createElement('ui-avatar');
+    document.body.appendChild(el);
+    await flushMicrotask();
+    const css = Array.from(el.shadowRoot!.querySelectorAll('style')).map((node) => node.textContent).join('\n');
+    expect(css).toMatch(/:host\(\[tone="brand"\]\),\s*:host\(\[tone="info"\]\) \{\s*--ui-avatar-accent: var\(--ui-color-primary/);
+  });
+
   it('normalizes numeric and full radius values', async () => {
     const el = document.createElement('ui-avatar');
     el.setAttribute('radius', '12');

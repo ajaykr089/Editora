@@ -416,6 +416,18 @@ const lightDomStyle = `
     table-layout: fixed;
   }
 
+  /* layout="auto": columns take the width their content needs (an ID column stays narrow, a name
+     column grows) instead of an equal share. Long text then widens the table and it scrolls, so set
+     widths on the th for columns that should truncate. Resizable or virtualized tables keep fixed
+     columns: their widths must not jump as rows change. */
+  ui-data-table[layout="auto"]:not([headless]):not([resizable-columns]):not([virtualize]) > table {
+    table-layout: auto;
+  }
+
+  ui-data-table[layout="auto"]:not([headless]):not([resizable-columns]):not([virtualize]) > table :is(th, td) {
+    text-overflow: clip;
+  }
+
   /* Numbers line up on the right: put data-align="end" on the column's th and td (or "center"). */
   ui-data-table:not([headless]) > table :is(th, td)[data-align="end"] {
     text-align: end;

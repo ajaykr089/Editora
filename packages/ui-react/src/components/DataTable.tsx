@@ -108,6 +108,11 @@ export type DataTableProps = React.HTMLAttributes<HTMLElement> & {
   striped?: boolean;
   hover?: boolean;
   compact?: boolean;
+  /**
+   * `auto`: columns take the width their content needs instead of an equal share (the default,
+   * `fixed`). Ignored with resizable columns or virtualized rows, which need fixed widths.
+   */
+  layout?: 'fixed' | 'auto';
   bordered?: boolean;
   stickyHeader?: boolean;
   stickyFooter?: boolean;
@@ -168,6 +173,7 @@ export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function 
     striped,
     hover,
     compact,
+    layout,
     bordered,
     stickyHeader,
     stickyFooter,
@@ -322,6 +328,7 @@ export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function 
       ...(striped ? { striped: '' } : {}),
       ...(hover ? { hover: '' } : {}),
       ...(compact ? { compact: '' } : {}),
+      ...(layout === 'auto' ? { layout: 'auto' } : {}),
       ...(bordered ? { bordered: '' } : {}),
       ...(stickyHeader ? { 'sticky-header': '' } : {}),
       ...(stickyFooter ? { 'sticky-footer': '' } : {}),
