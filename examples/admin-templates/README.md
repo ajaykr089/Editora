@@ -39,6 +39,7 @@ npm and none of the aliases are needed.
 | Charts | `pages/Commerce.tsx`, `pages/Analytics.tsx` | `copperline/src/dashboard.ts` |
 | Kanban (Sortable) | `apps/Kanban.tsx` | |
 | Calendar with events | `apps/Calendar.tsx` | |
+| Page header and stat tiles | `pages/Commerce.tsx` | `copperline/index.html` |
 | Every component family | `pages/UiKit.tsx` (`#/ui`) | |
 
 ## Rules that save time
@@ -65,7 +66,8 @@ building the templates.
 **Data tables**
 
 - `ui-data-table` wraps an ordinary `<table>`. Columns share the width equally unless you give the `<th>`s widths
-  (`style="width: 30%"`). Right-align numbers with `data-align="end"` on the `<th>` and `<td>`.
+  (`style="width: 30%"`) or set `layout="auto"` (React `layout="auto"`), which sizes each column to its content.
+  Right-align numbers with `data-align="end"` on the `<th>` and `<td>`.
 - Server-side: `serverSide`, `totalRows`, `page`, `pageSize`, and handle `onSortChange` / `onPageChange` by
   fetching. Put `data-id` on rows: selection reports `ids`, and `data-href` makes the row a link.
 - A checkbox column: put `<Checkbox data-row-select>` in each row and `<Checkbox data-select-all>` in its header
@@ -106,6 +108,9 @@ building the templates.
 - For categories (stages, devices), pass `showChange={false}` (`show-change="false"`): a first-to-last change means
   nothing there, so the summary shows the lowest value instead.
 
-**Known limits**
+**Page headers and stat tiles**
 
-- `Stat`, `PageHeader` and `MetricCard` are React-only; Copperline builds its stat cards from `ui-card`.
+- React: `PageHeader`, `Stat`, `MetricCard`. HTML: `ui-page-header` (`heading`, `subtitle`, `eyebrow`, `status`,
+  buttons in `slot="actions"`; the heading is an `h1` unless you set `heading-level`) and `ui-stat` /
+  `ui-metric-card` (`label`, `value`, `trend`, `meta`, `icon`, `tone`). See `copperline/index.html`.
+- `ui-form` events are typed: `form.addEventListener('submit', (e) => e.detail.values)` compiles.

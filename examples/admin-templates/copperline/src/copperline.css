@@ -12,10 +12,6 @@ a { color: var(--ui-color-accent-text, var(--ui-color-primary)); }
 .cl-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; color: inherit; text-decoration: none; }
 .cl-mark { width: 28px; height: 28px; }
 .cl-stats { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-.cl-stat { display: grid; gap: 6px; }
-.cl-stat .label { font-size: 13px; color: var(--ui-color-muted); display: flex; justify-content: space-between; align-items: center; }
-.cl-stat .value { font-size: 26px; font-weight: 700; }
-.cl-stat .trend { font-size: 12px; font-weight: 600; }
 .cl-up { color: var(--ui-color-success-text, #15803d); }
 .cl-down { color: var(--ui-color-danger-text, #b91c1c); }
 .cl-grid-2 { display: grid; gap: 16px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }

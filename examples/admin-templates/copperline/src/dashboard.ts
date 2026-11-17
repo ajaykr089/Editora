@@ -1,6 +1,8 @@
 import { $, esc } from './common';
 import '@editora/ui-core/chart';
 import '@editora/ui-core/data-table';
+import '@editora/ui-core/stat';
+import '@editora/ui-core/page-header';
 import { commerceSummary, money, orderId, ORDER_STATUS_LABEL, ORDER_STATUS_TONE, shortDate, wholeMoney } from '../../shared/data';
 
 const pct = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(Math.round(v * 1000) / 10)}% vs previous 30 days`;
@@ -10,17 +12,18 @@ $('#export').addEventListener('click', () => window.print());
 
 const data = await commerceSummary();
 
-const set = (name: string, text: string, cls?: string) => {
-  const el = $(`[data-stat="${name}"]`);
-  el.textContent = text;
-  if (cls) el.className = `trend ${cls}`;
+// ui-metric-card: the figure, and a trend whose colour comes from the tone.
+const stat = (id: string, value: string, change?: number) => {
+  const el = $(`#stat-${id}`);
+  el.setAttribute('value', value);
+  if (change === undefined) return;
+  el.setAttribute('trend', pct(change));
+  el.setAttribute('tone', change >= 0 ? 'success' : 'danger');
 };
-set('revenue', wholeMoney(data.revenue));
-set('revenue-trend', pct(data.revenueChange), data.revenueChange >= 0 ? 'cl-up' : 'cl-down');
-set('orders', String(data.orders));
-set('orders-trend', pct(data.ordersChange), data.ordersChange >= 0 ? 'cl-up' : 'cl-down');
-set('aov', money(data.aov));
-set('customers', String(data.newCustomers));
+stat('revenue', wholeMoney(data.revenue), data.revenueChange);
+stat('orders', String(data.orders), data.ordersChange);
+stat('aov', money(data.aov));
+stat('customers', String(data.newCustomers));
 
 // Charts take their data as JSON attributes (or the .data property).
 const revenue = $('#revenue-chart');
