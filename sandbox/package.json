@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@editora/core": "1.0.31",
+    "@editora/core": "1.0.32",
     "@editora/icons": "0.3.0",
     "@editora/light-code-editor": "1.1.0",
     "@editora/markdown-editor": "0.2.2",
-    "@editora/plugins": "1.2.5",
+    "@editora/plugins": "1.2.6",
     "@editora/react": "1.0.32",
     "@editora/react-icons": "0.2.0",
     "@editora/themes": "1.1.0",
