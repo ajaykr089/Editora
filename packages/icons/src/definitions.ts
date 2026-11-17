@@ -110,6 +110,7 @@ const commonTags = {
 
 export const iconDefinitions: IconDefinition[] = [
   icon("check", [p("M3.75 7.75 6.5 10.5 11.5 5.5")], {
+    categories: ["actions"],
     solid: [
       p(
         "M5.93 10.94a.75.75 0 0 1-1.06 0L2.85 8.9a.75.75 0 0 1 1.06-1.06l1.49 1.49 4.7-4.7a.75.75 0 0 1 1.06 1.06z",
@@ -119,6 +120,8 @@ export const iconDefinitions: IconDefinition[] = [
     aliases: ["tick", "done"],
   }),
   icon("x", [l(4, 4, 11, 11), l(11, 4, 4, 11)], {
+    tags: ["dismiss", "exit"],
+    categories: ["actions"],
     solid: [
       p(
         "M4.53 3.47a.75.75 0 0 0-1.06 1.06L5.94 7 3.47 9.47a.75.75 0 1 0 1.06 1.06L7 8.06l2.47 2.47a.75.75 0 1 0 1.06-1.06L8.06 7l2.47-2.47a.75.75 0 1 0-1.06-1.06L7 5.94z",
@@ -128,14 +131,20 @@ export const iconDefinitions: IconDefinition[] = [
     aliases: ["close", "cancel"],
   }),
   icon("plus", [l(7.5, 3, 7.5, 12), l(3, 7.5, 12, 7.5)], {
+    tags: ["new"],
+    categories: ["actions"],
     aliases: ["add", "create"],
   }),
-  icon("minus", [l(3, 7.5, 12, 7.5)], { aliases: ["remove", "subtract"] }),
-  icon("dot", [c(7.5, 7.5, 1.4, { fill: "currentColor", stroke: "none" })]),
+  icon("minus", [l(3, 7.5, 12, 7.5)], { tags: ["less"],
+  categories: ["actions"],
+  aliases: ["remove", "subtract"] }),
+  icon("dot", [c(7.5, 7.5, 1.4, { fill: "currentColor", stroke: "none" })], { categories: ["shapes"] }),
   icon("circle", [c(7.5, 7.5, 4.5)], {
+    categories: ["shapes"],
     solid: [c(7.5, 7.5, 4.5, { fill: "currentColor", stroke: "none" })],
   }),
   icon("square", [r(3.5, 3.5, 8, 8, { rx: 1.2 })], {
+    categories: ["shapes"],
     solid: [
       r(3.25, 3.25, 8.5, 8.5, {
         rx: 1.25,
@@ -145,6 +154,7 @@ export const iconDefinitions: IconDefinition[] = [
     ],
   }),
   icon("triangle", [polygon("7.5,2.9 12.1,11.1 2.9,11.1")], {
+    categories: ["shapes"],
     solid: [
       polygon("7.5,2.5 12.5,11.5 2.5,11.5", {
         fill: "currentColor",
@@ -153,6 +163,7 @@ export const iconDefinitions: IconDefinition[] = [
     ],
   }),
   icon("diamond", [polygon("7.5,2.8 12.2,7.5 7.5,12.2 2.8,7.5")], {
+    categories: ["shapes"],
     aliases: ["component-instance", "component-master"],
     solid: [
       polygon("7.5,2.4 12.6,7.5 7.5,12.6 2.4,7.5", {
@@ -162,6 +173,7 @@ export const iconDefinitions: IconDefinition[] = [
     ],
   }),
   icon("hexagon", [polygon("7.5,2.8 11.4,5.1 11.4,9.9 7.5,12.2 3.6,9.9 3.6,5.1")], {
+    categories: ["shapes"],
     solid: [
       polygon("7.5,2.4 11.8,4.9 11.8,10.1 7.5,12.6 3.2,10.1 3.2,4.9", {
         fill: "currentColor",
@@ -171,20 +183,24 @@ export const iconDefinitions: IconDefinition[] = [
   }),
 
   icon("chevron-down", [polyline("4.25 6 7.5 9.25 10.75 6")], {
+    categories: ["arrows"],
     aliases: ["down"],
     rtlMirror: false,
     tags: commonTags.navigation,
   }),
   icon("chevron-up", [polyline("4.25 9 7.5 5.75 10.75 9")], {
+    categories: ["arrows"],
     aliases: ["up"],
     tags: commonTags.navigation,
   }),
   icon("chevron-left", [polyline("9 4.25 5.75 7.5 9 10.75")], {
+    categories: ["arrows"],
     aliases: ["left", "pagination-prev"],
     rtlMirror: true,
     tags: commonTags.navigation,
   }),
   icon("chevron-right", [polyline("6 4.25 9.25 7.5 6 10.75")], {
+    categories: ["arrows"],
     aliases: ["right", "pagination-next"],
     rtlMirror: true,
     tags: commonTags.navigation,
@@ -195,7 +211,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("4.25 4.75 7.5 8 10.75 4.75"),
       polyline("4.25 8 7.5 11.25 10.75 8"),
     ],
-    { tags: commonTags.navigation },
+    { categories: ["arrows"],
+    tags: commonTags.navigation },
   ),
   icon(
     "chevrons-up",
@@ -203,7 +220,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("4.25 10.25 7.5 7 10.75 10.25"),
       polyline("4.25 7 7.5 3.75 10.75 7"),
     ],
-    { tags: commonTags.navigation },
+    { categories: ["arrows"],
+    tags: commonTags.navigation },
   ),
   icon(
     "chevrons-left",
@@ -211,7 +229,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("10.25 4.25 7 7.5 10.25 10.75"),
       polyline("7 4.25 3.75 7.5 7 10.75"),
     ],
-    { aliases: ["pagination-first"],
+    { categories: ["arrows"],
+    aliases: ["pagination-first"],
     rtlMirror: true, tags: commonTags.navigation },
   ),
   icon(
@@ -220,58 +239,69 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("4.75 4.25 8 7.5 4.75 10.75"),
       polyline("8 4.25 11.25 7.5 8 10.75"),
     ],
-    { aliases: ["pagination-last"],
+    { categories: ["arrows"],
+    aliases: ["pagination-last"],
     rtlMirror: true, tags: commonTags.navigation },
   ),
 
   icon("caret-down", [
     polygon("4.5 6 10.5 6 7.5 10", { fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["arrows"] }),
   icon("caret-up", [
     polygon("4.5 9 10.5 9 7.5 5", { fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["arrows"] }),
   icon(
     "caret-left",
     [polygon("9 4.5 9 10.5 5 7.5", { fill: "currentColor", stroke: "none" })],
-    { rtlMirror: true },
+    { categories: ["arrows"],
+    rtlMirror: true },
   ),
   icon(
     "caret-right",
     [polygon("6 4.5 6 10.5 10 7.5", { fill: "currentColor", stroke: "none" })],
-    { rtlMirror: true },
+    { categories: ["arrows"],
+    rtlMirror: true },
   ),
 
   icon(
     "arrow-up",
     [l(7.5, 11.5, 7.5, 3.5), polyline("4.5 6.5 7.5 3.5 10.5 6.5")],
-    { tags: commonTags.navigation },
+    { categories: ["arrows"],
+    tags: commonTags.navigation },
   ),
   icon(
     "arrow-down",
     [l(7.5, 3.5, 7.5, 11.5), polyline("4.5 8.5 7.5 11.5 10.5 8.5")],
-    { tags: commonTags.navigation },
+    { categories: ["arrows"],
+    tags: commonTags.navigation },
   ),
   icon(
     "arrow-left",
     [l(11.5, 7.5, 3.5, 7.5), polyline("6.5 4.5 3.5 7.5 6.5 10.5")],
-    { rtlMirror: true, tags: commonTags.navigation },
+    { categories: ["arrows"],
+    rtlMirror: true, tags: commonTags.navigation },
   ),
   icon(
     "arrow-right",
     [l(3.5, 7.5, 11.5, 7.5), polyline("8.5 4.5 11.5 7.5 8.5 10.5")],
-    { rtlMirror: true, tags: commonTags.navigation },
+    { categories: ["arrows"],
+    rtlMirror: true, tags: commonTags.navigation },
   ),
   icon("arrow-up-right", [l(4, 11, 11, 4), polyline("7.5 4 11 4 11 7.5")], {
+    categories: ["arrows"],
     tags: commonTags.navigation,
   }),
   icon("arrow-up-left", [l(11, 11, 4, 4), polyline("7.5 4 4 4 4 7.5")], {
+    categories: ["arrows"],
     rtlMirror: true,
     tags: commonTags.navigation,
   }),
   icon("arrow-down-right", [l(4, 4, 11, 11), polyline("7.5 11 11 11 11 7.5")], {
+    categories: ["arrows"],
     tags: commonTags.navigation,
   }),
   icon("arrow-down-left", [l(11, 4, 4, 11), polyline("7.5 11 4 11 4 7.5")], {
+    categories: ["arrows"],
     rtlMirror: true,
     tags: commonTags.navigation,
   }),
@@ -283,18 +313,28 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.75, 3.25, 11.75, 7.75),
       l(11.75, 3.25, 7.75, 7.25),
     ],
-    { aliases: ["open-in-new"] },
+    { tags: ["new-tab", "new-window"],
+    categories: ["arrows", "actions"],
+    aliases: ["open-in-new"] },
   ),
-  icon("undo", [polyline("4.4 3.4 1.9 5.6 4.4 7.8"), p("M2.2 5.6h5a3.8 3.8 0 1 1 0 7.6H4.7")]),
-  icon("redo", [polyline("10.6 3.4 13.1 5.6 10.6 7.8"), p("M12.8 5.6h-5a3.8 3.8 0 1 0 0 7.6h2.5")]),
+  icon("undo", [polyline("4.4 3.4 1.9 5.6 4.4 7.8"), p("M2.2 5.6h5a3.8 3.8 0 1 1 0 7.6H4.7")], { tags: ["back", "revert"],
+  categories: ["arrows", "actions"] }),
+  icon("redo", [polyline("10.6 3.4 13.1 5.6 10.6 7.8"), p("M12.8 5.6h-5a3.8 3.8 0 1 0 0 7.6h2.5")], { tags: ["again"],
+  categories: ["arrows", "actions"] }),
 
   icon("menu", [l(3, 4.5, 12, 4.5), l(3, 7.5, 12, 7.5), l(3, 10.5, 12, 10.5)], {
+    tags: ["navigation", "bars"],
+    categories: ["navigation"],
     aliases: ["hamburger", "menu-alt"],
   }),
   icon("more-horizontal", [c(4.25, 7.5, 1), c(7.5, 7.5, 1), c(10.75, 7.5, 1)], {
+    tags: ["more", "options", "dots"],
+    categories: ["actions", "navigation"],
     aliases: ["ellipsis-horizontal", "menu-horizontal"],
   }),
   icon("more-vertical", [c(7.5, 4.25, 1), c(7.5, 7.5, 1), c(7.5, 10.75, 1)], {
+    tags: ["more", "options", "dots", "kebab"],
+    categories: ["actions", "navigation"],
     aliases: ["ellipsis-vertical", "menu-vertical"],
   }),
   icon("grip-vertical", [
@@ -304,7 +344,8 @@ export const iconDefinitions: IconDefinition[] = [
     c(9.75, 7.5, 0.6, { fill: "currentColor", stroke: "none" }),
     c(5.25, 10.8, 0.6, { fill: "currentColor", stroke: "none" }),
     c(9.75, 10.8, 0.6, { fill: "currentColor", stroke: "none" }),
-  ], { aliases: ["drag-handle", "drag-indicator"] }),
+  ], { categories: ["navigation"],
+  aliases: ["drag-handle", "drag-indicator"] }),
   icon("grip-horizontal", [
     c(4.2, 5.25, 0.6, { fill: "currentColor", stroke: "none" }),
     c(7.5, 5.25, 0.6, { fill: "currentColor", stroke: "none" }),
@@ -312,9 +353,11 @@ export const iconDefinitions: IconDefinition[] = [
     c(4.2, 9.75, 0.6, { fill: "currentColor", stroke: "none" }),
     c(7.5, 9.75, 0.6, { fill: "currentColor", stroke: "none" }),
     c(10.8, 9.75, 0.6, { fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["navigation"] }),
 
   icon("search", [c(6.5, 6.5, 3.75), l(9.5, 9.5, 12, 12)], {
+    tags: ["find", "lookup", "magnifying-glass"],
+    categories: ["actions"],
     aliases: ["magnifier"],
   }),
   icon(
@@ -326,6 +369,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.05, 6.4, 12.65, 6.4),
     ],
     {
+      categories: ["actions"],
       aliases: ["zoom-in"],
     },
   ),
@@ -333,6 +377,7 @@ export const iconDefinitions: IconDefinition[] = [
     "search-minus",
     [c(6.2, 6.2, 3.4), l(8.7, 8.7, 11.2, 11.2), l(10.05, 6.4, 12.65, 6.4)],
     {
+      categories: ["actions"],
       aliases: ["zoom-out"],
     },
   ),
@@ -340,6 +385,8 @@ export const iconDefinitions: IconDefinition[] = [
     "filter",
     [polygon("2.75,3.5 12.25,3.5 8.75,7.5 8.75,11.5 6.25,10.25 6.25,7.5")],
     {
+      tags: ["funnel", "refine"],
+      categories: ["actions"],
       solid: [
         polygon("2.2,3 12.8,3 8.9,7.5 8.9,12 6.1,10.55 6.1,7.5", {
           fill: "currentColor",
@@ -358,6 +405,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("8.4 10.2 10 11.8 11.6 10.2"),
     ],
     {
+      tags: ["order", "arrange"],
+      categories: ["actions"],
       aliases: ["arrange"],
     },
   ),
@@ -367,14 +416,14 @@ export const iconDefinitions: IconDefinition[] = [
     l(8, 4.2, 11.7, 4.2),
     l(8, 7, 10.7, 7),
     l(8, 9.8, 9.7, 9.8),
-  ]),
+  ], { categories: ["actions"] }),
   icon("sort-desc", [
     l(4.2, 11.7, 4.2, 3.3),
     polyline("2.8 10.3 4.2 11.7 5.6 10.3"),
     l(8, 4.2, 9.7, 4.2),
     l(8, 7, 10.7, 7),
     l(8, 9.8, 11.7, 9.8),
-  ]),
+  ], { categories: ["actions"] }),
   icon(
     "sliders",
     [
@@ -386,6 +435,8 @@ export const iconDefinitions: IconDefinition[] = [
       c(5, 11, 1.1, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["adjust", "controls"],
+      categories: ["actions", "ui-components"],
       aliases: ["slider"],
     },
   ),
@@ -403,6 +454,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.05, 9.95, 4.15, 10.85),
     ],
     {
+      tags: ["gear", "preferences", "options", "configuration"],
+      categories: ["actions"],
       aliases: ["cog", "settings-2", "settings-3"],
     },
   ),
@@ -415,6 +468,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(6.4, 8.1, 2.2, 3.4, { rx: 0.55 }),
     ],
     {
+      tags: ["house", "start"],
       solid: [
         p(
           "M2.2 6.6 7.5 2.65 12.8 6.6v5.65a1 1 0 0 1-1 1h-2.1V9.4H5.3v3.85H3.2a1 1 0 0 1-1-1z",
@@ -469,7 +523,7 @@ export const iconDefinitions: IconDefinition[] = [
         "grid-view",
         "catalog-grid",
       ],
-      categories: ["navigation"],
+      categories: ["navigation", "layout"],
     },
   ),
   icon(
@@ -503,7 +557,7 @@ export const iconDefinitions: IconDefinition[] = [
           stroke: "none",
         }),
       ],
-      categories: ["navigation"],
+      categories: ["navigation", "layout"],
     },
   ),
   icon(
@@ -514,6 +568,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.1, 7.3, 12.1, 7.3),
     ],
     {
+      categories: ["layout"],
       aliases: ["grid-layout"],
     },
   ),
@@ -522,57 +577,63 @@ export const iconDefinitions: IconDefinition[] = [
     l(5.2, 5.2, 10.8, 5.2),
     l(5.2, 7.5, 10.8, 7.5),
     l(5.2, 9.8, 10.8, 9.8),
-  ], { aliases: ["backlog", "backlog-item"] }),
+  ], { categories: ["layout"],
+  aliases: ["backlog", "backlog-item"] }),
   icon("layout-sidebar", [
     r(2.75, 3, 9.5, 9, { rx: 1.1 }),
     l(5.35, 3.1, 5.35, 11.9),
-  ]),
+  ], { categories: ["layout"] }),
   icon("columns", [
     r(2.75, 3, 9.5, 9, { rx: 1.1 }),
     l(5.95, 3.1, 5.95, 11.9),
     l(9.05, 3.1, 9.05, 11.9),
-  ], { aliases: ["kanban", "kanban-board", "compare-product", "kanban-productivity"] }),
+  ], { categories: ["layout"],
+  aliases: ["kanban", "kanban-board", "compare-product", "kanban-productivity"] }),
   icon("rows", [
     r(2.75, 3, 9.5, 9, { rx: 1.1 }),
     l(2.9, 6, 12.1, 6),
     l(2.9, 8.95, 12.1, 8.95),
-  ]),
+  ], { categories: ["layout"] }),
   icon("sidebar-left", [
     r(2.75, 3, 9.5, 9, { rx: 1.1 }),
     r(2.9, 3.1, 2.45, 8.8, { rx: 0.6 }),
-  ]),
+  ], { categories: ["layout"] }),
   icon("sidebar-right", [
     r(2.75, 3, 9.5, 9, { rx: 1.1 }),
     r(9.65, 3.1, 2.45, 8.8, { rx: 0.6 }),
-  ]),
+  ], { categories: ["layout"] }),
   icon("panel-left", [
     r(2.75, 3.2, 9.5, 8.6, { rx: 1.1 }),
     r(2.95, 3.4, 2.5, 8.2, { rx: 0.6 }),
-  ], { aliases: ["drawer-left", "docking-left"] }),
+  ], { categories: ["layout"],
+  aliases: ["drawer-left", "docking-left"] }),
   icon("panel-right", [
     r(2.75, 3.2, 9.5, 8.6, { rx: 1.1 }),
     r(9.55, 3.4, 2.5, 8.2, { rx: 0.6 }),
-  ], { aliases: ["drawer-right", "docking-right"] }),
+  ], { categories: ["layout"],
+  aliases: ["drawer-right", "docking-right"] }),
   icon("panel-top", [
     r(2.75, 3.2, 9.5, 8.6, { rx: 1.1 }),
     r(2.95, 3.4, 9.1, 2.45, { rx: 0.6 }),
-  ], { aliases: ["docking-top"] }),
+  ], { categories: ["layout"],
+  aliases: ["docking-top"] }),
   icon("panel-bottom", [
     r(2.75, 3.2, 9.5, 8.6, { rx: 1.1 }),
     r(2.95, 9.15, 9.1, 2.45, { rx: 0.6 }),
-  ], { aliases: ["docking-bottom"] }),
+  ], { categories: ["layout"],
+  aliases: ["docking-bottom"] }),
   icon("split-horizontal", [
     r(2.75, 3.1, 9.5, 8.8, { rx: 1.1 }),
     l(3, 7.5, 12, 7.5),
     polyline("6 5.8 7.5 4.3 9 5.8"),
     polyline("6 9.2 7.5 10.7 9 9.2"),
-  ]),
+  ], { categories: ["layout"] }),
   icon("split-vertical", [
     r(2.75, 3.1, 9.5, 8.8, { rx: 1.1 }),
     l(7.5, 3.35, 7.5, 11.65),
     polyline("5.8 6 4.3 7.5 5.8 9"),
     polyline("9.2 6 10.7 7.5 9.2 9"),
-  ]),
+  ], { categories: ["layout"] }),
   icon("list-view", [
     c(3.6, 4.6, 0.6, { fill: "currentColor", stroke: "none" }),
     c(3.6, 7.5, 0.6, { fill: "currentColor", stroke: "none" }),
@@ -580,22 +641,24 @@ export const iconDefinitions: IconDefinition[] = [
     l(5.2, 4.6, 11.8, 4.6),
     l(5.2, 7.5, 11.8, 7.5),
     l(5.2, 10.4, 11.8, 10.4),
-  ]),
+  ], { categories: ["layout"] }),
   icon("table", [
     r(2.75, 3, 9.5, 9, { rx: 1 }),
     l(2.9, 6.1, 12.1, 6.1),
     l(2.9, 9.2, 12.1, 9.2),
     l(5.9, 3.1, 5.9, 11.9),
     l(9, 3.1, 9, 11.9),
-  ], { aliases: ["balance-sheet", "cohort-analysis"] }),
+  ], { tags: ["spreadsheet", "data"],
+  categories: ["layout"],
+  aliases: ["balance-sheet", "cohort-analysis"] }),
   icon("table-alt", [
     r(2.75, 3, 9.5, 9, { rx: 1 }),
     l(2.9, 5.9, 12.1, 5.9),
     l(2.9, 8.7, 12.1, 8.7),
     l(7.4, 3.1, 7.4, 11.9),
-  ]),
-  icon("columns-alt", [r(2.75, 3, 9.5, 9, { rx: 1 }), l(7.5, 3.1, 7.5, 11.9)]),
-  icon("row", [r(2.75, 3, 9.5, 9, { rx: 1 }), l(2.9, 7.5, 12.1, 7.5)]),
+  ], { categories: ["layout"] }),
+  icon("columns-alt", [r(2.75, 3, 9.5, 9, { rx: 1 }), l(7.5, 3.1, 7.5, 11.9)], { categories: ["layout"] }),
+  icon("row", [r(2.75, 3, 9.5, 9, { rx: 1 }), l(2.9, 7.5, 12.1, 7.5)], { categories: ["layout"] }),
   icon("grid-3x3", [
     r(3, 3.2, 2.1, 2.1, { rx: 0.35 }),
     r(6.45, 3.2, 2.1, 2.1, { rx: 0.35 }),
@@ -606,31 +669,32 @@ export const iconDefinitions: IconDefinition[] = [
     r(3, 9.7, 2.1, 2.1, { rx: 0.35 }),
     r(6.45, 9.7, 2.1, 2.1, { rx: 0.35 }),
     r(9.9, 9.7, 2.1, 2.1, { rx: 0.35 }),
-  ], { aliases: ["pixel-grid"] }),
+  ], { categories: ["layout"],
+  aliases: ["pixel-grid"] }),
   icon("text-align-left", [
     l(3, 4, 12, 4),
     l(3, 6.5, 10.5, 6.5),
     l(3, 9, 12, 9),
     l(3, 11.5, 9.6, 11.5),
-  ]),
+  ], { categories: ["typography", "alignment"] }),
   icon("text-align-center", [
     l(3, 4, 12, 4),
     l(4.2, 6.5, 10.8, 6.5),
     l(3, 9, 12, 9),
     l(4.6, 11.5, 10.4, 11.5),
-  ]),
+  ], { categories: ["typography", "alignment"] }),
   icon("text-align-right", [
     l(3, 4, 12, 4),
     l(4.5, 6.5, 12, 6.5),
     l(3, 9, 12, 9),
     l(5.4, 11.5, 12, 11.5),
-  ]),
+  ], { categories: ["typography", "alignment"] }),
   icon("text-align-justify", [
     l(3, 4, 12, 4),
     l(3, 6.5, 12, 6.5),
     l(3, 9, 12, 9),
     l(3, 11.5, 12, 11.5),
-  ]),
+  ], { categories: ["typography", "alignment"] }),
   icon("indent", [
     l(3.2, 3.5, 3.2, 12),
     l(5.3, 4, 12, 4),
@@ -641,7 +705,7 @@ export const iconDefinitions: IconDefinition[] = [
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["typography"] }),
   icon("outdent", [
     l(3.2, 3.5, 3.2, 12),
     l(5.3, 4, 12, 4),
@@ -652,7 +716,7 @@ export const iconDefinitions: IconDefinition[] = [
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["typography"] }),
 
   icon(
     "folder",
@@ -662,6 +726,7 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["directory"],
       aliases: ["project"],
       solid: [
         p(
@@ -756,7 +821,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.9, 7.2, 9.1, 10.4),
       l(9.1, 7.2, 5.9, 10.4),
     ],
-    { categories: commonTags.files },
+    { tags: ["delete", "remove"],
+    categories: commonTags.files },
   ),
   icon(
     "file",
@@ -767,6 +833,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M8.5 2.9v2.35h2.35"),
     ],
     {
+      tags: ["document", "page"],
       aliases: [
         "file-pdf",
         "file-doc",
@@ -787,7 +854,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.9, 9.1, 9.9, 9.1),
       l(4.9, 11.1, 8.6, 11.1),
     ],
-    { aliases: [
+    { tags: ["document", "page", "text"],
+    aliases: [
       "proposal",
       "quotation",
       "estimate",
@@ -899,8 +967,9 @@ export const iconDefinitions: IconDefinition[] = [
     { categories: commonTags.files },
   ),
   icon("copy", [r(5, 5, 7, 7, { rx: 1 }), r(3, 3, 7, 7, { rx: 1 })], {
+    tags: ["clone"],
     aliases: ["duplicate"],
-    categories: commonTags.files,
+    categories: ["file", "actions"],
   }),
   icon(
     "clipboard",
@@ -925,7 +994,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(9.7, 9.1, 11.8, 9.1),
       l(10.75, 8.1, 10.75, 10.1),
     ],
-    { categories: commonTags.files },
+    { tags: ["clipboard"],
+    categories: ["file", "actions"] },
   ),
   icon(
     "cut",
@@ -935,7 +1005,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.15, 5.05, 11.8, 11.8),
       l(5.15, 9.35, 11.8, 2.8),
     ],
-    { categories: commonTags.files },
+    { tags: ["scissors"],
+    categories: ["file", "actions"] },
   ),
   icon(
     "save",
@@ -944,7 +1015,8 @@ export const iconDefinitions: IconDefinition[] = [
       r(5.1, 2.8, 3.8, 3, { rx: 0.4 }),
       r(5, 8.5, 5, 2.8, { rx: 0.5 }),
     ],
-    { aliases: ["save-alt"], categories: commonTags.files },
+    { tags: ["disk", "floppy"],
+    aliases: ["save-alt"], categories: ["file", "actions"] },
   ),
   icon(
     "trash",
@@ -956,6 +1028,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(8.7, 6, 8.7, 10),
     ],
     {
+      tags: ["bin", "garbage", "rubbish", "discard"],
+      categories: ["actions"],
       solid: [
         p(
           "M3.1 4.2h8.8l-.6 7.2a1.4 1.4 0 0 1-1.39 1.28H5.1A1.4 1.4 0 0 1 3.71 11.4zM5.3 2.8h4.4a.75.75 0 0 1 .75.75v.65H4.55v-.65a.75.75 0 0 1 .75-.75",
@@ -971,12 +1045,16 @@ export const iconDefinitions: IconDefinition[] = [
       r(2.8, 9.6, 5.1, 2.6, { rx: 0.8 }),
       p("M5.3 10.9 10.7 5.5l1.8 1.8-5.4 5.4-2.4.6z"),
     ],
-    { aliases: ["pen"] },
+    { tags: ["modify", "write", "change"],
+    categories: ["actions"],
+    aliases: ["pen"] },
   ),
   icon(
     "pencil",
     [p("M4 11.4 10.9 4.5l1.6 1.6-6.9 6.9-2.2.6z"), p("M9.9 3.5 11.5 5.1")],
-    { aliases: ["edit-2", "document-sign", "contract-sign", "signature", "e-signature"] },
+    { tags: ["write", "draw"],
+    categories: ["actions", "design"],
+    aliases: ["edit-2", "document-sign", "contract-sign", "signature", "e-signature"] },
   ),
   icon(
     "link",
@@ -989,7 +1067,9 @@ export const iconDefinitions: IconDefinition[] = [
       ),
       l(5.9, 9.1, 9.1, 5.9),
     ],
-    { aliases: ["chain", "affiliate", "affiliate-link"] },
+    { tags: ["url", "hyperlink"],
+    categories: ["actions"],
+    aliases: ["chain", "affiliate", "affiliate-link"] },
   ),
   icon(
     "unlink",
@@ -998,12 +1078,15 @@ export const iconDefinitions: IconDefinition[] = [
       p("M9.6 6 10.8 4.8a2.25 2.25 0 1 1 3.18 3.18L12.8 9.2"),
       l(4.5, 4.5, 10.5, 10.5),
     ],
-    { aliases: ["link-off"] },
+    { categories: ["actions"],
+    aliases: ["link-off"] },
   ),
   icon(
     "paperclip",
     [p("M9.8 4.9 5.25 9.45a2.15 2.15 0 1 1-3.05-3.05l4.95-4.95a2.95 2.95 0 1 1 4.18 4.18l-5.55 5.55a1.45 1.45 0 0 1-2.05-2.05l5.05-5.05")],
-    { aliases: ["attachment"] },
+    { tags: ["attach", "file"],
+    categories: ["actions"],
+    aliases: ["attachment"] },
   ),
   icon("share", [
     c(3.1, 7.5, 1),
@@ -1011,18 +1094,22 @@ export const iconDefinitions: IconDefinition[] = [
     c(11.4, 10.8, 1),
     l(4, 7, 10.5, 4.7),
     l(4, 8, 10.5, 10.3),
-  ]),
+  ], { tags: ["send"],
+  categories: ["actions", "communication"] }),
   icon("share-2", [
     c(3.4, 7.5, 0.9),
     c(11.2, 4.3, 0.9),
     c(11.2, 10.7, 0.9),
     polyline("4.2 7.05 10.2 4.8"),
     polyline("4.2 7.95 10.2 10.2"),
-  ], { aliases: ["referral", "referral-code"] }),
+  ], { categories: ["actions", "communication"],
+  aliases: ["referral", "referral-code"] }),
   icon(
     "send",
     [p("M2.55 7.45 12.1 3.25 8.75 12.15 6.7 8.95 2.55 7.45z"), l(6.7, 8.95, 12.1, 3.25)],
     {
+      tags: ["submit"],
+      categories: ["actions", "communication"],
       solid: [fp("M2.55 7.45 12.1 3.25 8.75 12.15 6.7 8.95 2.55 7.45z")],
       aliases: ["paper-plane"],
     },
@@ -1030,7 +1117,9 @@ export const iconDefinitions: IconDefinition[] = [
   icon(
     "reply",
     [l(11.2, 5.1, 6.5, 5.1), polyline("8.2 3.3 6.4 5.1 8.2 6.9"), p("M6.5 5.1c-2.1 0-3.45 1-4.35 2.95")],
-    { rtlMirror: true },
+    { tags: ["respond", "answer"],
+    categories: ["actions", "communication"],
+    rtlMirror: true },
   ),
   icon(
     "reply-all",
@@ -1040,13 +1129,15 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5.95 3.35 4.15 5.15 5.95 6.95"),
       p("M7.3 5.15c-2.15 0-3.65 1-4.95 2.95"),
     ],
-    { rtlMirror: true },
+    { categories: ["actions", "communication"],
+    rtlMirror: true },
   ),
 
   icon(
     "user",
     [c(7.5, 5.25, 2.25), p("M3.2 12c.8-1.95 2.4-3 4.3-3s3.5 1.05 4.3 3")],
     {
+      tags: ["person", "me"],
       aliases: ["profile", "account", "customer"],
       categories: commonTags.users,
     },
@@ -1084,6 +1175,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M8.45 11.8c.43-1.07 1.24-1.73 2.25-1.73.95 0 1.75.58 2.2 1.55"),
     ],
     {
+      tags: ["people", "group", "members"],
       aliases: [
         "users-group",
         "team",
@@ -1119,7 +1211,8 @@ export const iconDefinitions: IconDefinition[] = [
       p("M2.6 11.8c.66-1.6 1.95-2.45 3.5-2.45 1.58 0 2.9.9 3.55 2.6"),
       l(8.6, 8.2, 12.4, 8.2),
     ],
-    { categories: commonTags.users },
+    { tags: ["delete"],
+    categories: commonTags.users },
   ),
   icon(
     "user-check",
@@ -1139,7 +1232,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(9, 7.1, 12.1, 10.2),
       l(12.1, 7.1, 9, 10.2),
     ],
-    { aliases: ["churn"],
+    { tags: ["delete", "remove", "block"],
+    aliases: ["churn"],
     categories: commonTags.users },
   ),
 
@@ -1152,6 +1246,8 @@ export const iconDefinitions: IconDefinition[] = [
       p("M6.1 11.2a1.4 1.4 0 0 0 2.8 0"),
     ],
     {
+      tags: ["alert", "reminder"],
+      categories: ["communication"],
       solid: [
         p(
           "M7.5 2.5a3.4 3.4 0 0 0-3.4 3.4v1.35c0 .74-.25 1.46-.7 2.05l-.95 1.25h10.1l-.95-1.25c-.45-.59-.7-1.31-.7-2.05V5.9a3.4 3.4 0 0 0-3.4-3.4zm-1.55 9.3a1.55 1.55 0 0 0 3.1 0z",
@@ -1169,29 +1265,33 @@ export const iconDefinitions: IconDefinition[] = [
         "M4.45 4.45a3 3 0 0 1 5.1 2.15v1.5c0 .59.18 1.17.52 1.65l.68.95H4.2l.68-.95c.34-.48.52-1.06.52-1.65v-3.65",
       ),
       p("M6.2 11.2a1.35 1.35 0 0 0 2.6 0"),
-    ],
+    ], { categories: ["communication"] },
   ),
   icon(
     "mail",
     [r(2.5, 3.5, 10, 8, { rx: 1.1 }), polyline("3.2 4.5 7.5 8 11.8 4.5")],
     {
+      tags: ["email", "envelope", "inbox"],
+      categories: ["communication"],
       aliases: ["mail-open", "mail-send", "message", "email-campaign"],
     },
   ),
   icon("inbox", [
     r(2.7, 3.5, 9.6, 8.7, { rx: 1.2 }),
     p("M2.8 8h2.9l1.2 1.6h1.2L9.3 8h2.9"),
-  ]),
+  ], { categories: ["communication", "file"] }),
   icon("archive", [
     r(2.7, 3.1, 9.6, 9.1, { rx: 1.1 }),
     l(2.8, 5.6, 12.2, 5.6),
     l(6.1, 8.2, 8.9, 8.2),
-  ], { aliases: ["backup", "backup-scheduled", "archive-admin"] }),
+  ], { categories: ["file"],
+  aliases: ["backup", "backup-scheduled", "archive-admin"] }),
   icon("phone", [
     p(
       "M4.25 2.8h1.6L6.55 5 5.3 6.25a8.4 8.4 0 0 0 3.45 3.45L10 8.45l2.2.7v1.6A1.25 1.25 0 0 1 10.95 12c-4.95 0-8.95-4-8.95-8.95A1.25 1.25 0 0 1 3.25 2.8",
     ),
-  ]),
+  ], { tags: ["call", "telephone"],
+  categories: ["communication"] }),
   icon(
     "map-pin",
     [
@@ -1200,7 +1300,9 @@ export const iconDefinitions: IconDefinition[] = [
       ),
       c(7.5, 6.45, 1.35),
     ],
-    { aliases: ["pin", "location", "address", "address-add", "address-edit"] },
+    { tags: ["marker", "place"],
+    categories: ["maps-location"],
+    aliases: ["pin", "location", "address", "address-add", "address-edit"] },
   ),
   icon("pin-off", [
     p(
@@ -1208,20 +1310,20 @@ export const iconDefinitions: IconDefinition[] = [
     ),
     c(7.5, 6.45, 1.35),
     l(2.4, 2.4, 12.6, 12.6),
-  ]),
+  ], { categories: ["maps-location"] }),
   icon("map", [
     polygon(
       "2.6,4.5 5.8,3.2 9.2,4.5 12.4,3.2 12.4,10.5 9.2,11.8 5.8,10.5 2.6,11.8",
     ),
     l(5.8, 3.2, 5.8, 10.5),
     l(9.2, 4.5, 9.2, 11.8),
-  ]),
+  ], { categories: ["maps-location"] }),
   icon("location-arrow", [
     polygon("3.2,3.2 12.1,7.4 8.2,8.3 7.3,12.2 3.2,3.2", {
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["navigation", "maps-location"] }),
   icon(
     "compass",
     [
@@ -1230,6 +1332,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 7.5, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["navigation", "maps-location"],
       aliases: ["compass-alt"],
     },
   ),
@@ -1237,6 +1340,7 @@ export const iconDefinitions: IconDefinition[] = [
     "navigation",
     [polygon("7.5,2.8 11.8,12.2 7.5,10.3 3.2,12.2", { fill: "none" })],
     {
+      categories: ["navigation", "maps-location"],
       aliases: ["gps", "nav", "navigation-icon"],
     },
   ),
@@ -1245,13 +1349,16 @@ export const iconDefinitions: IconDefinition[] = [
     c(11.8, 10.9, 0.7, { fill: "currentColor", stroke: "none" }),
     p("M3.9 4.1h3.3c2.2 0 2.4 2.6 4.6 2.6h.7"),
     p("M11.1 10.9H7.7c-2.2 0-2.4-2.6-4.6-2.6h-.7"),
-  ], { aliases: ["user-flow"] }),
+  ], { categories: ["navigation", "maps-location"],
+  aliases: ["user-flow"] }),
   icon("globe", [
     c(7.5, 7.5, 4.7),
     l(2.8, 7.5, 12.2, 7.5),
     p("M7.5 2.8c1.2 1.2 1.9 2.9 1.9 4.7s-.7 3.5-1.9 4.7"),
     p("M7.5 2.8c-1.2 1.2-1.9 2.9-1.9 4.7s.7 3.5 1.9 4.7"),
-  ], { aliases: ["cross-border", "international-shipping", "channel-online", "global-payment"] }),
+  ], { tags: ["world", "earth", "internet", "language", "international"],
+  categories: ["maps-location"],
+  aliases: ["cross-border", "international-shipping", "channel-online", "global-payment"] }),
   icon(
     "calendar",
     [
@@ -1264,6 +1371,8 @@ export const iconDefinitions: IconDefinition[] = [
       c(9.75, 8.3, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["date", "schedule", "event"],
+      categories: ["time"],
       aliases: [
         "calendar-check",
         "calendar-plus",
@@ -1284,7 +1393,8 @@ export const iconDefinitions: IconDefinition[] = [
       r(4.3, 8.05, 1.4, 1.35, { rx: 0.3, fill: "currentColor", stroke: "none" }),
       r(9.3, 8.05, 1.4, 1.35, { rx: 0.3, fill: "currentColor", stroke: "none" }),
       l(5.9, 8.72, 8.95, 8.72),
-    ], { aliases: ["planner-month"] },
+    ], { categories: ["time"],
+    aliases: ["planner-month"] },
   ),
   icon(
     "calendar-clock",
@@ -1296,7 +1406,8 @@ export const iconDefinitions: IconDefinition[] = [
       c(8.9, 9.15, 2.1),
       l(8.9, 9.15, 8.9, 8.05),
       l(8.9, 9.15, 9.95, 9.75),
-    ], { aliases: ["timesheet"] },
+    ], { categories: ["time"],
+    aliases: ["timesheet"] },
   ),
   icon(
     "calendar-days",
@@ -1311,12 +1422,15 @@ export const iconDefinitions: IconDefinition[] = [
       c(5.25, 9.65, 0.45, { fill: "currentColor", stroke: "none" }),
       c(7.5, 9.65, 0.45, { fill: "currentColor", stroke: "none" }),
       c(9.75, 9.65, 0.45, { fill: "currentColor", stroke: "none" }),
-    ], { aliases: ["planner-week"] },
+    ], { categories: ["time"],
+    aliases: ["planner-week"] },
   ),
   icon(
     "clock",
     [c(7.5, 7.5, 4.7), l(7.5, 7.5, 7.5, 5), l(7.5, 7.5, 9.2, 8.7)],
     {
+      tags: ["time", "hour"],
+      categories: ["time"],
       aliases: ["watch", "approval-pending", "task-pending", "session"],
     },
   ),
@@ -1326,33 +1440,37 @@ export const iconDefinitions: IconDefinition[] = [
     l(7.5, 8.1, 9.05, 9.15),
     l(6.1, 2.85, 8.9, 2.85),
     l(7.5, 2.85, 7.5, 4.2),
-  ], { aliases: ["sla", "pomodoro", "timer-productivity", "session-duration"] }),
+  ], { categories: ["time"],
+  aliases: ["sla", "pomodoro", "timer-productivity", "session-duration"] }),
   icon("stopwatch", [
     c(7.5, 8.3, 3.7),
     l(7.5, 8.3, 7.5, 6.45),
     l(7.5, 8.3, 8.95, 9.1),
     r(6.55, 2.5, 1.9, 1.2, { rx: 0.3 }),
     l(10.2, 4.1, 11.35, 2.95),
-  ], { aliases: ["benchmark"] }),
+  ], { categories: ["time"],
+  aliases: ["benchmark"] }),
   icon("alarm", [
     c(7.5, 8, 3.8),
     l(7.5, 8, 7.5, 6.2),
     l(7.5, 8, 9, 8.8),
     polyline("4.6 3.6 3.4 2.4 2.4 3.4"),
     polyline("10.4 3.6 11.6 2.4 12.6 3.4"),
-  ], { aliases: ["task-overdue", "reminder", "reminder-add", "reminder-snooze", "overdue"] }),
+  ], { categories: ["time"],
+  aliases: ["task-overdue", "reminder", "reminder-add", "reminder-snooze", "overdue"] }),
   icon("history", [
     c(7.7, 7.7, 4),
     l(7.7, 7.7, 7.7, 5.9),
     l(7.7, 7.7, 9.4, 8.8),
     polyline("2.9 7.7 2.9 4.9 5.7 4.9"),
-  ], { aliases: ["restore", "restore-point", "rollback", "rollback-success"] }),
+  ], { categories: ["time"],
+  aliases: ["restore", "restore-point", "rollback", "rollback-success"] }),
   icon("signal", [
     r(2.8, 9.8, 1.5, 2.2, { rx: 0.35, fill: "currentColor", stroke: "none" }),
     r(5.1, 8.1, 1.5, 3.9, { rx: 0.35, fill: "currentColor", stroke: "none" }),
     r(7.4, 6.4, 1.5, 5.6, { rx: 0.35, fill: "currentColor", stroke: "none" }),
     r(9.7, 4.7, 1.5, 7.3, { rx: 0.35, fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["devices", "connectivity"] }),
   icon(
     "battery",
     [
@@ -1361,6 +1479,8 @@ export const iconDefinitions: IconDefinition[] = [
       r(3.4, 5.3, 4.2, 4.4, { rx: 0.4, fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["charge", "power"],
+      categories: ["devices"],
       aliases: ["battery-half"],
     },
   ),
@@ -1368,12 +1488,12 @@ export const iconDefinitions: IconDefinition[] = [
     r(2.8, 4.7, 8.8, 5.6, { rx: 1 }),
     r(11.8, 6.35, 0.95, 2.3, { rx: 0.35 }),
     r(3.4, 5.3, 7.8, 4.4, { rx: 0.4, fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["devices"] }),
   icon("battery-low", [
     r(2.8, 4.7, 8.8, 5.6, { rx: 1 }),
     r(11.8, 6.35, 0.95, 2.3, { rx: 0.35 }),
     r(3.4, 5.3, 2, 4.4, { rx: 0.4, fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["devices"] }),
   icon("battery-charging", [
     r(2.8, 4.7, 8.8, 5.6, { rx: 1 }),
     r(11.8, 6.35, 0.95, 2.3, { rx: 0.35 }),
@@ -1381,13 +1501,14 @@ export const iconDefinitions: IconDefinition[] = [
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
-  icon("power", [l(7.5, 2.9, 7.5, 7.2), p("M4.55 4.25a4.2 4.2 0 1 0 5.9 0")]),
+  ], { categories: ["devices"] }),
+  icon("power", [l(7.5, 2.9, 7.5, 7.2), p("M4.55 4.25a4.2 4.2 0 1 0 5.9 0")], { tags: ["on", "off", "shutdown"],
+  categories: ["devices"] }),
   icon("power-off", [
     l(7.5, 2.9, 7.5, 7.2),
     p("M4.55 4.25a4.2 4.2 0 1 0 5.9 0"),
     l(2.4, 2.4, 12.6, 12.6),
-  ]),
+  ], { categories: ["devices"] }),
 
   icon(
     "chart-bar",
@@ -1398,6 +1519,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(9.3, 5, 1.7, 7, { rx: 0.3 }),
     ],
     {
+      tags: ["statistics", "stats"],
       aliases: [
         "chart",
         "analytics",
@@ -1425,11 +1547,13 @@ export const iconDefinitions: IconDefinition[] = [
       c(10.8, 5.4, 0.45, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["statistics", "stats", "trend"],
       aliases: ["graph", "stocks"],
       categories: ["analytics"],
     },
   ),
   icon("chart-pie", [c(7.5, 7.5, 4.5), p("M7.5 3v4.5h4.5")], {
+    tags: ["statistics", "stats", "share"],
     aliases: [
       "mutual-fund",
       "portfolio",
@@ -1460,7 +1584,8 @@ export const iconDefinitions: IconDefinition[] = [
     ],
     categories: ["analytics"],
   }),
-  icon("activity", [polyline("2.8 8 5 8 6.2 5.2 8.1 10.8 9.6 7.4 12.2 7.4")], { aliases: [
+  icon("activity", [polyline("2.8 8 5 8 6.2 5.2 8.1 10.8 9.6 7.4 12.2 7.4")], { categories: ["status", "analytics"],
+  aliases: [
       "performance",
       "performance-ui",
       "performance-render",
@@ -1495,6 +1620,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["rate", "rating"],
+      categories: ["symbols"],
       solid: [
         polygon(
           "7.5,2.2 9.1,5.45 12.7,5.98 10.1,8.52 10.72,12 7.5,10.3 4.28,12 4.9,8.52 2.3,5.98 5.9,5.45",
@@ -1520,6 +1647,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["love"],
+      categories: ["symbols"],
       solid: [
         p(
           "M7.5 12.35s-4.9-3.1-4.9-6.45a3.1 3.1 0 0 1 5.3-2.2A3.1 3.1 0 0 1 12.4 5.9c0 3.35-4.9 6.45-4.9 6.45z",
@@ -1546,6 +1675,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["save", "later"],
+      categories: ["symbols"],
       solid: [
         p("M4 2.5h7a1 1 0 0 1 1 1v9.4l-4.5-2.55L3 12.9V3.5a1 1 0 0 1 1-1z", {
           fill: "currentColor",
@@ -1563,7 +1694,7 @@ export const iconDefinitions: IconDefinition[] = [
       ),
       l(10.9, 4.9, 10.9, 7.3),
       l(9.7, 6.1, 12.1, 6.1),
-    ],
+    ], { categories: ["symbols"] },
   ),
   icon(
     "bookmark-minus",
@@ -1572,14 +1703,16 @@ export const iconDefinitions: IconDefinition[] = [
         "M4.2 2.8h6.1a.8.8 0 0 1 .8.8V12l-3.85-2.2L3.4 12V3.6a.8.8 0 0 1 .8-.8z",
       ),
       l(9.7, 6.1, 12.1, 6.1),
-    ],
+    ], { categories: ["symbols"] },
   ),
   icon("tag", [
     p(
       "M8.75 3h3.25v3.25l-5.35 5.35a1.1 1.1 0 0 1-1.56 0L3.4 9.9a1.1 1.1 0 0 1 0-1.56z",
     ),
     c(10.2, 4.8, 0.7, { fill: "currentColor", stroke: "none" }),
-  ], { aliases: [
+  ], { tags: ["label", "price"],
+  categories: ["commerce", "symbols"],
+  aliases: [
       "pricing",
       "release-version",
       "label-shipping",
@@ -1598,6 +1731,8 @@ export const iconDefinitions: IconDefinition[] = [
       "label-admin",
     ] }),
   icon("flag", [p("M4 2.9v9.2"), p("M4.1 3.4h6.7l-1.3 2.2 1.3 2.2H4.1")], {
+    tags: ["report", "mark"],
+    categories: ["symbols"],
     solid: [
       p("M3.65 2.6h.7v10.9h-.7zM4.35 3h7.05l-1.35 2.25L11.4 7.5H4.35z", {
         fill: "currentColor",
@@ -1619,7 +1754,8 @@ export const iconDefinitions: IconDefinition[] = [
     p("M5.8 5.8h3.3v3.3L3.9 14.3a1 1 0 0 1-1.4 0L.7 12.5a1 1 0 0 1 0-1.4z", {
       transform: "translate(2 0)",
     }),
-  ], { aliases: ["pricing-tier", "category"] }),
+  ], { categories: ["commerce", "symbols"],
+  aliases: ["pricing-tier", "category"] }),
 
   icon(
     "lock",
@@ -1630,6 +1766,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(7.5, 9.9, 7.5, 10.8),
     ],
     {
+      tags: ["secure", "private", "locked", "password"],
+      categories: ["security"],
       aliases: ["encryption", "vault", "vault-secure", "escrow", "escrow-secure"],
       solid: [
         p(
@@ -1648,6 +1786,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(7.5, 9.9, 7.5, 10.8),
     ],
     {
+      tags: ["unlocked", "open"],
+      categories: ["security"],
       aliases: ["lock-open"],
     },
   ),
@@ -1655,6 +1795,8 @@ export const iconDefinitions: IconDefinition[] = [
     "shield",
     [p("M7.5 2.6 11.5 4v3.9c0 2.5-1.45 3.95-4 4.95-2.55-1-4-2.45-4-4.95V4z")],
     {
+      tags: ["security", "protect", "safe"],
+      categories: ["security"],
       duotone: [
         p(
           "M7.5 2.6 11.5 4v3.9c0 2.5-1.45 3.95-4 4.95-2.55-1-4-2.45-4-4.95V4z",
@@ -1724,6 +1866,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 4.9, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["information", "about", "details"],
       aliases: ["info-circle", "alert-info"],
       categories: commonTags.status,
     },
@@ -1736,6 +1879,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 10.3, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["caution", "danger"],
       aliases: ["warning", "alert", "alert-warning"],
       categories: commonTags.status,
     },
@@ -1747,7 +1891,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(7.5, 5.4, 7.5, 8.4),
       c(7.5, 10.2, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
-    { aliases: ["error", "alert-critical"], categories: commonTags.status },
+    { tags: ["problem"],
+    aliases: ["error", "alert-critical"], categories: commonTags.status },
   ),
   icon(
     "help-circle",
@@ -1757,18 +1902,21 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 10.45, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["faq", "support"],
       aliases: ["question", "help"],
       categories: commonTags.status,
     },
   ),
   icon("check-circle", [c(7.5, 7.5, 4.75), p("M5.4 7.55 6.9 9.05 9.85 6.1")], {
+    tags: ["success", "done", "complete"],
     aliases: ["incident-resolved", "approval-approved"],
     categories: commonTags.status,
   }),
   icon(
     "x-circle",
     [c(7.5, 7.5, 4.75), l(5.6, 5.6, 9.4, 9.4), l(9.4, 5.6, 5.6, 9.4)],
-    { aliases: ["approval-rejected"],
+    { tags: ["error", "fail"],
+    aliases: ["approval-rejected"],
     categories: commonTags.status },
   ),
 
@@ -1777,7 +1925,9 @@ export const iconDefinitions: IconDefinition[] = [
       "M1.9 7.5c1.2-2.25 3.35-3.75 5.6-3.75s4.4 1.5 5.6 3.75c-1.2 2.25-3.35 3.75-5.6 3.75S3.1 9.75 1.9 7.5z",
     ),
     c(7.5, 7.5, 1.6),
-  ], { aliases: ["page-view"] }),
+  ], { tags: ["view", "show", "visible", "watch"],
+  categories: ["security", "accessibility"],
+  aliases: ["page-view"] }),
   icon("eye-off", [
     l(2.4, 2.4, 12.6, 12.6),
     p(
@@ -1787,26 +1937,29 @@ export const iconDefinitions: IconDefinition[] = [
       "M6.1 3.95c.45-.13.91-.2 1.4-.2 2.25 0 4.4 1.5 5.6 3.75-.3.56-.66 1.08-1.06 1.54",
     ),
     p("M6.2 6.2a1.85 1.85 0 0 0 2.6 2.6"),
-  ]),
+  ], { tags: ["hide", "hidden", "invisible"],
+  categories: ["security"] }),
   icon("camera", [
     r(2.6, 4.2, 9.8, 7.2, { rx: 1.2 }),
     r(5.2, 2.9, 2.5, 1.3, { rx: 0.5 }),
     c(7.5, 7.8, 2),
-  ]),
+  ], { tags: ["photo", "snapshot"],
+  categories: ["media"] }),
   icon("camera-off", [
     r(2.6, 4.2, 9.8, 7.2, { rx: 1.2 }),
     r(5.2, 2.9, 2.5, 1.3, { rx: 0.5 }),
     l(2.4, 2.4, 12.6, 12.6),
-  ]),
+  ], { categories: ["media"] }),
   icon("video", [
     r(2.6, 4.2, 7.1, 6.6, { rx: 1 }),
     polygon("10.2,6.2 12.6,5.1 12.6,9.9 10.2,8.8"),
-  ]),
+  ], { tags: ["film", "movie", "record"],
+  categories: ["media"] }),
   icon("video-off", [
     r(2.6, 4.2, 7.1, 6.6, { rx: 1 }),
     polygon("10.2,6.2 12.6,5.1 12.6,9.9 10.2,8.8"),
     l(2.4, 2.4, 12.6, 12.6),
-  ]),
+  ], { categories: ["media"] }),
   icon(
     "image",
     [
@@ -1815,6 +1968,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("3.6 10.2 6.15 7.65 8.1 9.35 10.8 6.6 11.4 7.2"),
     ],
     {
+      tags: ["photo", "picture"],
       aliases: ["gallery", "picture"],
       categories: commonTags.media,
     },
@@ -1828,7 +1982,8 @@ export const iconDefinitions: IconDefinition[] = [
         stroke: "none",
       }),
     ],
-    { categories: commonTags.media },
+    { tags: ["start", "run"],
+    categories: commonTags.media },
   ),
   icon("play-circle", [
     c(7.5, 7.5, 4.8),
@@ -1836,7 +1991,7 @@ export const iconDefinitions: IconDefinition[] = [
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["media"] }),
   icon(
     "pause",
     [
@@ -1849,18 +2004,18 @@ export const iconDefinitions: IconDefinition[] = [
     c(7.5, 7.5, 4.8),
     r(5.7, 5.6, 1.3, 3.8, { rx: 0.4, fill: "currentColor", stroke: "none" }),
     r(8, 5.6, 1.3, 3.8, { rx: 0.4, fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["media"] }),
   icon("stop-circle", [
     c(7.5, 7.5, 4.8),
     r(5.7, 5.7, 3.6, 3.6, { rx: 0.5, fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["media"] }),
   icon("forward", [
     polygon("4.7,5.1 8,7.5 4.7,9.9", { fill: "currentColor", stroke: "none" }),
     polygon("8.1,5.1 11.4,7.5 8.1,9.9", {
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["arrows", "media"] }),
   icon("rewind", [
     polygon("10.3,5.1 7,7.5 10.3,9.9", {
       fill: "currentColor",
@@ -1870,7 +2025,7 @@ export const iconDefinitions: IconDefinition[] = [
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["arrows", "media"] }),
   icon("skip-next", [
     polygon("4.7,5.1 8.1,7.5 4.7,9.9", {
       fill: "currentColor",
@@ -1881,7 +2036,7 @@ export const iconDefinitions: IconDefinition[] = [
       stroke: "none",
     }),
     l(11.9, 5.1, 11.9, 9.9),
-  ]),
+  ], { categories: ["media"] }),
   icon("skip-previous", [
     polygon("10.3,5.1 6.9,7.5 10.3,9.9", {
       fill: "currentColor",
@@ -1892,24 +2047,27 @@ export const iconDefinitions: IconDefinition[] = [
       stroke: "none",
     }),
     l(3.1, 5.1, 3.1, 9.9),
-  ]),
+  ], { categories: ["media"] }),
   icon("shuffle", [
     p("M3.2 4.8h1.8c1.15 0 1.8.35 2.45 1.2l2.55 3.2c.55.72 1.15 1.05 2.15 1.05h.95"),
     p("M3.2 10.2h1.8c1.05 0 1.7-.32 2.25-.98l.7-.85"),
     p("M10.4 4.8h1.8"),
     polyline("11.1 3.6 12.3 4.8 11.1 6"),
     polyline("11.1 9 12.3 10.2 11.1 11.4"),
-  ]),
+  ], { categories: ["arrows", "media"] }),
   icon("repeat", [
     p("M3.4 5.1h6.9c.85 0 1.45.2 2 .8"),
     polyline("10.9 3.55 12.25 4.9 10.9 6.25"),
     p("M11.6 9.9H4.7c-.85 0-1.45-.2-2-.8"),
     polyline("4.1 8.75 2.75 10.1 4.1 11.45"),
-  ], { aliases: ["recurring-order"] }),
+  ], { categories: ["arrows", "media"],
+  aliases: ["recurring-order"] }),
   icon(
     "volume",
     [polygon("3.1,6.2 5.1,6.2 7.3,4.4 7.3,10.6 5.1,8.8 3.1,8.8")],
     {
+      tags: ["sound", "audio"],
+      categories: ["media"],
       aliases: ["speaker"],
     },
   ),
@@ -1917,16 +2075,17 @@ export const iconDefinitions: IconDefinition[] = [
     polygon("3.1,6.2 5.1,6.2 7.3,4.4 7.3,10.6 5.1,8.8 3.1,8.8"),
     p("M9 6a2 2 0 0 1 0 3"),
     p("M10.2 4.8a3.7 3.7 0 0 1 0 5.4"),
-  ]),
+  ], { categories: ["media"] }),
   icon("volume-down", [
     polygon("3.1,6.2 5.1,6.2 7.3,4.4 7.3,10.6 5.1,8.8 3.1,8.8"),
     p("M9.1 6.4a1.4 1.4 0 0 1 0 2.2"),
-  ]),
+  ], { categories: ["media"] }),
   icon("volume-mute", [
     polygon("3.1,6.2 5.1,6.2 7.3,4.4 7.3,10.6 5.1,8.8 3.1,8.8"),
     l(9.2, 6.1, 11.4, 8.3),
     l(11.4, 6.1, 9.2, 8.3),
-  ]),
+  ], { tags: ["silent", "quiet"],
+  categories: ["media"] }),
   icon(
     "mic",
     [
@@ -1938,6 +2097,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.5, 12.1, 9.5, 12.1),
     ],
     {
+      tags: ["record", "voice", "audio"],
       aliases: ["microphone"],
       categories: commonTags.media,
     },
@@ -1962,7 +2122,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("4.9 6.9 7.5 9.5 10.1 6.9"),
       l(3.2, 11.7, 11.8, 11.7),
     ],
-    { aliases: ["arrow-down-to-line", "export", "export-csv", "export-pdf"], tags: commonTags.actions },
+    { categories: ["arrows", "actions"],
+    aliases: ["arrow-down-to-line", "export", "export-csv", "export-pdf"], tags: ["action", "command", "save", "get"] },
   ),
   icon(
     "upload",
@@ -1971,27 +2132,29 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("4.9 8.1 7.5 5.5 10.1 8.1"),
       l(3.2, 3.3, 11.8, 3.3),
     ],
-    { aliases: ["arrow-up-to-line", "import", "import-csv", "import-api"], tags: commonTags.actions },
+    { categories: ["arrows", "actions"],
+    aliases: ["arrow-up-to-line", "import", "import-csv", "import-api"], tags: ["action", "command", "send", "attach"] },
   ),
   icon("cloud", [
     p(
       "M4.8 11.5h5.5a2.25 2.25 0 0 0 .2-4.5A3.15 3.15 0 0 0 4.5 7.6 2 2 0 0 0 4.8 11.5z",
     ),
-  ]),
+  ], { tags: ["online", "storage"],
+  categories: ["weather", "connectivity", "development"] }),
   icon("cloud-upload", [
     p(
       "M4.8 11.5h5.5a2.25 2.25 0 0 0 .2-4.5A3.15 3.15 0 0 0 4.5 7.6 2 2 0 0 0 4.8 11.5z",
     ),
     l(7.5, 10.1, 7.5, 6.7),
     polyline("6.2 8 7.5 6.7 8.8 8"),
-  ]),
+  ], { categories: ["connectivity", "development"] }),
   icon("cloud-download", [
     p(
       "M4.8 11.5h5.5a2.25 2.25 0 0 0 .2-4.5A3.15 3.15 0 0 0 4.5 7.6 2 2 0 0 0 4.8 11.5z",
     ),
     l(7.5, 6.7, 7.5, 10.1),
     polyline("6.2 8.8 7.5 10.1 8.8 8.8"),
-  ]),
+  ], { categories: ["connectivity", "development"] }),
   icon("cloud-sync", [
     p(
       "M4.8 11.5h5.5a2.25 2.25 0 0 0 .2-4.5A3.15 3.15 0 0 0 4.5 7.6 2 2 0 0 0 4.8 11.5z",
@@ -2000,19 +2163,22 @@ export const iconDefinitions: IconDefinition[] = [
     polyline("8.9 10.35 8.8 9.15 7.65 9.2"),
     p("M9 8a1.75 1.75 0 0 0-2.7-1.35"),
     polyline("6.1 6.65 6.2 7.85 7.35 7.8"),
-  ], { aliases: ["data-sync"] }),
+  ], { categories: ["connectivity", "development"],
+  aliases: ["data-sync"] }),
   icon(
     "refresh-cw",
     [p("M11.5 5.5V3.3H9.3"), p("M11.3 3.7a4.6 4.6 0 1 0 1 5.8")],
     {
+      categories: ["arrows", "actions"],
       aliases: ["reload", "refresh", "sync", "rotate", "rotate-right", "data-refresh"],
-      tags: commonTags.actions,
+      tags: ["action", "command", "again", "reload-page"],
     },
   ),
   icon(
     "refresh-ccw",
     [p("M3.5 9.5v2.2h2.2"), p("M3.7 11.3a4.6 4.6 0 1 0-1-5.8")],
     {
+      categories: ["arrows", "actions"],
       aliases: ["rotate-left"],
       tags: commonTags.actions,
     },
@@ -2022,6 +2188,8 @@ export const iconDefinitions: IconDefinition[] = [
     "terminal",
     [polyline("3.5 5.2 5.8 7.5 3.5 9.8"), l(6.9, 10.1, 11.5, 10.1)],
     {
+      tags: ["console", "shell", "command-line", "cli"],
+      categories: ["development"],
       aliases: ["terminal-alt"],
     },
   ),
@@ -2033,6 +2201,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(8.2, 3.7, 6.8, 11.3),
     ],
     {
+      tags: ["develop", "programming"],
+      categories: ["development"],
       aliases: ["code-block", "api"],
     },
   ),
@@ -2048,6 +2218,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["ai", "generate", "assistant"],
+      categories: ["design", "symbols"],
       aliases: [
         "magic",
         "data-clean",
@@ -2067,6 +2239,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["flash", "energy", "fast"],
+      categories: ["symbols"],
       solid: [
         polygon("8.15,2.6 4.35,8.35 7.05,8.35 6.55,12.4 10.65,6.65 7.95,6.65", {
           fill: "currentColor",
@@ -2086,20 +2260,25 @@ export const iconDefinitions: IconDefinition[] = [
     l(10.5, 10.5, 11.5, 11.5),
     l(10.5, 4.5, 11.5, 3.5),
     l(3.5, 11.5, 4.5, 10.5),
-  ], { aliases: ["theme-light"] }),
-  icon("moon", [p("M10.9 9.5A4.7 4.7 0 1 1 6 3.2a3.9 3.9 0 1 0 4.9 6.3z")], { aliases: ["theme-dark"] }),
+  ], { tags: ["light", "day", "brightness"],
+  categories: ["weather"],
+  aliases: ["theme-light"] }),
+  icon("moon", [p("M10.9 9.5A4.7 4.7 0 1 1 6 3.2a3.9 3.9 0 1 0 4.9 6.3z")], { tags: ["dark", "night"],
+  categories: ["weather"],
+  aliases: ["theme-dark"] }),
   icon("wifi", [
     p("M2.6 5.9a7 7 0 0 1 9.8 0"),
     p("M4.6 7.9a4.2 4.2 0 0 1 5.8 0"),
     p("M6.55 9.85a1.35 1.35 0 0 1 1.9 0"),
     c(7.5, 11.45, 0.55, { fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { tags: ["wireless", "internet", "network"],
+  categories: ["devices", "connectivity"] }),
   icon("wifi-off", [
     p("M2.6 5.9a7 7 0 0 1 9.8 0"),
     p("M4.6 7.9a4.2 4.2 0 0 1 5.8 0"),
     c(7.5, 11.45, 0.55, { fill: "currentColor", stroke: "none" }),
     l(2.4, 2.4, 12.6, 12.6),
-  ]),
+  ], { categories: ["devices", "connectivity"] }),
 
   icon(
     "login",
@@ -2109,6 +2288,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.8 5.2 12.1 7.5 9.8 9.8"),
     ],
     {
+      tags: ["enter"],
+      categories: ["actions"],
       aliases: ["sign-in", "attendance-checkin"],
     },
   ),
@@ -2120,6 +2301,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5.2 5.2 2.9 7.5 5.2 9.8"),
     ],
     {
+      tags: ["exit", "leave"],
+      categories: ["actions"],
       aliases: ["sign-out", "attendance-checkout"],
     },
   ),
@@ -2132,6 +2315,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.7, 7.5, 11.7, 8.5),
     ],
     {
+      tags: ["password"],
+      categories: ["security"],
       aliases: ["key-alt", "permission", "authorization"],
     },
   ),
@@ -2140,7 +2325,9 @@ export const iconDefinitions: IconDefinition[] = [
     p("M7.5 4.9a2.6 2.6 0 0 1 2.6 2.6v1.6"),
     p("M7.5 6.4a1.1 1.1 0 0 1 1.1 1.1v1.9"),
     p("M4.1 8.9V7.5a3.4 3.4 0 1 1 6.8 0v2.2a3.4 3.4 0 0 1-6.8 0V7.5"),
-  ], { aliases: ["authentication", "biometric-payment", "touch-id"] }),
+  ], { tags: ["biometric", "identity"],
+  categories: ["security"],
+  aliases: ["authentication", "biometric-payment", "touch-id"] }),
   icon(
     "dislike",
     [
@@ -2150,6 +2337,7 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      categories: ["symbols"],
       aliases: ["thumbs-down"],
     },
   ),
@@ -2161,21 +2349,24 @@ export const iconDefinitions: IconDefinition[] = [
     p("M8.1 2.9v2.3h2.3"),
     l(6.2, 8.5, 6.2, 10.8),
     l(5, 9.65, 7.4, 9.65),
-  ], { aliases: ["notes-add"] }),
+  ], { categories: ["file"],
+  aliases: ["notes-add"] }),
   icon("file-minus", [
     p(
       "M3.8 2.9h4.3l2.3 2.3v6.9a1.2 1.2 0 0 1-1.2 1.2H3.8a1.2 1.2 0 0 1-1.2-1.2V4.1a1.2 1.2 0 0 1 1.2-1.2z",
     ),
     p("M8.1 2.9v2.3h2.3"),
     l(5, 9.65, 7.4, 9.65),
-  ]),
+  ], { tags: ["remove"],
+  categories: ["file"] }),
   icon("file-check", [
     p(
       "M3.8 2.9h4.3l2.3 2.3v6.9a1.2 1.2 0 0 1-1.2 1.2H3.8a1.2 1.2 0 0 1-1.2-1.2V4.1a1.2 1.2 0 0 1 1.2-1.2z",
     ),
     p("M8.1 2.9v2.3h2.3"),
     p("M5 9.6 5.9 10.5 7.3 9.1"),
-  ], { aliases: ["claim-approved", "document-verify"] }),
+  ], { categories: ["file"],
+  aliases: ["claim-approved", "document-verify"] }),
   icon("file-x", [
     p(
       "M3.8 2.9h4.3l2.3 2.3v6.9a1.2 1.2 0 0 1-1.2 1.2H3.8a1.2 1.2 0 0 1-1.2-1.2V4.1a1.2 1.2 0 0 1 1.2-1.2z",
@@ -2183,7 +2374,9 @@ export const iconDefinitions: IconDefinition[] = [
     p("M8.1 2.9v2.3h2.3"),
     l(5.1, 9.1, 7.3, 11.2),
     l(7.3, 9.1, 5.1, 11.2),
-  ], { aliases: ["claim-rejected"] }),
+  ], { tags: ["delete", "remove"],
+  categories: ["file"],
+  aliases: ["claim-rejected"] }),
   icon(
     "stop",
     [
@@ -2191,6 +2384,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(5.4, 5.4, 4.2, 4.2, { rx: 0.65, fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["actions", "media"],
       aliases: ["stop-square"],
     },
   ),
@@ -2200,17 +2394,17 @@ export const iconDefinitions: IconDefinition[] = [
     polyline("10.9 12.2 10.9 4.1 2.8 4.1"),
     l(6.2, 2.8, 6.2, 4.1),
     l(8.8, 10.9, 8.8, 12.2),
-  ]),
+  ], { categories: ["actions", "design"] }),
   icon("flip-horizontal", [
     l(7.5, 2.8, 7.5, 12.2),
     p("M3.1 4.2h2.8l1.2 1.2v4.2l-1.2 1.2H3.1z"),
     p("M12 4.2H9.2L8 5.4v4.2l1.2 1.2H12z"),
-  ]),
+  ], { categories: ["actions", "design"] }),
   icon("flip-vertical", [
     l(2.8, 7.5, 12.2, 7.5),
     p("M4.2 3.1v2.8l1.2 1.2h4.2l1.2-1.2V3.1z"),
     p("M4.2 12v-2.8l1.2-1.2h4.2l1.2 1.2V12z"),
-  ]),
+  ], { categories: ["actions", "design"] }),
   icon(
     "maximize",
     [
@@ -2221,6 +2415,8 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.6 7.9 9.6 9.6 7.9 9.6"),
     ],
     {
+      tags: ["enlarge", "expand"],
+      categories: ["actions", "layout"],
       aliases: ["fullscreen", "expand"],
     },
   ),
@@ -2234,13 +2430,16 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("8.2 8.8 9.6 8.8 9.6 10.2"),
     ],
     {
+      tags: ["shrink", "collapse"],
+      categories: ["actions", "layout"],
       aliases: ["fullscreen-exit", "collapse"],
     },
   ),
   icon("check-square", [
     r(3.1, 3.1, 8.8, 8.8, { rx: 1.2 }),
     p("M5.1 7.7 6.8 9.4 9.9 6.3"),
-  ], { aliases: ["task-admin", "task-productivity", "task-complete"] }),
+  ], { categories: ["actions"],
+  aliases: ["task-admin", "task-productivity", "task-complete"] }),
 
   icon("bug", [
     c(7.5, 7.8, 2.4),
@@ -2251,7 +2450,9 @@ export const iconDefinitions: IconDefinition[] = [
     l(10.2, 7.1, 12.1, 7.1),
     l(5.1, 10.3, 3.4, 11.3),
     l(9.9, 10.3, 11.6, 11.3),
-  ], { aliases: ["debug"] }),
+  ], { tags: ["issue", "defect", "error"],
+  categories: ["development"],
+  aliases: ["debug"] }),
   icon(
     "bracket",
     [
@@ -2259,6 +2460,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9 3.1 10.8 3.1 10.8 11.9 9 11.9"),
     ],
     {
+      categories: ["development"],
       aliases: ["brackets"],
     },
   ),
@@ -2282,6 +2484,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.9, 9.6, 12.2, 9.6),
     ],
     {
+      categories: ["devices", "development"],
       aliases: ["chip", "memory", "processor", "memory-usage"],
     },
   ),
@@ -2292,7 +2495,9 @@ export const iconDefinitions: IconDefinition[] = [
     c(4.3, 8.65, 0.45, { fill: "currentColor", stroke: "none" }),
     l(6, 4.75, 11.1, 4.75),
     l(6, 8.65, 11.1, 8.65),
-  ], { aliases: ["server-admin", "server-health", "server-restart"] }),
+  ], { tags: ["hosting", "backend"],
+  categories: ["devices", "development"],
+  aliases: ["server-admin", "server-health", "server-restart"] }),
   icon(
     "database",
     [
@@ -2303,6 +2508,8 @@ export const iconDefinitions: IconDefinition[] = [
       p("M3.1 7.4v2.8c0 1.3 1.95 2.3 4.4 2.3s4.4-1 4.4-2.3V7.4"),
     ],
     {
+      tags: ["sql", "db"],
+      categories: ["development"],
       aliases: [
         "storage",
         "database-admin",
@@ -2323,14 +2530,14 @@ export const iconDefinitions: IconDefinition[] = [
     p("M3.1 4.4v2.7c0 1.3 1.95 2.3 4.4 2.3 1.1 0 2.1-.2 2.9-.55"),
     l(10.5, 8.9, 10.5, 12.1),
     l(8.9, 10.5, 12.1, 10.5),
-  ]),
+  ], { categories: ["development"] }),
   icon("database-remove", [
     p(
       "M3.1 4.4c0-1.3 1.95-2.3 4.4-2.3s4.4 1 4.4 2.3-1.95 2.3-4.4 2.3-4.4-1-4.4-2.3z",
     ),
     p("M3.1 4.4v2.7c0 1.3 1.95 2.3 4.4 2.3 1.1 0 2.1-.2 2.9-.55"),
     l(8.9, 10.5, 12.1, 10.5),
-  ]),
+  ], { categories: ["development"] }),
   icon(
     "hard-drive",
     [
@@ -2340,6 +2547,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(4, 8.7, 7.5, 8.7),
     ],
     {
+      categories: ["devices", "development"],
       aliases: ["hdd"],
     },
   ),
@@ -2352,7 +2560,8 @@ export const iconDefinitions: IconDefinition[] = [
     l(7.5, 4.6, 11.4, 6.5),
     l(3.6, 8.5, 7.5, 10.4),
     l(11.4, 8.5, 7.5, 10.4),
-  ], { aliases: ["organization-chart", "mindmap", "sitemap"] }),
+  ], { categories: ["connectivity", "development"],
+  aliases: ["organization-chart", "mindmap", "sitemap"] }),
   icon("chart-area", [
     l(2.9, 12.1, 12.1, 12.1),
     l(2.9, 12.1, 2.9, 3.4),
@@ -2363,7 +2572,7 @@ export const iconDefinitions: IconDefinition[] = [
       tone: "secondary",
       opacity: 0.25,
     }),
-  ]),
+  ], { categories: ["analytics"] }),
 
   icon(
     "wallet",
@@ -2373,6 +2582,8 @@ export const iconDefinitions: IconDefinition[] = [
       c(9.3, 8.5, 0.35, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      tags: ["payment", "purse"],
+      categories: ["commerce"],
       aliases: [
         "money",
         "currency",
@@ -2401,6 +2612,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.3, 9.1, 7.2, 9.1),
     ],
     {
+      tags: ["pay", "payment"],
+      categories: ["commerce"],
       aliases: ["card", "debit", "debit-card", "credit-limit"],
     },
   ),
@@ -2409,7 +2622,8 @@ export const iconDefinitions: IconDefinition[] = [
     l(5.5, 5.5, 9.4, 5.5),
     l(5.5, 7.4, 9.4, 7.4),
     l(5.5, 9.3, 8.1, 9.3),
-  ], { aliases: ["billing-invoice", "invoice-admin", "invoice-ecommerce", "invoice-payment"] }),
+  ], { categories: ["commerce"],
+  aliases: ["billing-invoice", "invoice-admin", "invoice-ecommerce", "invoice-payment"] }),
   icon(
     "receipt",
     [
@@ -2419,6 +2633,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.5, 9.3, 7.1, 9.3),
     ],
     {
+      categories: ["commerce"],
       aliases: ["bill", "receipt-digital", "receipt-print", "payslip"],
     },
   ),
@@ -2431,6 +2646,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.2, 9.4, 11.4, 9.4),
     ],
     {
+      tags: ["basket", "checkout", "buy"],
+      categories: ["commerce"],
       aliases: [
         "cart-add",
         "cart-remove",
@@ -2447,7 +2664,8 @@ export const iconDefinitions: IconDefinition[] = [
     [
       p("M4.1 4.9h6.8l-.6 6.6a1.2 1.2 0 0 1-1.2 1.1H5.9a1.2 1.2 0 0 1-1.2-1.1z"),
       p("M5.7 5.1a1.8 1.8 0 0 1 3.6 0"),
-    ],
+    ], { tags: ["shop", "buy", "purchase"],
+    categories: ["commerce"] },
   ),
 
   icon(
@@ -2463,6 +2681,8 @@ export const iconDefinitions: IconDefinition[] = [
       r(6.9, 9.2, 1.3, 3.9, { rx: 0.3 }),
     ],
     {
+      tags: ["company"],
+      categories: ["business"],
       aliases: [
         "office",
         "home-office",
@@ -2483,7 +2703,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.2, 6.1, 5.2, 11.9),
       l(7.6, 3.45, 7.6, 5.95),
       l(9.9, 3.45, 9.9, 5.95),
-    ], { aliases: [
+    ], { categories: ["commerce"],
+    aliases: [
       "retail",
       "marketplace",
       "vendor",
@@ -2503,6 +2724,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(10.2, 11.2, 0.7, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["symbols"],
       aliases: [
         "taxi",
       ],
@@ -2516,7 +2738,9 @@ export const iconDefinitions: IconDefinition[] = [
       c(5, 10.7, 0.75, { fill: "currentColor", stroke: "none" }),
       c(10.3, 10.7, 0.75, { fill: "currentColor", stroke: "none" }),
       l(3.2, 9.6, 9.6, 9.6),
-    ], { aliases: ["supplier"] },
+    ], { tags: ["delivery", "shipping"],
+    categories: ["commerce", "symbols"],
+    aliases: ["supplier"] },
   ),
   icon(
     "airplane",
@@ -2527,6 +2751,7 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      categories: ["symbols"],
       aliases: ["airplan"],
     },
   ),
@@ -2541,13 +2766,13 @@ export const iconDefinitions: IconDefinition[] = [
     p(
       "M5.4 11.3h4.6a1.95 1.95 0 0 0 .2-3.9 2.75 2.75 0 0 0-5.35.55 1.6 1.6 0 0 0 .5 3.35z",
     ),
-  ]),
+  ], { categories: ["weather"] }),
   icon("cloud-moon", [
     p("M5.2 3.7a2 2 0 1 0 2.2 2.8A2.6 2.6 0 0 1 5.2 3.7z"),
     p(
       "M5.3 11.3h4.7a2 2 0 0 0 .2-4 2.8 2.8 0 0 0-5.45.55 1.65 1.65 0 0 0 .55 3.45z",
     ),
-  ]),
+  ], { categories: ["weather"] }),
   icon("rain", [
     p(
       "M4.6 10.1h5.3a2 2 0 0 0 .2-4 2.8 2.8 0 0 0-5.45.55 1.65 1.65 0 0 0-.05 3.45z",
@@ -2555,7 +2780,7 @@ export const iconDefinitions: IconDefinition[] = [
     l(5.6, 11, 5, 12.2),
     l(7.5, 11, 6.9, 12.2),
     l(9.4, 11, 8.8, 12.2),
-  ]),
+  ], { categories: ["weather"] }),
   icon("snow", [
     p(
       "M4.6 10.1h5.3a2 2 0 0 0 .2-4 2.8 2.8 0 0 0-5.45.55 1.65 1.65 0 0 0-.05 3.45z",
@@ -2563,7 +2788,7 @@ export const iconDefinitions: IconDefinition[] = [
     l(7.5, 10.9, 7.5, 12.2),
     l(6.9, 11.2, 8.1, 11.9),
     l(8.1, 11.2, 6.9, 11.9),
-  ]),
+  ], { categories: ["weather"] }),
   icon("storm", [
     p(
       "M4.6 10.1h5.3a2 2 0 0 0 .2-4 2.8 2.8 0 0 0-5.45.55 1.65 1.65 0 0 0-.05 3.45z",
@@ -2573,17 +2798,20 @@ export const iconDefinitions: IconDefinition[] = [
       fill: "currentColor",
       stroke: "none",
     }),
-  ]),
+  ], { categories: ["weather"] }),
   icon("umbrella", [
     p("M2.8 7.2a4.7 4.7 0 0 1 9.4 0H2.8z"),
     l(7.5, 7.2, 7.5, 11),
     p("M7.5 11a1.2 1.2 0 0 0 2.4 0"),
-  ], { aliases: ["insurance", "insurance-policy"] }),
+  ], { categories: ["weather", "symbols"],
+  aliases: ["insurance", "insurance-policy"] }),
   icon("fire", [
     p(
       "M7.5 12c2 0 3.6-1.5 3.6-3.6 0-1.9-1.1-3.2-2.4-4.5-.3.9-1.2 1.6-2.2 1.6 0-1.2-.5-2.1-1.3-2.9-1.5 1.2-2.6 2.9-2.6 5 0 2.4 1.8 4.4 4.9 4.4z",
     ),
-  ], { aliases: ["deal-hot", "streak", "streak-fire"] }),
+  ], { tags: ["hot", "trending", "popular"],
+  categories: ["symbols"],
+  aliases: ["deal-hot", "streak", "streak-fire"] }),
   icon(
     "leaf",
     [
@@ -2593,6 +2821,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M4.3 10.9c2.7-2.6 4.2-4.2 6.8-6.8"),
     ],
     {
+      categories: ["symbols"],
       aliases: ["tree", "flower"],
     },
   ),
@@ -2606,6 +2835,8 @@ export const iconDefinitions: IconDefinition[] = [
       p("M7.5 6.1h2.6a1.4 1.4 0 1 0 0-2.8c-1.4 0-2.2 1-2.6 2.8z"),
     ],
     {
+      tags: ["present"],
+      categories: ["commerce", "symbols"],
       aliases: ["gift-card", "gift-card-balance", "referral-bonus"],
     },
   ),
@@ -2619,20 +2850,25 @@ export const iconDefinitions: IconDefinition[] = [
       r(5.7, 10.2, 3.6, 2.1, { rx: 0.5 }),
     ],
     {
+      tags: ["winner", "prize"],
+      categories: ["symbols"],
       aliases: ["medal", "award"],
     },
   ),
   icon("crown", [
     polygon("2.8,10.7 3.7,4.5 6.2,7.1 7.5,3.9 8.8,7.1 11.3,4.5 12.2,10.7"),
     l(3.6, 12.1, 11.4, 12.1),
-  ], { aliases: ["customer-vip"] }),
+  ], { categories: ["symbols"],
+  aliases: ["customer-vip"] }),
   icon("rocket", [
     p(
       "M9.8 3.2c-2.4 0-4.4 1.9-5.2 4.8L3 9.6l2.4-.3 1.7 1.7-.3 2.4 1.6-1.6c2.9-.8 4.8-2.8 4.8-5.2V3.2z",
     ),
     c(9.1, 5.7, 0.75),
     p("M4.7 10.3 2.8 12.2"),
-  ], { aliases: ["release"] }),
+  ], { tags: ["launch", "startup", "ship"],
+  categories: ["symbols"],
+  aliases: ["release"] }),
   icon(
     "coffee",
     [
@@ -2641,6 +2877,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(2.8, 12.1, 10.8, 12.1),
     ],
     {
+      categories: ["symbols"],
       aliases: ["tea"],
     },
   ),
@@ -2651,14 +2888,14 @@ export const iconDefinitions: IconDefinition[] = [
     ),
     p("M9 3.7a3 3 0 0 1 2.3 2.3"),
     p("M8.6 5.4a1.4 1.4 0 0 1 1 1"),
-  ]),
+  ], { categories: ["communication"] }),
   icon("phone-missed", [
     p(
       "M4.25 2.8h1.6L6.55 5 5.3 6.25a8.4 8.4 0 0 0 3.45 3.45L10 8.45l2.2.7v1.6A1.25 1.25 0 0 1 10.95 12c-4.95 0-8.95-4-8.95-8.95A1.25 1.25 0 0 1 3.25 2.8",
     ),
     l(8.8, 3.2, 12.2, 6.6),
     l(12.2, 3.2, 8.8, 6.6),
-  ]),
+  ], { categories: ["communication"] }),
   icon(
     "message-square",
     [
@@ -2666,7 +2903,8 @@ export const iconDefinitions: IconDefinition[] = [
       p("M5.85 10.1 4.85 12l.15-1.95"),
       l(5, 5.7, 10, 5.7),
       l(5, 7.55, 8.7, 7.55),
-    ], { aliases: ["sms-campaign"] },
+    ], { categories: ["communication"],
+    aliases: ["sms-campaign"] },
   ),
   icon(
     "message-circle",
@@ -2675,9 +2913,13 @@ export const iconDefinitions: IconDefinition[] = [
       p("M5.6 10.55 5.1 12 6.45 11.55"),
       l(5.4, 6.15, 9.4, 6.15),
       l(5.4, 7.95, 8.55, 7.95),
-    ], { aliases: ["chatbot", "bot-response"] },
+    ], { tags: ["speech", "bubble"],
+    categories: ["communication"],
+    aliases: ["chatbot", "bot-response"] },
   ),
   icon("chat", [r(2.8, 3.2, 9.4, 6.9, { rx: 1.1 }), p("M6.2 10.1 5 12l.3-2")], {
+    tags: ["conversation", "talk"],
+    categories: ["communication"],
     aliases: [
       "chat-bubble",
       "comment",
@@ -2691,6 +2933,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(5.8, 6.3, 6.6, 4.7, { rx: 0.9 }),
     ],
     {
+      categories: ["communication"],
       aliases: ["forum", "team-chat"],
     },
   ),
@@ -2703,6 +2946,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(3.2, 7.1, 1.8, 3.6, { rx: 0.45 }),
     ],
     {
+      categories: ["communication"],
       aliases: [
         "broadcast",
         "broadcast-admin",
@@ -2718,7 +2962,9 @@ export const iconDefinitions: IconDefinition[] = [
     r(4.2, 8.6, 6.6, 3.6, { rx: 0.5 }),
     c(10, 5.6, 0.45, { fill: "currentColor", stroke: "none" }),
     l(5.2, 10, 9, 10),
-  ], { aliases: ["invoice-print"] }),
+  ], { tags: ["print"],
+  categories: ["actions", "devices"],
+  aliases: ["invoice-print"] }),
   icon(
     "monitor",
     [
@@ -2727,6 +2973,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(7.5, 9.8, 7.5, 12.2),
     ],
     {
+      tags: ["desktop", "screen", "display"],
+      categories: ["devices"],
       aliases: ["screen", "responsive-desktop"],
     },
   ),
@@ -2737,17 +2985,22 @@ export const iconDefinitions: IconDefinition[] = [
       p("M2.5 10.2h10a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1"),
     ],
     {
+      tags: ["computer"],
+      categories: ["devices"],
       aliases: ["notebook"],
     },
   ),
   icon("tablet", [
     r(4.1, 2.7, 6.8, 9.8, { rx: 1.1 }),
     c(7.5, 10.7, 0.45, { fill: "currentColor", stroke: "none" }),
-  ], { aliases: ["responsive-tablet"] }),
+  ], { categories: ["devices"],
+  aliases: ["responsive-tablet"] }),
   icon("smartphone", [
     r(4.5, 2.5, 6, 10.4, { rx: 1.1 }),
     c(7.5, 10.6, 0.45, { fill: "currentColor", stroke: "none" }),
-  ], { aliases: ["responsive-mobile", "mobile-commerce"] }),
+  ], { tags: ["mobile", "phone", "device"],
+  categories: ["devices"],
+  aliases: ["responsive-mobile", "mobile-commerce"] }),
   icon(
     "cast",
     [
@@ -2755,7 +3008,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M3.5 10.5a2.6 2.6 0 0 1 2.6-2.6"),
       p("M3.5 8.6a4.5 4.5 0 0 1 4.5 4.5"),
       c(3.7, 10.3, 0.45, { fill: "currentColor", stroke: "none" }),
-    ],
+    ], { categories: ["media", "devices", "connectivity"] },
   ),
   icon(
     "router",
@@ -2768,14 +3021,14 @@ export const iconDefinitions: IconDefinition[] = [
       c(5.35, 9.45, 0.35, { fill: "currentColor", stroke: "none" }),
       c(7.5, 9.45, 0.35, { fill: "currentColor", stroke: "none" }),
       c(9.65, 9.45, 0.35, { fill: "currentColor", stroke: "none" }),
-    ],
+    ], { categories: ["devices", "connectivity"] },
   ),
   icon(
     "mouse",
     [
       p("M7.5 12.1A3.6 3.6 0 0 0 11.1 8.5V6.3a3.6 3.6 0 0 0-7.2 0v2.2a3.6 3.6 0 0 0 3.6 3.6z"),
       l(7.5, 3.1, 7.5, 5.9),
-    ],
+    ], { categories: ["devices"] },
   ),
 
   icon(
@@ -2791,6 +3044,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(10.7, 10.7, 1.5, 1.5),
     ],
     {
+      categories: ["commerce"],
       aliases: ["scan-qr", "qr-payment"],
     },
   ),
@@ -2806,6 +3060,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.1, 3.5, 11.1, 11.5),
     ],
     {
+      categories: ["commerce"],
       aliases: ["scan", "sku", "barcode-scan"],
     },
   ),
@@ -2822,7 +3077,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.8, 11.8, 9.8, 11.8),
       c(7.2, 7.2, 2),
       l(8.65, 8.65, 10.4, 10.4),
-    ],
+    ], { categories: ["security"] },
   ),
 
   icon(
@@ -2834,6 +3089,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(7.5, 2.8, 7.5, 10.3),
     ],
     {
+      categories: ["commerce"],
       aliases: ["pass"],
     },
   ),
@@ -2847,6 +3103,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(8.1, 8, 10.8, 8),
     ],
     {
+      categories: ["security"],
       aliases: ["passport", "kyc"],
     },
   ),
@@ -2859,6 +3116,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.7, 7.2, 8.3, 7.2),
     ],
     {
+      tags: ["work", "job", "business"],
+      categories: ["business"],
       aliases: ["suitcase"],
     },
   ),
@@ -2873,6 +3132,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.2, 8.8, 8.6, 8.8),
     ],
     {
+      tags: ["read", "docs", "documentation"],
+      categories: ["file", "symbols"],
       aliases: ["book-open", "library", "ledger", "ledger-entry", "journal", "ledger-fintech"],
     },
   ),
@@ -2884,6 +3145,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.7, 7.1, 10.7, 9.3),
     ],
     {
+      tags: ["education", "learning"],
+      categories: ["symbols"],
       aliases: ["school", "university"],
     },
   ),
@@ -2895,6 +3158,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["ai", "smart", "think", "mind"],
+      categories: ["symbols"],
       aliases: ["idea", "idea-board", "brainstorming", "ai-model", "ai-training", "bot-training"],
     },
   ),
@@ -2907,6 +3172,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.8, 4.2, 12.2, 2.8),
     ],
     {
+      categories: ["symbols"],
       aliases: [
         "target-arrow",
         "focus",
@@ -2930,6 +3196,8 @@ export const iconDefinitions: IconDefinition[] = [
       polygon("7.5,6.9 12.1,9.4 7.5,11.9 2.9,9.4"),
     ],
     {
+      tags: ["stack", "levels"],
+      categories: ["layout"],
       aliases: ["stack", "layer-group"],
     },
   ),
@@ -2942,6 +3210,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(12, 5.2, 7.5, 7.4),
     ],
     {
+      categories: ["commerce", "symbols", "objects"],
       aliases: ["box-open", "container"],
     },
   ),
@@ -2952,7 +3221,9 @@ export const iconDefinitions: IconDefinition[] = [
       p("M3.2 5.15v5.3l4.3 2.3 4.3-2.3v-5.3"),
       l(7.5, 7.45, 7.5, 12.75),
       l(5.8, 4.25, 9.2, 6.1),
-    ], { aliases: ["fulfillment", "packaging", "packaging-box", "bundle-offer", "subscription-box"] },
+    ], { tags: ["parcel", "delivery"],
+    categories: ["commerce", "symbols", "objects"],
+    aliases: ["fulfillment", "packaging", "packaging-box", "bundle-offer", "subscription-box"] },
   ),
   icon(
     "cube",
@@ -2963,6 +3234,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.5, 5.2, 7.5, 7.2),
     ],
     {
+      categories: ["symbols", "objects"],
       aliases: ["cubes", "plugin", "extension", "component"],
     },
   ),
@@ -2974,13 +3246,14 @@ export const iconDefinitions: IconDefinition[] = [
       c(5.1, 7.5, 1.6, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: ["switch"],
     },
   ),
   icon("toggle-right", [
     r(2.8, 5.2, 9.4, 4.6, { rx: 2.3 }),
     c(9.9, 7.5, 1.6, { fill: "currentColor", stroke: "none" }),
-  ]),
+  ], { categories: ["ui-components"] }),
   icon(
     "drag",
     [
@@ -2999,6 +3272,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.9, 7.5, 12.2, 7.5),
     ],
     {
+      categories: ["actions", "ui-components"],
       aliases: [
         "move",
         "cursor-drag",
@@ -3012,15 +3286,16 @@ export const iconDefinitions: IconDefinition[] = [
     l(3, 7.5, 12, 7.5),
     polyline("5 5.5 3 7.5 5 9.5"),
     polyline("10 5.5 12 7.5 10 9.5"),
-  ]),
+  ], { categories: ["arrows"] }),
   icon("move-vertical", [
     l(7.5, 3, 7.5, 12),
     polyline("5.5 5 7.5 3 9.5 5"),
     polyline("5.5 10 7.5 12 9.5 10"),
-  ]),
+  ], { categories: ["arrows"] }),
   icon(
     "mouse-pointer",
-    [p("M3.2 3.2 8.6 8.7H6.4l1.25 3.25-1.2.45-1.3-3.35-1.95 1.6z")], { aliases: [
+    [p("M3.2 3.2 8.6 8.7H6.4l1.25 3.25-1.2.45-1.3-3.35-1.95 1.6z")], { categories: ["ui-components"],
+    aliases: [
       "interaction-click",
       "interaction-hover",
       "hand-pointer",
@@ -3036,7 +3311,7 @@ export const iconDefinitions: IconDefinition[] = [
     polyline("9.6 11.2 3.8 11.2 3.8 5.4"),
     l(11.2, 3.8, 8.5, 6.5),
     l(3.8, 11.2, 6.5, 8.5),
-  ]),
+  ], { categories: ["actions", "layout"] }),
 
   icon(
     "align-left",
@@ -3045,7 +3320,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(3.2, 6.4, 9.6, 6.4),
       l(3.2, 8.6, 11.1, 8.6),
       l(3.2, 10.8, 8.5, 10.8),
-    ],
+    ], { categories: ["alignment"] },
   ),
   icon(
     "align-center",
@@ -3056,6 +3331,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.8, 10.8, 10.2, 10.8),
     ],
     {
+      categories: ["alignment"],
       aliases: ["align-middle-text"],
     },
   ),
@@ -3066,7 +3342,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.4, 6.4, 11.8, 6.4),
       l(3.9, 8.6, 11.8, 8.6),
       l(6.5, 10.8, 11.8, 10.8),
-    ],
+    ], { categories: ["alignment"] },
   ),
   icon(
     "align-top",
@@ -3074,7 +3350,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(3.2, 3.4, 11.8, 3.4),
       r(4, 5.2, 2.2, 6.8, { rx: 0.45 }),
       r(8.8, 5.2, 2.2, 4.5, { rx: 0.45 }),
-    ],
+    ], { categories: ["alignment"] },
   ),
   icon(
     "align-middle",
@@ -3084,6 +3360,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(8.8, 5.6, 2.2, 3.8, { rx: 0.45 }),
     ],
     {
+      categories: ["alignment"],
       aliases: ["align-center-vertical"],
     },
   ),
@@ -3091,12 +3368,14 @@ export const iconDefinitions: IconDefinition[] = [
     l(3.2, 11.6, 11.8, 11.6),
     r(4, 4.8, 2.2, 6.8, { rx: 0.45 }),
     r(8.8, 7.1, 2.2, 4.5, { rx: 0.45 }),
-  ]),
+  ], { categories: ["alignment"] }),
 
   icon(
     "bold",
     [p("M4.2 3.4h3.6a2 2 0 0 1 0 4H4.2z"), p("M4.2 7.4h4a2 2 0 0 1 0 4h-4z")],
     {
+      tags: ["format", "text", "strong"],
+      categories: ["typography"],
       aliases: ["font", "typography"],
     },
   ),
@@ -3111,7 +3390,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(9.3, 5, 10.7, 3.8),
       l(10.7, 3.8, 10.7, 11.2),
       l(9.5, 11.2, 11.9, 11.2),
-    ], { aliases: ["heading"] },
+    ], { categories: ["typography"],
+    aliases: ["heading"] },
   ),
   icon(
     "heading-2",
@@ -3120,7 +3400,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.2, 3.8, 6.2, 11.2),
       l(2.4, 7.5, 6.2, 7.5),
       p("M9 5.3a1.8 1.8 0 1 1 3.6 0c0 1.15-.75 1.75-1.6 2.35L9.1 9.05a2.2 2.2 0 0 0-.95 1.75h4.55"),
-    ],
+    ], { categories: ["typography"] },
   ),
   icon(
     "heading-3",
@@ -3130,12 +3410,14 @@ export const iconDefinitions: IconDefinition[] = [
       l(2.4, 7.5, 6.2, 7.5),
       p("M8.8 4.7a1.75 1.75 0 0 1 3.3.7c0 1-.8 1.55-1.8 1.6"),
       p("M10.3 7c1.15 0 1.95.7 1.95 1.75 0 1.05-.85 1.85-2.05 1.85-.95 0-1.7-.5-1.95-1.4"),
-    ],
+    ], { categories: ["typography"] },
   ),
   icon(
     "italic",
     [l(6.2, 3.4, 10.2, 3.4), l(4.8, 11.4, 8.8, 11.4), l(9.2, 3.4, 5.8, 11.4)],
     {
+      tags: ["format", "text", "emphasis"],
+      categories: ["typography"],
       aliases: ["typography-alt"],
     },
   ),
@@ -3146,7 +3428,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.4, 3.4, 10.4, 7.7),
       p("M4.6 7.7a2.9 2.9 0 0 0 5.8 0"),
       l(3.6, 11.6, 11.4, 11.6),
-    ],
+    ], { tags: ["format", "text"],
+    categories: ["typography"] },
   ),
   icon(
     "strikethrough",
@@ -3154,7 +3437,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(3.6, 7.5, 11.4, 7.5),
       p("M4.6 5.4a2 2 0 0 1 2-2h1.8a2 2 0 0 1 2 2"),
       p("M10.4 9.6a2 2 0 0 1-2 2H6.6a2 2 0 0 1-2-2"),
-    ],
+    ], { tags: ["format", "text", "cross-out"],
+    categories: ["typography"] },
   ),
   icon(
     "list-ordered",
@@ -3167,6 +3451,8 @@ export const iconDefinitions: IconDefinition[] = [
       p("M2.8 8.3h1a.5.5 0 0 1 .5.5v.4a.5.5 0 0 1-.5.5h-1"),
     ],
     {
+      tags: ["numbered"],
+      categories: ["typography"],
       aliases: ["waitlist"],
     },
   ),
@@ -3179,14 +3465,16 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.2, 4.3, 11.8, 4.3),
       l(6.2, 7.5, 11.8, 7.5),
       l(6.2, 10.7, 11.8, 10.7),
-    ],
+    ], { tags: ["bullets", "bulleted"],
+    categories: ["typography"] },
   ),
   icon(
     "quote",
     [
       p("M4.3 5.2h2.3v2.1H5.1v1.4h1.5v2.1H4.3A1.3 1.3 0 0 1 3 9.5V6.5a1.3 1.3 0 0 1 1.3-1.3z"),
       p("M8.4 5.2h2.3v2.1H9.2v1.4h1.5v2.1H8.4a1.3 1.3 0 0 1-1.3-1.3V6.5a1.3 1.3 0 0 1 1.3-1.3z"),
-    ],
+    ], { tags: ["citation", "blockquote"],
+    categories: ["typography"] },
   ),
   icon(
     "at-sign",
@@ -3194,7 +3482,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.3, 7.4, 4.4),
       p("M9.75 5.7V9.4a1.2 1.2 0 1 0 2.4 0V7.4a4.85 4.85 0 1 0-1.65 3.64"),
       c(7.25, 7.35, 1.75),
-    ],
+    ], { categories: ["typography", "communication"] },
   ),
   icon(
     "keyboard",
@@ -3205,6 +3493,8 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.8, 9.6, 10.2, 9.6),
     ],
     {
+      tags: ["type", "typing", "input"],
+      categories: ["devices", "accessibility"],
       aliases: ["keyboard-navigation"],
     },
   ),
@@ -3216,7 +3506,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("7.2 7.2 10.4 4.65"),
       polyline("7.2 7.2 10.4 9.75 7.2 12.2"),
       polyline("4.8 5.35 7.2 7.2 4.8 9.05"),
-    ],
+    ], { categories: ["devices", "connectivity"] },
   ),
   icon(
     "branch",
@@ -3228,6 +3518,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M8.6 3.8a2 2 0 0 1 2 2v4.1"),
     ],
     {
+      categories: ["development"],
       aliases: [
         "merge",
         "split",
@@ -3247,6 +3538,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(9.9, 12, 7.5, 9.8),
     ],
     {
+      categories: ["accessibility"],
       aliases: [
         "accessibility-alt",
         "accessibility-font",
@@ -3262,6 +3554,7 @@ export const iconDefinitions: IconDefinition[] = [
     },
   ),
   icon("contrast", [c(7.5, 7.5, 4.7), p("M7.5 2.8a4.7 4.7 0 0 1 0 9.4z")], {
+    categories: ["design", "accessibility"],
     aliases: [
       "contrast-high",
       "contrast-low",
@@ -3281,6 +3574,8 @@ export const iconDefinitions: IconDefinition[] = [
       ),
     ],
     {
+      tags: ["color", "colour", "theme", "paint"],
+      categories: ["design"],
       aliases: ["palette-alt"],
     },
   ),
@@ -3294,6 +3589,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.9, 3.1, 11.9, 11.9),
     ],
     {
+      categories: ["design"],
       aliases: [
         "border-all",
         "border-top",
@@ -3311,6 +3607,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M4.8 11.9h6.8a2.2 2.2 0 0 0-2.2-2.2H2.6a2.2 2.2 0 0 0 2.2 2.2z"),
     ],
     {
+      categories: ["design"],
       aliases: [
         "shadow-sm",
         "shadow-md",
@@ -3326,6 +3623,8 @@ export const iconDefinitions: IconDefinition[] = [
     "spinner",
     [p("M7.5 2.8a4.7 4.7 0 1 0 4.7 4.7"), l(7.5, 2.8, 7.5, 4.4)],
     {
+      tags: ["wait", "busy"],
+      categories: ["status", "ui-components"],
       aliases: [
         "loading",
         "loading-dots",
@@ -3345,6 +3644,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 8, 0.5, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "tooltip-top",
         "tooltip-bottom",
@@ -3364,6 +3664,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5.35 7.95 7.5 9.9 9.65 7.95"),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "dropdown-open",
         "dropdown-close",
@@ -3377,6 +3678,7 @@ export const iconDefinitions: IconDefinition[] = [
     "select",
     [r(3, 3.3, 9, 8.4, { rx: 1.1 }), polyline("4.95 7.95 6.8 9.8 10.05 6.55")],
     {
+      categories: ["ui-components"],
       aliases: ["select-multiple", "multiselect"],
     },
   ),
@@ -3387,6 +3689,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 7.5, 1.45, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: ["radio-checked"],
     },
   ),
@@ -3397,6 +3700,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5 7.6 6.75 9.35 10.05 6.05"),
     ],
     {
+      categories: ["ui-components"],
       aliases: ["checkbox-checked", "checkbox-indeterminate"],
     },
   ),
@@ -3407,6 +3711,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(9.9, 7.5, 1.5, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: ["toggle-on"],
     },
   ),
@@ -3417,10 +3722,12 @@ export const iconDefinitions: IconDefinition[] = [
       c(5.1, 7.5, 1.5, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: ["toggle-off"],
     },
   ),
   icon("input", [r(2.8, 4.6, 9.4, 5.8, { rx: 1 }), l(4.5, 7.5, 10.5, 7.5)], {
+    categories: ["ui-components"],
     aliases: [
       "input-text",
       "input-number",
@@ -3440,16 +3747,19 @@ export const iconDefinitions: IconDefinition[] = [
       l(5, 9.7, 8.3, 9.7),
     ],
     {
+      categories: ["ui-components"],
       aliases: ["form-group", "form-section", "survey", "survey-response"],
     },
   ),
   icon("validation", [c(7.5, 7.5, 4.6), p("M5.2 7.6 6.9 9.3 9.9 6.3")], {
+    categories: ["status", "ui-components"],
     aliases: ["validation-success", "validation-error", "validation-warning"],
   }),
   icon(
     "error-state",
     [c(7.5, 7.5, 4.6), l(5.7, 5.7, 9.3, 9.3), l(9.3, 5.7, 5.7, 9.3)],
     {
+      categories: ["status", "ui-components"],
       aliases: ["state-error"],
     },
   ),
@@ -3457,10 +3767,12 @@ export const iconDefinitions: IconDefinition[] = [
     "empty-state",
     [r(3.1, 3.1, 8.8, 8.8, { rx: 1 }), l(5.2, 7.5, 9.8, 7.5)],
     {
+      categories: ["status", "ui-components"],
       aliases: ["state-empty"],
     },
   ),
   icon("success-state", [c(7.5, 7.5, 4.6), p("M5.2 7.6 6.9 9.3 9.9 6.3")], {
+    categories: ["status", "ui-components"],
     aliases: ["state-success"],
   }),
   icon(
@@ -3470,6 +3782,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 7.5, 1.2, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "active-state",
         "disabled-state",
@@ -3482,6 +3795,7 @@ export const iconDefinitions: IconDefinition[] = [
     },
   ),
   icon("divider", [l(2.9, 7.5, 12.1, 7.5)], {
+    categories: ["layout", "ui-components"],
     aliases: ["divider-horizontal", "divider-vertical", "spacer"],
   }),
   icon(
@@ -3492,6 +3806,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.9, 11.2, 8.1, 11.2),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "breakpoint",
         "breakpoint-sm",
@@ -3506,6 +3821,7 @@ export const iconDefinitions: IconDefinition[] = [
     "aspect-ratio",
     [r(2.8, 3.4, 9.4, 8.2, { rx: 1 }), l(4.2, 10.2, 10.8, 4.6)],
     {
+      categories: ["layout"],
       aliases: ["ratio-16-9", "ratio-4-3"],
     },
   ),
@@ -3517,6 +3833,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("10 5.8 11.7 7.5 10 9.2"),
     ],
     {
+      categories: ["actions", "layout"],
       aliases: ["expand-vertical"],
     },
   ),
@@ -3528,6 +3845,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(3.2, 11.1, 8.6, 1.8, { rx: 0.7 }),
     ],
     {
+      categories: ["layout"],
       aliases: [
         "layout-inline",
         "layout-centered",
@@ -3548,6 +3866,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M6.9 7.2V6.6a1.1 1.1 0 1 1 2.2 0v.6"),
     ],
     {
+      categories: ["design"],
       aliases: ["layer-unlock", "layer-front", "layer-back", "z-index"],
     },
   ),
@@ -3564,6 +3883,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(2.8, 12.2, 2.8, 9.4),
     ],
     {
+      categories: ["layout", "design"],
       aliases: [
         "frame-alt",
         "artboard",
@@ -3577,9 +3897,10 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "interaction",
-    [c(7.5, 7.5, 4.6), p("M7.5 4.6v2.9l2 1.2"), l(10.9, 3.9, 12.1, 2.7)],
+    [c(7.5, 7.5, 4.6), p("M7.5 4.6v2.9l2 1.2"), l(10.9, 3.9, 12.1, 2.7)], { categories: ["ui-components"] },
   ),
   icon("animation", [c(7.5, 7.5, 4.6), polyline("7.5 4.6 10.4 7.5 7.5 10.4")], {
+    categories: ["ui-components"],
     aliases: [
       "animation-fade",
       "animation-slide",
@@ -3599,6 +3920,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("6.6 9.9 7.5 10.8 8.4 9.9"),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "scroll-horizontal",
         "scroll-vertical",
@@ -3615,6 +3937,7 @@ export const iconDefinitions: IconDefinition[] = [
     "anchor",
     [l(7.5, 3, 7.5, 11.8), c(7.5, 3, 1), p("M3.6 8.2h7.8a2.4 2.4 0 0 1-4.8 0")],
     {
+      categories: ["ui-components"],
       aliases: ["anchor-link", "anchor-broken", "hotspot"],
     },
   ),
@@ -3627,6 +3950,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(9.5, 9.5, 0.7, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["design"],
       aliases: [
         "color-token",
         "spacing-token",
@@ -3646,6 +3970,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.1, 10.8, 9.9, 10.8),
     ],
     {
+      categories: ["alignment", "design"],
       aliases: [
         "alignment-horizontal",
         "alignment-vertical",
@@ -3660,6 +3985,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 7.5, 0.7, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "preview-device",
         "preview-mobile",
@@ -3677,6 +4003,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.9, 10.9, 12.3, 12.3),
     ],
     {
+      categories: ["ui-components"],
       aliases: [
         "inspect-element",
         "inspect-code",
@@ -3946,7 +4273,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["instagram"],
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -3955,7 +4282,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["facebook"],
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -3964,7 +4291,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["twitter"],
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -3973,7 +4300,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["whatsapp"],
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -3982,7 +4309,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["telegram-cursor"],
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -3990,7 +4317,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -3998,7 +4325,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4006,7 +4333,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0Zm4.388 3.199c1.104 0 1.999.895 1.999 1.999 0 1.105-.895 2-1.999 2-.946 0-1.739-.657-1.947-1.539v.002c-1.147.162-2.032 1.15-2.032 2.341v.007c1.776.067 3.4.567 4.686 1.363.473-.363 1.064-.58 1.707-.58 1.547 0 2.802 1.254 2.802 2.802 0 1.117-.655 2.081-1.601 2.531-.088 3.256-3.637 5.876-7.997 5.876-4.361 0-7.905-2.617-7.998-5.87-.954-.447-1.614-1.415-1.614-2.538 0-1.548 1.255-2.802 2.803-2.802.645 0 1.239.218 1.712.585 1.275-.79 2.881-1.291 4.64-1.365v-.01c0-1.663 1.263-3.034 2.88-3.207.188-.911.993-1.595 1.959-1.595Zm-8.085 8.376c-.784 0-1.459.78-1.506 1.797-.047 1.016.64 1.429 1.426 1.429.786 0 1.371-.369 1.418-1.385.047-1.017-.553-1.841-1.338-1.841Zm7.406 0c-.786 0-1.385.824-1.338 1.841.047 1.017.634 1.385 1.418 1.385.785 0 1.473-.413 1.426-1.429-.046-1.017-.721-1.797-1.506-1.797Zm-3.703 4.013c-.974 0-1.907.048-2.77.135-.147.015-.241.168-.183.305.483 1.154 1.622 1.964 2.953 1.964 1.33 0 2.47-.81 2.953-1.964.057-.137-.037-.29-.184-.305-.863-.087-1.795-.135-2.769-.135Z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4014,7 +4341,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4022,7 +4349,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4030,7 +4357,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12 0C5.24 0 0 4.952 0 11.64c0 3.499 1.434 6.521 3.769 8.61a.96.96 0 0 1 .323.683l.065 2.135a.96.96 0 0 0 1.347.85l2.381-1.053a.96.96 0 0 1 .641-.046A13 13 0 0 0 12 23.28c6.76 0 12-4.952 12-11.64S18.76 0 12 0m6.806 7.44c.522-.03.971.567.63 1.094l-4.178 6.457a.707.707 0 0 1-.977.208l-3.87-2.504a.44.44 0 0 0-.49.007l-4.363 3.01c-.637.438-1.415-.317-.995-.966l4.179-6.457a.706.706 0 0 1 .977-.21l3.87 2.505c.15.097.344.094.491-.007l4.362-3.008a.7.7 0 0 1 .364-.13")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4038,7 +4365,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12 0q-.934 0-1.83.139l.17 1.111a11 11 0 0 1 3.32 0l.172-1.111A12 12 0 0 0 12 0M9.152.34A12 12 0 0 0 5.77 1.742l.584.961a10.8 10.8 0 0 1 3.066-1.27zm5.696 0-.268 1.094a10.8 10.8 0 0 1 3.066 1.27l.584-.962A12 12 0 0 0 14.848.34M12 2.25a9.75 9.75 0 0 0-8.539 14.459c.074.134.1.292.064.441l-1.013 4.338 4.338-1.013a.62.62 0 0 1 .441.064A9.7 9.7 0 0 0 12 21.75c5.385 0 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25m-7.092.068a12 12 0 0 0-2.59 2.59l.909.664a11 11 0 0 1 2.345-2.345zm14.184 0-.664.909a11 11 0 0 1 2.345 2.345l.909-.664a12 12 0 0 0-2.59-2.59M1.742 5.77A12 12 0 0 0 .34 9.152l1.094.268a10.8 10.8 0 0 1 1.269-3.066zm20.516 0-.961.584a10.8 10.8 0 0 1 1.27 3.066l1.093-.268a12 12 0 0 0-1.402-3.383M.138 10.168A12 12 0 0 0 0 12q0 .934.139 1.83l1.111-.17A11 11 0 0 1 1.125 12q0-.848.125-1.66zm23.723.002-1.111.17q.125.812.125 1.66c0 .848-.042 1.12-.125 1.66l1.111.172a12.1 12.1 0 0 0 0-3.662M1.434 14.58l-1.094.268a12 12 0 0 0 .96 2.591l-.265 1.14 1.096.255.36-1.539-.188-.365a10.8 10.8 0 0 1-.87-2.35m21.133 0a10.8 10.8 0 0 1-1.27 3.067l.962.584a12 12 0 0 0 1.402-3.383zm-1.793 3.848a11 11 0 0 1-2.345 2.345l.664.909a12 12 0 0 0 2.59-2.59zm-19.959 1.1L.357 21.48a1.8 1.8 0 0 0 2.162 2.161l1.954-.455-.256-1.095-1.953.455a.675.675 0 0 1-.81-.81l.454-1.954zm16.832 1.769a10.8 10.8 0 0 1-3.066 1.27l.268 1.093a12 12 0 0 0 3.382-1.402zm-10.94.213-1.54.36.256 1.095 1.139-.266c.814.415 1.683.74 2.591.961l.268-1.094a10.8 10.8 0 0 1-2.35-.869zm3.634 1.24-.172 1.111a12.1 12.1 0 0 0 3.662 0l-.17-1.111q-.812.125-1.66.125a11 11 0 0 1-1.66-.125")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4046,7 +4373,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M11.4 0C9.473.028 5.333.344 3.02 2.467 1.302 4.187.696 6.7.633 9.817.57 12.933.488 18.776 6.12 20.36h.003l-.004 2.416s-.037.977.61 1.177c.777.242 1.234-.5 1.98-1.302.407-.44.972-1.084 1.397-1.58 3.85.326 6.812-.416 7.15-.525.776-.252 5.176-.816 5.892-6.657.74-6.02-.36-9.83-2.34-11.546-.596-.55-3.006-2.3-8.375-2.323 0 0-.395-.025-1.037-.017zm.058 1.693c.545-.004.88.017.88.017 4.542.02 6.717 1.388 7.222 1.846 1.675 1.435 2.53 4.868 1.906 9.897v.002c-.604 4.878-4.174 5.184-4.832 5.395-.28.09-2.882.737-6.153.524 0 0-2.436 2.94-3.197 3.704-.12.12-.26.167-.352.144-.13-.033-.166-.188-.165-.414l.02-4.018c-4.762-1.32-4.485-6.292-4.43-8.895.054-2.604.543-4.738 1.996-6.173 1.96-1.773 5.474-2.018 7.11-2.03zm.38 2.602c-.167 0-.303.135-.304.302 0 .167.133.303.3.305 1.624.01 2.946.537 4.028 1.592 1.073 1.046 1.62 2.468 1.633 4.334.002.167.14.3.307.3.166-.002.3-.138.3-.304-.014-1.984-.618-3.596-1.816-4.764-1.19-1.16-2.692-1.753-4.447-1.765zm-3.96.695c-.19-.032-.4.005-.616.117l-.01.002c-.43.247-.816.562-1.146.932-.002.004-.006.004-.008.008-.267.323-.42.638-.46.948-.008.046-.01.093-.007.14 0 .136.022.27.065.4l.013.01c.135.48.473 1.276 1.205 2.604.42.768.903 1.5 1.446 2.186.27.344.56.673.87.984l.132.132c.31.308.64.6.984.87.686.543 1.418 1.027 2.186 1.447 1.328.733 2.126 1.07 2.604 1.206l.01.014c.13.042.265.064.402.063.046.002.092 0 .138-.008.31-.036.627-.19.948-.46.004 0 .003-.002.008-.005.37-.33.683-.72.93-1.148l.003-.01c.225-.432.15-.842-.18-1.12-.004 0-.698-.58-1.037-.83-.36-.255-.73-.492-1.113-.71-.51-.285-1.032-.106-1.248.174l-.447.564c-.23.283-.657.246-.657.246-3.12-.796-3.955-3.955-3.955-3.955s-.037-.426.248-.656l.563-.448c.277-.215.456-.737.17-1.248-.217-.383-.454-.756-.71-1.115-.25-.34-.826-1.033-.83-1.035-.137-.165-.31-.265-.502-.297zm4.49.88c-.158.002-.29.124-.3.282-.01.167.115.312.282.324 1.16.085 2.017.466 2.645 1.15.63.688.93 1.524.906 2.57-.002.168.13.306.3.31.166.003.305-.13.31-.297.025-1.175-.334-2.193-1.067-2.994-.74-.81-1.777-1.253-3.05-1.346h-.024zm.463 1.63c-.16.002-.29.127-.3.287-.008.167.12.31.288.32.523.028.875.175 1.113.422.24.245.388.62.416 1.164.01.167.15.295.318.287.167-.008.295-.15.287-.317-.03-.644-.215-1.178-.58-1.557-.367-.378-.893-.574-1.52-.607h-.018z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
 
@@ -4056,7 +4383,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M5.033 14.649H.743a.74.74 0 0 1-.686-.458.74.74 0 0 1 .16-.808L3.19 10.41H1.06A1.06 1.06 0 0 1 0 9.35h3.957c.301 0 .57.18.686.458a.74.74 0 0 1-.161.808L1.51 13.59h2.464c.585 0 1.06.475 1.06 1.06zM24 11.338c0-1.14-.927-2.066-2.066-2.066-.61 0-1.158.265-1.537.686a2.061 2.061 0 0 0-1.536-.686c-1.14 0-2.066.926-2.066 2.066v3.311a1.06 1.06 0 0 0 1.06-1.06v-2.251a1.004 1.004 0 0 1 2.013 0v2.251c0 .586.474 1.06 1.06 1.06v-3.311a1.004 1.004 0 0 1 2.012 0v2.251c0 .586.475 1.06 1.06 1.06zM16.265 12a2.728 2.728 0 1 1-5.457 0 2.728 2.728 0 0 1 5.457 0zm-1.06 0a1.669 1.669 0 1 0-3.338 0 1.669 1.669 0 0 0 3.338 0zm-4.82 0a2.728 2.728 0 1 1-5.458 0 2.728 2.728 0 0 1 5.457 0zm-1.06 0a1.669 1.669 0 1 0-3.338 0 1.669 1.669 0 0 0 3.338 0z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["communication"],
+      categories: ["communication", "logos"],
     },
   ),
   icon(
@@ -4064,7 +4391,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.069 18.874c-4.023 0-5.82-1.979-5.82-3.464 0-.765.561-1.296 1.333-1.296 1.723 0 1.273 2.477 4.487 2.477 1.641 0 2.55-.895 2.55-1.811 0-.551-.269-1.16-1.354-1.429l-3.576-.895c-2.88-.724-3.403-2.286-3.403-3.751 0-3.047 2.861-4.191 5.549-4.191 2.471 0 5.393 1.373 5.393 3.199 0 .784-.688 1.24-1.453 1.24-1.469 0-1.198-2.037-4.164-2.037-1.469 0-2.292.664-2.292 1.617s1.153 1.258 2.157 1.487l2.637.587c2.891.649 3.624 2.346 3.624 3.944 0 2.476-1.902 4.324-5.722 4.324m11.084-4.882l-.029.135-.044-.24c.015.045.044.074.059.12.12-.675.181-1.363.181-2.052 0-1.529-.301-3.012-.898-4.42-.569-1.348-1.395-2.562-2.427-3.596-1.049-1.033-2.247-1.856-3.595-2.426-1.318-.631-2.801-.93-4.328-.93-.72 0-1.444.07-2.143.204l.119.06-.239-.033.119-.025C8.91.274 7.829 0 6.731 0c-1.789 0-3.47.698-4.736 1.967C.729 3.235.032 4.923.032 6.716c0 1.143.292 2.265.844 3.258l.02-.124.041.239-.06-.115c-.114.645-.172 1.299-.172 1.955 0 1.53.3 3.017.884 4.416.568 1.362 1.378 2.576 2.427 3.609 1.034 1.05 2.247 1.857 3.595 2.442 1.394.6 2.877.898 4.404.898.659 0 1.334-.06 1.977-.179l-.119-.062.24.046-.135.03c1.002.569 2.126.871 3.294.871 1.783 0 3.459-.69 4.733-1.963 1.259-1.259 1.962-2.951 1.962-4.749 0-1.138-.299-2.262-.853-3.266")],
     {
       viewBox: "0 0 24 24",
-      categories: ["communication"],
+      categories: ["communication", "logos"],
     },
   ),
 
@@ -4074,7 +4401,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4082,7 +4409,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.01 1.485c-2.082 0-3.754.02-3.743.047.01.02 1.708 3.001 3.774 6.62l3.76 6.574h3.76c2.081 0 3.753-.02 3.742-.047-.005-.02-1.708-3.001-3.775-6.62l-3.76-6.574zm-4.76 1.73a789.828 789.861 0 0 0-3.63 6.319L0 15.868l1.89 3.298 1.885 3.297 3.62-6.335 3.618-6.33-1.88-3.287C8.1 4.704 7.255 3.22 7.25 3.214zm2.259 12.653-.203.348c-.114.198-.96 1.672-1.88 3.287a423.93 423.948 0 0 1-1.698 2.97c-.01.026 3.24.042 7.222.042h7.244l1.796-3.157c.992-1.734 1.85-3.23 1.906-3.323l.104-.167h-7.249z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4090,7 +4417,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M19.527 4.799c1.212 2.608.937 5.678-.405 8.173-1.101 2.047-2.744 3.74-4.098 5.614-.619.858-1.244 1.75-1.669 2.727-.141.325-.263.658-.383.992-.121.333-.224.673-.34 1.008-.109.314-.236.684-.627.687h-.007c-.466-.001-.579-.53-.695-.887-.284-.874-.581-1.713-1.019-2.525-.51-.944-1.145-1.817-1.79-2.671L19.527 4.799zM8.545 7.705l-3.959 4.707c.724 1.54 1.821 2.863 2.871 4.18.247.31.494.622.737.936l4.984-5.925-.029.01c-1.741.601-3.691-.291-4.392-1.987a3.377 3.377 0 0 1-.209-.716c-.063-.437-.077-.761-.004-1.198l.001-.007zM5.492 3.149l-.003.004c-1.947 2.466-2.281 5.88-1.117 8.77l4.785-5.689-.058-.05-3.607-3.035zM14.661.436l-3.838 4.563a.295.295 0 0 1 .027-.01c1.6-.551 3.403.15 4.22 1.626.176.319.323.683.377 1.045.068.446.085.773.012 1.22l-.003.016 3.836-4.561A8.382 8.382 0 0 0 14.67.439l-.009-.003zM9.466 5.868L14.162.285l-.047-.012A8.31 8.31 0 0 0 11.986 0a8.439 8.439 0 0 0-6.169 2.766l-.016.018 3.665 3.084z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4098,7 +4425,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4106,7 +4433,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4114,7 +4441,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M0 0v11.408h11.408V0zm12.594 0v11.408H24V0zM0 12.594V24h11.408V12.594zm12.594 0V24H24V12.594z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4122,7 +4449,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726a17.617 17.617 0 01-10.951-.577 17.88 17.88 0 01-5.43-3.35c-.1-.074-.151-.15-.151-.22 0-.047.021-.09.051-.13zm6.565-6.218c0-1.005.247-1.863.743-2.577.495-.71 1.17-1.25 2.04-1.615.796-.335 1.756-.575 2.912-.72.39-.046 1.033-.103 1.92-.174v-.37c0-.93-.105-1.558-.3-1.875-.302-.43-.78-.65-1.44-.65h-.182c-.48.046-.896.196-1.246.46-.35.27-.575.63-.675 1.096-.06.3-.206.465-.435.51l-2.52-.315c-.248-.06-.372-.18-.372-.39 0-.046.007-.09.022-.15.247-1.29.855-2.25 1.82-2.88.976-.616 2.1-.975 3.39-1.05h.54c1.65 0 2.957.434 3.888 1.29.135.15.27.3.405.48.12.165.224.314.283.45.075.134.15.33.195.57.06.254.105.42.135.51.03.104.062.3.076.615.01.313.02.493.02.553v5.28c0 .376.06.72.165 1.036.105.313.21.54.315.674l.51.674c.09.136.136.256.136.36 0 .12-.06.226-.18.314-1.2 1.05-1.86 1.62-1.963 1.71-.165.135-.375.15-.63.045a6.062 6.062 0 01-.526-.496l-.31-.347a9.391 9.391 0 01-.317-.42l-.3-.435c-.81.886-1.603 1.44-2.4 1.665-.494.15-1.093.227-1.83.227-1.11 0-2.04-.343-2.76-1.034-.72-.69-1.08-1.665-1.08-2.94l-.05-.076zm3.753-.438c0 .566.14 1.02.425 1.364.285.34.675.512 1.155.512.045 0 .106-.007.195-.02.09-.016.134-.023.166-.023.614-.16 1.08-.553 1.424-1.178.165-.28.285-.58.36-.91.09-.32.12-.59.135-.8.015-.195.015-.54.015-1.005v-.54c-.84 0-1.484.06-1.92.18-1.275.36-1.92 1.17-1.92 2.43l-.035-.02zm9.162 7.027c.03-.06.075-.11.132-.17.362-.243.714-.41 1.05-.5a8.094 8.094 0 011.612-.24c.14-.012.28 0 .41.03.65.06 1.05.168 1.172.33.063.09.099.228.099.39v.15c0 .51-.149 1.11-.424 1.8-.278.69-.664 1.248-1.156 1.68-.073.06-.14.09-.197.09-.03 0-.06 0-.09-.012-.09-.044-.107-.12-.064-.24.54-1.26.806-2.143.806-2.64 0-.15-.03-.27-.087-.344-.145-.166-.55-.257-1.224-.257-.243 0-.533.016-.87.046-.363.045-.7.09-1 .135-.09 0-.148-.014-.18-.044-.03-.03-.036-.047-.02-.077 0-.017.006-.03.02-.063v-.06z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4130,7 +4457,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("m5.398 0 8.348 23.602c2.346.059 4.856.398 4.856.398L10.113 0H5.398zm8.489 0v9.172l4.715 13.33V0h-4.715zM5.398 1.5V24c1.873-.225 2.81-.312 4.715-.398V14.83L5.398 1.5z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4138,7 +4465,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4147,7 +4474,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["gateway-stripe"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4156,7 +4483,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["gateway-paypal"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
 
@@ -4167,7 +4494,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["aws"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4176,7 +4503,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["azure"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4184,7 +4511,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M19.455 8.369c-.538-.748-1.778-2.285-3.681-4.569-.826-.991-1.535-1.832-1.884-2.245a146 146 0 0 0-.488-.576l-.207-.245-.113-.133-.022-.032-.01-.005L12.57 0l-.609.488c-1.555 1.246-2.828 2.851-3.681 4.64-.523 1.064-.864 2.105-1.043 3.176-.047.241-.088.489-.121.738-.209-.017-.421-.028-.632-.033-.018-.001-.035-.002-.059-.003a7.46 7.46 0 0 0-2.28.274l-.317.089-.163.286c-.765 1.342-1.198 2.869-1.252 4.416-.07 2.01.477 3.954 1.583 5.625 1.082 1.633 2.61 2.882 4.42 3.611l.236.095.071.025.003-.001a9.59 9.59 0 0 0 2.941.568q.171.006.342.006c1.273 0 2.513-.249 3.69-.742l.008.004.313-.145a9.63 9.63 0 0 0 3.927-3.335c1.01-1.49 1.577-3.234 1.641-5.042.075-2.161-.643-4.304-2.133-6.371m-7.083 6.695c.328 1.244.264 2.44-.191 3.558-1.135-1.12-1.967-2.352-2.475-3.665-.543-1.404-.87-2.74-.974-3.975.48.157.922.366 1.315.622 1.132.737 1.914 1.902 2.325 3.461zm.207 6.022c.482.368.99.712 1.513 1.028-.771.21-1.565.302-2.369.273a8 8 0 0 1-.373-.022c.458-.394.869-.823 1.228-1.279zm1.347-6.431c-.516-1.957-1.527-3.437-3.002-4.398-.647-.421-1.385-.741-2.194-.95.011-.134.026-.268.043-.4.014-.113.03-.216.046-.313.133-.689.332-1.37.589-2.025.099-.25.206-.499.321-.74l.004-.008c.177-.358.376-.719.61-1.105l.092-.152-.003-.001c.544-.851 1.197-1.627 1.942-2.311l.288.341c.672.796 1.304 1.548 1.878 2.237 1.291 1.549 2.966 3.583 3.612 4.48 1.277 1.771 1.893 3.579 1.83 5.375-.049 1.395-.461 2.755-1.195 3.933-.694 1.116-1.661 2.05-2.8 2.708-.636-.318-1.559-.839-2.539-1.599.79-1.575.952-3.28.479-5.072zm-2.575 5.397c-.725.939-1.587 1.55-2.09 1.856-.081-.029-.163-.06-.243-.093l-.065-.026c-1.49-.616-2.747-1.656-3.635-3.01-.907-1.384-1.356-2.993-1.298-4.653.041-1.19.338-2.327.882-3.379.316-.07.638-.114.96-.131l.084-.002c.162-.003.324-.003.478 0 .227.011.454.035.677.07.073 1.513.445 3.145 1.105 4.852.637 1.644 1.694 3.162 3.144 4.515z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4192,7 +4519,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("m12 1.608 12 20.784H0Z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4200,7 +4527,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M6.49 19.04h-.23L5.13 17.9v-.23l1.73-1.71h1.2l.15.15v1.2L6.5 19.04ZM5.13 6.31V6.1l1.13-1.13h.23L8.2 6.68v1.2l-.15.15h-1.2L5.13 6.31Zm9.96 9.09h-1.65l-.14-.13v-3.83c0-.68-.27-1.2-1.1-1.23-.42 0-.9 0-1.43.02l-.07.08v4.96l-.14.14H8.9l-.13-.14V8.73l.13-.14h3.7a2.6 2.6 0 0 1 2.61 2.6v4.08l-.13.14Zm-8.37-2.44H.14L0 12.82v-1.64l.14-.14h6.58l.14.14v1.64l-.14.14Zm17.14 0h-6.58l-.14-.14v-1.64l.14-.14h6.58l.14.14v1.64l-.14.14ZM11.05 6.55V1.64l.14-.14h1.65l.14.14v4.9l-.14.14h-1.65l-.14-.13Zm0 15.81v-4.9l.14-.14h1.65l.14.13v4.91l-.14.14h-1.65l-.14-.14Z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4208,7 +4535,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.04 0C5.408-.02.005 5.37.005 11.992h4.638c0-4.923 4.882-8.731 10.064-6.855a6.95 6.95 0 014.147 4.148c1.889 5.177-1.924 10.055-6.84 10.064v-4.61H7.391v4.623h4.61V24c7.86 0 13.967-7.588 11.397-15.83-1.115-3.59-3.985-6.446-7.575-7.575A12.8 12.8 0 0012.039 0zM7.39 19.362H3.828v3.564H7.39zm-3.563 0v-2.978H.85v2.978z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4217,7 +4544,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["cloudflare"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4225,7 +4552,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4234,7 +4561,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["docker"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4243,7 +4570,7 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["kubernetes"],
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
   icon(
@@ -4251,7 +4578,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["tech"],
+      categories: ["tech", "logos"],
     },
   ),
 
@@ -4261,7 +4588,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M0 7.97v4.958c0 1.867 1.302 3.101 3 3.101.826 0 1.562-.316 2.094-.87v.736H6.27V7.97H5.082v4.888c0 1.257-.85 2.106-1.947 2.106-1.11 0-1.946-.827-1.946-2.106V7.971H0zm7.44 0v7.925h1.13v-.725c.521.532 1.257.86 2.06.86a3.006 3.006 0 0 0 3.034-3.01 3.01 3.01 0 0 0-3.033-3.024 2.86 2.86 0 0 0-2.049.861V7.971H7.439zm9.869 2.038c-1.687 0-2.965 1.37-2.965 3 0 1.72 1.334 3.01 3.066 3.01 1.053 0 1.913-.463 2.49-1.233l-.826-.611c-.43.577-.996.847-1.664.847-.973 0-1.753-.7-1.912-1.64h4.697v-.373c0-1.72-1.222-3-2.886-3zm6.295.068c-.634 0-1.098.294-1.381.758v-.713h-1.131v5.774h1.142V12.61c0-.894.544-1.47 1.291-1.47H24v-1.065h-.396zm-6.319.928c.85 0 1.564.588 1.756 1.47H15.52c.203-.882.916-1.47 1.765-1.47zm-6.732.012c1.086 0 1.98.883 1.98 2.004a1.993 1.993 0 0 1-1.98 2.001A1.989 1.989 0 0 1 8.56 13.02a1.99 1.99 0 0 1 1.992-2.004z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4269,7 +4596,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M4.38 15.883c.036.042.125.135.125.135s-.094.059-.152.086a3.046 3.046 0 0 1-1.28.286C1.593 16.39 0 15.29 0 12.878v-8.78h3.512v9.365c0 .95.306 1.781.867 2.42zM24 11.122V7.61h-1.253c-.524-2.76-3.425-4.574-6.341-3.484-1.624.607-2.943 2.548-2.943 4.282v7.979a1608.8 1608.8 0 0 0 .153 0 3.495 3.495 0 0 0 2.38-1.077c.632-.658.98-1.522.98-2.432h1.463V9.366h-1.463V8.4c0-.375.198-.726.526-.909.9-.5 1.815.143 1.815.996v3.22c0 1.273.48 2.456 1.354 3.329a4.666 4.666 0 0 0 3.178 1.351H24v-3.51a1.17 1.17 0 0 1-1.17-1.17v-.586H24zm-14.927 1.17a.585.585 0 0 1-1.17 0V7.61H4.39v5.853a2.928 2.928 0 0 0 4.83 2.224c-.055.433-.294.792-.69 1.04-.373.234-.857.357-1.402.357a3.83 3.83 0 0 1-1.65-.382s-.093-.044-.21-.11v3.119a6.65 6.65 0 0 0 2.468.484c1.312 0 2.51-.41 3.371-1.155.967-.836 1.478-2.056 1.478-3.528V7.61H9.073v4.683z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4277,7 +4604,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M23.071 8.409a6.09 6.09 0 00-5.396-3.228H.584A.589.589 0 00.17 6.184L3.894 9.93a1.752 1.752 0 001.242.516h12.049a1.554 1.554 0 11.031 3.108H8.91a.589.589 0 00-.415 1.003l3.725 3.747a1.75 1.75 0 001.242.516h3.757c4.887 0 8.584-5.225 5.852-10.413")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4285,7 +4612,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M12.001 18.275c-1.353-1.697-2.148-3.184-2.413-4.457-.263-1.027-.16-1.848.291-2.465.477-.71 1.188-1.056 2.121-1.056s1.643.345 2.12 1.063c.446.61.558 1.432.286 2.465-.291 1.298-1.085 2.785-2.412 4.458zm9.601 1.14c-.185 1.246-1.034 2.28-2.2 2.783-2.253.98-4.483-.583-6.392-2.704 3.157-3.951 3.74-7.028 2.385-9.018-.795-1.14-1.933-1.695-3.394-1.695-2.944 0-4.563 2.49-3.927 5.382.37 1.565 1.352 3.343 2.917 5.332-.98 1.085-1.91 1.856-2.732 2.333-.636.344-1.245.558-1.828.609-2.679.399-4.778-2.2-3.825-4.88.132-.345.395-.98.845-1.961l.025-.053c1.464-3.178 3.242-6.79 5.285-10.795l.053-.132.58-1.116c.45-.822.635-1.19 1.351-1.643.346-.21.77-.315 1.246-.315.954 0 1.698.558 2.016 1.007.158.239.345.557.582.953l.558 1.089.08.159c2.041 4.004 3.821 7.608 5.279 10.794l.026.025.533 1.22.318.764c.243.613.294 1.222.213 1.858zm1.22-2.39c-.186-.583-.505-1.271-.9-2.094v-.03c-1.889-4.006-3.642-7.608-5.307-10.844l-.111-.163C15.317 1.461 14.468 0 12.001 0c-2.44 0-3.476 1.695-4.535 3.898l-.081.16c-1.669 3.236-3.421 6.843-5.303 10.847v.053l-.559 1.22c-.21.504-.317.768-.345.847C-.172 20.74 2.611 24 5.98 24c.027 0 .132 0 .265-.027h.372c1.75-.213 3.554-1.325 5.384-3.317 1.829 1.989 3.635 3.104 5.382 3.317h.372c.133.027.239.027.265.027 3.37.003 6.152-3.261 4.802-6.975z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
   icon(
@@ -4293,7 +4620,7 @@ export const iconDefinitions: IconDefinition[] = [
     [fp("M15.337 23.979l7.216-1.561s-2.604-17.613-2.625-17.73c-.018-.116-.114-.192-.211-.192s-1.929-.136-1.929-.136-1.275-1.274-1.439-1.411c-.045-.037-.075-.057-.121-.074l-.914 21.104h.023zM11.71 11.305s-.81-.424-1.774-.424c-1.447 0-1.504.906-1.504 1.141 0 1.232 3.24 1.715 3.24 4.629 0 2.295-1.44 3.76-3.406 3.76-2.354 0-3.54-1.465-3.54-1.465l.646-2.086s1.245 1.066 2.28 1.066c.675 0 .975-.545.975-.932 0-1.619-2.654-1.694-2.654-4.359-.034-2.237 1.571-4.416 4.827-4.416 1.257 0 1.875.361 1.875.361l-.945 2.715-.02.01zM11.17.83c.136 0 .271.038.405.135-.984.465-2.064 1.639-2.508 3.992-.656.213-1.293.405-1.889.578C7.697 3.75 8.951.84 11.17.84V.83zm1.235 2.949v.135c-.754.232-1.583.484-2.394.736.466-1.777 1.333-2.645 2.085-2.971.193.501.309 1.176.309 2.1zm.539-2.234c.694.074 1.141.867 1.429 1.755-.349.114-.735.231-1.158.366v-.252c0-.752-.096-1.371-.271-1.871v.002zm2.992 1.289c-.02 0-.06.021-.078.021s-.289.075-.714.21c-.423-1.233-1.176-2.37-2.508-2.37h-.115C12.135.209 11.669 0 11.265 0 8.159 0 6.675 3.877 6.21 5.846c-1.194.365-2.063.636-2.16.674-.675.213-.694.232-.772.87-.075.462-1.83 14.063-1.83 14.063L15.009 24l.927-21.166z")],
     {
       viewBox: "0 0 24 24",
-      categories: ["social"],
+      categories: ["social", "logos"],
     },
   ),
 
@@ -4595,6 +4922,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5.2 7.8 3.1 9.9 5.2 12"),
     ],
     {
+      tags: ["switch", "exchange"],
       aliases: ["currency-convert", "currency-exchange", "exchange-rate"],
       categories: ["arrows"],
     },
@@ -4831,6 +5159,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.4, 9.7, 10.1, 9.7),
     ],
     {
+      categories: ["business"],
       aliases: [
         "workspace",
         "workspace-add",
@@ -4848,6 +5177,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(9.1, 9.3, 12.3, 9.3),
     ],
     {
+      categories: ["business"],
       aliases: [
         "role-admin",
         "role-user",
@@ -4866,6 +5196,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.8, 11.8, 13, 13),
     ],
     {
+      categories: ["business"],
       aliases: [
         "activity-log",
         "system-log",
@@ -4886,6 +5217,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M9.2 11.4h3"),
     ],
     {
+      categories: ["business", "analytics"],
       aliases: [
         "report-generate",
         "report-download",
@@ -4907,6 +5239,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(11.2, 7.1, 0.45, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["business", "analytics"],
       aliases: [
         "kpi-trend",
         "insight",
@@ -4926,6 +5259,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.4 4.8 11.3 4.8 11.3 6.7"),
     ],
     {
+      categories: ["commerce", "analytics"],
       aliases: [
         "revenue-growth",
         "margin",
@@ -4945,6 +5279,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.4, 7.5, 9.6, 7.5),
     ],
     {
+      categories: ["business", "analytics"],
       aliases: [
         "conversion-rate",
         "funnel",
@@ -4963,6 +5298,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(7.5, 6.8, 10.5, 4.9),
     ],
     {
+      categories: ["business", "analytics"],
       aliases: [
         "forecast-up",
         "forecast-down",
@@ -4983,6 +5319,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 7.5, 1.1),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "budget-plan",
         "expense",
@@ -5006,6 +5343,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.4 2.9 11.4 2.9 11.4 4.9"),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "subscription-active",
         "subscription-paused",
@@ -5028,6 +5366,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(9.8, 9.2, 11.6, 11),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "tax-rate",
         "tax-report",
@@ -5044,6 +5383,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("4.9 7 7.5 9.6 10.1 7"),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "payout-scheduled",
         "payout-completed",
@@ -5065,6 +5405,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.4, 7.5, 11.4, 8.5),
     ],
     {
+      categories: ["development"],
       aliases: [
         "api-key-generate",
         "api-key-revoke",
@@ -5081,6 +5422,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.1, 8.2, 11.1, 10.8),
     ],
     {
+      categories: ["development"],
       aliases: [
         "integration-add",
         "integration-remove",
@@ -5100,6 +5442,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.2, 6.3, 9.8, 6.3),
     ],
     {
+      categories: ["business"],
       aliases: [
         "support",
         "support-open",
@@ -5123,6 +5466,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(9.9, 9.9, 10.8, 10.8),
     ],
     {
+      categories: ["development"],
       aliases: [
         "maintenance-mode",
       ],
@@ -5137,6 +5481,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M5.8 7.4 7.1 8.7 9.4 6.4"),
     ],
     {
+      categories: ["business"],
       aliases: [
         "compliance-gdpr",
         "compliance-hipaa",
@@ -5156,6 +5501,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(7.5, 10.3, 0.55, { fill: "currentColor", stroke: "none" }),
     ],
     {
+      categories: ["business"],
       aliases: [
         "risk-low",
         "risk-medium",
@@ -5178,6 +5524,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("3.6 9.2 5.5 9.2 6.8 5.8 8.2 10.1 9.4 7.2 11.4 7.2"),
     ],
     {
+      categories: ["development"],
       aliases: [
         "monitoring-live",
         "alert-admin",
@@ -5194,6 +5541,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5.4 7.7 7.5 9.8 9.6 7.7"),
     ],
     {
+      categories: ["development"],
       aliases: [
         "deployment-success",
         "deployment-failed",
@@ -5208,6 +5556,7 @@ export const iconDefinitions: IconDefinition[] = [
     "feature-flag",
     [l(4, 2.8, 4, 12.2), p("M4 3.4h6.6l-1.2 2.1 1.2 2.1H4")],
     {
+      categories: ["development"],
       aliases: [
         "feature-flag-on",
         "feature-flag-off",
@@ -5228,6 +5577,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M8.1 10.8c.4-1 1.2-1.6 2.2-1.6 1 0 1.8.6 2.2 1.6"),
     ],
     {
+      categories: ["business"],
       aliases: [
         "crm-contact",
         "crm-deal",
@@ -5254,6 +5604,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.7, 5.1, 8.1, 9.9),
     ],
     {
+      categories: ["business"],
       aliases: [
         "workflow-automation",
         "automation",
@@ -5281,6 +5632,7 @@ export const iconDefinitions: IconDefinition[] = [
       c(10.8, 8.3, 0.8),
     ],
     {
+      categories: ["business"],
       aliases: [
         "roadmap-quarter",
         "roadmap-year",
@@ -5300,6 +5652,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(12, 5.2, 7.5, 7.4),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "product-add",
         "product-remove",
@@ -5320,6 +5673,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(8.7, 6.4, 8.7, 11.8),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "inventory-low",
         "inventory-out",
@@ -5338,6 +5692,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(5.2, 10.3, 8.4, 10.3),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "order-pending",
         "order-processing",
@@ -5359,6 +5714,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(11.9, 5.2, 7.5, 7.4),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "shipment-track",
         "tracking-number",
@@ -5374,6 +5730,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.3, 9.2, 7.2, 9.2),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "payment-success",
         "payment-failed",
@@ -5397,6 +5754,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("5.4 8.5 3.2 10.3 5.4 12.1"),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "transaction-success",
         "transaction-failed",
@@ -5416,6 +5774,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.6 8.5 11.8 10.3 9.6 12.1"),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "refund-approved",
         "refund-rejected",
@@ -5428,6 +5787,7 @@ export const iconDefinitions: IconDefinition[] = [
     "loyalty",
     [p("M7.5 2.9 8.8 5.6l3 .4-2.2 2.1.5 3-2.6-1.4-2.6 1.4.5-3-2.2-2.1 3-.4z")],
     {
+      categories: ["commerce"],
       aliases: [
         "loyalty-points",
       ],
@@ -5442,6 +5802,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(10.7, 10.6, 12.2, 12.1),
     ],
     {
+      categories: ["commerce"],
       aliases: [
         "loan",
         "loan-approved",
@@ -5451,7 +5812,7 @@ export const iconDefinitions: IconDefinition[] = [
   ),
   icon(
     "productivity",
-    [c(7.5, 7.5, 4.7), l(7.5, 4.5, 7.5, 7.5), l(7.5, 7.5, 9.5, 8.9)],
+    [c(7.5, 7.5, 4.7), l(7.5, 4.5, 7.5, 7.5), l(7.5, 7.5, 9.5, 8.9)], { categories: ["business"] },
   ),
   icon(
     "marketing",
@@ -5462,6 +5823,7 @@ export const iconDefinitions: IconDefinition[] = [
       r(3.2, 7.1, 1.8, 3.6, { rx: 0.45 }),
     ],
     {
+      categories: ["business"],
       aliases: [
         "campaign",
         "campaign-active",
@@ -5482,7 +5844,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(3.5, 6.1, 11.5, 6.1),
       l(3.5, 8.9, 11.5, 8.9),
       l(5.4, 3.7, 5.4, 11.3),
-    ],
+    ], { categories: ["ui-components"] },
   ),
   icon(
     "semantic-admin",
@@ -5493,7 +5855,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.6, 5.3, 11.2, 5.3),
       l(6.6, 8.1, 11.2, 8.1),
       l(3.3, 10.6, 11.7, 10.6),
-    ],
+    ], { categories: ["business", "analytics"] },
   ),
   icon(
     "semantic-business",
@@ -5502,7 +5864,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M3.6 10.5 5.6 8.2 7.2 8.9 9.1 6.4 11.6 7.8"),
       l(3.3, 10.6, 11.7, 10.6),
       l(3.3, 10.6, 3.3, 4.2),
-    ],
+    ], { categories: ["business"] },
   ),
   icon(
     "link-2",
@@ -5511,13 +5873,14 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.5 6 10.75 4.75 12.05 6.05 10.8 7.3"),
       l(5.9, 9.1, 9.1, 5.9),
     ],
-    { aliases: ["chain-link"] },
+    { categories: ["actions"],
+    aliases: ["chain-link"] },
   ),
   icon("command", [
     p(
       "M5.1 5.1a1.6 1.6 0 1 1 0-3.2h1.2v4.4H5.1a1.6 1.6 0 1 1 0-3.2h4.8a1.6 1.6 0 1 1 0 3.2H8.7v4.4h1.2a1.6 1.6 0 1 1 0 3.2H8.7V9.5H6.3v1.2H5.1a1.6 1.6 0 1 1 0 3.2h1.2V9.5H5.1a1.6 1.6 0 1 1 0-3.2",
     ),
-  ]),
+  ], { categories: ["actions", "development"] }),
 ];
 
 export const iconNameList = Array.from(

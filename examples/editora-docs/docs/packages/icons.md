@@ -20,6 +20,7 @@ npm i @editora/icons
 | --- | --- | --- |
 | `iconDefinitions`, `iconNameList` | Data exports | Built-in icon metadata catalog |
 | `getIcon`, `hasIcon`, `listIcons`, `listIconAliases`, `resolveIcon` | Registry functions | Query and resolve icons/aliases |
+| `searchIcons(query, { category?, limit? })`, `listIconCategories()` | Search functions | Ranked search by name, alias, tag and category; categories with counts for picker filters |
 | `registerIcon`, `registerIcons` | Registry functions | Register custom icon definitions |
 | `renderIconSvg`, `iconToDataUri` | Render functions | SVG string and data-URI generation |
 | `registerWithEditoraUI(registerFn)` | Integration helper | Push icon set into UI-core registries |
@@ -36,6 +37,16 @@ const svg = renderIconSvg("check", {
   color: "currentColor",
   strokeWidth: 1.5,
 });
+```
+
+To build an icon picker, search instead of filtering names yourself. Results come best first and say what matched:
+
+```ts
+import { listIconCategories, searchIcons } from "@editora/icons";
+
+searchIcons("bin");                         // [{ name: "trash", matchedBy: "tag", matched: "bin", score: 105 }]
+searchIcons("arrow", { category: "arrows", limit: 10 });
+listIconCategories();                        // [{ name: "abstract", count: 6 }, ...]
 ```
 
 ## Best Practices
