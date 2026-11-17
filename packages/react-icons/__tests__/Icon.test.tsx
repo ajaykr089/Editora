@@ -3,10 +3,15 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-import { listIcons } from '@editora/icons';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { getIcon, hasIcon, listIcons, registerIcon } from '@editora/icons';
+import { checkIcon } from '@editora/icons/glyphs';
 import * as ReactIcons from '../src/index';
+// @ts-expect-error plain .mjs script
+import { renderIconsModule } from '../scripts/generate-icons.mjs';
 
-const { Icon, CheckIcon, IconProvider, defaultIconContext } = ReactIcons;
+const { Icon, CheckIcon, IconProvider, defaultIconContext, defineIcon, icons } = ReactIcons;
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
 const strokeWidths = (el: React.ReactElement) => [...new Set(html(el).match(/stroke-width="[^"]*"/g) || [])];
 
@@ -129,5 +134,70 @@ describe('refs', () => {
     expect(named.current).toBeInstanceOf(SVGSVGElement);
     expect(named.current).toBe(container.querySelectorAll('svg')[1]);
     flushSync(() => root.unmount());
+  });
+});
+
+describe('named icons drawn from their own glyph', () => {
+  it('src/icons.tsx is regenerated from @editora/icons/glyphs (run scripts/generate-icons.mjs)', () => {
+    expect(readFileSync(resolve(__dirname, '../src/icons.tsx'), 'utf8') === renderIconsModule()).toBe(true);
+  });
+
+  it('draw exactly what <Icon name> draws, for every icon and variant', () => {
+    for (const [name, Component] of Object.entries(icons)) {
+      const canonical = getIcon(name)!.name; // the legacy components (NavIcon, ...) are named after an alias
+      for (const variant of ['outline', 'solid', 'duotone'] as const) {
+        expect(html(<Component variant={variant} rtl title="t" />), `${name}:${variant}`).toBe(html(<Icon name={canonical} variant={variant} rtl title="t" />));
+      }
+    }
+  });
+
+  it('still draw an icon the app registered under the same name', () => {
+    const original = getIcon('check')!;
+    registerIcon({ name: 'check', variants: { outline: { nodes: [{ tag: 'circle', attrs: { cx: 12, cy: 12, r: 4 } }] } } });
+    try {
+      expect(html(<CheckIcon />)).toContain('<circle');
+      expect(html(<CheckIcon />)).toBe(html(<Icon name="check" />));
+    } finally {
+      registerIcon(original);
+    }
+    expect(html(<CheckIcon />)).not.toContain('<circle');
+  });
+
+  it('do not import the registry (so a bundle keeps only the icons it uses)', () => {
+    const runtimeImports = (file: string) =>
+      [...readFileSync(resolve(__dirname, '../src', file), 'utf8').matchAll(/^import (?!type )[^;]*? from '([^']+)'/gms)].map((match) => match[1]);
+    expect(runtimeImports('defineIcon.tsx').sort()).toEqual(['./IconContext', '@editora/icons/renderer', 'react']);
+    expect(runtimeImports('icons.tsx').sort()).toEqual(['./defineIcon', '@editora/icons/glyphs']);
+    expect(runtimeImports('IconContext.tsx')).toEqual(['react']);
+  });
+});
+
+describe('defineIcon', () => {
+  const brand = {
+    name: 'brand-mark',
+    variants: { outline: { nodes: [{ tag: 'path' as const, attrs: { d: 'M12 3l8 4.5v9L12 21l-8-4.5v-9z' } }] } },
+  };
+
+  it('makes a component from a definition without registering it', () => {
+    const BrandIcon = defineIcon(brand);
+    expect(BrandIcon.displayName).toBe('BrandMarkIcon');
+    expect(defineIcon(brand, 'Logo').displayName).toBe('Logo');
+    const out = html(<IconProvider value={{ size: 24, color: 'red' }}><BrandIcon title="Acme" /></IconProvider>);
+    expect(out).toContain('d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"');
+    expect(out).toContain('width="24"');
+    expect(out).toContain('color="red"');
+    expect(out).toContain('aria-label="Acme"');
+    expect(html(<BrandIcon decorative={false} />)).toContain('aria-label="brand-mark"');
+    expect(hasIcon('brand-mark')).toBe(false);
+  });
+
+  it('draws a built-in glyph the same as the named component', () => {
+    const Check = defineIcon(checkIcon);
+    expect(html(<Check variant="solid" size={20} />)).toBe(html(<CheckIcon variant="solid" size={20} />));
+  });
+
+  it('renders nothing for a definition without an outline', () => {
+    const Broken = defineIcon({ name: 'broken' } as never);
+    expect(html(<Broken />)).toBe('');
   });
 });
