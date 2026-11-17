@@ -25,7 +25,7 @@
 ## Features
 
 - **<!-- icons:504 -->504 icons** that share one 24 × 24 grid and one line weight, in categories from arrows and files to
-  social logos and charts, and **<!-- aliases:1139 -->1139 aliases** for the names you would guess (`tick` and `done` are
+  social logos and charts, and **<!-- aliases:935 -->935 aliases** for the names you would guess (`tick` and `done` are
   `check`).
 - **Plain strings.** `renderIconSvg` returns an `<svg>` string, so it works in the browser, in Node (the server, a build
   script, an email template) and in any framework. `iconToDataUri` gives the same icon for an `<img>` or a CSS background.
