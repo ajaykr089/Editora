@@ -26,7 +26,10 @@
 
 - **A component for every icon**: <!-- components:507 -->507 of them (`CheckIcon`, `ChartLineIcon`, `SettingsIcon`...),
   from [`@editora/icons`](https://www.npmjs.com/package/@editora/icons), and `<Icon name="…">` for any name.
-- **Typed names.** `IconName` is the union of every name, so a typo in a menu configuration is a compile error.
+- **Only what you import.** Each named component carries its own glyph: `<CheckIcon />` alone adds about 2.5 KB
+  gzipped, not the whole catalog.
+- **Typed names.** `IconName` is the union of every name, so a typo in a menu configuration is a compile error, and
+  `<Icon name>` autocompletes.
 - **One place for the defaults.** An `IconProvider` sets the size, colour, weight and variant of everything inside it,
   and providers nest.
 - **Accessible by default.** An icon is hidden from screen readers unless you give it a title or a label.
@@ -167,10 +170,15 @@ export default function App() {
 ## Names from data, and your own icons
 
 Name an icon with a string where the name comes from data. `IconName` makes that string a checked one, and
-`getIconComponent(name)` gives you the component when you need one. For an icon of your own, register it with
-[`@editora/icons`](https://www.npmjs.com/package/@editora/icons#your-own-icons) and use it as `<Icon name="brand-mark" />`,
-or wrap it with `createIcon(name, displayName?)` to get a component like the built-in ones. Install `@editora/icons`
-yourself for that, so that your code can import it under pnpm and other strict layouts.
+`getIconComponent(name)` gives you the component when you need one.
+
+For an icon of your own, `defineIcon(definition, displayName?)` gives you a component like the built-in ones without
+registering anything. To use it by name as well, register it with
+[`@editora/icons`](https://www.npmjs.com/package/@editora/icons#your-own-icons): then `<Icon name="brand-mark" />` draws
+it, and `createIcon(name, displayName?)` makes a component that draws whatever is registered under that name. Registering
+a built-in name replaces that icon everywhere, the named components included: after `registerIcon({ name: 'check', … })`,
+`<CheckIcon />` draws your check. Install `@editora/icons` yourself for that, so that your code can import it under pnpm
+and other strict layouts.
 
 ```tsx
 import { registerIcon } from '@editora/icons';
@@ -243,17 +251,22 @@ export default function App() {
 | `defaultIconContext` | The built-in defaults: outline, 15 pixels, `currentColor`, a 1.5 stroke with round caps and joins. |
 | `icons` (also `Icons`), `iconNames` | The map from name to component, and the list of names. |
 | `getIconComponent(name)` | The component of a built-in icon, by name. |
-| `createIcon(name, displayName?)` | A component for any icon, including one you registered. |
+| `defineIcon(definition, displayName?)` | A component for an icon definition: your own, or a built-in one from `@editora/icons/glyphs`. Registers nothing. |
+| `createIcon(name, displayName?)` | A component that draws an icon by name when it renders, including one you registered. |
 
 The types are `IconName`, `IconProps`, `NamedIconProps`, `IconContextValue`, `IconComponent`, `IconFlip`,
 `IconBaseProps` and `IconWeight`.
 
 ## Size, servers and Next.js
 
-Every icon component and the whole catalog are one module, so importing one icon costs the same as importing them all:
-about 164 KB minified and 57 KB gzipped, without React. Named imports are not smaller than `<Icon name="…">`. If a
-page needs a handful of icons and every kilobyte counts, render them with
-[`@editora/icons`](https://www.npmjs.com/package/@editora/icons) and keep the strings.
+Each named icon is built from its own glyph, so a bundler keeps only the icons you import. `<CheckIcon />` on its own
+adds about 2.5 KB gzipped (the shared drawing code and one glyph), and each further icon about 150 bytes; a
+`defineIcon` component costs the same. Looking icons up by name needs the whole catalog: `<Icon name="…">`, `createIcon`,
+`icons`, `iconNames` and `getIconComponent` each bring all 504 icons, about 50 KB gzipped. Use the named components
+where you know the icon when you write the code, and `<Icon name>` where the name comes from data.
+
+Those numbers are from esbuild and Vite, without React. Dropping the unused icons relies on the ES module build,
+`"sideEffects": false` and `/*#__PURE__*/` annotations, the same signals webpack 5 uses in production mode.
 
 The components are plain, and render to markup on the server. They use React
 context, and the package carries no `'use client'` directive, so in the Next.js App Router use them from a Client

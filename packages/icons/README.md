@@ -33,7 +33,9 @@
   stay crisp: they are the same width in pixels at every size.
 - **Accessible by default.** An icon is hidden from screen readers unless you give it a title or a label.
 - **Extensible.** Register your own icons, and they work everywhere the built-in ones do.
-- Written in TypeScript, with no dependencies. The whole catalog is about 48 KB gzipped.
+- **Typed names.** Names autocomplete, and `IconName` turns a typo in your own configuration into a compile error.
+- Written in TypeScript, with no dependencies. The whole catalog is about 48 KB gzipped; import icons one by one from
+  `@editora/icons/glyphs` to ship only those (about 2 KB for the first).
 - For React, use [`@editora/react-icons`](https://www.npmjs.com/package/@editora/react-icons), which is built on this
   package.
 
@@ -82,6 +84,24 @@ hover and dark-mode colours without any extra work.
 its icon. A name is matched without regard to case, and spaces and underscores count as dashes: `Chart Line`,
 `chart_line` and `chart-line` are the same icon. `renderIconSvg` returns an empty string for a name it does not know, so
 a typo draws nothing rather than throwing.
+
+In TypeScript the names autocomplete. Every function that takes a name accepts an `IconName` (one of the built-in names)
+or any other string, since an alias or an icon you registered is a name too. To have a typo caught when you compile,
+type your own names as `IconName`:
+
+```ts
+import { renderIconSvg, type IconName } from '@editora/icons';
+
+const menu: Array<{ label: string; icon: IconName }> = [
+  { label: 'Orders', icon: 'order' },
+  { label: 'Settings', icon: 'settings' },
+  // { label: 'Reports', icon: 'reprot' },  // error: Type '"reprot"' is not assignable to type 'IconName'. Did you mean '"report"'?
+];
+
+const html = menu.map((item) => `${renderIconSvg(item.icon)} ${item.label}`);
+```
+
+`IconName` lists the built-in names only, not their aliases (`check`, not `tick`).
 
 ```ts
 import { listIconAliases, listIcons, renderIconSvg } from '@editora/icons';
@@ -317,13 +337,14 @@ ui-core yourself (`registerWithEditoraUI(registerIcon)`): its registry wins over
 | `resolveIcon(name, variant?)` | `{ definition, viewBox, variant, glyph }`: the variant that will be drawn, which is `outline` if the one asked for is missing. |
 | `registerIcon(definition)`, `registerIcons(definitions)` | Add icons, or replace them. |
 | `iconDefinitions`, `iconNameList` | The built-in catalog as data, and its names. |
-| `renderIconDefinition(definition, options?)` (from `@editora/icons/renderer`) | Like `renderIconSvg`, for a definition you pass in; needs no catalog. |
+| `renderIconDefinition(definition, options?)` (also from `@editora/icons/renderer`) | Like `renderIconSvg`, for a definition you pass in; needs no catalog. |
+| `getRegisteredIcon(name)` (also from `@editora/icons/renderer`) | The icon `registerIcon` added or replaced under that name, or `undefined`; built-in icons are not listed. |
 | `checkIcon`, `chevronDownIcon`, … (from `@editora/icons/glyphs`) | Each built-in icon's definition, to import one by one. |
 | `normalizeIconSize(size, fallback?)` | The size `renderIconSvg` would draw: a positive number or CSS length, else the fallback. |
 | `registerWithEditoraUI(register)` | Calls `register(name, svg)` once for every icon, with its outline as markup: for an icon store of your own. |
 
-The types are `IconDefinition`, `IconGlyph`, `IconNode`, `IconTag`, `IconAttrValue`, `IconRenderOptions`, `IconVariant`,
-`IconWeight` and `ResolvedIcon`.
+The types are `IconName`, `IconDefinition`, `IconGlyph`, `IconNode`, `IconTag`, `IconAttrValue`, `IconRenderOptions`,
+`IconVariant`, `IconWeight` and `ResolvedIcon`.
 
 ## Size and where it runs
 

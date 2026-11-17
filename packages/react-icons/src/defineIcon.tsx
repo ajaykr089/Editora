@@ -1,0 +1,288 @@
+// Draws one icon definition. Imports only `@editora/icons/renderer` (about 2 KB), never the registry, so a
+// named icon (<CheckIcon />) or a defineIcon() component adds just its own glyph to a bundle. <Icon name>
+// (Icon.tsx) is the only part that looks names up, and the only one that brings the whole set.
+import React from 'react';
+import { getRegisteredIcon, normalizeIconSize, resolveDefinition } from '@editora/icons/renderer';
+import type { IconDefinition, IconNode, IconWeight } from '@editora/icons';
+import { useIconContext } from './IconContext';
+import type { IconComponent, NamedIconProps } from './types';
+
+const DEFAULT_SIZE = 15;
+const DEFAULT_STROKE_WIDTH = 1.5;
+const STROKE_WIDTH_BY_WEIGHT: Record<IconWeight, number> = {
+  thin: 1.25,
+  regular: DEFAULT_STROKE_WIDTH,
+  bold: 1.75,
+};
+
+// Same rules as renderIconSvg: a positive number, or a CSS length; anything else falls back to the default
+// instead of reaching width/height (a React "NaN for the width attribute" warning, or a 300x150 <svg>).
+function normalizeSize(size: string | number | undefined): string | number {
+  const normalized = normalizeIconSize(size, DEFAULT_SIZE);
+  return /^[\d.]+$/.test(normalized) ? Number(normalized) : normalized;
+}
+
+function isValidStrokeWidth(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+function parseViewBoxSize(viewBox: string): { width: number; height: number } {
+  const parts = viewBox
+    .trim()
+    .split(/\s+/)
+    .map((part) => Number(part));
+
+  if (parts.length === 4 && Number.isFinite(parts[2]) && Number.isFinite(parts[3])) {
+    return { width: parts[2], height: parts[3] };
+  }
+
+  return { width: 24, height: 24 };
+}
+
+// Every stroke is drawn with vector-effect="non-scaling-stroke" (see normalizeNodeAttrs), so its width is in screen pixels at
+// any icon size. That is what `absoluteStrokeWidth` asks for, so there is nothing to compensate: it used to scale the width
+// by viewBox / size on top of that, which gave a 3px stroke at size 12 and a 0.75px one at size 48.
+function resolveStrokeWidth(options: {
+  strokeWidth?: number;
+  defaultStrokeWidth?: number;
+  iconWeight?: IconWeight;
+  defaultIconWeight?: IconWeight;
+}): number {
+  // prop width > prop weight > context width > context weight > built-in
+  return (
+    (isValidStrokeWidth(options.strokeWidth) ? options.strokeWidth : undefined) ??
+    (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : undefined) ??
+    (isValidStrokeWidth(options.defaultStrokeWidth) ? options.defaultStrokeWidth : undefined) ??
+    (options.defaultIconWeight ? STROKE_WIDTH_BY_WEIGHT[options.defaultIconWeight] : undefined) ??
+    DEFAULT_STROKE_WIDTH
+  );
+}
+
+function computeTransform(options: { rotate?: number; flip?: 'horizontal' | 'vertical' | 'both'; rtl?: boolean }, viewBox: string): string | undefined {
+  const { width, height } = parseViewBoxSize(viewBox);
+  const transforms: string[] = [];
+
+  if (options.flip === 'horizontal' || options.rtl) transforms.push(`translate(${width} 0) scale(-1 1)`);
+  if (options.flip === 'vertical') transforms.push(`translate(0 ${height}) scale(1 -1)`);
+  if (options.flip === 'both') transforms.push(`translate(${width} ${height}) scale(-1 -1)`);
+
+  if (typeof options.rotate === 'number' && Number.isFinite(options.rotate) && options.rotate !== 0) {
+    transforms.push(`rotate(${options.rotate} ${width / 2} ${height / 2})`);
+  }
+
+  if (!transforms.length) return undefined;
+  return transforms.join(' ');
+}
+
+function toReactAttrName(key: string): string {
+  if (key === 'class') return 'className';
+  return key.replace(/-([a-z])/g, (_, part: string) => part.toUpperCase());
+}
+
+function mergeClassName(a?: string, b?: string): string | undefined {
+  if (a && b) return `${a} ${b}`;
+  return a || b;
+}
+
+type NodeRenderOptions = {
+  secondaryColor: string;
+  strokeWidth: number;
+  strokeLinecap: 'butt' | 'round' | 'square';
+  strokeLinejoin: 'miter' | 'round' | 'bevel';
+};
+
+function normalizeNodeAttrs(node: IconNode, options: NodeRenderOptions): Record<string, unknown> {
+  const attrs = { ...(node.attrs || {}) } as Record<string, unknown>;
+
+  const tone = String(attrs.tone || '');
+  delete attrs.tone;
+
+  if (tone === 'secondary') {
+    if (attrs.fill === 'currentColor') attrs.fill = options.secondaryColor;
+    if (attrs.stroke === 'currentColor') attrs.stroke = options.secondaryColor;
+  }
+
+  const hasNoVisibleFill = attrs.fill == null || attrs.fill === 'none' || attrs.fill === 'transparent';
+  if (attrs.stroke == null && hasNoVisibleFill && node.tag !== 'g') {
+    attrs.stroke = 'currentColor';
+    attrs.fill = 'none';
+  }
+
+  if (attrs.stroke != null && attrs.strokeWidth == null) {
+    attrs.strokeWidth = options.strokeWidth;
+  }
+
+  if (attrs.stroke != null && attrs.vectorEffect == null) {
+    attrs.vectorEffect = 'non-scaling-stroke';
+  }
+
+  if (attrs.stroke != null && attrs.strokeLinecap == null) {
+    attrs.strokeLinecap = options.strokeLinecap;
+  }
+
+  if (attrs.stroke != null && attrs.strokeLinejoin == null) {
+    attrs.strokeLinejoin = options.strokeLinejoin;
+  }
+
+  return attrs;
+}
+
+function renderNode(node: IconNode, index: number, options: NodeRenderOptions): React.ReactElement {
+  const attrs = normalizeNodeAttrs(node, options);
+
+  const props: Record<string, unknown> = { key: `${node.tag}-${index}` };
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value == null || value === false) continue;
+    props[toReactAttrName(key)] = value;
+  }
+
+  const children = (node.children || []).map((child, childIndex) => renderNode(child, childIndex, options));
+  return React.createElement(node.tag, props, children.length ? children : undefined);
+}
+
+type IconSvgProps = NamedIconProps & {
+  definition: IconDefinition;
+  /** What a non-decorative icon with no title or label is called; the definition's name by default. */
+  fallbackLabel?: string;
+};
+
+/**
+ * @internal Gives a component its displayName inside one call. With a `#__PURE__` annotation on the call (and on
+ * the forwardRef inside it) a bundler drops the component when nothing uses it; a bare forwardRef() call and a
+ * `displayName` assignment at the top of a module count as side effects and are always kept.
+ */
+export function named<T extends { displayName?: string }>(component: T, displayName: string): T {
+  component.displayName = displayName;
+  return component;
+}
+
+/** @internal Draws one definition with the provider's defaults. Shared by Icon, defineIcon and the named icons. */
+export const IconSvg = /*#__PURE__*/ named(/*#__PURE__*/ React.forwardRef<SVGSVGElement, IconSvgProps>(function IconSvg(
+  {
+    definition,
+    fallbackLabel,
+    variant,
+    size,
+    iconWeight,
+    color,
+    secondaryColor,
+    strokeWidth,
+    absoluteStrokeWidth: _absoluteStrokeWidth, // accepted, but strokes are always absolute: see resolveStrokeWidth
+    strokeLinecap,
+    strokeLinejoin,
+    decorative,
+    title,
+    ariaLabel,
+    rotate,
+    flip,
+    rtl,
+    className,
+    children,
+    'aria-label': ariaLabelAttr,
+    ...rest
+  },
+  ref
+) {
+  const defaults = useIconContext();
+
+  if (!definition || !definition.variants || !definition.variants.outline) return null;
+  const finalVariant = variant ?? defaults.variant ?? 'outline';
+  const resolved = resolveDefinition(definition, finalVariant);
+
+  const finalSize = normalizeSize(size ?? defaults.size);
+  const finalColor = color ?? defaults.color ?? 'currentColor';
+  const finalSecondaryColor = secondaryColor ?? defaults.secondaryColor ?? finalColor;
+  const finalStrokeLinecap = strokeLinecap ?? defaults.strokeLinecap ?? 'round';
+  const finalStrokeLinejoin = strokeLinejoin ?? defaults.strokeLinejoin ?? 'round';
+  const finalStrokeWidth = resolveStrokeWidth({
+    strokeWidth,
+    defaultStrokeWidth: defaults.strokeWidth,
+    iconWeight,
+    defaultIconWeight: defaults.iconWeight
+  });
+
+  const explicitAriaLabel = ariaLabel || (typeof ariaLabelAttr === 'string' ? ariaLabelAttr : undefined);
+  const finalDecorative = decorative ?? defaults.decorative ?? (!title && !explicitAriaLabel);
+  const mergedClassName = mergeClassName(defaults.className, className);
+
+  const transform = computeTransform(
+    {
+      rotate,
+      flip,
+      rtl: (rtl ?? defaults.rtl) && resolved.definition.rtlMirror
+    },
+    resolved.viewBox
+  );
+
+  const nodeOptions: NodeRenderOptions = {
+    secondaryColor: finalSecondaryColor,
+    strokeWidth: finalStrokeWidth,
+    strokeLinecap: finalStrokeLinecap,
+    strokeLinejoin: finalStrokeLinejoin
+  };
+
+  const content = resolved.glyph.nodes.map((node, index) => renderNode(node, index, nodeOptions));
+
+  const role = rest.role || (finalDecorative ? 'presentation' : 'img');
+  const ariaHidden = finalDecorative ? true : undefined;
+  const computedAriaLabel = finalDecorative ? undefined : explicitAriaLabel || title || fallbackLabel || definition.name;
+
+  return (
+    <svg
+      ref={ref}
+      xmlns="http://www.w3.org/2000/svg"
+      width={finalSize}
+      height={finalSize}
+      viewBox={resolved.viewBox}
+      fill="none"
+      color={finalColor}
+      overflow="visible"
+      shapeRendering="geometricPrecision"
+      className={mergedClassName}
+      role={role}
+      aria-hidden={ariaHidden}
+      aria-label={computedAriaLabel}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      {transform ? <g transform={transform}>{content}</g> : content}
+      {children}
+    </svg>
+  );
+}), 'IconSvg');
+
+/** `chart-line` -> `ChartLineIcon`. */
+export function toComponentName(name: string): string {
+  return (
+    name
+      .split(/[-_\s]+/g)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('') + 'Icon'
+  );
+}
+
+function componentFor(definition: IconDefinition, displayName: string | undefined, replaceable: boolean): IconComponent {
+  const Component = React.forwardRef<SVGSVGElement, NamedIconProps>(function EditoraNamedIcon(props, ref) {
+    // A built-in drawn from its glyph still honours registerIcon({ name: 'check', ... }), as it did when
+    // named icons looked their name up in the registry.
+    const drawn = (replaceable && getRegisteredIcon(definition.name)) || definition;
+    return <IconSvg ref={ref} definition={drawn} {...props} />;
+  });
+  Component.displayName = displayName || toComponentName(definition.name);
+  return Component;
+}
+
+/**
+ * A component for an icon definition, with the same props as the named icons. Nothing is registered and the
+ * registry is not imported, so a bundle gets this definition and nothing else: use it for your own icons, or
+ * for a built-in one from `@editora/icons/glyphs`.
+ */
+export function defineIcon(definition: IconDefinition, displayName?: string): IconComponent {
+  return componentFor(definition, displayName, false);
+}
+
+/** @internal The named icons (CheckIcon, ...): like defineIcon, but an icon registered under the same name wins. */
+export function builtInIcon(definition: IconDefinition, displayName: string): IconComponent {
+  return componentFor(definition, displayName, true);
+}

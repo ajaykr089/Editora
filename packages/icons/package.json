@@ -37,6 +37,8 @@
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts",
+    "glyphs/package.json",
+    "renderer/package.json",
     "README.md"
   ],
   "scripts": {

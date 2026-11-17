@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "main": "../dist/glyphs.cjs.js",
+  "module": "../dist/glyphs.esm.js",
+  "types": "../dist/glyphs.d.ts",
+  "sideEffects": false
+}

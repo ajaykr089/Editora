@@ -2,6 +2,10 @@ import { iconDefinitions, iconNameList } from './definitions';
 import { getIcon, hasIcon, listIconAliases, listIcons, registerIcon, registerIcons, resolveIcon } from './registry';
 import { iconToDataUri, normalizeIconSize, renderIconSvg } from './render';
 
+export type { IconName } from './names';
+export { getRegisteredIcon } from './registered';
+export { renderIconDefinition } from './renderer';
+
 export type {
   IconAttrValue,
   IconDefinition,
