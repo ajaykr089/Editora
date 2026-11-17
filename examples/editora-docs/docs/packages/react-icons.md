@@ -23,6 +23,7 @@ npm i @editora/react-icons @editora/icons
 | `IconContext`, `IconProvider`, `useIconContext`, `defaultIconContext` | Context exports | Provider and hook for shared defaults |
 | `Icons`, `icons`, `iconNames`, `getIconComponent` | Registry exports | Catalog and dynamic component lookup |
 | `export * from './icons'` | Component exports | Named icon components |
+| `searchIcons`, `listIconCategories` | Search exports | Ranked icon search and categories, re-exported from `@editora/icons` |
 | `IconBaseProps`, `IconComponent`, `IconContextValue`, `IconFlip`, `IconProps`, `NamedIconProps`, `IconName` | Type exports | Component + context typing |
 
 ## Usage Example
