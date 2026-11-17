@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "main": "../dist/renderer.cjs.js",
+  "module": "../dist/renderer.esm.js",
+  "types": "../dist/renderer.d.ts",
+  "sideEffects": false
+}

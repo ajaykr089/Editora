@@ -5,6 +5,10 @@ import { listIconCategories, searchIcons } from './search';
 
 export type { IconSearchField, IconSearchOptions, IconSearchResult } from './search';
 
+export type { IconName } from './names';
+export { getRegisteredIcon } from './registered';
+export { renderIconDefinition } from './renderer';
+
 export type {
   IconAttrValue,
   IconDefinition,

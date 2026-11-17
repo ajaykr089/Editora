@@ -1,10 +1,11 @@
 import type React from 'react';
-import type { IconVariant, IconWeight } from '@editora/icons';
+import type { IconName as BuiltInIconName, IconVariant, IconWeight } from '@editora/icons';
 
 export type IconFlip = 'horizontal' | 'vertical' | 'both';
 
 export type IconBaseProps = Omit<React.SVGProps<SVGSVGElement>, 'color'> & {
-  name: string;
+  /** A built-in name autocompletes; any other string (an alias, an icon you registered) works too. */
+  name: BuiltInIconName | (string & {});
   variant?: IconVariant;
   iconWeight?: IconWeight;
   size?: number | string;
