@@ -25,31 +25,40 @@ export class PluginLoader {
   }
 
   /**
-   * Load a plugin by name (async)
+   * Load a plugin by name (async). The instance is cached by name: every later call gets the same
+   * one, configured by the first call. For one instance per editor, use create().
    */
   async load(name: string, config?: PluginLoadConfig): Promise<Plugin | null> {
-    // Check if already loaded
     if (this.loadedPlugins.has(name)) {
       return this.loadedPlugins.get(name)!;
     }
-    
-    // Check if registered
+    const plugin = await this.create(name, config);
+    if (plugin) this.loadedPlugins.set(name, plugin);
+    return plugin;
+  }
+
+  /**
+   * Create a new instance of a registered plugin, configured with `config`, without caching it.
+   */
+  async create(name: string, config?: PluginLoadConfig): Promise<Plugin | null> {
     const factory = this.pluginRegistry.get(name);
     if (!factory) {
       console.warn(`Plugin not found: ${name}`);
       return null;
     }
-    
-    // Create plugin instance (may be async)
+    // The factory may be async (lazy-loaded plugin chunks).
     const plugin = await factory();
-    
-    // Apply config if provided
     if (config) {
       this.applyPluginConfig(plugin, config);
     }
-    
-    this.loadedPlugins.set(name, plugin);
     return plugin;
+  }
+
+  /**
+   * Attach configuration to a plugin instance (read at runtime as `__pluginConfig`).
+   */
+  configure(plugin: Plugin, config: PluginLoadConfig): void {
+    this.applyPluginConfig(plugin, config);
   }
 
   /**

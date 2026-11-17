@@ -214,6 +214,11 @@ export class RichTextEditorElement extends ElementBase {
   // DOM, or setConfig()) resumes from it instead of from the original data-initial-content.
   private preservedContent: string | null = null;
   private loadedPlugins: Plugin[] = [];
+  // This editor's own plugin instances, by name. The registry is shared by every editor on the page,
+  // but instances are not: plugins keep per-instance state (collaboration's claim on its editor and
+  // room) and read their config from the instance, so a shared one would serve only the first
+  // editor, with the first editor's config. Kept across rebuilds of this editor.
+  private pluginInstances: Map<string, Plugin> = new Map();
   private lastBeforeInputType: string | null = null;
   /** The content a keystroke is about to change, kept until its `input` event so the history can record the change. */
   private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null = null;
@@ -526,14 +531,14 @@ export class RichTextEditorElement extends ElementBase {
           pluginNames.push('a11yChecker');
         }
         for (const pluginName of pluginNames) {
-          const plugin = await this.pluginLoader.load(pluginName, this.getPluginLoadConfig(pluginName));
+          const plugin = await this.loadPlugin(pluginName, this.getPluginLoadConfig(pluginName));
           if (plugin) plugins.push(plugin);
         }
       } else if (Array.isArray(this.config.plugins)) {
         // Already plugin instances or names
         for (const p of this.config.plugins) {
           if (typeof p === 'string') {
-            const plugin = await this.pluginLoader.load(p, this.getPluginLoadConfig(p));
+            const plugin = await this.loadPlugin(p, this.getPluginLoadConfig(p));
             if (plugin) plugins.push(plugin);
           } else {
             plugins.push(p as Plugin);
@@ -541,7 +546,7 @@ export class RichTextEditorElement extends ElementBase {
         }
 
         if (shouldForceA11yChecker && !plugins.some((plugin) => plugin?.name === 'a11yChecker')) {
-          const plugin = await this.pluginLoader.load('a11yChecker', this.getPluginLoadConfig('a11yChecker'));
+          const plugin = await this.loadPlugin('a11yChecker', this.getPluginLoadConfig('a11yChecker'));
           if (plugin) plugins.push(plugin);
         }
       }
@@ -551,11 +556,26 @@ export class RichTextEditorElement extends ElementBase {
       for (const pluginName of registeredNames) {
         const loadConfig = this.getPluginLoadConfig(pluginName);
         if (OPT_IN_ONLY_PLUGINS.has(pluginName) && !loadConfig) continue;
-        const plugin = await this.pluginLoader.load(pluginName, loadConfig);
+        const plugin = await this.loadPlugin(pluginName, loadConfig);
         if (plugin) plugins.push(plugin);
       }
     }
     return plugins;
+  }
+
+  /**
+   * This editor's instance of a registered plugin: created on first use, then reused (with the
+   * current config) when the editor rebuilds.
+   */
+  private async loadPlugin(name: string, config?: Record<string, any>): Promise<Plugin | null> {
+    const existing = this.pluginInstances.get(name);
+    if (existing) {
+      if (config) this.pluginLoader.configure(existing, config);
+      return existing;
+    }
+    const plugin = await this.pluginLoader.create(name, config);
+    if (plugin) this.pluginInstances.set(name, plugin);
+    return plugin;
   }
 
   private resolveToolbarItems(): string | undefined {
