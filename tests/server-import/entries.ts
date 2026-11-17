@@ -26,6 +26,8 @@ export const sourceEntries: SourceEntry[] = [
   { name: '@editora/react', file: 'packages/react/src/index.ts' },
   { name: '@editora/themes', file: 'packages/themes/src/index.ts' },
   { name: '@editora/light-code-editor', file: 'packages/light-code-editor/src/index.ts' },
+  { name: '@editora/ui-core', file: 'packages/ui-core/src/index.ts' },
+  { name: '@editora/ui-sortable', file: 'packages/ui-sortable/src/index.ts' },
   { name: '@editora/plugins', file: 'packages/plugins/src/index.ts' },
   { name: '@editora/plugins/lite', file: 'packages/plugins/src/lite.ts' },
   { name: '@editora/plugins/enterprise', file: 'packages/plugins/src/enterprise.ts' },
@@ -45,6 +47,10 @@ export const builtPackages = [
   'icons',
   'react-icons',
   'performance',
+  'ui-core',
+  'ui-sortable',
+  'ui-react',
+  'ui-editor',
 ];
 
 export type BuiltEntry = { name: string; kind: 'esm' | 'cjs'; file: string };
@@ -64,9 +70,27 @@ export function builtEntries(): BuiltEntry[] {
       const name = pkg.name + subpath.slice(1);
       for (const [kind, rel] of [['esm', esm], ['cjs', cjs]] as const) {
         if (!rel || /\.(css|json|d\.ts)$/.test(rel)) continue;
-        out.push({ name, kind, file: path.join(`packages/${dir}`, rel) });
+        for (const file of expandWildcard(`packages/${dir}`, rel)) {
+          out.push({ name: name.includes('*') ? name.replace('*', wildcardPart(rel, file)) : name, kind, file });
+        }
       }
     }
   }
   return out;
+}
+
+// `"./components/*": { "import": "./dist/components/*.esm.js" }`: one entry per file the pattern matches
+function expandWildcard(pkgDir: string, rel: string): string[] {
+  if (!rel.includes('*')) return [path.join(pkgDir, rel)];
+  const [dir, pattern] = [path.dirname(rel), path.basename(rel)];
+  const re = new RegExp('^' + pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace('*', '(.+)') + '$');
+  const abs = path.join(repoRoot, pkgDir, dir);
+  if (!fs.existsSync(abs)) return [path.join(pkgDir, rel)];
+  return fs.readdirSync(abs).filter((n) => re.test(n)).sort().map((n) => path.join(pkgDir, dir, n));
+}
+
+function wildcardPart(rel: string, file: string): string {
+  const [before, after] = path.basename(rel).split('*');
+  const base = path.basename(file);
+  return base.slice(before.length, base.length - after.length);
 }
