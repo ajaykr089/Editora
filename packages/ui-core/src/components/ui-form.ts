@@ -453,23 +453,28 @@ export interface UIFormEventMap extends Omit<HTMLElementEventMap, 'submit' | 'in
   autosave: CustomEvent<UIFormAutosaveDetail>;
 }
 
-// Typed listeners (merged into the class below).
-export interface UIForm {
+export class UIForm extends ElementBase {
+  // Typed listeners: see UIFormEventMap.
   addEventListener<K extends keyof UIFormEventMap>(
     type: K,
     listener: (this: UIForm, ev: UIFormEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
   ): void;
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: any, options?: boolean | AddEventListenerOptions): void {
+    super.addEventListener(type, listener, options);
+  }
+
   removeEventListener<K extends keyof UIFormEventMap>(
     type: K,
     listener: (this: UIForm, ev: UIFormEventMap[K]) => any,
     options?: boolean | EventListenerOptions
   ): void;
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-}
+  removeEventListener(type: string, listener: any, options?: boolean | EventListenerOptions): void {
+    super.removeEventListener(type, listener, options);
+  }
 
-export class UIForm extends ElementBase {
   static get observedAttributes() {
     return [
       'novalidate',
