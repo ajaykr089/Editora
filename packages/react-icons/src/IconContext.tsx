@@ -18,7 +18,7 @@ const defaultIconContext: IconContextValue = {
 // `strokeWidth` was silently ignored. `defaultIconContext` stays exported unchanged for anyone reading it.
 const { strokeWidth: _defaultStrokeWidth, iconWeight: _defaultIconWeight, ...baseContext } = defaultIconContext;
 
-const IconContext = React.createContext<IconContextValue>(baseContext);
+const IconContext = /*#__PURE__*/ React.createContext<IconContextValue>(baseContext);
 
 export type IconProviderProps = {
   value?: IconContextValue;

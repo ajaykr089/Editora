@@ -1,5 +1,6 @@
 export { Icon } from './Icon';
 export { createIcon } from './createIcon';
+export { defineIcon } from './defineIcon';
 export { IconContext, IconProvider, useIconContext, defaultIconContext } from './IconContext';
 export { Icons, icons, iconNames, getIconComponent } from './icons';
 

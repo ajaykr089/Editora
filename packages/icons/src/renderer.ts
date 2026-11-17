@@ -1,6 +1,8 @@
 // Rendering without the registry: imported by render.ts and by the `@editora/icons/renderer` entry.
 import type { IconAttrValue, IconDefinition, IconGlyph, IconNode, IconRenderOptions, IconVariant, IconWeight } from './types';
 
+export { getRegisteredIcon } from './registered';
+
 const DEFAULT_SIZE = 15;
 const DEFAULT_STROKE_WIDTH = 1.5;
 const STROKE_WIDTH_BY_WEIGHT: Record<IconWeight, number> = {

@@ -1,5 +1,10 @@
 import { iconDefinitions } from './definitions';
+import type { IconName } from './names';
+import { rememberRegisteredIcon } from './registered';
 import type { IconDefinition, IconGlyph, IconVariant, ResolvedIcon } from './types';
+
+// A built-in name autocompletes; any other string (an alias, or an icon you registered) is still accepted.
+type AnyIconName = IconName | (string & {});
 
 const DEFAULT_ICON_VIEWBOX = '0 0 24 24';
 
@@ -19,15 +24,16 @@ type RegisterOptions = {
   source?: string;
 };
 
-function registerDefinition(definition: IconDefinition, options: RegisterOptions = {}): void {
+function registerDefinition(definition: IconDefinition, options: RegisterOptions = {}): IconDefinition | undefined {
   const name = normalizeName(definition.name);
-  if (!name) return;
+  if (!name) return undefined;
 
   if (options.strict && iconMap.has(name)) {
     throw new Error(`Duplicate icon name "${name}" detected in ${options.source || 'registry'}.`);
   }
 
-  iconMap.set(name, { ...definition, name });
+  const stored = { ...definition, name };
+  iconMap.set(name, stored);
 
   const aliases = definition.aliases || [];
   for (const alias of aliases) {
@@ -52,13 +58,14 @@ function registerDefinition(definition: IconDefinition, options: RegisterOptions
 
     aliasMap.set(normalized, name);
   }
+  return stored;
 }
 
 for (const definition of iconDefinitions) {
   registerDefinition(definition, { strict: true, source: 'iconDefinitions' });
 }
 
-export function getIcon(name: string): IconDefinition | undefined {
+export function getIcon(name: AnyIconName): IconDefinition | undefined {
   const normalized = normalizeName(name);
   if (!normalized) return undefined;
   const direct = iconMap.get(normalized);
@@ -67,7 +74,7 @@ export function getIcon(name: string): IconDefinition | undefined {
   return target ? iconMap.get(target) : undefined;
 }
 
-export function hasIcon(name: string): boolean {
+export function hasIcon(name: AnyIconName): boolean {
   return !!getIcon(name);
 }
 
@@ -84,14 +91,15 @@ export function listIconAliases(): Record<string, string> {
 }
 
 export function registerIcon(definition: IconDefinition): void {
-  registerDefinition(definition);
+  const stored = registerDefinition(definition);
+  if (stored) rememberRegisteredIcon(stored);
 }
 
 export function registerIcons(definitions: IconDefinition[]): void {
-  definitions.forEach((definition) => registerDefinition(definition));
+  definitions.forEach((definition) => registerIcon(definition));
 }
 
-export function resolveIcon(name: string, variant: IconVariant = 'outline'): ResolvedIcon | undefined {
+export function resolveIcon(name: AnyIconName, variant: IconVariant = 'outline'): ResolvedIcon | undefined {
   const definition = getIcon(name);
   if (!definition) return undefined;
 
