@@ -137,6 +137,35 @@ describe('refs', () => {
   });
 });
 
+describe('search (re-exported from @editora/icons)', () => {
+  // The README's picker, rendered: results come best first and draw with <Icon name>.
+  function IconPicker({ query, category }: { query: string; category?: string }) {
+    const results = ReactIcons.searchIcons(query, { category, limit: 60 });
+    return (
+      <ul>
+        {results.map((result) => (
+          <li key={result.name} title={result.matchedBy === 'name' ? result.name : `${result.name} · ${result.matched}`}>
+            <Icon name={result.name} size={20} /> {result.name}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  it('finds icons by name, alias, tag and category, and each result renders', () => {
+    expect(ReactIcons.searchIcons('bin')[0]).toMatchObject({ name: 'trash', matchedBy: 'tag', matched: 'bin' });
+    const markup = html(<IconPicker query="delete" />);
+    expect(markup).toContain('title="trash · delete"');
+    expect((markup.match(/<svg/g) || []).length).toBe((markup.match(/<li[ >]/g) || []).length);
+    expect(html(<IconPicker query="" category="weather" />)).toContain('umbrella');
+  });
+
+  it('lists categories with counts', () => {
+    const categories = ReactIcons.listIconCategories();
+    expect(categories.find((category) => category.name === 'weather')?.count).toBeGreaterThan(0);
+  });
+});
+
 describe('named icons drawn from their own glyph', () => {
   it('src/icons.tsx is regenerated from @editora/icons/glyphs (run scripts/generate-icons.mjs)', () => {
     expect(readFileSync(resolve(__dirname, '../src/icons.tsx'), 'utf8') === renderIconsModule()).toBe(true);

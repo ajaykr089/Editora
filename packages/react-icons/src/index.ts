@@ -8,3 +8,7 @@ export * from './icons';
 
 export type { IconBaseProps, IconComponent, IconContextValue, IconFlip, IconProps, NamedIconProps, IconWeight } from './types';
 export type { IconName } from './icons';
+
+// Icon search lives in @editora/icons; re-exported so an icon picker needs one import.
+export { searchIcons, listIconCategories } from '@editora/icons';
+export type { IconSearchField, IconSearchOptions, IconSearchResult } from '@editora/icons';

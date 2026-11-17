@@ -32,6 +32,7 @@
 - **Outline, solid and duotone**, three weights, any size and colour, rotate, flip and right-to-left mirroring. Strokes
   stay crisp: they are the same width in pixels at every size.
 - **Accessible by default.** An icon is hidden from screen readers unless you give it a title or a label.
+- **Search built in.** `searchIcons` ranks by name, alias, tag and category: an icon picker in a few lines.
 - **Extensible.** Register your own icons, and they work everywhere the built-in ones do.
 - **Typed names.** Names autocomplete, and `IconName` turns a typo in your own configuration into a compile error.
 - Written in TypeScript, with no dependencies. The whole catalog is about 48 KB gzipped; import icons one by one from
@@ -80,6 +81,13 @@ hover and dark-mode colours without any extra work.
 
 ## Find an icon
 
+`searchIcons(query)` finds icons the way a person looks for them, best match first: by name (`calendar`), by alias
+(`delete` finds `trash`), by tag (`bin` finds `trash`, `ai` finds `sparkles`) and by category (`weather`). Every word
+of the query has to match ("arrow left"); when no icon matches them all, the ones that match the most words come back
+instead of nothing. Each result says what matched, so a picker can show "trash · bin". `{ category }` searches one
+category (or several), `{ limit }` caps the list, and an empty query lists every icon. `listIconCategories()` gives the
+categories and their sizes, for the filters of a picker. Icons you register are searched too.
+
 `listIcons()` has every name, `hasIcon(name)` tells you whether one exists and `listIconAliases()` maps each alias to
 its icon. A name is matched without regard to case, and spaces and underscores count as dashes: `Chart Line`,
 `chart_line` and `chart-line` are the same icon. `renderIconSvg` returns an empty string for a name it does not know, so
@@ -104,44 +112,51 @@ const html = menu.map((item) => `${renderIconSvg(item.icon)} ${item.label}`);
 `IconName` lists the built-in names only, not their aliases (`check`, not `tick`).
 
 ```ts
-import { listIconAliases, listIcons, renderIconSvg } from '@editora/icons';
-
-const names = listIcons();
-
-// Every alias points at an icon: 'tick' and 'done' are other names for 'check'.
-const aliasesOf = new Map<string, string[]>();
-for (const [alias, target] of Object.entries(listIconAliases())) {
-  aliasesOf.set(target, [...(aliasesOf.get(target) ?? []), alias]);
-}
+import { listIconCategories, renderIconSvg, searchIcons } from '@editora/icons';
 
 const root = document.getElementById('editor')!;
 root.innerHTML = `
   <style>
-    .catalog input { box-sizing: border-box; width: 100%; padding: 10px 14px; border: 1px solid #d0d7de; border-radius: 8px; font: 15px system-ui, sans-serif; }
-    .catalog .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); grid-auto-rows: 76px; gap: 8px; max-height: 328px; margin-top: 12px; overflow: auto; }
+    .catalog .bar { display: flex; gap: 8px; }
+    .catalog input, .catalog select { box-sizing: border-box; padding: 10px 14px; border: 1px solid #d0d7de; border-radius: 8px; font: 15px system-ui, sans-serif; background: #fff; }
+    .catalog input { flex: 1; min-width: 0; }
+    .catalog .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); grid-auto-rows: 76px; gap: 8px; max-height: 328px; margin-top: 12px; overflow: auto; }
     .catalog .cell { display: grid; justify-items: center; align-content: center; gap: 8px; min-width: 0; border-radius: 8px; color: #24292f; background: #f6f8fa; font: 11px ui-monospace, monospace; }
     .catalog .cell span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   </style>
   <div class="catalog">
-    <input type="search" placeholder="Search ${names.length} icons" aria-label="Search icons" />
+    <div class="bar">
+      <input type="search" placeholder="Search icons" aria-label="Search icons" />
+      <select aria-label="Category">
+        <option value="">All categories</option>
+        ${listIconCategories().map(({ name, count }) => `<option value="${name}">${name} (${count})</option>`).join('')}
+      </select>
+    </div>
     <div class="grid"></div>
   </div>`;
 
+const input = root.querySelector('input')!;
+const select = root.querySelector('select')!;
 const grid = root.querySelector('.grid')!;
-const show = (query: string) => {
-  const q = query.trim().toLowerCase();
-  const matches = names.filter((name) => !q || name.includes(q) || (aliasesOf.get(name) ?? []).some((alias) => alias.includes(q)));
-  grid.innerHTML = matches
-    .map((name) => `<div class="cell" title="${name}">${renderIconSvg(name, { size: 28 })}<span>${name}</span></div>`)
+
+const show = () => {
+  const results = searchIcons(input.value, { category: select.value || undefined });
+  grid.innerHTML = results
+    .map(({ name, matchedBy, matched }) => {
+      // "trash · bin": say why an icon whose name does not contain the query is here.
+      const label = matchedBy === 'name' ? name : `${name} · ${matched}`;
+      return `<div class="cell" title="${label}">${renderIconSvg(name, { size: 28 })}<span>${label}</span></div>`;
+    })
     .join('');
 };
 
-root.querySelector('input')!.addEventListener('input', (event) => show((event.target as HTMLInputElement).value));
-show('');
+input.addEventListener('input', show);
+select.addEventListener('change', show);
+show();
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/icons/docs/images/catalog.png" alt="The icon catalog: a search box and a grid of icons, each with its name under it" width="760">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/icons/docs/images/search.png" alt="The icon search with the query delete: trash first, labelled with the alias that matched, then file-x, folder-x and other icons for deleting" width="760">
 </p>
 
 ## Style an icon
@@ -331,6 +346,8 @@ ui-core yourself (`registerWithEditoraUI(registerIcon)`): its registry wins over
 | `renderIconSvg(name, options?)` | The icon as an `<svg>` string, or `''` if there is no such icon. |
 | `iconToDataUri(name, options?)` | `data:image/svg+xml;utf8,…` for an `<img>` or `url()`, or `''`. |
 | `listIcons()` | Every icon name, sorted, without aliases. |
+| `searchIcons(query, { category?, limit? })` | Icons matching a query, best first: `{ name, score, matchedBy, matched }`, where `matchedBy` is `name`, `alias`, `tag` or `category`. |
+| `listIconCategories()` | `{ name, count }` for every category, sorted by name. |
 | `listIconAliases()` | `{ alias: name }` for every alias. |
 | `hasIcon(name)` | Whether the name, or an alias, is an icon. |
 | `getIcon(name)` | The icon's definition, or `undefined`. |
@@ -343,8 +360,8 @@ ui-core yourself (`registerWithEditoraUI(registerIcon)`): its registry wins over
 | `normalizeIconSize(size, fallback?)` | The size `renderIconSvg` would draw: a positive number or CSS length, else the fallback. |
 | `registerWithEditoraUI(register)` | Calls `register(name, svg)` once for every icon, with its outline as markup: for an icon store of your own. |
 
-The types are `IconName`, `IconDefinition`, `IconGlyph`, `IconNode`, `IconTag`, `IconAttrValue`, `IconRenderOptions`,
-`IconVariant`, `IconWeight` and `ResolvedIcon`.
+The types are `IconName`, `IconSearchResult`, `IconSearchOptions`, `IconSearchField`, `IconDefinition`, `IconGlyph`,
+`IconNode`, `IconTag`, `IconAttrValue`, `IconRenderOptions`, `IconVariant`, `IconWeight` and `ResolvedIcon`.
 
 ## Size and where it runs
 

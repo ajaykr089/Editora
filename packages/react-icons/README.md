@@ -241,11 +241,49 @@ export default function App() {
   <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/react-icons/docs/images/dynamic.png" alt="A navigation menu with a blue custom brand icon and the name Acme, then Dashboard, Orders, Reports, Settings and Command palette, each with an icon" width="230">
 </p>
 
+## Search for an icon
+
+`searchIcons` and `listIconCategories` from [`@editora/icons`](https://www.npmjs.com/package/@editora/icons#find-an-icon)
+are exported here too, so an icon picker needs one import. Results come best first, by name, alias (`delete` finds
+`trash`), tag (`bin` finds `trash`) and category (`weather`), and each says what matched. Draw them with
+`<Icon name>`, which looks names up and so brings the whole icon set: fine in a picker, which shows the whole set anyway.
+
+```tsx
+import { useState } from 'react';
+import { Icon, listIconCategories, searchIcons } from '@editora/react-icons';
+
+export function IconPicker({ onPick }: { onPick: (name: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('');
+  const results = searchIcons(query, { category: category || undefined, limit: 60 });
+
+  return (
+    <div style={{ display: 'grid', gap: 8, font: '14px system-ui, sans-serif' }}>
+      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search icons" aria-label="Search icons" />
+      <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Category">
+        <option value="">All categories</option>
+        {listIconCategories().map(({ name, count }) => (
+          <option key={name} value={name}>{name} ({count})</option>
+        ))}
+      </select>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+        {results.map(({ name, matchedBy, matched }) => (
+          <button key={name} type="button" onClick={() => onPick(name)} title={matchedBy === 'name' ? name : `${name} · ${matched}`}>
+            <Icon name={name} size={20} />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
 ## API
 
 | Export | What it is |
 | --- | --- |
 | `Icon` | The component for any name. |
+| `searchIcons(query, { category?, limit? })`, `listIconCategories()` | Icon search and its categories, from `@editora/icons`. |
 | `CheckIcon`, `SearchIcon`, … | A component for every icon, named after it in PascalCase (`chart-line` is `ChartLineIcon`). |
 | `IconProvider`, `IconContext`, `useIconContext()` | Shared defaults, and a way to read them. |
 | `defaultIconContext` | The built-in defaults: outline, 15 pixels, `currentColor`, a 1.5 stroke with round caps and joins. |
@@ -255,6 +293,7 @@ export default function App() {
 | `createIcon(name, displayName?)` | A component that draws an icon by name when it renders, including one you registered. |
 
 The types are `IconName`, `IconProps`, `NamedIconProps`, `IconContextValue`, `IconComponent`, `IconFlip`,
+`IconSearchResult`, `IconSearchOptions`, `IconSearchField`,
 `IconBaseProps` and `IconWeight`.
 
 ## Size, servers and Next.js

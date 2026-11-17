@@ -1,6 +1,9 @@
 import { iconDefinitions, iconNameList } from './definitions';
 import { getIcon, hasIcon, listIconAliases, listIcons, registerIcon, registerIcons, resolveIcon } from './registry';
 import { iconToDataUri, normalizeIconSize, renderIconSvg } from './render';
+import { listIconCategories, searchIcons } from './search';
+
+export type { IconSearchField, IconSearchOptions, IconSearchResult } from './search';
 
 export type { IconName } from './names';
 export { getRegisteredIcon } from './registered';
@@ -30,6 +33,8 @@ export {
   resolveIcon,
   renderIconSvg,
   iconToDataUri,
+  searchIcons,
+  listIconCategories,
   normalizeIconSize
 };
 
