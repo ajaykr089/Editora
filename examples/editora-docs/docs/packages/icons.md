@@ -23,8 +23,10 @@ npm i @editora/icons
 | `searchIcons(query, { category?, limit? })`, `listIconCategories()` | Search functions | Ranked search by name, alias, tag and category; categories with counts for picker filters |
 | `registerIcon`, `registerIcons` | Registry functions | Register custom icon definitions |
 | `renderIconSvg`, `iconToDataUri` | Render functions | SVG string and data-URI generation |
+| `renderIconDefinition`, `getRegisteredIcon` | Render functions (also in `@editora/icons/renderer`) | Draw a definition without the catalog; look up an icon registered by name |
+| `checkIcon`, `chevronDownIcon`, … (`@editora/icons/glyphs`) | Per-icon exports | One definition per built-in icon, for tree shaking |
 | `registerWithEditoraUI(registerFn)` | Integration helper | Push icon set into UI-core registries |
-| `IconAttrValue`, `IconDefinition`, `IconGlyph`, `IconNode`, `IconRenderOptions`, `IconTag`, `IconVariant`, `ResolvedIcon` | Type exports | Icon typing for authoring and rendering |
+| `IconName`, `IconAttrValue`, `IconDefinition`, `IconGlyph`, `IconNode`, `IconRenderOptions`, `IconTag`, `IconVariant`, `ResolvedIcon` | Type exports | Icon typing for authoring and rendering; `IconName` is every built-in name |
 
 ## Usage Example
 
@@ -47,6 +49,17 @@ import { listIconCategories, searchIcons } from "@editora/icons";
 searchIcons("bin");                         // [{ name: "trash", matchedBy: "tag", matched: "bin", score: 105 }]
 searchIcons("arrow", { category: "arrows", limit: 10 });
 listIconCategories();                        // [{ name: "abstract", count: 6 }, ...]
+```
+
+Names autocomplete, and `IconName` catches a typo in names you keep in your own data:
+
+```ts
+import type { IconName } from "@editora/icons";
+
+const menu: Array<{ label: string; icon: IconName }> = [
+  { label: "Orders", icon: "order" },
+  { label: "Settings", icon: "settings" },
+];
 ```
 
 ## Best Practices

@@ -1,3 +1,4 @@
+import type { IconName } from "./names";
 import type { IconDefinition, IconNode } from "./types";
 
 const LEGACY_ICON_VIEWBOX = "0 0 15 15";
@@ -5885,4 +5886,4 @@ export const iconDefinitions: IconDefinition[] = [
 
 export const iconNameList = Array.from(
   new Set(iconDefinitions.map((entry) => entry.name)),
-).sort();
+).sort() as IconName[];
