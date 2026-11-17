@@ -183,7 +183,13 @@ export function initWebComponent(plugins: Record<string, () => Plugin>): void {
   });
 }
 
-export class RichTextEditorElement extends HTMLElement {
+// `class extends HTMLElement` is evaluated when the module is imported, and importing the package
+// must not throw where there is no DOM (Node, server-side rendering). The class is only ever
+// constructed by `customElements.define()`, which needs a browser anyway.
+const ElementBase: typeof HTMLElement =
+  typeof HTMLElement === 'undefined' ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
+
+export class RichTextEditorElement extends ElementBase {
   private engine?: EditorEngine;
   private toolbar?: ToolbarRenderer;
   private floatingToolbar?: FloatingToolbar;

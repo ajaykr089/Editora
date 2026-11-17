@@ -1,4 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
 
 export interface InlineMenuOption {
   label: string;
@@ -70,7 +71,7 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
     setPosition({ top, left });
   };
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!isOpen) {
       setPosition(null);
       return;

@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Editor } from '@editora/core';
 import { ToolbarItem } from '@editora/core';
 import { EditorIcons, EditorIconName } from './EditorIcons';
 import { InlineMenu, InlineMenuOption } from './InlineMenu';
+import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
 import {
   getToolbarSelectionState,
   isToolbarCommandActive,
@@ -30,9 +31,6 @@ const normalizeToolbarToken = (value: string): string =>
 
 const getToolbarItemMeasureKey = (item: ToolbarItemLike, index: number): string =>
   `${index}:${item.type}:${item.command || ''}:${item.label || ''}`;
-
-const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 const COMMAND_ALIASES: Record<string, string> = {
   undo: 'undo',
