@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import toastLegacy, { toastAdvanced, toastPro } from '@editora/toast';
+import importedToastLegacy, { toastAdvanced as importedToastAdvanced, toastPro as importedToastPro } from '@editora/toast';
 import type { ToastConfig, ToastOptionsAdvanced } from '@editora/toast';
+
+// Own bindings, not a re-export of the imports: Rollup would route a re-export straight to whoever imports it, so the
+// package root imported @editora/toast (and bundled it) even for apps that never show a toast.
+export const toastAdvanced = importedToastAdvanced;
+export const toastPro = importedToastPro;
+export const toastLegacy = importedToastLegacy;
 
 export type ToastOptions = Partial<Omit<ToastOptionsAdvanced, 'message'>> & {
   type?: string;
@@ -99,6 +105,5 @@ export function useToast(): ToastContextValue {
   return context;
 }
 
-export { toastAdvanced, toastPro, toastLegacy };
 
 export default ToastAPI;

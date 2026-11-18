@@ -107,6 +107,13 @@ export default defineConfig({
         exports: 'named',
         interop: 'auto',
         esModule: true,
+        // Hooks are not entries, so Rollup inlined them into index.esm.js, and with them their import of
+        // @editora/ui-core/runtime, which a bundler then keeps for every root import. A chunk of their own lets the
+        // bundler drop a hook (and its imports) that the app does not use.
+        manualChunks(id) {
+          const hook = id.match(/\/src\/hooks\/(\w+)\.tsx?$/);
+          return hook ? `hooks-${hook[1]}` : undefined;
+        },
       },
     }
   }
