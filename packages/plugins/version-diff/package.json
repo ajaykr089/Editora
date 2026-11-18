@@ -1,6 +1,6 @@
 {
   "name": "@editora/version-diff",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Version diff plugin for Editora rich text editor with inline and side-by-side comparison",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -27,7 +27,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.19"
+    "@editora/core": "^1.0.33"
   },
   "exports": {
     ".": {

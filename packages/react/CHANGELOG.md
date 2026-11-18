@@ -1,5 +1,23 @@
 # Change Log
 
+## 1.0.33
+
+### Patch Changes
+
+- 314a959: Document what the `contextMenu` option does. It was easy to read as "show an editor context menu", which is why `contextMenu={{ enabled: true }}` looked like it did nothing. It is a switch for the browser's own right-click menu: `enabled: false` stops that menu from opening inside the editor, and the default (`true`) leaves it alone. The editor does not draw a context menu of its own. The behaviour is unchanged; the typings and the docs now say this, and the web component's handling is covered by tests.
+- acd32a4: Deprecate the `menubar` option, which has never done anything. The React prop (`menubar={{ enabled: true, items: [...] }}`) and the `<editora-editor menubar>` attribute were accepted, passed along and ignored: no menu bar is rendered, and a menu bar is not planned for the editor.
+
+  It is not removed, so code that passes it keeps compiling and running, but it is marked `@deprecated` in the typings, logs one console warning per page when a page actually asks for a menu bar, and will be removed in a future major release. `getConfig().menubar` on the web component now reports `false` by default instead of claiming a menu bar that does not exist.
+
+- Updated dependencies [314a959]
+- Updated dependencies [920db42]
+- Updated dependencies [5e5795e]
+- Updated dependencies [9707d98]
+- Updated dependencies [acd32a4]
+- Updated dependencies [9c297a2]
+  - @editora/core@1.0.33
+  - @editora/plugins@1.2.7
+
 ## 1.0.32
 
 ### Patch Changes

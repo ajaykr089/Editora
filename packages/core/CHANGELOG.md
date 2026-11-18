@@ -1,5 +1,25 @@
 # Change Log
 
+## 1.0.33
+
+### Patch Changes
+
+- 314a959: Document what the `contextMenu` option does. It was easy to read as "show an editor context menu", which is why `contextMenu={{ enabled: true }}` looked like it did nothing. It is a switch for the browser's own right-click menu: `enabled: false` stops that menu from opening inside the editor, and the default (`true`) leaves it alone. The editor does not draw a context menu of its own. The behaviour is unchanged; the typings and the docs now say this, and the web component's handling is covered by tests.
+- 920db42: Make `<editora-editor disabled>` (and `disabled="true"`, or `setConfig({ disabled: true })`) disable the editor. The attribute was accepted and ignored: the surface stayed editable and every toolbar button stayed enabled. A disabled editor is now read-only, its toolbar buttons are disabled, the surface leaves the tab order and reports `aria-disabled="true"`, and toolbar and keyboard commands do nothing. Removing the attribute restores exactly what it disabled (a button a plugin had already disabled stays disabled). `disabled="false"` no longer greys the editor out either: the style now follows the real state instead of the mere presence of the attribute.
+- 5e5795e: Fix two options of `<editora-editor>.setConfig()` that were accepted and then ignored.
+
+  - `setConfig({ content })` now replaces the content, for an editor that is already running and for one that is not in the page yet (it outranks the element's own markup). The editor was rebuilt from the content it already held, so the new content was dropped. The value is used once: a later rebuild, such as a `plugins` attribute change, resumes from what the user typed, not from the value passed here. It is sanitised like any other content that comes from outside.
+  - `setConfig({ theme: 'dark' })` now swaps the theme class. It added `editora-theme-dark` next to the existing `editora-theme-light`, so the editor carried both. Changing the `theme` attribute had the same problem whenever more than one theme class was present, because the old classes were removed while the class list was being walked, which skips every other one.
+
+- 9707d98: Build `<editora-editor>` once, and report each change once.
+
+  - An editor written with a `plugins` or `toolbar` attribute was torn down and rebuilt once per attribute while the element was being upgraded (the usual page: the markup first, the script after it), so `editor-ready` fired three times for an editor with both attributes, plugins were initialised repeatedly, and `editor-destroy` fired for an editor that had not been destroyed. The editor is now built once from all the attributes. An attribute changed later still rebuilds it, once for however many are changed together. An editor taken out of the page while its plugins are still loading no longer builds itself in the detached element.
+  - `content-change` fired a second time on every blur, repeating the HTML that the debounced event had just reported, and it fired on a blur with no change at all, such as clicking a toolbar button, so one toolbar edit produced two events. Blur now reports only HTML that differs from what the last event said. An edit still waiting for the debounce, or one made without an input event, is still reported on blur.
+
+- acd32a4: Deprecate the `menubar` option, which has never done anything. The React prop (`menubar={{ enabled: true, items: [...] }}`) and the `<editora-editor menubar>` attribute were accepted, passed along and ignored: no menu bar is rendered, and a menu bar is not planned for the editor.
+
+  It is not removed, so code that passes it keeps compiling and running, but it is marked `@deprecated` in the typings, logs one console warning per page when a page actually asks for a menu bar, and will be removed in a future major release. `getConfig().menubar` on the web component now reports `false` by default instead of claiming a menu bar that does not exist.
+
 ## 1.0.32
 
 ### Patch Changes

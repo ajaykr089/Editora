@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.2.7
+
+### Patch Changes
+
+- 9c297a2: Fix `VersionDiffPlugin({ baselineHtml })` having no effect. The plugin remembers the editor's starting content the first time the editor is focused or typed in, and that remembered copy was checked before the `baselineHtml` option, so the dialog compared the document with itself and always showed "No changes detected" (only `getBaselineHtml` worked). The option now outranks the remembered starting content; a baseline set at run time (`setVersionDiffBaseline` or "Set Current as Baseline") still outranks both.
+- Updated dependencies [314a959]
+- Updated dependencies [920db42]
+- Updated dependencies [5e5795e]
+- Updated dependencies [9707d98]
+- Updated dependencies [acd32a4]
+  - @editora/core@1.0.33
+
 ## 1.2.6
 
 ### Patch Changes
