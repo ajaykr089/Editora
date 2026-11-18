@@ -42,7 +42,7 @@
 **0.6.0**
 
 - A bundler keeps only the components you import, from the package root too: `import { Button } from
-  '@editora/ui-react'` went from about 590 KB to 10.6 KB gzipped (Vite, React left out), the same as
+  '@editora/ui-react'` went from about 590 KB to 10.5 KB gzipped (Vite, React left out), the same as
   `@editora/ui-react/Button`.
 - **Breaking:** importing from this package no longer registers every `@editora/ui-core` element. If you write raw
   `<ui-…>` tags yourself, import their entries (`@editora/ui-core/progress`) or `@editora/ui-core` once. A console
@@ -176,16 +176,18 @@ is needed (the icon catalog, the first time an icon is drawn).
 
 | Import | Up front, gzipped | Later, if needed |
 | --- | --- | --- |
-| `import { Button } from '@editora/ui-react'` | 10.6 KB | 50 KB |
-| `import Button from '@editora/ui-react/Button'` | 10.6 KB | 50 KB |
-| `import { Input } from '@editora/ui-react'` | 10.6 KB | none |
-| `import { DataTable } from '@editora/ui-react'` | 17.5 KB | none |
-| `Button`, `Input`, `Checkbox`, `Dialog` and `DataTable` from the root | 48 KB | 50 KB |
+| `import { Button } from '@editora/ui-react'` | 10.5 KB | 50 KB |
+| `import Button from '@editora/ui-react/Button'` | 10.5 KB | 50 KB |
+| `import { Input } from '@editora/ui-react'` | 10.8 KB | none |
+| `import { DataTable } from '@editora/ui-react'` | 17.8 KB | none |
+| `Button`, `Input`, `Checkbox`, `Dialog` and `DataTable` from the root | 47.7 KB | 50 KB |
+
+Every page also fetches a 0.4 KB check three seconds after the first render (see the note below).
 
 **Writing `<ui-…>` tags yourself?** A component registers only the elements it renders, so a raw tag in your own JSX or
 HTML (`<ui-progress value="40">`) needs its element registered: import `@editora/ui-core/progress`, or
 `@editora/ui-core` once to register every element. Until then the tag renders as an empty unknown element, and the page
-logs a warning that names it. Before 0.6.0 any import from this package registered every element, about 600 KB gzipped.
+logs a warning that names it: that check is the 0.4 KB fetched three seconds after the first render. Before 0.6.0 any import from this package registered every element, about 600 KB gzipped.
 
 ## Forms
 
