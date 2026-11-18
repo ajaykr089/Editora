@@ -52,6 +52,10 @@ Or from npm, for a bundler such as Vite, webpack or esbuild:
 npm install @editora/core
 ```
 
+A bundler (Vite, webpack, esbuild, Next.js) handles the packages on any Node version. Importing them in plain
+Node, with no bundler in between (a script, a test runner, a server render that keeps dependencies external), needs
+Node 20.19 or later, or 22.12 or later: older releases, Node 18 included, cannot load them.
+
 ## Quick start
 
 ```html
