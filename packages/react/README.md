@@ -337,7 +337,7 @@ page hydrates, and the plugins' `init` hooks run then, not on the server.
 This is checked with Next.js 15 and React 19, in `next dev` and in a production build: HTTP 200, no hydration
 messages, and the editor works.
 
-Releases up to `@editora/core` 1.0.22 and `@editora/react` 1.0.25 cannot be imported on the server: the page fails
+Releases before `@editora/core` 1.0.31 and `@editora/react` 1.0.32 cannot be imported on the server: the page fails
 with `HTMLElement is not defined` (a 500 in Next.js). With those versions, or to skip the server-rendered shell, load
 the editor on the client only, with `next/dynamic`:
 
