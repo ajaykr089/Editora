@@ -65,3 +65,5 @@ Validate keyboard navigation and screen-reader labels for all composed controls.
 ## Performance Notes
 
 Memoize heavy composite views and avoid broad context updates in high-frequency interaction zones.
+
+A bundler keeps only the components you import, from the package root or from a component's own entry (`@editora/ui-react/Button`): `import { Button } from "@editora/ui-react"` loads about 10.5 KB gzipped up front with a Vite production build. Each component registers the custom elements it renders. If you write raw `<ui-…>` tags yourself, register their elements with `@editora/ui-core/<name>`, or `@editora/ui-core` once for all of them; a console warning names any tag on the page that nothing registered.

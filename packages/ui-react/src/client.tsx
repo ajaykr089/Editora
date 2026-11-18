@@ -1,7 +1,7 @@
 /// <reference path="./custom-elements.d.ts" />
 'use client';
 
-import '@editora/ui-core';
+// No blanket `import '@editora/ui-core'`: each component registers the elements it renders (see index.tsx).
 
 // RSC-safe client barrel:
 // keep this surface limited to commonly used wrappers that are safe to import

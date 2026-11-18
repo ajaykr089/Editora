@@ -39,6 +39,15 @@
 
 ## What's new
 
+**0.6.0**
+
+- A bundler keeps only the components you import, from the package root too: `import { Button } from
+  '@editora/ui-react'` went from about 590 KB to 10.5 KB gzipped (Vite, React left out), the same as
+  `@editora/ui-react/Button`.
+- **Breaking:** importing from this package no longer registers every `@editora/ui-core` element. If you write raw
+  `<ui-…>` tags yourself, import their entries (`@editora/ui-core/progress`) or `@editora/ui-core` once. A console
+  warning names any unregistered tag on the page.
+
 **0.3.0** (2026-11-07)
 
 - `Form` takes `errors` to show errors from a server response on their fields, and focuses the first one.
@@ -139,13 +148,14 @@ export default function Gallery() {
 
 ## Import from the package or from one component
 
-Importing from the package root is the simplest, and it is the heaviest: every wrapper and every component's custom
-element is in the bundle, and the bundler cannot drop the ones you do not use. Each component also has its own entry:
+Import from the package root or from a component's own entry: a bundler keeps only the components you use either way.
+Each component registers the custom elements it renders, and the package declares no side effects, so the ones you do not
+import are dropped.
 
 ```tsx
-// Everything from the package root: the simplest, and the heaviest.
+// From the package root.
 import { Button, Input } from '@editora/ui-react';
-// One component per entry: a lighter first load.
+// Or from one component's own entry, which costs the same.
 import ButtonOnly from '@editora/ui-react/Button';
 import InputOnly from '@editora/ui-react/Input';
 
@@ -161,18 +171,23 @@ export default function Imports() {
 }
 ```
 
-Measured with esbuild, minified, with code splitting, importing one component and leaving React out. This is everything
-the import needs:
+Measured with a Vite production build, React left out: what the page loads up front, and what loads later only if it
+is needed (the icon catalog, the first time an icon is drawn).
 
-| Import | Gzipped |
-| --- | --- |
-| `import { Button } from '@editora/ui-react'` | 1 MB |
-| `import Button from '@editora/ui-react/Button'` | 55 KB |
-| `import Input from '@editora/ui-react/Input'` | 8 KB |
-| `import DataTable from '@editora/ui-react/DataTable'` | 14 KB |
+| Import | Up front, gzipped | Later, if needed |
+| --- | --- | --- |
+| `import { Button } from '@editora/ui-react'` | 10.5 KB | 50 KB |
+| `import Button from '@editora/ui-react/Button'` | 10.5 KB | 50 KB |
+| `import { Input } from '@editora/ui-react'` | 10.8 KB | none |
+| `import { DataTable } from '@editora/ui-react'` | 17.8 KB | none |
+| `Button`, `Input`, `Checkbox`, `Dialog` and `DataTable` from the root | 47.7 KB | 50 KB |
 
-Each entry registers only the custom elements its component renders, so nothing else is fetched later. The package root
-registers the whole catalog on purpose, which is why it is the heavy one.
+Every page also fetches a 0.4 KB check three seconds after the first render (see the note below).
+
+**Writing `<ui-…>` tags yourself?** A component registers only the elements it renders, so a raw tag in your own JSX or
+HTML (`<ui-progress value="40">`) needs its element registered: import `@editora/ui-core/progress`, or
+`@editora/ui-core` once to register every element. Until then the tag renders as an empty unknown element, and the page
+logs a warning that names it: that check is the 0.4 KB fetched three seconds after the first render. Before 0.6.0 any import from this package registered every element, about 600 KB gzipped.
 
 ## Forms
 
@@ -562,6 +577,9 @@ element on the client, in an effect, and clean it up when they unmount.
 
 - **A component renders as an empty tag, or React warns that a tag is not registered.** Import the wrapper from the
   package root or from its own entry (`@editora/ui-react/Button`); both register the element.
+- **A `<ui-…>` tag you wrote yourself stays empty, and the console says it is not registered.** Since 0.6.0 importing
+  from this package registers only the elements its components render. Import that element's entry
+  (`@editora/ui-core/progress`), or `@editora/ui-core` once for all of them.
 - **A callback does not fire as expected.** Use the typed `detail` that wrapper callbacks receive, such as
   `onPageChange={(d) => d.page}`, instead of parsing the DOM event.
 

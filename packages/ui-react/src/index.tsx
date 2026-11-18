@@ -1,6 +1,8 @@
 /// <reference path="./custom-elements.d.ts" />
 'use client';
-import '@editora/ui-core';
+// No blanket `import '@editora/ui-core'` here: each component registers the elements it renders, so a bundler keeps
+// only the components an app imports (package.json says `"sideEffects": false`). To use raw <ui-*> tags, import
+// '@editora/ui-core' (every element) or '@editora/ui-core/<name>' yourself.
 
 export { Button } from './components/Button';
 export type { ButtonProps } from './components/Button';

@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { IS_SERVER, takeServerAttributes } from './_serverAttributes';
+import { scheduleUndefinedElementCheck } from './_undefinedElements';
 
 // Kept apart from _internals.ts on purpose: this file is reachable from `@editora/ui-react/server`,
 // which React Server Components load, so it must not import a hook or anything that needs a DOM.
@@ -16,6 +17,7 @@ export function createUIElement(
   props?: (Record<string, unknown> & { className?: unknown; class?: unknown }) | null,
   ...children: ReactNode[]
 ): ReactElement {
+  if (!IS_SERVER) scheduleUndefinedElementCheck();
   if (!props || !tag.includes('-')) {
     return createElement(tag, props, ...children);
   }

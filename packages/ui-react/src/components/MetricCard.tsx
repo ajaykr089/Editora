@@ -4,5 +4,10 @@
 if (typeof window !== 'undefined' && typeof customElements !== 'undefined' && !customElements.get('ui-icon')) {
   void import('@editora/ui-core/icon' as string);
 }
-export * from './server/MetricCard';
-export { default } from './server/MetricCard';
+
+// Own bindings, not `export … from './server/…'`: a file that only re-exports lets Rollup skip it and copy its
+// top-level imports into every importer, so the package root used to register this element for everyone.
+import { MetricCard as ServerMetricCard } from './server/MetricCard';
+export type * from './server/MetricCard';
+export const MetricCard = ServerMetricCard;
+export default ServerMetricCard;
