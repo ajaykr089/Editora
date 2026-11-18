@@ -33,7 +33,7 @@
 - **Themes.** Light, dark and acme, applied to everything inside an element with `data-theme`.
 - **An imperative API** for the cases where state is not enough: read and replace the HTML, run commands.
 - **Typed.** The props and the editor API are typed; the typings ship with the package.
-- Tested with React 18 and 19 (the peer range is React 16.8 to 20). Server rendering needs one extra step; see [Next.js and server rendering](#nextjs-and-server-rendering).
+- Tested with React 18 and 19 (the peer range is React 16.8 to 20). Can be server rendered (Next.js); see [Next.js and server rendering](#nextjs-and-server-rendering).
 
 ## Install
 
@@ -43,6 +43,10 @@ npm install @editora/react @editora/core @editora/plugins @editora/themes
 
 `@editora/core` is required. `@editora/plugins` (the toolbar items) and `@editora/themes` (the styles) are optional
 peer dependencies, but you will want both.
+
+A bundler (Vite, webpack, esbuild, Next.js) handles the packages on any Node version. Importing them in plain
+Node, with no bundler in between (a script, a test runner, a server render that keeps dependencies external), needs
+Node 20.19 or later, or 22.12 or later: older releases, Node 18 included, cannot load them.
 
 ## Quick start
 
@@ -195,6 +199,7 @@ export default function DocumentEditor() {
 | `toolbar` | `{ items?, sticky?, showMoreOptions? }` | `items` is a string such as `'undo redo \| bold italic'` or an array of names (see [Toolbar items](#toolbar-items)). `sticky` keeps the toolbar in view while the page scrolls, and `showMoreOptions` folds the buttons that do not fit into a menu. |
 | `floatingToolbar` | `boolean \| { enabled? }` | A toolbar that appears next to the selected text. |
 | `statusbar` | `{ enabled?, position? }` | A status bar with the cursor position and the word and character counts. `position` is `'top'` or `'bottom'`. |
+| `contextMenu` | `{ enabled? }` | `enabled: false` stops the browser's own right-click menu from opening in the editor. The default leaves it alone; the editor draws no context menu of its own. |
 | `readonly` | `boolean` | Shows the content without letting the user edit it. |
 | `placeholder` | `string` | Text shown while the editor is empty. |
 | `ariaLabel` / `ariaLabelledBy` | `string` | The editing area's accessible name, or the id of a visible label for it. Without them screen readers hear the placeholder, which is not a label. |
@@ -212,7 +217,7 @@ export default function DocumentEditor() {
 | `onDestroy` | `() => void` | Called when the editor is removed. |
 | `id`, `className` | `string` | Passed to the editor's container. |
 
-`menubar` is accepted but nothing renders a menu bar yet.
+`menubar` is deprecated and has no effect: the editor renders no menu bar. It still compiles, and logs a warning once when it is enabled.
 
 ## Toolbar items
 
@@ -328,9 +333,17 @@ export default function Themes() {
 
 ## Next.js and server rendering
 
-The editor needs the browser's DOM when its code is loaded, so it cannot be imported on the server. In Next.js a
-`'use client'` file is still rendered on the server first, which fails with `HTMLElement is not defined`. Load the
-editor on the client only, with `next/dynamic`:
+`@editora/react`, `@editora/core` and `@editora/plugins` can be imported where there is no DOM, so a `'use client'`
+file (which Next.js also renders on the server first) can import and render `<EditoraEditor />` directly, as in the
+quick start. The server sends the editor's shell: the toolbar and an empty content area. The content appears when the
+page hydrates, and the plugins' `init` hooks run then, not on the server.
+
+This is checked with Next.js 15 and React 19, in `next dev` and in a production build: HTTP 200, no hydration
+messages, and the editor works.
+
+Releases before `@editora/core` 1.0.31 and `@editora/react` 1.0.32 cannot be imported on the server: the page fails
+with `HTMLElement is not defined` (a 500 in Next.js). With those versions, or to skip the server-rendered shell, load
+the editor on the client only, with `next/dynamic`:
 
 ```tsx
 'use client';
@@ -348,8 +361,7 @@ export default function Page() {
 }
 ```
 
-This is checked with Next.js 15 and React 19. In other frameworks, do the same: import the editor only in code that
-runs in the browser.
+In other frameworks, older versions need the same: import the editor only in code that runs in the browser.
 
 ## Lower-level exports
 

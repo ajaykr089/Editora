@@ -116,9 +116,9 @@ Notes:
 | `toolbar.showMoreOptions` | `boolean` | `true` |
 | `statusbar.enabled` | `boolean` | `false` |
 | `statusbar.position` | `'top' \| 'bottom'` | `'bottom'` |
-| `menubar.enabled` | `boolean` | `false` |
-| `menubar.items` | `string[]` | `[]` |
-| `contextMenu.enabled` | `boolean` | `true` |
+| `menubar.enabled` | `boolean` | `false` (deprecated: the editor renders no menu bar, so this has no effect) |
+| `menubar.items` | `string[]` | `[]` (deprecated, no effect) |
+| `contextMenu.enabled` | `boolean` | `true` (`false` blocks the browser's right-click menu; `true` leaves it alone, the editor draws no menu of its own) |
 | `floatingToolbar` (legacy) | `boolean \| { enabled?: boolean }` | `undefined` |
 
 ### Media, paste, history, language

@@ -54,10 +54,20 @@ export interface RichTextEditorProps {
     enabled?: boolean;
     position?: "top" | "bottom";
   };
+  /**
+   * @deprecated Has no effect: the editor renders no menu bar, whatever this is set to. It is still
+   * accepted so existing code keeps compiling, logs a one-time warning when it is enabled, and will be
+   * removed in a future major release.
+   */
   menubar?: {
     enabled: boolean;
     items?: string[];
   };
+  /**
+   * Whether the browser's own right-click menu may open inside the editor. `enabled: false` stops it;
+   * `true` (the default) leaves it alone. The editor does not draw a context menu of its own, so `true`
+   * adds none. A plugin that needs one, such as the spell-check suggestions, draws its own.
+   */
   contextMenu?: {
     enabled?: boolean;
   };

@@ -8,6 +8,10 @@ export interface EditorConfigDefaults {
   width?: number | string;
   readonly?: boolean;
   disabled?: boolean;
+  /**
+   * @deprecated Has no effect: the editor renders no menu bar, whatever this is set to. It is still
+   * accepted so existing code keeps working, and will be removed in a future major release.
+   */
   menubar?: boolean | { enabled?: boolean; items?: string[] };
   toolbar?:
     | string
@@ -53,6 +57,11 @@ export interface EditorConfigDefaults {
         apiHeaders?: Record<string, string>;
       };
   language?: string | { locale?: string; direction?: 'ltr' | 'rtl' };
+  /**
+   * Whether the browser's own right-click menu may open inside the editor. `enabled: false` stops it;
+   * `true` (the default) leaves it alone. The editor does not draw a context menu of its own, so `true`
+   * adds none. A plugin that needs one, such as the spell-check suggestions, draws its own.
+   */
   contextMenu?: { enabled?: boolean } | boolean;
   contentConfig?: {
     allowedTags?: string[];
@@ -85,7 +94,7 @@ export class ConfigResolver {
     width: '100%',
     readonly: false,
     disabled: false,
-    menubar: true,
+    menubar: false,
     toolbar: true,
     plugins: [],
     theme: 'light',

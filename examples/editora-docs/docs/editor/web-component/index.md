@@ -71,7 +71,7 @@ Config resolution order:
 | `toolbar-items` | `string` | Toolbar item layout string |
 | `toolbar-floating` | `boolean` | Enable floating toolbar behavior |
 | `toolbar-sticky` | `boolean` | Sticky main toolbar |
-| `menubar` | `boolean \| object` | Menubar config |
+| `menubar` | `boolean \| object` | Deprecated: the editor renders no menu bar, so this has no effect |
 | `statusbar` | `boolean \| object` | Statusbar config |
 
 ### Runtime/operational attributes
@@ -88,8 +88,8 @@ Config resolution order:
 | `language-locale`, `language-direction` | flattened attrs | Language bridge fields |
 | `spellcheck` | `boolean \| object` | Spellcheck provider config |
 | `spellcheck-enabled`, `spellcheck-provider`, `spellcheck-api-url` | flattened attrs | Spellcheck bridge fields |
-| `context-menu` | `boolean \| object` | Context menu behavior |
-| `context-menu-enabled` | `boolean` | Flattened bridge field |
+| `context-menu` | `boolean \| object` | `false` or `{ "enabled": false }` blocks the browser's right-click menu; the default leaves it alone (the editor draws no menu of its own) |
+| `context-menu-enabled` | `boolean` | Flattened form of `context-menu`: `false` blocks the browser's right-click menu |
 | `paste` | `object` | Paste handling config |
 | `paste-clean`, `paste-keep-formatting`, `paste-convert-word` | flattened attrs | Paste bridge fields |
 | `security` | `object` | Security sanitization config |
@@ -139,7 +139,7 @@ Use `editorElement.getAPI()` to access:
 | Event | Detail | Trigger |
 | --- | --- | --- |
 | `editor-ready` | `api object` | Editor initialized |
-| `content-change` | `html payload` | Input/blur change emit |
+| `content-change` | `html payload` | Once per change: after typing pauses, or on blur if the change was not reported yet |
 | `editor-focus` | none | Content receives focus |
 | `editor-blur` | none | Content loses focus |
 | `editor-destroy` | none | Instance teardown |

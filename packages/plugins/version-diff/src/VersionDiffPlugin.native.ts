@@ -82,7 +82,10 @@ const defaultLabels: Required<VersionDiffLabels> = {
   largeDocFallback: 'Large document fallback mode applied for performance.',
 };
 
+// A baseline somebody chose: setVersionDiffBaseline() or "Set Current as Baseline".
 const baselineByEditor = new WeakMap<HTMLElement, string>();
+// What the editor held when it was first used. Only a fallback: the baselineHtml option outranks it.
+const initialBaselineByEditor = new WeakMap<HTMLElement, string>();
 const optionsByEditor = new WeakMap<HTMLElement, ResolvedVersionDiffPluginOptions>();
 let pluginInstanceCount = 0;
 let globalShortcutHandler: ((event: KeyboardEvent) => void) | null = null;
@@ -778,13 +781,20 @@ async function resolveBaselineHtml(
     if (typeof dynamic === 'string') return dynamic;
   }
 
-  const existing = baselineByEditor.get(editor);
-  if (typeof existing === 'string') return existing;
+  const chosen = baselineByEditor.get(editor);
+  if (typeof chosen === 'string') return chosen;
 
   if (typeof options.baselineHtml === 'string') return options.baselineHtml;
 
-  const initial = resolveInitialBaseline(editor);
-  baselineByEditor.set(editor, initial);
+  return getInitialBaseline(editor);
+}
+
+function getInitialBaseline(editor: HTMLElement): string {
+  let initial = initialBaselineByEditor.get(editor);
+  if (typeof initial !== 'string') {
+    initial = resolveInitialBaseline(editor);
+    initialBaselineByEditor.set(editor, initial);
+  }
   return initial;
 }
 
@@ -825,8 +835,8 @@ function ensureNoActiveDialog(): void {
 }
 
 function captureInitialBaseline(editor: HTMLElement): void {
-  if (!editor || baselineByEditor.has(editor)) return;
-  baselineByEditor.set(editor, resolveInitialBaseline(editor));
+  if (!editor || initialBaselineByEditor.has(editor)) return;
+  initialBaselineByEditor.set(editor, resolveInitialBaseline(editor));
 }
 
 function normalizeOptions(raw: VersionDiffPluginOptions): ResolvedVersionDiffPluginOptions {
@@ -951,7 +961,7 @@ function renderDialog(
     try {
       baselineHtml = await resolveBaselineHtml(editor, options, manualBaseline ?? openArgs?.baselineHtml);
     } catch {
-      baselineHtml = baselineByEditor.get(editor) ?? resolveInitialBaseline(editor);
+      baselineHtml = baselineByEditor.get(editor) ?? getInitialBaseline(editor);
     }
 
     if (requestId !== refreshRequestId || !overlay.isConnected) return;

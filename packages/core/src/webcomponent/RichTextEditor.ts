@@ -14,6 +14,7 @@ import { getCleanEditorHTML, stripEditorUiArtifacts } from '../utils/editorOutpu
 import { ConfigResolver, EditorConfigDefaults } from '../config/ConfigResolver';
 import { PluginLoader } from '../config/PluginLoader';
 import { Plugin } from '../plugins/Plugin';
+import { warnIgnoredOption } from '../config/deprecatedOptions';
 
 // Import styles
 import styles from './styles.css?inline';
@@ -30,6 +31,8 @@ const DEFAULT_EDITOR_LABEL = 'Rich text editor';
 // document to it. The default plugin set (no `plugins` given) leaves them out; they load when they
 // are named in `plugins` or configured under `pluginConfig`.
 const OPT_IN_ONLY_PLUGINS: ReadonlySet<string> = new Set(['collaboration']);
+// Marks a toolbar control the host disabled itself, so that enabling the editor restores exactly those.
+const DISABLED_BY_HOST_ATTR = 'data-editora-disabled-by-host';
 const connectedWebEditors = new Set<RichTextEditorElement>();
 let lastActiveWebEditor: RichTextEditorElement | null = null;
 let commandBridgeInstalled = false;
@@ -222,6 +225,12 @@ export class RichTextEditorElement extends ElementBase {
   private lastBeforeInputType: string | null = null;
   /** The content a keystroke is about to change, kept until its `input` event so the history can record the change. */
   private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null = null;
+  // False while the element is being upgraded: its attributes are replayed through
+  // attributeChangedCallback before connectedCallback, and connectedCallback builds the editor once.
+  private hasConnected = false;
+  private reinitializeQueued = false;
+  // The HTML last reported by content-change (or present at start), so blur only reports a difference.
+  private lastReportedContent: string | null = null;
 
   // Observed attributes for reactive updates
   static get observedAttributes(): string[] {
@@ -291,6 +300,7 @@ export class RichTextEditorElement extends ElementBase {
    * Called when element is added to DOM
    */
   connectedCallback(): void {
+    this.hasConnected = true;
     // Resolve configuration
     this.config = this.resolveConfig();
     
@@ -356,8 +366,36 @@ export class RichTextEditorElement extends ElementBase {
     // Reinitialize if already connected
     if (this.isConnected) {
       this.destroy();
+      this.adoptConfiguredContent(config);
       await this.waitForPluginLoader();
       await this.initialize();
+    } else {
+      this.adoptConfiguredContent(config);
+    }
+  }
+
+  /**
+   * `content` in setConfig() is a one-off replacement, not a setting: it feeds the next initialize()
+   * the same way the live content that destroy() keeps does, so a later rebuild (a `plugins`
+   * attribute change, the element being moved) resumes from what the user typed, not from this value.
+   * It outranks that kept content, autosave and the element's own markup.
+   */
+  private adoptConfiguredContent(config: EditorConfigDefaults): void {
+    if (typeof config.content === 'string') {
+      this.preservedContent = config.content;
+    }
+  }
+
+  /** Replace the `editora-theme-*` class (there is only ever one) with the one for `theme`. */
+  private applyThemeClass(theme: unknown): void {
+    // classList is live: removing while iterating it skips the entry after each removal.
+    Array.from(this.classList).forEach((cls) => {
+      if (cls.startsWith('editora-theme-')) {
+        this.classList.remove(cls);
+      }
+    });
+    if (theme) {
+      this.classList.add(`editora-theme-${theme}`);
     }
   }
 
@@ -400,11 +438,14 @@ export class RichTextEditorElement extends ElementBase {
     
     // Add base class
     this.classList.add('editora-editor');
+    this.classList.toggle('editora-disabled', this.isEditorDisabled());
     
-    if (this.config.theme) {
-      this.classList.add(`editora-theme-${this.config.theme}`);
+    this.applyThemeClass(this.config.theme);
+    
+    if (this.isMenubarRequested()) {
+      warnIgnoredOption('menubar', '<editora-editor> does not render a menu bar.');
     }
-    
+
     // Plugins load on demand, which can take a moment: say so instead of showing an empty box.
     this.setAttribute('data-loading', 'true');
     this.setAttribute('aria-busy', 'true');
@@ -451,7 +492,7 @@ export class RichTextEditorElement extends ElementBase {
     this.engine = new EditorEngine({
       content: initialContent,
       plugins,
-      readonly: this.config.readonly,
+      readonly: Boolean(this.config.readonly) || this.isEditorDisabled(),
     });
     
     // Create UI elements
@@ -707,7 +748,10 @@ export class RichTextEditorElement extends ElementBase {
     if (accessibility.enableARIA) {
       this.contentElement.setAttribute('role', 'textbox');
       this.contentElement.setAttribute('aria-multiline', 'true');
-      this.contentElement.setAttribute('aria-disabled', this.config.readonly ? 'true' : 'false');
+      this.contentElement.setAttribute(
+        'aria-disabled',
+        this.config.readonly || this.isEditorDisabled() ? 'true' : 'false'
+      );
       // A textbox needs an accessible name. The host's own aria-label wins (it is meaningless on
       // a custom element with no role, so this is the natural place to set it), then the
       // placeholder, then a generic fallback so the surface is never announced as unnamed.
@@ -721,7 +765,7 @@ export class RichTextEditorElement extends ElementBase {
       this.contentElement.removeAttribute('aria-label');
     }
 
-    this.contentElement.tabIndex = accessibility.keyboardNavigation ? 0 : -1;
+    this.contentElement.tabIndex = accessibility.keyboardNavigation && !this.isEditorDisabled() ? 0 : -1;
   }
 
   private applyLanguageSettings(): void {
@@ -1023,6 +1067,7 @@ export class RichTextEditorElement extends ElementBase {
       );
       
       this.toolbar.setCommandHandler((command, value) => {
+        if (this.isEditorDisabled()) return false;
         // Ensure editor has focus and a valid selection for multi-instance support
         if (this.contentElement) {
           // Focus the editor
@@ -1062,7 +1107,7 @@ export class RichTextEditorElement extends ElementBase {
     // Create content area
     this.contentElement = document.createElement('div');
     this.contentElement.className = 'editora-content rte-content'; // Add rte-content class for plugin helpers
-    this.contentElement.contentEditable = this.config.readonly ? 'false' : 'true';
+    this.contentElement.contentEditable = this.config.readonly || this.isEditorDisabled() ? 'false' : 'true';
     this.applyLanguageSettings();
     this.applyAccessibilitySettings();
     this.applySpellcheckSettings();
@@ -1132,10 +1177,23 @@ export class RichTextEditorElement extends ElementBase {
       }
     }
     
+    this.setToolbarControlsDisabled(this.isEditorDisabled());
+    this.lastReportedContent = getCleanEditorHTML(this.contentElement);
+
     // Auto-focus if configured
-    if (this.config.autofocus) {
+    if (this.config.autofocus && !this.isEditorDisabled()) {
       setTimeout(() => this.contentElement?.focus(), 0);
     }
+  }
+
+  /** True only when the page asked for a menu bar (the default is not a request), through setConfig() or the attribute. */
+  private isMenubarRequested(): boolean {
+    const fromScript = this.jsConfig?.menubar;
+    if (fromScript !== undefined) {
+      return fromScript === true || (typeof fromScript === 'object' && fromScript !== null && fromScript.enabled !== false);
+    }
+    const fromMarkup = this.getAttribute('menubar');
+    return fromMarkup !== null && fromMarkup !== 'false';
   }
 
   /**
@@ -1155,6 +1213,50 @@ export class RichTextEditorElement extends ElementBase {
         selectionCollapsed: snapshot.selectionCollapsed,
       });
     }
+  }
+
+  /**
+   * `disabled` is `readonly` plus a toolbar that cannot be pressed and a surface that leaves the tab
+   * order, like a disabled form control.
+   */
+  private isEditorDisabled(): boolean {
+    return this.config.disabled === true;
+  }
+
+  private applyDisabledState(): void {
+    const disabled = this.isEditorDisabled();
+    this.classList.toggle('editora-disabled', disabled);
+    if (disabled) {
+      this.floatingToolbar?.hide();
+    }
+    if (this.contentElement) {
+      this.contentElement.contentEditable = disabled || this.config.readonly ? 'false' : 'true';
+      this.applyAccessibilitySettings();
+    }
+    this.engine?.setReadonly(disabled || Boolean(this.config.readonly));
+    this.setToolbarControlsDisabled(disabled);
+  }
+
+  /**
+   * Disable (or give back) every control the default toolbar rendered. Controls that were already
+   * disabled for another reason are marked untouched, so enabling the editor does not wake them up.
+   */
+  private setToolbarControlsDisabled(disabled: boolean): void {
+    if (!this.toolbarElement) return;
+    const controls = this.toolbarElement.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>(
+      'button, input, select, textarea'
+    );
+    controls.forEach((control) => {
+      if (disabled) {
+        if (!control.disabled) {
+          control.disabled = true;
+          control.setAttribute(DISABLED_BY_HOST_ATTR, '');
+        }
+      } else if (control.hasAttribute(DISABLED_BY_HOST_ATTR)) {
+        control.disabled = false;
+        control.removeAttribute(DISABLED_BY_HOST_ATTR);
+      }
+    });
   }
 
   /**
@@ -1224,10 +1326,7 @@ export class RichTextEditorElement extends ElementBase {
       }
 
       const emitChange = () => {
-        this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html: stripEditorUiArtifacts(html) },
-          bubbles: true,
-        }));
+        this.emitContentChange(stripEditorUiArtifacts(html));
       };
 
       if (performanceConfig.debounceInputMs > 0) {
@@ -1302,10 +1401,12 @@ export class RichTextEditorElement extends ElementBase {
         this.contentChangeDebounceTimer = undefined;
       }
       if (this.contentElement) {
-        this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html: getCleanEditorHTML(this.contentElement) },
-          bubbles: true,
-        }));
+        // Flush an edit that was still waiting for the debounce, or one made without an input event;
+        // report nothing when the HTML is what content-change last said.
+        const html = getCleanEditorHTML(this.contentElement);
+        if (html !== this.lastReportedContent) {
+          this.emitContentChange(html);
+        }
       }
       this.dispatchEvent(new Event('editor-blur', { bubbles: true }));
       this.updateFloatingToolbar();
@@ -1314,7 +1415,7 @@ export class RichTextEditorElement extends ElementBase {
 
     this.contentElement.addEventListener('keydown', (event: KeyboardEvent) => {
       const accessibility = this.getAccessibilityConfig();
-      if (!accessibility.keyboardNavigation) return;
+      if (!accessibility.keyboardNavigation || this.isEditorDisabled()) return;
       shortcutManager.handleKeyDown(event, (command, params) => {
         this.executeCommand(command, params);
       });
@@ -1345,6 +1446,14 @@ export class RichTextEditorElement extends ElementBase {
 
     this.selectionChangeHandler = updateSelectionInfo;
     document.addEventListener('selectionchange', this.selectionChangeHandler);
+  }
+
+  private emitContentChange(html: string): void {
+    this.lastReportedContent = html;
+    this.dispatchEvent(new CustomEvent('content-change', {
+      detail: { html },
+      bubbles: true,
+    }));
   }
 
   private getSelectionRangeInEditor(): Range | null {
@@ -1489,25 +1598,21 @@ export class RichTextEditorElement extends ElementBase {
     switch (name) {
       case 'readonly':
         if (this.contentElement) {
-          this.contentElement.contentEditable = this.isReadonlyAttribute(value) ? 'false' : 'true';
+          this.contentElement.contentEditable =
+            this.isReadonlyAttribute(value) || this.isEditorDisabled() ? 'false' : 'true';
           this.applyAccessibilitySettings();
         }
         if (this.engine) {
-          this.engine.setReadonly(this.isReadonlyAttribute(value));
+          this.engine.setReadonly(this.isReadonlyAttribute(value) || this.isEditorDisabled());
         }
+        break;
+
+      case 'disabled':
+        this.applyDisabledState();
         break;
         
       case 'theme':
-        // Remove old theme classes
-        this.classList.forEach(cls => {
-          if (cls.startsWith('editora-theme-')) {
-            this.classList.remove(cls);
-          }
-        });
-        // Add new theme class
-        if (value) {
-          this.classList.add(`editora-theme-${value}`);
-        }
+        this.applyThemeClass(value);
         break;
         
       case 'placeholder':
@@ -1570,17 +1675,29 @@ export class RichTextEditorElement extends ElementBase {
       case 'toolbar-sticky':
       case 'plugins':
       case 'statusbar':
-        // These require re-initialization
-        if (this.isConnected) {
-          this.destroy();
-          this.waitForPluginLoader().then(() => {
-            this.initialize().catch(error => {
-              console.error('[RichTextEditor] Error during attribute change re-initialization:', error);
-            });
-          });
+        // These require re-initialization. While the element is being upgraded its attributes are
+        // replayed one by one before connectedCallback, which builds the editor once from all of them.
+        if (this.isConnected && this.hasConnected) {
+          this.scheduleReinitialize();
         }
         break;
     }
+  }
+
+  /** One rebuild for however many attributes are changed in the same task. */
+  private scheduleReinitialize(): void {
+    if (this.reinitializeQueued) return;
+    this.reinitializeQueued = true;
+    queueMicrotask(() => {
+      this.reinitializeQueued = false;
+      if (!this.isConnected) return;
+      this.destroy();
+      this.waitForPluginLoader().then(() => {
+        this.initialize().catch(error => {
+          console.error('[RichTextEditor] Error during attribute change re-initialization:', error);
+        });
+      });
+    });
   }
 
   /**
@@ -1680,6 +1797,7 @@ export class RichTextEditorElement extends ElementBase {
     this.toolbarElement = undefined;
     this.statusBarElement = undefined;
     this.loadedPlugins = [];
+    this.lastReportedContent = null;
     this.isInitialized = false;
     connectedWebEditors.delete(this);
     if (lastActiveWebEditor === this) {
