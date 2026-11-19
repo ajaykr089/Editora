@@ -47,6 +47,9 @@
   "module": "dist/index.esm.js",
   "types": "index.d.ts",
   "style": "dist/plugins.css",
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./index.d.ts",

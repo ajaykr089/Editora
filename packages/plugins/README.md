@@ -90,18 +90,20 @@ Create the plugins once, outside the component or with `useMemo`, so the editor 
 
 ## Choose an entry point
 
-| Import from | You get | Cost of importing one plugin from it |
-| --- | --- | --- |
-| `@editora/plugins/<subpath>` | One plugin, such as `@editora/plugins/bold`. | `BoldPlugin`: 3 KB (1 KB gzipped)<br>`TrackChangesPlugin`: 20 KB (5 KB gzipped) |
-| `@editora/plugins/lite` | The 27 common plugins: formatting, lists, links, tables, colours, fonts, history. | `BoldPlugin`: 83 KB (24 KB gzipped) |
-| `@editora/plugins/enterprise` | The 22 advanced plugins: review, workflow, structured authoring, import and export. | `TrackChangesPlugin`: 256 KB (77 KB gzipped) |
-| `@editora/plugins` | All 56 plugins. | `BoldPlugin`: 447 KB (125 KB gzipped)<br>`TrackChangesPlugin`: 467 KB (129 KB gzipped) |
+| Import from | You get |
+| --- | --- |
+| `@editora/plugins` | All 56 plugins. |
+| `@editora/plugins/lite` | The 27 common plugins: formatting, lists, links, tables, colours, fonts, history. |
+| `@editora/plugins/enterprise` | The 22 advanced plugins: review, workflow, structured authoring, import and export. |
+| `@editora/plugins/<subpath>` | One plugin, such as `@editora/plugins/bold`. |
 
-The last column is measured with esbuild, as minified ES modules, importing that one plugin and nothing else; a
-bundler of your own may differ a little. The point is that **the entry points do not tree-shake**: importing one plugin
-from `@editora/plugins`, `lite` or `enterprise` bundles everything that entry exports. Six common plugins (bold, italic,
-headings, lists, links, history) cost 127 KB gzipped from the root and 27 KB from `lite`. Import from `lite` for the
-common ones, and from a subpath for anything else.
+Every entry point tree-shakes: your bundle gets the plugins you import and what they use, whichever entry you import
+them from. `BoldPlugin` costs 3.5 KB (1.5 KB gzipped) from any of them, `TrackChangesPlugin` 20 KB (5.5 KB gzipped), and
+six common plugins (bold, italic, headings, lists, links, history) 42 KB (12.5 KB gzipped). These are measured with
+esbuild and Vite as minified ES modules; a bundler of your own may differ a little. It needs a bundler that reads the
+`sideEffects` field of `package.json` (Vite, Rollup, webpack, esbuild and Parcel do); 1.2.7 and earlier had none, and one
+plugin from the root cost 40 KB gzipped. A plugin's load-time code (global listeners, for example) runs when you import
+that plugin, not when you import another one from the same entry.
 
 ## Plugin catalog
 
