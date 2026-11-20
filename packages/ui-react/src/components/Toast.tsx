@@ -1,8 +1,10 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import '@editora/ui-core/toast';
-import { toastAdvanced } from '@editora/toast';
+// The lite entry: this component imports toast.css itself, so the copy of the styles built into the main entry would
+// be shipped twice.
+import { toastAdvanced } from '@editora/toast/lite';
 import '@editora/toast/toast.css';
-import type { ToastConfig, ToastInstance, ToastOptionsAdvanced, ToastPosition, ToastTheme } from '@editora/toast';
+import type { ToastConfig, ToastInstance, ToastOptionsAdvanced, ToastPosition, ToastTheme } from '@editora/toast/lite';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 

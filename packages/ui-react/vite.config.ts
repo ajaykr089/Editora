@@ -93,7 +93,7 @@ export default defineConfig({
     rollupOptions: {
       // @editora/ui-core/preload is a plain CSS string: bundle it so the server entry still reaches
       // nothing but react (server-entry.dist.test.ts).
-      external: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime', /^@editora\/ui-core(?!\/preload$)(\/.*)?$/, '@editora/toast'],
+      external: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime', /^@editora\/ui-core(?!\/preload$)(\/.*)?$/, '@editora/toast', '@editora/toast/lite'],
       onwarn(warning, warn) {
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && /use client/i.test(warning.message)) {
           return;
