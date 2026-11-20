@@ -17,6 +17,7 @@
       "@editora/ui-core/*": ["../../packages/ui-core/src/standalone/*"],
       "@editora/core/webcomponent": ["../../packages/core/src/webcomponent/standalone.native.ts"],
       "@editora/toast": ["../../packages/editora-toast/src/index.ts"],
+      "@editora/toast/*": ["../../packages/editora-toast/src/*"],
       "@editora/icons/glyphs": ["../../packages/icons/src/glyphs.ts"],
       "@editora/react": ["../../packages/react/src/index.ts"],
       "@editora/plugins/lite": ["../../packages/plugins/src/lite.ts"],

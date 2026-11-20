@@ -7,7 +7,7 @@
       "@editora/core/*": ["../core/index.d.ts"],
       "@editora/light-code-editor": ["../light-code-editor/dist/index.d.ts"],
       "@editora/light-code-editor/*": ["../light-code-editor/dist/*"],
-      "@editora/toast": ["../editora-toast/src/index.d.ts"],
+      "@editora/toast": ["../editora-toast/src/index.ts"],
       "@editora/toast/*": ["../editora-toast/src/*"],
       "@editora/themes": ["../themes/index.d.ts"],
       "@editora/themes/*": ["../themes/src/*"]

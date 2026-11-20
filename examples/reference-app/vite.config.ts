@@ -29,6 +29,10 @@ export default defineConfig({
       { find: '@editora/ui-react', replacement: `${pkgs}/ui-react/src/index.tsx` },
       { find: /^@editora\/icons\/(glyphs|renderer)$/, replacement: `${pkgs}/icons/src/$1.ts` },
       { find: '@editora/icons', replacement: `${pkgs}/icons/src/index.ts` },
+      // Before the root alias, which would also take '@editora/toast/<subpath>' and append it to index.ts.
+      { find: '@editora/toast/toast.css', replacement: `${pkgs}/editora-toast/src/toast.css` },
+      { find: '@editora/toast/lite', replacement: `${pkgs}/editora-toast/src/lite.ts` },
+      { find: '@editora/toast/react', replacement: `${pkgs}/editora-toast/src/react.tsx` },
       { find: '@editora/toast', replacement: `${pkgs}/editora-toast/src/index.ts` },
     ],
   },
