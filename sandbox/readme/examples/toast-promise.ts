@@ -1,5 +1,4 @@
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 const saveDocument = new Promise<{ name: string }>((resolve) => {
   setTimeout(() => resolve({ name: 'Q3-summary.pdf' }), 1500);

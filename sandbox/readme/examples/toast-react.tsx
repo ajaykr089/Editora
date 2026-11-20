@@ -1,5 +1,4 @@
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 async function saveDraft() {
   await new Promise((resolve) => setTimeout(resolve, 800));

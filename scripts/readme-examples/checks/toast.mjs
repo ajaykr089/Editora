@@ -3,8 +3,18 @@ export default async function checks({ run }) {
   const toasts = (page) => page.locator('.editora-toast');
   const has = async (page, text) => (await page.locator(`text=${text}`).count()) > 0;
 
+  // The toast card's real look (from toast.css): an opaque background and a status icon laid out next to the text.
+  const styled = (page) =>
+    page.$eval('.editora-toast', (el) => {
+      const style = getComputedStyle(el);
+      return style.backgroundColor !== 'rgba(0, 0, 0, 0)' && getComputedStyle(el.querySelector('.editora-toast-content')).display === 'flex';
+    });
+
   await run('toast-quick-start', async (page) => {
     await page.waitForTimeout(500);
+    // No CSS was imported: the package put its own styles on the page.
+    if ((await page.locator('style[data-editora-toast]').count()) !== 1) return 'the built-in styles were not put on the page';
+    if (!(await styled(page))) return 'the toasts are not styled';
     // Three toasts are visible at once by default; the fourth waits in the queue.
     const visible = await toasts(page).count();
     if (visible !== 3) return `expected 3 visible toasts, found ${visible}`;
@@ -150,5 +160,34 @@ export default async function checks({ run }) {
     if (!(await has(page, 'Saving...'))) return 'the loading toast is not shown';
     await page.waitForTimeout(1200);
     return (await has(page, 'Saved draft.md')) ? true : 'the toast did not turn into the success message';
+  });
+
+  await run('toast-lite', async (page) => {
+    await page.waitForTimeout(500);
+    if (!(await has(page, 'Styled by toast.css'))) return 'the toast is not shown';
+    // The app's toast.css is used, and the lite entry brought no copy of its own.
+    if ((await page.locator('style[data-editora-toast]').count()) !== 0) return 'the lite entry put its own styles on the page';
+    if ((await page.locator('style[data-editora-toast-fallback]').count()) !== 0) return 'toast.css was not found, so the fallback style was used';
+    return (await styled(page)) ? true : 'the toast is not styled by toast.css';
+  });
+
+  await run('toast-react-jsx', async (page) => {
+    await page.getByRole('button', { name: 'Archive' }).click();
+    await page.waitForTimeout(500);
+    const bold = await page.locator('.editora-toast-message strong').textContent().catch(() => null);
+    if (bold !== 'Q3-summary.pdf') return `the JSX message is not rendered (found ${bold})`;
+    if (!(await styled(page))) return 'the toast is not styled';
+    await page.locator('.editora-toast').getByRole('button', { name: 'Undo' }).click();
+    await page.waitForTimeout(600);
+    if (!(await has(page, 'Moved back'))) return 'the action did not run';
+
+    await page.getByRole('button', { name: 'Invite' }).click();
+    await page.waitForTimeout(500);
+    const invite = page.locator('.editora-toast', { hasText: 'Ana invited you to' });
+    if ((await invite.count()) !== 1) return 'the custom toast is not shown';
+    await page.locator('.editora-toast-container').hover();
+    await invite.getByRole('button', { name: 'Join' }).click();
+    await page.waitForTimeout(800);
+    return (await has(page, 'Ana invited you to')) ? 'dismiss() from the custom toast did not dismiss it' : true;
   });
 }

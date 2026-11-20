@@ -1,8 +1,9 @@
 <h1 align="center">@editora/toast</h1>
 
 <p align="center">
-  Toast notifications with no dependencies and nothing to mount: call <code>toast.success('Saved')</code> from
-  anywhere. Status icons, a stack that opens on hover, promise toasts, actions, progress, light and dark, keyboard access.
+  Toast notifications with no dependencies, nothing to mount and no CSS to import: call <code>toast.success('Saved')</code>
+  from anywhere. Status icons, a stack that opens on hover, promise toasts, actions, progress, light and dark, keyboard
+  access, and JSX in React.
 </p>
 
 <p align="center">
@@ -24,8 +25,11 @@
 
 ## Features
 
-- **Nothing to mount.** No provider, no container element: the first call creates what it needs. It works from React,
-  Vue, plain JavaScript, a service, or an event handler.
+- **Nothing to mount, no CSS to import.** No provider, no container element, no stylesheet: the first call creates
+  what it needs and puts the styles on the page. It works from React, Vue, plain JavaScript, a service, or an event
+  handler.
+- **JSX in React.** `@editora/toast/react` takes JSX wherever text goes, and `toast.custom()` shows your own component in
+  the toast. `<Toaster />` renders it with your app's context.
 - **A modern card.** An opaque, neutral surface with a status icon (a different shape for each level, so colour is
   never the only cue), in light and dark. Dark follows the system, or your app's own `.dark` switch.
 - **A stack that opens on hover.** Several toasts fold into a deck, the newest in full; hover it or focus it and it
@@ -36,7 +40,8 @@
   swipe-to-dismiss.
 - **Keyboard and screen readers.** Alt+T jumps to the toasts, Escape dismisses one, errors are announced as alerts and
   the rest politely, and `prefers-reduced-motion` is respected.
-- **Small.** 15 KB gzipped plus 5 KB of CSS. No dependencies.
+- **Small.** 15 KB gzipped in your app, styles included (11 KB with the [lite entry](#styles) and your own copy of
+  toast.css). The spring, bounce and other animations load only if you use one. No dependencies.
 - **Safe on the server.** The package imports in Node and the calls do nothing there, so a call in shared code does not
   break server rendering.
 - Written in TypeScript. A script tag works too (a UMD build).
@@ -51,7 +56,6 @@ npm install @editora/toast
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 toast.success('Document saved');
 toast.info('A new version is available');
@@ -77,7 +81,6 @@ subscriptions.
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 // A toast with a title, a description, actions and progress. duration: 0 keeps it until it is dismissed.
 const report = toast.show({
@@ -113,7 +116,6 @@ and closes the toast; give the action `dismissOnClick: false` to keep the toast 
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 const saveDocument = new Promise<{ name: string }>((resolve) => {
   setTimeout(() => resolve({ name: 'Q3-summary.pdf' }), 1500);
@@ -152,7 +154,6 @@ loading text.
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 // By default several toasts fold into a deck: the newest in full, the others as edges behind it.
 // Hover the deck (or press Alt+T) and it opens into a list; the timers wait while it is open.
@@ -185,7 +186,6 @@ On a touch screen a tap opens the deck; a tap elsewhere closes it.
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 // A list instead of a deck, so all four are visible at once.
 toast.configure({ maxVisible: 4, stack: false });
@@ -212,7 +212,6 @@ There is nothing to render. Call `toast` from a handler, an effect or a service:
 
 ```tsx
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 async function saveDraft() {
   await new Promise((resolve) => setTimeout(resolve, 800));
@@ -237,16 +236,93 @@ export default function SaveButton() {
 }
 ```
 
+### JSX
+
+For React content, import from `@editora/toast/react`. It is the same `toast`, except that the title, the message, the
+description and the icon can be JSX, and `toast.custom()` shows a component of your own:
+
+```tsx
+import { Toaster, toast } from '@editora/toast/react';
+
+export default function App() {
+  function archive() {
+    // JSX goes anywhere text does: the title, the message, the description, the icon.
+    toast.success(
+      <span>
+        Moved <strong>Q3-summary.pdf</strong> to Archive
+      </span>,
+      { action: { label: 'Undo', onClick: () => toast.info('Moved back') } }
+    );
+  }
+
+  function invite() {
+    // A toast made of your own JSX, in the toast card, with a function that dismisses it.
+    toast.custom(
+      ({ dismiss }) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ flex: 1 }}>
+            Ana invited you to <strong>Roadmap</strong>
+          </span>
+          <button onClick={dismiss}>Join</button>
+        </div>
+      ),
+      { duration: 0 }
+    );
+  }
+
+  return (
+    <>
+      {/* Once, inside your providers: it renders the JSX of the toasts, with your app's context. */}
+      <Toaster position="bottom-right" />
+      <button onClick={archive}>Archive</button>
+      <button onClick={invite}>Invite</button>
+    </>
+  );
+}
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/react-jsx.png" alt="Two toasts: a success toast that says Moved Q3-summary.pdf to Archive, with the file name in bold and an Undo button, and a custom toast that says Ana invited you to Roadmap, with a Join button" width="440">
+</p>
+
+`<Toaster />` renders that JSX into the toasts through portals, so it sees the context of the place it is mounted
+(a theme, a router, a translation provider): mount it once, inside your providers. It renders nothing else, and its props
+are the [settings](#configure-it). Text does not need it; a toast with JSX and no `<Toaster />` says so in the console.
+
+The JSX keeps its state while the toast is updated (`toast.update(id, { title: <b>New</b> })` swaps the title in place),
+and goes when the toast does. `toast.promise` takes JSX for each state, or a function that returns it, and keeps the
+loading toast however long the promise takes.
+
 [`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react) also has a `ToastProvider` and a `useToast()` hook
 if you like a provider.
 
+## Styles
+
+The styles are built in. The first toast puts them in a `<style>` at the start of `<head>`, so your own CSS still wins,
+and only if `toast.css` is not on the page already. Under a content security policy, give it your nonce:
+`configure({ nonce })`, or a `<meta property="csp-nonce" nonce="...">` (which Vite writes for you) is read.
+
+To load the stylesheet as a file instead (a CSS pipeline, or a policy that allows no inline styles), import the lite
+entry, which has the same API without the built-in copy, about 5 KB gzipped smaller:
+
+```ts
+import { toast } from '@editora/toast/lite';
+import '@editora/toast/toast.css';
+
+// The same API, styled by your copy of toast.css (the lite entry has no built-in one).
+toast.success('Styled by toast.css');
+```
+
+`configure({ injectStyles: false })` does the same with the main entry. Restyle toasts with the `--et-*` variables or by
+overriding `.editora-toast` (see [Themes](#themes)).
+
+
 ## From a script tag
 
-The UMD build defines three globals: `toast`, `toastAdvanced` and `toastPro` (the same object as `toastAdvanced`).
-Pin a version in production, as here:
+The UMD build defines three globals: `toast`, `toastAdvanced` and `toastPro` (the same object as `toastAdvanced`), and
+brings its styles, as the main entry does. Pin a version in production, as here:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/toast@2/dist/toast.css" />
 <script src="https://cdn.jsdelivr.net/npm/@editora/toast@2/dist/index.umd.js"></script>
 
 <button id="save">Save</button>
@@ -275,7 +351,6 @@ Pin a version in production, as here:
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 // Settings for every toast from now on. A toast can still override them.
 toast.configure({
@@ -310,6 +385,8 @@ toast.warning('Your plan renews tomorrow', { theme: 'sunset', duration: 0 });
 | `rtl` | `false` | Right-to-left layout. |
 | `richColors` | `false` | Tint each toast with the colour of its level. |
 | `container` | the page body | The element toasts are added to. |
+| `injectStyles` | `true` | Put the built-in styles on the page with the first toast (see [Styles](#styles)). |
+| `nonce` | from `<meta property="csp-nonce">` | The nonce for that `<style>`, under a content security policy. |
 
 `toast.getConfig()` (on `toastAdvanced`) returns the current settings.
 
@@ -320,7 +397,6 @@ toast.warning('Your plan renews tomorrow', { theme: 'sunset', duration: 0 });
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 // A deck would fold these into one; stack: false keeps them in a list.
 toast.configure({ position: 'top-right', maxVisible: 12, stack: false, gap: 8 });
@@ -360,7 +436,6 @@ A theme is a set of CSS variables, so you can make your own with a few lines (th
 
 ```ts
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 toast.configure({ maxVisible: 10 });
 
@@ -385,7 +460,7 @@ Everything `show()` accepts. All of it is optional except a message (or a title)
 
 | Option | |
 | --- | --- |
-| `message`, `title`, `description` | The text. |
+| `message`, `title`, `description` | The text, or a DOM node (a link you made, say). With `@editora/toast/react`, JSX. |
 | `level` | `'info'`, `'success'`, `'warning'`, `'error'` or `'loading'`. |
 | `icon` | Your own icon: a string (text or an emoji) or a DOM node; `false` for none. Left out, the level's icon. |
 | `actions`, `action`, `cancel` | Buttons: `{ label, onClick, primary?, dismissOnClick? }`. |
@@ -424,7 +499,7 @@ to where you were. While a toast has keyboard focus, or the pointer is over the 
 | `toast(message, options?)` | A plain toast, with no level and no icon. |
 | `info`, `success`, `warning`, `error`, `loading` `(message, options?)` | A toast of that level. |
 | `show(options)` | Show a toast from full options; returns `{ id, options, dismiss(), update(options) }`. |
-| `promise(promise, { loading, success, error })` | A toast that follows a promise (also `onSuccess` and `onError`); resolves with the promise's value. |
+| `promise(promise, { loading, success, error })` | A toast that follows a promise (also `onSuccess` and `onError`); resolves with the promise's value. Each state is a message, options, or (for `success` and `error`) a function of the result that returns either. The loading toast stays until the promise settles. |
 | `update(id, options)` | Change a toast. |
 | `dismiss(id?)` / `clear()` | Remove one toast, or (with no id) every toast. |
 | `configure(settings)` | Set the [settings](#configure-it). |
@@ -444,6 +519,29 @@ to where you were. While a toast has keyboard focus, or the pointer is over the 
 The classes and types are exported too: `ToastManager`, and `ToastOptions`, `ToastConfig`, `ToastInstance`,
 `ToastPosition`, `ToastTheme`, `ToastPromiseOptions` and more. If you are upgrading from 1.x, see the
 [migration guide](https://github.com/ajaykr089/Editora/blob/main/packages/editora-toast/MIGRATION_GUIDE.md).
+
+`@editora/toast/react` exports the same `toast` (taking JSX), plus:
+
+| Export | |
+| --- | --- |
+| `toast.custom(render, options?)` | A toast made of your JSX. `render` is JSX, or `({ id, dismiss }) => JSX`. |
+| `<Toaster {...settings} />` | Renders the JSX of the toasts; its props are the settings. |
+
+The types are exported too: `ReactToastOptions`, `ToasterProps`, `CustomToast`, `ToastNode`.
+
+## Upgrading from 2.1
+
+2.2 adds; nothing was removed or renamed.
+
+- **No CSS import.** The styles come with the package. If you import `toast.css`, nothing changes: the built-in copy is
+  only used when the stylesheet is not on the page. To keep only your file, import `@editora/toast/lite` instead.
+- **JSX** with `@editora/toast/react` and `<Toaster />`, and DOM nodes as `title`, `message` and `description`.
+- **toast.promise** keeps the loading toast until the promise settles. Before, a promise slower than `duration` lost its
+  toast, and the result was never shown. A result can be options returned by a function:
+  ``success: (file) => ({ title: `Saved ${file.name}`, description: 'In Drafts' })``.
+- **Smaller**: the named animations (spring, bounce, slide...) are a separate file, loaded the first time one is used.
+- The package no longer sets the `browser` field: bundlers that read it (webpack 4) now get the ES module build rather
+  than the UMD one. The UMD file is where it was, for `<script>` tags and CDNs.
 
 ## Upgrading from 2.0
 

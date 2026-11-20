@@ -1,5 +1,4 @@
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 // A list instead of a deck, so all four are visible at once.
 toast.configure({ maxVisible: 4, stack: false });
