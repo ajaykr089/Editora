@@ -111,7 +111,7 @@ test("run installs with the chosen package manager and returns its exit code", (
     encoding: "utf8",
     env: { ...process.env, PATH: dir + path.delimiter + process.env.PATH }
   });
-  assert.equal(fs.readFileSync(received, "utf8").trim(), "add @editora/react @editora/plugins @editora/themes");
+  assert.equal(fs.readFileSync(received, "utf8").trim(), "add @editora/react @editora/core @editora/plugins @editora/themes");
   assert.equal(result.status, 3);
 });
 

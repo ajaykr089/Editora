@@ -14,7 +14,19 @@ fs.mkdirSync(dist, { recursive: true });
 
 const cjs = "// CommonJS programmatic entrypoint \u2014 re-export the CLI helpers\nconst cli = require('../bin/editora.js');\nmodule.exports = cli;\n";
 
-const mjs = "// ESM programmatic entrypoint \u2014 load the existing CommonJS implementation\nimport { createRequire } from 'module';\nconst require = createRequire(import.meta.url);\nconst cli = require('../bin/editora.js');\n\nexport const run = cli.run;\nexport const parseArgs = cli.parseArgs;\nexport const resolveTarget = cli.resolveTarget;\nexport const detectPackageManager = cli.detectPackageManager;\nexport const installCommand = cli.installCommand;\nexport const getVersion = cli.getVersion;\nexport const formatHelpText = cli.formatHelpText;\nexport const uiReactComponents = cli.uiReactComponents;\nexport const specialRegistry = cli.specialRegistry;\n\nexport default cli;\n";
+// The ES module names every export of the CommonJS one, so a helper added to bin/editora.js is exported by both.
+const names = Object.keys(require('../bin/editora.js'));
+const mjs = [
+  "// ESM programmatic entrypoint \u2014 load the existing CommonJS implementation",
+  "import { createRequire } from 'module';",
+  "const require = createRequire(import.meta.url);",
+  "const cli = require('../bin/editora.js');",
+  "",
+  ...names.map((name) => `export const ${name} = cli.${name};`),
+  "",
+  "export default cli;",
+  ""
+].join("\n");
 
 fs.writeFileSync(path.join(dist, 'index.cjs'), cjs);
 fs.writeFileSync(path.join(dist, 'index.mjs'), mjs);
