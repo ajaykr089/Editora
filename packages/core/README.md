@@ -99,7 +99,7 @@ Set options as attributes:
 
 | Attribute | |
 | --- | --- |
-| `plugins` | The plugins to load, separated by spaces (see [the plugin list](https://www.npmjs.com/package/@editora/plugins#plugin-catalog), column *Name*). |
+| `plugins` | The plugins to load, separated by spaces (see [the plugin list](https://www.npmjs.com/package/@editora/plugins#plugin-catalog), column *Name*). `all` loads every plugin in the bundle. Leave it out for [the default set](#default-plugins). |
 | `toolbar` | The toolbar items, with `\|` between groups: `"undo redo \| bold italic"`. `"false"` hides the toolbar. |
 | `height` | The height in pixels. Default `400`. |
 | `width` | The width in pixels. By default the editor fills its parent. |
@@ -177,7 +177,8 @@ disables the toolbar buttons and takes the editor out of the tab order. Both wor
 ### Toolbar items
 
 `toolbar` takes names separated by spaces, with `|` between groups. The names are camelCase and case-sensitive
-(`textColor`, not `textcolor`), and each one needs its plugin in `plugins`:
+(`textColor`, not `textcolor`). Each one needs its plugin: if you set `plugins`, list it there; if you don't, the
+editor loads it for you (see [Default plugins](#default-plugins)).
 
 | Name | Plugin |
 | --- | --- |
@@ -251,7 +252,7 @@ loaded by, is in [`@editora/plugins`](https://www.npmjs.com/package/@editora/plu
 
 | File | Contains |
 | --- | --- |
-| `dist/webcomponent.js` | Every plugin. List the ones you want in `plugins`; leave it out and all load except `collaboration`, which needs a server. |
+| `dist/webcomponent.js` | Every plugin, each fetched only when an editor uses it. Without `plugins`, an editor loads [the default set](#default-plugins). |
 | `dist/webcomponent-core.js` | Ten essentials: `bold`, `italic`, `underline`, `strikethrough`, `clearFormatting`, `heading`, `blockquote`, `code`, `list` and `history`. |
 
 Each has its own stylesheet (`webcomponent.min.css`, `webcomponent-core.min.css`).
@@ -265,12 +266,31 @@ Each has its own stylesheet (`webcomponent.min.css`, `webcomponent-core.min.css`
 </editora-editor>
 ```
 
-> [!NOTE]
-> List the plugins you want. If you leave `plugins` out, every plugin in the bundle is loaded **except `collaboration`**,
-> because it sends the document to a server. It loads only when you name it in `plugins` (or configure it under
-> `pluginConfig`), and then stays off until you give it your own `websocketUrl` or a `provider`. Earlier versions loaded
-> it by default and synced through a public Yjs demo server, in a room shared by every default editor. See
-> [`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins#collaboration).
+## Default plugins
+
+Without a `plugins` attribute, `<editora-editor>` loads a small default set: `bold`, `italic`, `underline`,
+`strikethrough`, `clearFormatting`, `heading`, `blockquote`, `list`, `link`, `table` and `history`. That is about
+68 KB gzipped of JavaScript for a page with nothing but the tag, against about 437 KB when it loaded every plugin.
+
+The editor also loads any other plugin the page asks for:
+
+- a toolbar item: `toolbar="undo redo | bold italic | fontSize textColor | insertImage"` loads `fontSize`,
+  `textColor` and `image` as well;
+- an entry under `pluginConfig`, such as `pluginConfig: { mentions: { ... } }`;
+- `accessibility: { checker: true }`, which loads `a11yChecker`;
+- a plugin you registered yourself, or loaded with `EditoraPlugins.loadPlugins()`.
+
+To get every plugin, as a bare tag did before 1.1.0, ask for all of them:
+
+```html
+<editora-editor plugins="all"></editora-editor>
+```
+
+`all` can be combined with other names (`plugins="all collaboration"`). It never includes `collaboration` on its own,
+because that plugin sends the document to a server: it loads only when you name it in `plugins` or configure it under
+`pluginConfig`, and then stays off until you give it your own `websocketUrl` or a `provider`. Earlier versions loaded
+it by default and synced through a public Yjs demo server, in a room shared by every default editor. See
+[`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins#collaboration).
 
 ## Security
 

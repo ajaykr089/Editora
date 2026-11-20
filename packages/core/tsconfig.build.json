@@ -15,6 +15,7 @@
   "exclude": [
     "dist",
     "**/*.test.ts",
+    "src/webcomponent/builtInPlugins.ts",
     "src/webcomponent/plugin-loader.ts",
     "src/webcomponent/standalone.core.ts",
     "src/webcomponent/standalone.native.ts"

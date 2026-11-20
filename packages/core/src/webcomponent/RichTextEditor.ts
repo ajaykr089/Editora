@@ -15,6 +15,7 @@ import { ConfigResolver, EditorConfigDefaults } from '../config/ConfigResolver';
 import { PluginLoader } from '../config/PluginLoader';
 import { Plugin } from '../plugins/Plugin';
 import { warnIgnoredOption } from '../config/deprecatedOptions';
+import { ALL_PLUGINS_KEYWORD, BUILT_IN_PLUGIN_NAMES, DEFAULT_PLUGINS, pluginsForToolbarItems } from './defaultPlugins';
 
 // Import styles
 import styles from './styles.css?inline';
@@ -28,8 +29,8 @@ const EDITOR_HOST_SELECTOR = 'editora-editor, [data-editora-editor], .rte-editor
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const DEFAULT_EDITOR_LABEL = 'Rich text editor';
 // Plugins that act on their own once loaded: collaboration opens a network connection and sends the
-// document to it. The default plugin set (no `plugins` given) leaves them out; they load when they
-// are named in `plugins` or configured under `pluginConfig`.
+// document to it. `plugins="all"` leaves them out; they load when they are named in `plugins` or
+// configured under `pluginConfig`.
 const OPT_IN_ONLY_PLUGINS: ReadonlySet<string> = new Set(['collaboration']);
 // Marks a toolbar control the host disabled itself, so that enabling the editor restores exactly those.
 const DISABLED_BY_HOST_ATTR = 'data-editora-disabled-by-host';
@@ -546,62 +547,114 @@ export class RichTextEditorElement extends ElementBase {
   }
 
   /**
-   * Load plugins based on configuration
+   * Load plugins based on configuration.
+   *
+   * With `plugins` listed, exactly those load (`all` stands for every registered plugin). Without it,
+   * the editor loads DEFAULT_PLUGINS plus whatever the page asks for in other ways: a toolbar item, a
+   * `pluginConfig` entry, `accessibility.checker`, a plugin it registered itself, or one it already
+   * loaded through the plugin loader.
    */
   private async loadPlugins(): Promise<Plugin[]> {
     // Ensure plugin loader is available
     if (!this.pluginLoader) {
       await this.waitForPluginLoader();
     }
-    
+
+    const configured = this.config.plugins;
+    const entries: Array<string | Plugin> =
+      typeof configured === 'string'
+        ? configured.split(/\s+/).filter(Boolean)
+        : Array.isArray(configured)
+          ? configured
+          : [];
+    const shouldForceA11yChecker = this.getAccessibilityConfig().checker === true;
+
+    if (entries.length === 0) {
+      const names = this.resolveDefaultPluginNames();
+      if (shouldForceA11yChecker) names.push('a11yChecker');
+      return this.loadPluginsByName(names);
+    }
+
     const plugins: Plugin[] = [];
-    
-    // Check if plugins are explicitly configured (non-empty array or string)
-    const hasPluginConfig = this.config.plugins && (
-      (typeof this.config.plugins === 'string' && this.config.plugins.length > 0) ||
-      (Array.isArray(this.config.plugins) && this.config.plugins.length > 0)
-    );
-    
-    const accessibility = this.getAccessibilityConfig();
-    const shouldForceA11yChecker = accessibility.checker === true;
-
-    if (hasPluginConfig) {
-      if (typeof this.config.plugins === 'string') {
-        const pluginNames = this.config.plugins.split(/\s+/).filter(Boolean);
-        if (shouldForceA11yChecker && !pluginNames.includes('a11yChecker')) {
-          pluginNames.push('a11yChecker');
-        }
-        for (const pluginName of pluginNames) {
-          const plugin = await this.loadPlugin(pluginName, this.getPluginLoadConfig(pluginName));
-          if (plugin) plugins.push(plugin);
-        }
-      } else if (Array.isArray(this.config.plugins)) {
-        // Already plugin instances or names
-        for (const p of this.config.plugins) {
-          if (typeof p === 'string') {
-            const plugin = await this.loadPlugin(p, this.getPluginLoadConfig(p));
-            if (plugin) plugins.push(plugin);
-          } else {
-            plugins.push(p as Plugin);
-          }
-        }
-
-        if (shouldForceA11yChecker && !plugins.some((plugin) => plugin?.name === 'a11yChecker')) {
-          const plugin = await this.loadPlugin('a11yChecker', this.getPluginLoadConfig('a11yChecker'));
-          if (plugin) plugins.push(plugin);
-        }
-      }
-    } else {
-      // No plugins specified - load all registered plugins, except those that need to be asked for
-      const registeredNames = this.pluginLoader.getRegisteredPluginNames();
-      for (const pluginName of registeredNames) {
-        const loadConfig = this.getPluginLoadConfig(pluginName);
-        if (OPT_IN_ONLY_PLUGINS.has(pluginName) && !loadConfig) continue;
-        const plugin = await this.loadPlugin(pluginName, loadConfig);
+    for (const entry of entries) {
+      if (typeof entry !== 'string') {
+        plugins.push(entry as Plugin);
+      } else if (entry === ALL_PLUGINS_KEYWORD) {
+        plugins.push(...(await this.loadPluginsByName(this.resolveAllPluginNames())));
+      } else {
+        const plugin = await this.loadPlugin(entry, this.getPluginLoadConfig(entry));
         if (plugin) plugins.push(plugin);
       }
     }
-    return plugins;
+
+    if (shouldForceA11yChecker && !plugins.some((plugin) => plugin?.name === 'a11yChecker')) {
+      const plugin = await this.loadPlugin('a11yChecker', this.getPluginLoadConfig('a11yChecker'));
+      if (plugin) plugins.push(plugin);
+    }
+    return this.withoutDuplicatePlugins(plugins);
+  }
+
+  /** The plugins a bare editor loads: see loadPlugins(). Only registered names, in a stable order. */
+  private resolveDefaultPluginNames(): string[] {
+    const registered = this.pluginLoader.getRegisteredPluginNames();
+    const isRegistered = (name: string) => registered.includes(name);
+    const wanted = new Set<string>([
+      ...DEFAULT_PLUGINS,
+      ...pluginsForToolbarItems(this.resolveToolbarItems(), isRegistered),
+    ]);
+    for (const name of registered) {
+      if (
+        !BUILT_IN_PLUGIN_NAMES.has(name) ||
+        this.pluginLoader.isLoaded(name) ||
+        this.isPluginRequestedByConfig(name)
+      ) {
+        wanted.add(name);
+      }
+    }
+    return registered.filter((name) => wanted.has(name));
+  }
+
+  /** Every registered plugin, except the ones that act on their own and have not been configured. */
+  private resolveAllPluginNames(): string[] {
+    return this.pluginLoader
+      .getRegisteredPluginNames()
+      .filter((name) => !OPT_IN_ONLY_PLUGINS.has(name) || this.getPluginLoadConfig(name));
+  }
+
+  private async loadPluginsByName(names: string[]): Promise<Plugin[]> {
+    const plugins: Plugin[] = [];
+    for (const name of names) {
+      const plugin = await this.loadPlugin(name, this.getPluginLoadConfig(name));
+      if (plugin) plugins.push(plugin);
+    }
+    return this.withoutDuplicatePlugins(plugins);
+  }
+
+  /**
+   * One instance per plugin. Several registered names can create the same plugin (`formatPainter`,
+   * `format-painter`, `formatpainter`), and loading each of them put its buttons on the toolbar again.
+   */
+  private withoutDuplicatePlugins(plugins: Plugin[]): Plugin[] {
+    const seen = new Set<string>();
+    return plugins.filter((plugin) => {
+      if (!plugin?.name) return true;
+      if (seen.has(plugin.name)) return false;
+      seen.add(plugin.name);
+      return true;
+    });
+  }
+
+  /**
+   * True when the page configured this plugin, under `pluginConfig` or as a top-level option of its own
+   * name. `spellcheck` does not count: it is the editor's own setting (the browser's spell checking) and
+   * always has a value.
+   */
+  private isPluginRequestedByConfig(name: string): boolean {
+    const config = this.getPluginLoadConfig(name);
+    if (!config) return false;
+    if (name !== 'spellCheck') return true;
+    const pluginConfig = this.config.pluginConfig as Record<string, unknown> | undefined;
+    return Boolean(pluginConfig && typeof pluginConfig === 'object' && (pluginConfig.spellCheck || pluginConfig.spellcheck));
   }
 
   /**

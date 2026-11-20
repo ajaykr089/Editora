@@ -39,9 +39,11 @@ npm i @editora/core
 </editora-editor>
 ```
 
-List the plugins you want in `plugins`: only those are loaded. Leave the attribute out and every plugin in the bundle
-is loaded except `collaboration`, which sends the document to a server: it loads only when you name it (or configure it
-under `pluginConfig`), and then stays off until you give it your own `websocketUrl` or a `provider`.
+List the plugins you want in `plugins`: only those are loaded. Leave the attribute out and the editor loads a small
+default set (`bold`, `italic`, `underline`, `strikethrough`, `clearFormatting`, `heading`, `blockquote`, `list`, `link`,
+`table` and `history`), plus any plugin a `toolbar` item or a `pluginConfig` entry asks for. `plugins="all"` loads every
+plugin in the bundle except `collaboration`, which sends the document to a server: it loads only when you name it (or
+configure it under `pluginConfig`), and then stays off until you give it your own `websocketUrl` or a `provider`.
 
 With a bundler, `import "@editora/core/webcomponent"` and `import "@editora/core/webcomponent.css"` instead of the CDN tags.
 
