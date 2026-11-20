@@ -136,8 +136,12 @@ export class ToastQueue {
   }
 
   private getDedupeKey(toast: ToastInstance): string {
-    return toast.options.dedupeKey ||
-      `${toast.options.level || 'info'}:${toast.options.title || ''}:${toast.options.message || ''}:${toast.options.description || ''}`;
+    if (toast.options.dedupeKey) return toast.options.dedupeKey;
+    const { level, title, message, description } = toast.options;
+    // Content given as a DOM node (JSX, say) has no text to compare yet: such a toast is only a duplicate by dedupeKey.
+    const parts = [title, message, description];
+    if (typeof Node !== 'undefined' && parts.some((part) => part instanceof Node)) return `node:${toast.id}`;
+    return `${level || 'info'}:${title || ''}:${message || ''}:${description || ''}`;
   }
 
   private sortQueue(): void {

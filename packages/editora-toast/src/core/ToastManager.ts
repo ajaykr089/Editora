@@ -1,9 +1,11 @@
 // ToastManager - Main orchestrator for the toast notification system
-import { ToastInstance, ToastOptions, ToastConfig, ToastManager as IToastManager, ToastPromiseOptions, ToastPlugin, ToastState, ToastSubscriber } from './types';
+import { ToastInstance, ToastOptions, ToastConfig, ToastManager as IToastManager, ToastPromiseOptions, ToastPlugin, ToastState, ToastSubscriber, ToastText } from './types';
 import { ToastStore } from './ToastStore';
 import { ToastQueue } from './ToastQueue';
 import { ToastRenderer } from './ToastRenderer';
 import { ToastLifecycle } from './ToastLifecycle';
+
+const isNode = (value: unknown): value is Node => typeof Node !== 'undefined' && value instanceof Node;
 
 const DEFAULT_CONFIG: ToastConfig = {
   position: 'bottom-right',
@@ -153,7 +155,9 @@ export class ToastManager implements IToastManager {
 
   // Promise API
   async promise<T>(promise: Promise<T>, options: ToastPromiseOptions<T>): Promise<T> {
-    const loadingToast = this.show(this.normalizeOptions(options.loading, 'loading'));
+    // The loading toast stays until the promise settles: with the normal timer, a promise slower than `duration`
+    // lost its toast, and the success or error then updated nothing.
+    const loadingToast = this.show({ duration: 0, ...this.normalizeOptions(options.loading, 'loading') });
 
     try {
       const result = await promise;
@@ -248,29 +252,29 @@ export class ToastManager implements IToastManager {
   }
 
   // Convenience methods for backward compatibility
-  info(message: string, duration?: number): ToastInstance {
+  info(message: ToastText, duration?: number): ToastInstance {
     return this.show({ message, level: 'info', duration });
   }
 
-  success(message: string, duration?: number): ToastInstance {
+  success(message: ToastText, duration?: number): ToastInstance {
     return this.show({ message, level: 'success', duration });
   }
 
-  error(message: string, duration?: number): ToastInstance {
+  error(message: ToastText, duration?: number): ToastInstance {
     return this.show({ message, level: 'error', duration });
   }
 
-  warning(message: string, duration?: number): ToastInstance {
+  warning(message: ToastText, duration?: number): ToastInstance {
     return this.show({ message, level: 'warning', duration });
   }
 
-  loading(message: string, duration?: number): ToastInstance {
+  loading(message: ToastText, duration?: number): ToastInstance {
     return this.show({ message, level: 'loading', duration });
   }
 
   // Utility methods
-  private normalizeOptions(input: string | ToastOptions, defaultLevel: ToastOptions['level']): ToastOptions {
-    if (typeof input === 'string') {
+  private normalizeOptions(input: ToastText | ToastOptions, defaultLevel: ToastOptions['level']): ToastOptions {
+    if (typeof input === 'string' || isNode(input)) {
       return { message: input, level: defaultLevel };
     }
     return { ...input, level: input.level || defaultLevel };
@@ -278,7 +282,7 @@ export class ToastManager implements IToastManager {
 
   // The result of a promise replaces the loading toast's text. update() merges, so a result given as options
   // without a message (a title and a description, say) would otherwise keep showing the loading message.
-  private normalizeResult(input: string | ToastOptions, defaultLevel: ToastOptions['level']): ToastOptions {
+  private normalizeResult(input: ToastText | ToastOptions, defaultLevel: ToastOptions['level']): ToastOptions {
     const options = this.normalizeOptions(input, defaultLevel);
     return 'message' in options ? options : { ...options, message: undefined };
   }

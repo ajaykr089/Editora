@@ -1,11 +1,63 @@
 // ToastRenderer - Handles DOM creation, rendering, and animations
 import { ToastInstance, ToastPosition, ToastConfig, AnimationConfig } from './types';
 import { setSafeHtml } from './safeHtml';
-import { animationManager } from './AnimationUtils';
+import type { AnimationManager } from './AnimationUtils';
 import { createCloseIcon, createLevelIcon } from './icons';
 import { invalidateHeight, layoutStack } from './ToastStack';
+import { builtInStyles } from './styles';
 
 type Timing = { remaining: number; startedAt: number };
+
+// The animation engine (spring, bounce, slide, zoom, flip, fade, elastic, rotate) is about a third of the package, and
+// most apps never ask for it: it is loaded the first time one of those animations is used. The default CSS transition
+// and custom animations need none of it.
+let engine: Promise<AnimationManager> | null = null;
+const loadEngine = () => (engine ||= import('./AnimationUtils').then((module) => module.animationManager));
+const needsEngine = (animation?: AnimationConfig) => Boolean(animation) && animation!.type !== 'css' && animation!.type !== 'custom';
+
+const cssShow = (element: HTMLElement) =>
+  new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      element.classList.add('show');
+      window.setTimeout(resolve, 220);
+    });
+  });
+
+const cssHide = (element: HTMLElement) =>
+  new Promise<void>((resolve) => {
+    element.classList.remove('show');
+    element.classList.add('hiding');
+    window.setTimeout(resolve, 220);
+  });
+
+async function animate(kind: 'show' | 'hide', element: HTMLElement, toast: ToastInstance, animation: AnimationConfig): Promise<void> {
+  if (needsEngine(animation)) {
+    const manager = await loadEngine();
+    return kind === 'show' ? manager.showToast(element, toast, animation) : manager.hideToast(element, toast, animation);
+  }
+  if (animation.type === 'custom') {
+    const run = kind === 'show' ? animation.show : animation.hide;
+    if (run) return void (await Promise.resolve(run(element, toast)));
+  }
+  return kind === 'show' ? cssShow(element) : cssHide(element);
+}
+
+const isNode = (value: unknown): value is Node => typeof Node !== 'undefined' && value instanceof Node;
+
+// Text, or a DOM node the app made (the React entry renders its JSX into one), into an element.
+function setContent(element: HTMLElement, value: string | Node, html?: boolean): void {
+  if (isNode(value)) element.appendChild(value);
+  else if (html) setSafeHtml(element, value);
+  else element.textContent = value;
+}
+
+// The nonce a content security policy gives the page's own styles: Vite and others put it on <meta property="csp-nonce">.
+function cspNonce(): string | undefined {
+  const meta = document.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]');
+  return (meta && (meta.nonce || meta.getAttribute('nonce') || meta.content)) || undefined;
+}
+
+const textOf = (value: unknown) => (isNode(value) ? value.textContent || '' : value ? String(value) : '');
 
 export class ToastRenderer {
   private containers = new Map<ToastPosition, HTMLElement>();
@@ -20,11 +72,44 @@ export class ToastRenderer {
   private returnFocusTo: HTMLElement | null = null;
   private globalListeners: Array<[EventTarget, string, EventListener]> = [];
 
+  // Content can change size after a toast is shown (JSX rendered a moment later, an image or a font loading), and the
+  // stack is laid out from measured heights: watch each toast's content and lay its stack out again.
+  private resizeObserver: ResizeObserver | null = null;
+
   constructor(config: ToastConfig) {
     this.config = config;
+    if (needsEngine(config.animation)) loadEngine();
+  }
+
+  private observeSize(element: HTMLElement): void {
+    if (typeof ResizeObserver === 'undefined') return;
+    if (!this.resizeObserver) {
+      const pending = new Set<HTMLElement>();
+      let frame = 0;
+      this.resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const toastElement = (entry.target as HTMLElement).closest<HTMLElement>('.editora-toast');
+          if (toastElement) pending.add(toastElement);
+        }
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const containers = new Set<HTMLElement>();
+          pending.forEach((toastElement) => {
+            invalidateHeight(toastElement);
+            if (toastElement.parentElement) containers.add(toastElement.parentElement);
+          });
+          pending.clear();
+          containers.forEach((container) => this.layout(container));
+        });
+      });
+    }
+    const content = element.querySelector('.editora-toast-content');
+    if (content) this.resizeObserver.observe(content);
   }
 
   updateConfig(config: ToastConfig): void {
+    if (needsEngine(config.animation)) loadEngine();
     this.config = config;
     this.containers.forEach((container, position) => {
       this.applyContainerStyles(container, position);
@@ -289,8 +374,9 @@ export class ToastRenderer {
     // Get animation config (toast-specific or global default)
     const animation = toast.options.animation || this.config.animation || { type: 'css' };
 
-    // Use animation manager for showing
-    await animationManager.showToast(element, toast, animation);
+    if (needsEngine(animation)) loadEngine();
+    this.observeSize(element);
+    await animate('show', element, toast, animation);
 
     // Accessibility announcement
     if (this.config.enableAccessibility) {
@@ -319,8 +405,9 @@ export class ToastRenderer {
     // Get animation config
     const animation = toast.options.animation || this.config.animation || { type: 'css' };
 
-    // Use animation manager for hiding
-    await animationManager.hideToast(leaving, toast, animation);
+    const content = leaving.querySelector('.editora-toast-content');
+    if (content) this.resizeObserver?.unobserve(content);
+    await animate('hide', leaving, toast, animation);
 
     // Remove element after animation
     if (toast.element && toast.element.parentNode) {
@@ -349,8 +436,8 @@ export class ToastRenderer {
     const animation = toast.options.animation || this.config.animation || { type: 'css' };
 
     // Handle custom animation updates
-    if (animation.type === 'custom' && (animation as any).update) {
-      await animationManager.updateToast(toast.element, toast, updates, animation);
+    if (animation.type === 'custom' && animation.update) {
+      await Promise.resolve(animation.update(toast.element, toast, updates));
       return;
     }
 
@@ -369,7 +456,9 @@ export class ToastRenderer {
     if (updates.title !== undefined || updates.description !== undefined || updates.message !== undefined || updates.icon !== undefined || updates.level !== undefined || updates.render) {
       const contentElement = toast.element.querySelector('.editora-toast-content');
       const nextContent = this.createContent(toast);
+      if (contentElement) this.resizeObserver?.unobserve(contentElement);
       contentElement?.replaceWith(nextContent);
+      this.observeSize(toast.element);
     }
 
     // Add or remove the close button when it is toggled. `closeButton` is the alias and wins, as in show().
@@ -449,25 +538,21 @@ export class ToastRenderer {
       if (options.title) {
         const title = document.createElement('div');
         title.className = 'editora-toast-title';
-        title.textContent = options.title;
+        setContent(title, options.title);
         body.appendChild(title);
       }
 
       if (options.message) {
         const message = document.createElement('div');
         message.className = 'editora-toast-message';
-        if (options.html) {
-          setSafeHtml(message, options.message);
-        } else {
-          message.textContent = options.message;
-        }
+        setContent(message, options.message, options.html);
         body.appendChild(message);
       }
 
       if (options.description) {
         const description = document.createElement('div');
         description.className = 'editora-toast-description';
-        description.textContent = options.description;
+        setContent(description, options.description);
         body.appendChild(description);
       }
     }
@@ -845,7 +930,7 @@ export class ToastRenderer {
     announcement.style.height = '1px';
     announcement.style.overflow = 'hidden';
 
-    const text = [toast.options.title, toast.options.message, toast.options.description].filter(Boolean).join('. ');
+    const text = [toast.options.title, toast.options.message, toast.options.description].map(textOf).filter(Boolean).join('. ');
     announcement.textContent = `${toast.options.level || 'info'}: ${text}`;
 
     document.body.appendChild(announcement);
@@ -857,9 +942,13 @@ export class ToastRenderer {
     }, 1000);
   }
 
-  // Inject CSS
+  // The stylesheet, once, with the first toast. In order:
+  //   - toast.css is already on the page (linked, imported by a bundler, or put there earlier): nothing to do;
+  //   - the built-in copy (the main entry has one) goes first in <head>, so the app's own CSS still wins;
+  //   - otherwise (the lite entry, or injectStyles: false) a minimal layout style, and a warning.
   private injectCSS(): void {
     if (this.cssInjected || typeof document === 'undefined') return;
+    this.cssInjected = true;
 
     // toast.css sets --editora-toast-stylesheet on :root, which also finds it inside a bundled
     // stylesheet (app.css, index-1a2b.css) where neither the file name nor a <style> tag shows it.
@@ -868,25 +957,35 @@ export class ToastRenderer {
       (s.ownerNode as any)?.href?.includes('toast.css') ||
       (s.ownerNode as any)?.textContent?.includes('editora-toast')
     );
+    if (existing) return;
 
-    if (!existing) {
-      // Say so once: without it toasts work but look bare (no icon row, no tones, no dark theme).
-      console.warn(
-        "[@editora/toast] toast.css is not loaded, so toasts use a minimal fallback style. " +
-          "Import '@editora/toast/toast.css' once in your app (or link @editora/toast/dist/toast.css)."
-      );
-      const style = document.createElement('style');
-      style.setAttribute('data-editora-toast-fallback', 'true');
-      // Enough to lay the toasts out and show them when toast.css was not loaded; the real look is in toast.css.
-      style.textContent = '.editora-toast-container{position:fixed;width:360px;max-width:100vw;box-sizing:border-box}.editora-toast{position:absolute;left:0;width:100%;box-sizing:border-box;padding:12px 14px;background:#fff;color:#111;border:1px solid #ddd;border-radius:12px;font:13px/1.45 system-ui,sans-serif;overflow:hidden;pointer-events:auto;opacity:0;translate:0 var(--et-y,0px);scale:var(--et-s,1);transition:opacity .2s,translate .3s,scale .3s,height .3s}.editora-toast-container[data-edge=bottom] .editora-toast{bottom:0}.editora-toast-container[data-edge=top] .editora-toast{top:0}.editora-toast.show{opacity:1}.editora-toast.hiding,.editora-toast[data-hidden=true]{opacity:0}';
-      document.head.appendChild(style);
+    const style = document.createElement('style');
+    const nonce = this.config.nonce || cspNonce();
+    if (nonce) style.nonce = nonce;
+
+    const css = this.config.injectStyles === false ? null : builtInStyles();
+    if (css) {
+      style.setAttribute('data-editora-toast', '');
+      style.textContent = css;
+      document.head.insertBefore(style, document.head.firstChild);
+      return;
     }
 
-    this.cssInjected = true;
+    // Say so once: without it toasts work but look bare (no icon row, no tones, no dark theme).
+    console.warn(
+      "[@editora/toast] toast.css is not loaded, so toasts use a minimal fallback style. " +
+        "Import '@editora/toast/toast.css' once in your app (or link @editora/toast/dist/toast.css)."
+    );
+    style.setAttribute('data-editora-toast-fallback', 'true');
+    // Enough to lay the toasts out and show them when toast.css was not loaded; the real look is in toast.css.
+    style.textContent = '.editora-toast-container{position:fixed;width:360px;max-width:100vw;box-sizing:border-box}.editora-toast{position:absolute;left:0;width:100%;box-sizing:border-box;padding:12px 14px;background:#fff;color:#111;border:1px solid #ddd;border-radius:12px;font:13px/1.45 system-ui,sans-serif;overflow:hidden;pointer-events:auto;opacity:0;translate:0 var(--et-y,0px);scale:var(--et-s,1);transition:opacity .2s,translate .3s,scale .3s,height .3s}.editora-toast-container[data-edge=bottom] .editora-toast{bottom:0}.editora-toast-container[data-edge=top] .editora-toast{top:0}.editora-toast.show{opacity:1}.editora-toast.hiding,.editora-toast[data-hidden=true]{opacity:0}';
+    document.head.appendChild(style);
   }
 
   // Cleanup
   destroy(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     this.globalListeners.forEach(([target, type, handler]) => target.removeEventListener(type, handler));
     this.globalListeners = [];
     window.clearTimeout(this.resizeTimer);
