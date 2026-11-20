@@ -1,9 +1,8 @@
 <h1 align="center">@editora/cli</h1>
 
 <p align="center">
-  Add Editora to a project with one command. <code>npx @editora/cli add editor</code> installs the rich text editor,
-  <code>add toast</code> the notifications, <code>add data-table</code> a component. It picks the packages and runs
-  your package manager.
+  Add Editora to a project with one command. <code>npx @editora/cli add editor</code> installs the rich text editor
+  with your package manager, then shows the two imports and the five lines of code that put it on the page.
 </p>
 
 <p align="center">
@@ -19,36 +18,60 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/cli/docs/images/add.png" alt="A terminal running npx @editora/cli add editor --dry-run, which prints that it will run npm install @editora/react @editora/plugins @editora/themes, and the same for add button modal toast, which installs @editora/ui-react and @editora/toast" width="760">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/cli/docs/images/add.png" alt="A terminal running npx @editora/cli add button data-table toast --dry-run in a project called my-app: it installs @editora/ui-react and @editora/toast with npm, found from package-lock.json, then shows the stylesheet to import in src/main.tsx and the import lines for Button, DataTable and toast" width="760">
 </p>
 
 ## What it does
 
-`editora add` turns a name you know, such as `editor` or `button`, into the packages behind it and installs them with
-npm, pnpm, yarn or bun. That is all it does: it does not create files, change your configuration or write code, so what
-changes in your project is what your package manager changes (`package.json`, the lock file, `node_modules`).
+- **`editora add <name>`** installs what a name needs (`editor`, `toast`, `data-table`, `docx`...), then prints the
+  stylesheets to import once, in your app's entry file, and a few lines of code that use it.
+- **`editora init`** looks at your project (the framework, where its entry file is, the package manager), asks what you
+  want, and does the same.
+- **`editora list`** shows every name, and searches them.
 
-- **One command, several packages.** `add editor` installs three, `add all` seven.
-- **Look before you install.** `--dry-run` prints the command and stops.
-- **Your package manager.** npm, pnpm, yarn or bun, detected or chosen with a flag.
-- **No dependencies.** It needs Node.js 16 or later.
+It uses the package manager your project uses, found from its lock file. It never edits your files: what changes is
+what your package manager changes (`package.json`, the lock file, `node_modules`), and the code to add is printed for you
+to paste. It has no dependencies and needs Node.js 16 or later.
 
 ## Quick start
 
+In your project's folder:
+
 ```bash
+npx @editora/cli init
 npx @editora/cli add editor
 ```
 
-Add `--dry-run` to see what it would run without installing anything:
+Add `--dry-run` to see what it would do without installing anything:
 
 ```text
 $ npx @editora/cli add editor --dry-run
-Editora add targets: editor
-- editor: Rich text editor stack for React
+Adding editor
 
-Installing with npm: npm install @editora/react @editora/plugins @editora/themes
+  editor   Rich text editor for React
 
-Dry run enabled. No packages were installed.
+Installing with npm (package-lock.json):
+  npm install @editora/react @editora/core @editora/plugins @editora/themes
+
+Dry run: nothing was installed.
+
+Next steps
+
+Import the styles once, in src/main.tsx:
+
+  import '@editora/themes/themes/default.css';
+  import '@editora/plugins/styles.css';
+
+editor:
+
+  import { EditoraEditor } from '@editora/react';
+  import { BoldPlugin, HistoryPlugin, ItalicPlugin, ListPlugin } from '@editora/plugins/lite';
+
+  const plugins = [BoldPlugin(), ItalicPlugin(), ListPlugin(), HistoryPlugin()];
+
+  <EditoraEditor plugins={plugins} />
+
+  Docs: https://www.npmjs.com/package/@editora/react
 ```
 
 To use it as a command, install it once and run `editora`:
@@ -58,72 +81,150 @@ npm install -g @editora/cli
 editora add editor
 ```
 
+## Set up a project
+
+`editora init` says what it found, then asks what to set up. Answer with numbers or names (`2 4`, or `editor toast`).
+In a React project it offers the React packages; in any other, the web components.
+
+```text
+$ npx @editora/cli init
+Project          my-app (package.json)
+Framework        Vite + React (styles go in src/main.tsx)
+Package manager  npm (package-lock.json)
+
+What do you want to set up? Name it, for example:
+  editora init ui-react toast
+
+  1  UI components                                        ui-react
+  2  Rich text editor                                     editor
+  3  Markdown editor                                      markdown-editor
+  4  Toast notifications                                  toast
+  5  Icons                                                react-icons
+  6  Everything: UI, editor, toasts, icons, code editor   all
+```
+
+That is what it prints when it cannot ask (in CI, or with its output piped): name what you want instead.
+
+```bash
+npx @editora/cli init ui-react toast
+```
+
 ## What you can add
 
-| You type | It installs | Then read |
-| --- | --- | --- |
-| `editor` | `@editora/react`, `@editora/plugins`, `@editora/themes` | [`@editora/react`](https://www.npmjs.com/package/@editora/react) |
-| `toast` | `@editora/toast` | [`@editora/toast`](https://www.npmjs.com/package/@editora/toast) |
-| `react-icons` | `@editora/react-icons` | [`@editora/react-icons`](https://www.npmjs.com/package/@editora/react-icons) |
-| `light-code-editor` | `@editora/light-code-editor` | [`@editora/light-code-editor`](https://www.npmjs.com/package/@editora/light-code-editor) |
-| `button`, `data-table`, `tabs`, `modal`, ... | `@editora/ui-react` | [`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react) |
-| `all` | all of the above | |
+| You type | It installs |
+| --- | --- |
+| `editor` | the rich text editor for React: `@editora/react`, `@editora/core`, `@editora/plugins`, `@editora/themes` |
+| `web-editor` | the same editor as a web component, for any framework: `@editora/core` |
+| `markdown-editor` | `@editora/markdown-editor`, `@editora/themes` |
+| `light-code-editor` (or `code-editor`) | `@editora/light-code-editor` |
+| `button`, `data-table`, `date-picker`, `modal`, ... | `@editora/ui-react`, once for all of them |
+| `ui-core` (or `web-components`) | the same components as web components: `@editora/ui-core` |
+| `ui-sortable` | drag-and-drop lists and boards on their own: `@editora/ui-sortable` |
+| `toast` | `@editora/toast` |
+| `icons`, `react-icons` | `@editora/icons`, `@editora/react-icons` |
+| `ai-review`, `agent`, `authorship`, `collaboration` | the editor's AI, authorship and real-time packages |
+| `paste-cleaner`, `content-a11y`, `rich-text-convert`, `email-html`, `docx` | the content tools |
+| `ui-testing` | `@editora/ui-testing`, as a development dependency |
+| `all` | UI components, toasts, the editor, icons and the code editor, for React |
 
-The last two rows are the components of [`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react): every
-component it exports can be added by name, written the way you like (`data-table`, `datatable` and `DataTable` are the
-same). A leading `ui-` is allowed, so `ui-select` is `select`. Parts of a compound component, such as `AlertTitle`, come
-with the component they belong to. `modal` is a name for `Dialog` and installs the same package.
+`editora list` prints them all, with every component of [`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react),
+and searches them:
 
-Two names are not what they seem. `toast` is the notification package, `@editora/toast`, and `ui-toast` is the toast
-component of `@editora/ui-react`. And `editor` installs the packages, but you still need `react` and `react-dom` in your
-project, and `@editora/core`, which `@editora/react` lists as a peer dependency: npm 7 and later install it for you, and
-with a package manager that does not, add it yourself.
+```text
+$ npx @editora/cli list date
+UI components  from @editora/ui-react, add any of them by name
+  date-field  date-picker  date-range-picker  date-range-time-picker  date-time-picker
+```
+
+How names are read:
+
+- A component can be written the way you like: `data-table`, `datatable` and `DataTable` are the same. Parts of a
+  compound component, such as `AlertTitle`, come with the component they belong to. `modal` is `Dialog`.
+- A package name works too: `editora add @editora/docx`.
+- A leading `ui-` is allowed, so `ui-select` is `select`, except for the names that are packages of their own:
+  `ui-react`, `ui-core`, `ui-sortable`, `ui-editor` and `ui-testing`.
+- `toast` is the notification package, `@editora/toast`; `ui-toast` is the toast component of `@editora/ui-react`.
 
 ## Several at once
 
-Give as many names as you like. The packages are installed with one command, and a package that two names share is
-installed once:
+Give as many names as you like. The packages are installed with one command, a package that two names share is
+installed once, and the components share one import line:
 
 ```text
 $ npx @editora/cli add button modal toast --dry-run
-Editora add targets: button, modal, toast
-- button: UI component (button) from @editora/ui-react
-- modal: Use Dialog from @editora/ui-react as modal primitive
-- toast: Notification runtime
+Adding button, modal, toast
 
-Installing with npm: npm install @editora/ui-react @editora/toast
+  button   Button from @editora/ui-react
+  modal    Dialog from @editora/ui-react
+  toast    Toast notifications for any framework, nothing to mount
 
-Dry run enabled. No packages were installed.
+Installing with npm (package-lock.json):
+  npm install @editora/ui-react @editora/toast
+
+Dry run: nothing was installed.
+
+Next steps
+
+Import the styles once, in src/main.tsx:
+
+  import '@editora/toast/toast.css';
+
+button:
+
+  import { Button } from '@editora/ui-react';
+
+  Docs: https://www.npmjs.com/package/@editora/ui-react
+
+modal:
+
+  import { Dialog } from '@editora/ui-react';
+
+  Docs: https://www.npmjs.com/package/@editora/ui-react
+
+toast:
+
+  import { toast } from '@editora/toast';
+
+  toast.success('Document saved');
+
+  Docs: https://www.npmjs.com/package/@editora/toast
 ```
 
 ## Choose the package manager
 
-The CLI uses the package manager that started it: `npm_config_user_agent`, which npm, pnpm, yarn and bun set for the
-commands they run. Run through `npx`, or on its own after `npm install -g`, that is npm. It does not read your lock
-file, so in a project that uses pnpm, yarn or bun, start it with that tool (`pnpm dlx @editora/cli add editor`,
-`yarn dlx`, `bunx`) or say which one you want:
+The CLI uses the package manager your project uses, whichever way you start it, `npx` included. Going up from the current
+folder, the first folder that has one of these decides:
+
+1. the `packageManager` field of its `package.json` (the one Corepack reads)
+2. a lock file: `pnpm-lock.yaml`, `yarn.lock`, `bun.lock` or `bun.lockb`, `package-lock.json`
+
+So in a workspace package, the lock file at the root of the repository is found. With no lock file, it uses the tool that
+started it (`pnpm dlx`, `yarn dlx`, `bunx`), and then npm. `--package-manager` picks one yourself:
 
 ```bash
 npx @editora/cli add button --package-manager pnpm
 npx @editora/cli add button --package-manager=yarn
-npx @editora/cli add button --package-manager bun
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/cli/docs/images/package-managers.png" alt="A terminal running add button --dry-run with each package manager: npm install, pnpm add, yarn add and bun add, followed by deno, which is refused with Unsupported package manager: deno" width="760">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/cli/docs/images/package-managers.png" alt="A terminal running add button --dry-run in four projects: with pnpm-lock.yaml it runs pnpm add, with yarn.lock yarn add, with bun.lock bun add and with package-lock.json npm install" width="760">
 </p>
 
-## When something is wrong
+## What it checks
 
-A name it does not know prints what is supported and exits with status 1. A missing name, an unknown option or an unknown
-command print the usage text and exit with status 1 too.
+- **There is a project.** With no `package.json` in the folder or above it, it installs nothing and says so (a dry run
+  still shows the command).
+- **React is there.** A React package in a project that does not list `react` and `react-dom` gets a note with the
+  command that adds them. It does not install React for you: your app picks its version.
+- **The install worked.** If the package manager is not installed, it says so and exits with status 1. If the install
+  fails, the exit status is the package manager's own, so a script or a CI job stops where the install did.
+
+A name it does not know gets suggestions, and exits with status 1:
 
 ```text
-$ npx @editora/cli add floating-ui
-Unknown feature(s): floating-ui
-Supported:
-- all exported @editora/ui-react component names
-- special: all, card, editor, light-code-editor, modal, react-icons, toast, ui-components, ui-react
+$ npx @editora/cli add datepiker
+Unknown name: datepiker. Did you mean date-picker?
+Run `editora list` to see every name you can add.
 ```
 
 An unsupported package manager does the same:
@@ -132,9 +233,6 @@ An unsupported package manager does the same:
 $ npx @editora/cli add button --package-manager deno
 Unsupported package manager: deno
 ```
-
-If the package manager is not installed, the CLI says so and exits with status 1. If the install itself fails, the exit
-status is the package manager's own, so a script or a CI job stops where the install did.
 
 ```bash
 npx @editora/cli --help      # the usage text
@@ -159,9 +257,10 @@ data-table [ '@editora/ui-react' ]
 [ 'pnpm', [ 'add', '@editora/ui-react' ] ]
 ```
 
-`resolveTarget(name)` returns `null` for a name it does not know. The module also exports `run(argv)`, which does what
-the command does and returns the exit status, `parseArgs`, `detectPackageManager`, `getVersion`, `formatHelpText`, the
-list `uiReactComponents` and the table `specialRegistry`.
+`resolveTarget(name)` returns `null` for a name it does not know. The module also exports `run(argv, options?)`, which
+does what the command does and returns the exit status, `listTargets(search?)`, `findPackageManager({ cwd })` (the
+package manager and why), `detectPackageManager`, `parseArgs`, `getVersion`, `formatHelpText`, the list
+`uiReactComponents` and the table `specialRegistry`.
 
 ## License
 

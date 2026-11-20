@@ -16,12 +16,33 @@ const cliDir = path.join(root, 'packages/cli');
 const bin = path.join(cliDir, 'bin/editora.js');
 const clean = (text) => text.replace(/\r\n/g, '\n').split('\n').map((line) => line.trimEnd()).join('\n').trim();
 
-// What the README calls the command, run as the local copy. The user agent is cleared, as it is when run by npx.
-export function runCommand(command) {
+// The project the README's commands run in: a React app made with Vite, like the reader's. `lockfile` picks its package
+// manager (package-lock.json is npm). The folders are made once and removed when the process ends.
+const projects = new Map();
+function sampleProject(lockfile) {
+  if (projects.has(lockfile)) return projects.get(lockfile);
+  const dir = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'editora-cli-readme-')), 'my-app');
+  fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, 'package.json'),
+    JSON.stringify({ name: 'my-app', private: true, dependencies: { react: '^18.3.1', 'react-dom': '^18.3.1' }, devDependencies: { vite: '^5.4.0' } }, null, 2)
+  );
+  fs.writeFileSync(path.join(dir, 'src/main.tsx'), '');
+  fs.writeFileSync(path.join(dir, lockfile), '');
+  projects.set(lockfile, dir);
+  return dir;
+}
+process.on('exit', () => {
+  for (const dir of projects.values()) fs.rmSync(path.dirname(dir), { recursive: true, force: true });
+});
+
+// What the README calls the command, run as the local copy in the sample project. The user agent is cleared, as it is
+// when run by npx.
+export function runCommand(command, { lockfile = 'package-lock.json' } = {}) {
   const local = command.replace(/^npx @editora\/cli\b/, `node "${bin}"`).replace(/^editora\b/, `node "${bin}"`);
   const env = { ...process.env };
   delete env.npm_config_user_agent;
-  return spawnSync('/bin/sh', ['-c', `${local} 2>&1`], { encoding: 'utf8', env });
+  return spawnSync('/bin/sh', ['-c', `${local} 2>&1`], { encoding: 'utf8', env, cwd: sampleProject(lockfile) });
 }
 
 export function checkCli({ ok, fail }) {
@@ -54,6 +75,12 @@ export function checkCli({ ok, fail }) {
       if (!/^(npx @editora\/cli|editora)\b/.test(line)) continue;
       const safe = /--(dry-run|help|version)\b/.test(line) ? line : `${line} --dry-run`;
       const result = runCommand(safe);
+      // `init` with no names asks what to set up; here, with no terminal, it lists the choices and exits with 1.
+      if (/^(npx @editora\/cli|editora) init$/.test(line)) {
+        if (/What do you want to set up\?/.test(result.stdout)) ok(line);
+        else fail(`${line}: does not offer the choices\n${clean(result.stdout)}`);
+        continue;
+      }
       if (result.status === 0) ok(line);
       else fail(`${line}: the CLI exits with ${result.status}\n${clean(result.stdout).split('\n')[0]}`);
     }
@@ -81,7 +108,7 @@ export function checkCli({ ok, fail }) {
   }
 
   // 4. the helpers the README lists
-  const listed = ['run', 'resolveTarget', 'installCommand', 'parseArgs', 'detectPackageManager', 'getVersion', 'formatHelpText', 'uiReactComponents', 'specialRegistry'];
+  const listed = ['run', 'resolveTarget', 'installCommand', 'parseArgs', 'detectPackageManager', 'findPackageManager', 'listTargets', 'getVersion', 'formatHelpText', 'uiReactComponents', 'specialRegistry'];
   return import(pathToFileURL(mjs).href).then(async (esm) => {
     const common = (await import('node:module')).createRequire(import.meta.url)(cjs);
     for (const name of listed) {

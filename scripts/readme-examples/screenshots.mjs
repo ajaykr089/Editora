@@ -512,16 +512,16 @@ for (const shot of shots) {
 const terminals = [
   {
     out: 'packages/cli/docs/images/add.png',
-    commands: ['npx @editora/cli add editor --dry-run', 'npx @editora/cli add button modal toast --dry-run'],
+    commands: ['npx @editora/cli add button data-table toast --dry-run'],
   },
   {
+    // The same command in four projects, each with the lock file of another package manager.
     out: 'packages/cli/docs/images/package-managers.png',
     commands: [
-      'npx @editora/cli add button --package-manager npm --dry-run | grep Installing',
-      'npx @editora/cli add button --package-manager pnpm --dry-run | grep Installing',
-      'npx @editora/cli add button --package-manager yarn --dry-run | grep Installing',
-      'npx @editora/cli add button --package-manager bun --dry-run | grep Installing',
-      'npx @editora/cli add button --package-manager deno',
+      { command: 'npx @editora/cli add button --dry-run | grep -A1 Installing', lockfile: 'pnpm-lock.yaml' },
+      { command: 'npx @editora/cli add button --dry-run | grep -A1 Installing', lockfile: 'yarn.lock' },
+      { command: 'npx @editora/cli add button --dry-run | grep -A1 Installing', lockfile: 'bun.lock' },
+      { command: 'npx @editora/cli add button --dry-run | grep -A1 Installing', lockfile: 'package-lock.json' },
     ],
   },
 ];
@@ -544,8 +544,9 @@ for (const terminal of terminals) {
   const context = await browser.newContext({ viewport: { width: 810, height: 800 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
   try {
-    const blocks = terminal.commands.map((command) => {
-      const result = runCommand(command);
+    const blocks = terminal.commands.map((item) => {
+      const { command, lockfile } = typeof item === 'string' ? { command: item } : item;
+      const result = runCommand(command, { lockfile });
       return { command, output: result.stdout.replace(/\s+$/, '') };
     });
     await page.setContent(terminalHtml(blocks));
