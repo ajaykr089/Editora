@@ -246,6 +246,34 @@ const shots = [
     },
   },
   { out: 'packages/ui-sortable/docs/images/quick-start.png', example: 'sortable-quick-start' },
+  // The headless entry, mid-drag: the copy follows the pointer and the item's place stays faded.
+  {
+    out: 'packages/ui-sortable/docs/images/headless.png',
+    example: 'sortable-headless',
+    viewport: { width: 420, height: 260 },
+    async act(page) {
+      const from = await page.getByText('Review the copy', { exact: true }).boundingBox();
+      await page.mouse.move(from.x + 60, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(from.x + 70, from.y + from.height / 2 + 10, { steps: 4 });
+      await page.mouse.move(from.x + 90, from.y + from.height / 2 + 26, { steps: 6 });
+      await page.waitForTimeout(400);
+    },
+  },
+  {
+    out: 'packages/ui-sortable/docs/images/headless-board.png',
+    example: 'sortable-headless-board',
+    viewport: { width: 640, height: 320 },
+    async act(page) {
+      const from = await page.getByText('Review the copy', { exact: true }).boundingBox();
+      const to = await page.getByText('Kick-off call', { exact: true }).boundingBox();
+      await page.mouse.move(from.x + 40, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(from.x + 50, from.y + from.height / 2 + 8, { steps: 4 });
+      await page.mouse.move(to.x + 60, to.y + to.height + 14, { steps: 14 });
+      await page.waitForTimeout(500);
+    },
+  },
   { out: 'packages/ui-sortable/docs/images/custom.png', example: 'sortable-custom' },
   { out: 'packages/ui-sortable/docs/images/flat.png', example: 'sortable-flat' },
   {

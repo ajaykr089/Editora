@@ -3,6 +3,8 @@
 <p align="center">
   Drag-and-drop lists and boards as one web component, <code>&lt;ui-sortable&gt;</code>: reorder within a list, move
   between lists, nest, clone and select several items, with full keyboard support. A small React wrapper is included.
+  Or make <a href="#headless-your-own-markup">your own markup</a> sortable with <code>createSortable</code> or the
+  <code>useSortable</code> React hook (5 KB).
 </p>
 
 <p align="center">
@@ -43,6 +45,9 @@
 - **Your own markup, with or without React**: custom cards, list headers and empty states, and a free `data` field on
   every item and list.
 - **Translatable and quiet**: every text it shows or announces can be replaced (`labels`), and the hint line can be hidden.
+- **Headless, for the markup you already have**: `createSortable(element)` and the `useSortable()` React hook add
+  dragging (mouse, touch, keyboard, between lists, auto-scroll) to your own list, grid or board, in 5 KB gzipped and with
+  no stylesheet. See [Headless](#headless-your-own-markup).
 
 ## Install
 
@@ -421,6 +426,153 @@ Ids must be unique across the group (a drop onto a board that already has one of
 id there). Dragging between boards is for the pointer: for the keyboard and for code there is
 `moveSelectionTo(otherSortable, { targetListId, beforeId?, parentId?, clone? })`.
 
+## Headless: your own markup
+
+When you already render the list yourself (your components, your CSS, your state), use the headless entry instead of the
+component. It adds dragging to the children of an element, and nothing else: no markup, no stylesheet, no ui-core. It is
+5 KB gzipped (the component is 24 KB).
+
+```html
+<ul id="tasks" aria-label="Tasks">
+  <li data-id="brief">Write the brief</li>
+  <li data-id="copy">Review the copy</li>
+  <li data-id="ship">Ship it</li>
+</ul>
+
+<style>
+  #tasks { list-style: none; padding: 0; width: 280px; font: 15px system-ui, sans-serif; }
+  #tasks li { padding: 10px 14px; margin: 6px 0; border: 1px solid #d0d7de; border-radius: 8px; background: #fff; cursor: grab; }
+</style>
+
+<script type="module">
+  import { createSortable } from '@editora/ui-sortable/headless';
+
+  // Your own list: drag an item, or focus one and press Space, then the arrow keys.
+  const list = createSortable(document.getElementById('tasks'), {
+    onSort: () => console.log('order', list.toArray().join(', '))
+  });
+</script>
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/headless.png" alt="A plain list of three tasks; the second, Review the copy, is lifted and follows the pointer with a shadow while its place in the list stays faded" width="320">
+</p>
+
+A drag follows the pointer with a copy of the item while the others slide aside; Escape puts it back. On touch, an item
+lifts after a short press, so a swipe still scrolls the page. From the keyboard, Space picks up the focused item, the
+arrow keys move it (Up and Down in a column, Left and Right in a row, all four in a grid), Home and End jump, Space drops
+and Escape cancels; each step is announced to screen readers. Near the edge of a scrolling list or of the window, the
+list scrolls. A click on an item is still a click, and a press in a field or a link inside it is left alone.
+
+### In React
+
+`useSortable` gives you a `ref` for the list element and calls `onChange` with the reordered array. React keeps
+rendering the list: after a drop the elements go back where React put them, and your state decides the order.
+
+```tsx
+import { useState } from 'react';
+import { useSortable } from '@editora/ui-sortable/headless/react';
+
+type Task = { id: string; title: string };
+
+const card = { padding: '10px 14px', margin: '6px 0', border: '1px solid #d0d7de', borderRadius: 8, background: '#fff', cursor: 'grab' };
+
+export default function Tasks() {
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: 'brief', title: 'Write the brief' },
+    { id: 'copy', title: 'Review the copy' },
+    { id: 'ship', title: 'Ship it' }
+  ]);
+  // Your markup and your state: after a drop, onChange gets the reordered array.
+  const { ref } = useSortable({ items: tasks, onChange: setTasks });
+
+  return (
+    <ul ref={ref} aria-label="Tasks" style={{ listStyle: 'none', padding: 0, width: 280 }}>
+      {tasks.map((task) => (
+        <li key={task.id} style={card}>
+          {task.title}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+Lists with the same `group` take each other's items. Each list keeps its own state: a move between two lists calls the
+`onChange` of both, one without the item and one with it.
+
+```tsx
+import { useState } from 'react';
+import { useSortable } from '@editora/ui-sortable/headless/react';
+
+type Card = { id: string; title: string };
+
+function Column({ title, initial }: { title: string; initial: Card[] }) {
+  const [cards, setCards] = useState(initial);
+  // Columns with the same group take each other's cards; each one keeps its own state.
+  const { ref } = useSortable({ items: cards, onChange: setCards, group: 'board' });
+
+  return (
+    <section style={{ width: 220, padding: 12, borderRadius: 10, background: '#f3f4f6' }}>
+      <h3 style={{ margin: '0 0 8px', font: '600 14px system-ui' }}>{title}</h3>
+      <ul ref={ref} aria-label={title} style={{ listStyle: 'none', margin: 0, padding: 0, minHeight: 48 }}>
+        {cards.map((card) => (
+          <li key={card.id} style={{ padding: '10px 12px', margin: '6px 0', borderRadius: 8, background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.08)', cursor: 'grab' }}>
+            {card.title}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export default function Board() {
+  return (
+    <div style={{ display: 'flex', gap: 16, font: '14px system-ui' }}>
+      <Column title="To do" initial={[{ id: 'brief', title: 'Write the brief' }, { id: 'copy', title: 'Review the copy' }]} />
+      <Column title="Done" initial={[{ id: 'kickoff', title: 'Kick-off call' }]} />
+    </div>
+  );
+}
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/headless-board.png" alt="Two columns, To do and Done; the card Review the copy is being dragged from To do into Done" width="520">
+</p>
+
+### Headless options
+
+`createSortable(element, options)` and `useSortable({ items, onChange, ...options })` take:
+
+| Option | |
+| --- | --- |
+| `itemSelector` | Which children are items (a selector); the others (a header, say) stay put. All of them by default. |
+| `handle` | Start a pointer drag only from this part of an item, such as a grip icon. The handle is also what keyboard users focus. |
+| `group` | Lists with the same group exchange items. |
+| `id` | The list's id in events; its `data-sortable-id` or `id` otherwise. |
+| `direction` | `'vertical'`, `'horizontal'` or `'grid'`, for the arrow keys. Worked out from the layout otherwise. |
+| `disabled` | Turn it off for now. |
+| `canMove(move)` | Return `false` to refuse a move (`{ item, from, to, newIndex }`): a full list, a locked item. |
+| `animation` | How long the others take to slide aside, in ms. `150`; none with `prefers-reduced-motion`. |
+| `touchDelay`, `threshold` | The press before a touch drag (`200` ms), and how far a mouse moves before a press is a drag (`4` px). |
+| `keyboard` | `false` leaves the keys alone, and the items are not made focusable. |
+| `ghostClass`, `placeholderClass` | Classes for the copy that follows the pointer and for the item left in place, instead of the built-in look. |
+| `getId(item)` | Each item's id; its `data-id` or `id` otherwise. |
+| `announcements` | What screen readers are told (`lifted`, `moved`, `movedToList`, `dropped`, `cancelled`, `instructions`), for another language. |
+| `revert` | `createSortable` only: put the elements back after a drop and leave the reordering to you (`useSortable` does this). |
+
+The callbacks, for `createSortable` (`useSortable` takes `onStart` and `onEnd` too):
+
+| Callback | |
+| --- | --- |
+| `onSort(event)` | The order changed: `{ type, item, itemId, from, to, fromId, toId, oldIndex, newIndex, source }`. `type` is `'update'` within a list; between lists the list it left gets `'remove'` and the list it joined `'add'`. |
+| `onStart(event)`, `onEnd(event)` | A drag or keyboard move began, and ended; `onEnd` also says whether anything `changed` and whether it was `cancelled`. |
+
+The list it returns has `toArray()` (the ids in order), `sort(ids)`, `update(options)` and `destroy()`. Style the item
+being dragged with `[data-sortable-dragging]` and the copy with `[data-sortable-ghost]`. `moveItem(array, from, to)`,
+`moveBetween(from, to, fromIndex, toIndex)` and `applySortEvent(lists, event)` reorder plain arrays, for state kept outside
+React. Both entries import on the server, where `createSortable` returns a list that does nothing.
+
 ## Items and lists
 
 | Item field | |
@@ -529,7 +681,9 @@ explains the keys.
 `UISortableBeforeChangeDetail`, `UISortableDropInfo`, `UISortableLabels`, `UISortableNestTrigger` and
 `UISortableDropzoneStyle`, among others. `@editora/ui-sortable/react` exports `Sortable`, `SortableList`, `SortableItem`,
 `SortableChangeDetail`, `SortableBeforeChangeDetail`, `SortableDropInfo`, `SortableLabels`, `SortableNestTrigger` and
-`SortableDropzoneStyle`.
+`SortableDropzoneStyle`. `@editora/ui-sortable/headless` exports `Sortable`, `SortableOptions`, `SortableEvent`,
+`SortableEndEvent`, `SortableMove` and `SortableAnnouncements`, and `@editora/ui-sortable/headless/react` the same plus
+`UseSortableOptions`. The typings are built from the source.
 
 ## Server rendering
 

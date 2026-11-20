@@ -14,6 +14,7 @@ It is available as:
 - `@editora/ui-core` for the broader web component bundle
 - `@editora/ui-sortable` for a standalone `ui-sortable` install
 - `@editora/ui-sortable/react` for a standalone React wrapper around `ui-sortable`
+- `@editora/ui-sortable/headless` and `@editora/ui-sortable/headless/react` to make **your own markup** sortable (`createSortable`, `useSortable`), see [Headless](#headless-your-own-markup)
 
 It covers:
 
@@ -38,6 +39,57 @@ It covers:
 - Dragging cards between two sortables (`group`), and lists that scroll by themselves (`maxHeight`)
 - Every text can be replaced through `labels`, and the hint line hidden with `hideToolbar`
 - The same custom rendering without React, through properties of the element
+
+## Headless: your own markup
+
+When you render the list yourself, the headless entry adds dragging to the children of an element and nothing else: no
+markup, no stylesheet, no ui-core (about 5 KB gzipped). It handles the mouse, touch (a short press lifts an item, so a
+swipe still scrolls), the keyboard (Space, arrows, Space; Escape cancels) with screen-reader announcements, lists that
+exchange items through `group`, and auto-scroll near the edges.
+
+```tsx
+import { useState } from "react";
+import { useSortable } from "@editora/ui-sortable/headless/react";
+
+export function Tasks() {
+  const [tasks, setTasks] = useState([
+    { id: "brief", title: "Write the brief" },
+    { id: "copy", title: "Review the copy" },
+  ]);
+  // After a drop, onChange gets the reordered array; React renders it.
+  const { ref } = useSortable({ items: tasks, onChange: setTasks });
+  return (
+    <ul ref={ref}>
+      {tasks.map((task) => (
+        <li key={task.id}>{task.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+Without React:
+
+```ts
+import { createSortable } from "@editora/ui-sortable/headless";
+
+const list = createSortable(document.querySelector("#tasks")!, {
+  onSort: () => save(list.toArray()), // the data-id of each item, in order
+});
+```
+
+| Option | |
+| --- | --- |
+| `itemSelector`, `handle` | Which children are items; the part of an item that starts a drag |
+| `group`, `id` | Lists with the same group exchange items; the list's id in events |
+| `direction` | `vertical`, `horizontal` or `grid` for the arrow keys (worked out from the layout otherwise) |
+| `canMove({ item, from, to, newIndex })` | Return `false` to refuse a move |
+| `disabled`, `keyboard`, `animation`, `touchDelay`, `threshold` | Behaviour |
+| `ghostClass`, `placeholderClass`, `ghostParent` | The look of the dragged copy and of the item left in place |
+| `announcements` | What screen readers are told, for another language |
+| `onSort`, `onStart`, `onEnd` | `onSort` has `{ type: 'update' \| 'add' \| 'remove', oldIndex, newIndex, fromId, toId, ... }` |
+
+`moveItem`, `moveBetween` and `applySortEvent` reorder plain arrays for state kept outside React.
 
 ## Import
 

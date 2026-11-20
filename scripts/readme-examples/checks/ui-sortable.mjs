@@ -165,4 +165,55 @@ export default async function checks({ run }) {
     const back = await boards();
     return back.backlog.split(' ').includes('login') && !back.sprint.split(' ').includes('login') ? true : `the card did not go back (${JSON.stringify(back)})`;
   });
+
+  // ---- your own markup (the headless entry): a real mouse drag, then the keyboard
+  const texts = (page, selector) => page.$$eval(selector, (els) => els.map((el) => el.textContent.trim()));
+  async function mouseDrag(page, fromText, toText) {
+    const a = await page.getByText(fromText, { exact: true }).boundingBox();
+    const b = await page.getByText(toText, { exact: true }).boundingBox();
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2 + 8, { steps: 2 });
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2 + 4, { steps: 14 });
+    await page.waitForTimeout(250);
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+  }
+  async function keyboardMove(page, text, keys) {
+    await page.getByText(text, { exact: true }).focus();
+    for (const key of ['Space', ...keys, 'Space']) await page.keyboard.press(key);
+    await page.waitForTimeout(200);
+  }
+
+  await run('sortable-headless', async (page, { logs }) => {
+    await mouseDrag(page, 'Write the brief', 'Ship it');
+    const order = await texts(page, '#tasks li');
+    if (order.join('|') !== 'Review the copy|Ship it|Write the brief') return `a drag left ${order.join(', ')}`;
+    if (!logs.includes('order copy, ship, brief')) return `onSort did not log the new order (${logs.join(' / ')})`;
+    await keyboardMove(page, 'Ship it', ['ArrowUp']);
+    const after = await texts(page, '#tasks li');
+    return after.join('|') === 'Ship it|Review the copy|Write the brief' ? true : `the keyboard left ${after.join(', ')}`;
+  });
+
+  await run('sortable-headless-react', async (page) => {
+    await mouseDrag(page, 'Write the brief', 'Ship it');
+    const order = await texts(page, 'ul[aria-label="Tasks"] li');
+    if (order.join('|') !== 'Review the copy|Ship it|Write the brief') return `a drag left ${order.join(', ')}`;
+    await keyboardMove(page, 'Write the brief', ['Home']);
+    const after = await texts(page, 'ul[aria-label="Tasks"] li');
+    if (after.join('|') !== 'Write the brief|Review the copy|Ship it') return `the keyboard left ${after.join(', ')}`;
+    const focused = await page.evaluate(() => document.activeElement?.textContent);
+    return focused === 'Write the brief' ? true : `focus moved to ${focused}`;
+  });
+
+  await run('sortable-headless-board', async (page) => {
+    await mouseDrag(page, 'Review the copy', 'Kick-off call');
+    const todo = await texts(page, 'ul[aria-label="To do"] li');
+    const done = await texts(page, 'ul[aria-label="Done"] li');
+    if (todo.join('|') !== 'Write the brief' || !done.includes('Review the copy')) return `after a drag: to do ${todo}, done ${done}`;
+    // Back with the keyboard: Left goes to the column before.
+    await keyboardMove(page, 'Review the copy', ['ArrowLeft']);
+    const back = await texts(page, 'ul[aria-label="To do"] li');
+    return back.includes('Review the copy') ? true : `the keyboard did not move it back (${back})`;
+  });
 }

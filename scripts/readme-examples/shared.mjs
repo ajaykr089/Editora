@@ -95,6 +95,7 @@ const importMapEntries = {
   '@editora/ui-core/sortable': 'ui-core/dist/sortable.esm.js',
   '@editora/icons': 'icons/dist/index.esm.js',
   '@editora/ui-sortable': 'ui-sortable/dist/index.esm.js',
+  '@editora/ui-sortable/headless': 'ui-sortable/dist/headless.esm.js',
   '@editora/toast': 'toast/dist/index.esm.js',
   '@editora/ui-editor': 'ui-editor/dist/index.esm.js',
 };
