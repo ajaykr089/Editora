@@ -69,11 +69,17 @@ test("every component that @editora/ui-react exports can be added", (t) => {
 
   const source = fs.readFileSync(indexFile, "utf8");
   const exported = new Set();
-  for (const [, typeOnly, names] of source.matchAll(/export\s*(type\s*)?\{([^}]*)\}/g)) {
+  // A name exported from a module of its own name (IconCloud from ./components/IconCloud) is a component in its own
+  // right, even when it starts with the name of another component (Icon).
+  const ownModule = new Set();
+  for (const [, typeOnly, names, from] of source.matchAll(/export\s*(type\s*)?\{([^}]*)\}(?:\s*from\s*["']([^"']+)["'])?/g)) {
     if (typeOnly) continue;
+    const moduleName = from ? from.split("/").pop() : undefined;
     for (const entry of names.split(",")) {
       const name = entry.trim().split(/\s+as\s+/).pop().trim();
-      if (/^[A-Z]/.test(name) && !/^type\s/.test(entry.trim())) exported.add(name);
+      if (!/^[A-Z]/.test(name) || /^type\s/.test(entry.trim())) continue;
+      exported.add(name);
+      if (name === moduleName) ownModule.add(name);
     }
   }
   const pascal = (name) => name.split("-").map((part) => part[0].toUpperCase() + part.slice(1)).join("");
@@ -82,7 +88,9 @@ test("every component that @editora/ui-react exports can be added", (t) => {
 
   // AlertTitle, AppHeaderStart, NavigationMenuItem...: parts of a component that is listed, installed with it.
   const missing = [...exported].filter(
-    (name) => !cli.resolveTarget(kebab(name)) && !listed.some((component) => name.startsWith(component))
+    (name) =>
+      !cli.resolveTarget(kebab(name)) &&
+      (ownModule.has(name) || !listed.some((component) => name.startsWith(component)))
   );
   assert.deepEqual(missing, [], "add these to uiReactComponents in bin/editora.js");
 });
@@ -103,7 +111,7 @@ test("run installs with the chosen package manager and returns its exit code", (
     encoding: "utf8",
     env: { ...process.env, PATH: dir + path.delimiter + process.env.PATH }
   });
-  assert.equal(fs.readFileSync(received, "utf8").trim(), "add @editora/react @editora/plugins @editora/themes");
+  assert.equal(fs.readFileSync(received, "utf8").trim(), "add @editora/react @editora/core @editora/plugins @editora/themes");
   assert.equal(result.status, 3);
 });
 
