@@ -161,9 +161,6 @@ const style = `
     outline: none;
   }
 
-  /* In range mode the two inputs overlap, so the top one (end) used to take every press: dragging
-     the start handle moved the end handle instead. The track handles pointers itself and moves the
-     nearer handle; the inputs still take focus and keys. */
   :host([range]) input[type="range"] {
     pointer-events: none;
   }
@@ -179,14 +176,6 @@ const style = `
 
   :host([range][disabled]) .track-wrap {
     cursor: default;
-  }
-
-  .thumb-probe {
-    position: absolute;
-    visibility: hidden;
-    pointer-events: none;
-    inline-size: var(--ui-slider-thumb-size);
-    block-size: 0;
   }
 
   input[type="range"]::-webkit-slider-runnable-track {
@@ -636,19 +625,14 @@ export class UISlider extends ElementBase {
   private _value = 0;
   private _valueStart = 0;
   private _valueEnd = 0;
-  // Pointer gesture on the range track: which handle it moves ('tie' = both handles sit on the
-  // same value, decided by the first move), and whether it changed anything yet.
-  private _dragHandle: 'start' | 'end' | 'tie' | null = null;
-  private _dragPointerId: number | null = null;
-  private _dragChanged = false;
+  // Pointer gesture on the range track ('' handle = both handles share a value, the first move picks).
+  private _drag: { id: number; handle: string; moved: boolean } | null = null;
 
   constructor() {
     super();
     this._onInput = this._onInput.bind(this);
     this._onChange = this._onChange.bind(this);
-    this._onTrackPointerDown = this._onTrackPointerDown.bind(this);
-    this._onTrackPointerMove = this._onTrackPointerMove.bind(this);
-    this._onTrackPointerUp = this._onTrackPointerUp.bind(this);
+    this._onPointer = this._onPointer.bind(this);
   }
 
   formResetCallback(): void {
@@ -884,123 +868,82 @@ export class UISlider extends ElementBase {
     this._emit('change');
   }
 
-  private _isDisabled(): boolean {
-    return isTruthy(this.getAttribute('disabled')) || this.hasAttribute('disabled');
-  }
-
-  /** The value under the pointer, using the native thumb's travel (half a thumb in from each end). */
-  private _valueFromPointer(event: PointerEvent): number | null {
-    const input = this._startInput;
-    const wrap = this._trackWrap;
-    if (!input || !wrap) return null;
+  /** The value under the pointer, along the native thumb's travel (half a thumb in from each end). */
+  private _valueAt(event: PointerEvent): number {
     const min = parseNumber(this.getAttribute('min'), 0);
     const max = Math.max(min, parseNumber(this.getAttribute('max'), 100));
+    const input = this._startInput as HTMLInputElement;
     const rect = input.getBoundingClientRect();
     const vertical = this.getAttribute('orientation') === 'vertical';
     const length = vertical ? rect.height : rect.width;
-    if (!(length > 0)) return null;
-
-    const probe = document.createElement('span');
-    probe.className = 'thumb-probe';
-    wrap.appendChild(probe);
-    const thumb = Math.min(probe.getBoundingClientRect().width || 0, length);
+    const probe = document.createElement('i');
+    probe.style.cssText = 'position:absolute;inline-size:var(--ui-slider-thumb-size)';
+    this._trackWrap?.appendChild(probe);
+    const thumb = Math.min(probe.getBoundingClientRect().width, length);
     probe.remove();
-
-    const offset = vertical ? rect.bottom - event.clientY : event.clientX - rect.left;
-    let fraction = length - thumb > 0 ? (offset - thumb / 2) / (length - thumb) : offset / length;
+    let fraction = ((vertical ? rect.bottom - event.clientY : event.clientX - rect.left) - thumb / 2) / (length - thumb || 1);
     if (!vertical && getComputedStyle(input).direction === 'rtl') fraction = 1 - fraction;
     return min + clamp(fraction, 0, 1) * (max - min);
   }
 
+  /** Snaps to the step counted from min, like the native input. */
   private _snap(raw: number): number {
     const min = parseNumber(this.getAttribute('min'), 0);
     const max = Math.max(min, parseNumber(this.getAttribute('max'), 100));
     const step = Math.max(0.0001, parseNumber(this.getAttribute('step'), 1));
-    const decimals = (String(step).split('.')[1] || '').length;
     const snapped = min + Math.round((clamp(raw, min, max) - min) / step) * step;
-    return clamp(Number(snapped.toFixed(decimals)), min, max);
+    return clamp(Number(snapped.toFixed((String(step).split('.')[1] || '').length)), min, max);
   }
 
-  /** Moves one handle of the range to `raw` (snapped, never past the other handle). */
-  private _moveHandle(handle: 'start' | 'end', raw: number): boolean {
-    const next = this._snap(raw);
-    const prevStart = this._valueStart;
-    const prevEnd = this._valueEnd;
-    if (handle === 'start') this._valueStart = Math.min(next, this._valueEnd);
-    else this._valueEnd = Math.max(next, this._valueStart);
-    this._value = this._valueEnd;
-    if (this._valueStart === prevStart && this._valueEnd === prevEnd) return false;
+  /**
+   * In range mode the two inputs overlap and take no pointers (the top one used to take every
+   * press, so the start handle moved the end one): the track moves the nearer handle instead, never
+   * past the other one. When both share a value the first move picks one. The handle gets focus.
+   */
+  private _onPointer(event: PointerEvent): void {
+    const drag = this._drag;
+    if (event.type !== 'pointerdown') {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (event.type !== 'pointermove') {
+        this._drag = null;
+        if (drag.moved) this._emit('change');
+        return;
+      }
+    } else if (!this._rangeMode || this.hasAttribute('disabled') || !this._startInput || event.button > 0) {
+      return;
+    }
 
+    const raw = this._valueAt(event);
+    const value = this._snap(raw);
+    const start = this._valueStart;
+    const end = this._valueEnd;
+    let handle = drag ? drag.handle : value < start ? 'start' : value > end ? 'end' : start === end ? '' : value - start <= end - value ? 'start' : 'end';
+    if (event.type === 'pointerdown') {
+      event.preventDefault();
+      this._trackWrap?.setPointerCapture?.(event.pointerId);
+      this._drag = { id: event.pointerId, handle, moved: false };
+    }
+    if (!handle) {
+      if (event.type === 'pointerdown' || value === start) {
+        this._endInput?.focus({ preventScroll: true });
+        return;
+      }
+      handle = value < start ? 'start' : 'end';
+      this._drag!.handle = handle;
+    }
+    (handle === 'start' ? this._startInput : this._endInput)?.focus({ preventScroll: true });
+
+    if (handle === 'start') this._valueStart = Math.min(value, end);
+    else this._valueEnd = Math.max(value, start);
+    if (this._valueStart === start && this._valueEnd === end) return;
+    this._value = this._valueEnd;
+    this._drag!.moved = true;
     this.setAttribute('value-start', String(this._valueStart));
     this.setAttribute('value-end', String(this._valueEnd));
     this.setAttribute('value', String(this._valueEnd));
     this._syncDom();
     this._emit('input');
     this._emit('valuechange');
-    return true;
-  }
-
-  private _focusHandle(handle: 'start' | 'end'): void {
-    const input = handle === 'start' ? this._startInput : this._endInput;
-    try {
-      input?.focus({ preventScroll: true });
-    } catch {
-      input?.focus();
-    }
-  }
-
-  private _onTrackPointerDown(event: PointerEvent): void {
-    if (!this._rangeMode || this._isDisabled() || !this._trackWrap) return;
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    const raw = this._valueFromPointer(event);
-    if (raw == null) return;
-    const value = this._snap(raw);
-
-    let handle: 'start' | 'end' | 'tie';
-    if (value < this._valueStart) handle = 'start';
-    else if (value > this._valueEnd) handle = 'end';
-    else if (this._valueStart === this._valueEnd) handle = 'tie';
-    else handle = Math.abs(value - this._valueStart) <= Math.abs(value - this._valueEnd) ? 'start' : 'end';
-
-    // Keep the press from selecting text or starting a native drag; focus moves to the handle.
-    event.preventDefault();
-    this._dragHandle = handle;
-    this._dragPointerId = event.pointerId;
-    this._dragChanged = false;
-    try {
-      this._trackWrap.setPointerCapture?.(event.pointerId);
-    } catch {
-      /* pointer already released */
-    }
-    this._focusHandle(handle === 'start' ? 'start' : 'end');
-    if (handle !== 'tie') this._dragChanged = this._moveHandle(handle, raw);
-  }
-
-  private _onTrackPointerMove(event: PointerEvent): void {
-    if (!this._dragHandle || event.pointerId !== this._dragPointerId) return;
-    const raw = this._valueFromPointer(event);
-    if (raw == null) return;
-    if (this._dragHandle === 'tie') {
-      const value = this._snap(raw);
-      if (value === this._valueStart) return;
-      this._dragHandle = value < this._valueStart ? 'start' : 'end';
-      this._focusHandle(this._dragHandle);
-    }
-    if (this._moveHandle(this._dragHandle, raw)) this._dragChanged = true;
-  }
-
-  private _onTrackPointerUp(event: PointerEvent): void {
-    if (!this._dragHandle || event.pointerId !== this._dragPointerId) return;
-    const changed = this._dragChanged;
-    this._dragHandle = null;
-    this._dragPointerId = null;
-    this._dragChanged = false;
-    try {
-      this._trackWrap?.releasePointerCapture?.(event.pointerId);
-    } catch {
-      /* already released */
-    }
-    if (changed) this._emit('change');
   }
 
   private _renderMarks(min: number, max: number): string {
@@ -1070,14 +1013,9 @@ export class UISlider extends ElementBase {
     this._valueEl = this.root.querySelector('.value') as HTMLElement | null;
     this._trackWrap = this.root.querySelector('.track-wrap') as HTMLElement | null;
     // A re-render replaces the track, so a gesture in progress ends with it.
-    this._dragHandle = null;
-    this._dragPointerId = null;
-    this._dragChanged = false;
-    if (this._trackWrap) {
-      this._trackWrap.addEventListener('pointerdown', this._onTrackPointerDown as EventListener);
-      this._trackWrap.addEventListener('pointermove', this._onTrackPointerMove as EventListener);
-      this._trackWrap.addEventListener('pointerup', this._onTrackPointerUp as EventListener);
-      this._trackWrap.addEventListener('pointercancel', this._onTrackPointerUp as EventListener);
+    this._drag = null;
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
+      this._trackWrap?.addEventListener(type, this._onPointer as EventListener);
     }
 
     this._syncDom();
