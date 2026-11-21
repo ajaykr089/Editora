@@ -210,18 +210,20 @@ test("next steps: the styles once, in the framework's entry file, then the code"
   const result = capture(["add", "editor", "button", "toast", "data-table", "--dry-run"], { cwd: vite });
   const output = result.output;
   assert.match(output, /Import the styles once, in src\/main\.tsx:/);
-  assert.equal(output.split("import '@editora/toast/toast.css';").length, 2, "each stylesheet once");
+  assert.equal(output.split("import '@editora/plugins/styles.css';").length, 2, "each stylesheet once");
+  // The toast main entry brings its own styles (2.2), so it adds no import.
+  assert.doesNotMatch(output, /toast\.css/);
   assert.match(output, /import { Button, DataTable } from '@editora\/ui-react';/);
   // In the order the names were given: editor, then the components, then toast.
   assert.ok(output.indexOf("editor:") < output.indexOf("button, data-table:"));
   assert.ok(output.indexOf("button, data-table:") < output.indexOf("toast:"));
 
   const next = project(t, { "package.json": { ...REACT_APP, dependencies: { ...REACT_APP.dependencies, next: "^15.0.0" } }, "src/app/layout.tsx": "" });
-  assert.match(capture(["add", "toast", "--dry-run"], { cwd: next }).output, /in src\/app\/layout\.tsx:/);
+  assert.match(capture(["add", "web-editor", "--dry-run"], { cwd: next }).output, /in src\/app\/layout\.tsx:/);
   assert.equal(cli.detectFramework(cli.findProject(next)).name, "Next.js");
 
   const nothing = project(t, { "package.json": { name: "plain" } });
-  assert.match(capture(["add", "toast", "--dry-run"], { cwd: nothing }).output, /in your app's entry file:/);
+  assert.match(capture(["add", "web-editor", "--dry-run"], { cwd: nothing }).output, /in your app's entry file:/);
 });
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -299,7 +299,7 @@ const specialRegistry = {
     group: "UI",
     packages: ["@editora/toast"],
     note: "Toast notifications for any framework, nothing to mount",
-    styles: ["@editora/toast/toast.css"],
+    // No stylesheet: since 2.2 the main entry puts its own on the page with the first toast.
     usage: ["import { toast } from '@editora/toast';", "", "toast.success('Document saved');"],
     docs: npm("@editora/toast")
   },
@@ -437,6 +437,7 @@ const specialRegistry = {
     ],
     note: "UI components, toasts, the rich text editor, icons and the code editor, for React",
     requires: REACT,
+    // toast.css stays: the toast API in @editora/ui-react uses @editora/toast/lite, which has no built-in styles.
     styles: [...editorStyles, "@editora/toast/toast.css", "@editora/light-code-editor/light-code-editor.css"],
     docs: "https://editora-ecosystem.netlify.app/"
   }

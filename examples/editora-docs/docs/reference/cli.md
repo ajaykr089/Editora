@@ -38,10 +38,6 @@ Dry run: nothing was installed.
 
 Next steps
 
-Import the styles once, in src/main.tsx:
-
-  import '@editora/toast/toast.css';
-
 button, data-table:
 
   import { Button, DataTable } from '@editora/ui-react';
