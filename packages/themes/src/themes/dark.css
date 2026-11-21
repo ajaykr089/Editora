@@ -3,7 +3,12 @@
 /* When the whole page is dark (an Editora UI app in dark mode), the dark editor takes the app's palette.
    A dark editor on a light page keeps its own: the page's --ui tokens are light there (dark text on the
    dark input failed contrast). --rte-page-* stay undefined elsewhere, so each rule uses its fallback. */
-:is(html, body):is([data-theme="dark"], .dark, .editora-theme-dark),
+html[data-theme="dark"],
+html.dark,
+html.editora-theme-dark,
+body[data-theme="dark"],
+body.dark,
+body.editora-theme-dark,
 [data-ui-mode="dark"] {
   --rte-page-border: var(--ui-color-border);
   --rte-page-foreground-on-primary: var(--ui-color-foreground-on-primary);
@@ -15,7 +20,9 @@
 }
 
 /* Override CSS Custom Properties for Dark Theme */
-:is([data-theme="dark"], .dark, .editora-theme-dark) {
+[data-theme="dark"],
+.dark,
+.editora-theme-dark {
   /* Colors */
   --rte-color-primary: var(--rte-page-primary, #58a6ff);
   --rte-color-primary-hover: #4b9cf8;
@@ -49,28 +56,40 @@
   --rte-shadow-lg: 0 14px 24px rgba(0, 0, 0, 0.45);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-editor {
+[data-theme="dark"] .rte-editor,
+.dark .rte-editor,
+.editora-theme-dark .rte-editor {
   background: var(--rte-page-surface, linear-gradient(180deg, #1b2330 0%, #1c2430 100%));
   border-color: var(--rte-color-border);
   color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar {
+[data-theme="dark"] .rte-toolbar,
+.dark .rte-toolbar,
+.editora-theme-dark .rte-toolbar {
   background: var(--rte-page-surface-alt, linear-gradient(180deg, #353d48 0%, #2d3540 100%));
   border-color: var(--rte-color-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button {
+[data-theme="dark"] .rte-toolbar-button,
+.dark .rte-toolbar-button,
+.editora-theme-dark .rte-toolbar-button {
   background: var(--rte-page-surface, linear-gradient(180deg, #46505f 0%, #3b4553 100%));
   border-color: var(--rte-page-border, #566275);
   color: var(--rte-page-text, #d0dae8);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg {
+[data-theme="dark"] .rte-toolbar-button svg,
+[data-theme="dark"] .editora-toolbar-button svg,
+[data-theme="dark"] .editora-toolbar-icon svg,
+.dark .rte-toolbar-button svg,
+.dark .editora-toolbar-button svg,
+.dark .editora-toolbar-icon svg,
+.editora-theme-dark .rte-toolbar-button svg,
+.editora-theme-dark .editora-toolbar-button svg,
+.editora-theme-dark .editora-toolbar-icon svg {
   color: currentColor;
 }
 
@@ -88,123 +107,413 @@
  * fill="none". Elements with their own hardcoded fill (root or descendant)
  * are converted directly by the attribute-selector rules below, since an
  * attribute on the element itself doesn't inherit away. */
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg:not([fill="none" i]) {
+[data-theme="dark"] .rte-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+[data-theme="dark"] .editora-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+[data-theme="dark"] .editora-toolbar-icon svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.dark .rte-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.dark .editora-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.dark .editora-toolbar-icon svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-theme-dark .rte-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-theme-dark .editora-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-theme-dark .editora-toolbar-icon svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]) {
   fill: currentColor;
 }
 
 /* Normalize plugin-provided inline SVGs with hardcoded black stroke values only */
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [stroke="#000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [stroke="#000000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [stroke="black" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [stroke="#0f0f0f" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [stroke="#111111" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="stroke:#000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="stroke: #000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="stroke:black" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="stroke: black" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="stroke:#0f0f0f" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="stroke: #0f0f0f" i] {
+[data-theme="dark"] .rte-toolbar-button svg [stroke="#000"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="#000"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="#000"],
+.dark .rte-toolbar-button svg [stroke="#000"],
+.dark .editora-toolbar-button svg [stroke="#000"],
+.dark .editora-toolbar-icon svg [stroke="#000"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="#000"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#000"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#000"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="#000000"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="#000000"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="#000000"],
+.dark .rte-toolbar-button svg [stroke="#000000"],
+.dark .editora-toolbar-button svg [stroke="#000000"],
+.dark .editora-toolbar-icon svg [stroke="#000000"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="#000000"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#000000"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#000000"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="black"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="BLACK"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="Black"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="black"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="BLACK"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="Black"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="black"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="BLACK"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="Black"],
+.dark .rte-toolbar-button svg [stroke="black"],
+.dark .rte-toolbar-button svg [stroke="BLACK"],
+.dark .rte-toolbar-button svg [stroke="Black"],
+.dark .editora-toolbar-button svg [stroke="black"],
+.dark .editora-toolbar-button svg [stroke="BLACK"],
+.dark .editora-toolbar-button svg [stroke="Black"],
+.dark .editora-toolbar-icon svg [stroke="black"],
+.dark .editora-toolbar-icon svg [stroke="BLACK"],
+.dark .editora-toolbar-icon svg [stroke="Black"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="black"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="BLACK"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="Black"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="black"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="Black"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="black"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="Black"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="#0f0f0f"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="#0F0F0F"],
+.dark .rte-toolbar-button svg [stroke="#0f0f0f"],
+.dark .rte-toolbar-button svg [stroke="#0F0F0F"],
+.dark .editora-toolbar-button svg [stroke="#0f0f0f"],
+.dark .editora-toolbar-button svg [stroke="#0F0F0F"],
+.dark .editora-toolbar-icon svg [stroke="#0f0f0f"],
+.dark .editora-toolbar-icon svg [stroke="#0F0F0F"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="#0f0f0f"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#0F0F0F"],
+[data-theme="dark"] .rte-toolbar-button svg [stroke="#111111"],
+[data-theme="dark"] .editora-toolbar-button svg [stroke="#111111"],
+[data-theme="dark"] .editora-toolbar-icon svg [stroke="#111111"],
+.dark .rte-toolbar-button svg [stroke="#111111"],
+.dark .editora-toolbar-button svg [stroke="#111111"],
+.dark .editora-toolbar-icon svg [stroke="#111111"],
+.editora-theme-dark .rte-toolbar-button svg [stroke="#111111"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#111111"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#111111"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="stroke:#000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="STROKE:#000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="stroke:#000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="STROKE:#000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="stroke:#000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="STROKE:#000"],
+.dark .rte-toolbar-button svg [style*="stroke:#000"],
+.dark .rte-toolbar-button svg [style*="STROKE:#000"],
+.dark .editora-toolbar-button svg [style*="stroke:#000"],
+.dark .editora-toolbar-button svg [style*="STROKE:#000"],
+.dark .editora-toolbar-icon svg [style*="stroke:#000"],
+.dark .editora-toolbar-icon svg [style*="STROKE:#000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="stroke:#000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="STROKE:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE:#000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="stroke: #000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="STROKE: #000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="stroke: #000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="STROKE: #000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="stroke: #000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="STROKE: #000"],
+.dark .rte-toolbar-button svg [style*="stroke: #000"],
+.dark .rte-toolbar-button svg [style*="STROKE: #000"],
+.dark .editora-toolbar-button svg [style*="stroke: #000"],
+.dark .editora-toolbar-button svg [style*="STROKE: #000"],
+.dark .editora-toolbar-icon svg [style*="stroke: #000"],
+.dark .editora-toolbar-icon svg [style*="STROKE: #000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="stroke: #000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="STROKE: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE: #000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="stroke:black"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="STROKE:BLACK"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="stroke:black"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="STROKE:BLACK"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="stroke:black"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="STROKE:BLACK"],
+.dark .rte-toolbar-button svg [style*="stroke:black"],
+.dark .rte-toolbar-button svg [style*="STROKE:BLACK"],
+.dark .editora-toolbar-button svg [style*="stroke:black"],
+.dark .editora-toolbar-button svg [style*="STROKE:BLACK"],
+.dark .editora-toolbar-icon svg [style*="stroke:black"],
+.dark .editora-toolbar-icon svg [style*="STROKE:BLACK"],
+.editora-theme-dark .rte-toolbar-button svg [style*="stroke:black"],
+.editora-theme-dark .rte-toolbar-button svg [style*="STROKE:BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke:black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE:BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke:black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE:BLACK"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="stroke: black"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="STROKE: BLACK"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="stroke: black"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="STROKE: BLACK"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="stroke: black"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="STROKE: BLACK"],
+.dark .rte-toolbar-button svg [style*="stroke: black"],
+.dark .rte-toolbar-button svg [style*="STROKE: BLACK"],
+.dark .editora-toolbar-button svg [style*="stroke: black"],
+.dark .editora-toolbar-button svg [style*="STROKE: BLACK"],
+.dark .editora-toolbar-icon svg [style*="stroke: black"],
+.dark .editora-toolbar-icon svg [style*="STROKE: BLACK"],
+.editora-theme-dark .rte-toolbar-button svg [style*="stroke: black"],
+.editora-theme-dark .rte-toolbar-button svg [style*="STROKE: BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke: black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE: BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke: black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE: BLACK"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="stroke:#0f0f0f"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="STROKE:#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="stroke:#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="STROKE:#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="stroke:#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="STROKE:#0F0F0F"],
+.dark .rte-toolbar-button svg [style*="stroke:#0f0f0f"],
+.dark .rte-toolbar-button svg [style*="STROKE:#0F0F0F"],
+.dark .editora-toolbar-button svg [style*="stroke:#0f0f0f"],
+.dark .editora-toolbar-button svg [style*="STROKE:#0F0F0F"],
+.dark .editora-toolbar-icon svg [style*="stroke:#0f0f0f"],
+.dark .editora-toolbar-icon svg [style*="STROKE:#0F0F0F"],
+.editora-theme-dark .rte-toolbar-button svg [style*="stroke:#0f0f0f"],
+.editora-theme-dark .rte-toolbar-button svg [style*="STROKE:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE:#0F0F0F"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="stroke: #0f0f0f"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="STROKE: #0F0F0F"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="stroke: #0f0f0f"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="STROKE: #0F0F0F"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="stroke: #0f0f0f"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="STROKE: #0F0F0F"],
+.dark .rte-toolbar-button svg [style*="stroke: #0f0f0f"],
+.dark .rte-toolbar-button svg [style*="STROKE: #0F0F0F"],
+.dark .editora-toolbar-button svg [style*="stroke: #0f0f0f"],
+.dark .editora-toolbar-button svg [style*="STROKE: #0F0F0F"],
+.dark .editora-toolbar-icon svg [style*="stroke: #0f0f0f"],
+.dark .editora-toolbar-icon svg [style*="STROKE: #0F0F0F"],
+.editora-theme-dark .rte-toolbar-button svg [style*="stroke: #0f0f0f"],
+.editora-theme-dark .rte-toolbar-button svg [style*="STROKE: #0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE: #0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE: #0F0F0F"] {
   stroke: currentColor !important;
 }
 
 /* Normalize plugin-provided inline SVGs with hardcoded black fill values only */
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [fill="#000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [fill="#000000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [fill="black" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [fill="#0f0f0f" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [fill="#111111" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="fill:#000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="fill: #000" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="fill:black" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="fill: black" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="fill:#0f0f0f" i],
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  [style*="fill: #0f0f0f" i] {
+[data-theme="dark"] .rte-toolbar-button svg [fill="#000"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="#000"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="#000"],
+.dark .rte-toolbar-button svg [fill="#000"],
+.dark .editora-toolbar-button svg [fill="#000"],
+.dark .editora-toolbar-icon svg [fill="#000"],
+.editora-theme-dark .rte-toolbar-button svg [fill="#000"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#000"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#000"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="#000000"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="#000000"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="#000000"],
+.dark .rte-toolbar-button svg [fill="#000000"],
+.dark .editora-toolbar-button svg [fill="#000000"],
+.dark .editora-toolbar-icon svg [fill="#000000"],
+.editora-theme-dark .rte-toolbar-button svg [fill="#000000"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#000000"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#000000"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="black"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="BLACK"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="Black"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="black"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="BLACK"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="Black"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="black"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="BLACK"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="Black"],
+.dark .rte-toolbar-button svg [fill="black"],
+.dark .rte-toolbar-button svg [fill="BLACK"],
+.dark .rte-toolbar-button svg [fill="Black"],
+.dark .editora-toolbar-button svg [fill="black"],
+.dark .editora-toolbar-button svg [fill="BLACK"],
+.dark .editora-toolbar-button svg [fill="Black"],
+.dark .editora-toolbar-icon svg [fill="black"],
+.dark .editora-toolbar-icon svg [fill="BLACK"],
+.dark .editora-toolbar-icon svg [fill="Black"],
+.editora-theme-dark .rte-toolbar-button svg [fill="black"],
+.editora-theme-dark .rte-toolbar-button svg [fill="BLACK"],
+.editora-theme-dark .rte-toolbar-button svg [fill="Black"],
+.editora-theme-dark .editora-toolbar-button svg [fill="black"],
+.editora-theme-dark .editora-toolbar-button svg [fill="BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [fill="Black"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="black"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="Black"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="#0f0f0f"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="#0F0F0F"],
+.dark .rte-toolbar-button svg [fill="#0f0f0f"],
+.dark .rte-toolbar-button svg [fill="#0F0F0F"],
+.dark .editora-toolbar-button svg [fill="#0f0f0f"],
+.dark .editora-toolbar-button svg [fill="#0F0F0F"],
+.dark .editora-toolbar-icon svg [fill="#0f0f0f"],
+.dark .editora-toolbar-icon svg [fill="#0F0F0F"],
+.editora-theme-dark .rte-toolbar-button svg [fill="#0f0f0f"],
+.editora-theme-dark .rte-toolbar-button svg [fill="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#0F0F0F"],
+[data-theme="dark"] .rte-toolbar-button svg [fill="#111111"],
+[data-theme="dark"] .editora-toolbar-button svg [fill="#111111"],
+[data-theme="dark"] .editora-toolbar-icon svg [fill="#111111"],
+.dark .rte-toolbar-button svg [fill="#111111"],
+.dark .editora-toolbar-button svg [fill="#111111"],
+.dark .editora-toolbar-icon svg [fill="#111111"],
+.editora-theme-dark .rte-toolbar-button svg [fill="#111111"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#111111"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#111111"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="fill:#000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="FILL:#000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="fill:#000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="FILL:#000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="fill:#000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="FILL:#000"],
+.dark .rte-toolbar-button svg [style*="fill:#000"],
+.dark .rte-toolbar-button svg [style*="FILL:#000"],
+.dark .editora-toolbar-button svg [style*="fill:#000"],
+.dark .editora-toolbar-button svg [style*="FILL:#000"],
+.dark .editora-toolbar-icon svg [style*="fill:#000"],
+.dark .editora-toolbar-icon svg [style*="FILL:#000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="fill:#000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="FILL:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL:#000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="fill: #000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="FILL: #000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="fill: #000"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="FILL: #000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="fill: #000"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="FILL: #000"],
+.dark .rte-toolbar-button svg [style*="fill: #000"],
+.dark .rte-toolbar-button svg [style*="FILL: #000"],
+.dark .editora-toolbar-button svg [style*="fill: #000"],
+.dark .editora-toolbar-button svg [style*="FILL: #000"],
+.dark .editora-toolbar-icon svg [style*="fill: #000"],
+.dark .editora-toolbar-icon svg [style*="FILL: #000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="fill: #000"],
+.editora-theme-dark .rte-toolbar-button svg [style*="FILL: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL: #000"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="fill:black"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="FILL:BLACK"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="fill:black"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="FILL:BLACK"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="fill:black"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="FILL:BLACK"],
+.dark .rte-toolbar-button svg [style*="fill:black"],
+.dark .rte-toolbar-button svg [style*="FILL:BLACK"],
+.dark .editora-toolbar-button svg [style*="fill:black"],
+.dark .editora-toolbar-button svg [style*="FILL:BLACK"],
+.dark .editora-toolbar-icon svg [style*="fill:black"],
+.dark .editora-toolbar-icon svg [style*="FILL:BLACK"],
+.editora-theme-dark .rte-toolbar-button svg [style*="fill:black"],
+.editora-theme-dark .rte-toolbar-button svg [style*="FILL:BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill:black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL:BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill:black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL:BLACK"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="fill: black"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="FILL: BLACK"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="fill: black"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="FILL: BLACK"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="fill: black"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="FILL: BLACK"],
+.dark .rte-toolbar-button svg [style*="fill: black"],
+.dark .rte-toolbar-button svg [style*="FILL: BLACK"],
+.dark .editora-toolbar-button svg [style*="fill: black"],
+.dark .editora-toolbar-button svg [style*="FILL: BLACK"],
+.dark .editora-toolbar-icon svg [style*="fill: black"],
+.dark .editora-toolbar-icon svg [style*="FILL: BLACK"],
+.editora-theme-dark .rte-toolbar-button svg [style*="fill: black"],
+.editora-theme-dark .rte-toolbar-button svg [style*="FILL: BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill: black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL: BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill: black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL: BLACK"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="fill:#0f0f0f"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="FILL:#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="fill:#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="FILL:#0F0F0F"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="fill:#0f0f0f"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="FILL:#0F0F0F"],
+.dark .rte-toolbar-button svg [style*="fill:#0f0f0f"],
+.dark .rte-toolbar-button svg [style*="FILL:#0F0F0F"],
+.dark .editora-toolbar-button svg [style*="fill:#0f0f0f"],
+.dark .editora-toolbar-button svg [style*="FILL:#0F0F0F"],
+.dark .editora-toolbar-icon svg [style*="fill:#0f0f0f"],
+.dark .editora-toolbar-icon svg [style*="FILL:#0F0F0F"],
+.editora-theme-dark .rte-toolbar-button svg [style*="fill:#0f0f0f"],
+.editora-theme-dark .rte-toolbar-button svg [style*="FILL:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL:#0F0F0F"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="fill: #0f0f0f"],
+[data-theme="dark"] .rte-toolbar-button svg [style*="FILL: #0F0F0F"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="fill: #0f0f0f"],
+[data-theme="dark"] .editora-toolbar-button svg [style*="FILL: #0F0F0F"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="fill: #0f0f0f"],
+[data-theme="dark"] .editora-toolbar-icon svg [style*="FILL: #0F0F0F"],
+.dark .rte-toolbar-button svg [style*="fill: #0f0f0f"],
+.dark .rte-toolbar-button svg [style*="FILL: #0F0F0F"],
+.dark .editora-toolbar-button svg [style*="fill: #0f0f0f"],
+.dark .editora-toolbar-button svg [style*="FILL: #0F0F0F"],
+.dark .editora-toolbar-icon svg [style*="fill: #0f0f0f"],
+.dark .editora-toolbar-icon svg [style*="FILL: #0F0F0F"],
+.editora-theme-dark .rte-toolbar-button svg [style*="fill: #0f0f0f"],
+.editora-theme-dark .rte-toolbar-button svg [style*="FILL: #0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL: #0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL: #0F0F0F"] {
   fill: currentColor !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button:hover {
+[data-theme="dark"] .rte-toolbar-button:hover,
+.dark .rte-toolbar-button:hover,
+.editora-theme-dark .rte-toolbar-button:hover {
   background: linear-gradient(180deg, #525d6d 0%, #465262 100%);
   color: #f4f8ff;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button:active,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] {
+[data-theme="dark"] .rte-toolbar-button:active,
+.dark .rte-toolbar-button:active,
+.editora-theme-dark .rte-toolbar-button:active,
+[data-theme="dark"] .rte-toolbar-button.active,
+.dark .rte-toolbar-button.active,
+.editora-theme-dark .rte-toolbar-button.active,
+[data-theme="dark"] .rte-toolbar-button[data-active="true"],
+.dark .rte-toolbar-button[data-active="true"],
+.editora-theme-dark .rte-toolbar-button[data-active="true"] {
   background: linear-gradient(180deg, #5eaaf6 0%, #4a95de 100%);
   border-color: #67adf4;
   color: #0f1b2a;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg {
+[data-theme="dark"] .rte-toolbar-button.active svg,
+.dark .rte-toolbar-button.active svg,
+.editora-theme-dark .rte-toolbar-button.active svg,
+[data-theme="dark"] .rte-toolbar-button[data-active="true"] svg,
+.dark .rte-toolbar-button[data-active="true"] svg,
+.editora-theme-dark .rte-toolbar-button[data-active="true"] svg {
   color: currentColor;
 }
 
@@ -213,235 +522,339 @@
  * attribute (e.g. Bold/Italic) default to black and need the root converted
  * explicitly; hardcoded-black-fill icons are handled by the
  * attribute-selector rules above. */
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg:not([fill="none" i]),
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg:not([fill="none" i]) {
+[data-theme="dark"] .rte-toolbar-button.active svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.dark .rte-toolbar-button.active svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-theme-dark .rte-toolbar-button.active svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+[data-theme="dark"] .rte-toolbar-button[data-active="true"] svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.dark .rte-toolbar-button[data-active="true"] svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-theme-dark .rte-toolbar-button[data-active="true"] svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]) {
   fill: currentColor;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button:disabled {
+[data-theme="dark"] .rte-toolbar-button:disabled,
+.dark .rte-toolbar-button:disabled,
+.editora-theme-dark .rte-toolbar-button:disabled {
   background: #313946;
   border-color: #424d5e;
   color: #7f8ca1;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-input,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-group-items.font-size,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size {
+[data-theme="dark"] .rte-toolbar-input,
+.dark .rte-toolbar-input,
+.editora-theme-dark .rte-toolbar-input,
+[data-theme="dark"] .rte-toolbar-group-items.font-size,
+.dark .rte-toolbar-group-items.font-size,
+.editora-theme-dark .rte-toolbar-group-items.font-size,
+[data-theme="dark"] .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size,
+.dark .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size,
+.editora-theme-dark .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size {
   background-color: #2e3642;
   color: var(--rte-color-text-primary);
   border-color: #566275;
   caret-color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-input::placeholder,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size::placeholder {
+[data-theme="dark"] .rte-toolbar-input::placeholder,
+.dark .rte-toolbar-input::placeholder,
+.editora-theme-dark .rte-toolbar-input::placeholder,
+[data-theme="dark"] .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size::placeholder,
+.dark .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size::placeholder,
+.editora-theme-dark .rte-toolbar-group-items.font-size .rte-toolbar-input.font-size::placeholder {
   color: var(--rte-color-text-primary);
   opacity: 1;
 }
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-group-items.font-size {
-    & .rte-toolbar-item {
-        &:first-child {
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-            border-right: 1px solid #566275;
-        }
-        &:last-child {
-            border-top-right-radius: 4px; 
-            border-left: 1px solid #566275;
-        }
-      }
-    }
+[data-theme="dark"] .rte-toolbar-group-items.font-size .rte-toolbar-item:first-child,
+.dark .rte-toolbar-group-items.font-size .rte-toolbar-item:first-child,
+.editora-theme-dark .rte-toolbar-group-items.font-size .rte-toolbar-item:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-right: 1px solid #566275;
+}
+[data-theme="dark"] .rte-toolbar-group-items.font-size .rte-toolbar-item:last-child,
+.dark .rte-toolbar-group-items.font-size .rte-toolbar-item:last-child,
+.editora-theme-dark .rte-toolbar-group-items.font-size .rte-toolbar-item:last-child {
+  border-top-right-radius: 4px;
+  border-left: 1px solid #566275;
+}
 
-    :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-input.font-size {
+    [data-theme="dark"] .rte-toolbar-input.font-size,
+.dark .rte-toolbar-input.font-size,
+.editora-theme-dark .rte-toolbar-input.font-size {
         text-align: center;
         border: none !important;
     }
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-menu {
+[data-theme="dark"] .rte-toolbar-dropdown-menu,
+.dark .rte-toolbar-dropdown-menu,
+.editora-theme-dark .rte-toolbar-dropdown-menu {
   background: #29323d;
   border-color: #4d596b;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item {
+[data-theme="dark"] .rte-toolbar-dropdown-item,
+.dark .rte-toolbar-dropdown-item,
+.editora-theme-dark .rte-toolbar-dropdown-item {
   color: var(--rte-color-text-secondary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item:hover,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item[data-active="true"],
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item:focus {
+[data-theme="dark"] .rte-toolbar-dropdown-item:hover,
+.dark .rte-toolbar-dropdown-item:hover,
+.editora-theme-dark .rte-toolbar-dropdown-item:hover,
+[data-theme="dark"] .rte-toolbar-dropdown-item[data-active="true"],
+.dark .rte-toolbar-dropdown-item[data-active="true"],
+.editora-theme-dark .rte-toolbar-dropdown-item[data-active="true"],
+[data-theme="dark"] .rte-toolbar-dropdown-item:focus,
+.dark .rte-toolbar-dropdown-item:focus,
+.editora-theme-dark .rte-toolbar-dropdown-item:focus {
   background: #3a4554;
   color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-more-button {
+[data-theme="dark"] .rte-toolbar-more-button,
+.dark .rte-toolbar-more-button,
+.editora-theme-dark .rte-toolbar-more-button {
   background: linear-gradient(180deg, #46505f 0%, #3b4553 100%);
   border-color: #566275;
   color: var(--rte-color-text-secondary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-more-button:hover {
+[data-theme="dark"] .rte-toolbar-more-button:hover,
+.dark .rte-toolbar-more-button:hover,
+.editora-theme-dark .rte-toolbar-more-button:hover {
   background: linear-gradient(180deg, #525d6d 0%, #465262 100%);
   color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-more-button.active {
+[data-theme="dark"] .rte-toolbar-more-button.active,
+.dark .rte-toolbar-more-button.active,
+.editora-theme-dark .rte-toolbar-more-button.active {
   background: linear-gradient(180deg, #5eaaf6 0%, #4a95de 100%);
   border-color: #67adf4;
   color: #0f1b2a;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-expanded-row {
+[data-theme="dark"] .rte-toolbar-expanded-row,
+.dark .rte-toolbar-expanded-row,
+.editora-theme-dark .rte-toolbar-expanded-row {
   background: #2a323c;
   border-color: var(--rte-color-border);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content :is(.rte-table, table) {
+[data-theme="dark"] .rte-content :is(.rte-table, table),
+.dark .rte-content :is(.rte-table, table),
+.editora-theme-dark .rte-content :is(.rte-table, table) {
   border-color: #607088;
   background: #24303c;
   color: #e6eefb;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content :is(.rte-table td, .rte-table th, table td, table th) {
+[data-theme="dark"] .rte-content :is(.rte-table td, .rte-table th, table td, table th),
+.dark .rte-content :is(.rte-table td, .rte-table th, table td, table th),
+.editora-theme-dark .rte-content :is(.rte-table td, .rte-table th, table td, table th) {
   border-color: #607088;
   color: #e6eefb;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content :is(.rte-table th, table th) {
+[data-theme="dark"] .rte-content :is(.rte-table th, table th),
+.dark .rte-content :is(.rte-table th, table th),
+.editora-theme-dark .rte-content :is(.rte-table th, table th) {
   background: linear-gradient(180deg, #3b4553 0%, #333d4a 100%);
   color: #f3f8ff;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .table-toolbar,
+[data-theme="dark"] .table-toolbar,
+.dark .table-toolbar,
+.editora-theme-dark .table-toolbar,
 .table-toolbar.rte-theme-dark {
   background: linear-gradient(180deg, #2f3844 0%, #2a323c 100%);
   border-color: #4d596b;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-divider,
+[data-theme="dark"] .toolbar-divider,
+.dark .toolbar-divider,
+.editora-theme-dark .toolbar-divider,
 .table-toolbar.rte-theme-dark .toolbar-divider {
   background: #4d596b;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn,
+[data-theme="dark"] .toolbar-icon-btn,
+.dark .toolbar-icon-btn,
+.editora-theme-dark .toolbar-icon-btn,
 .table-toolbar.rte-theme-dark .toolbar-icon-btn {
   color: #d7deea;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:hover:not(:disabled),
+[data-theme="dark"] .toolbar-icon-btn:hover:not(:disabled),
+.dark .toolbar-icon-btn:hover:not(:disabled),
+.editora-theme-dark .toolbar-icon-btn:hover:not(:disabled),
 .table-toolbar.rte-theme-dark .toolbar-icon-btn:hover:not(:disabled) {
   background: #3a4554;
   border-color: #607088;
   color: #f3f8ff;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content {
+[data-theme="dark"] .rte-content,
+.dark .rte-content,
+.editora-theme-dark .rte-content {
   color: var(--rte-color-text-primary);
   background: var(--rte-page-surface, linear-gradient(180deg, #1f2732 0%, #1c232e 100%));
   border-color: var(--rte-color-border) !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content h1,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content h2,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content h3,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content h4,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content h5,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content h6 {
+[data-theme="dark"] .rte-content h1,
+.dark .rte-content h1,
+.editora-theme-dark .rte-content h1,
+[data-theme="dark"] .rte-content h2,
+.dark .rte-content h2,
+.editora-theme-dark .rte-content h2,
+[data-theme="dark"] .rte-content h3,
+.dark .rte-content h3,
+.editora-theme-dark .rte-content h3,
+[data-theme="dark"] .rte-content h4,
+.dark .rte-content h4,
+.editora-theme-dark .rte-content h4,
+[data-theme="dark"] .rte-content h5,
+.dark .rte-content h5,
+.editora-theme-dark .rte-content h5,
+[data-theme="dark"] .rte-content h6,
+.dark .rte-content h6,
+.editora-theme-dark .rte-content h6 {
   color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content blockquote {
+[data-theme="dark"] .rte-content blockquote,
+.dark .rte-content blockquote,
+.editora-theme-dark .rte-content blockquote {
   background-color: #2f3946;
   color: #c0cada;
   border-left-color: var(--rte-color-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-link {
+[data-theme="dark"] .rte-link,
+.dark .rte-link,
+.editora-theme-dark .rte-link {
   color: var(--rte-color-primary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-link:hover {
+[data-theme="dark"] .rte-link:hover,
+.dark .rte-link:hover,
+.editora-theme-dark .rte-link:hover {
   color: var(--rte-color-primary-hover);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content code {
+[data-theme="dark"] .rte-content code,
+.dark .rte-content code,
+.editora-theme-dark .rte-content code {
   background-color: #2f3946;
   color: var(--rte-color-warning);
 }
 
 /* Code Sample plugin uses inline light styles, so dark theme needs explicit overrides. */
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block {
+[data-theme="dark"] .rte-code-block,
+.dark .rte-code-block,
+.editora-theme-dark .rte-code-block {
   background: linear-gradient(180deg, #212a36 0%, #1b2430 100%) !important;
   border-color: #4f5b70 !important;
   color: #e7effc !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block:hover {
+[data-theme="dark"] .rte-code-block:hover,
+.dark .rte-code-block:hover,
+.editora-theme-dark .rte-code-block:hover {
   background: linear-gradient(180deg, #273240 0%, #1f2935 100%) !important;
   border-color: #607088 !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block code {
+[data-theme="dark"] .rte-code-block code,
+.dark .rte-code-block code,
+.editora-theme-dark .rte-code-block code {
   color: #e7effc !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block::before {
+[data-theme="dark"] .rte-code-block::before,
+.dark .rte-code-block::before,
+.editora-theme-dark .rte-code-block::before {
   background: #111927 !important;
   color: #dce8ff !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block .rte-code-copy {
+[data-theme="dark"] .rte-code-block .rte-code-copy,
+.dark .rte-code-block .rte-code-copy,
+.editora-theme-dark .rte-code-block .rte-code-copy {
   background: #2b3441 !important;
   border-color: #5a667b !important;
   color: #dce8ff !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block .rte-code-copy:hover {
+[data-theme="dark"] .rte-code-block .rte-code-copy:hover,
+.dark .rte-code-block .rte-code-copy:hover,
+.editora-theme-dark .rte-code-block .rte-code-copy:hover {
   background: #3a4554 !important;
   border-color: #6e7d95 !important;
   color: #f3f8ff !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-code-block[contenteditable='false']::after {
+[data-theme="dark"] .rte-code-block[contenteditable='false']::after,
+.dark .rte-code-block[contenteditable='false']::after,
+.editora-theme-dark .rte-code-block[contenteditable='false']::after {
   background: rgba(255, 255, 255, 0.06) !important;
   border-top-color: #4f5b70 !important;
   color: #9fb0ca !important;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content::selection {
+[data-theme="dark"] .rte-content::selection,
+.dark .rte-content::selection,
+.editora-theme-dark .rte-content::selection {
   background-color: rgba(88, 166, 255, 0.28);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content:empty:before,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-content.rte-content-empty:before {
+[data-theme="dark"] .rte-content:empty:before,
+.dark .rte-content:empty:before,
+.editora-theme-dark .rte-content:empty:before,
+[data-theme="dark"] .rte-content.rte-content-empty:before,
+.dark .rte-content.rte-content-empty:before,
+.editora-theme-dark .rte-content.rte-content-empty:before {
   color: var(--rte-color-text-muted);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar {
+[data-theme="dark"] .editora-statusbar,
+.dark .editora-statusbar,
+.editora-theme-dark .editora-statusbar {
   background: var(--rte-page-surface-alt, linear-gradient(180deg, #2c3440 0%, #252d37 100%));
   border-top-color: var(--rte-page-border, #3f4a5b);
   color: var(--rte-page-muted, #c5cfdf);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-item {
+[data-theme="dark"] .editora-statusbar-item,
+.dark .editora-statusbar-item,
+.editora-theme-dark .editora-statusbar-item {
   color: var(--rte-page-muted, #d7deea);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-separator {
+[data-theme="dark"] .editora-statusbar-separator,
+.dark .editora-statusbar-separator,
+.editora-theme-dark .editora-statusbar-separator {
   color: #607088;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-top {
+[data-theme="dark"] .editora-statusbar-top,
+.dark .editora-statusbar-top,
+.editora-theme-dark .editora-statusbar-top {
   border-bottom-color: #3f4a5b;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .editora-statusbar-bottom {
+[data-theme="dark"] .editora-statusbar-bottom,
+.dark .editora-statusbar-bottom,
+.editora-theme-dark .editora-statusbar-bottom {
   border-left-color: var(--rte-page-border, #3f4a5b);
   border-right-color: var(--rte-page-border, #3f4a5b);
 }
 
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu,
+[data-theme="dark"] .rte-inline-menu,
+.dark .rte-inline-menu,
+.editora-theme-dark .rte-inline-menu,
 .rte-inline-menu.rte-inline-menu-theme-dark {
   position: fixed;
   z-index: 1000;
@@ -453,7 +866,9 @@
   max-width: 200px;
   pointer-events: auto;
 }
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item,
+[data-theme="dark"] .rte-inline-menu-item,
+.dark .rte-inline-menu-item,
+.editora-theme-dark .rte-inline-menu-item,
 .rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item {
   padding: 8px 12px;
   cursor: pointer;
@@ -465,14 +880,20 @@
   background-color: transparent;
   color: #e5e7eb;
 }
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:hover,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:focus,
+[data-theme="dark"] .rte-inline-menu-item:hover,
+.dark .rte-inline-menu-item:hover,
+.editora-theme-dark .rte-inline-menu-item:hover,
+[data-theme="dark"] .rte-inline-menu-item:focus,
+.dark .rte-inline-menu-item:focus,
+.editora-theme-dark .rte-inline-menu-item:focus,
 .rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item:focus,
 .rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item:hover {
     background-color: #2f3946;
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .floating-toolbar {
+[data-theme="dark"] .floating-toolbar,
+.dark .floating-toolbar,
+.editora-theme-dark .floating-toolbar {
   --rte-floating-toolbar-bg: #273240;
   --rte-floating-toolbar-border: #4f5f76;
   --rte-floating-toolbar-text: #d8e4f6;

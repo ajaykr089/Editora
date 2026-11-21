@@ -35,6 +35,9 @@ jobs:
       - name: Verify custom element registrations are complete
         run: npm run check:element-registrations
 
+      - name: Check shipped CSS survives app build pipelines
+        run: npm run check:shipped-css
+
       - name: Run linter
         run: npm run lint
       

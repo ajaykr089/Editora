@@ -111,27 +111,28 @@
   border: 1px solid var(--rte-color-border-light);
   border-radius: var(--rte-radius-sm);
 }
+/* No CSS nesting here: build tools still mangle it (see @editora/themes default.css). */
 .editora-toolbar-group-items {
   display: flex;
   align-items: center;
   border: 1px solid #ccc;
-  .editora-toolbar-button {
-    border: none;
-    border-radius: 0;
-    &:first-child {
-      border-right: 1px solid #ccc;
-      border-top-left-radius: 3px;
-      border-bottom-left-radius: 3px;
-    }
-    &:last-child {
-      border: 0px solid #ccc;
-      border-radius: 0px !important;
-    }
-    &:hover {
-      background: #e0e0e0;
-      border-color: #ccc;
-    }
-  }
+}
+.editora-toolbar-group-items .editora-toolbar-button {
+  border: none;
+  border-radius: 0;
+}
+.editora-toolbar-group-items .editora-toolbar-button:first-child {
+  border-right: 1px solid #ccc;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+.editora-toolbar-group-items .editora-toolbar-button:last-child {
+  border: 0px solid #ccc;
+  border-radius: 0px !important;
+}
+.editora-toolbar-group-items .editora-toolbar-button:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
 }
 .editora-theme-dark .editora-toolbar-button {
   background: linear-gradient(
@@ -262,8 +263,8 @@
  * invisible against the dark theme's toolbar background. Convert the root
  * to currentColor, skipping any root that explicitly opts out with
  * fill="none" (outline icons keep relying on their own stroke). */
-.editora-theme-dark .editora-toolbar-button svg:not([fill="none" i]),
-.editora-theme-dark .editora-toolbar-icon svg:not([fill="none" i]) {
+.editora-theme-dark .editora-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-theme-dark .editora-toolbar-icon svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]) {
   fill: currentColor;
 }
 
@@ -272,41 +273,89 @@
   color: inherit;
 }
 
-.editora-theme-dark
-  :is(.editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  :is(
-    [stroke="#000" i],
-    [stroke="#000000" i],
-    [stroke="black" i],
-    [stroke="#0f0f0f" i],
-    [stroke="#111111" i],
-    [style*="stroke:#000" i],
-    [style*="stroke: #000" i],
-    [style*="stroke:black" i],
-    [style*="stroke: black" i],
-    [style*="stroke:#0f0f0f" i],
-    [style*="stroke: #0f0f0f" i]
-  ) {
+.editora-theme-dark .editora-toolbar-button svg [stroke="#000"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#000000"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="black"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="Black"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [stroke="#111111"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke:black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE:BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke: black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE: BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [style*="stroke: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="STROKE: #0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#000"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#000000"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="black"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="Black"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [stroke="#111111"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke:black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE:BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke: black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE: BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="stroke: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="STROKE: #0F0F0F"] {
   stroke: currentColor !important;
 }
 
-.editora-theme-dark
-  :is(.editora-toolbar-button, .editora-toolbar-icon)
-  svg
-  :is(
-    [fill="#000" i],
-    [fill="#000000" i],
-    [fill="black" i],
-    [fill="#0f0f0f" i],
-    [fill="#111111" i],
-    [style*="fill:#000" i],
-    [style*="fill: #000" i],
-    [style*="fill:black" i],
-    [style*="fill: black" i],
-    [style*="fill:#0f0f0f" i],
-    [style*="fill: #0f0f0f" i]
-  ) {
+.editora-theme-dark .editora-toolbar-button svg [fill="#000"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#000000"],
+.editora-theme-dark .editora-toolbar-button svg [fill="black"],
+.editora-theme-dark .editora-toolbar-button svg [fill="BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [fill="Black"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [fill="#111111"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL:#000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL: #000"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill:black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL:BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill: black"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL: BLACK"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-button svg [style*="fill: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-button svg [style*="FILL: #0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#000"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#000000"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="black"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="Black"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [fill="#111111"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL:#000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL: #000"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill:black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL:BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill: black"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL: BLACK"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill:#0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL:#0F0F0F"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="fill: #0f0f0f"],
+.editora-theme-dark .editora-toolbar-icon svg [style*="FILL: #0F0F0F"] {
   fill: currentColor !important;
 }
 
@@ -497,33 +546,31 @@
 /* Prevent host-page typography rules (e.g. `p { color: ... }`) from overriding
    webcomponent editor content colors in dark mode. */
 .editora-theme-dark .editora-content,
-.editora-theme-dark .editora-content :is(
-  p,
-  span,
-  div,
-  li,
-  ul,
-  ol,
-  td,
-  th,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  strong,
-  em,
-  u,
-  s,
-  small,
-  sub,
-  sup,
-  blockquote,
-  code,
-  pre,
-  a
-) {
+.editora-theme-dark .editora-content p,
+.editora-theme-dark .editora-content span,
+.editora-theme-dark .editora-content div,
+.editora-theme-dark .editora-content li,
+.editora-theme-dark .editora-content ul,
+.editora-theme-dark .editora-content ol,
+.editora-theme-dark .editora-content td,
+.editora-theme-dark .editora-content th,
+.editora-theme-dark .editora-content h1,
+.editora-theme-dark .editora-content h2,
+.editora-theme-dark .editora-content h3,
+.editora-theme-dark .editora-content h4,
+.editora-theme-dark .editora-content h5,
+.editora-theme-dark .editora-content h6,
+.editora-theme-dark .editora-content strong,
+.editora-theme-dark .editora-content em,
+.editora-theme-dark .editora-content u,
+.editora-theme-dark .editora-content s,
+.editora-theme-dark .editora-content small,
+.editora-theme-dark .editora-content sub,
+.editora-theme-dark .editora-content sup,
+.editora-theme-dark .editora-content blockquote,
+.editora-theme-dark .editora-content code,
+.editora-theme-dark .editora-content pre,
+.editora-theme-dark .editora-content a {
   color: #ecf3ff;
 }
 

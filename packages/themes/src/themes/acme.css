@@ -1,6 +1,7 @@
 /* Rich Text Editor - Acme Theme */
 
-:is([data-theme="acme"], .editora-theme-acme) {
+[data-theme="acme"],
+.editora-theme-acme {
   /* Colors */
   --rte-color-primary: #0f766e;
   --rte-color-primary-hover: #0d5f59;
@@ -34,167 +35,225 @@
   --rte-shadow-lg: 0 14px 28px rgba(2, 8, 20, 0.14);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-editor, .editora-editor) {
+[data-theme="acme"] .rte-editor,
+[data-theme="acme"] .editora-editor,
+.editora-theme-acme .rte-editor,
+.editora-theme-acme .editora-editor {
   background: linear-gradient(180deg, #fbfdff 0%, #f5f8fc 100%);
   border-color: var(--rte-color-border);
   color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-toolbar, .editora-toolbar) {
+[data-theme="acme"] .rte-toolbar,
+[data-theme="acme"] .editora-toolbar,
+.editora-theme-acme .rte-toolbar,
+.editora-theme-acme .editora-toolbar {
   background: linear-gradient(180deg, #eef4fb 0%, #e8f0f9 100%);
   border-color: var(--rte-color-border);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-toolbar-button, .editora-toolbar-button) {
+[data-theme="acme"] .rte-toolbar-button,
+[data-theme="acme"] .editora-toolbar-button,
+.editora-theme-acme .rte-toolbar-button,
+.editora-theme-acme .editora-toolbar-button {
   background: linear-gradient(180deg, #fefefe 0%, #f4f8fc 100%);
   border-color: var(--rte-color-border);
   color: var(--rte-color-text-secondary);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-button, .editora-toolbar-button):hover {
+[data-theme="acme"] .rte-toolbar-button:hover,
+[data-theme="acme"] .editora-toolbar-button:hover,
+.editora-theme-acme .rte-toolbar-button:hover,
+.editora-theme-acme .editora-toolbar-button:hover {
   background: linear-gradient(180deg, #f5faf9 0%, #e9f5f4 100%);
   border-color: #a7cfc8;
   color: #115e59;
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-button, .editora-toolbar-button):active,
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-button, .editora-toolbar-button)[data-active="true"],
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-button, .editora-toolbar-button).active {
+[data-theme="acme"] .rte-toolbar-button:active,
+[data-theme="acme"] .editora-toolbar-button:active,
+.editora-theme-acme .rte-toolbar-button:active,
+.editora-theme-acme .editora-toolbar-button:active,
+[data-theme="acme"] .rte-toolbar-button[data-active="true"],
+[data-theme="acme"] .editora-toolbar-button[data-active="true"],
+.editora-theme-acme .rte-toolbar-button[data-active="true"],
+.editora-theme-acme .editora-toolbar-button[data-active="true"],
+[data-theme="acme"] .rte-toolbar-button.active,
+[data-theme="acme"] .editora-toolbar-button.active,
+.editora-theme-acme .rte-toolbar-button.active,
+.editora-theme-acme .editora-toolbar-button.active {
   background: linear-gradient(180deg, #ccfbf1 0%, #b7f3e7 100%);
   border-color: #64c9b4;
   color: #0f4f4a;
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-button, .editora-toolbar-button):disabled {
+[data-theme="acme"] .rte-toolbar-button:disabled,
+[data-theme="acme"] .editora-toolbar-button:disabled,
+.editora-theme-acme .rte-toolbar-button:disabled,
+.editora-theme-acme .editora-toolbar-button:disabled {
   background: #e2e8f0;
   color: #94a3b8;
   border-color: #cbd5e1;
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-input, .editora-toolbar-input, .editora-toolbar-input.font-size) {
+[data-theme="acme"] :is(.rte-toolbar-input, .editora-toolbar-input, .editora-toolbar-input.font-size),
+.editora-theme-acme :is(.rte-toolbar-input, .editora-toolbar-input, .editora-toolbar-input.font-size) {
   background: #ffffff;
   color: var(--rte-color-text-primary);
   border-color: var(--rte-color-border);
   caret-color: var(--rte-color-text-primary);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-input, .editora-toolbar-input, .editora-toolbar-input.font-size)::placeholder {
+[data-theme="acme"] :is(.rte-toolbar-input, .editora-toolbar-input, .editora-toolbar-input.font-size)::placeholder,
+.editora-theme-acme :is(.rte-toolbar-input, .editora-toolbar-input, .editora-toolbar-input.font-size)::placeholder {
   color: var(--rte-color-text-muted);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-dropdown-menu, .editora-toolbar-dropdown-menu) {
+[data-theme="acme"] .rte-toolbar-dropdown-menu,
+[data-theme="acme"] .editora-toolbar-dropdown-menu,
+.editora-theme-acme .rte-toolbar-dropdown-menu,
+.editora-theme-acme .editora-toolbar-dropdown-menu {
   background: #ffffff;
   border-color: var(--rte-color-border);
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.15);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-dropdown-item, .editora-toolbar-dropdown-item) {
+[data-theme="acme"] .rte-toolbar-dropdown-item,
+[data-theme="acme"] .editora-toolbar-dropdown-item,
+.editora-theme-acme .rte-toolbar-dropdown-item,
+.editora-theme-acme .editora-toolbar-dropdown-item {
   color: var(--rte-color-text-secondary);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-dropdown-item, .editora-toolbar-dropdown-item):hover {
+[data-theme="acme"] .rte-toolbar-dropdown-item:hover,
+[data-theme="acme"] .editora-toolbar-dropdown-item:hover,
+.editora-theme-acme .rte-toolbar-dropdown-item:hover,
+.editora-theme-acme .editora-toolbar-dropdown-item:hover {
   background: #f0f8f6;
   color: #0f4f4a;
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-more-button, .editora-toolbar-more-button) {
+[data-theme="acme"] .rte-toolbar-more-button,
+[data-theme="acme"] .editora-toolbar-more-button,
+.editora-theme-acme .rte-toolbar-more-button,
+.editora-theme-acme .editora-toolbar-more-button {
   background: linear-gradient(180deg, #fefefe 0%, #f4f8fc 100%);
   border-color: var(--rte-color-border);
   color: var(--rte-color-text-secondary);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-more-button, .editora-toolbar-more-button):hover {
+[data-theme="acme"] .rte-toolbar-more-button:hover,
+[data-theme="acme"] .editora-toolbar-more-button:hover,
+.editora-theme-acme .rte-toolbar-more-button:hover,
+.editora-theme-acme .editora-toolbar-more-button:hover {
   background: linear-gradient(180deg, #f5faf9 0%, #e9f5f4 100%);
   border-color: #a7cfc8;
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-toolbar-more-button, .editora-toolbar-more-button).active {
+[data-theme="acme"] .rte-toolbar-more-button.active,
+[data-theme="acme"] .editora-toolbar-more-button.active,
+.editora-theme-acme .rte-toolbar-more-button.active,
+.editora-theme-acme .editora-toolbar-more-button.active {
   background: linear-gradient(180deg, #ccfbf1 0%, #b7f3e7 100%);
   border-color: #64c9b4;
   color: #0f4f4a;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .rte-toolbar-expanded-row {
+[data-theme="acme"] .rte-toolbar-expanded-row,
+.editora-theme-acme .rte-toolbar-expanded-row {
   background: #edf4fa;
   border-color: var(--rte-color-border);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-content, .editora-content) {
+[data-theme="acme"] .rte-content,
+[data-theme="acme"] .editora-content,
+.editora-theme-acme .rte-content,
+.editora-theme-acme .editora-content {
   color: var(--rte-color-text-primary);
   background: #fdfefe;
   border-color: var(--rte-color-border) !important;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-content, .editora-content) blockquote {
+[data-theme="acme"] .rte-content blockquote,
+[data-theme="acme"] .editora-content blockquote,
+.editora-theme-acme .rte-content blockquote,
+.editora-theme-acme .editora-content blockquote {
   border-left-color: #14b8a6;
   background: #f0fdfa;
   color: #0f4f4a;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-content, .editora-content) code {
+[data-theme="acme"] .rte-content code,
+[data-theme="acme"] .editora-content code,
+.editora-theme-acme .rte-content code,
+.editora-theme-acme .editora-content code {
   background: #f1f5f9;
   color: #0f172a;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-content, .editora-content) :is(a, .rte-link) {
+[data-theme="acme"] .rte-content :is(a, .rte-link),
+[data-theme="acme"] .editora-content :is(a, .rte-link),
+.editora-theme-acme .rte-content :is(a, .rte-link),
+.editora-theme-acme .editora-content :is(a, .rte-link) {
   color: #0f766e;
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-content, .editora-content)
-  :is(a, .rte-link):hover {
+[data-theme="acme"] .rte-content :is(a, .rte-link):hover,
+[data-theme="acme"] .editora-content :is(a, .rte-link):hover,
+.editora-theme-acme .rte-content :is(a, .rte-link):hover,
+.editora-theme-acme .editora-content :is(a, .rte-link):hover {
   color: #0d5f59;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) :is(.rte-content, .editora-content) ::selection {
+[data-theme="acme"] .rte-content ::selection,
+[data-theme="acme"] .editora-content ::selection,
+.editora-theme-acme .rte-content ::selection,
+.editora-theme-acme .editora-content ::selection {
   background: rgba(20, 184, 166, 0.24);
 }
 
-:is([data-theme="acme"], .editora-theme-acme)
-  :is(.rte-content:empty::before, .rte-content.rte-content-empty::before, .editora-content:empty::before) {
+[data-theme="acme"] .rte-content:empty::before,
+[data-theme="acme"] .rte-content.rte-content-empty::before,
+[data-theme="acme"] .editora-content:empty::before,
+.editora-theme-acme .rte-content:empty::before,
+.editora-theme-acme .rte-content.rte-content-empty::before,
+.editora-theme-acme .editora-content:empty::before {
   color: #7f8ea3;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .editora-statusbar {
+[data-theme="acme"] .editora-statusbar,
+.editora-theme-acme .editora-statusbar {
   background: #eff5fb;
   color: #3b4b61;
   border-top-color: var(--rte-color-border);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .editora-statusbar-separator {
+[data-theme="acme"] .editora-statusbar-separator,
+.editora-theme-acme .editora-statusbar-separator {
   color: #a1afc2;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .rte-inline-menu {
+[data-theme="acme"] .rte-inline-menu,
+.editora-theme-acme .rte-inline-menu {
   background: #ffffff;
   border-color: var(--rte-color-border);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .rte-inline-menu-item {
+[data-theme="acme"] .rte-inline-menu-item,
+.editora-theme-acme .rte-inline-menu-item {
   color: #334155;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .rte-inline-menu-item:hover {
+[data-theme="acme"] .rte-inline-menu-item:hover,
+.editora-theme-acme .rte-inline-menu-item:hover {
   background: #f0f8f6;
   color: #0f4f4a;
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .floating-toolbar {
+[data-theme="acme"] .floating-toolbar,
+.editora-theme-acme .floating-toolbar {
   --rte-floating-toolbar-bg: #ffffff;
   --rte-floating-toolbar-border: #c3d3e5;
   --rte-floating-toolbar-text: #334155;
@@ -205,7 +264,8 @@
   --rte-floating-toolbar-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
 }
 
-:is([data-theme="acme"], .editora-theme-acme) .editora-floating-toolbar {
+[data-theme="acme"] .editora-floating-toolbar,
+.editora-theme-acme .editora-floating-toolbar {
   background: #ffffff;
   border-color: var(--rte-color-border);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
