@@ -92,6 +92,7 @@ export function App() {
 | `defaultValue` | `string` | `undefined` |
 | `onChange` | `(html: string) => void` | `undefined` |
 | `readonly` | `boolean` | `false` |
+| `autofocus` | `boolean` | `false` (focuses the editor on mount and when it turns editable; focusing scrolls the page to it) |
 | `placeholder` | `string` | `""` |
 
 ### Plugin integration

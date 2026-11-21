@@ -38,6 +38,8 @@ export interface RichTextEditorProps {
   value?: string;
   defaultValue?: string;
   readonly?: boolean;
+  /** Focus the editing area when the editor mounts (and when it turns editable). Off by default: focusing also scrolls the page to the editor. */
+  autofocus?: boolean;
   placeholder?: string;
   onChange?: (html: string) => void;
   onInit?: (editor: EditorAPI) => void;
@@ -181,6 +183,7 @@ export interface EditorContentProps {
   defaultValue?: string;
   value?: string;
   readonly?: boolean;
+  autofocus?: boolean;
   placeholder?: string;
   onChange?: (html: string) => void;
 }
