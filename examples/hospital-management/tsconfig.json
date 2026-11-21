@@ -17,6 +17,7 @@
       "@editora/ui-core": ["../../packages/ui-core/src/index.ts"],
       "@editora/ui-react": ["../../packages/ui-react/src/index.tsx"],
       "@editora/toast": ["../../packages/editora-toast/src/index.ts"],
+      "@editora/toast/*": ["../../packages/editora-toast/src/*"],
       "@editora/editor": ["../../packages/react/src/index.ts"],
       "@editora/core": ["../../packages/core/src/index.ts"],
       "@editora/plugins": ["../../packages/plugins/src/index.ts"],

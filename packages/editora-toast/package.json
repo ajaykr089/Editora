@@ -1,10 +1,9 @@
 {
   "name": "@editora/toast",
   "version": "2.1.2",
-  "description": "Enterprise toast notification library for React and web apps, with SaaS-ready UX patterns, accessibility, and high-performance lifecycle controls.",
+  "description": "Toast notifications for any framework, with nothing to mount and no CSS to import: promise toasts, actions, progress, a stack that opens on hover, light and dark, keyboard access, and React content with <Toaster />.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
-  "browser": "dist/index.umd.js",
   "unpkg": "dist/index.umd.js",
   "jsdelivr": "dist/index.umd.js",
   "types": "dist/index.d.ts",
@@ -13,10 +12,22 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
-      "browser": "./dist/index.umd.js",
       "default": "./dist/index.esm.js"
     },
-    "./toast.css": "./dist/toast.css"
+    "./lite": {
+      "types": "./dist/lite.d.ts",
+      "import": "./dist/lite.esm.js",
+      "require": "./dist/lite.cjs.js",
+      "default": "./dist/lite.esm.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.esm.js",
+      "require": "./dist/react.cjs.js",
+      "default": "./dist/react.esm.js"
+    },
+    "./toast.css": "./dist/toast.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/**/*.js",
@@ -70,9 +81,24 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.0.0",
     "vite": "^7.3.1",
     "vitest": "^1.0.0"
   },
-  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b",
+  "peerDependencies": {
+    "react": ">=16.8 <21",
+    "react-dom": ">=16.8 <21"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  }
 }

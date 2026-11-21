@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import importedToastLegacy, { toastAdvanced as importedToastAdvanced, toastPro as importedToastPro } from '@editora/toast';
-import type { ToastConfig, ToastOptionsAdvanced } from '@editora/toast';
+// The lite entry, as before 2.2: the app loads toast.css (the toast docs say so), and the main entry's built-in copy
+// of the styles would cost every user of this API about 5 KB.
+import importedToastLegacy, { toastAdvanced as importedToastAdvanced, toastPro as importedToastPro } from '@editora/toast/lite';
+import type { ToastConfig, ToastOptionsAdvanced } from '@editora/toast/lite';
 
 // Own bindings, not a re-export of the imports: Rollup would route a re-export straight to whoever imports it, so the
 // package root imported @editora/toast (and bundled it) even for apps that never show a toast.

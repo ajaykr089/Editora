@@ -1,0 +1,261 @@
+// The toast API, shared by the main entry (which also brings the stylesheet) and the lite one (which does not).
+// Backward compatible with the original API.
+
+import { ToastManager } from "./core/ToastManager";
+import {
+  ToastOptions,
+  ToastInstance,
+  ToastConfig,
+  ToastPlugin,
+  ToastPromiseOptions,
+  ToastTheme,
+  ToastPosition,
+  ToastSubscriber,
+  ToastText,
+} from "./core/types";
+
+// Legacy types for backward compatibility
+export type ToastLevel = "info" | "success" | "error" | "warning" | "loading";
+
+let managerInstance: ToastManager | null = null;
+
+function getManager(): ToastManager {
+  if (!managerInstance) {
+    managerInstance = new ToastManager();
+  }
+  return managerInstance;
+}
+
+// Legacy API - maintains exact same interface
+// Legacy options should be compatible with the advanced ToastOptions shape
+export interface ToastOptionsLegacy extends ToastOptions {
+  message: string;
+}
+
+// What a call returns on the server, where there is no page to show a toast on: it has the shape of a toast and does nothing.
+const inertToast = (options: ToastOptions): ToastInstance => ({
+  id: options.id || "",
+  options,
+  createdAt: 0,
+  dismiss: () => {},
+  update: () => {},
+});
+
+function showLegacy(options: ToastOptions): ToastInstance {
+  if (typeof document === "undefined") return inertToast(options);
+  return getManager().show(options);
+}
+
+// Normalize legacy arguments to the new ToastOptions shape.
+// IMPORTANT: Do NOT apply hardcoded theme/position defaults here.
+// The ToastManager has its own configured defaults (e.g. theme: 'dark') and those
+// must win when the caller doesn't explicitly pass a theme or position.
+// The old code had `theme: 'light'` as a fallback which caused every toast fired
+// via the legacy shorthand API to get data-theme="light" regardless of the
+// globally configured theme — making theme switching via t.configure() broken.
+function normalizeLegacyArgs(
+  message: ToastText,
+  optionsOrDuration?: Partial<ToastOptions> | number | null,
+  theme?: ToastTheme,
+  position?: ToastPosition,
+): ToastOptions {
+  let opts: Partial<ToastOptions> = {};
+
+  if (optionsOrDuration && typeof optionsOrDuration === "object") {
+    opts = { ...(optionsOrDuration as Partial<ToastOptions>) };
+  } else if (typeof optionsOrDuration === "number") {
+    opts.duration = optionsOrDuration;
+  }
+
+  // Only apply explicit overrides passed as direct arguments.
+  if (theme) opts.theme = theme;
+  if (position) opts.position = position;
+
+  // Build the result without defaulting position or theme to anything.
+  // Undefined values are ignored by ToastManager which then uses its config.
+  const result: Partial<ToastOptions> = {
+    message,
+    ...opts,
+    level: (opts.level || undefined) as any,
+  };
+
+  if (opts.duration !== undefined) result.duration = opts.duration;
+  if (opts.position) result.position = opts.position as ToastPosition;
+  if (opts.theme) result.theme = opts.theme as ToastTheme;
+
+  return result as ToastOptions;
+}
+
+// The simple API. `toast('Copied')` shows a plain toast (no level, no icon); the level methods add an icon and a
+// colour. Everything the advanced API does for a single toast is here too, so one import is enough.
+function makeLevel(level: ToastLevel) {
+  return (
+    msg: ToastText,
+    optionsOrDuration?: Partial<ToastOptions> | number,
+    theme?: ToastTheme,
+    position?: ToastPosition,
+  ) =>
+    showLegacy({
+      ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position),
+      level,
+    });
+}
+
+const isBrowser = () => typeof document !== "undefined";
+
+function toastBase(
+  msg: ToastText,
+  optionsOrDuration?: Partial<ToastOptions> | number,
+  theme?: ToastTheme,
+  position?: ToastPosition,
+) {
+  const options = normalizeLegacyArgs(msg, optionsOrDuration, theme, position);
+  return showLegacy({ ...options, level: options.level || "custom" });
+}
+
+export const toast = Object.assign(toastBase, {
+  info: makeLevel("info"),
+  success: makeLevel("success"),
+  error: makeLevel("error"),
+  warning: makeLevel("warning"),
+  loading: makeLevel("loading"),
+
+  // Full options (title, description, actions, progress, ...). Returns the toast.
+  show: (options: ToastOptions) => showLegacy(options),
+
+  // One toast that follows a promise from loading to success or error. Resolves with the promise's value.
+  promise: <T>(promise: Promise<T>, options: ToastPromiseOptions<T>): Promise<T> =>
+    isBrowser() ? getManager().promise(promise, options) : promise,
+
+  update: (id: string, options: Partial<ToastOptions>) =>
+    isBrowser() ? getManager().update(id, options) : false,
+
+  // With an id: that toast. Without: all of them.
+  dismiss: (id?: string) => {
+    if (!isBrowser()) return false;
+    if (id === undefined) {
+      getManager().clear();
+      return true;
+    }
+    return getManager().dismiss(id);
+  },
+  clear: () => {
+    if (isBrowser()) getManager().clear();
+  },
+  configure: (config: Partial<ToastConfig>) => {
+    if (isBrowser()) getManager().configure(config);
+  },
+});
+
+export default toast;
+
+// Advanced API exports
+export { ToastManager } from "./core/ToastManager";
+export type {
+  ToastLevel as ToastLevelAdvanced,
+  ToastPosition,
+  ToastTheme,
+  ToastAction,
+  ToastProgress,
+  ToastContent,
+  ToastOptions as ToastOptionsAdvanced,
+  ToastInstance,
+  ToastConfig,
+  ToastPlugin,
+  ToastPromiseOptions,
+  ToastState,
+  ToastSubscriber,
+  ToastText,
+  // New animation types
+  SpringConfig,
+  AnimationType,
+  AnimationConfig,
+  SpringAnimation,
+  BounceAnimation,
+  SlideAnimation,
+  ZoomAnimation,
+  FlipAnimation,
+  FadeAnimation,
+  ElasticAnimation,
+  RotateAnimation,
+  CustomAnimation,
+} from "./core/types";
+
+// Advanced toast instance with enhanced features
+export const toastAdvanced = {
+  // Core methods
+  show: (options: ToastOptions) => getManager().show(options),
+  update: (id: string, options: Partial<ToastOptions>) =>
+    getManager().update(id, options),
+  dismiss: (id: string) => getManager().dismiss(id),
+  clear: () => getManager().clear(),
+
+  // Convenience methods
+  info: (message: ToastText, options?: Partial<ToastOptions>) =>
+    getManager().show({ message, level: "info", ...options }),
+  success: (message: ToastText, options?: Partial<ToastOptions>) =>
+    getManager().show({ message, level: "success", ...options }),
+  error: (message: ToastText, options?: Partial<ToastOptions>) =>
+    getManager().show({ message, level: "error", ...options }),
+  warning: (message: ToastText, options?: Partial<ToastOptions>) =>
+    getManager().show({ message, level: "warning", ...options }),
+  loading: (message: ToastText, options?: Partial<ToastOptions>) =>
+    getManager().show({ message, level: "loading", ...options }),
+
+  // Advanced features
+  promise: <T>(promise: Promise<T>, options: ToastPromiseOptions<T>) =>
+    getManager().promise(promise, options),
+  group: (id: string, options: ToastOptions) => getManager().group(id, options),
+  configure: (config: Partial<ToastConfig>) => getManager().configure(config),
+  use: (plugin: ToastPlugin) => getManager().use(plugin),
+
+  // State queries
+  getToasts: () => getManager().getToasts(),
+  getGroups: () => getManager().getGroups(),
+  getConfig: () => getManager().getConfig(),
+  getState: () => getManager().getState(),
+  subscribe: (listener: ToastSubscriber) => getManager().subscribe(listener),
+
+  // Editor integration
+  onEditorEvent: (
+    event: string,
+    callback: (toast: ToastInstance, ...args: any[]) => void,
+  ) => getManager().onEditorEvent(event, callback),
+  triggerEditorEvent: (event: string, toast: ToastInstance, ...args: any[]) =>
+    getManager().triggerEditorEvent(event, toast, ...args),
+
+  // Cleanup
+  destroy: () => {
+    if (!managerInstance) return;
+    managerInstance.destroy();
+    managerInstance = null;
+  },
+};
+
+// Re-export for convenience
+export { toastAdvanced as toastPro };
+
+// Browser global exports for direct script usage
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  const globalWindow = window as Window & {
+    __editoraToastReady?: boolean;
+    toast?: unknown;
+    toastAdvanced?: unknown;
+    toastPro?: unknown;
+    ToastManager?: unknown;
+  };
+  globalWindow.toast = toast;
+  globalWindow.toastAdvanced = toastAdvanced;
+  globalWindow.toastPro = toastAdvanced;
+  globalWindow.ToastManager = ToastManager;
+
+  // Dispatch once per page to avoid duplicate "ready" signals when bundled multiple times.
+  if (!globalWindow.__editoraToastReady) {
+    globalWindow.__editoraToastReady = true;
+    window.dispatchEvent(
+      new CustomEvent("toastReady", {
+        detail: { toast, toastAdvanced, toastPro: toastAdvanced, ToastManager },
+      }),
+    );
+  }
+}

@@ -16,7 +16,6 @@ Use this page when generating notification workflows with `@editora/toast`.
 
 ```ts
 import { toastAdvanced } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 toastAdvanced.success('Saved successfully');
 ```
@@ -27,6 +26,8 @@ toastAdvanced.success('Saved successfully');
 2. Include at least one lifecycle pattern: `show/update`, `promise`, or `group`.
 3. Keep messages concise and action-oriented.
 4. Include accessible action labels for action buttons.
+5. Do not import `@editora/toast/toast.css`: the styles are built in (only `@editora/toast/lite` needs it).
+6. For JSX content in React, import from `@editora/toast/react` and mount `<Toaster />` once.
 
 ## SaaS example
 

@@ -1,5 +1,4 @@
 import { toast } from '@editora/toast';
-import '@editora/toast/toast.css';
 
 toast.configure({ maxVisible: 10 });
 

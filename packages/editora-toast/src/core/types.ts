@@ -110,10 +110,14 @@ export interface ToastProgress {
   showPercentage?: boolean;
 }
 
+// Text, or a DOM node you made (the React entry renders JSX into one). A node is shown as it is, so it is yours to make
+// safe and accessible; its text is what screen readers are told.
+export type ToastText = string | Node;
+
 export interface ToastContent {
-  message?: string;
-  title?: string;
-  description?: string;
+  message?: ToastText;
+  title?: ToastText;
+  description?: ToastText;
   icon?: string | false | Node; // text or emoji, a DOM node, or false for no icon. Left out: the built-in icon of the level
   actions?: ToastAction[];
   action?: ToastAction;
@@ -164,9 +168,9 @@ export interface ToastInstance {
 }
 
 export interface ToastPromiseOptions<T = any> {
-  loading: string | ToastOptions;
-  success: string | ((data: T) => string) | ToastOptions;
-  error: string | ((error: any) => string) | ToastOptions;
+  loading: ToastText | ToastOptions;
+  success: ToastText | ToastOptions | ((data: T) => ToastText | ToastOptions);
+  error: ToastText | ToastOptions | ((error: any) => ToastText | ToastOptions);
   onSuccess?: (data: T) => void;
   onError?: (error: any) => void;
 }
@@ -206,6 +210,8 @@ export interface ToastConfig {
   dedupeScope: 'visible' | 'queue' | 'all';
   container?: HTMLElement;
   zIndex?: number;
+  injectStyles?: boolean; // the main entry puts its stylesheet on the page with the first toast; false leaves it to you
+  nonce?: string; // for that <style> under a content security policy (read from <meta property="csp-nonce"> if left out)
   animation?: AnimationConfig; // Default animation configuration
 }
 

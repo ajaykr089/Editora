@@ -14,7 +14,8 @@ const toastMocks = vi.hoisted(() => ({
   clear: vi.fn()
 }));
 
-vi.mock('@editora/toast', () => ({
+// The components import the lite entry (they load toast.css themselves).
+vi.mock('@editora/toast/lite', () => ({
   __esModule: true,
   default: {},
   toastLegacy: {},

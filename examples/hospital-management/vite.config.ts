@@ -14,6 +14,9 @@ export default defineConfig({
       { find: '@editora/ui-core', replacement: resolve(__dirname, '../../packages/ui-core/src/index.ts') },
       { find: '@editora/ui-react', replacement: resolve(__dirname, '../../packages/ui-react/src/index.tsx') },
       { find: '@editora/toast/toast.css', replacement: resolve(__dirname, '../../packages/editora-toast/src/toast.css') },
+      // Before the root alias, which would also take '@editora/toast/<subpath>' and append it to index.ts.
+      { find: '@editora/toast/lite', replacement: resolve(__dirname, '../../packages/editora-toast/src/lite.ts') },
+      { find: '@editora/toast/react', replacement: resolve(__dirname, '../../packages/editora-toast/src/react.tsx') },
       { find: '@editora/toast', replacement: resolve(__dirname, '../../packages/editora-toast/src/index.ts') },
       { find: '@editora/editor', replacement: resolve(__dirname, '../../packages/react/src/index.ts') },
       { find: '@editora/core', replacement: resolve(__dirname, '../../packages/core/src/index.ts') },

@@ -19,16 +19,12 @@ Notification patterns and full API reference for `@editora/toast` in the Editora
 npm i @editora/toast
 ```
 
-```ts
-import "@editora/toast/toast.css";
-import toast from "@editora/toast";
-```
+The styles come with the package: the first toast puts them on the page, so there is no CSS to import (see Styles below).
 
 ## Quick Start
 
 ```ts
 import { toast } from "@editora/toast";
-import "@editora/toast/toast.css";
 
 toast.success("Document saved");
 toast("Copied to clipboard"); // a plain toast: no level, no icon
@@ -42,6 +38,37 @@ toast.promise(saveDocument(), {
 
 `toast` is the whole simple API: `toast(message)`, the level methods, and `show`, `promise`, `update`, `dismiss`
 (with no id it clears every toast), `clear` and `configure`. It needs no provider and does nothing on the server.
+
+## React
+
+`@editora/toast/react` is the same `toast` taking JSX wherever text goes (title, message, description, icon), plus
+`toast.custom()` for a toast made of your own component. Mount `<Toaster />` once, inside your providers: it renders the
+JSX through portals, so it sees your app's context, and its props are the settings.
+
+```tsx
+import { Toaster, toast } from "@editora/toast/react";
+
+export function App() {
+  return (
+    <>
+      <Toaster position="bottom-right" />
+      <button onClick={() => toast.success(<span>Moved <strong>Q3-summary.pdf</strong></span>)}>Archive</button>
+      <button onClick={() => toast.custom(({ dismiss }) => <button onClick={dismiss}>Join Roadmap</button>)}>Invite</button>
+    </>
+  );
+}
+```
+
+Text needs no `<Toaster />`. `toast.promise` takes JSX for each state and keeps the loading toast until the promise
+settles.
+
+## Styles
+
+- The main entry has the stylesheet built in. The first toast puts it at the start of `<head>` (your CSS still wins),
+  unless `toast.css` is already on the page.
+- Under a content security policy: `configure({ nonce })`, or a `<meta property="csp-nonce" nonce="...">`.
+- To load the CSS as a file instead: `import { toast } from "@editora/toast/lite"` and `import "@editora/toast/toast.css"`
+  (about 5 KB gzipped smaller), or `configure({ injectStyles: false })`.
 
 ## Usage Patterns
 
@@ -106,7 +133,10 @@ focus (`pauseOnFocus`). `configure({ hotkey: false })` turns the shortcut off.
 | `ToastOptionsAdvanced`, `ToastInstance`, `ToastConfig` | Types | Runtime data contracts |
 | `ToastPlugin`, `ToastPromiseOptions` | Types | Plugin and promise integration |
 | Animation types (`SpringConfig`, `AnimationType`, `AnimationConfig`, `SpringAnimation`, `BounceAnimation`, `SlideAnimation`, `ZoomAnimation`, `FlipAnimation`, `FadeAnimation`, `ElasticAnimation`, `RotateAnimation`, `CustomAnimation`) | Types | Animation system contracts |
-| Package export `@editora/toast/toast.css` | CSS entry | Toast theme and component styling |
+| `@editora/toast/react` | Entry | `toast` with JSX content, `toast.custom(render, options?)`, `<Toaster {...settings} />` |
+| `@editora/toast/lite` | Entry | The same API without the built-in stylesheet |
+| `configure({ injectStyles, nonce })` | Settings | Turn the built-in stylesheet off; the nonce for its `<style>` |
+| Package export `@editora/toast/toast.css` | CSS entry | The stylesheet as a file, for the lite entry or `injectStyles: false` |
 
 ## Best Practices
 
@@ -124,5 +154,6 @@ focus (`pauseOnFocus`). `configure({ hotkey: false })` turns the shortcut off.
 ## Performance Notes
 
 - Reuse one manager instance through exported API.
+- The spring, bounce, slide and other named animations are loaded the first time one is used; the default CSS transition needs none of that code.
 - Batch repeated low-priority notifications.
 - Use grouped toasts for recurring task streams (import/export sync) instead of creating independent stacks.

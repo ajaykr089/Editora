@@ -308,6 +308,21 @@ const shots = [
     },
   },
   {
+    out: 'packages/editora-toast/docs/images/react-jsx.png',
+    example: 'toast-react-jsx',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 160, width: 440, height: 200 },
+    async act(page) {
+      await page.getByRole('button', { name: 'Archive' }).click();
+      await page.waitForTimeout(300);
+      await page.getByRole('button', { name: 'Invite' }).click();
+      await page.waitForTimeout(400);
+      await page.locator('.editora-toast[data-front="true"]').hover();
+      await page.waitForTimeout(700);
+    },
+  },
+  {
     out: 'packages/editora-toast/docs/images/promise-loading.png',
     example: 'toast-promise',
     viewport: { width: 1008, height: 360 },
