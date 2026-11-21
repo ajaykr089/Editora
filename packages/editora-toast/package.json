@@ -1,6 +1,6 @@
 {
   "name": "@editora/toast",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Toast notifications for any framework, with nothing to mount and no CSS to import: promise toasts, actions, progress, a stack that opens on hover, light and dark, keyboard access, and React content with <Toaster />.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -865,7 +865,7 @@
     "react-dom": ">=16.8 <21"
   },
   "dependencies": {
-    "@editora/toast": "^2.1.2",
+    "@editora/toast": "^2.2.0",
     "@editora/ui-core": "^0.6.0"
   },
   "keywords": [
