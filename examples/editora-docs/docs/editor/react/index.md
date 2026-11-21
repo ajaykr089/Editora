@@ -41,6 +41,36 @@ export function App() {
 }
 ```
 
+## Live example
+
+Edit the text, use the toolbar or `Mod+B` / `Mod+I` / `Mod+Z`, and watch `onChange` report the HTML. You can also change the code: the editor runs in this page.
+
+```tsx live
+function QuickStart() {
+  const [html, setHtml] = React.useState('');
+
+  return (
+    <>
+      <EditoraEditor
+        plugins={[
+          HeadingPlugin(),
+          BoldPlugin(),
+          ItalicPlugin(),
+          UnderlinePlugin(),
+          ListPlugin(),
+          LinkPlugin(),
+          HistoryPlugin(),
+        ]}
+        defaultValue="<h2>Release notes</h2><p>Select some text and make it <strong>bold</strong> or <em>italic</em>.</p>"
+        placeholder="Start writing..."
+        onChange={setHtml}
+      />
+      <pre style={{ marginTop: 12, whiteSpace: 'pre-wrap' }}>{html || 'onChange has not fired yet'}</pre>
+    </>
+  );
+}
+```
+
 ## CRA and bundler compatibility
 
 - If you load plugins from `@editora/plugins`, import `@editora/plugins/styles.css`.

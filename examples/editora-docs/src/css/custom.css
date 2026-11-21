@@ -789,3 +789,11 @@ html {
 .markdown h4:hover .hash-link {
   opacity: 1 !important;
 }
+
+/* Live examples: <editora-editor> keeps its light theme (editora-theme-light) on a dark page, but
+   @editora/core's stylesheet does not declare `color-scheme: light` for it, so in the site's dark mode
+   its buttons took the browser's dark-scheme text colour: white icons on white buttons. Remove once
+   @editora/core sets this itself. */
+editora-editor.editora-theme-light {
+  color-scheme: light;
+}

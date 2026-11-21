@@ -21,6 +21,25 @@ import { ChecklistPlugin } from "@editora/plugins";
 const plugins = [ChecklistPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function ChecklistDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), ChecklistPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Turn these lines into a checklist, then tick them off:</p><p>Write the draft</p><p>Ask for review</p><p>Publish</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

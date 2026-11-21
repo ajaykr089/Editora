@@ -21,6 +21,25 @@ import { EmojisPlugin } from "@editora/plugins";
 const plugins = [EmojisPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function EmojisDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), EmojisPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Open the emoji picker from the toolbar and insert one here: </p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

@@ -29,6 +29,31 @@ const groups: Group[] = [
     override: true,
     load: () => import(/* webpackChunkName: "live-scope-ui" */ './scopes/ui').then((m) => m.default),
   },
+  {
+    // The React editor with every plugin factory (BoldPlugin(), TablePlugin()...).
+    name: 'editor',
+    test: (code) => /\b(EditoraEditor|RichTextEditor)\b|\b[A-Z]\w*Plugin\s*\(/.test(code),
+    load: () =>
+      import(/* webpackChunkName: "live-scope-editor" */ './scopes/editor').then((m) => m.ready.then(() => m.default)),
+  },
+  {
+    // @editora/toast/react: its `toast` takes JSX, and it has <Toaster />.
+    // ui-react exports a `toast` of its own (the text-only one), which every
+    // other block keeps.
+    name: 'toast-react',
+    test: (code) => /\bToaster\b|toast\.custom\(/.test(code),
+    load: () => import(/* webpackChunkName: "live-scope-toast" */ './scopes/toastReact').then((m) => m.default),
+    override: true,
+  },
+  {
+    // The <editora-editor> custom element.
+    name: 'webcomponent',
+    test: (code) => code.includes('editora-editor'),
+    load: () =>
+      import(/* webpackChunkName: "live-scope-webcomponent" */ './scopes/webcomponent').then((m) =>
+        m.ready.then(() => m.default),
+      ),
+  },
 ];
 
 const loaded = new Map<string, Promise<LiveScope>>();

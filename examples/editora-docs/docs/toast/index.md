@@ -52,12 +52,54 @@ export function App() {
   return (
     <>
       <Toaster position="bottom-right" />
-      <button onClick={() => toast.success(<span>Moved <strong>Q3-summary.pdf</strong></span>)}>Archive</button>
-      <button onClick={() => toast.custom(({ dismiss }) => <button onClick={dismiss}>Join Roadmap</button>)}>Invite</button>
+      <button className="button button--secondary button--sm" onClick={() => toast.success(<span>Moved <strong>Q3-summary.pdf</strong></span>)}>Archive</button>
+      <button className="button button--secondary button--sm" onClick={() => toast.custom(({ dismiss }) => <button onClick={dismiss}>Join Roadmap</button>)}>Invite</button>
     </>
   );
 }
 ```
+
+### Live example
+
+```tsx live
+function ToastDemo() {
+  const save = () =>
+    toast.promise(new Promise((resolve) => setTimeout(() => resolve({ name: 'Q3-summary.pdf' }), 1500)), {
+      loading: 'Saving...',
+      success: (file) => <span>Saved <strong>{file.name}</strong></span>,
+      error: 'Could not save',
+    });
+
+  return (
+    <>
+      <Toaster position="bottom-right" />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <button className="button button--secondary button--sm" onClick={() => toast.success('Document saved')}>Success</button>
+        <button className="button button--secondary button--sm" onClick={() => toast.error('Upload failed', { description: 'The file is larger than 10 MB.' })}>Error</button>
+        <button className="button button--secondary button--sm" onClick={() => toast.warning('Your session ends in 5 minutes')}>Warning</button>
+        <button className="button button--secondary button--sm" onClick={() => toast.info(<span>Moved <strong>Q3-summary.pdf</strong> to Archive</span>)}>JSX message</button>
+        <button className="button button--secondary button--sm" onClick={save}>Promise</button>
+        <button
+          className="button button--secondary button--sm"
+          onClick={() =>
+            toast.custom(({ dismiss }) => (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                Join the roadmap call?
+                <button className="button button--secondary button--sm" onClick={dismiss}>Join</button>
+              </div>
+            ))
+          }
+        >
+          Custom
+        </button>
+        <button className="button button--secondary button--sm" onClick={() => toast.dismiss()}>Dismiss all</button>
+      </div>
+    </>
+  );
+}
+```
+
+Press `Alt+T` to move focus to the newest toast, and `Escape` to dismiss it.
 
 Text needs no `<Toaster />`. `toast.promise` takes JSX for each state and keeps the loading toast until the promise
 settles.
