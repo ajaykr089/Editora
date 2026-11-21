@@ -12,7 +12,7 @@
     "@editora/react-icons": "0.2.0",
     "@editora/themes": "1.1.0",
     "@editora/toast": "2.2.0",
-    "@editora/ui-core": "0.6.1",
+    "@editora/ui-core": "0.6.2",
     "@editora/ui-react": "0.6.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
