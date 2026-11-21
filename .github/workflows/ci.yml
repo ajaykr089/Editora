@@ -48,6 +48,10 @@ jobs:
       - name: Check ui-react size budgets
         run: npm run check:ui-size
 
+      # A plugin imported from the @editora/plugins root must cost what its own subpath costs, and stay within plugins-size-budgets.json.
+      - name: Check plugins tree-shaking and size budgets
+        run: npm run check:plugins-size
+
       - name: Test release scripts
         run: npm run test:scripts
 
