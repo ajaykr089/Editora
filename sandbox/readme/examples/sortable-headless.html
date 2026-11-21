@@ -1,0 +1,19 @@
+<ul id="tasks" aria-label="Tasks">
+  <li data-id="brief">Write the brief</li>
+  <li data-id="copy">Review the copy</li>
+  <li data-id="ship">Ship it</li>
+</ul>
+
+<style>
+  #tasks { list-style: none; padding: 0; width: 280px; font: 15px system-ui, sans-serif; }
+  #tasks li { padding: 10px 14px; margin: 6px 0; border: 1px solid #d0d7de; border-radius: 8px; background: #fff; cursor: grab; }
+</style>
+
+<script type="module">
+  import { createSortable } from '@editora/ui-sortable/headless';
+
+  // Your own list: drag an item, or focus one and press Space, then the arrow keys.
+  const list = createSortable(document.getElementById('tasks'), {
+    onSort: () => console.log('order', list.toArray().join(', '))
+  });
+</script>

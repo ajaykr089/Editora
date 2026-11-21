@@ -1,0 +1,19 @@
+{
+  // The published typings, made from the source (they were written by hand, and drifted).
+  // @editora/ui-core is read from its own published typings (node_modules), not from its source: ui-core is built
+  // before this package (lerna, verify:release), and its source would be emitted here too.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": "types",
+    "rootDir": "src",
+    "moduleResolution": "bundler",
+    "paths": {},
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["src/__tests__"]
+}

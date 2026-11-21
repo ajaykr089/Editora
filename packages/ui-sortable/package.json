@@ -1,7 +1,7 @@
 {
   "name": "@editora/ui-sortable",
   "version": "0.1.13",
-  "description": "Standalone install for the Editora sortable web component, with reordering, transfer, hierarchy, cloning, and keyboard-accessible drag and drop.",
+  "description": "Drag-and-drop for the web: the <ui-sortable> board and list component, or sortable behaviour for your own markup (createSortable and a React useSortable hook), with keyboard, touch, screen-reader announcements and lists that exchange items.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react/interactive/sortable",
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
@@ -13,33 +13,45 @@
   },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
-  "types": "index.d.ts",
+  "types": "types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
+      "types": "./types/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     },
     "./react": {
-      "types": "./react.d.ts",
+      "types": "./types/react.d.ts",
       "import": "./dist/react.esm.js",
       "require": "./dist/react.cjs.js",
       "default": "./dist/react.esm.js"
-    }
+    },
+    "./headless": {
+      "types": "./types/headless.d.ts",
+      "import": "./dist/headless.esm.js",
+      "require": "./dist/headless.cjs.js",
+      "default": "./dist/headless.esm.js"
+    },
+    "./headless/react": {
+      "types": "./types/headless-react.d.ts",
+      "import": "./dist/headless-react.esm.js",
+      "require": "./dist/headless-react.cjs.js",
+      "default": "./dist/headless-react.esm.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "index.d.ts",
-    "react.d.ts"
+    "types"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "dev": "vite build --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rimraf dist",
-    "prepare": "npm run build"
+    "clean": "rimraf dist types",
+    "prepare": "vite build"
   },
   "dependencies": {
     "@editora/ui-core": "^0.6.0"
@@ -73,12 +85,35 @@
     "web-components",
     "kanban",
     "tree",
-    "accessible-ui"
+    "accessible-ui",
+    "headless",
+    "react-hook",
+    "useSortable",
+    "reorder",
+    "dnd"
   ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
-  "sideEffects": true,
+  "sideEffects": [
+    "./dist/index.*",
+    "./dist/react.*",
+    "./src/index.ts",
+    "./src/react.tsx"
+  ],
   "publishConfig": {
     "access": "public"
+  },
+  "typesVersions": {
+    "*": {
+      "react": [
+        "types/react.d.ts"
+      ],
+      "headless": [
+        "types/headless.d.ts"
+      ],
+      "headless/react": [
+        "types/headless-react.d.ts"
+      ]
+    }
   }
 }
