@@ -42,9 +42,9 @@ import "@editora/plugins/styles.css";
 | `setDocumentManagerConfig/getDocumentManagerConfig` | Functions | Document manager runtime config |
 | `setGlobalApiConfig/getGlobalApiConfig/getGlobalApiHeaders/buildApiUrl` | Functions | Shared API config layer |
 | `ApiConfig`, `MediaManagerConfig`, `DocumentManagerConfig` | Type exports | Config contracts |
-| `@editora/plugins/lite` | Entry export | Lightweight subset for smaller bundles |
+| `@editora/plugins/lite` | Entry export | The 27 common plugins: formatting, lists, links, tables, colours, fonts, history |
 | `@editora/plugins/enterprise` | Entry export | Advanced/specialized workflow, compliance, and QA plugins |
-| `@editora/plugins/<plugin-name>` | Subpath exports | Per-plugin imports for tree-shaking/lazy loading |
+| `@editora/plugins/<plugin-name>` | Subpath exports | One plugin per import, such as `@editora/plugins/bold` |
 | `@editora/plugins/styles.css` | CSS export | Plugin UI styles (table toolbar, dialogs, color pickers) |
 
 ## Entry Paths
@@ -55,6 +55,9 @@ All plugin entry paths are completely free (MIT) and fully customizable.
 - `@editora/plugins/lite`: common/core subset
 - `@editora/plugins/enterprise`: advanced/specialized subset
 - `@editora/plugins/<plugin-name>`: granular subpath imports
+
+Every entry tree-shakes, so pick the one that reads best: the bundle size is the same (see
+[Bundle size](#bundle-size)).
 
 ### Enterprise Subset Includes
 
@@ -155,6 +158,33 @@ const plugins = [TemplatePlugin()];
 
 Ensure all plugin dialogs and sidebars are keyboard accessible and announce state changes clearly.
 
-## Performance Notes
+## Bundle size
 
-Prefer subpath imports, `@editora/plugins/lite`, or `@editora/plugins/enterprise` when you need a smaller default bundle.
+Your bundle gets the plugins you import and what they use, whichever entry you import them from. These were measured
+with esbuild and Vite as minified ES modules; your own bundler may differ a little:
+
+| Import | Size |
+| --- | --- |
+| `BoldPlugin`, from any entry | 3.5 KB (1.5 KB gzipped) |
+| `TrackChangesPlugin`, from any entry | 20 KB (5.5 KB gzipped) |
+| Bold, italic, headings, lists, links and history | 42 KB (12.5 KB gzipped) |
+
+This needs a bundler that reads the `sideEffects` field of `package.json`. Vite, Rollup, webpack, esbuild and Parcel
+all do. Version 1.2.7 and earlier declared no `sideEffects`, so importing one plugin from the root cost about
+40 KB gzipped.
+
+### Load-time code since 1.2.8
+
+A plugin's load-time code, such as a global listener, now runs only when you import that plugin. It no longer runs
+because you imported another plugin from the same entry. Code that relied on a plugin it never imported, or on a bare
+`import '@editora/plugins'` for its side effects, no longer gets:
+
+- `window.execEditorCommand` and `window.executeEditorCommand`, with `undo`, `redo` and `recordDomTransaction`
+  registered globally. Calling `HistoryPlugin()` still sets these up.
+- The global command registrations of the italic, list, link, indent and line-height modules. These were duplicates:
+  the editor registers the commands of the plugins you pass it.
+- Document-wide listeners of plugins you did not pass to the editor: fullscreen's Escape key, the table toolbar, math's
+  double-click to edit, code-sample's copy button, and text colour's styles.
+
+To keep one of these, import that plugin and pass it to the editor. `import '@editora/plugins/styles.css'` is kept as
+before.

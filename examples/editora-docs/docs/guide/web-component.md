@@ -16,7 +16,9 @@ Web component integration guide for framework-agnostic editor deployment and run
 
 ## Core attributes
 
-- `plugins`: space-separated plugin ids to load.
+- `plugins`: space-separated plugin ids to load. `plugins="all"` loads every plugin. Without the attribute, the
+  editor loads a small default set (formatting, headings, quotes, lists, links, tables, undo/redo), plus any plugin a
+  toolbar item or a `pluginConfig` entry asks for. See [Which plugins load](../editor/web-component/index.md#which-plugins-load).
 - `toolbar-items`: command layout string with `|` separators.
 - `theme`: visual mode (`light`, `dark`, custom token scope).
 - `statusbar`: enable/disable status bar.

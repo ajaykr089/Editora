@@ -25,7 +25,8 @@ Primary packages:
 - @editora/ui-react (React wrappers for ui-core)
 - @editora/icons
 - @editora/react-icons
-- @editora/toast
+- @editora/toast (notifications; styles built in; @editora/toast/react for JSX and <Toaster />, @editora/toast/lite without styles)
+- @editora/ui-sortable (drag-and-drop lists; @editora/ui-sortable/headless createSortable and /headless/react useSortable for your own markup)
 - @editora/markdown-editor (markdown editor for React)
 
 Content tools (work with any editor; docs: https://editora-ecosystem.netlify.app/docs/content-tools/overview):
@@ -47,12 +48,21 @@ Authoring rules for AI-generated snippets:
 5. Return runnable snippets with complete imports.
 
 CLI quick-add commands:
-- npx editora add button
-- npx editora add modal
-- npx editora add datatable
-- npx editora add editor
-- npx editora add toast
+- npx @editora/cli init (detects the project and framework, asks what to set up, installs it)
+- npx @editora/cli add button
+- npx @editora/cli add modal
+- npx @editora/cli add datatable
+- npx @editora/cli add editor
+- npx @editora/cli add toast
+- npx @editora/cli list [search] [--json] (every name it can add, or a search)
 - Supports all exported @editora/ui-react component names (for example: accordion, avatar, select, ui-date-picker).
+- Installs with the project's package manager (from packageManager or the lock file), then prints the imports and stylesheet to add.
+- Docs: https://editora-ecosystem.netlify.app/docs/reference/cli
+
+Defaults worth knowing:
+- A bare <editora-editor> loads a small default plugin set (formatting, headings, quotes, lists, links, tables, history) plus what its toolbar or pluginConfig asks for; plugins="all" loads every plugin. Docs: https://editora-ecosystem.netlify.app/docs/editor/web-component/
+- Every @editora/plugins entry tree-shakes: import { BoldPlugin } from '@editora/plugins' bundles only that plugin.
+- @editora/toast injects its own stylesheet; no CSS import is needed. Under a CSP, pass configure({ nonce }) or a <meta property="csp-nonce">.
 
 Notable numeric display components:
 - `AnimatedNumber` from `@editora/ui-react` wraps `ui-odometer` from `@editora/ui-core`.
