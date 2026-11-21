@@ -24,6 +24,73 @@ export interface ToolbarButton {
   items?: ToolbarButton[]; // For groups
 }
 
+/**
+ * Toolbar names that stand for a plugin command (`bold` for `toggleBold`). A toolbar string can use either.
+ */
+export const TOOLBAR_ITEM_ALIASES: Readonly<Record<string, string>> = {
+  bold: "toggleBold",
+  italic: "toggleItalic",
+  underline: "toggleUnderline",
+  strikethrough: "toggleStrikethrough",
+  bullist: "toggleBulletList",
+  numlist: "toggleOrderedList",
+  checklist: "toggleChecklist",
+  link: "openLinkDialog",
+  image: "insertImage",
+  table: "insertTable",
+  trackChanges: "toggleTrackChanges",
+  acceptTrackChanges: "acceptAllTrackChanges",
+  rejectTrackChanges: "rejectAllTrackChanges",
+  anchor: "insertAnchor",
+  code: "toggleSourceView",
+  blockquote: "toggleBlockquote",
+  undo: "undo",
+  redo: "redo",
+  textColor: "openTextColorPicker",
+  backgroundColor: "openBackgroundColorPicker",
+  fontSize: "fontSize",
+  fontFamily: "setFontFamily",
+  lineHeight: "setLineHeight",
+  heading: "setBlockType",
+  paragraph: "setParagraph",
+  textAlignment: "setTextAlignment",
+  direction: "setDirectionLTR",
+  indent: "increaseIndent",
+  outdent: "decreaseIndent",
+  capitalization: "setCapitalization",
+  math: "insertMath",
+  specialCharacters: "insertSpecialCharacter",
+  emojis: "openEmojiDialog",
+  embedIframe: "openEmbedIframeDialog",
+  fullscreen: "toggleFullscreen",
+  preview: "togglePreview",
+  print: "print",
+  a11yChecker: "toggleA11yChecker",
+  spellCheck: "toggleSpellCheck",
+  comments: "addComment",
+  showHideComments: "toggleComments",
+  toggleComments: "toggleComments",
+  footnote: "insertFootnote",
+  mergeTags: "insertMergeTag",
+  dataBinding: "openDataBindingDialog",
+  dataBindingPreview: "openDataBindingDialog",
+  contentRules: "toggleContentRulesPanel",
+  contentRulesAudit: "runContentRulesAudit",
+  contentRulesRealtime: "toggleContentRulesRealtime",
+  mention: "insertMention",
+  slash: "openSlashCommands",
+  slashCommands: "openSlashCommands",
+  pageBreak: "insertPageBreak",
+  template: "insertTemplate",
+  importWord: "importWord",
+  exportWord: "exportWord",
+  exportPdf: "exportPdf",
+  insertImage: "insertImage",
+  insertVideo: "insertVideo",
+  insertAudio: "insertAudio",
+  codeBlock: "insertCodeBlock",
+};
+
 export class ToolbarRenderer {
   private config: ToolbarConfig;
   private plugins: Plugin[];
@@ -92,70 +159,6 @@ export class ToolbarRenderer {
       if (item.type === "group" && item.label) itemMap.set(item.label, item);
     });
 
-    // Common command aliases for backward compatibility
-    const aliases: Record<string, string> = {
-      bold: "toggleBold",
-      italic: "toggleItalic",
-      underline: "toggleUnderline",
-      strikethrough: "toggleStrikethrough",
-      bullist: "toggleBulletList",
-      numlist: "toggleOrderedList",
-      checklist: "toggleChecklist",
-      link: "openLinkDialog",
-      image: "openImageDialog",
-      table: "insertTable",
-      trackChanges: "toggleTrackChanges",
-      acceptTrackChanges: "acceptAllTrackChanges",
-      rejectTrackChanges: "rejectAllTrackChanges",
-      anchor: "insertAnchor",
-      code: "toggleSourceView",
-      blockquote: "toggleBlockquote",
-      undo: "undo",
-      redo: "redo",
-      textColor: "openTextColorPicker",
-      backgroundColor: "openBackgroundColorPicker",
-      fontSize: "fontSize",
-      fontFamily: "setFontFamily",
-      lineHeight: "setLineHeight",
-      heading: "setBlockType",
-      paragraph: "setParagraph",
-      textAlignment: "setTextAlignment",
-      direction: "setDirectionLTR",
-      indent: "increaseIndent",
-      outdent: "decreaseIndent",
-      capitalization: "setCapitalization",
-      math: "insertMath",
-      specialCharacters: "insertSpecialCharacter",
-      emojis: "openEmojiDialog",
-      embedIframe: "openEmbedIframeDialog",
-      fullscreen: "toggleFullscreen",
-      preview: "togglePreview",
-      print: "print",
-      a11yChecker: "toggleA11yChecker",
-      spellCheck: "toggleSpellCheck",
-      comments: "addComment",
-      showHideComments: "toggleComments",
-      toggleComments: "toggleComments",
-      footnote: "insertFootnote",
-      mergeTags: "insertMergeTag",
-      dataBinding: "openDataBindingDialog",
-      dataBindingPreview: "openDataBindingDialog",
-      contentRules: "toggleContentRulesPanel",
-      contentRulesAudit: "runContentRulesAudit",
-      contentRulesRealtime: "toggleContentRulesRealtime",
-      mention: "insertMention",
-      slash: "openSlashCommands",
-      slashCommands: "openSlashCommands",
-      pageBreak: "insertPageBreak",
-      template: "insertTemplate",
-      importWord: "importWord",
-      exportWord: "exportWord",
-      exportPdf: "exportPdf",
-      insertImage: "insertImage",
-      insertVideo: "insertVideo",
-      insertAudio: "insertAudio",
-      codeBlock: "insertCodeBlock",
-    };
 
     sections.forEach((section) => {
       const buttons: ToolbarButton[] = [];
@@ -218,7 +221,7 @@ export class ToolbarRenderer {
         }
 
         // Try direct command first, then alias
-        const actualCommand = aliases[cmd] || cmd;
+        const actualCommand = TOOLBAR_ITEM_ALIASES[cmd] || cmd;
         let item = itemMap.get(actualCommand);
         // If not found by command, try by label (for group type)
         if (!item) item = itemMap.get(cmd);
