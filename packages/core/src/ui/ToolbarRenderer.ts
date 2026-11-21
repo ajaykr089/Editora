@@ -36,7 +36,7 @@ export const TOOLBAR_ITEM_ALIASES: Readonly<Record<string, string>> = {
   numlist: "toggleOrderedList",
   checklist: "toggleChecklist",
   link: "openLinkDialog",
-  image: "openImageDialog",
+  image: "insertImage",
   table: "insertTable",
   trackChanges: "toggleTrackChanges",
   acceptTrackChanges: "acceptAllTrackChanges",

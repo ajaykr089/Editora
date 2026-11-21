@@ -19,6 +19,7 @@ const STAND_INS: Record<string, { name: string; command: string }> = {
   fontSize: { name: 'fontSize', command: 'fontSize' },
   textColor: { name: 'textColor', command: 'openTextColorPicker' },
   math: { name: 'math', command: 'insertMath' },
+  image: { name: 'image', command: 'insertImage' },
   mentions: { name: 'mentions', command: 'insertMention' },
   mention: { name: 'mentions', command: 'insertMention' },
   spellCheck: { name: 'spellCheck', command: 'toggleSpellCheck' },
@@ -112,6 +113,12 @@ describe('<editora-editor> default plugin set', () => {
       'openTextColorPicker',
       'insertMath',
     ]);
+  });
+
+  it('draws the image button for the `image` toolbar name', async () => {
+    const el = await mount({ toolbar: 'bold image' });
+    expect(created).toContain('image');
+    expect(toolbarCommands(el)).toEqual(['toggleBold', 'insertImage']);
   });
 
   it('loads a plugin once when the toolbar names it more than one way', async () => {
