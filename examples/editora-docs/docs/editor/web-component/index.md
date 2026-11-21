@@ -18,6 +18,8 @@ npm i @editora/core @editora/plugins @editora/themes
 
 ### Full bundle (recommended for broad plugin coverage)
 
+It includes every plugin, but each one is fetched only when an editor on the page uses it.
+
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css" />
@@ -29,6 +31,32 @@ npm i @editora/core @editora/plugins @editora/themes
 <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css" />
 ```
+
+## Which plugins load
+
+List the plugins you want in `plugins`, separated by spaces: only those load.
+
+Without a `plugins` attribute, the editor loads a small default set: `bold`, `italic`, `underline`, `strikethrough`,
+`clearFormatting`, `heading`, `blockquote`, `list`, `link`, `table` and `history`. A page with nothing but the tag
+loads about 68 KB gzipped of JavaScript. Before `@editora/core` 1.1.0, a bare tag loaded every plugin, about 437 KB.
+
+The editor also loads any other plugin the page asks for:
+
+- a toolbar item: `toolbar-items="undo redo | bold italic | fontSize textColor | insertImage"` also loads `fontSize`,
+  `textColor` and `image`;
+- an entry under `pluginConfig`, such as `pluginConfig: { mentions: { ... } }`;
+- `accessibility: { checker: true }`, which loads `a11yChecker`;
+- a plugin you registered yourself, or loaded with `EditoraPlugins.loadPlugins()`.
+
+To get every plugin, as a bare tag did before 1.1.0, ask for all of them:
+
+```html
+<editora-editor plugins="all"></editora-editor>
+```
+
+`all` can be combined with other names, as in `plugins="all collaboration"`. It never includes `collaboration` on its
+own, because that plugin sends the document to a server. It loads only when you name it in `plugins` or configure it
+under `pluginConfig`. Even then it stays off until you give it your own `websocketUrl` or a `provider`.
 
 ## Configuration priority
 
@@ -42,7 +70,7 @@ Config resolution order:
 
 | Capability | Web component surface |
 | --- | --- |
-| Plugin loading | `plugins="bold,italic,link"` |
+| Plugin loading | `plugins="bold italic link"`, `plugins="all"`, or leave it out for [the default set](#which-plugins-load) |
 | Toolbar layout | `toolbar-items="..."`, `toolbar-floating`, `toolbar-sticky` |
 | Theme scope | `theme="light\\|dark\\|custom"` |
 | Readonly mode | `readonly="true\\|false"` |
@@ -66,7 +94,7 @@ Config resolution order:
 | `theme` | `string` | Theme class scope (`editora-theme-*`) |
 | `placeholder` | `string` | Empty content hint |
 | `autofocus` | `boolean` | Focus on mount |
-| `plugins` | `string` | Space-separated plugin IDs |
+| `plugins` | `string` | Space-separated plugin IDs. `all` loads every plugin; leave it out for [the default set](#which-plugins-load) |
 | `toolbar` | `boolean \| object \| string` | Toolbar enable/config |
 | `toolbar-items` | `string` | Toolbar item layout string |
 | `toolbar-floating` | `boolean` | Enable floating toolbar behavior |

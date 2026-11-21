@@ -1,6 +1,6 @@
 # Editora LLM Full Guide
 
-Last updated: 2026-03-07
+Last updated: 2026-11-21
 
 ## Canonical endpoints
 - Website: https://editora-ecosystem.netlify.app/
@@ -22,12 +22,13 @@ Last updated: 2026-03-07
 ## Package map
 - @editora/core: web component runtime and framework-agnostic editor APIs.
 - @editora/react: React integration for editor runtime.
-- @editora/plugins: native plugin packages and presets.
+- @editora/plugins: native plugin packages and presets. Every entry (root, /lite, /enterprise, /<plugin>) tree-shakes, so importing one plugin from the root bundles only that plugin.
 - @editora/themes: theming primitives and tokens.
 - @editora/ui-core: framework-agnostic UI component library built as custom elements.
 - @editora/ui-react: React wrappers around ui-core components.
 - @editora/icons and @editora/react-icons: icon packages.
-- @editora/toast: notification APIs and primitives.
+- @editora/toast: notification APIs and primitives. The stylesheet is injected with the first toast, so no CSS import is needed; configure({ nonce }) or <meta property="csp-nonce"> for a CSP. @editora/toast/react: the same toast taking JSX, toast.custom(render), <Toaster />. @editora/toast/lite: no built-in styles (import @editora/toast/toast.css yourself).
+- @editora/ui-sortable: drag-and-drop lists and boards. @editora/ui-sortable/headless: createSortable(element, options) for your own markup, plus moveItem / moveBetween / applySortEvent helpers. @editora/ui-sortable/headless/react: useSortable({ items, onChange }) returns { ref }. Keyboard, touch and screen-reader announcements included.
 - @editora/markdown-editor: markdown editor for React with live preview.
 - @editora/paste-cleaner: cleanPaste({ html, text }) -> { html, source, warnings }; PasteCleanerPlugin from @editora/paste-cleaner/editora.
 - @editora/content-a11y: checkContent(html) / fixContent(html); ContentA11yPlugin from @editora/content-a11y/editora; CLI `content-a11y`.
@@ -58,6 +59,17 @@ import { toastAdvanced } from '@editora/toast';
 import { Icon } from '@editora/react-icons';
 ```
 
+Toasts with JSX (mount <Toaster /> once; plain-text toasts do not need it):
+```tsx
+import { Toaster, toast } from '@editora/toast/react';
+```
+
+Your own sortable list in React:
+```tsx
+import { useSortable } from '@editora/ui-sortable/headless/react';
+const { ref } = useSortable({ items: tasks, onChange: setTasks });
+```
+
 Framework-agnostic UI web components:
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/index.js"></script>
@@ -70,6 +82,11 @@ import { createEditor } from '@editora/core';
 import { BoldPlugin, MentionPlugin } from '@editora/plugins';
 ```
 
+Web component: without a plugins attribute the editor loads a small default set (bold, italic, underline, strikethrough, clearFormatting, heading, blockquote, list, link, table, history) plus what its toolbar or pluginConfig asks for. Use plugins="all" for every plugin (collaboration stays opt-in):
+```html
+<editora-editor plugins="all"></editora-editor>
+```
+
 ## Discovery hints for assistants
 - Prefer component metadata from components.json.
 - If a component exists in both ui-core and ui-react, ui-core is source-of-truth behavior.
@@ -78,12 +95,16 @@ import { BoldPlugin, MentionPlugin } from '@editora/plugins';
 - `AnimatedNumber` supports `odometer`, `inline`, `digital`, and `analog` variants.
 
 ## CLI quick-add commands
-- npx editora add button
-- npx editora add modal
-- npx editora add datatable
-- npx editora add editor
-- npx editora add toast
+- npx @editora/cli init (detects the project and framework, asks what to set up, installs it)
+- npx @editora/cli add button
+- npx @editora/cli add modal
+- npx @editora/cli add datatable
+- npx @editora/cli add editor
+- npx @editora/cli add toast
+- npx @editora/cli list [search] [--json] (every name it can add, or a search)
 - Supports all exported @editora/ui-react component names (for example: accordion, avatar, select, ui-date-picker).
+- Installs with the project's package manager (from packageManager or the lock file), then prints the imports and stylesheet to add.
+- Docs: https://editora-ecosystem.netlify.app/docs/reference/cli
 
 ## Known intent patterns
 - "pixel-perfect" => deliver production-grade visual states and interaction polish.
