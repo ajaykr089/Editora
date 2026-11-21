@@ -21,6 +21,25 @@ import { MathPlugin } from "@editora/plugins";
 const plugins = [MathPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function MathDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), MathPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Insert a formula from the toolbar, for example: E = mc^2</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

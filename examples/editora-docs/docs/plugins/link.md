@@ -21,6 +21,25 @@ import { LinkPlugin } from "@editora/plugins";
 const plugins = [LinkPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function LinkDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), LinkPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Select <strong>this text</strong> and press Mod+K, or use the toolbar, to add a link.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

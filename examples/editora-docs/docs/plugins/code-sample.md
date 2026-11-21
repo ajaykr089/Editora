@@ -21,6 +21,25 @@ import { CodeSamplePlugin } from "@editora/plugins";
 const plugins = [CodeSamplePlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function CodeSampleDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), CodeSamplePlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Insert a code sample from the toolbar, pick a language, and edit it in the dialog.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

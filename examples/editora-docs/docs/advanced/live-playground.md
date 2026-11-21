@@ -25,6 +25,18 @@ function CounterDemo() {
 }
 ```
 
+## What a live block can use
+
+Live blocks on this site run without imports. Each block loads only the packages its code mentions
+(`src/live/scopeLoader.ts`), so pages without live blocks load none of them:
+
+| In the code | Available |
+| --- | --- |
+| Always | `React` and its hooks, every `@editora/ui-react` and `@editora/react-icons` export (ui-react's `Icon` wins the name clash) |
+| `EditoraEditor`, `RichTextEditor` or a `...Plugin()` call | `@editora/react`'s editor and every `@editora/plugins` factory, with the plugin and theme styles |
+| `<Toaster />` or `toast.custom(` | `toast` and `Toaster` from `@editora/toast/react` (JSX toasts) instead of ui-react's `toast` |
+| `editora-editor` | the `<editora-editor>` custom element and its stylesheet |
+
 ## Usage Rules
 
 - Keep snippets deterministic and small.

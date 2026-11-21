@@ -17,16 +17,23 @@ import '@editora/toast/toast.css';
 
 ## Basic Usage
 
+`useToast()` returns the level methods (`success`, `error`, `warning`, `info`, `loading`, `dismiss`, `clear`). The
+`toast` export is a single function, `toast(message, { level })`, without methods of its own.
+
 ```tsx live noInline
 function SaveButton() {
+  const toast = useToast();
+
   return (
     <ThemeProvider>
-      <button
-        type="button"
-        onClick={() => toast.success('Saved successfully')}
-      >
-        Save
-      </button>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button type="button" onClick={() => toast.success('Saved successfully')}>
+          Save
+        </button>
+        <button type="button" onClick={() => toast.error('Could not save')}>
+          Fail
+        </button>
+      </div>
     </ThemeProvider>
   );
 }

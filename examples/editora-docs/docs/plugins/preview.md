@@ -21,6 +21,25 @@ import { PreviewPlugin } from "@editora/plugins";
 const plugins = [PreviewPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function PreviewDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), PreviewPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<h2>Preview</h2><p>Open the preview from the toolbar to see the rendered document.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |
