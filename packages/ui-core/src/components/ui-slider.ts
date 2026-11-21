@@ -161,6 +161,23 @@ const style = `
     outline: none;
   }
 
+  :host([range]) input[type="range"] {
+    pointer-events: none;
+  }
+
+  :host([range]) .track-wrap {
+    cursor: pointer;
+    touch-action: pan-y;
+  }
+
+  :host([range][orientation="vertical"]) .track-wrap {
+    touch-action: pan-x;
+  }
+
+  :host([range][disabled]) .track-wrap {
+    cursor: default;
+  }
+
   input[type="range"]::-webkit-slider-runnable-track {
     appearance: none;
     background: transparent;
@@ -608,11 +625,14 @@ export class UISlider extends ElementBase {
   private _value = 0;
   private _valueStart = 0;
   private _valueEnd = 0;
+  // Pointer gesture on the range track ('' handle = both handles share a value, the first move picks).
+  private _drag: { id: number; handle: string; moved: boolean } | null = null;
 
   constructor() {
     super();
     this._onInput = this._onInput.bind(this);
     this._onChange = this._onChange.bind(this);
+    this._onPointer = this._onPointer.bind(this);
   }
 
   formResetCallback(): void {
@@ -703,8 +723,8 @@ export class UISlider extends ElementBase {
     const start = clamp(Math.min(attrStart, attrEnd), min, max);
     const end = clamp(Math.max(attrStart, attrEnd), min, max);
 
-    this._valueStart = Math.round(start / step) * step;
-    this._valueEnd = Math.round(end / step) * step;
+    this._valueStart = this._snap(start);
+    this._valueEnd = this._snap(end);
     this._value = this._valueEnd;
   }
 
@@ -818,8 +838,8 @@ export class UISlider extends ElementBase {
       this._valueEnd = Math.max(raw, this._valueStart);
     }
 
-    this._valueStart = Math.round(this._valueStart / step) * step;
-    this._valueEnd = Math.round(this._valueEnd / step) * step;
+    this._valueStart = this._snap(this._valueStart);
+    this._valueEnd = this._snap(this._valueEnd);
     this._value = this._valueEnd;
 
     this.setAttribute('value-start', String(this._valueStart));
@@ -846,6 +866,84 @@ export class UISlider extends ElementBase {
     this._updateFromInput(target);
     this._syncDom();
     this._emit('change');
+  }
+
+  /** The value under the pointer, along the native thumb's travel (half a thumb in from each end). */
+  private _valueAt(event: PointerEvent): number {
+    const min = parseNumber(this.getAttribute('min'), 0);
+    const max = Math.max(min, parseNumber(this.getAttribute('max'), 100));
+    const input = this._startInput as HTMLInputElement;
+    const rect = input.getBoundingClientRect();
+    const vertical = this.getAttribute('orientation') === 'vertical';
+    const length = vertical ? rect.height : rect.width;
+    const probe = document.createElement('i');
+    probe.style.cssText = 'position:absolute;inline-size:var(--ui-slider-thumb-size)';
+    this._trackWrap?.appendChild(probe);
+    const thumb = Math.min(probe.getBoundingClientRect().width, length);
+    probe.remove();
+    let fraction = ((vertical ? rect.bottom - event.clientY : event.clientX - rect.left) - thumb / 2) / (length - thumb || 1);
+    if (!vertical && getComputedStyle(input).direction === 'rtl') fraction = 1 - fraction;
+    return min + clamp(fraction, 0, 1) * (max - min);
+  }
+
+  /** Snaps to the step counted from min, like the native input. */
+  private _snap(raw: number): number {
+    const min = parseNumber(this.getAttribute('min'), 0);
+    const max = Math.max(min, parseNumber(this.getAttribute('max'), 100));
+    const step = Math.max(0.0001, parseNumber(this.getAttribute('step'), 1));
+    const snapped = min + Math.round((clamp(raw, min, max) - min) / step) * step;
+    return clamp(Number(snapped.toFixed((String(step).split('.')[1] || '').length)), min, max);
+  }
+
+  /**
+   * In range mode the two inputs overlap and take no pointers (the top one used to take every
+   * press, so the start handle moved the end one): the track moves the nearer handle instead, never
+   * past the other one. When both share a value the first move picks one. The handle gets focus.
+   */
+  private _onPointer(event: PointerEvent): void {
+    const drag = this._drag;
+    if (event.type !== 'pointerdown') {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (event.type !== 'pointermove') {
+        this._drag = null;
+        if (drag.moved) this._emit('change');
+        return;
+      }
+    } else if (!this._rangeMode || this.hasAttribute('disabled') || !this._startInput || event.button > 0) {
+      return;
+    }
+
+    const raw = this._valueAt(event);
+    const value = this._snap(raw);
+    const start = this._valueStart;
+    const end = this._valueEnd;
+    let handle = drag ? drag.handle : value < start ? 'start' : value > end ? 'end' : start === end ? '' : value - start <= end - value ? 'start' : 'end';
+    if (event.type === 'pointerdown') {
+      event.preventDefault();
+      this._trackWrap?.setPointerCapture?.(event.pointerId);
+      this._drag = { id: event.pointerId, handle, moved: false };
+    }
+    if (!handle) {
+      if (event.type === 'pointerdown' || value === start) {
+        this._endInput?.focus({ preventScroll: true });
+        return;
+      }
+      handle = value < start ? 'start' : 'end';
+      this._drag!.handle = handle;
+    }
+    (handle === 'start' ? this._startInput : this._endInput)?.focus({ preventScroll: true });
+
+    if (handle === 'start') this._valueStart = Math.min(value, end);
+    else this._valueEnd = Math.max(value, start);
+    if (this._valueStart === start && this._valueEnd === end) return;
+    this._value = this._valueEnd;
+    this._drag!.moved = true;
+    this.setAttribute('value-start', String(this._valueStart));
+    this.setAttribute('value-end', String(this._valueEnd));
+    this.setAttribute('value', String(this._valueEnd));
+    this._syncDom();
+    this._emit('input');
+    this._emit('valuechange');
   }
 
   private _renderMarks(min: number, max: number): string {
@@ -914,6 +1012,11 @@ export class UISlider extends ElementBase {
     this._endInput = this.root.querySelector('input.end') as HTMLInputElement | null;
     this._valueEl = this.root.querySelector('.value') as HTMLElement | null;
     this._trackWrap = this.root.querySelector('.track-wrap') as HTMLElement | null;
+    // A re-render replaces the track, so a gesture in progress ends with it.
+    this._drag = null;
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
+      this._trackWrap?.addEventListener(type, this._onPointer as EventListener);
+    }
 
     this._syncDom();
   }
