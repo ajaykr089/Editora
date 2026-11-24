@@ -22,9 +22,13 @@
 }
 
 /* Theme variants */
+/* color-scheme: a light editor on a page with `color-scheme: dark` (any dark site) otherwise draws its
+   buttons and fields in the browser's dark-scheme colours: the toolbar buttons keep their white
+   background but take white text, so every icon (drawn with currentColor) disappears. */
 .editora-theme-light {
   background: #fff;
   color: #333;
+  color-scheme: light;
 }
 
 .editora-theme-dark {
