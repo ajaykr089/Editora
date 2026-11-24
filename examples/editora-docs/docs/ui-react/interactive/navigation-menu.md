@@ -33,7 +33,7 @@ function NavigationMenuDemo() {
           </NavigationMenu.Item>
 
           <NavigationMenu.Item>
-            <NavigationMenu.Link href="/analytics">Analytics</NavigationMenu.Link>
+            <NavigationMenu.Link href="#analytics">Analytics</NavigationMenu.Link>
             <NavigationMenu.Content>Analytics content</NavigationMenu.Content>
           </NavigationMenu.Item>
         </NavigationMenu.List>

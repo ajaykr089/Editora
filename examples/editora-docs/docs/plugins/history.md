@@ -21,6 +21,25 @@ import { HistoryPlugin } from "@editora/plugins";
 const plugins = [HistoryPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function HistoryDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Type, format and delete some text, then undo with Mod+Z and redo with Mod+Shift+Z.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

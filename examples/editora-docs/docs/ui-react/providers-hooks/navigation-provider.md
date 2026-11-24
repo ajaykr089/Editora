@@ -26,6 +26,35 @@ const navigate = useNavigate();
 
 The links stay real `<a href>` elements, so Cmd/Ctrl-click, middle-click and `target="_blank"` open a new tab as usual; those clicks never reach the provider.
 
+## Live example
+
+This "router" is a piece of state, so you can see where each link would take your app. The Breadcrumb and the
+Pagination links both go through the one provider, and the page never reloads.
+
+```tsx live
+function RoutedLinks() {
+  const [path, setPath] = React.useState('/projects/atlas/invoices?page=2');
+  const page = Number(new URLSearchParams(path.split('?')[1]).get('page')) || 1;
+
+  return (
+    <ThemeProvider>
+      <NavigationProvider navigate={(href) => setPath(href)}>
+        <div style={{ display: 'grid', gap: 16 }}>
+          <Breadcrumb ariaLabel="Location">
+            <Breadcrumb.Item href="/" label="Home">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/projects" label="Projects">Projects</Breadcrumb.Item>
+            <Breadcrumb.Item href="/projects/atlas" label="Atlas">Atlas</Breadcrumb.Item>
+            <Breadcrumb.Item label="Invoices">Invoices</Breadcrumb.Item>
+          </Breadcrumb>
+          <Pagination page={page} count={5} hrefTemplate="/projects/atlas/invoices?page={page}" />
+          <code>router path: {path}</code>
+        </div>
+      </NavigationProvider>
+    </ThemeProvider>
+  );
+}
+```
+
 ## Per component
 
 Each of these components also takes `onNavigate`. It runs before the provider and can handle a link itself:

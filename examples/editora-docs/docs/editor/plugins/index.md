@@ -27,6 +27,46 @@ import "@editora/plugins/styles.css";
 const plugins = [BoldPlugin(), ItalicPlugin(), HistoryPlugin()];
 ```
 
+## Live example
+
+A wider stack from the root entry. Try the table, checklist, colors, emoji and special-character pickers, and the
+math dialog.
+
+```tsx live
+function PluginStack() {
+  const plugins = React.useMemo(
+    () => [
+      HeadingPlugin(),
+      BoldPlugin(),
+      ItalicPlugin(),
+      UnderlinePlugin(),
+      StrikethroughPlugin(),
+      TextColorPlugin(),
+      BackgroundColorPlugin(),
+      TextAlignmentPlugin(),
+      ListPlugin(),
+      ChecklistPlugin(),
+      BlockquotePlugin(),
+      LinkPlugin(),
+      TablePlugin(),
+      EmojisPlugin(),
+      SpecialCharactersPlugin(),
+      MathPlugin(),
+      ClearFormattingPlugin(),
+      HistoryPlugin(),
+    ],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<h2>Plugin stack</h2><p>Every button in the toolbar comes from a plugin in the list.</p>"
+    />
+  );
+}
+```
+
 ## Usage
 
 Use root exports for fast integration, subpath exports for bundle control, `lite` for minimal stacks, and `enterprise` for advanced/specialized stacks.
