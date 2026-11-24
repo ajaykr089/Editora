@@ -3,6 +3,8 @@ import { FormControl } from '../primitives/form-control';
 
 type SliderMark = { value: number; label?: string };
 
+// Thumb rules name one engine's pseudo-element each: a selector list naming both is invalid in every
+// browser, which drops the whole rule.
 const style = `
   :host {
     --ui-slider-width: min(340px, 100%);
@@ -222,7 +224,10 @@ const style = `
     box-shadow: var(--ui-slider-thumb-shadow), var(--ui-slider-thumb-ring);
   }
 
-  input[type="range"]:active::-webkit-slider-thumb,
+  input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.06);
+  }
+
   input[type="range"]:active::-moz-range-thumb {
     transform: scale(1.06);
   }
@@ -415,11 +420,17 @@ const style = `
 
   @media (prefers-reduced-motion: reduce) {
     .shell,
-    .track-indicator::after,
-    input[type="range"]::-webkit-slider-thumb,
-    input[type="range"]::-moz-range-thumb {
+    .track-indicator::after {
       transition: none !important;
       animation: none !important;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      transition: none !important;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      transition: none !important;
     }
   }
 
@@ -476,10 +487,13 @@ const style = `
       animation: none !important;
     }
 
-    input[type="range"]::-webkit-slider-thumb,
+    input[type="range"]::-webkit-slider-thumb {
+      background: Highlight;
+      box-shadow: none;
+    }
+
     input[type="range"]::-moz-range-thumb {
       background: Highlight;
-      border-color: HighlightText;
       box-shadow: none;
     }
   }
