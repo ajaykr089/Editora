@@ -38,6 +38,23 @@ plugin in the bundle except `collaboration`, which sends the document to a serve
 configure it under `pluginConfig`), and then stays off until you give it your own `websocketUrl` or a `provider`.
 
 
+
+### Try it
+
+The same element, running in this page:
+
+```tsx live
+<editora-editor
+  height="320"
+  plugins="heading bold italic underline list link history"
+  toolbar="undo redo | heading | bold italic underline | bullist numlist | link"
+  placeholder="Start writing..."
+>
+  <h2>Hello, Editora</h2>
+  <p>This is a <strong>web component</strong>. Select some text and use the toolbar.</p>
+</editora-editor>
+```
+
 ## Usage
 
 Use `@editora/core` as the runtime foundation for command execution, plugin registration, and selection-aware editing.

@@ -21,6 +21,25 @@ import { TablePlugin } from "@editora/plugins";
 const plugins = [TablePlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function TableDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), TablePlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Insert a table from the toolbar, then click a cell to open the table toolbar.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

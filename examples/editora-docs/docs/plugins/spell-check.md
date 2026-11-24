@@ -21,6 +21,25 @@ import { SpellCheckPlugin } from "@editora/plugins";
 const plugins = [SpellCheckPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function SpellCheckDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), SpellCheckPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Ths sentense has a few speling mistakes for the checker to find.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

@@ -172,6 +172,38 @@ Use `editorElement.getAPI()` to access:
 | `editor-blur` | none | Content loses focus |
 | `editor-destroy` | none | Instance teardown |
 
+## Live example
+
+The element on this page is the real `<editora-editor>`. The listener shows the `content-change` event; type, pause,
+and the HTML appears below.
+
+```tsx live
+function WebComponentDemo() {
+  const ref = React.useRef(null);
+  const [html, setHtml] = React.useState('');
+
+  React.useEffect(() => {
+    const editor = ref.current;
+    const onChange = () => setHtml(editor.getContent());
+    editor.addEventListener('content-change', onChange);
+    return () => editor.removeEventListener('content-change', onChange);
+  }, []);
+
+  return (
+    <>
+      <editora-editor
+        ref={ref}
+        plugins="heading bold italic underline list link history"
+        toolbar-items="undo redo | heading | bold italic underline | bullist numlist | link"
+        statusbar="true"
+        placeholder="Write something, then pause..."
+      ></editora-editor>
+      <pre style={{ marginTop: 12, whiteSpace: 'pre-wrap' }}>{html || 'No content-change event yet'}</pre>
+    </>
+  );
+}
+```
+
 ## Dedicated capability demo
 
 ```html

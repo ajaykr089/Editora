@@ -18,6 +18,8 @@ import { Select } from '@editora/ui-react/Select';
 
 ```tsx live
 function SelectDemo() {
+  const [value, setValue] = React.useState('');
+
   return (
     <ThemeProvider>
       <Select
@@ -25,7 +27,7 @@ function SelectDemo() {
         onChange={setValue}
         variant="soft"
         size="md"
-        validation="error"
+        validation={value ? 'none' : 'error'}
         required
       >
         <Select.Label>Workflow status <span style={{ color: '#dc2626' }}>*</span></Select.Label>

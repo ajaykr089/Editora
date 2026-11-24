@@ -30,6 +30,25 @@ import {
 const plugins = [TemplatePlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function TemplateDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), TemplatePlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Open the template picker from the toolbar and insert one of the built-in templates.</p>"
+    />
+  );
+}
+```
+
 ## Add Custom Templates
 
 ```ts

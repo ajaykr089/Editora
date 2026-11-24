@@ -21,6 +21,25 @@ import { SpecialCharactersPlugin } from "@editora/plugins";
 const plugins = [SpecialCharactersPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function SpecialCharactersDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), SpecialCharactersPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Insert a symbol from the special characters dialog: </p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |
