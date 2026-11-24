@@ -201,6 +201,7 @@ export default function DocumentEditor() {
 | `statusbar` | `{ enabled?, position? }` | A status bar with the cursor position and the word and character counts. `position` is `'top'` or `'bottom'`. |
 | `contextMenu` | `{ enabled? }` | `enabled: false` stops the browser's own right-click menu from opening in the editor. The default leaves it alone; the editor draws no context menu of its own. |
 | `readonly` | `boolean` | Shows the content without letting the user edit it. |
+| `autofocus` | `boolean` | Focuses the editing area when the editor mounts (and when it turns editable). Off by default, because focusing also scrolls the page to the editor. |
 | `placeholder` | `string` | Text shown while the editor is empty. |
 | `ariaLabel` / `ariaLabelledBy` | `string` | The editing area's accessible name, or the id of a visible label for it. Without them screen readers hear the placeholder, which is not a label. |
 | `content` | `{ minHeight?, maxHeight?, autoHeight?, sanitize?, allowedTags?, allowedAttributes? }` | The size of the editing area, in pixels, and what HTML it keeps. With `autoHeight` the area grows with the content, up to `maxHeight`. |

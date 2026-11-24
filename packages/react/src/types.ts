@@ -61,6 +61,8 @@ export interface RichTextEditorProps {
   value?: string;
   defaultValue?: string;
   readonly?: boolean;
+  /** Focus the editing area when the editor mounts (and when it turns editable). Off by default: focusing also scrolls the page to the editor. */
+  autofocus?: boolean;
   placeholder?: string;
   /** Accessible name of the editing area (what a screen reader announces). Without it, the placeholder or "Rich text editor" is used. */
   ariaLabel?: string;
@@ -206,7 +208,7 @@ export interface RichTextEditorProps {
 /**
  * Internal merged configuration (after defaults applied)
  */
-export interface EditorConfig extends Required<Omit<RichTextEditorProps, 'id' | 'className' | 'ariaLabel' | 'ariaLabelledBy' | 'value' | 'defaultValue' | 'onChange' | 'onInit' | 'onDestroy' | 'plugins' | 'pluginConfig' | 'floatingToolbar' | 'mediaConfig'>> {
+export interface EditorConfig extends Required<Omit<RichTextEditorProps, 'id' | 'className' | 'autofocus' | 'ariaLabel' | 'ariaLabelledBy' | 'value' | 'defaultValue' | 'onChange' | 'onInit' | 'onDestroy' | 'plugins' | 'pluginConfig' | 'floatingToolbar' | 'mediaConfig'>> {
   id?: string;
   className?: string;
   value?: string;

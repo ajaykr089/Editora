@@ -228,6 +228,7 @@ interface EditorContentProps {
   defaultValue?: string;
   value?: string;
   readonly?: boolean;
+  autofocus?: boolean;
   placeholder?: string;
   ariaLabel?: string;
   ariaLabelledBy?: string;
@@ -281,6 +282,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   defaultValue,
   value,
   readonly = false,
+  autofocus = false,
   placeholder,
   ariaLabel,
   ariaLabelledBy,
@@ -657,13 +659,15 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     };
   }, [editor, onChange, pasteConfig, contentConfig, securityConfig, performanceConfig, placeholder, contextMenuConfig, readonly]);
 
-  // Focus the editor when it mounts and when it becomes editable. This used to sit inside the effect
-  // above, which re-runs whenever `onChange` or any config prop changes identity (an inline arrow
-  // function is a new one on every parent render), so the editor stole focus back from any other field
-  // on the page after each keystroke that re-rendered the parent.
+  // With `autofocus`, focus the editor when it mounts and when it becomes editable. Only on request:
+  // focus() also scrolls the page to the editor, so an editor further down a page (or several on one
+  // page) used to pull the page down to itself on load and take focus from wherever the user was.
+  // This stays out of the effect above, which re-runs whenever `onChange` or any config prop changes
+  // identity (an inline arrow function is a new one on every parent render): there it stole focus back
+  // from any other field on the page after each keystroke that re-rendered the parent.
   useEffect(() => {
-    if (!readonly) contentRef.current?.focus();
-  }, [readonly]);
+    if (autofocus && !readonly) contentRef.current?.focus();
+  }, [readonly, autofocus]);
 
   const nativeSpellcheckEnabled =
     (spellcheckConfig?.enabled ?? false) &&
