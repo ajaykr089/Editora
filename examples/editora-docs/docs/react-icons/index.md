@@ -34,6 +34,50 @@ export function Demo() {
 }
 ```
 
+## Live example
+
+Every icon in the package, rendered with `getIconComponent`. Search, and change the provider's defaults: every icon
+inside `IconProvider` follows them.
+
+```tsx live
+function IconBrowser() {
+  const [query, setQuery] = React.useState('arrow');
+  const [size, setSize] = React.useState(20);
+  const [strokeWidth, setStrokeWidth] = React.useState(1.5);
+  const matches = iconNames.filter((name) => name.includes(query.trim().toLowerCase()));
+
+  return (
+    <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search icons" aria-label="Search icons" />
+        <label>
+          Size {size}{' '}
+          <input type="range" min={12} max={36} value={size} onChange={(e) => setSize(Number(e.target.value))} />
+        </label>
+        <label>
+          Stroke {strokeWidth}{' '}
+          <input type="range" min={1} max={2.5} step={0.25} value={strokeWidth} onChange={(e) => setStrokeWidth(Number(e.target.value))} />
+        </label>
+        <span>{matches.length} of {iconNames.length}</span>
+      </div>
+      <IconProvider value={{ size, strokeWidth }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 8, maxHeight: 320, overflow: 'auto' }}>
+          {matches.slice(0, 120).map((name) => {
+            const IconComponent = getIconComponent(name);
+            return (
+              <div key={name} title={name} style={{ display: 'grid', justifyItems: 'center', gap: 6, padding: 8, fontSize: 11, textAlign: 'center', wordBreak: 'break-word' }}>
+                <IconComponent aria-hidden="true" />
+                {name}
+              </div>
+            );
+          })}
+        </div>
+      </IconProvider>
+    </div>
+  );
+}
+```
+
 ## Usage
 
 Use named icon components for static UI and `<Icon name="..." />` for dynamic rendering.

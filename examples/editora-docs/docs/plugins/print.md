@@ -21,6 +21,25 @@ import { PrintPlugin } from "@editora/plugins";
 const plugins = [PrintPlugin()];
 ```
 
+
+## Try it
+
+```tsx live
+function PrintDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), PrintPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<h2>Print</h2><p>Use the print button to open the print flow for this content.</p>"
+    />
+  );
+}
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

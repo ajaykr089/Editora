@@ -55,6 +55,25 @@ Autosave saves on an interval and comments are saved at once, so keep `intervalM
 
 `localStorage` belongs to one browser: other people and other devices do not see these comments. For shared comments use `onChange` and your backend. If the browser refuses to store (private mode, full), commenting carries on and a warning is logged once.
 
+
+## Try it
+
+```tsx live
+function CommentsDemo() {
+  const plugins = React.useMemo(
+    () => [BoldPlugin(), ItalicPlugin(), CommentsPlugin(), HistoryPlugin()],
+    [],
+  );
+
+  return (
+    <EditoraEditor
+      plugins={plugins}
+      defaultValue="<p>Select a few words in this sentence and add a comment to start a thread.</p>"
+    />
+  );
+}
+```
+
 ## Options
 
 | Option | Type | Description |
