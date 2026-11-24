@@ -223,18 +223,24 @@
  * explicitly opts out with fill="none". Elements with their OWN explicit
  * hardcoded fill (root or descendant) are also converted directly, since an
  * attribute on the element itself doesn't inherit away. */
-.rte-toolbar-button svg:not([fill="none" i]),
-.editora-toolbar-button svg:not([fill="none" i]),
-.editora-toolbar-icon svg:not([fill="none" i]),
-.rte-toolbar-button svg [fill="#000" i],
-.rte-toolbar-button svg [fill="#000000" i],
-.rte-toolbar-button svg [fill="black" i],
-.editora-toolbar-button svg [fill="#000" i],
-.editora-toolbar-button svg [fill="#000000" i],
-.editora-toolbar-button svg [fill="black" i],
-.editora-toolbar-icon svg [fill="#000" i],
-.editora-toolbar-icon svg [fill="#000000" i],
-.editora-toolbar-icon svg [fill="black" i] {
+.rte-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-toolbar-button svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.editora-toolbar-icon svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.rte-toolbar-button svg [fill="#000"],
+.rte-toolbar-button svg [fill="#000000"],
+.rte-toolbar-button svg [fill="black"],
+.rte-toolbar-button svg [fill="BLACK"],
+.rte-toolbar-button svg [fill="Black"],
+.editora-toolbar-button svg [fill="#000"],
+.editora-toolbar-button svg [fill="#000000"],
+.editora-toolbar-button svg [fill="black"],
+.editora-toolbar-button svg [fill="BLACK"],
+.editora-toolbar-button svg [fill="Black"],
+.editora-toolbar-icon svg [fill="#000"],
+.editora-toolbar-icon svg [fill="#000000"],
+.editora-toolbar-icon svg [fill="black"],
+.editora-toolbar-icon svg [fill="BLACK"],
+.editora-toolbar-icon svg [fill="Black"] {
   fill: currentColor;
 }
 
@@ -242,7 +248,8 @@
   opacity: 0.9;
 }
 
-:is(.rte-toolbar-button[data-active="true"], .editora-toolbar-button.active) svg {
+.rte-toolbar-button[data-active="true"] svg,
+.editora-toolbar-button.active svg {
   color: var(--rte-color-text-inverse);
 }
 
@@ -269,14 +276,18 @@
  * Solid-glyph icons with no fill attribute default to black and need the
  * root converted explicitly; elements with their own hardcoded fill need
  * converting directly, same as the base rule above. */
-.rte-toolbar-button.active svg:not([fill="none" i]),
-.rte-toolbar-button[data-active="true"] svg:not([fill="none" i]),
-.rte-toolbar-button.active svg [fill="#000" i],
-.rte-toolbar-button.active svg [fill="#000000" i],
-.rte-toolbar-button.active svg [fill="black" i],
-.rte-toolbar-button[data-active="true"] svg [fill="#000" i],
-.rte-toolbar-button[data-active="true"] svg [fill="#000000" i],
-.rte-toolbar-button[data-active="true"] svg [fill="black" i] {
+.rte-toolbar-button.active svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.rte-toolbar-button[data-active="true"] svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.rte-toolbar-button.active svg [fill="#000"],
+.rte-toolbar-button.active svg [fill="#000000"],
+.rte-toolbar-button.active svg [fill="black"],
+.rte-toolbar-button.active svg [fill="BLACK"],
+.rte-toolbar-button.active svg [fill="Black"],
+.rte-toolbar-button[data-active="true"] svg [fill="#000"],
+.rte-toolbar-button[data-active="true"] svg [fill="#000000"],
+.rte-toolbar-button[data-active="true"] svg [fill="black"],
+.rte-toolbar-button[data-active="true"] svg [fill="BLACK"],
+.rte-toolbar-button[data-active="true"] svg [fill="Black"] {
   fill: currentColor;
 }
 

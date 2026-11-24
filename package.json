@@ -49,6 +49,7 @@
     "generate:api-docs": "node scripts/generate-api-docs.mjs",
     "check:api-docs": "node scripts/generate-api-docs.mjs --check",
     "check:element-registrations": "node scripts/check-custom-element-registrations.js",
+    "check:shipped-css": "node scripts/check-shipped-css.mjs",
     "check:ui-size": "node scripts/check-ui-size.mjs",
     "check:plugins-size": "node scripts/check-plugins-size.mjs",
     "cli": "node packages/cli/bin/editora.js",

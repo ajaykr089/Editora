@@ -36,37 +36,43 @@
   align-items: center;
   white-space: nowrap;
 }
-.rte-toolbar-group-items.font-size{
-    display: flex;
-    align-items: center;
-    border: 1px solid #ccc;
-    .rte-toolbar-input.font-size{
-      width: 40px;
-      padding: 0.25rem;
-      text-align: center;
-      font-size: 14px;
-      background: #fff;
-      color: #1f2937;
-      border: 1px solid var(--rte-color-border-light);
-      border-radius: var(--rte-radius-sm);
-    }
-    .rte-toolbar-button {
-      border: none;
-      border-radius: 0;
-    }
-    .rte-toolbar-item{
-        &:first-child {
-            border-right: 1px solid #ccc;
-            border-top-left-radius: 3px;
-            border-bottom-left-radius: 3px;
-        }
-        &:last-child {
-            border-left: 1px solid #ccc;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-        }
-      }   
+/* No CSS nesting in the shipped stylesheets: build tools still mangle it (cssnano, the default CSS
+   minifier of webpack setups, turned the nested `.rte-toolbar-button` rule below into a top-level one
+   and merged the real `.rte-toolbar-button` rule away, so every toolbar button lost its layout). */
+.rte-toolbar-group-items.font-size {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
 }
+
+.rte-toolbar-group-items.font-size .rte-toolbar-input.font-size {
+  width: 40px;
+  padding: 0.25rem;
+  text-align: center;
+  font-size: 14px;
+  background: #fff;
+  color: #1f2937;
+  border: 1px solid var(--rte-color-border-light);
+  border-radius: var(--rte-radius-sm);
+}
+
+.rte-toolbar-group-items.font-size .rte-toolbar-button {
+  border: none;
+  border-radius: 0;
+}
+
+.rte-toolbar-group-items.font-size .rte-toolbar-item:first-child {
+  border-right: 1px solid #ccc;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.rte-toolbar-group-items.font-size .rte-toolbar-item:last-child {
+  border-left: 1px solid #ccc;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
 .rte-toolbar-button {
   padding: 6px 12px;
   border: 1px solid var(--ui-color-border, #ccc);
@@ -115,14 +121,18 @@
  * Solid-glyph icons with no fill attribute (e.g. Bold/Italic) default to
  * black and need the root converted explicitly; elements with their own
  * hardcoded fill need converting directly since it doesn't inherit away. */
-.rte-toolbar-button.active svg:not([fill="none" i]),
-.rte-toolbar-button[data-active="true"] svg:not([fill="none" i]),
-.rte-toolbar-button.active svg [fill="#000" i],
-.rte-toolbar-button.active svg [fill="#000000" i],
-.rte-toolbar-button.active svg [fill="black" i],
-.rte-toolbar-button[data-active="true"] svg [fill="#000" i],
-.rte-toolbar-button[data-active="true"] svg [fill="#000000" i],
-.rte-toolbar-button[data-active="true"] svg [fill="black" i] {
+.rte-toolbar-button.active svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.rte-toolbar-button[data-active="true"] svg:not([fill="none"]):not([fill="NONE"]):not([fill="None"]),
+.rte-toolbar-button.active svg [fill="#000"],
+.rte-toolbar-button.active svg [fill="#000000"],
+.rte-toolbar-button.active svg [fill="black"],
+.rte-toolbar-button.active svg [fill="BLACK"],
+.rte-toolbar-button.active svg [fill="Black"],
+.rte-toolbar-button[data-active="true"] svg [fill="#000"],
+.rte-toolbar-button[data-active="true"] svg [fill="#000000"],
+.rte-toolbar-button[data-active="true"] svg [fill="black"],
+.rte-toolbar-button[data-active="true"] svg [fill="BLACK"],
+.rte-toolbar-button[data-active="true"] svg [fill="Black"] {
   fill: currentColor;
 }
 
