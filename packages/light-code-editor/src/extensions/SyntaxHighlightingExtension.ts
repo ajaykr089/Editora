@@ -14,6 +14,8 @@ export class SyntaxHighlightingExtension implements EditorExtension {
   private currentTheme = 'dark';
   private currentLanguage: string | null = null;
   private modes: Map<string, { name: string; highlight: (src: string, colors: Record<string,string>) => string }> = new Map();
+  /** The modes this extension ships: they tokenise a few lines on their own the same way as inside the document. */
+  private builtInModes = new Set<object>();
 
   setup(editor: EditorAPI): void {
     this.editor = editor;
@@ -59,6 +61,8 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     this.registerMode('dockerfile', { name: 'dockerfile', highlight: (src, colors) => this._highlightDockerfile(src, colors) });
     this.registerMode('docker', { name: 'dockerfile', highlight: (src, colors) => this._highlightDockerfile(src, colors) });
     this.registerMode('php', { name: 'php', highlight: (src, colors) => this._highlightPHP(src, colors) });
+
+    this.builtInModes = new Set(this.modes.values());
 
     editor.registerCommand('setSyntaxLanguage', (language: string | null) => {
       this.setLanguage(language);
@@ -118,6 +122,26 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     );
     const mode = this.modes.get(chosen) || this.modes.get('html')!;
     return mode.highlight(src, colors);
+  }
+
+  /**
+   * For the editor's line-by-line highlighting of long documents: the language `highlight()` uses for `src`, or null
+   * when that is a mode registered from outside (which may need the whole document, so it always gets it).
+   */
+  lineSafeLanguage(src: string): string | null {
+    const chosen = this.normalizeLanguageId(this.currentLanguage || this.detectLanguage(src) || 'html');
+    const mode = this.modes.get(chosen) || this.modes.get('html');
+    return mode && this.builtInModes.has(mode) ? chosen : null;
+  }
+
+  /** Highlights a few lines on their own, in the given language (from `lineSafeLanguage` of the whole document). */
+  highlightFragment(fragment: string, language: string): string {
+    return this.highlight(fragment, language);
+  }
+
+  /** Changes when the colours would: a new theme or language means highlighting everything again. */
+  highlightContextKey(): string {
+    return `${this.currentTheme}|${this.currentLanguage ?? ''}`;
   }
 
   // Backwards-compatible method

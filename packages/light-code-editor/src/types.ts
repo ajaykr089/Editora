@@ -363,6 +363,8 @@ export interface View {
   setHTML(html: string): void;
   setHighlightHTML(html: string): void;
   syncTrailingNewlineMarkerForText(text: string): void;
+  /** Re-reads which lines folds hide, and places line numbers and line decorations by the lines as shown. */
+  refreshFoldedLayout?(): void;
   setLineWrapping(enabled: boolean): void;
   setLineNumbersVisible(visible: boolean): void;
   setTabSize(tabSize: number): void;

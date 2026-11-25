@@ -40,6 +40,9 @@ export class ActiveLineAndIndentGuidesExtension implements EditorExtension {
   private refreshIndentGuidesPending = false;
   private lastRenderedActiveLine: number | null = null;
   private lastIndentGuidesSignature = '';
+  /** The leading whitespace of every line at the last render: typing that leaves it alone needs no new guides. */
+  private lastLeadingWhitespace: string[] | null = null;
+  private lastGuideStep = 0;
 
   constructor(config: ActiveLineAndIndentGuidesExtensionConfig = {}) {
     this.config = {
@@ -148,6 +151,7 @@ export class ActiveLineAndIndentGuidesExtension implements EditorExtension {
       if (this.lastIndentGuidesSignature) {
         editor.clearDecorations(this.indentLayerName);
         this.lastIndentGuidesSignature = '';
+        this.lastLeadingWhitespace = null;
       }
       return;
     }
@@ -158,11 +162,31 @@ export class ActiveLineAndIndentGuidesExtension implements EditorExtension {
       if (this.lastIndentGuidesSignature !== 'disabled:max-lines') {
         editor.clearDecorations(this.indentLayerName);
         this.lastIndentGuidesSignature = 'disabled:max-lines';
+        this.lastLeadingWhitespace = null;
       }
       return;
     }
 
     const guideStepColumns = this.resolveGuideStepColumns();
+    // Guides depend only on each line's indentation. Most keystrokes change none, and building every guide again
+    // (and comparing it with the last one) cost a few milliseconds per keystroke in a long file.
+    const leading = lines.map((line) => {
+      let end = 0;
+      while (end < line.length && (line.charCodeAt(end) === 32 || line.charCodeAt(end) === 9)) end += 1;
+      return end === 0 ? '' : line.slice(0, end);
+    });
+    const previous = this.lastLeadingWhitespace;
+    if (
+      previous &&
+      guideStepColumns === this.lastGuideStep &&
+      previous.length === leading.length &&
+      previous.every((value, index) => value === leading[index])
+    ) {
+      return;
+    }
+    this.lastLeadingWhitespace = leading;
+    this.lastGuideStep = guideStepColumns;
+
     const decorations: EditorDecoration[] = [];
     const signatureParts: string[] = [];
 

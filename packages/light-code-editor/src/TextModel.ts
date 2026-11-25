@@ -8,6 +8,10 @@ import { Position, Range, TextChange } from './types';
 export class TextModel {
   private _lines: string[] = [];
   private _version = 0;
+  // The joined text and where each line starts, kept so that reading the text or turning a position into an offset
+  // does not walk the whole document (both happen several times per keystroke).
+  private _text = '';
+  private _lineStarts: number[] | null = null;
 
   constructor(text: string = '') {
     this.setText(text);
@@ -30,13 +34,29 @@ export class TextModel {
 
   // Get total text content
   getText(): string {
-    return this._lines.join('\n');
+    return this._text;
   }
 
   // Set entire text content
   setText(text: string): void {
+    this._text = text;
     this._lines = text.split('\n');
+    this._lineStarts = null;
     this._version++;
+  }
+
+  /** Where each line starts, as an offset into the text. */
+  getLineStarts(): readonly number[] {
+    if (!this._lineStarts) {
+      const starts = new Array<number>(this._lines.length);
+      let offset = 0;
+      for (let i = 0; i < this._lines.length; i++) {
+        starts[i] = offset;
+        offset += this._lines[i].length + 1;
+      }
+      this._lineStarts = starts;
+    }
+    return this._lineStarts;
   }
 
   // Get text in a range
@@ -88,29 +108,33 @@ export class TextModel {
 
   // Convert position to offset
   positionToOffset(position: Position): number {
-    let offset = 0;
-    for (let i = 0; i < position.line; i++) {
-      offset += this.getLine(i).length + 1; // +1 for newline
+    const starts = this.getLineStarts();
+    if (position.line >= starts.length) {
+      // Past the last line: as before, every line counts with its line break.
+      return this._text.length + 1 + (position.line - starts.length) + position.column;
     }
-    offset += position.column;
-    return offset;
+    return (position.line > 0 ? starts[position.line] : 0) + position.column;
   }
 
   // Convert offset to position
   offsetToPosition(offset: number): Position {
-    let remaining = offset;
-    for (let line = 0; line < this.getLineCount(); line++) {
-      const lineLength = this.getLine(line).length;
-      if (remaining <= lineLength) {
-        return { line, column: remaining };
-      }
-      remaining -= lineLength + 1; // +1 for newline
+    if (offset > this._text.length) {
+      // Past end of document
+      const last = this._lines.length - 1;
+      return { line: last, column: this._lines[last].length };
     }
-    // Past end of document
-    return {
-      line: this.getLineCount() - 1,
-      column: this.getLine(this.getLineCount() - 1).length
-    };
+    if (offset <= 0) {
+      return { line: 0, column: offset };
+    }
+    const starts = this.getLineStarts();
+    let low = 0;
+    let high = starts.length - 1;
+    while (low < high) {
+      const mid = (low + high + 1) >> 1;
+      if (starts[mid] <= offset) low = mid;
+      else high = mid - 1;
+    }
+    return { line: low, column: offset - starts[low] };
   }
 
   // Validate position
@@ -138,6 +162,7 @@ export class TextModel {
   clone(): TextModel {
     const clone = new TextModel();
     clone._lines = [...this._lines];
+    clone._text = this._text;
     clone._version = this._version;
     return clone;
   }

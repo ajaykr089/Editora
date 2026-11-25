@@ -34,6 +34,16 @@ interface HistorySnapshot {
 
 let EDITOR_INSTANCE_COUNTER = 0;
 
+/**
+ * From this many characters on, a keystroke re-highlights only the lines it changed, and the whole document once the
+ * typing pauses. Below it a full highlight takes a couple of milliseconds, so it is done every time.
+ */
+const LINE_HIGHLIGHT_MIN_LENGTH = 20000;
+/** An edit that changes more lines than this (a paste, a replace-all) is highlighted in full straight away. */
+const LINE_HIGHLIGHT_MAX_LINES = 200;
+/** How long typing pauses before the whole document is highlighted again. */
+const FULL_HIGHLIGHT_DELAY_MS = 250;
+
 /** How many undo steps are kept. */
 const MAX_UNDO_STEPS = 200;
 /** Typing, or deleting, stays one undo step until the user pauses this long... */
@@ -58,6 +68,13 @@ export class EditorCore implements EditorAPI {
   private redoStack: HistorySnapshot[] = [];
   private suppressHistory = false;
   private highlightTimeout: ReturnType<typeof setTimeout> | null = null;
+  // What the highlight overlay shows: the text and lines it was made for, the language and colours of the last full
+  // highlight, and the pending full highlight that follows line-by-line updates.
+  private highlightedText: string | null = null;
+  private highlightedLines: string[] | null = null;
+  private highlightLanguage: string | null = null;
+  private highlightContext = '';
+  private fullHighlightTimer: ReturnType<typeof setTimeout> | null = null;
   // When true, callers are about to set the cursor programmatically after a render
   // and we should not auto-restore the caret from a saved offset (avoids clobbering).
   private expectingProgrammaticCursor: boolean = false;
@@ -81,6 +98,9 @@ export class EditorCore implements EditorAPI {
   private readonly decorationLayers = new Map<string, EditorDecoration[]>();
   private readonly inlineDecorationHighlightNames = new Set<string>();
   private decorationRenderRaf: number | null = null;
+  /** Bumped whenever a decoration layer changes; line and gutter decorations are re-applied only then. */
+  private decorationLayersVersion = 0;
+  private appliedLineDecorationsKey = '';
   private decorationMutationObserver: MutationObserver | null = null;
   private hasCustomDecorationHighlightSupport = false;
   private lastProgrammaticClipboardInsertAt = 0;
@@ -656,6 +676,7 @@ export class EditorCore implements EditorAPI {
       throw new Error('Decoration layer name must not be empty');
     }
 
+    this.decorationLayersVersion += 1;
     if (!Array.isArray(decorations) || decorations.length === 0) {
       this.decorationLayers.delete(normalizedLayer);
       this.scheduleDecorationRender();
@@ -670,6 +691,7 @@ export class EditorCore implements EditorAPI {
   }
 
   clearDecorations(layer?: string): void {
+    this.decorationLayersVersion += 1;
     if (typeof layer === 'string') {
       this.decorationLayers.delete(layer.trim());
     } else {
@@ -926,21 +948,29 @@ export class EditorCore implements EditorAPI {
           typeof this.view.setHighlightHTML === 'function';
 
         if (supportsOverlayHighlight) {
-          const contentElement = this.view.getContentElement();
-          const hasFoldPlaceholders = !!contentElement.querySelector(
-            '[data-lce-fold-placeholder]',
-          );
-          if (hasFoldPlaceholders || contentElement.textContent !== text) {
-            // Compare against the live editable DOM, not serialized source text.
-            // Fold placeholders serialize back to the full source, so relying on
-            // `view.getText()` here can incorrectly skip the DOM reset on unfold.
-            this.view.setText(text);
+          // Writes only the lines that differ from what the editable DOM holds (and replaces fold placeholders,
+          // which are never what a line holds), so a keystroke re-lays out one line, not the document.
+          this.view.setSourceText(text);
+          if (this.highlightChangedLines(sh, text)) {
+            this.view.syncTrailingNewlineMarkerForText(text);
+            this.scheduleDecorationRender();
+            return;
           }
+          this.cancelFullHighlight();
           const html =
             typeof sh.highlight === 'function'
               ? sh.highlight(text)
               : sh.highlightHTML(text);
-          this.view.setHighlightHTML(html);
+          let lineCount = 1;
+          for (let at = text.indexOf('\n'); at !== -1; at = text.indexOf('\n', at + 1)) lineCount += 1;
+          this.view.setHighlightHTML(html, lineCount);
+          this.highlightedText = text;
+          this.highlightedLines = null;
+          this.highlightLanguage =
+            typeof sh.lineSafeLanguage === 'function' && typeof sh.highlight === 'function'
+              ? sh.lineSafeLanguage(text)
+              : null;
+          this.highlightContext = typeof sh.highlightContextKey === 'function' ? sh.highlightContextKey() : '';
           this.view.syncTrailingNewlineMarkerForText(text);
           this.scheduleDecorationRender();
           return;
@@ -1033,6 +1063,87 @@ export class EditorCore implements EditorAPI {
     this.scheduleDecorationRender();
   }
 
+  /**
+   * In a long document, highlights only the lines an edit changed and leaves the rest of the overlay alone; the whole
+   * document follows once the typing pauses, which corrects anything a few lines cannot know on their own (a "/*"
+   * just typed that turns the lines below into a comment). Returns false when the full highlight is needed now.
+   */
+  private highlightChangedLines(sh: any, text: string): boolean {
+    if (
+      text.length < LINE_HIGHLIGHT_MIN_LENGTH ||
+      this.highlightedText === null ||
+      text === this.highlightedText ||
+      this.highlightLanguage === null ||
+      typeof sh.highlightFragment !== 'function' ||
+      typeof sh.highlightContextKey !== 'function' ||
+      sh.highlightContextKey() !== this.highlightContext
+    ) {
+      return false;
+    }
+
+    const previous = this.highlightedLines ?? this.highlightedText.split('\n');
+    if (this.view.getHighlightLineCount() !== previous.length) return false;
+    const lines = text.split('\n');
+    const shared = Math.min(previous.length, lines.length);
+    let head = 0;
+    while (head < shared && previous[head] === lines[head]) head += 1;
+    let tail = 0;
+    while (tail < shared - head && previous[previous.length - 1 - tail] === lines[lines.length - 1 - tail]) tail += 1;
+    const changed = lines.slice(head, lines.length - tail);
+    if (changed.length > LINE_HIGHLIGHT_MAX_LINES || previous.length - tail - head > LINE_HIGHLIGHT_MAX_LINES) {
+      return false;
+    }
+
+    const carried = this.view.getHighlightLineStartTags(head);
+    let html: string[];
+    let startTags: string[];
+    if (carried) {
+      // Inside a token that spans lines (a block comment, a template string): the lines keep its colour.
+      const closers = (carried.match(/<([A-Za-z][\w-]*)/g) ?? [])
+        .map((tag) => `</${tag.slice(1)}>`)
+        .reverse()
+        .join('');
+      html = changed.map((line) => `${carried}${EditorCore.escapeHtml(line)}${closers}`);
+      startTags = changed.map(() => carried);
+    } else {
+      ({ lines: html, startTags } = View.splitHtmlLines(sh.highlightFragment(changed.join('\n'), this.highlightLanguage)));
+      if (html.length !== changed.length) return false;
+    }
+
+    this.view.replaceHighlightLines(head, previous.length - tail - head, html, startTags);
+    this.highlightedText = text;
+    this.highlightedLines = lines;
+    this.scheduleFullHighlight();
+    return true;
+  }
+
+  private static escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private scheduleFullHighlight(): void {
+    this.cancelFullHighlight();
+    this.fullHighlightTimer = setTimeout(() => {
+      this.fullHighlightTimer = null;
+      if (this.isDestroyed) return;
+      // Forget what is shown so the next render highlights everything, then render the current text.
+      this.highlightedText = null;
+      this.renderTextWithHighlight(this.textModel.getText(), false);
+    }, FULL_HIGHLIGHT_DELAY_MS);
+  }
+
+  private cancelFullHighlight(): void {
+    if (this.fullHighlightTimer !== null) {
+      clearTimeout(this.fullHighlightTimer);
+      this.fullHighlightTimer = null;
+    }
+  }
+
   private hasCollapsedSelectionInEditor(): boolean {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) {
@@ -1120,6 +1231,7 @@ export class EditorCore implements EditorAPI {
       clearTimeout(this.highlightTimeout);
       this.highlightTimeout = null;
     }
+    this.cancelFullHighlight();
     this.pendingInputSnapshot = undefined;
 
     if (this.documentSelectionChangeHandler) {
@@ -1482,6 +1594,12 @@ export class EditorCore implements EditorAPI {
   }
 
   private clampPositionToText(position: Position, text: string): Position {
+    // Usually the text is the document itself: then its lines are at hand instead of splitting it again.
+    if (text === this.textModel.getText()) {
+      const lineCount = this.textModel.getLineCount();
+      const safeLine = Math.max(0, Math.min(position.line, lineCount - 1));
+      return { line: safeLine, column: Math.max(0, Math.min(position.column, this.textModel.getLine(safeLine).length)) };
+    }
     const lines = text.split('\n');
     const safeLine = Math.max(0, Math.min(position.line, lines.length - 1));
     const safeColumn = Math.max(
@@ -1495,8 +1613,11 @@ export class EditorCore implements EditorAPI {
   }
 
   private positionToOffsetInText(position: Position, text: string): number {
-    const lines = text.split('\n');
     const safe = this.clampPositionToText(position, text);
+    if (text === this.textModel.getText()) {
+      return this.textModel.positionToOffset(safe);
+    }
+    const lines = text.split('\n');
     let offset = 0;
     for (let i = 0; i < safe.line; i++) {
       offset += (lines[i]?.length ?? 0) + 1;
@@ -1881,8 +2002,16 @@ export class EditorCore implements EditorAPI {
     if (this.decorationLayers.size === 0) {
       this.view.clearDecorations();
       this.clearInlineDecorationHighlights();
+      this.appliedLineDecorationsKey = '';
       return;
     }
+
+    // Line and gutter decorations depend on the layers and the number of lines, not on the DOM, so typing (which
+    // calls this for the inline ones after every DOM change) does not rebuild them. It used to serialise every one of
+    // them, a thousand indent guides in a long file, on each keystroke, only to find nothing had changed.
+    const lineDecorationsKey = `${this.decorationLayersVersion}:${this.textModel.getLineCount()}`;
+    const refreshLineDecorations = lineDecorationsKey !== this.appliedLineDecorationsKey;
+    this.appliedLineDecorationsKey = lineDecorationsKey;
 
     const lineDecorations: LineDecoration[] = [];
     const gutterDecorations: GutterDecoration[] = [];
@@ -1891,6 +2020,9 @@ export class EditorCore implements EditorAPI {
     for (const [layer, decorations] of this.decorationLayers.entries()) {
       for (const decoration of decorations) {
         const layerDecorationId = `${layer}::${decoration.id}`;
+        if (decoration.type !== 'inline' && !refreshLineDecorations) {
+          continue;
+        }
         if (decoration.type === 'line') {
           lineDecorations.push({
             ...decoration,
@@ -1914,10 +2046,12 @@ export class EditorCore implements EditorAPI {
       }
     }
 
-    this.view.setDecorations(
-      this.normalizeLineDecorations(lineDecorations),
-      this.normalizeGutterDecorations(gutterDecorations),
-    );
+    if (refreshLineDecorations) {
+      this.view.setDecorations(
+        this.normalizeLineDecorations(lineDecorations),
+        this.normalizeGutterDecorations(gutterDecorations),
+      );
+    }
     this.renderInlineDecorations(inlineDecorations);
   }
 

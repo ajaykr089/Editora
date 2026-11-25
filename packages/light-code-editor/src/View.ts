@@ -33,8 +33,8 @@ export class View {
   private lastLineCount = 0;
   private lastHighlightHTML = '';
   private highlightOverlayActive = false;
-  private lastLineDecorationSnapshot = '';
-  private lastGutterDecorationSnapshot = '';
+  private readonly lineDecorationElements = new Map<string, { element: HTMLElement; key: string }>();
+  private readonly gutterDecorationElements = new Map<string, { element: HTMLElement; key: string }>();
   private lineDecorations: LineDecoration[] = [];
   private gutterDecorations: GutterDecoration[] = [];
   // With line wrapping a line is as many rows tall as it wraps to, so the line numbers (and anything placed by
@@ -51,6 +51,27 @@ export class View {
   private measurer: HTMLElement | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private destroyed = false;
+  // The editable text is one block per line (<div data-lce-line>). An edit then lays out only the lines it touched;
+  // as one text node, every keystroke re-laid out the whole document. A folded document is still shown flat (text
+  // nodes and fold placeholders), and every method below reads both shapes.
+  private readonly lineAttr = 'data-lce-line';
+  /** The lines the content holds, as last rendered here; trusted only while `domDirty` is false. */
+  private renderedLines: string[] | null = null;
+  private renderedText: string | null = null;
+  private renderedLineStarts: number[] | null = null;
+  /** The HTML of each line of the highlight overlay, as rendered, and the elements left open from the line before. */
+  private overlayLines: string[] = [];
+  private overlayStartTags: string[] = [];
+  /** Sees edits the browser makes itself (IME composition, drag and drop): after one, the DOM is read again. */
+  private contentObserver: MutationObserver | null = null;
+  private domDirty = true;
+  /**
+   * While something is folded: for each line of the document, the line it is shown on, or -1 inside a fold. Line
+   * numbers, line decorations and scrolling to a line go through it; they used to count shown lines as document
+   * lines, so after a fold the gutter renumbered the lines below it and decorations sat lines too low.
+   */
+  private foldedDisplayLines: number[] | null = null;
+  private gutterRelabelled = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -226,6 +247,13 @@ export class View {
     // the gutter and content scroll together naturally. No transform
     // syncing or RAF loop is necessary.
     this.updateLineNumbers(1);
+
+    if (typeof MutationObserver !== 'undefined') {
+      this.contentObserver = new MutationObserver(() => {
+        this.domDirty = true;
+      });
+      this.contentObserver.observe(this.contentElement, { childList: true, subtree: true, characterData: true });
+    }
   }
 
   // Update line numbers
@@ -289,7 +317,7 @@ export class View {
     const sources = (this.contentElement as HTMLElement & { __lceFoldPlaceholderSources?: Map<string, string> })
       .__lceFoldPlaceholderSources;
     const rows = this.lineNumbersContentElement.children;
-    const lines = (this.contentElement.textContent || '').split('\n');
+    const lines = this.getText().split('\n');
     // Folded blocks make the text on screen differ from the document, so lines cannot be matched to numbers; and
     // a hidden editor has no width to wrap to (it is measured when it is shown: see the resize observer).
     const width = this.contentElement.clientWidth;
@@ -405,8 +433,6 @@ export class View {
     }
 
     // Decorations are placed by line, so they move with the lines.
-    this.lastLineDecorationSnapshot = '';
-    this.lastGutterDecorationSnapshot = '';
     this.renderLineDecorations(this.lineDecorations);
     this.renderGutterDecorations(this.gutterDecorations);
   }
@@ -443,13 +469,15 @@ export class View {
   }
 
   clearDecorations(): void {
-    if (this.lastLineDecorationSnapshot) {
+    this.lineDecorations = [];
+    this.gutterDecorations = [];
+    if (this.lineDecorationElements.size > 0) {
       this.lineDecorationsElement.innerHTML = '';
-      this.lastLineDecorationSnapshot = '';
+      this.lineDecorationElements.clear();
     }
-    if (this.lastGutterDecorationSnapshot) {
+    if (this.gutterDecorationElements.size > 0) {
       this.gutterDecorationsElement.innerHTML = '';
-      this.lastGutterDecorationSnapshot = '';
+      this.gutterDecorationElements.clear();
     }
   }
 
@@ -465,19 +493,87 @@ export class View {
 
   // Get text content
   getText(): string {
+    const lines = this.cleanRenderedLines();
+    if (lines) {
+      if (this.renderedText === null) this.renderedText = lines.join('\n');
+      return this.renderedText;
+    }
     return this.serializeContentToSource();
   }
 
-  // Set text content
+  // Set text content (and drop the highlight overlay)
   setText(text: string): void {
     this.clearHighlightOverlay();
+    this.setSourceText(text);
+  }
+
+  /**
+   * Shows `text` in the editable surface, one block per line, changing only the lines that differ from what is
+   * there. Lines that already read right are not touched, so an IME composition in progress is left alone.
+   */
+  setSourceText(text: string): void {
     this.setFoldPlaceholderSources(new Map());
-    if (this.contentElement.textContent !== text) {
-      this.contentElement.textContent = text;
+    const lines = text.split('\n');
+    this.renderContentLines(lines, text);
+    this.updateLineNumbers(lines.length);
+    if (this.foldedDisplayLines || this.gutterRelabelled) this.refreshFoldedLayout();
+  }
+
+  /**
+   * Re-reads which lines are hidden by folds (from the fold placeholders in the editable DOM) and places the line
+   * numbers and line decorations by the lines as shown. Folding calls it after it changes the DOM.
+   */
+  refreshFoldedLayout(): void {
+    this.foldedDisplayLines = this.computeFoldedDisplayLines();
+    this.labelGutterRows();
+    this.renderLineDecorations(this.lineDecorations);
+    this.renderGutterDecorations(this.gutterDecorations);
+  }
+
+  /** The shown line a document line is on, or -1 when it is folded away. */
+  private displayLineOf(line: number): number {
+    if (!this.foldedDisplayLines) return line;
+    return this.foldedDisplayLines[line] ?? -1;
+  }
+
+  private computeFoldedDisplayLines(): number[] | null {
+    if (!this.contentElement.querySelector(`[${this.foldPlaceholderAttr}]`)) return null;
+    const map: number[] = [0];
+    let shown = 0;
+    const countBreaks = (text: string, hidden: boolean) => {
+      for (let at = text.indexOf('\n'); at !== -1; at = text.indexOf('\n', at + 1)) {
+        if (hidden) {
+          map.push(-1);
+        } else {
+          shown += 1;
+          map.push(shown);
+        }
+      }
+    };
+    this.contentElement.childNodes.forEach((child) => {
+      if (child instanceof HTMLElement && child.hasAttribute(this.foldPlaceholderAttr)) {
+        countBreaks(this.getFoldPlaceholderSource(child), true);
+      } else {
+        countBreaks(this.nodeSource(child), false);
+      }
+    });
+    return map;
+  }
+
+  /** Numbers the gutter rows with the document lines they show (1, 2, 3, then 9 after a fold of lines 4-8). */
+  private labelGutterRows(): void {
+    const rows = this.lineNumbersContentElement.children;
+    const labels: number[] = [];
+    if (this.foldedDisplayLines) {
+      this.foldedDisplayLines.forEach((shown, line) => {
+        if (shown >= 0 && labels[shown] === undefined) labels[shown] = line + 1;
+      });
     }
-    this.syncTrailingNewlineMarker(text.endsWith('\n'));
-    const lines = text.split('\n').length;
-    this.updateLineNumbers(lines);
+    for (let i = 0; i < rows.length; i++) {
+      const label = String(labels[i] ?? i + 1);
+      if (rows[i].textContent !== label) rows[i].textContent = label;
+    }
+    this.gutterRelabelled = !!this.foldedDisplayLines;
   }
 
   // Set inner HTML (used for syntax highlighted content)
@@ -511,13 +607,24 @@ export class View {
     this.syncTrailingNewlineMarker(hasTrailingNewline);
 
     const text = this.contentElement.textContent || '';
-    const lines = text.split('\n').length;
-    this.updateLineNumbers(lines);
+    const lines = text.split('\n');
+    this.updateLineNumbers(lines.length);
   }
 
-  setHighlightHTML(html: string): void {
-    if (html !== this.lastHighlightHTML) {
-      this.highlightElement.innerHTML = html;
+  setHighlightHTML(html: string, lineCount?: number): void {
+    if (html !== this.lastHighlightHTML || (lineCount !== undefined && lineCount !== this.overlayLines.length)) {
+      // One block per line, like the editable text, and only the lines whose HTML changed are replaced. A highlighter
+      // may drop a trailing line break: the overlay still gets a line for every line of the text.
+      const { lines, startTags } = View.splitHtmlLines(html);
+      while (lineCount !== undefined && lines.length < lineCount) {
+        lines.push('');
+        startTags.push('');
+      }
+      this.patchBlocks(this.highlightElement, this.overlayLines, lines, (block, line) => {
+        block.innerHTML = line || '<br>';
+      });
+      this.overlayLines = lines;
+      this.overlayStartTags = startTags;
       this.lastHighlightHTML = html;
     }
     this.highlightElement.style.visibility = 'visible';
@@ -525,9 +632,8 @@ export class View {
     this.contentElement.style.color = 'transparent';
     (this.contentElement.style as CSSStyleDeclaration & { WebkitTextFillColor?: string }).WebkitTextFillColor = 'transparent';
 
-    const text = this.contentElement.textContent || '';
-    const lines = text.split('\n').length;
-    this.updateLineNumbers(lines);
+    // The gutter counts the lines of the text (set with it), not of the highlighted HTML.
+    this.updateLineNumbers(Math.max(1, this.renderedLines?.length ?? this.overlayLines.length));
   }
 
   setLineWrapping(enabled: boolean): void {
@@ -888,8 +994,10 @@ export class View {
 
   // Scroll to position
   scrollToPosition(position: Position): void {
-    const safeLine = Math.max(0, Math.floor(position.line) || 0);
-    const targetTop = this.lineTop(safeLine);
+    let safeLine = Math.max(0, Math.floor(position.line) || 0);
+    // A line inside a fold is shown as the fold's first line.
+    while (safeLine > 0 && this.displayLineOf(safeLine) < 0) safeLine -= 1;
+    const targetTop = this.lineTop(this.displayLineOf(safeLine));
     const centeredTop = targetTop - (this.editorContainer.clientHeight / 2) + (this.lineHeight / 2);
     this.editorContainer.scrollTop = Math.max(0, centeredTop);
   }
@@ -915,7 +1023,8 @@ export class View {
       .querySelectorAll(`[${this.trailingNewlineMarkerAttr}]`)
       .forEach((node) => node.remove());
 
-    if (!shouldShow) return;
+    // With a block per line the last, empty line is a block of its own: the marker is only for the flat (folded) text.
+    if (!shouldShow || this.isLineElement(this.contentElement.firstChild)) return;
 
     const marker = document.createElement('span');
     marker.setAttribute(this.trailingNewlineMarkerAttr, 'true');
@@ -959,6 +1068,8 @@ export class View {
   // Destroy the view
   destroy(): void {
     this.destroyed = true;
+    this.contentObserver?.disconnect();
+    this.contentObserver = null;
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.clearDecorations();
@@ -973,18 +1084,35 @@ export class View {
 
   private resolveOffsetToDomPoint(offset: number): { node: Node; offset: number } | null {
     const boundedOffset = Math.max(0, offset);
-    let currentOffset = 0;
-    const children = Array.from(this.contentElement.childNodes);
+    const children = this.contentElement.childNodes;
 
-    for (let i = 0; i < children.length; i++) {
+    const lines = this.cleanRenderedLines();
+    if (lines) {
+      const starts = this.getRenderedLineStarts();
+      const index = View.lineIndexAt(starts, boundedOffset);
+      return this.pointInLineElement(children[index], Math.min(boundedOffset - starts[index], lines[index].length));
+    }
+
+    const parts = this.computeContentParts();
+    if (parts.length === 0) {
+      return { node: this.contentElement, offset: children.length };
+    }
+    const part = parts.find((candidate) => boundedOffset <= candidate.start + candidate.length) ?? parts[parts.length - 1];
+    const target = Math.max(part.start, Math.min(boundedOffset, part.start + part.length));
+    if (part.kind === 'block') {
+      return this.pointInLineElement(children[part.first], target - part.start);
+    }
+
+    let currentOffset = part.start;
+    for (let i = part.first; i <= part.last; i++) {
       const child = children[i];
 
       if (child instanceof Text) {
         const text = child.textContent || '';
         const visibleToDom = this.buildVisibleToDomMap(text);
         const visibleLen = Math.max(0, visibleToDom.length - 1);
-        if (currentOffset + visibleLen >= boundedOffset) {
-          const localVisibleOffset = Math.max(0, boundedOffset - currentOffset);
+        if (currentOffset + visibleLen >= target) {
+          const localVisibleOffset = Math.max(0, target - currentOffset);
           const domOffset = visibleToDom[localVisibleOffset] ?? text.length;
           return { node: child, offset: domOffset };
         }
@@ -1003,20 +1131,23 @@ export class View {
       if (child.hasAttribute(this.foldPlaceholderAttr)) {
         const hiddenText = this.getFoldPlaceholderSource(child);
         const hiddenLength = hiddenText.length;
-        if (currentOffset + hiddenLength >= boundedOffset) {
-          const localOffset = boundedOffset - currentOffset;
+        if (currentOffset + hiddenLength >= target) {
+          const localOffset = target - currentOffset;
           return {
             node: this.contentElement,
             offset: localOffset <= hiddenLength / 2 ? i : i + 1,
           };
         }
         currentOffset += hiddenLength;
+        continue;
       }
+
+      currentOffset += this.getSourceLength(child);
     }
 
     return {
       node: this.contentElement,
-      offset: this.contentElement.childNodes.length,
+      offset: part === parts[parts.length - 1] ? children.length : part.last + 1,
     };
   }
 
@@ -1162,91 +1293,112 @@ export class View {
     this.highlightElement.innerHTML = '';
     this.highlightElement.style.visibility = 'hidden';
     this.lastHighlightHTML = '';
+    this.overlayLines = [];
+    this.overlayStartTags = [];
     this.highlightOverlayActive = false;
     this.contentElement.style.color = 'inherit';
     (this.contentElement.style as CSSStyleDeclaration & { WebkitTextFillColor?: string }).WebkitTextFillColor = 'currentcolor';
   }
 
   private serializeContentToSource(): string {
-    let output = '';
-    const children = Array.from(this.contentElement.childNodes);
+    const children = this.contentElement.childNodes;
+    return this.computeContentParts()
+      .map((part) => {
+        let output = '';
+        for (let i = part.first; i <= part.last; i++) {
+          output += this.nodeSource(children[i]);
+        }
+        return output;
+      })
+      .join('\n');
+  }
 
-    for (const child of children) {
-      if (child instanceof Text) {
-        output += this.stripVirtualMarkers(child.textContent || '');
-        continue;
-      }
-
-      if (!(child instanceof HTMLElement)) {
-        continue;
-      }
-
-      if (child.hasAttribute(this.trailingNewlineMarkerAttr)) {
-        continue;
-      }
-
-      if (child.hasAttribute(this.foldPlaceholderAttr)) {
-        output += this.getFoldPlaceholderSource(child);
-        continue;
-      }
-
-      output += this.stripVirtualMarkers(child.textContent || '');
+  /** The source text a node stands for: its text without the virtual markers, or the code under a fold. */
+  private nodeSource(node: Node): string {
+    if (node instanceof Text) {
+      return this.stripVirtualMarkers(node.textContent || '');
     }
-
+    if (!(node instanceof HTMLElement) || node.hasAttribute(this.trailingNewlineMarkerAttr)) {
+      return '';
+    }
+    if (node.hasAttribute(this.foldPlaceholderAttr)) {
+      return this.getFoldPlaceholderSource(node);
+    }
+    let output = '';
+    node.childNodes.forEach((child) => {
+      output += this.nodeSource(child);
+    });
     return output;
   }
 
   private sourceOffsetFromBoundary(container: Node, offset: number): number {
-    let total = 0;
-    const children = Array.from(this.contentElement.childNodes);
+    const children = this.contentElement.childNodes;
+
+    const lines = this.cleanRenderedLines();
+    if (lines) {
+      const starts = this.getRenderedLineStarts();
+      if (container === this.contentElement) {
+        return offset >= children.length ? this.getText().length : starts[Math.max(0, offset)];
+      }
+      const top = this.topLevelChildOf(container);
+      const index = top ? Array.prototype.indexOf.call(children, top) : -1;
+      if (!top || index < 0 || index >= lines.length) return 0;
+      return starts[index] + Math.min(this.sourceOffsetWithinNode(top, container, offset), lines[index].length);
+    }
+
+    const parts = this.computeContentParts();
+    const last = parts[parts.length - 1];
+    const textLength = last ? last.start + last.length : 0;
 
     if (container === this.contentElement) {
-      for (let i = 0; i < Math.min(offset, children.length); i++) {
-        total += this.getSourceLength(children[i]);
+      if (offset >= children.length) return textLength;
+      for (const part of parts) {
+        if (offset > part.last) continue;
+        if (offset <= part.first) return part.start;
+        let total = part.start;
+        for (let i = part.first; i < offset; i++) total += this.getSourceLength(children[i]);
+        return total;
+      }
+      return textLength;
+    }
+
+    const top = this.topLevelChildOf(container);
+    const index = top ? Array.prototype.indexOf.call(children, top) : -1;
+    const part = parts.find((candidate) => index >= candidate.first && index <= candidate.last);
+    if (!top || !part) {
+      const next = parts.find((candidate) => candidate.first > index);
+      return next ? next.start : textLength;
+    }
+    if (part.kind === 'block') {
+      return part.start + Math.min(this.sourceOffsetWithinNode(top, container, offset), part.length);
+    }
+
+    let total = part.start;
+    for (let i = part.first; i < index; i++) total += this.getSourceLength(children[i]);
+    const child = children[index];
+
+    if (child === container) {
+      if (child instanceof Text) {
+        return total + this.stripVirtualMarkers((child.textContent || '').slice(0, offset)).length;
+      }
+
+      if (child instanceof HTMLElement) {
+        if (child.hasAttribute(this.foldPlaceholderAttr)) {
+          return total + this.getFoldPlaceholderBoundaryOffset(child, child, offset);
+        }
+
+        const innerChildren = Array.from(child.childNodes);
+        for (let j = 0; j < Math.min(offset, innerChildren.length); j++) {
+          total += this.getSourceLength(innerChildren[j]);
+        }
       }
       return total;
     }
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
-
-      if (child === container) {
-        if (child instanceof Text) {
-          return total + this.stripVirtualMarkers((child.textContent || '').slice(0, offset)).length;
-        }
-
-        if (child instanceof HTMLElement) {
-          if (child.hasAttribute(this.foldPlaceholderAttr)) {
-            return total + this.getFoldPlaceholderBoundaryOffset(
-              child,
-              child,
-              offset,
-            );
-          }
-
-          const innerChildren = Array.from(child.childNodes);
-          for (let j = 0; j < Math.min(offset, innerChildren.length); j++) {
-            total += this.getSourceLength(innerChildren[j]);
-          }
-          return total;
-        }
-      }
-
-      if (child instanceof HTMLElement && child.contains(container)) {
-        if (child.hasAttribute(this.foldPlaceholderAttr)) {
-          return total + this.getFoldPlaceholderBoundaryOffset(
-            child,
-            container,
-            offset,
-          );
-        }
-        return total + this.sourceOffsetWithinNode(child, container, offset);
-      }
-
-      total += this.getSourceLength(child);
+    if (child instanceof HTMLElement && child.hasAttribute(this.foldPlaceholderAttr)) {
+      return total + this.getFoldPlaceholderBoundaryOffset(child, container, offset);
     }
-
-    return total;
+    return total + this.sourceOffsetWithinNode(child, container, offset);
   }
 
   private sourceOffsetWithinNode(root: Node, container: Node, offset: number): number {
@@ -1326,98 +1478,410 @@ export class View {
     return total;
   }
 
+  private isLineElement(node: Node | null): node is HTMLElement {
+    return node instanceof HTMLElement && node.hasAttribute(this.lineAttr);
+  }
+
+  /** Whether the editable DOM may have changed since this view last rendered it (an edit the browser made). */
+  private syncDomDirty(): boolean {
+    if (this.contentObserver && this.contentObserver.takeRecords().length > 0) {
+      this.domDirty = true;
+    }
+    return this.domDirty;
+  }
+
+  /** The rendered lines, when the DOM is still exactly what this view put there. */
+  private cleanRenderedLines(): string[] | null {
+    if (!this.renderedLines || this.syncDomDirty()) return null;
+    return this.renderedLines;
+  }
+
+  private getRenderedLineStarts(): number[] {
+    if (!this.renderedLineStarts) {
+      const starts: number[] = [];
+      let offset = 0;
+      for (const line of this.renderedLines ?? ['']) {
+        starts.push(offset);
+        offset += line.length + 1;
+      }
+      this.renderedLineStarts = starts;
+    }
+    return this.renderedLineStarts;
+  }
+
+  /** The line holding `offset`: the last line that starts at or before it. */
+  private static lineIndexAt(starts: number[], offset: number): number {
+    let low = 0;
+    let high = starts.length - 1;
+    while (low < high) {
+      const mid = (low + high + 1) >> 1;
+      if (starts[mid] <= offset) low = mid;
+      else high = mid - 1;
+    }
+    return low;
+  }
+
+  private topLevelChildOf(node: Node): Node | null {
+    let current: Node | null = node;
+    while (current && current.parentNode !== this.contentElement) {
+      current = current.parentNode;
+    }
+    return current;
+  }
+
+  /** A DOM point `local` characters into one line block. */
+  private pointInLineElement(line: Node, local: number): { node: Node; offset: number } {
+    const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+    let consumed = 0;
+    let lastText: Text | null = null;
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = node as Text;
+      const visibleToDom = this.buildVisibleToDomMap(text.data);
+      const visibleLength = visibleToDom.length - 1;
+      if (consumed + visibleLength >= local) {
+        return { node: text, offset: visibleToDom[Math.max(0, local - consumed)] ?? text.data.length };
+      }
+      consumed += visibleLength;
+      lastText = text;
+    }
+    return lastText ? { node: lastText, offset: lastText.data.length } : { node: line, offset: 0 };
+  }
+
+  /**
+   * The content as lines: each line block is a line, and a run of other nodes (the flat text of a folded document,
+   * or something the browser put between blocks) is one more. Nodes with no text do not start a line of their own.
+   */
+  private computeContentParts(): Array<{ kind: 'block' | 'inline'; first: number; last: number; start: number; length: number }> {
+    type Part = { kind: 'block' | 'inline'; first: number; last: number; start: number; length: number };
+    const parts: Part[] = [];
+    const children = this.contentElement.childNodes;
+    let inline: Part | null = null;
+    const nextStart = () => {
+      const previous = parts[parts.length - 1];
+      return previous ? previous.start + previous.length + 1 : 0;
+    };
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (this.isLineElement(child)) {
+        inline = null;
+        parts.push({ kind: 'block', first: i, last: i, start: nextStart(), length: this.getSourceLength(child) });
+        continue;
+      }
+      const length = this.getSourceLength(child);
+      if (!inline) {
+        if (length === 0 && parts.length > 0) continue;
+        inline = { kind: 'inline', first: i, last: i, start: nextStart(), length: 0 };
+        parts.push(inline);
+      }
+      inline.last = i;
+      inline.length += length;
+    }
+    return parts;
+  }
+
+  /** What a line block holds when it is exactly as rendered here: one text node, or a <br> for an empty line. */
+  private canonicalLineText(block: HTMLElement): string | null {
+    if (block.childNodes.length !== 1) return null;
+    const only = block.firstChild!;
+    if (only instanceof Text) return only.data && !this.virtualMarkerRegex.test(only.data) ? only.data : null;
+    return only instanceof HTMLBRElement ? '' : null;
+  }
+
+  private renderContentLines(lines: string[], text: string): void {
+    const content = this.contentElement;
+    let current: Array<string | null> | null = null;
+    if (this.renderedLines && !this.syncDomDirty()) {
+      current = this.renderedLines;
+    } else {
+      // Read what is there: the browser may have edited it, or folding may have replaced it with flat text.
+      const children = content.childNodes;
+      current = [];
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (!this.isLineElement(child)) {
+          current = null;
+          break;
+        }
+        current.push(this.canonicalLineText(child));
+      }
+    }
+
+    if (current && current.length > 0) {
+      this.patchBlocks(content, current, lines, (block, line) => this.fillLineElement(block, line));
+    } else {
+      const fragment = document.createDocumentFragment();
+      for (const line of lines) fragment.appendChild(this.createLineElement(line));
+      content.replaceChildren(fragment);
+    }
+
+    this.renderedLines = lines;
+    this.renderedText = text;
+    this.renderedLineStarts = null;
+    this.contentObserver?.takeRecords();
+    this.domDirty = !this.contentObserver;
+  }
+
+  private createLineElement(line: string): HTMLElement {
+    const block = document.createElement('div');
+    block.setAttribute(this.lineAttr, '');
+    this.fillLineElement(block, line);
+    return block;
+  }
+
+  private fillLineElement(block: HTMLElement, line: string): void {
+    if (line === '') {
+      if (!(block.childNodes.length === 1 && block.firstChild instanceof HTMLBRElement)) {
+        block.replaceChildren(document.createElement('br'));
+      }
+      return;
+    }
+    const only = block.childNodes.length === 1 ? block.firstChild : null;
+    if (only instanceof Text) {
+      if (only.data !== line) only.data = line;
+      return;
+    }
+    block.replaceChildren(document.createTextNode(line));
+  }
+
+  /**
+   * Makes the block children of `parent` hold `next` (one block per entry), given that they hold `previous` now (null
+   * for a block whose content is unknown). Only the blocks between the first and the last difference are written.
+   */
+  private patchBlocks(
+    parent: HTMLElement,
+    previous: ReadonlyArray<string | null>,
+    next: ReadonlyArray<string>,
+    fill: (block: HTMLElement, value: string) => void,
+  ): void {
+    const makeBlock = (value: string) => {
+      if (parent === this.contentElement) return this.createLineElement(value);
+      const block = document.createElement('div');
+      fill(block, value);
+      return block;
+    };
+    const children = parent.children;
+    if (children.length !== previous.length || parent.childNodes.length !== children.length) {
+      const fragment = document.createDocumentFragment();
+      for (const value of next) fragment.appendChild(makeBlock(value));
+      parent.replaceChildren(fragment);
+      return;
+    }
+
+    const shared = Math.min(previous.length, next.length);
+    let head = 0;
+    while (head < shared && previous[head] === next[head]) head += 1;
+    let tail = 0;
+    while (tail < shared - head && previous[previous.length - 1 - tail] === next[next.length - 1 - tail]) tail += 1;
+
+    const oldMiddle = previous.length - head - tail;
+    const newMiddle = next.length - head - tail;
+    const common = Math.min(oldMiddle, newMiddle);
+    for (let i = 0; i < common; i++) {
+      if (previous[head + i] !== next[head + i]) fill(children[head + i] as HTMLElement, next[head + i]);
+    }
+    if (newMiddle > oldMiddle) {
+      const fragment = document.createDocumentFragment();
+      for (let i = common; i < newMiddle; i++) fragment.appendChild(makeBlock(next[head + i]));
+      parent.insertBefore(fragment, children[head + common] ?? null);
+    } else {
+      for (let i = oldMiddle - 1; i >= common; i--) {
+        children[head + i].remove();
+      }
+    }
+  }
+
+  private static readonly voidTags = new Set(['br', 'hr', 'img', 'wbr', 'input', 'col', 'area', 'source', 'track', 'embed', 'meta', 'link', 'base', 'param']);
+
+  /**
+   * Splits highlighted HTML at its line breaks into one string per line. An element open across a break (a block
+   * comment, a template string) is closed at the end of the line and opened again on the next one; `startTags` has,
+   * for each line, the elements that were opened again (empty when the line starts outside any). `carried` is HTML
+   * of elements already open before the first line.
+   */
+  static splitHtmlLines(html: string, carried = ''): { lines: string[]; startTags: string[] } {
+    const lines: string[] = [];
+    const startTags: string[] = [];
+    const openTags: string[] = [];
+    const openNames: string[] = [];
+    const pattern = /<\/?([A-Za-z][\w-]*)[^>]*>|\n|[^<\n]+|</g;
+    const open = (token: string, name: string) => {
+      if (!View.voidTags.has(name) && !token.endsWith('/>')) {
+        openNames.push(name);
+        openTags.push(token);
+      }
+    };
+    for (let match = pattern.exec(carried); match; match = pattern.exec(carried)) {
+      if (match[1] && !match[0].startsWith('</')) open(match[0], match[1].toLowerCase());
+    }
+    let line = openTags.join('');
+    startTags.push(line);
+    for (let match = pattern.exec(html); match; match = pattern.exec(html)) {
+      const token = match[0];
+      const name = match[1]?.toLowerCase();
+      if (token === '\n') {
+        for (let i = openNames.length - 1; i >= 0; i--) line += `</${openNames[i]}>`;
+        lines.push(line);
+        line = openTags.join('');
+        startTags.push(line);
+      } else if (name && token.startsWith('</')) {
+        line += token;
+        const at = openNames.lastIndexOf(name);
+        if (at !== -1) {
+          openNames.splice(at, 1);
+          openTags.splice(at, 1);
+        }
+      } else if (name) {
+        line += token;
+        open(token, name);
+      } else {
+        line += token;
+      }
+    }
+    for (let i = openNames.length - 1; i >= 0; i--) line += `</${openNames[i]}>`;
+    lines.push(line);
+    return { lines, startTags };
+  }
+
+  static splitHtmlIntoLines(html: string): string[] {
+    return View.splitHtmlLines(html).lines;
+  }
+
+  /** How many lines the highlight overlay shows. */
+  getHighlightLineCount(): number {
+    return this.highlightOverlayActive ? this.overlayLines.length : 0;
+  }
+
+  /** The HTML of the elements still open where overlay line `line` starts (empty when it starts outside any). */
+  getHighlightLineStartTags(line: number): string {
+    return this.overlayStartTags[line] ?? '';
+  }
+
+  /** Replaces `removeCount` overlay lines from `start` with new ones, leaving every other line as it is. */
+  replaceHighlightLines(start: number, removeCount: number, lines: string[], startTags: string[]): void {
+    const previous = this.overlayLines.slice(start, start + removeCount);
+    const next = [...this.overlayLines];
+    next.splice(start, removeCount, ...lines);
+    const nextStarts = [...this.overlayStartTags];
+    nextStarts.splice(start, removeCount, ...startTags);
+
+    const children = this.highlightElement.children;
+    const common = Math.min(removeCount, lines.length);
+    for (let i = 0; i < common; i++) {
+      if (previous[i] !== lines[i]) (children[start + i] as HTMLElement).innerHTML = lines[i] || '<br>';
+    }
+    if (lines.length > removeCount) {
+      const fragment = document.createDocumentFragment();
+      for (let i = common; i < lines.length; i++) {
+        const block = document.createElement('div');
+        block.innerHTML = lines[i] || '<br>';
+        fragment.appendChild(block);
+      }
+      this.highlightElement.insertBefore(fragment, children[start + common] ?? null);
+    } else {
+      for (let i = removeCount - 1; i >= common; i--) children[start + i].remove();
+    }
+
+    this.overlayLines = next;
+    this.overlayStartTags = nextStarts;
+    // The overlay no longer matches any one highlighted HTML string: the next full highlight is compared line by line.
+    this.lastHighlightHTML = '\u0000';
+    this.updateLineNumbers(Math.max(1, this.renderedLines?.length ?? next.length));
+  }
+
   private renderLineDecorations(lineDecorations: LineDecoration[]): void {
-    const normalized = [...lineDecorations]
-      .filter((decoration) => Number.isFinite(decoration.line) && decoration.line >= 0)
-      .sort((a, b) => a.line - b.line || a.id.localeCompare(b.id));
-    const snapshot = normalized
-      .map((decoration) =>
-        `${decoration.id}:${decoration.line}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
-      )
-      .join('|');
-    if (snapshot === this.lastLineDecorationSnapshot) {
-      return;
-    }
-
-    this.lineDecorationsElement.innerHTML = '';
-    this.lastLineDecorationSnapshot = snapshot;
-    if (normalized.length === 0) {
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    for (const decoration of normalized) {
-      const element = document.createElement('div');
-      element.className = this.joinClassNames(
-        'lce-decoration lce-decoration-line',
-        decoration.className,
-      );
-      element.setAttribute('data-decoration-id', decoration.id);
-      element.setAttribute('data-decoration-line', String(decoration.line));
-      element.style.cssText = this.joinStyleFragments([
-        'position: absolute',
-        `top: ${this.lineTop(decoration.line)}px`,
-        `height: ${this.lineHeightAt(decoration.line)}px`,
-        'left: 12px',
-        'right: 12px',
-        'border-radius: 3px',
-        this.serializeStyleObject(decoration.style),
-      ]);
-      fragment.appendChild(element);
-    }
-
-    this.lineDecorationsElement.appendChild(fragment);
+    this.syncDecorationElements(
+      this.lineDecorationsElement,
+      this.lineDecorationElements,
+      lineDecorations.filter((decoration) => this.displayLineOf(decoration.line) >= 0),
+      (decoration) =>
+        `${this.lineTop(this.displayLineOf(decoration.line))}:${this.lineHeightAt(this.displayLineOf(decoration.line))}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
+      (element, decoration) => {
+        element.className = this.joinClassNames('lce-decoration lce-decoration-line', decoration.className);
+        element.setAttribute('data-decoration-id', decoration.id);
+        element.setAttribute('data-decoration-line', String(decoration.line));
+        element.style.cssText = this.joinStyleFragments([
+          'position: absolute',
+          `top: ${this.lineTop(this.displayLineOf(decoration.line))}px`,
+          `height: ${this.lineHeightAt(this.displayLineOf(decoration.line))}px`,
+          'left: 12px',
+          'right: 12px',
+          'border-radius: 3px',
+          this.serializeStyleObject(decoration.style),
+        ]);
+      },
+    );
   }
 
   private renderGutterDecorations(gutterDecorations: GutterDecoration[]): void {
-    const normalized = [...gutterDecorations]
-      .filter((decoration) => Number.isFinite(decoration.line) && decoration.line >= 0)
-      .sort((a, b) => a.line - b.line || a.id.localeCompare(b.id));
-    const snapshot = normalized
-      .map((decoration) =>
-        `${decoration.id}:${decoration.line}:${decoration.label || ''}:${decoration.title || ''}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
-      )
-      .join('|');
-    if (snapshot === this.lastGutterDecorationSnapshot) {
-      return;
-    }
+    this.syncDecorationElements(
+      this.gutterDecorationsElement,
+      this.gutterDecorationElements,
+      gutterDecorations.filter((decoration) => this.displayLineOf(decoration.line) >= 0),
+      (decoration) =>
+        `${this.lineTop(this.displayLineOf(decoration.line))}:${this.lineHeightAt(this.displayLineOf(decoration.line))}:${decoration.label || ''}:${decoration.title || ''}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
+      (element, decoration) => {
+        element.className = this.joinClassNames('lce-decoration lce-decoration-gutter', decoration.className);
+        element.setAttribute('data-decoration-id', decoration.id);
+        element.setAttribute('data-decoration-line', String(decoration.line));
+        element.style.cssText = this.joinStyleFragments([
+          'position: absolute',
+          `top: ${this.lineTop(this.displayLineOf(decoration.line))}px`,
+          `height: ${this.lineHeightAt(this.displayLineOf(decoration.line))}px`,
+          'left: 0',
+          'right: 0',
+          'display: flex',
+          'align-items: center',
+          'justify-content: flex-end',
+          'padding-right: 4px',
+          'box-sizing: border-box',
+          this.serializeStyleObject(decoration.style),
+        ]);
+        if (decoration.title) element.title = decoration.title;
+        else element.removeAttribute('title');
+        element.textContent = decoration.label || '';
+      },
+    );
+  }
 
-    this.gutterDecorationsElement.innerHTML = '';
-    this.lastGutterDecorationSnapshot = snapshot;
-    if (normalized.length === 0) {
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    for (const decoration of normalized) {
-      const element = document.createElement('div');
-      element.className = this.joinClassNames(
-        'lce-decoration lce-decoration-gutter',
-        decoration.className,
-      );
-      element.setAttribute('data-decoration-id', decoration.id);
-      element.setAttribute('data-decoration-line', String(decoration.line));
-      element.style.cssText = this.joinStyleFragments([
-        'position: absolute',
-        `top: ${this.lineTop(decoration.line)}px`,
-        `height: ${this.lineHeightAt(decoration.line)}px`,
-        'left: 0',
-        'right: 0',
-        'display: flex',
-        'align-items: center',
-        'justify-content: flex-end',
-        'padding-right: 4px',
-        'box-sizing: border-box',
-        this.serializeStyleObject(decoration.style),
-      ]);
-      if (decoration.title) {
-        element.title = decoration.title;
+  /**
+   * Keeps one element per decoration id, writing only those whose description changed. Rebuilding them all used to
+   * cost several milliseconds whenever a layer changed (a thousand indent guides in a long file).
+   */
+  private syncDecorationElements<T extends { id: string; line: number }>(
+    host: HTMLElement,
+    store: Map<string, { element: HTMLElement; key: string }>,
+    decorations: T[],
+    describe: (decoration: T) => string,
+    paint: (element: HTMLElement, decoration: T) => void,
+  ): void {
+    const seen = new Set<string>();
+    let fragment: DocumentFragment | null = null;
+    for (const decoration of decorations) {
+      if (!Number.isFinite(decoration.line) || decoration.line < 0) continue;
+      let id = decoration.id;
+      for (let copy = 2; seen.has(id); copy += 1) id = `${decoration.id}#${copy}`;
+      seen.add(id);
+      const key = describe(decoration);
+      const existing = store.get(id);
+      if (existing) {
+        if (existing.key !== key) {
+          paint(existing.element, decoration);
+          existing.key = key;
+        }
+        continue;
       }
-      element.textContent = decoration.label || '';
-      fragment.appendChild(element);
+      const element = document.createElement('div');
+      paint(element, decoration);
+      store.set(id, { element, key });
+      (fragment ??= document.createDocumentFragment()).appendChild(element);
     }
-
-    this.gutterDecorationsElement.appendChild(fragment);
+    for (const [id, entry] of store) {
+      if (!seen.has(id)) {
+        entry.element.remove();
+        store.delete(id);
+      }
+    }
+    if (fragment) host.appendChild(fragment);
   }
 
   private joinClassNames(...parts: Array<string | undefined>): string {
@@ -1439,18 +1903,33 @@ export class View {
       return '';
     }
 
-    return Object.entries(style)
-      .filter(([, value]) => typeof value === 'string' && value.length > 0)
-      .map(([key, value]) => `${this.toKebabCase(key)}: ${value}`)
-      .join('; ');
+    let output = '';
+    for (const key in style) {
+      const value = style[key];
+      if (typeof value !== 'string' || value.length === 0) continue;
+      output += `${output ? '; ' : ''}${this.toKebabCase(key)}: ${value}`;
+    }
+    return output;
   }
 
+  private readonly kebabCache = new Map<string, string>();
+
   private toKebabCase(value: string): string {
-    return value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+    let kebab = this.kebabCache.get(value);
+    if (kebab === undefined) {
+      kebab = value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+      this.kebabCache.set(value, kebab);
+    }
+    return kebab;
   }
 
   private offsetToPositionInText(offset: number, text: string): Position {
     const boundedOffset = Math.max(0, Math.min(offset, text.length));
+    if (text === this.renderedText && this.renderedLines) {
+      const starts = this.getRenderedLineStarts();
+      const line = View.lineIndexAt(starts, boundedOffset);
+      return { line, column: boundedOffset - starts[line] };
+    }
     const before = text.slice(0, boundedOffset);
     const lines = before.split('\n');
     return {
@@ -1460,6 +1939,12 @@ export class View {
   }
 
   private positionToTextOffset(position: Position, text: string): number {
+    if (text === this.renderedText && this.renderedLines) {
+      const lines = this.renderedLines;
+      const safeLine = Math.max(0, Math.min(position.line, lines.length - 1));
+      const safeColumn = Math.max(0, Math.min(position.column, lines[safeLine].length));
+      return this.getRenderedLineStarts()[safeLine] + safeColumn;
+    }
     const lines = text.split('\n');
     const safeLine = Math.max(0, Math.min(position.line, lines.length - 1));
     const safeColumn = Math.max(

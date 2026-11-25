@@ -89,6 +89,8 @@ export class CodeFoldingExtension implements EditorExtension {
   private pendingUpdateRaf: number | null = null;
   private lastSnapshot = '';
   private lastParsedText: string | null = null;
+  /** While typing, fold regions are found again once the typing pauses, not on every keystroke. */
+  private deferredSyncTimer: ReturnType<typeof setTimeout> | null = null;
   private changeHandler: ((changes: unknown[]) => void) | null = null;
   private foldRegions: FoldRange[] = [];
   private foldSnapshots = new Map<string, FoldSnapshot>();
@@ -115,7 +117,19 @@ export class CodeFoldingExtension implements EditorExtension {
     });
 
     this.changeHandler = () => {
-      this.syncFoldingState();
+      // Finding the regions scans the whole document, and redrawing the fold arrows touches every one of them: on
+      // each keystroke of a long file that was several milliseconds. With nothing folded, nothing on screen depends
+      // on them until the typing pauses, so they wait for that (a fold command catches up first).
+      if (this.isDisplayingFolded || this.hasActiveFolds()) {
+        this.cancelDeferredSync();
+        this.syncFoldingState();
+        return;
+      }
+      this.cancelDeferredSync();
+      this.deferredSyncTimer = setTimeout(() => {
+        this.deferredSyncTimer = null;
+        this.syncFoldingState();
+      }, 150);
     };
     editor.on('change', this.changeHandler);
 
@@ -173,6 +187,21 @@ export class CodeFoldingExtension implements EditorExtension {
 
     this.rememberActiveFoldSnapshots(text);
     this.scheduleFoldIndicatorUpdate();
+  }
+
+  private cancelDeferredSync(): void {
+    if (this.deferredSyncTimer !== null) {
+      clearTimeout(this.deferredSyncTimer);
+      this.deferredSyncTimer = null;
+    }
+  }
+
+  /** Brings the regions up to date now if typing left them waiting. */
+  private flushDeferredSync(): void {
+    if (this.deferredSyncTimer !== null) {
+      this.cancelDeferredSync();
+      this.syncFoldingState();
+    }
   }
 
   private scheduleFoldIndicatorUpdate(): void {
@@ -585,6 +614,7 @@ export class CodeFoldingExtension implements EditorExtension {
 
   private toggleFold(region: FoldRange): void {
     if (!this.editor) return;
+    this.flushDeferredSync();
 
     if (this.isFoldActive(region)) {
       this.editor.unfold(region);
@@ -597,6 +627,7 @@ export class CodeFoldingExtension implements EditorExtension {
 
   private foldAtCursor(): void {
     if (!this.editor) return;
+    this.flushDeferredSync();
     const cursorLine = this.editor.getCursor().position.line;
     const region = this.findBestRegionForLine(cursorLine, false);
     if (!region) return;
@@ -606,6 +637,7 @@ export class CodeFoldingExtension implements EditorExtension {
 
   private unfoldAtCursor(): void {
     if (!this.editor) return;
+    this.flushDeferredSync();
     const cursorLine = this.editor.getCursor().position.line;
     const region = this.findBestRegionForLine(cursorLine, true);
     if (!region) return;
@@ -615,6 +647,7 @@ export class CodeFoldingExtension implements EditorExtension {
 
   private foldAll(): void {
     if (!this.editor) return;
+    this.flushDeferredSync();
     const topLevelRegions = this.getTopLevelFoldRegions(this.foldRegions);
     for (const region of topLevelRegions) {
       this.editor.fold(region);
@@ -783,7 +816,10 @@ export class CodeFoldingExtension implements EditorExtension {
         __lceFoldPlaceholderSources?: Map<string, string>;
       }
     ).__lceFoldPlaceholderSources = placeholderSources;
-    this.editor.getView().syncTrailingNewlineMarkerForText(projection.text);
+    const view = this.editor.getView();
+    view.syncTrailingNewlineMarkerForText(projection.text);
+    // Line numbers and line decorations follow the lines as shown, not as counted in the document.
+    view.refreshFoldedLayout?.();
   }
 
   private getFoldPlaceholder(fold: FoldRange): string {
@@ -1235,6 +1271,7 @@ export class CodeFoldingExtension implements EditorExtension {
   }
 
   destroy(): void {
+    this.cancelDeferredSync();
     if (this.pendingUpdateRaf !== null) {
       cancelAnimationFrame(this.pendingUpdateRaf);
       this.pendingUpdateRaf = null;
