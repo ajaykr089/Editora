@@ -5,6 +5,7 @@
 
 import { TextModel } from './TextModel';
 import { View } from './View';
+import { expandSearchReplacement } from './searchReplacement';
 import {
   EditorAPI,
   EditorConfig,
@@ -739,6 +740,9 @@ export class EditorCore implements EditorAPI {
           text,
           normalizedToRawOffsets,
         );
+        const result = results[results.length - 1];
+        result.groups = match.slice(1);
+        if (match.groups) result.namedGroups = { ...match.groups };
       }
     } else {
       let index = 0;
@@ -848,7 +852,8 @@ export class EditorCore implements EditorAPI {
     const changes: ReturnType<TextModel['replaceRange']>[] = [];
     // Process in reverse order to maintain positions
     for (let i = results.length - 1; i >= 0; i--) {
-      changes.push(this.textModel.replaceRange(results[i].range, replacement));
+      const text = options.regex ? expandSearchReplacement(replacement, results[i]) : replacement;
+      changes.push(this.textModel.replaceRange(results[i].range, text));
     }
 
     this.expectingProgrammaticCursor = true;

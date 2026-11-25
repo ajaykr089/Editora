@@ -293,6 +293,10 @@ export interface SearchOptions {
 export interface SearchResult {
   range: Range;
   match: string;
+  /** Regular-expression searches only: the capture groups, `$1` first (undefined for a group that did not take part). */
+  groups?: Array<string | undefined>;
+  /** Regular-expression searches only: the named capture groups (`(?<name>...)`). */
+  namedGroups?: Record<string, string | undefined>;
 }
 
 // Bracket matching result

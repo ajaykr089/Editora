@@ -4,6 +4,7 @@
  */
 
 import { EditorExtension, EditorAPI, SearchResult, SearchOptions, Position, Range } from '../types';
+import { expandSearchReplacement } from '../searchReplacement';
 
 type IndexedTextNode = {
   node: Text;
@@ -420,8 +421,9 @@ export class SearchExtension implements EditorExtension {
     const result = this.currentResults[this.currentIndex];
     if (!result) return;
 
-    const replacedRange = this.computeReplacementRange(result.range.start, replacement);
-    this.editor.replace(result.range, replacement);
+    const text = this.searchOptions.regex ? expandSearchReplacement(replacement, result) : replacement;
+    const replacedRange = this.computeReplacementRange(result.range.start, text);
+    this.editor.replace(result.range, text);
     if (this.config.replaceAndFindNext) {
       this.currentQuery = query;
       const refreshedResults = this.editor.search(query, this.searchOptions);
