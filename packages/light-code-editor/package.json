@@ -62,6 +62,9 @@
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
   "style": "dist/light-code-editor.css",
+  "sideEffects": [
+    "*.css"
+  ],
   "publishConfig": {
     "access": "public"
   },
