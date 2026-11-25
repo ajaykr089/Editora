@@ -5,6 +5,7 @@
 
 import { TextModel } from './TextModel';
 import { View } from './View';
+import { expandSearchReplacement } from './searchReplacement';
 import {
   EditorAPI,
   EditorConfig,
@@ -274,6 +275,24 @@ export class EditorCore implements EditorAPI {
       this.insertClipboardText(text);
     });
 
+    // Copy and cut put the source text on the clipboard. Left to the browser they copied what is on screen, and a
+    // folded block is on screen as its label (" … 3 lines … "): Cut then removed the code and kept only the label.
+    const copySelection = (event: ClipboardEvent, cut: boolean) => {
+      if (!event.clipboardData) return;
+      const selection = this.view.getSelectionOffsets();
+      if (!selection.isInEditor || selection.isCollapsed) return;
+      const from = Math.min(selection.startOffset, selection.endOffset);
+      const to = Math.max(selection.startOffset, selection.endOffset);
+      event.clipboardData.setData('text/plain', this.textModel.getText().slice(from, to));
+      event.preventDefault();
+      if (cut && !this.config.readOnly) {
+        this.pendingInputSnapshot = undefined;
+        this.replaceOffsetsWithText(from, to, '');
+      }
+    };
+    contentElement.addEventListener('copy', (event: ClipboardEvent) => copySelection(event, false));
+    contentElement.addEventListener('cut', (event: ClipboardEvent) => copySelection(event, true));
+
     // Handle input changes
     contentElement.addEventListener('input', () => {
       const newText = this.view.getText();
@@ -484,6 +503,13 @@ export class EditorCore implements EditorAPI {
 
   setValue(value: string): void {
     const old = this.textModel.getText();
+    // A new value is an undo step of its own. It used to leave no step, so Undo after it restored the state before
+    // the last typing instead, and what had been typed just before setValue() could not be reached again.
+    // (Undo and Redo set their text through here too, with history suppressed.)
+    if (!this.suppressHistory && value !== old) {
+      this.pushUndoSnapshot(this.captureHistorySnapshot(old));
+      this.typingRun = null;
+    }
     this.textModel.setText(value);
     // When setting programmatically, avoid automatic selection restore so callers
     // can manage caret/selection themselves (e.g., undo/redo).
@@ -714,6 +740,9 @@ export class EditorCore implements EditorAPI {
           text,
           normalizedToRawOffsets,
         );
+        const result = results[results.length - 1];
+        result.groups = match.slice(1);
+        if (match.groups) result.namedGroups = { ...match.groups };
       }
     } else {
       let index = 0;
@@ -823,7 +852,8 @@ export class EditorCore implements EditorAPI {
     const changes: ReturnType<TextModel['replaceRange']>[] = [];
     // Process in reverse order to maintain positions
     for (let i = results.length - 1; i >= 0; i--) {
-      changes.push(this.textModel.replaceRange(results[i].range, replacement));
+      const text = options.regex ? expandSearchReplacement(replacement, results[i]) : replacement;
+      changes.push(this.textModel.replaceRange(results[i].range, text));
     }
 
     this.expectingProgrammaticCursor = true;
@@ -1230,7 +1260,35 @@ export class EditorCore implements EditorAPI {
   // Insert a newline at current cursor position
   private insertNewLine(): void {
     if (this.config.readOnly) return;
-    this.replaceSelectionWithText('\n');
+    if (this.config.autoIndent === false) {
+      this.replaceSelectionWithText('\n');
+      return;
+    }
+
+    // A code editor keeps the indentation: Enter used to start every new line at column 0.
+    const text = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(text);
+    const from = Math.min(startOffset, endOffset);
+    const to = Math.max(startOffset, endOffset);
+    const lineStart = text.lastIndexOf('\n', from - 1) + 1;
+    const indent = /^[ \t]*/.exec(text.slice(lineStart, from))![0];
+    const unit = indent.includes('\t') ? '\t' : ' '.repeat(this.config.tabSize || 2);
+    const opener = /([{[(])[ \t]*$/.exec(text.slice(lineStart, from))?.[1];
+    const lineEnd = text.indexOf('\n', to);
+    const closer = /^[ \t]*([}\])])/.exec(text.slice(to, lineEnd === -1 ? text.length : lineEnd))?.[1];
+    const pairs: Record<string, string> = { '{': '}', '[': ']', '(': ')' };
+
+    if (!opener) {
+      this.replaceOffsetsWithText(from, to, `\n${indent}`);
+      return;
+    }
+    if (closer && pairs[opener] === closer) {
+      // Between a pair, as in "{|}": the closing bracket goes down a line, the caret onto an indented line between.
+      this.replaceOffsetsWithText(from, to, `\n${indent}${unit}\n${indent}`);
+      this.setCursor(this.textModel.offsetToPosition(from + 1 + indent.length + unit.length));
+      return;
+    }
+    this.replaceOffsetsWithText(from, to, `\n${indent}${unit}`);
   }
 
   private deleteBackward(unit: DeletionUnit = 'char'): void {

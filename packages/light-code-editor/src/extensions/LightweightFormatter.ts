@@ -121,6 +121,17 @@ export const lightweightFormatter: Formatter = createLightweightFormatter();
 
 export function formatLightweightCode(input: string): string {
   const language = detectLightweightFormattingLanguage(input);
+  const output = formatAsLanguage(input, language);
+  // The formatter only moves whitespace. If anything else came out different, something was misread: give the
+  // code back as it was rather than change what it does. (PHP may get its missing "<" of "<?php" back.)
+  return language === 'php' || sameNonWhitespace(input, output) ? output : input;
+}
+
+function sameNonWhitespace(a: string, b: string): boolean {
+  return a.replace(/\s+/g, '') === b.replace(/\s+/g, '');
+}
+
+function formatAsLanguage(input: string, language: LightweightFormattingLanguage): string {
 
   if (language === 'css') {
     return formatCss(input);
@@ -135,15 +146,15 @@ export function formatLightweightCode(input: string): string {
   }
 
   if (language === 'markdown') {
-    return normalizePlainCode(input);
+    return normalizeMarkdown(input);
   }
 
   if (language === 'php') {
-    return formatBraceCode(input, { repairPhpOpenTag: true });
+    return withProtectedLiterals(input, 'c', (code) => formatBraceCode(code, { repairPhpOpenTag: true }));
   }
 
   if (language === 'python') {
-    return formatPython(input);
+    return withProtectedLiterals(input, 'python', formatPython);
   }
 
   if (language === 'bash') {
@@ -151,7 +162,7 @@ export function formatLightweightCode(input: string): string {
   }
 
   if (language === 'javascript') {
-    return formatJavaScript(input);
+    return withProtectedLiterals(input, 'js', formatJavaScript);
   }
 
   if (language === 'ruby') {
@@ -163,11 +174,11 @@ export function formatLightweightCode(input: string): string {
   }
 
   if (language === 'jsx') {
-    return formatJsx(input);
+    return withProtectedLiterals(input, 'jsx', formatJsx);
   }
 
   if (['go', 'cpp', 'java', 'csharp', 'rust', 'dockerfile'].includes(language)) {
-    return formatBraceCode(input);
+    return withProtectedLiterals(input, 'c', (code) => formatBraceCode(code));
   }
 
   return normalizePlainCode(input);
@@ -260,6 +271,11 @@ export function detectLightweightFormattingLanguage(input: string): LightweightF
 }
 
 export function formatCss(input: string): string {
+  // Strings, comments and url(...) can hold ";", "{" and "}" (content: "{;}", data: URLs): they are kept as they are.
+  return withProtectedLiterals(input, 'css', formatCssLayout);
+}
+
+function formatCssLayout(input: string): string {
   const normalized = input
     .replace(/\r\n?/g, '\n')
     .replace(/\s*{\s*/g, ' {\n')
@@ -288,6 +304,7 @@ export function formatCss(input: string): string {
 
     if (line === '}') {
       depth = Math.max(0, depth - 1);
+      if (output[output.length - 1] === '') output.pop();
     }
 
     output.push(`${'  '.repeat(depth)}${line}`);
@@ -305,6 +322,16 @@ export function normalizePlainCode(input: string): string {
     .replace(/\r\n?/g, '\n')
     .split('\n')
     .map((line) => line.replace(/[ \t]+$/g, ''))
+    .join('\n')
+    .trim();
+}
+
+/** As normalizePlainCode, but two or more trailing spaces stay two: in Markdown they are a line break. */
+function normalizeMarkdown(input: string): string {
+  return input
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map((line) => line.replace(/[ \t]+$/g, (trailing) => (/^ {2,}$/.test(trailing) && line.trim() ? '  ' : '')))
     .join('\n')
     .trim();
 }
@@ -543,7 +570,7 @@ function formatPython(input: string): string {
     output.push(`${'    '.repeat(depth)}${line}`);
 
     const currentDepth = depth;
-    depth = /:\s*(#.*)?$/.test(line) ? currentDepth + 1 : currentDepth;
+    depth = /:\s*(#.*|\uE100[0-9a-z]+\uE101)?$/.test(line) ? currentDepth + 1 : currentDepth;
     previousClosedSuite = currentDepth > 0 && closesSimpleSuite(line);
   }
 
@@ -818,7 +845,7 @@ function formatHtml(input: string, options: { inlineAnyTextTag?: boolean } = {})
   }
 
   const tokens = normalized.match(
-    /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!DOCTYPE[\s\S]*?>|<style\b[^>]*>[\s\S]*?<\/style>|<script\b[^>]*>[\s\S]*?<\/script>|<\/?[A-Za-z][^>]*?>|[^<]+/gi,
+    /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!DOCTYPE[\s\S]*?>|<style\b[^>]*>[\s\S]*?<\/style>|<script\b[^>]*>[\s\S]*?<\/script>|<pre\b[^>]*>[\s\S]*?<\/pre>|<textarea\b[^>]*>[\s\S]*?<\/textarea>|<\/?[A-Za-z][^>]*?>|[^<]+/gi,
   ) || [];
   const output: string[] = [];
   const stack: string[] = [];
@@ -846,23 +873,39 @@ function formatHtml(input: string, options: { inlineAnyTextTag?: boolean } = {})
       continue;
     }
 
+    // The text of <pre> and <textarea> is shown (or submitted) with its whitespace: it is kept exactly.
+    if (/^<(pre|textarea)\b/i.test(line)) {
+      output.push(`${'  '.repeat(stack.length)}${line}`);
+      continue;
+    }
+
     const scriptBlockMatch = line.match(/^<script\b([^>]*)>([\s\S]*?)<\/script>$/i);
     if (scriptBlockMatch) {
       const depth = stack.length;
       output.push(`${'  '.repeat(depth)}<script${scriptBlockMatch[1]}>`);
 
-      const scriptBody = scriptBlockMatch[2]
+      // Lines are re-indented, but strings, template literals and comments that span lines are kept as they are.
+      const script = protectLiterals(scriptBlockMatch[2], 'js');
+      const scriptLines: string[] = [];
+      script.text
         .split('\n')
-        .map((scriptLine) => scriptLine.trim());
-      scriptBody.forEach((scriptLine) => {
-        if (!scriptLine) {
-          if (output.length > 0 && output[output.length - 1] !== '') {
-            output.push('');
+        .map((scriptLine) => scriptLine.trim())
+        .forEach((scriptLine) => {
+          if (!scriptLine) {
+            if (scriptLines.length > 0 && scriptLines[scriptLines.length - 1] !== '') {
+              scriptLines.push('');
+            }
+            return;
           }
-          return;
-        }
-        output.push(`${'  '.repeat(depth + 1)}${scriptLine}`);
-      });
+          scriptLines.push(`${'  '.repeat(depth + 1)}${scriptLine}`);
+        });
+      while (scriptLines.length > 0 && scriptLines[scriptLines.length - 1] === '') scriptLines.pop();
+      const restored = script.restore(scriptLines.join('\n'));
+      if (restored === null) {
+        output.push(scriptBlockMatch[2]);
+      } else if (restored) {
+        output.push(restored);
+      }
 
       output.push(`${'  '.repeat(depth)}</script>`);
       continue;
@@ -993,4 +1036,179 @@ function shouldIndentHtmlLine(line: string): boolean {
   }
 
   return true;
+}
+
+/** `jsx` keeps only template literals and block comments: quotes in JSX text ("don't") are not strings. */
+type LiteralSyntax = 'c' | 'js' | 'jsx' | 'css' | 'python';
+
+const LITERAL_OPEN = '\uE100';
+const LITERAL_CLOSE = '\uE101';
+const LITERAL_PLACEHOLDER = /\uE100([0-9a-z]+)\uE101/g;
+const REGEX_AFTER_WORDS = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
+
+/**
+ * Runs a line-based formatter with every string, template literal, regular-expression literal and comment taken out
+ * of the code first, so the formatter can neither split them (a "{" inside a string or regex used to start a new
+ * line) nor re-indent their lines (which changed the text of a multi-line template literal). If a literal does not
+ * come back exactly once, the input is returned unformatted.
+ */
+function withProtectedLiterals(input: string, syntax: LiteralSyntax, format: (code: string) => string): string {
+  if (input.includes(LITERAL_OPEN) || input.includes(LITERAL_CLOSE)) {
+    return input;
+  }
+  const { text, restore } = protectLiterals(input, syntax);
+  return restore(format(text)) ?? input;
+}
+
+function protectLiterals(input: string, syntax: LiteralSyntax): { text: string; restore: (formatted: string) => string | null } {
+  const literals: string[] = [];
+  const length = input.length;
+  let text = '';
+  let index = 0;
+  let lastSignificant = '';
+  let lastWord = '';
+
+  const take = (end: number) => {
+    literals.push(input.slice(index, end));
+    text += `${LITERAL_OPEN}${(literals.length - 1).toString(36)}${LITERAL_CLOSE}`;
+    index = end;
+    lastSignificant = 'a';
+    lastWord = '';
+  };
+  const lineEnd = (from: number) => {
+    const end = input.indexOf('\n', from);
+    return end === -1 ? length : end;
+  };
+  const quoted = (from: number, quote: string): number => {
+    for (let j = from + 1; j < length; j++) {
+      const char = input[j];
+      if (char === '\\') {
+        j++;
+      } else if (char === quote) {
+        return j + 1;
+      } else if (char === '\n') {
+        return j;
+      }
+    }
+    return length;
+  };
+  const template = (from: number): number => {
+    for (let j = from + 1; j < length; j++) {
+      const char = input[j];
+      if (char === '\\') {
+        j++;
+      } else if (char === '`') {
+        return j + 1;
+      } else if (char === '$' && input[j + 1] === '{') {
+        let depth = 1;
+        j += 2;
+        while (j < length && depth > 0) {
+          const inner = input[j];
+          if (inner === '"' || inner === "'") {
+            j = quoted(j, inner);
+            continue;
+          }
+          if (inner === '`') {
+            j = template(j);
+            continue;
+          }
+          if (inner === '{') depth++;
+          if (inner === '}') depth--;
+          j++;
+        }
+        j--;
+      }
+    }
+    return length;
+  };
+  const regexLiteral = (from: number): number => {
+    let inClass = false;
+    for (let j = from + 1; j < length; j++) {
+      const char = input[j];
+      if (char === '\n') return -1;
+      if (char === '\\') {
+        j++;
+      } else if (inClass) {
+        if (char === ']') inClass = false;
+      } else if (char === '[') {
+        inClass = true;
+      } else if (char === '/') {
+        j++;
+        while (j < length && /[a-z]/i.test(input[j])) j++;
+        return j;
+      }
+    }
+    return -1;
+  };
+  const regexAllowed = () => {
+    if (!lastSignificant) return true;
+    if (/[\w$]/.test(lastSignificant)) return REGEX_AFTER_WORDS.has(lastWord);
+    return lastSignificant !== ')' && lastSignificant !== ']';
+  };
+
+  while (index < length) {
+    const char = input[index];
+    const next = input[index + 1];
+
+    if (syntax !== 'python' && char === '/' && next === '*') {
+      const close = input.indexOf('*/', index + 2);
+      take(close === -1 ? length : close + 2);
+      continue;
+    }
+    if ((syntax === 'c' || syntax === 'js') && char === '/' && next === '/') {
+      take(lineEnd(index));
+      continue;
+    }
+    if (syntax === 'python' && char === '#') {
+      take(lineEnd(index));
+      continue;
+    }
+    if ((char === '"' || char === "'") && syntax !== 'jsx') {
+      if (syntax === 'python' && input.startsWith(char.repeat(3), index)) {
+        const close = input.indexOf(char.repeat(3), index + 3);
+        take(close === -1 ? length : close + 3);
+      } else {
+        take(quoted(index, char));
+      }
+      continue;
+    }
+    if (char === '`' && syntax !== 'css' && syntax !== 'python') {
+      take(template(index));
+      continue;
+    }
+    if (syntax === 'js' && char === '/' && regexAllowed()) {
+      const end = regexLiteral(index);
+      if (end !== -1) {
+        take(end);
+        continue;
+      }
+    }
+    if (syntax === 'css' && /^url\(/i.test(input.slice(index, index + 4))) {
+      const close = input.indexOf(')', index + 4);
+      if (close !== -1 && !input.slice(index, close).includes('\n')) {
+        take(close + 1);
+        continue;
+      }
+    }
+
+    const previous = text[text.length - 1] ?? '';
+    text += char;
+    if (!/\s/.test(char)) {
+      lastWord = /[\w$]/.test(char) ? (/[\w$]/.test(previous) ? lastWord + char : char) : '';
+      lastSignificant = char;
+    }
+    index++;
+  }
+
+  const restore = (formatted: string): string | null => {
+    const used = new Array<number>(literals.length).fill(0);
+    const result = formatted.replace(LITERAL_PLACEHOLDER, (_, id: string) => {
+      const position = parseInt(id, 36);
+      used[position] = (used[position] ?? 0) + 1;
+      return literals[position] ?? '';
+    });
+    return used.every((count) => count === 1) ? result : null;
+  };
+
+  return { text, restore };
 }

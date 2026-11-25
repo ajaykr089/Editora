@@ -66,11 +66,9 @@ export type {
 
 // Factory function for easy instantiation
 export function createEditor(container: HTMLElement, config?: import('./types').EditorConfig) {
-  // Include KeymapExtension by default if not explicitly disabled
-  const finalConfig = { ...config };
-  if (!finalConfig.extensions) {
-    finalConfig.extensions = [];
-  }
+  // A copy of the list: the defaults added below must not go into the caller's own array, or a second editor made
+  // from the same options would get this editor's keymap (and Ctrl+Z in one editor would undo in the other).
+  const finalConfig = { ...config, extensions: [...(config?.extensions ?? [])] };
 
   // Add KeymapExtension if not already present
   const hasKeymap = finalConfig.extensions.some(ext => ext.name === 'keymap');

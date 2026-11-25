@@ -207,6 +207,7 @@ createEditor(container, {
   tabSize: 2,            // how wide a tab is drawn
   lineWrapping: false,   // wrap long lines instead of scrolling sideways
   lineNumbers: true,     // the gutter; toggle it later with the toggleLineNumbers command
+  autoIndent: true,      // Enter keeps the line's indentation (one level more after {, [ or ( )
   extensions: [],        // see Extensions below
   keymap: {},            // your own shortcuts, for the default keymap
 });
@@ -218,7 +219,7 @@ createEditor(container, {
 
 | Method | |
 | --- | --- |
-| `getValue()` / `setValue(text)` | Read or replace the text. |
+| `getValue()` / `setValue(text)` | Read or replace the text. `setValue` is one undo step. |
 | `getCursor()` / `setCursor(position)` | The caret; a position is `{ line, column }`, both starting at 0. |
 | `getSelection()` / `setSelection(range)` | The selected range, `{ start, end }`, or `undefined`. |
 | `setTheme(name)` / `setReadOnly(boolean)` | Change the theme or the read-only mode. |
@@ -250,8 +251,8 @@ ones are also bound to keys.
 | `LineNumbersExtension` | The line-number gutter. | | `toggleLineNumbers` |
 | `SyntaxHighlightingExtension` | Syntax colours; the active language. | | `setSyntaxLanguage` |
 | `ThemeExtension` | Switch theme at run time. | | `setTheme`, `toggleTheme` |
-| `ReadOnlyExtension` | A read-only mode. | | `setReadOnly`, `toggleReadOnly` |
-| `SearchExtension` | Find and replace, with case, whole-word and regular-expression modes. | `replaceAndFindNext` | `find`, `findNext`, `findPrev`, `replace`, `replaceAll` |
+| `ReadOnlyExtension` | Commands for the read-only mode (no keyboard shortcut, so a reader cannot switch it off). | | `setReadOnly`, `toggleReadOnly` |
+| `SearchExtension` | Find and replace, with case, whole-word and regular-expression modes (a regex replacement can use `$1`, `$<name>` and `$&`). | `replaceAndFindNext` | `find`, `findNext`, `findPrev`, `replace`, `replaceAll` |
 | `DiagnosticsExtension` | Gutter markers, inline highlights, issue navigation and a status box. | `diagnostics`, `maxDiagnostics`, `clearOnChange`, `showInlineHighlights`, `showGutterMarkers`, `showActiveLine`, `showStatusBar`, `layerName` | `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic` |
 | `CompletionExtension` | An autocomplete popup fed by providers. | `providers`, `debounceMs`, `maxItems`, `maxVisibleItems`, `minPrefixLength`, `autoTrigger`, `triggerCharacters`, `acceptOnEnter`, `acceptOnTab`, `closeOnBlur` | `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion` |
 | `FormattingExtension` | Format the document or the selection, with a timeout and cancellation. | `formatter`, `timeoutMs`, `showStatusBar`, `successDurationMs`, `errorDurationMs` | `formatDocument`, `formatSelection` |
@@ -379,7 +380,10 @@ formattingExtension, hoverCodeActionsExtension }`, so you can keep a handle on a
 
 `FormattingExtension` takes a `formatter(context)` that returns the new text, or
 `{ text, range, selection, cursor }` when it needs to control the edit. `createLightweightFormatter()` is a small,
-dependency-free formatter for common snippets. It is conservative and no replacement for Prettier, Black or gofmt.
+dependency-free formatter for common snippets (`lightweightFormatter` is a ready-made one). It is conservative and no
+replacement for Prettier, Black or gofmt: it only re-indents and moves whitespace, never inside strings, template
+literals, regular expressions, comments, `<pre>` or `<textarea>`, and gives the code back unchanged when it cannot
+do that safely.
 
 ## Decorations
 

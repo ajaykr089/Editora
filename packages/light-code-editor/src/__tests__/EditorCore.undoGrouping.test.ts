@@ -182,3 +182,35 @@ describe('undo steps in the code editor', () => {
     expect(editor.getValue()).toBe('Z');
   });
 });
+
+describe('undo after setValue', () => {
+  it('takes back the new value first, then the typing before it', () => {
+    start('file A');
+    type('!');
+    editor.setValue('file B');
+    undo();
+    expect(editor.getValue()).toBe('file A!');
+    undo();
+    expect(editor.getValue()).toBe('file A');
+    redo();
+    redo();
+    expect(editor.getValue()).toBe('file B');
+  });
+
+  it('records nothing when the value does not change', () => {
+    start('same');
+    editor.setValue('same');
+    undo();
+    expect(editor.getValue()).toBe('same');
+  });
+
+  it('starts a new step for typing after it', () => {
+    start('a');
+    type('b');
+    editor.setValue('xy');
+    editor.setCursor({ line: 0, column: 2 });
+    type('c');
+    undo();
+    expect(editor.getValue()).toBe('xy');
+  });
+});
