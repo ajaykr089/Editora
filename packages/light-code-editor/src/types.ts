@@ -324,6 +324,11 @@ export interface EditorConfig {
   tabSize?: number;
   lineWrapping?: boolean;
   lineNumbers?: boolean;
+  /**
+   * Enter starts the new line at the indentation of the current one, one level deeper after an opening bracket,
+   * and puts a closing bracket right after the caret on a line of its own. Default true; false inserts a bare line break.
+   */
+  autoIndent?: boolean;
   extensions?: EditorExtension[];
   keymap?: Keymap;
 }

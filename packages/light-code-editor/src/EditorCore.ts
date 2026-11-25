@@ -1260,7 +1260,35 @@ export class EditorCore implements EditorAPI {
   // Insert a newline at current cursor position
   private insertNewLine(): void {
     if (this.config.readOnly) return;
-    this.replaceSelectionWithText('\n');
+    if (this.config.autoIndent === false) {
+      this.replaceSelectionWithText('\n');
+      return;
+    }
+
+    // A code editor keeps the indentation: Enter used to start every new line at column 0.
+    const text = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(text);
+    const from = Math.min(startOffset, endOffset);
+    const to = Math.max(startOffset, endOffset);
+    const lineStart = text.lastIndexOf('\n', from - 1) + 1;
+    const indent = /^[ \t]*/.exec(text.slice(lineStart, from))![0];
+    const unit = indent.includes('\t') ? '\t' : ' '.repeat(this.config.tabSize || 2);
+    const opener = /([{[(])[ \t]*$/.exec(text.slice(lineStart, from))?.[1];
+    const lineEnd = text.indexOf('\n', to);
+    const closer = /^[ \t]*([}\])])/.exec(text.slice(to, lineEnd === -1 ? text.length : lineEnd))?.[1];
+    const pairs: Record<string, string> = { '{': '}', '[': ']', '(': ')' };
+
+    if (!opener) {
+      this.replaceOffsetsWithText(from, to, `\n${indent}`);
+      return;
+    }
+    if (closer && pairs[opener] === closer) {
+      // Between a pair, as in "{|}": the closing bracket goes down a line, the caret onto an indented line between.
+      this.replaceOffsetsWithText(from, to, `\n${indent}${unit}\n${indent}`);
+      this.setCursor(this.textModel.offsetToPosition(from + 1 + indent.length + unit.length));
+      return;
+    }
+    this.replaceOffsetsWithText(from, to, `\n${indent}${unit}`);
   }
 
   private deleteBackward(unit: DeletionUnit = 'char'): void {
