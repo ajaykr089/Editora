@@ -274,6 +274,24 @@ export class EditorCore implements EditorAPI {
       this.insertClipboardText(text);
     });
 
+    // Copy and cut put the source text on the clipboard. Left to the browser they copied what is on screen, and a
+    // folded block is on screen as its label (" … 3 lines … "): Cut then removed the code and kept only the label.
+    const copySelection = (event: ClipboardEvent, cut: boolean) => {
+      if (!event.clipboardData) return;
+      const selection = this.view.getSelectionOffsets();
+      if (!selection.isInEditor || selection.isCollapsed) return;
+      const from = Math.min(selection.startOffset, selection.endOffset);
+      const to = Math.max(selection.startOffset, selection.endOffset);
+      event.clipboardData.setData('text/plain', this.textModel.getText().slice(from, to));
+      event.preventDefault();
+      if (cut && !this.config.readOnly) {
+        this.pendingInputSnapshot = undefined;
+        this.replaceOffsetsWithText(from, to, '');
+      }
+    };
+    contentElement.addEventListener('copy', (event: ClipboardEvent) => copySelection(event, false));
+    contentElement.addEventListener('cut', (event: ClipboardEvent) => copySelection(event, true));
+
     // Handle input changes
     contentElement.addEventListener('input', () => {
       const newText = this.view.getText();
