@@ -502,6 +502,13 @@ export class EditorCore implements EditorAPI {
 
   setValue(value: string): void {
     const old = this.textModel.getText();
+    // A new value is an undo step of its own. It used to leave no step, so Undo after it restored the state before
+    // the last typing instead, and what had been typed just before setValue() could not be reached again.
+    // (Undo and Redo set their text through here too, with history suppressed.)
+    if (!this.suppressHistory && value !== old) {
+      this.pushUndoSnapshot(this.captureHistorySnapshot(old));
+      this.typingRun = null;
+    }
     this.textModel.setText(value);
     // When setting programmatically, avoid automatic selection restore so callers
     // can manage caret/selection themselves (e.g., undo/redo).
