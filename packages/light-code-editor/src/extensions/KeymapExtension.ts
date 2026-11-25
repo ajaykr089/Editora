@@ -37,14 +37,48 @@ export class KeymapExtension implements EditorExtension {
   }
 
   private findMatchingBinding(event: KeyboardEvent): KeyBinding | null {
-    const { key, ctrlKey, altKey, shiftKey, metaKey } = event;
+    const { ctrlKey, altKey, metaKey } = event;
 
-    // Normalize key for cross-platform compatibility
-    const normalizedKey = String(key).toLowerCase();
+    const byKey = this.matchBindings(this.keymap[String(event.key).toLowerCase()], event);
+    if (byKey) return byKey;
 
-    // Check if we have bindings for this key
-    const bindings = this.keymap[normalizedKey];
+    // With a modifier held, `key` is often not the key on the keycap: Shift turns `[` into `{` (so Ctrl+Shift+[ came
+    // as "{" and fold never ran), and on a Mac Option turns F into "Ï". Fall back to the physical key in that case.
+    // `key` is tried first, so layouts where the letters sit elsewhere (Ctrl+Z on a German keyboard) still match by
+    // the letter, not by the position.
+    if (!(ctrlKey || altKey || metaKey)) return null;
+    const physical = KeymapExtension.keyFromCode(event.code);
+    return physical ? this.matchBindings(this.keymap[physical], event) : null;
+  }
+
+  private static readonly codePunctuation: Record<string, string> = {
+    BracketLeft: '[',
+    BracketRight: ']',
+    Slash: '/',
+    Backslash: '\\',
+    Comma: ',',
+    Period: '.',
+    Minus: '-',
+    Equal: '=',
+    Semicolon: ';',
+    Quote: "'",
+    Backquote: '`',
+    Space: ' ',
+  };
+
+  /** The unshifted character of a physical key on a US keyboard: KeyF -> "f", Digit1 -> "1", BracketLeft -> "[". */
+  private static keyFromCode(code: string | undefined): string | null {
+    if (!code) return null;
+    const letter = /^Key([A-Z])$/.exec(code);
+    if (letter) return letter[1].toLowerCase();
+    const digit = /^Digit([0-9])$/.exec(code);
+    if (digit) return digit[1];
+    return KeymapExtension.codePunctuation[code] ?? null;
+  }
+
+  private matchBindings(bindings: KeyBinding[] | undefined, event: KeyboardEvent): KeyBinding | null {
     if (!bindings) return null;
+    const { ctrlKey, altKey, shiftKey, metaKey } = event;
 
     // Find match where a modifier in the binding is either unspecified (don't care) or equals the event
     for (const binding of bindings) {
