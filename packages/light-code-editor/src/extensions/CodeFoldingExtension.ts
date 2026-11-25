@@ -816,7 +816,10 @@ export class CodeFoldingExtension implements EditorExtension {
         __lceFoldPlaceholderSources?: Map<string, string>;
       }
     ).__lceFoldPlaceholderSources = placeholderSources;
-    this.editor.getView().syncTrailingNewlineMarkerForText(projection.text);
+    const view = this.editor.getView();
+    view.syncTrailingNewlineMarkerForText(projection.text);
+    // Line numbers and line decorations follow the lines as shown, not as counted in the document.
+    view.refreshFoldedLayout?.();
   }
 
   private getFoldPlaceholder(fold: FoldRange): string {

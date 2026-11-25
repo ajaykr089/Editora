@@ -65,6 +65,13 @@ export class View {
   /** Sees edits the browser makes itself (IME composition, drag and drop): after one, the DOM is read again. */
   private contentObserver: MutationObserver | null = null;
   private domDirty = true;
+  /**
+   * While something is folded: for each line of the document, the line it is shown on, or -1 inside a fold. Line
+   * numbers, line decorations and scrolling to a line go through it; they used to count shown lines as document
+   * lines, so after a fold the gutter renumbered the lines below it and decorations sat lines too low.
+   */
+  private foldedDisplayLines: number[] | null = null;
+  private gutterRelabelled = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -509,6 +516,64 @@ export class View {
     const lines = text.split('\n');
     this.renderContentLines(lines, text);
     this.updateLineNumbers(lines.length);
+    if (this.foldedDisplayLines || this.gutterRelabelled) this.refreshFoldedLayout();
+  }
+
+  /**
+   * Re-reads which lines are hidden by folds (from the fold placeholders in the editable DOM) and places the line
+   * numbers and line decorations by the lines as shown. Folding calls it after it changes the DOM.
+   */
+  refreshFoldedLayout(): void {
+    this.foldedDisplayLines = this.computeFoldedDisplayLines();
+    this.labelGutterRows();
+    this.renderLineDecorations(this.lineDecorations);
+    this.renderGutterDecorations(this.gutterDecorations);
+  }
+
+  /** The shown line a document line is on, or -1 when it is folded away. */
+  private displayLineOf(line: number): number {
+    if (!this.foldedDisplayLines) return line;
+    return this.foldedDisplayLines[line] ?? -1;
+  }
+
+  private computeFoldedDisplayLines(): number[] | null {
+    if (!this.contentElement.querySelector(`[${this.foldPlaceholderAttr}]`)) return null;
+    const map: number[] = [0];
+    let shown = 0;
+    const countBreaks = (text: string, hidden: boolean) => {
+      for (let at = text.indexOf('\n'); at !== -1; at = text.indexOf('\n', at + 1)) {
+        if (hidden) {
+          map.push(-1);
+        } else {
+          shown += 1;
+          map.push(shown);
+        }
+      }
+    };
+    this.contentElement.childNodes.forEach((child) => {
+      if (child instanceof HTMLElement && child.hasAttribute(this.foldPlaceholderAttr)) {
+        countBreaks(this.getFoldPlaceholderSource(child), true);
+      } else {
+        countBreaks(this.nodeSource(child), false);
+      }
+    });
+    return map;
+  }
+
+  /** Numbers the gutter rows with the document lines they show (1, 2, 3, then 9 after a fold of lines 4-8). */
+  private labelGutterRows(): void {
+    const rows = this.lineNumbersContentElement.children;
+    const labels: number[] = [];
+    if (this.foldedDisplayLines) {
+      this.foldedDisplayLines.forEach((shown, line) => {
+        if (shown >= 0 && labels[shown] === undefined) labels[shown] = line + 1;
+      });
+    }
+    for (let i = 0; i < rows.length; i++) {
+      const label = String(labels[i] ?? i + 1);
+      if (rows[i].textContent !== label) rows[i].textContent = label;
+    }
+    this.gutterRelabelled = !!this.foldedDisplayLines;
   }
 
   // Set inner HTML (used for syntax highlighted content)
@@ -929,8 +994,10 @@ export class View {
 
   // Scroll to position
   scrollToPosition(position: Position): void {
-    const safeLine = Math.max(0, Math.floor(position.line) || 0);
-    const targetTop = this.lineTop(safeLine);
+    let safeLine = Math.max(0, Math.floor(position.line) || 0);
+    // A line inside a fold is shown as the fold's first line.
+    while (safeLine > 0 && this.displayLineOf(safeLine) < 0) safeLine -= 1;
+    const targetTop = this.lineTop(this.displayLineOf(safeLine));
     const centeredTop = targetTop - (this.editorContainer.clientHeight / 2) + (this.lineHeight / 2);
     this.editorContainer.scrollTop = Math.max(0, centeredTop);
   }
@@ -1725,17 +1792,17 @@ export class View {
     this.syncDecorationElements(
       this.lineDecorationsElement,
       this.lineDecorationElements,
-      lineDecorations,
+      lineDecorations.filter((decoration) => this.displayLineOf(decoration.line) >= 0),
       (decoration) =>
-        `${this.lineTop(decoration.line)}:${this.lineHeightAt(decoration.line)}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
+        `${this.lineTop(this.displayLineOf(decoration.line))}:${this.lineHeightAt(this.displayLineOf(decoration.line))}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
       (element, decoration) => {
         element.className = this.joinClassNames('lce-decoration lce-decoration-line', decoration.className);
         element.setAttribute('data-decoration-id', decoration.id);
         element.setAttribute('data-decoration-line', String(decoration.line));
         element.style.cssText = this.joinStyleFragments([
           'position: absolute',
-          `top: ${this.lineTop(decoration.line)}px`,
-          `height: ${this.lineHeightAt(decoration.line)}px`,
+          `top: ${this.lineTop(this.displayLineOf(decoration.line))}px`,
+          `height: ${this.lineHeightAt(this.displayLineOf(decoration.line))}px`,
           'left: 12px',
           'right: 12px',
           'border-radius: 3px',
@@ -1749,17 +1816,17 @@ export class View {
     this.syncDecorationElements(
       this.gutterDecorationsElement,
       this.gutterDecorationElements,
-      gutterDecorations,
+      gutterDecorations.filter((decoration) => this.displayLineOf(decoration.line) >= 0),
       (decoration) =>
-        `${this.lineTop(decoration.line)}:${this.lineHeightAt(decoration.line)}:${decoration.label || ''}:${decoration.title || ''}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
+        `${this.lineTop(this.displayLineOf(decoration.line))}:${this.lineHeightAt(this.displayLineOf(decoration.line))}:${decoration.label || ''}:${decoration.title || ''}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
       (element, decoration) => {
         element.className = this.joinClassNames('lce-decoration lce-decoration-gutter', decoration.className);
         element.setAttribute('data-decoration-id', decoration.id);
         element.setAttribute('data-decoration-line', String(decoration.line));
         element.style.cssText = this.joinStyleFragments([
           'position: absolute',
-          `top: ${this.lineTop(decoration.line)}px`,
-          `height: ${this.lineHeightAt(decoration.line)}px`,
+          `top: ${this.lineTop(this.displayLineOf(decoration.line))}px`,
+          `height: ${this.lineHeightAt(this.displayLineOf(decoration.line))}px`,
           'left: 0',
           'right: 0',
           'display: flex',
