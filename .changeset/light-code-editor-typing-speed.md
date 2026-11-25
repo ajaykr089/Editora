@@ -7,3 +7,4 @@ Typing stays fast in long documents. A keystroke used to re-render and re-highli
 - The editing surface holds one `<div data-lce-line>` per line instead of one text node, and the highlight overlay one block per line. Code that read the surface's DOM directly should use `getValue()` and the position APIs instead.
 - In documents over 20,000 characters, typing re-highlights only the changed lines and the whole document again 250 ms after the typing pauses. Custom highlighters (`registerMode`, language services) still get the whole document.
 - Fold regions and indent guides are worked out again when they can have changed, not on every keystroke.
+- While a block is folded, the gutter shows the document's line numbers (it used to renumber the lines below a fold) and the active line, indent guides and diagnostic markers sit on the right lines.
