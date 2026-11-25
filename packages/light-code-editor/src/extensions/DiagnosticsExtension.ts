@@ -325,9 +325,14 @@ export class DiagnosticsExtension implements EditorExtension {
       return;
     }
 
+    // With nothing to report the box is hidden. It used to stay over the code with a note meant for the developer
+    // ("Add diagnostics with setDiagnostics(...)"), shown to everyone using the editor.
+    if (this.statusElement) {
+      this.statusElement.style.display = this.diagnostics.length === 0 ? 'none' : '';
+    }
     if (this.diagnostics.length === 0) {
-      this.summaryElement.textContent = 'No diagnostics';
-      this.messageElement.textContent = 'Add diagnostics with setDiagnostics(...) or the setDiagnostics command.';
+      this.summaryElement.textContent = '';
+      this.messageElement.textContent = '';
       return;
     }
 
