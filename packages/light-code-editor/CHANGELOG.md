@@ -1,5 +1,29 @@
 # Change Log
 
+## 1.2.0
+
+### Minor Changes
+
+- 66cebb7: Fixes from an audit of the code editor:
+
+  - Read-only mode can no longer be switched off with Ctrl+R (pressed twice it made a read-only editor editable, and it blocked the browser's reload key on Windows and Linux). `ReadOnlyExtension` keeps its `setReadOnly` and `toggleReadOnly` commands.
+  - Copy and Cut across a folded block take the code, not the fold label (Cut used to lose the folded lines).
+  - The lightweight formatter no longer changes strings, template literals, regular expressions, comments, `<pre>`, `<textarea>`, Python docstrings or Markdown line breaks, and returns the code unchanged if it would change anything but whitespace.
+  - Shortcuts that need Shift or Option now work: fold/unfold (Ctrl/Cmd+Shift+[ and ]) never ran, and on a Mac neither did Option+Shift+F (format) or Option+Shift+A (block comment).
+  - A regular-expression replace expands `$1`, `$<name>`, `$&` and `$$`. Regex search results now carry `groups` and `namedGroups`.
+  - `setValue()` is one undo step; Undo after it used to skip what had been typed just before.
+  - `createEditor` no longer adds its defaults to the caller's `extensions` array (two editors made from the same options shared one keymap, so Ctrl+Z in one undid in the other).
+  - The diagnostics status box is hidden when there are no diagnostics, instead of showing a developer note to users.
+  - New: Enter keeps the indentation of the current line, indents one level after `{`, `[` or `(`, and splits `{|}` over three lines. Set `autoIndent: false` for the old behaviour.
+  - The ES build is now one file per module and the package declares `sideEffects`, so unused extensions are left out of an app's bundle (`createEditor` alone: 35 KB to 16 KB gzipped).
+
+- 223b1a4: Typing stays fast in long documents. A keystroke used to re-render and re-highlight the whole document (about 50 ms per keystroke at 1,200 lines and 230-315 ms at 6,000 lines, all extensions on); it now updates only the lines it changed: about 4-5 ms at 1,200 lines and 12-16 ms at 6,000 lines in Chromium, Firefox and WebKit.
+
+  - The editing surface holds one `<div data-lce-line>` per line instead of one text node, and the highlight overlay one block per line. Code that read the surface's DOM directly should use `getValue()` and the position APIs instead.
+  - In documents over 20,000 characters, typing re-highlights only the changed lines and the whole document again 250 ms after the typing pauses. Custom highlighters (`registerMode`, language services) still get the whole document.
+  - Fold regions and indent guides are worked out again when they can have changed, not on every keystroke.
+  - While a block is folded, the gutter shows the document's line numbers (it used to renumber the lines below a fold) and the active line, indent guides and diagnostic markers sit on the right lines.
+
 ## 1.1.0
 
 ### Minor Changes
