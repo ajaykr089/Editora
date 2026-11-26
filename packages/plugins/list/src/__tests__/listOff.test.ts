@@ -77,6 +77,13 @@ describe('switching a list off', () => {
     expect(browserCommands).toEqual(['insertOrderedList', 'insertUnorderedList']);
   });
 
+  it('keeps an item\'s own list and the rest of a bullet list as one list', () => {
+    const root = setUp('<ul><li>a<ul><li>x</li></ul></li><li>b</li></ul>');
+    select(root, 'a');
+    toggleBulletList();
+    expect(root.innerHTML).toBe('<p>a</p><ul><li>x</li><li>b</li></ul>');
+  });
+
   it('is one undo step', () => {
     const root = setUp('<ul><li>a</li></ul>');
     const recorded: unknown[][] = [];
@@ -90,3 +97,4 @@ describe('switching a list off', () => {
     delete (window as any).execEditorCommand;
   });
 });
+

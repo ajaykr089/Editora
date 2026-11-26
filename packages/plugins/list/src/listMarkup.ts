@@ -178,7 +178,7 @@ export function restoreCaretOffsetInBlock(root: HTMLElement, offset: number): vo
 const INLINE_LIST_BLOCKS = /^(P|DIV|UL|OL|BLOCKQUOTE|H[1-6]|PRE|TABLE|FIGURE|HR)$/;
 
 /** The list items the selection is in: the nearest item of every piece of selected text (and of the caret). */
-function selectedListItems(root: HTMLElement, range: Range): HTMLLIElement[] | null {
+export function selectedListItems(root: HTMLElement, range: Range): HTMLLIElement[] | null {
   const items = new Set<HTMLLIElement>();
   const add = (node: Node): boolean => {
     const element = node instanceof Element ? node : node.parentElement;
@@ -199,7 +199,7 @@ function selectedListItems(root: HTMLElement, range: Range): HTMLLIElement[] | n
   return Array.from(items);
 }
 
-function caretOffsets(root: HTMLElement, range: Range): { start: number; end: number } {
+export function caretOffsets(root: HTMLElement, range: Range): { start: number; end: number } {
   const measure = (node: Node, offset: number) => {
     const head = root.ownerDocument.createRange();
     head.selectNodeContents(root);
@@ -209,7 +209,7 @@ function caretOffsets(root: HTMLElement, range: Range): { start: number; end: nu
   return { start: measure(range.startContainer, range.startOffset), end: measure(range.endContainer, range.endOffset) };
 }
 
-function placeSelection(root: HTMLElement, offsets: { start: number; end: number }): void {
+export function placeSelection(root: HTMLElement, offsets: { start: number; end: number }): void {
   const selection = root.ownerDocument.defaultView?.getSelection();
   if (!selection) return;
   const pointAt = (offset: number): [Node, number] => {
@@ -227,6 +227,51 @@ function placeSelection(root: HTMLElement, offsets: { start: number; end: number
   const range = root.ownerDocument.createRange();
   range.setStart(...pointAt(offsets.start));
   range.setEnd(...pointAt(offsets.end));
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+export interface SavedBoundaries {
+  startContainer: Node;
+  startOffset: number;
+  endContainer: Node;
+  endOffset: number;
+  offsets: { start: number; end: number };
+}
+
+/** The selection as its nodes (plain values: a live Range moves with nodes that are about to move) and as offsets. */
+export function saveBoundaries(root: HTMLElement, range: Range): SavedBoundaries {
+  return {
+    startContainer: range.startContainer,
+    startOffset: range.startOffset,
+    endContainer: range.endContainer,
+    endOffset: range.endOffset,
+    offsets: caretOffsets(root, range),
+  };
+}
+
+/**
+ * Puts the selection back after nodes were moved: on the same nodes when they are still in the content (moving
+ * keeps text nodes, and a character offset is ambiguous at the start of a block), else at the start of `fallback`,
+ * else on the same characters.
+ */
+export function restoreBoundaries(root: HTMLElement, saved: SavedBoundaries, fallback?: Node | null): void {
+  const selection = root.ownerDocument.defaultView?.getSelection();
+  if (!selection) return;
+  const inside = (node: Node) => node.isConnected && root.contains(node) && node !== root;
+  const fits = (node: Node, offset: number) =>
+    offset <= (node.nodeType === Node.TEXT_NODE ? (node as Text).data.length : node.childNodes.length);
+  const range = root.ownerDocument.createRange();
+  if (inside(saved.startContainer) && inside(saved.endContainer) && fits(saved.startContainer, saved.startOffset) && fits(saved.endContainer, saved.endOffset)) {
+    range.setStart(saved.startContainer, saved.startOffset);
+    range.setEnd(saved.endContainer, saved.endOffset);
+  } else if (fallback && inside(fallback)) {
+    range.setStart(fallback, 0);
+    range.collapse(true);
+  } else {
+    placeSelection(root, saved.offsets);
+    return;
+  }
   selection.removeAllRanges();
   selection.addRange(range);
 }
@@ -266,24 +311,25 @@ function blocksFromItem(item: HTMLLIElement): Node[] {
  * one paragraph with line breaks (`<p>a<br>b</p>`), and Chromium wraps each in a span with the editor's font, so a
  * list could not be turned back into the paragraphs it was made from. Items before and after the selection stay
  * in their list. Returns false, leaving everything as it is, unless the selection is only in items of lists of
- * `tag` (anything else - making a list, or switching its type - is left to the browser).
+ * `tag` (anything else - making a list, or switching its type - is left to the browser). Gives back the blocks it made.
  */
-export function unwrapSelectedListItems(root: HTMLElement, tag: 'UL' | 'OL'): boolean {
+export function unwrapSelectedListItems(root: HTMLElement, tag: 'UL' | 'OL'): Node[] | null {
   const selection = root.ownerDocument.defaultView?.getSelection();
-  if (!selection || selection.rangeCount === 0) return false;
+  if (!selection || selection.rangeCount === 0) return null;
   const range = selection.getRangeAt(0);
-  if (!root.contains(range.commonAncestorContainer)) return false;
+  if (!root.contains(range.commonAncestorContainer)) return null;
 
   const items = selectedListItems(root, range);
-  if (!items || items.length === 0) return false;
+  if (!items || items.length === 0) return null;
   const lists = new Set<HTMLElement>();
   for (const item of items) {
     const list = item.parentElement;
-    if (!list || list.tagName !== tag || list.getAttribute('data-type') === 'checklist') return false;
+    if (!list || list.tagName !== tag || list.getAttribute('data-type') === 'checklist') return null;
     lists.add(list);
   }
 
-  const offsets = caretOffsets(root, range);
+  const saved = saveBoundaries(root, range);
+  const made: Node[] = [];
   lists.forEach((list) => {
     const children = Array.from(list.children) as HTMLElement[];
     const first = children.findIndex((child) => items.includes(child as HTMLLIElement));
@@ -298,7 +344,12 @@ export function unwrapSelectedListItems(root: HTMLElement, tag: 'UL' | 'OL'): bo
     // The items from the first to the last selected one become blocks, right after what stays of the list.
     const blocks = children.slice(first, last + 1).flatMap((item) => blocksFromItem(item as HTMLLIElement));
     blocks.forEach((block) => parent.insertBefore(block, anchor));
-    if (after.length > 0) {
+    made.push(...blocks);
+    const lastBlock = blocks[blocks.length - 1];
+    if (after.length > 0 && lastBlock instanceof HTMLElement && lastBlock.tagName === list.tagName && tag === 'UL') {
+      // The item held a list of its own, which now sits right before the rest of this one: one list, not two.
+      after.forEach((item) => lastBlock.appendChild(item));
+    } else if (after.length > 0) {
       const rest = list.cloneNode(false) as HTMLElement;
       // An ordered list carries on with its own numbers.
       if (tag === 'OL') rest.setAttribute('start', String((parseInt(list.getAttribute('start') || '1', 10) || 1) + last + 1));
@@ -308,6 +359,7 @@ export function unwrapSelectedListItems(root: HTMLElement, tag: 'UL' | 'OL'): bo
     children.slice(first).forEach((child) => child.parentNode === list && list.removeChild(child));
     if (list.children.length === 0) parent.removeChild(list);
   });
-  placeSelection(root, offsets);
-  return true;
+  restoreBoundaries(root, saved, made[0]);
+  return made;
 }
+
