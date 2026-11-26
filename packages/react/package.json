@@ -1,6 +1,6 @@
 {
   "name": "@editora/react",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "React rich text editor (WYSIWYG) with 30+ plugins, an accessible toolbar and TypeScript types. Free and open source, for React 16.8 and newer.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -57,8 +57,8 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@editora/core": "^1.1.1",
-    "@editora/plugins": "^1.2.7",
+    "@editora/core": "^1.1.2",
+    "@editora/plugins": "^1.2.9",
     "@editora/themes": "^1.1.1",
     "react": ">=16.8 <21",
     "react-dom": ">=16.8 <21"
@@ -75,7 +75,7 @@
     "@editora/light-code-editor": "^1.0.19"
   },
   "devDependencies": {
-    "@editora/core": "^1.1.1",
+    "@editora/core": "^1.1.2",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "typescript": "^5.0.0",

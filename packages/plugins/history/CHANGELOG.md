@@ -1,5 +1,16 @@
 # @editora/plugin-history
 
+## 1.0.7
+
+### Patch Changes
+
+- 58e80e3: In Safari, Bullet list and Numbered list are one undo step again. WebKit reports these commands itself, and the list plugin then recorded its clean-up of the markup as a second step, so the first Undo only took back the clean-up. A second report of the same change, right after the first, now replaces it.
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [0c23c09]
+- Updated dependencies [58e80e3]
+  - @editora/core@1.1.2
+
 ## 1.0.6
 
 ### Patch Changes

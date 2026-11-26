@@ -1,5 +1,30 @@
 # Change Log
 
+## 1.2.9
+
+### Patch Changes
+
+- 58e80e3: Source view (`code` plugin) fixes:
+
+  - **Saving without an edit no longer changes the document.** The formatter put every tag on its own line and trimmed the text between tags, so opening the source view and pressing Save turned `foo<b>bar</b>baz` into "foo bar baz" and `<i>x</i>.` into "x .", and a `<pre>` lost its leading spaces. Line breaks now go only between block elements, inline content and `<pre>` are shown exactly as they are, and Save leaves the document alone when the source was not edited.
+  - **Undo takes back a source edit.** Save replaced the content without telling the history, so Undo could not reverse it; it is now one undo step.
+  - **Edits are not thrown away without asking.** Escape, the close button and the backdrop closed the dialog at once (only Cancel asked about unsaved changes), and Escape in the find box closed the whole dialog. They now ask first, and an Escape the find box uses only closes the find box.
+  - **The dialog can be saved from the keyboard.** Escape in the code also closed the dialog, but in the code editor Escape is the way out of the Tab key (Tab indents; Escape then Tab moves on), so a keyboard user could never reach Save. Escape in the code is now left to the code editor.
+
+- 58e80e3: In Safari, Bullet list and Numbered list are one undo step again. WebKit reports these commands itself, and the list plugin then recorded its clean-up of the markup as a second step, so the first Undo only took back the clean-up. A second report of the same change, right after the first, now replaces it.
+- 58e80e3: Links that open in the same tab no longer get `target="_self"`. The link dialog wrote it on every link it made or edited, which is noise in the saved HTML. Links that open in a new tab keep `target="_blank"` and `rel="noopener noreferrer"`, and unticking "Open in new window/tab" now removes both.
+- b10d11c: Lists get the keys of a word processor. Tab nests an item under the one before it and Shift+Tab moves a nested item back out (Tab used to take the focus out of the editor; Shift+Tab on a top-level item still does, so the focus can always leave). Enter in an empty item moves it out one level, or makes it a paragraph at the top level (Firefox made a `<div>`). Backspace at the start of an item does the same (at the start of the first item it did nothing). Each is one undo step.
+- 58e80e3: Switching a list off gives back one paragraph per item. The browsers' own command joined the items into one paragraph with line breaks (`<p>a<br>b</p>`) in Chromium, Firefox and Safari, and Chromium wrapped each in a span with the editor's font. Items before and after the selection now stay in their list, an ordered list keeps its numbering after the gap, and the selection stays on the same text.
+- 50bb566: Switching a list between bullets and numbers switches the whole list. The browsers' own command converted item by item, splitting the list where the selection ended, and Chromium wrapped each converted item in a span carrying the editor's font. The list keeps its items, its attributes (a bullet list drops the numbering ones) and the selection.
+- 58e80e3: Rows and columns added next to header cells are header cells. A column added to a table with a header row put a `<td>` into the header, and a row added above the header row was a row of `<td>`s inside `<thead>`. A new cell is now a `<th>` where it joins a header row or a header column; a row added below the header row is still a body row.
+- 58e80e3: The table's row and column commands work on tables with merged cells. They counted cells instead of columns, so once a cell spanned two columns (which the toolbar's own Merge does) a new row came out a cell short, a new column went in at different places in different rows, and Delete Column deleted the merged cell with all its text. A merged cell now grows over a row or column added inside it, Delete Column makes it narrower instead of removing it, and deleting the first row of a cell that spans rows keeps its text in the next row.
+- 78c2ce7: The table shortcuts are now Mod+Shift+Enter (add a row below) and Mod+Alt+Enter (add a column to the right). They were Mod+Shift+R and Mod+Shift+C, which belong to the browsers: hard reload in Chrome and Firefox, Reader in Safari, and the DevTools element picker. They also only worked once the table toolbar had been shown. The toolbar's tooltips name the new keys (Cmd on a Mac, Ctrl elsewhere); the "Add row above" button no longer claims the add-row-below shortcut. Tab in the last cell still adds a row.
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [0c23c09]
+- Updated dependencies [58e80e3]
+  - @editora/core@1.1.2
+
 ## 1.2.8
 
 ### Patch Changes

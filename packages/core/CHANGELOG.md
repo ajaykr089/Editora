@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.1.2
+
+### Patch Changes
+
+- 58e80e3: Source view (`code` plugin) fixes:
+
+  - **Saving without an edit no longer changes the document.** The formatter put every tag on its own line and trimmed the text between tags, so opening the source view and pressing Save turned `foo<b>bar</b>baz` into "foo bar baz" and `<i>x</i>.` into "x .", and a `<pre>` lost its leading spaces. Line breaks now go only between block elements, inline content and `<pre>` are shown exactly as they are, and Save leaves the document alone when the source was not edited.
+  - **Undo takes back a source edit.** Save replaced the content without telling the history, so Undo could not reverse it; it is now one undo step.
+  - **Edits are not thrown away without asking.** Escape, the close button and the backdrop closed the dialog at once (only Cancel asked about unsaved changes), and Escape in the find box closed the whole dialog. They now ask first, and an Escape the find box uses only closes the find box.
+  - **The dialog can be saved from the keyboard.** Escape in the code also closed the dialog, but in the code editor Escape is the way out of the Tab key (Tab indents; Escape then Tab moves on), so a keyboard user could never reach Save. Escape in the code is now left to the code editor.
+
+- 58e80e3: `<editora-editor>` keeps the selection when it sanitizes an edit. When an edit reported without `beforeinput` (a plugin's own change, or Chromium's list commands) changed on sanitizing, the content was replaced and the selection fell to the start of the document. In Chromium this meant that after turning two paragraphs into a bullet list, pressing Numbered list changed only the first item and wrapped it in an inline `font-family` span.
+- 0c23c09: Cmd/Ctrl+Shift+8 (bullet list) and Cmd/Ctrl+Shift+7 (numbered list) work. Shortcuts were matched on the character a key types, and with Shift held the digit keys type `*` and `&`, so neither shortcut ever ran, in `<editora-editor>` or in the React editor. With a modifier held, a shortcut now also matches the key itself; the character is still tried first, so other keyboard layouts keep theirs.
+- 58e80e3: A paste is an undo step of its own, in `<editora-editor>` and in the React editor. A plain-text paste (the default) was recorded as typing in Safari and not at all in Chrome, so one Undo after a paste also took back the words typed just before it. With `paste.keepFormatting`, pasted HTML was never recorded, and no `input` event (React: no `onChange`) said the content had changed.
+
 ## 1.1.1
 
 ### Patch Changes

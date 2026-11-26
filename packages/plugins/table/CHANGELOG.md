@@ -1,5 +1,18 @@
 # @editora/plugin-table
 
+## 1.0.12
+
+### Patch Changes
+
+- 58e80e3: Rows and columns added next to header cells are header cells. A column added to a table with a header row put a `<td>` into the header, and a row added above the header row was a row of `<td>`s inside `<thead>`. A new cell is now a `<th>` where it joins a header row or a header column; a row added below the header row is still a body row.
+- 58e80e3: The table's row and column commands work on tables with merged cells. They counted cells instead of columns, so once a cell spanned two columns (which the toolbar's own Merge does) a new row came out a cell short, a new column went in at different places in different rows, and Delete Column deleted the merged cell with all its text. A merged cell now grows over a row or column added inside it, Delete Column makes it narrower instead of removing it, and deleting the first row of a cell that spans rows keeps its text in the next row.
+- 78c2ce7: The table shortcuts are now Mod+Shift+Enter (add a row below) and Mod+Alt+Enter (add a column to the right). They were Mod+Shift+R and Mod+Shift+C, which belong to the browsers: hard reload in Chrome and Firefox, Reader in Safari, and the DevTools element picker. They also only worked once the table toolbar had been shown. The toolbar's tooltips name the new keys (Cmd on a Mac, Ctrl elsewhere); the "Add row above" button no longer claims the add-row-below shortcut. Tab in the last cell still adds a row.
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [0c23c09]
+- Updated dependencies [58e80e3]
+  - @editora/core@1.1.2
+
 ## 1.0.11
 
 ### Patch Changes

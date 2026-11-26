@@ -1,5 +1,16 @@
 # @editora/plugin-link
 
+## 1.0.8
+
+### Patch Changes
+
+- 58e80e3: Links that open in the same tab no longer get `target="_self"`. The link dialog wrote it on every link it made or edited, which is noise in the saved HTML. Links that open in a new tab keep `target="_blank"` and `rel="noopener noreferrer"`, and unticking "Open in new window/tab" now removes both.
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [0c23c09]
+- Updated dependencies [58e80e3]
+  - @editora/core@1.1.2
+
 ## 1.0.7
 
 ### Patch Changes

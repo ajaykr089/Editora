@@ -1,5 +1,18 @@
 # @editora/plugin-list
 
+## 1.0.8
+
+### Patch Changes
+
+- b10d11c: Lists get the keys of a word processor. Tab nests an item under the one before it and Shift+Tab moves a nested item back out (Tab used to take the focus out of the editor; Shift+Tab on a top-level item still does, so the focus can always leave). Enter in an empty item moves it out one level, or makes it a paragraph at the top level (Firefox made a `<div>`). Backspace at the start of an item does the same (at the start of the first item it did nothing). Each is one undo step.
+- 58e80e3: Switching a list off gives back one paragraph per item. The browsers' own command joined the items into one paragraph with line breaks (`<p>a<br>b</p>`) in Chromium, Firefox and Safari, and Chromium wrapped each in a span with the editor's font. Items before and after the selection now stay in their list, an ordered list keeps its numbering after the gap, and the selection stays on the same text.
+- 50bb566: Switching a list between bullets and numbers switches the whole list. The browsers' own command converted item by item, splitting the list where the selection ended, and Chromium wrapped each converted item in a span carrying the editor's font. The list keeps its items, its attributes (a bullet list drops the numbering ones) and the selection.
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [0c23c09]
+- Updated dependencies [58e80e3]
+  - @editora/core@1.1.2
+
 ## 1.0.7
 
 ### Patch Changes

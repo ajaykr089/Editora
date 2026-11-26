@@ -1,5 +1,26 @@
 # Change Log
 
+## 1.1.1
+
+### Patch Changes
+
+- 0c23c09: Cmd/Ctrl+Shift+8 (bullet list) and Cmd/Ctrl+Shift+7 (numbered list) work. Shortcuts were matched on the character a key types, and with Shift held the digit keys type `*` and `&`, so neither shortcut ever ran, in `<editora-editor>` or in the React editor. With a modifier held, a shortcut now also matches the key itself; the character is still tried first, so other keyboard layouts keep theirs.
+- 58e80e3: A paste is an undo step of its own, in `<editora-editor>` and in the React editor. A plain-text paste (the default) was recorded as typing in Safari and not at all in Chrome, so one Undo after a paste also took back the words typed just before it. With `paste.keepFormatting`, pasted HTML was never recorded, and no `input` event (React: no `onChange`) said the content had changed.
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [0c23c09]
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [b10d11c]
+- Updated dependencies [58e80e3]
+- Updated dependencies [50bb566]
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [58e80e3]
+- Updated dependencies [78c2ce7]
+  - @editora/plugins@1.2.9
+  - @editora/core@1.1.2
+
 ## 1.1.0
 
 ### Minor Changes

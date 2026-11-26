@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-link",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Link plugin for Rich Text Editor",
   "keywords": [
     "editora",
@@ -28,7 +28,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.16"
+    "@editora/core": "^1.1.2"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
