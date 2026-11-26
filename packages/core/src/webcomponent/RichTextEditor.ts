@@ -11,6 +11,7 @@ import { getCursorPosition, countLines, calculateTextStats, getSelectionInfo } f
 import { KeyboardShortcutManager } from '../KeyboardShortcuts';
 import { sanitizeInputHTML, sanitizePastedHTML } from '../utils/sanitizeHTML';
 import { getCleanEditorHTML, stripEditorUiArtifacts } from '../utils/editorOutput';
+import { restoreSelectionOffsets, saveSelectionOffsets } from '../utils/selectionOffsets';
 import { ConfigResolver, EditorConfigDefaults } from '../config/ConfigResolver';
 import { PluginLoader } from '../config/PluginLoader';
 import { Plugin } from '../plugins/Plugin';
@@ -1357,17 +1358,13 @@ export class RichTextEditorElement extends ElementBase {
       if (shouldSanitizeOnInput) {
         const sanitized = sanitizeInputHTML(html, contentConfig, securityConfig, trustedAllowedTags);
         if (sanitized !== html) {
-          const selection = window.getSelection();
-          const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+          // Putting the old range back does not work: it points into the nodes that were just replaced, so the
+          // selection fell to the start of the document. Chromium reports its list commands half-way (the list
+          // still inside the paragraph, which sanitizing moves out), so turning two selected paragraphs into a list
+          // lost the selection and the next list command changed only one item. Keep it on the same characters.
+          const offsets = saveSelectionOffsets(this.contentElement);
           this.contentElement.innerHTML = sanitized;
-          if (range && selection) {
-            try {
-              selection.removeAllRanges();
-              selection.addRange(range);
-            } catch {
-              // Selection restoration may fail if DOM changed significantly.
-            }
-          }
+          restoreSelectionOffsets(this.contentElement, offsets);
           html = sanitized;
         }
       }
