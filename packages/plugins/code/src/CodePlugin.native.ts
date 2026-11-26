@@ -737,22 +737,22 @@ export const CodePlugin = (): Plugin => ({
           }
         };
 
+        let isConfirmingDiscard = false;
         const handleCancel = async () => {
-          if (
-            hasUnsavedChanges &&
-            !(await confirmAction("You have unsaved changes. Are you sure you want to cancel?", {
+          if (isConfirmingDiscard) return;
+          isConfirmingDiscard = true;
+          const discard =
+            !hasUnsavedChanges ||
+            (await confirmAction("You have unsaved changes. Are you sure you want to cancel?", {
               title: 'Discard changes?',
               confirmText: 'Discard changes',
               cancelText: 'Keep editing',
               danger: true,
               context: contentElement,
-            }))
-          ) {
-            return;
-          }
-          closeDialog();
+            }));
+          isConfirmingDiscard = false;
+          if (discard) closeDialog();
         };
-
         const handleSave = () => {
           try {
             const htmlContent = editorInstance?.getValue() ?? formattedOriginalHtml;
@@ -796,20 +796,31 @@ export const CodePlugin = (): Plugin => ({
         if (themeBtn) addListener(themeBtn, "click", toggleTheme);
         if (readonlyBtn) addListener(readonlyBtn, "click", toggleReadOnly);
         if (fullscreenBtn) addListener(fullscreenBtn, "click", toggleFullscreen);
-        if (closeBtn) addListener(closeBtn, "click", closeDialog);
+        // The close button, the backdrop and Escape are ways to cancel too, so they ask first when there are
+        // unsaved edits instead of throwing them away.
+        if (closeBtn) addListener(closeBtn, "click", handleCancel);
         if (cancelBtn) addListener(cancelBtn, "click", handleCancel);
         if (saveBtn) addListener(saveBtn, "click", handleSave);
         addListener(overlay, "click", (e: Event) => {
           if (e.target === overlay) {
-            closeDialog();
+            void handleCancel();
           }
         });
         addListener(document, "keydown", (e: Event) => {
           const keyEvent = e as KeyboardEvent;
-          if (keyEvent.key === "Escape") {
-            keyEvent.preventDefault();
+          // The overlay was removed without closing the dialog (a second source view replaced it): let go.
+          if (!overlay.isConnected) {
             closeDialog();
+            return;
           }
+          // An Escape something else used (the find panel closing on it) is not one for the dialog.
+          if (keyEvent.key !== "Escape" || keyEvent.defaultPrevented) return;
+          // In the code, Escape belongs to the code editor: it lets go of Tab, so that the next Tab can reach the
+          // Save button. Closing the dialog on it left a keyboard user no way to save.
+          const target = keyEvent.target;
+          if (target instanceof Node && editorContainer.contains(target)) return;
+          keyEvent.preventDefault();
+          void handleCancel();
         });
 
         document.body.appendChild(overlay);
