@@ -2,6 +2,16 @@ import { Plugin } from '@editora/core';
 import { notify } from '../../shared/notify';
 import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 import './table.css';
+import {
+  buildGrid,
+  cellsInColumnOf,
+  deleteColumn as deleteTableColumn,
+  deleteRow as deleteTableRow,
+  insertColumn,
+  insertRow,
+  tableRows,
+  type CellFactory,
+} from './tableGrid';
 
 /**
  * Advanced Table Plugin - Native Implementation
@@ -207,123 +217,49 @@ export const insertTableCommand = () => {
 // TABLE OPERATIONS (10 COMMANDS)
 // ============================================
 
+/** A new, empty cell, as the insert-table command makes them. */
+const makeEmptyCell: CellFactory = () => {
+  const cell = document.createElement('td');
+  const paragraph = document.createElement('p');
+  paragraph.innerHTML = '<br>';
+  cell.appendChild(paragraph);
+  return cell;
+};
+
 export const addRowAboveCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, rowIndex } = tableInfo;
-
-  // Create new row with same number of cells
-  const newRow = document.createElement('tr');
-  const cellCount = table.rows[0]?.cells.length || 0;
-
-  for (let i = 0; i < cellCount; i++) {
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-    newRow.appendChild(cell);
-  }
-
-  // Find the correct tbody/thead element and insert row
-  const currentRow = table.rows[rowIndex];
-  if (currentRow && currentRow.parentElement) {
-    currentRow.parentElement.insertBefore(newRow, currentRow);
-  } else {
-    table.appendChild(newRow);
-  }
-  
+  if (!tableInfo?.cell) return;
+  insertRow(tableInfo.table, tableInfo.cell, 'above', makeEmptyCell);
   updateTableInfo();
 };
 
 export const addRowBelowCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, rowIndex } = tableInfo;
-
-  // Create new row with same number of cells
-  const newRow = document.createElement('tr');
-  const cellCount = table.rows[0]?.cells.length || 0;
-
-  for (let i = 0; i < cellCount; i++) {
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-    newRow.appendChild(cell);
-  }
-
-  // Insert row after current position
-  if (rowIndex >= table.rows.length - 1) {
-    const lastRow = table.rows[table.rows.length - 1];
-    if (lastRow && lastRow.parentElement) {
-      lastRow.parentElement.appendChild(newRow);
-    } else {
-      table.appendChild(newRow);
-    }
-  } else {
-    const nextRow = table.rows[rowIndex + 1];
-    nextRow.parentElement?.insertBefore(newRow, nextRow);
-  }
-
+  if (!tableInfo?.cell) return;
+  insertRow(tableInfo.table, tableInfo.cell, 'below', makeEmptyCell);
   updateTableInfo();
 };
 
 export const addColumnLeftCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, colIndex } = tableInfo;
-
-  // Add cell to each row at specified column index
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-
-    if (colIndex === 0) {
-      row.insertBefore(cell, row.cells[0]);
-    } else {
-      row.insertBefore(cell, row.cells[colIndex]);
-    }
-  }
-  
+  if (!tableInfo?.cell) return;
+  insertColumn(tableInfo.table, tableInfo.cell, 'left', makeEmptyCell);
   updateTableInfo();
 };
 
 export const addColumnRightCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, colIndex } = tableInfo;
-
-  // Add cell to each row after specified column index
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-
-    if (colIndex >= row.cells.length - 1) {
-      row.appendChild(cell);
-    } else {
-      row.insertBefore(cell, row.cells[colIndex + 1]);
-    }
-  }
-  
+  if (!tableInfo?.cell) return;
+  insertColumn(tableInfo.table, tableInfo.cell, 'right', makeEmptyCell);
   updateTableInfo();
 };
 
 export const deleteRowCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo || tableInfo.rowCount <= 1) return;
+  if (!tableInfo?.cell || tableInfo.rowCount <= 1) return;
 
   const { table, rowIndex, colIndex } = tableInfo;
-  table.deleteRow(rowIndex);
+  if (!deleteTableRow(table, tableInfo.cell)) return;
 
   restoreCaretInTable(table, rowIndex, colIndex);
   updateTableInfo();
@@ -331,17 +267,10 @@ export const deleteRowCommand = () => {
 
 export const deleteColumnCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo || tableInfo.cellCount <= 1) return;
+  if (!tableInfo?.cell || tableInfo.cellCount <= 1) return;
 
   const { table, rowIndex: caretRow, colIndex } = tableInfo;
-
-  // Delete cell from each row at specified column index
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    if (row.cells[colIndex]) {
-      row.deleteCell(colIndex);
-    }
-  }
+  if (!deleteTableColumn(table, tableInfo.cell)) return;
 
   restoreCaretInTable(table, caretRow, colIndex);
   updateTableInfo();
@@ -404,26 +333,20 @@ function retagRowCells(row: HTMLTableRowElement, tag: 'td' | 'th'): void {
 
 export const toggleHeaderColumnCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
+  if (!tableInfo?.cell) return;
 
-  const { table, colIndex } = tableInfo;
-
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const cell = table.rows[rowIndex].cells[colIndex];
-    if (cell) {
-      const newTag = cell.tagName.toLowerCase() === 'th' ? 'td' : 'th';
-      const newCell = document.createElement(newTag);
-      newCell.innerHTML = cell.innerHTML;
-
-      for (let i = 0; i < cell.attributes.length; i++) {
-        const attr = cell.attributes[i];
-        newCell.setAttribute(attr.name, attr.value);
-      }
-
-      cell.parentNode?.replaceChild(newCell, cell);
+  // Every cell that covers the column, merged ones included (counting cells picked a different column in rows
+  // with a merged cell before it).
+  cellsInColumnOf(tableInfo.table, tableInfo.cell).forEach((cell) => {
+    const newCell = document.createElement(cell.tagName.toLowerCase() === 'th' ? 'td' : 'th');
+    newCell.innerHTML = cell.innerHTML;
+    for (let i = 0; i < cell.attributes.length; i++) {
+      const attr = cell.attributes[i];
+      newCell.setAttribute(attr.name, attr.value);
     }
-  }
-  
+    cell.parentNode?.replaceChild(newCell, cell);
+  });
+
   updateTableInfo();
 };
 
@@ -586,6 +509,8 @@ export const mergeCellsCommand = () => {
 
 interface TableDOMInfo {
   table: HTMLTableElement;
+  /** The cell the caret is in. */
+  cell: HTMLTableCellElement | null;
   rowIndex: number;
   colIndex: number;
   rowCount: number;
@@ -628,10 +553,12 @@ function getTableInfoFromDOM(): TableDOMInfo | null {
 
   return {
     table,
+    cell: cellElement as HTMLTableCellElement | null,
     rowIndex,
     colIndex,
-    rowCount: table.rows.length,
-    cellCount: table.rows[0]?.cells.length || 0
+    rowCount: tableRows(table).length,
+    // Columns, not the cells of the first row: a merged cell counts for every column it covers.
+    cellCount: buildGrid(table).width
   };
 }
 
