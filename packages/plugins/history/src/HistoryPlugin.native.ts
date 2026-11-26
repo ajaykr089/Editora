@@ -52,6 +52,8 @@ const TYPING_GROUP_PAUSE_MS = 1000;
 /** ...or until the step has been growing this long, so a minute of typing is not one undo. */
 const TYPING_GROUP_MAX_MS = 8000;
 const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
+/** Two reports of one change come within the same command, a few milliseconds apart at most. */
+const SAME_CHANGE_MS = 100;
 
 const domHistoryByEditor = new Map<HTMLElement, EditorHistoryState>();
 const commandHandlers: Record<string, CommandHandler> = {};
@@ -539,6 +541,24 @@ export const recordDomTransaction = (
   }
 
   const now = Date.now();
+
+  // The same change reported twice, the second time with the plugin's clean-up in it: WebKit reports a list
+  // command (beforeinput, input) and the host records it, then the list plugin tidies the markup and records the
+  // change from the same starting point. Two steps for one press meant the first Undo only took back the clean-up.
+  // A report from the very state the newest step started from, right after it, replaces that step's result.
+  if (
+    topEntry &&
+    !topEntry.group &&
+    topEntry.beforeHTML === beforeHTML &&
+    now - (topEntry.updatedAt ?? 0) <= SAME_CHANGE_MS
+  ) {
+    topEntry.afterHTML = finalAfter;
+    topEntry.updatedAt = now;
+    state.redoStack.length = 0;
+    lastTouchedEditor = editor;
+    return true;
+  }
+
   // Only a keystroke that really is one joins a run. Typing over a selection, or deleting a selection, is reported
   // as insertText or deleteContentBackward like any other keystroke, but it is an edit of its own: the host says
   // when a selection was involved (a host that says nothing is taken to be reporting plain keystrokes).

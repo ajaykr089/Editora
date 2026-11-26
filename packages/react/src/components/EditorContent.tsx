@@ -305,6 +305,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   // written back, or the newer characters are lost and the caret jumps to the start.
   const lastEmittedRef = useRef<string | null>(null);
   const pendingHistorySnapshotRef = useRef<{ beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null>(null);
+  /** True while a paste is being inserted, so the browser's report of it does not replace the paste's snapshot. */
+  const pasteInProgressRef = useRef(false);
   const autoHeightEnabled = contentConfig?.autoHeight === true;
   const minEditorHeight = typeof contentConfig?.minHeight === 'number' ? contentConfig.minHeight : 200;
   const maxEditorHeight = typeof contentConfig?.maxHeight === 'number' ? contentConfig.maxHeight : 0;
@@ -477,6 +479,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         pendingHistorySnapshotRef.current = null;
         return;
       }
+      // A paste inserts through execCommand, which WebKit reports as typed text: keep the paste's own snapshot.
+      if (pasteInProgressRef.current) return;
 
       pendingHistorySnapshotRef.current = {
         beforeHTML: contentRef.current.innerHTML,
@@ -569,51 +573,77 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       let pastedHTML = e.clipboardData?.getData('text/html');
       const pastedText = e.clipboardData?.getData('text/plain');
       const isWordLikeHTML = !!pastedHTML && /class=["'][^"']*Mso|xmlns:w=|urn:schemas-microsoft-com:office/i.test(pastedHTML);
-      
-      // If clean paste is enabled, strip formatting
-      if (pasteConfig?.clean || !pasteConfig?.keepFormatting) {
-        if (pastedText) {
-          document.execCommand('insertText', false, pastedText);
-        }
-        return;
-      }
+      const el = contentRef.current;
+      if (!el) return;
 
-      // If Word conversion is disabled, fallback to plain text for Word/Office payloads.
-      if (pasteConfig?.convertWord === false && isWordLikeHTML) {
-        if (pastedText) {
+      const insert = () => {
+        // If clean paste is enabled, strip formatting
+        if (pasteConfig?.clean || !pasteConfig?.keepFormatting) {
+          if (pastedText) {
+            document.execCommand('insertText', false, pastedText);
+          }
+          return;
+        }
+
+        // If Word conversion is disabled, fallback to plain text for Word/Office payloads.
+        if (pasteConfig?.convertWord === false && isWordLikeHTML) {
+          if (pastedText) {
+            document.execCommand('insertText', false, pastedText);
+          }
+          return;
+        }
+
+        // Sanitize pasted HTML if enabled
+        if (pastedHTML) {
+          if (securityConfig?.sanitizeOnPaste !== false && contentConfig?.sanitize !== false) {
+            pastedHTML = sanitizePastedHTML(pastedHTML, contentConfig, securityConfig);
+          }
+
+          // Insert sanitized HTML
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pastedHTML;
+
+            const fragment = document.createDocumentFragment();
+            while (tempDiv.firstChild) {
+              fragment.appendChild(tempDiv.firstChild);
+            }
+
+            range.insertNode(fragment);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            // Inserted by hand, so no input event would say the content changed.
+            el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertFromPaste' }));
+          }
+        } else if (pastedText) {
+          // Fallback to plain text
           document.execCommand('insertText', false, pastedText);
         }
-        return;
+      };
+
+      // A paste is an undo step of its own. Inserted as text, the browsers reported it as typing (WebKit) or not
+      // at all (Chromium), so Undo took it back together with the words typed before it; inserted as HTML, it
+      // was never recorded and onChange did not hear of it.
+      pendingHistorySnapshotRef.current = {
+        beforeHTML: el.innerHTML,
+        inputType: 'insertFromPaste',
+        data: null,
+        selectionCollapsed: window.getSelection()?.isCollapsed ?? true,
+      };
+      pasteInProgressRef.current = true;
+      try {
+        insert();
+      } finally {
+        pasteInProgressRef.current = false;
       }
-      
-      // Sanitize pasted HTML if enabled
-      if (pastedHTML) {
-        if (securityConfig?.sanitizeOnPaste !== false && contentConfig?.sanitize !== false) {
-          pastedHTML = sanitizePastedHTML(pastedHTML, contentConfig, securityConfig);
-        }
-        
-        // Insert sanitized HTML
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          range.deleteContents();
-          
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = pastedHTML;
-          
-          const fragment = document.createDocumentFragment();
-          while (tempDiv.firstChild) {
-            fragment.appendChild(tempDiv.firstChild);
-          }
-          
-          range.insertNode(fragment);
-          range.collapse(false);
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
-      } else if (pastedText) {
-        // Fallback to plain text
-        document.execCommand('insertText', false, pastedText);
+      // execCommand may change the content without an input event; record the paste all the same.
+      if (pendingHistorySnapshotRef.current?.inputType === 'insertFromPaste') {
+        recordNativeInputHistory(el, el.innerHTML);
       }
     };
 

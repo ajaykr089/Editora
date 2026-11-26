@@ -2,6 +2,16 @@ import { Plugin } from '@editora/core';
 import { notify } from '../../shared/notify';
 import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 import './table.css';
+import {
+  buildGrid,
+  cellsInColumnOf,
+  deleteColumn as deleteTableColumn,
+  deleteRow as deleteTableRow,
+  insertColumn,
+  insertRow,
+  tableRows,
+  type CellFactory,
+} from './tableGrid';
 
 /**
  * Advanced Table Plugin - Native Implementation
@@ -12,7 +22,7 @@ import './table.css';
  * - 10 table operations (rows, columns, headers, merge, delete)
  * - Column resizing with drag handles
  * - Table-level resizing
- * - Keyboard shortcuts (Ctrl+Shift+R, Ctrl+Shift+C)
+ * - Keyboard shortcuts (Mod+Shift+Enter: row below, Mod+Alt+Enter: column right)
  */
 
 // ============================================
@@ -207,123 +217,62 @@ export const insertTableCommand = () => {
 // TABLE OPERATIONS (10 COMMANDS)
 // ============================================
 
+const isHeaderRow = (row: HTMLTableRowElement | null): boolean =>
+  !!row && (row.parentElement?.tagName === 'THEAD' || Array.from(row.cells).every((cell) => cell.tagName === 'TH'));
+
+/**
+ * A new, empty cell, as the insert-table command makes them: a header cell where the row or column it joins is a
+ * header (a row in the table head, a row of header cells, a column of header cells), a data cell elsewhere.
+ * Without this a column added to a table with a header row put a data cell into the header.
+ */
+const makeEmptyCell: CellFactory = ({ adding, section, neighbour }) => {
+  const neighbourRow = neighbour?.parentElement as HTMLTableRowElement | null;
+  const header =
+    section?.tagName === 'THEAD' ||
+    (adding === 'column'
+      ? isHeaderRow(neighbourRow)
+      : neighbour?.tagName === 'TH' && !isHeaderRow(neighbourRow));
+  const cell = document.createElement(header ? 'th' : 'td');
+  const paragraph = document.createElement('p');
+  paragraph.innerHTML = '<br>';
+  cell.appendChild(paragraph);
+  return cell;
+};
+
 export const addRowAboveCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, rowIndex } = tableInfo;
-
-  // Create new row with same number of cells
-  const newRow = document.createElement('tr');
-  const cellCount = table.rows[0]?.cells.length || 0;
-
-  for (let i = 0; i < cellCount; i++) {
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-    newRow.appendChild(cell);
-  }
-
-  // Find the correct tbody/thead element and insert row
-  const currentRow = table.rows[rowIndex];
-  if (currentRow && currentRow.parentElement) {
-    currentRow.parentElement.insertBefore(newRow, currentRow);
-  } else {
-    table.appendChild(newRow);
-  }
-  
+  if (!tableInfo?.cell) return;
+  insertRow(tableInfo.table, tableInfo.cell, 'above', makeEmptyCell);
   updateTableInfo();
 };
 
 export const addRowBelowCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, rowIndex } = tableInfo;
-
-  // Create new row with same number of cells
-  const newRow = document.createElement('tr');
-  const cellCount = table.rows[0]?.cells.length || 0;
-
-  for (let i = 0; i < cellCount; i++) {
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-    newRow.appendChild(cell);
-  }
-
-  // Insert row after current position
-  if (rowIndex >= table.rows.length - 1) {
-    const lastRow = table.rows[table.rows.length - 1];
-    if (lastRow && lastRow.parentElement) {
-      lastRow.parentElement.appendChild(newRow);
-    } else {
-      table.appendChild(newRow);
-    }
-  } else {
-    const nextRow = table.rows[rowIndex + 1];
-    nextRow.parentElement?.insertBefore(newRow, nextRow);
-  }
-
+  if (!tableInfo?.cell) return;
+  insertRow(tableInfo.table, tableInfo.cell, 'below', makeEmptyCell);
   updateTableInfo();
 };
 
 export const addColumnLeftCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, colIndex } = tableInfo;
-
-  // Add cell to each row at specified column index
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-
-    if (colIndex === 0) {
-      row.insertBefore(cell, row.cells[0]);
-    } else {
-      row.insertBefore(cell, row.cells[colIndex]);
-    }
-  }
-  
+  if (!tableInfo?.cell) return;
+  insertColumn(tableInfo.table, tableInfo.cell, 'left', makeEmptyCell);
   updateTableInfo();
 };
 
 export const addColumnRightCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
-
-  const { table, colIndex } = tableInfo;
-
-  // Add cell to each row after specified column index
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    const cell = document.createElement('td');
-    const paragraph = document.createElement('p');
-    paragraph.innerHTML = '<br>';
-    cell.appendChild(paragraph);
-
-    if (colIndex >= row.cells.length - 1) {
-      row.appendChild(cell);
-    } else {
-      row.insertBefore(cell, row.cells[colIndex + 1]);
-    }
-  }
-  
+  if (!tableInfo?.cell) return;
+  insertColumn(tableInfo.table, tableInfo.cell, 'right', makeEmptyCell);
   updateTableInfo();
 };
 
 export const deleteRowCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo || tableInfo.rowCount <= 1) return;
+  if (!tableInfo?.cell || tableInfo.rowCount <= 1) return;
 
   const { table, rowIndex, colIndex } = tableInfo;
-  table.deleteRow(rowIndex);
+  if (!deleteTableRow(table, tableInfo.cell)) return;
 
   restoreCaretInTable(table, rowIndex, colIndex);
   updateTableInfo();
@@ -331,17 +280,10 @@ export const deleteRowCommand = () => {
 
 export const deleteColumnCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo || tableInfo.cellCount <= 1) return;
+  if (!tableInfo?.cell || tableInfo.cellCount <= 1) return;
 
   const { table, rowIndex: caretRow, colIndex } = tableInfo;
-
-  // Delete cell from each row at specified column index
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    if (row.cells[colIndex]) {
-      row.deleteCell(colIndex);
-    }
-  }
+  if (!deleteTableColumn(table, tableInfo.cell)) return;
 
   restoreCaretInTable(table, caretRow, colIndex);
   updateTableInfo();
@@ -404,26 +346,20 @@ function retagRowCells(row: HTMLTableRowElement, tag: 'td' | 'th'): void {
 
 export const toggleHeaderColumnCommand = () => {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo) return;
+  if (!tableInfo?.cell) return;
 
-  const { table, colIndex } = tableInfo;
-
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const cell = table.rows[rowIndex].cells[colIndex];
-    if (cell) {
-      const newTag = cell.tagName.toLowerCase() === 'th' ? 'td' : 'th';
-      const newCell = document.createElement(newTag);
-      newCell.innerHTML = cell.innerHTML;
-
-      for (let i = 0; i < cell.attributes.length; i++) {
-        const attr = cell.attributes[i];
-        newCell.setAttribute(attr.name, attr.value);
-      }
-
-      cell.parentNode?.replaceChild(newCell, cell);
+  // Every cell that covers the column, merged ones included (counting cells picked a different column in rows
+  // with a merged cell before it).
+  cellsInColumnOf(tableInfo.table, tableInfo.cell).forEach((cell) => {
+    const newCell = document.createElement(cell.tagName.toLowerCase() === 'th' ? 'td' : 'th');
+    newCell.innerHTML = cell.innerHTML;
+    for (let i = 0; i < cell.attributes.length; i++) {
+      const attr = cell.attributes[i];
+      newCell.setAttribute(attr.name, attr.value);
     }
-  }
-  
+    cell.parentNode?.replaceChild(newCell, cell);
+  });
+
   updateTableInfo();
 };
 
@@ -586,6 +522,8 @@ export const mergeCellsCommand = () => {
 
 interface TableDOMInfo {
   table: HTMLTableElement;
+  /** The cell the caret is in. */
+  cell: HTMLTableCellElement | null;
   rowIndex: number;
   colIndex: number;
   rowCount: number;
@@ -628,10 +566,12 @@ function getTableInfoFromDOM(): TableDOMInfo | null {
 
   return {
     table,
+    cell: cellElement as HTMLTableCellElement | null,
     rowIndex,
     colIndex,
-    rowCount: table.rows.length,
-    cellCount: table.rows[0]?.cells.length || 0
+    rowCount: tableRows(table).length,
+    // Columns, not the cells of the first row: a merged cell counts for every column it covers.
+    cellCount: buildGrid(table).width
   };
 }
 
@@ -744,6 +684,7 @@ function initTableToolbar(): void {
 
   document.addEventListener('selectionchange', selectionChangeHandler);
   document.addEventListener('keydown', handleTableTabKey);
+  document.addEventListener('keydown', handleTableShortcut);
   document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('tableDeleted', tableDeletedHandler as EventListener);
   window.addEventListener('scroll', scrollHandler, true); // Use capture to catch all scroll events
@@ -1102,12 +1043,12 @@ function createTableToolbar(): HTMLDivElement {
   const rowSection = createSection(
     createButton({
       icon: getIconAddRowAbove(),
-      title: 'Add row above (Ctrl+Shift+R)',
+      title: 'Add row above',
       action: 'addRowAbove'
     }),
     createButton({
       icon: getIconAddRowBelow(),
-      title: 'Add row below',
+      title: `Add row below (${shortcutLabel('Shift')})`,
       action: 'addRowBelow'
     }),
     createButton({
@@ -1127,7 +1068,7 @@ function createTableToolbar(): HTMLDivElement {
     }),
     createButton({
       icon: getIconAddColumnRight(),
-      title: 'Add column right (Ctrl+Shift+C)',
+      title: `Add column right (${shortcutLabel('Alt')})`,
       action: 'addColumnRight'
     }),
     createButton({
@@ -1182,24 +1123,32 @@ function createTableToolbar(): HTMLDivElement {
   toolbar.appendChild(createDivider());
   toolbar.appendChild(deleteSection);
 
-  // Add keyboard shortcuts
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (!toolbarElement || toolbarElement.style.display === 'none') return;
-    
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-      if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        executeTableCommand('addRowBelow');
-      } else if (e.key === 'c' || e.key === 'C') {
-        e.preventDefault();
-        executeTableCommand('addColumnRight');
-      }
-    }
-  };
-
-  window.addEventListener('keydown', handleKeyDown);
-
   return toolbar;
+}
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
+
+/** How the shortcut reads on this platform: Cmd on a Mac, Ctrl elsewhere. */
+function shortcutLabel(second: 'Shift' | 'Alt'): string {
+  return IS_MAC ? `Cmd+${second === 'Alt' ? 'Option' : 'Shift'}+Enter` : `Ctrl+${second}+Enter`;
+}
+
+/**
+ * Mod+Shift+Enter adds a row below, Mod+Alt+Enter a column to the right, with the caret in a table cell. They were
+ * Mod+Shift+R and Mod+Shift+C, which are the browsers' own: hard reload in Chrome and Firefox, Reader in Safari,
+ * and the DevTools element picker; a key the browser keeps for itself never reaches the page.
+ */
+function handleTableShortcut(event: KeyboardEvent): void {
+  if (event.key !== 'Enter' || event.defaultPrevented || !(event.ctrlKey || event.metaKey)) return;
+  const action = event.shiftKey && !event.altKey ? 'addRowBelow' : event.altKey && !event.shiftKey ? 'addColumnRight' : null;
+  if (!action) return;
+  const tableInfo = getTableInfoFromDOM();
+  if (!tableInfo?.cell || !isTableEditable(tableInfo.table)) return;
+  // Only a key pressed in that editor: not one typed into a dialog that happens to be open over it.
+  const host = tableInfo.table.closest('[contenteditable]');
+  if (!host || !(event.target instanceof Node) || !host.contains(event.target)) return;
+  event.preventDefault();
+  executeTableCommand(action);
 }
 
 function executeTableCommand(action: string): void {
@@ -1482,11 +1431,11 @@ export const TablePlugin = (): Plugin => ({
   },
 
   keymap: {
-    "Mod-Shift-r": () => {
+    "Mod-Shift-Enter": () => {
       executeTableCommand('addRowBelow');
       return true;
     },
-    "Mod-Shift-c": () => {
+    "Mod-Alt-Enter": () => {
       executeTableCommand('addColumnRight');
       return true;
     },

@@ -373,3 +373,34 @@ describe('history: how much it keeps', () => {
     expect(last).not.toBe('Startxxxxxxx');
   });
 });
+
+// WebKit reports a list command (beforeinput, input), so the host records it; then the list plugin tidies the
+// markup and records the change again from the same starting point. That made two undo steps for one press.
+describe('history: one change reported twice', () => {
+  it('is one step when the second report, with the clean-up, comes right after the first', () => {
+    const before = editor.innerHTML;
+    editor.innerHTML = '<ul><li>Start<br></li></ul>';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'insertUnorderedList' });
+    editor.innerHTML = '<ul><li>Start</li></ul>';
+    recordDomTransaction(editor, before, editor.innerHTML);
+
+    expect(undoDom(editor)).toBe(true);
+    expect(editor.innerHTML).toBe(before);
+    expect(undoDom(editor)).toBe(false);
+    expect(redoDom(editor)).toBe(true);
+    expect(editor.innerHTML).toBe('<ul><li>Start</li></ul>');
+  });
+
+  it('stays two steps when the second change starts from the same content later on', () => {
+    const before = editor.innerHTML;
+    editor.innerHTML = '<p>One</p>';
+    recordDomTransaction(editor, before, editor.innerHTML);
+    pause(2000);
+    editor.innerHTML = '<p>Two</p>';
+    recordDomTransaction(editor, before, editor.innerHTML);
+
+    expect(undoDom(editor)).toBe(true);
+    expect(undoDom(editor)).toBe(true);
+    expect(undoDom(editor)).toBe(false);
+  });
+});
