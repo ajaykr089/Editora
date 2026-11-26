@@ -14,6 +14,7 @@ import {
   SyntaxHighlightingExtension
 } from '@editora/light-code-editor';
 import { sanitizeHtml } from '../../shared/sanitizeHtml';
+import { formatSourceHtml, removeFormattingWhitespace } from './sourceFormat';
 
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
@@ -495,37 +496,12 @@ export const CodePlugin = (): Plugin => ({
       // Get current HTML
       const currentHtml = contentElement.innerHTML;
 
-      // Format HTML for better readability
-      const formatHTML = (html: string): string => {
-        let formatted = "";
-        let indentLevel = 0;
-        const indentSize = 2;
-        const tokens = html.split(/(<\/?[a-zA-Z][^>]*>)/);
-
-        for (const token of tokens) {
-          if (!token.trim()) continue;
-
-          if (token.match(/^<\/[a-zA-Z]/)) {
-            indentLevel = Math.max(0, indentLevel - 1);
-            formatted += "\n" + " ".repeat(indentLevel * indentSize) + token;
-          } else if (token.match(/^<[a-zA-Z]/) && !token.match(/\/>$/)) {
-            formatted += "\n" + " ".repeat(indentLevel * indentSize) + token;
-            indentLevel++;
-          } else if (token.match(/^<[a-zA-Z].*\/>$/)) {
-            formatted += "\n" + " ".repeat(indentLevel * indentSize) + token;
-          } else {
-            formatted += token.trim();
-          }
-        }
-        return formatted.trim();
-      };
-
       // Create source editor dialog
       const createSourceDialog = () => {
         document.querySelectorAll(".rte-source-editor-overlay").forEach((el) => el.remove());
 
         const originalHtml = currentHtml;
-        const formattedOriginalHtml = formatHTML(originalHtml);
+        const formattedOriginalHtml = formatSourceHtml(originalHtml);
         let editorInstance: EditorCore | null = null;
         let currentTheme = "dark";
         let isReadOnly = false;
@@ -778,11 +754,17 @@ export const CodePlugin = (): Plugin => ({
 
         const handleSave = () => {
           try {
-            const htmlContent = editorInstance?.getValue() || "";
+            const htmlContent = editorInstance?.getValue() ?? formattedOriginalHtml;
+            // Nothing was edited: leave the document exactly as it is.
+            if (htmlContent === formattedOriginalHtml) {
+              setUnsavedState(false);
+              closeDialog();
+              return;
+            }
 
             // Not a detached <div>: assigning to its innerHTML already runs <img onerror>, and a
             // blacklist misses plenty. sanitizeHtml parses inertly and drops scripts/handlers/js: URLs.
-            contentElement.innerHTML = sanitizeHtml(htmlContent);
+            contentElement.innerHTML = sanitizeHtml(removeFormattingWhitespace(htmlContent));
             try {
               contentElement.dispatchEvent(
                 new InputEvent("input", {
