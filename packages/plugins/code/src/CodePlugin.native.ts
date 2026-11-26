@@ -15,6 +15,7 @@ import {
 } from '@editora/light-code-editor';
 import { sanitizeHtml } from '../../shared/sanitizeHtml';
 import { formatSourceHtml, removeFormattingWhitespace } from './sourceFormat';
+import { recordDomHistory } from '../../shared/historyHelpers';
 
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
@@ -764,7 +765,10 @@ export const CodePlugin = (): Plugin => ({
 
             // Not a detached <div>: assigning to its innerHTML already runs <img onerror>, and a
             // blacklist misses plenty. sanitizeHtml parses inertly and drops scripts/handlers/js: URLs.
+            const beforeHTML = contentElement.innerHTML;
             contentElement.innerHTML = sanitizeHtml(removeFormattingWhitespace(htmlContent));
+            // Setting innerHTML is invisible to the history plugin, so Undo could not take a source edit back.
+            recordDomHistory(contentElement, beforeHTML);
             try {
               contentElement.dispatchEvent(
                 new InputEvent("input", {

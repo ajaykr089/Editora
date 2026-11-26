@@ -94,4 +94,27 @@ describe('the source view', () => {
     expect(content.innerHTML).toBe(before);
     expect(inputs).toBe(0);
   });
+
+  /** Replaces the text of the code editor the way the browser would: the DOM changes, then `input`. */
+  const editSource = (text: string) => {
+    const box = document.querySelector('.rte-source-editor-overlay [role="textbox"]') as HTMLElement;
+    box.textContent = text;
+    box.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
+  it('saves an edit as one undo step', async () => {
+    const content = await openSourceView('<p>one</p>');
+    const recorded: unknown[][] = [];
+    (window as any).execEditorCommand = (command: string, ...args: unknown[]) => {
+      if (command === 'recordDomTransaction') recorded.push(args);
+      return true;
+    };
+
+    editSource('<p>two</p>');
+    (document.querySelector('.rte-source-editor-btn-save') as HTMLButtonElement).click();
+
+    expect(content.innerHTML).toBe('<p>two</p>');
+    expect(recorded).toEqual([[content, '<p>one</p>', '<p>two</p>']]);
+    delete (window as any).execEditorCommand;
+  });
 });
