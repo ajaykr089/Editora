@@ -36,6 +36,22 @@ jobs:
       - name: Verify custom element registrations are complete
         run: npm run check:element-registrations
 
+      # `changeset publish` packs whatever is on disk and dist/ is not committed, so every
+      # workspace has to be built here or it is published empty (36 plugin packages were in the
+      # 2026-10-02 release). verify:release below only builds a subset.
+      - name: Build all packages
+        run: npm run build
+
+      - name: Generate plugin typings
+        run: npm run build:types
+
+      - name: Verify package contents
+        run: npm run verify:packages
+
+      # Every test step runs after the build, in the order ci.yml runs them. A test that imports another
+      # workspace package resolves it to that package's built dist/, which does not exist before the
+      # build. CI builds first, so such a test passes CI and only failed here, after the merge: the
+      # markdown-editor tests on 2026-10-08, the source-view test on 2026-11-26.
       - name: Run tests
         run: npm test
 
@@ -50,21 +66,6 @@ jobs:
       - name: Run ui-core and ui-react unit tests
         run: npm run test:ui:unit
 
-      # `changeset publish` packs whatever is on disk and dist/ is not committed, so every
-      # workspace has to be built here or it is published empty (36 plugin packages were in the
-      # 2026-10-02 release). verify:release below only builds a subset.
-      - name: Build all packages
-        run: npm run build
-
-      - name: Generate plugin typings
-        run: npm run build:types
-
-      - name: Verify package contents
-        run: npm run verify:packages
-
-      # After the build, not before: the markdown-editor tests import @editora/core and
-      # @editora/light-code-editor, which resolve to their built dist/ (as in ci.yml, where the build
-      # comes first). Before the build they fail with "Failed to resolve entry for package".
       - name: Run ui-sortable, collaboration, light-code-editor and markdown-editor tests
         run: npm run test:packages
 
