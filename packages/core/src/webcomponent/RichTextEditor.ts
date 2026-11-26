@@ -225,6 +225,8 @@ export class RichTextEditorElement extends ElementBase {
   // editor, with the first editor's config. Kept across rebuilds of this editor.
   private pluginInstances: Map<string, Plugin> = new Map();
   private lastBeforeInputType: string | null = null;
+  /** True while a paste is being inserted, so the browser's report of it does not replace the paste's snapshot. */
+  private pasteInProgress = false;
   /** The content a keystroke is about to change, kept until its `input` event so the history can record the change. */
   private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null = null;
   // False while the element is being upgraded: its attributes are replayed through
@@ -1322,6 +1324,8 @@ export class RichTextEditorElement extends ElementBase {
 
     this.contentElement.addEventListener('beforeinput', (event: InputEvent) => {
       this.lastBeforeInputType = event.inputType || null;
+      // A paste inserts through execCommand, which WebKit reports as typed text: keep the paste's own snapshot.
+      if (this.pasteInProgress) return;
       // Undo and redo are the history's own work; everything else the user types or deletes is recorded on `input`.
       if (event.inputType === 'historyUndo' || event.inputType === 'historyRedo') {
         this.pendingHistorySnapshot = null;
@@ -1415,26 +1419,37 @@ export class RichTextEditorElement extends ElementBase {
       const isWordLikeHTML =
         !!pastedHTML && /class=["'][^"']*Mso|xmlns:w=|urn:schemas-microsoft-com:office/i.test(pastedHTML);
 
-      if ((pasteConfig.clean || !pasteConfig.keepFormatting) && pastedText) {
-        document.execCommand('insertText', false, pastedText);
-        return;
-      }
-
-      if (pasteConfig.convertWord === false && isWordLikeHTML && pastedText) {
-        document.execCommand('insertText', false, pastedText);
-        return;
-      }
-
-      if (pastedHTML) {
-        if (securityConfig.sanitizeOnPaste !== false && contentConfig.sanitize !== false) {
-          pastedHTML = sanitizePastedHTML(pastedHTML, contentConfig, securityConfig);
+      // A paste is an undo step of its own. Inserted as text, the browsers reported it as typing (WebKit) or not
+      // at all (Chromium), so Undo took it back together with the words typed before it; inserted as HTML, it
+      // was never recorded and no input event told anyone the content had changed.
+      const content = this.contentElement;
+      if (!content) return;
+      this.pendingHistorySnapshot = {
+        beforeHTML: content.innerHTML,
+        inputType: 'insertFromPaste',
+        data: null,
+        selectionCollapsed: window.getSelection()?.isCollapsed ?? true,
+      };
+      this.pasteInProgress = true;
+      try {
+        if (((pasteConfig.clean || !pasteConfig.keepFormatting) && pastedText) ||
+          (pasteConfig.convertWord === false && isWordLikeHTML && pastedText)) {
+          document.execCommand('insertText', false, pastedText);
+        } else if (pastedHTML) {
+          if (securityConfig.sanitizeOnPaste !== false && contentConfig.sanitize !== false) {
+            pastedHTML = sanitizePastedHTML(pastedHTML, contentConfig, securityConfig);
+          }
+          this.insertHTMLAtSelection(pastedHTML);
+          content.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertFromPaste' }));
+        } else if (pastedText) {
+          document.execCommand('insertText', false, pastedText);
         }
-        this.insertHTMLAtSelection(pastedHTML);
-        return;
+      } finally {
+        this.pasteInProgress = false;
       }
-
-      if (pastedText) {
-        document.execCommand('insertText', false, pastedText);
+      // execCommand may change the content without an input event; record the paste all the same.
+      if (this.pendingHistorySnapshot?.inputType === 'insertFromPaste') {
+        this.recordInputHistory(content.innerHTML);
       }
     });
     
