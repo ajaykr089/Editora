@@ -5,6 +5,7 @@ import {
   liftListsOutOfParagraphs,
   removeEmptyParagraphsAroundLists,
   restoreCaretOffsetInBlock,
+  unwrapSelectedListItems,
 } from './listMarkup';
 
 /**
@@ -133,6 +134,13 @@ function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'):
   const beforeHTML = content.innerHTML;
   const caretOffset = getCaretOffsetInBlock(content);
   content.focus({ preventScroll: true });
+  // Switching a list off is done here: the browsers join the items into one paragraph.
+  if (unwrapSelectedListItems(content, command === 'insertUnorderedList' ? 'UL' : 'OL')) {
+    recordDomHistory(content, beforeHTML);
+    content.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  }
+
   const executed = document.execCommand(command, false);
 
   normalizeListMarkup(content);
