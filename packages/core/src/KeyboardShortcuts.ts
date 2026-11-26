@@ -419,21 +419,37 @@ export class KeyboardShortcutManager {
     return parts.join('+');
   }
 
-  private getEventKey(event: KeyboardEvent): string {
+  private getEventKey(event: KeyboardEvent, key: string = event.key): string {
     const parts = [];
     if (event.ctrlKey) parts.push('ctrl');
     if (event.altKey) parts.push('alt');
     if (event.shiftKey) parts.push('shift');
     if (event.metaKey) parts.push('meta');
-    parts.push(event.key.toLowerCase());
+    parts.push(key.toLowerCase());
     return parts.join('+');
+  }
+
+  /**
+   * The key on the keyboard, whatever character it types: `Digit8` is "8" even with Shift held (when `event.key` is
+   * "*"), and `KeyB` is "b" when Option changes the character on a Mac.
+   */
+  private keyFromCode(code: string | undefined): string | null {
+    if (!code) return null;
+    const match = /^(?:Digit|Key)([0-9A-Z])$/.exec(code);
+    return match ? match[1].toLowerCase() : null;
   }
 
   handleKeyDown(event: KeyboardEvent, commandExecutor: (command: string, params?: any) => void): boolean {
     if (!this.enabled) return false;
 
-    const eventKey = this.getEventKey(event);
-    const shortcut = this.shortcuts.get(eventKey);
+    // The character first, so layouts where it differs from the key cap keep their shortcuts; then the key itself,
+    // with a modifier held. Cmd/Ctrl+Shift+7 and +8 (numbered and bullet list) never matched before: with Shift,
+    // `event.key` is "&" and "*".
+    let shortcut = this.shortcuts.get(this.getEventKey(event));
+    const physical = this.keyFromCode(event.code);
+    if (!shortcut && physical && (event.ctrlKey || event.metaKey || event.altKey)) {
+      shortcut = this.shortcuts.get(this.getEventKey(event, physical));
+    }
 
     if (shortcut) {
       if (shortcut.preventDefault !== false) {
