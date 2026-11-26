@@ -22,7 +22,7 @@ import {
  * - 10 table operations (rows, columns, headers, merge, delete)
  * - Column resizing with drag handles
  * - Table-level resizing
- * - Keyboard shortcuts (Ctrl+Shift+R, Ctrl+Shift+C)
+ * - Keyboard shortcuts (Mod+Shift+Enter: row below, Mod+Alt+Enter: column right)
  */
 
 // ============================================
@@ -684,6 +684,7 @@ function initTableToolbar(): void {
 
   document.addEventListener('selectionchange', selectionChangeHandler);
   document.addEventListener('keydown', handleTableTabKey);
+  document.addEventListener('keydown', handleTableShortcut);
   document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('tableDeleted', tableDeletedHandler as EventListener);
   window.addEventListener('scroll', scrollHandler, true); // Use capture to catch all scroll events
@@ -1042,12 +1043,12 @@ function createTableToolbar(): HTMLDivElement {
   const rowSection = createSection(
     createButton({
       icon: getIconAddRowAbove(),
-      title: 'Add row above (Ctrl+Shift+R)',
+      title: 'Add row above',
       action: 'addRowAbove'
     }),
     createButton({
       icon: getIconAddRowBelow(),
-      title: 'Add row below',
+      title: `Add row below (${shortcutLabel('Shift')})`,
       action: 'addRowBelow'
     }),
     createButton({
@@ -1067,7 +1068,7 @@ function createTableToolbar(): HTMLDivElement {
     }),
     createButton({
       icon: getIconAddColumnRight(),
-      title: 'Add column right (Ctrl+Shift+C)',
+      title: `Add column right (${shortcutLabel('Alt')})`,
       action: 'addColumnRight'
     }),
     createButton({
@@ -1122,24 +1123,32 @@ function createTableToolbar(): HTMLDivElement {
   toolbar.appendChild(createDivider());
   toolbar.appendChild(deleteSection);
 
-  // Add keyboard shortcuts
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (!toolbarElement || toolbarElement.style.display === 'none') return;
-    
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-      if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        executeTableCommand('addRowBelow');
-      } else if (e.key === 'c' || e.key === 'C') {
-        e.preventDefault();
-        executeTableCommand('addColumnRight');
-      }
-    }
-  };
-
-  window.addEventListener('keydown', handleKeyDown);
-
   return toolbar;
+}
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
+
+/** How the shortcut reads on this platform: Cmd on a Mac, Ctrl elsewhere. */
+function shortcutLabel(second: 'Shift' | 'Alt'): string {
+  return IS_MAC ? `Cmd+${second === 'Alt' ? 'Option' : 'Shift'}+Enter` : `Ctrl+${second}+Enter`;
+}
+
+/**
+ * Mod+Shift+Enter adds a row below, Mod+Alt+Enter a column to the right, with the caret in a table cell. They were
+ * Mod+Shift+R and Mod+Shift+C, which are the browsers' own: hard reload in Chrome and Firefox, Reader in Safari,
+ * and the DevTools element picker; a key the browser keeps for itself never reaches the page.
+ */
+function handleTableShortcut(event: KeyboardEvent): void {
+  if (event.key !== 'Enter' || event.defaultPrevented || !(event.ctrlKey || event.metaKey)) return;
+  const action = event.shiftKey && !event.altKey ? 'addRowBelow' : event.altKey && !event.shiftKey ? 'addColumnRight' : null;
+  if (!action) return;
+  const tableInfo = getTableInfoFromDOM();
+  if (!tableInfo?.cell || !isTableEditable(tableInfo.table)) return;
+  // Only a key pressed in that editor: not one typed into a dialog that happens to be open over it.
+  const host = tableInfo.table.closest('[contenteditable]');
+  if (!host || !(event.target instanceof Node) || !host.contains(event.target)) return;
+  event.preventDefault();
+  executeTableCommand(action);
 }
 
 function executeTableCommand(action: string): void {
@@ -1422,11 +1431,11 @@ export const TablePlugin = (): Plugin => ({
   },
 
   keymap: {
-    "Mod-Shift-r": () => {
+    "Mod-Shift-Enter": () => {
       executeTableCommand('addRowBelow');
       return true;
     },
-    "Mod-Shift-c": () => {
+    "Mod-Alt-Enter": () => {
       executeTableCommand('addColumnRight');
       return true;
     },

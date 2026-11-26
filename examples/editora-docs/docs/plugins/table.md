@@ -45,8 +45,8 @@ function TableDemo() {
 | Action | Command | Shortcut | Toolbar |
 | --- | --- | --- | --- |
 | Insert table | `insertTable` | None | `Insert Table` |
-| Add row below | Internal table action | `Mod-Shift-r` | Table toolbar |
-| Add column right | Internal table action | `Mod-Shift-c` | Table toolbar |
+| Add row below | Internal table action | `Mod-Shift-Enter` (also Tab in the last cell) | Table toolbar |
+| Add column right | Internal table action | `Mod-Alt-Enter` | Table toolbar |
 | Add row above | Internal table action | None | Table toolbar |
 | Add column left | Internal table action | None | Table toolbar |
 | Merge cells | Internal table action | None | Table toolbar |
