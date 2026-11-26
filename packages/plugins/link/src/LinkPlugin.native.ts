@@ -83,6 +83,20 @@ const BLOCK_CONTENT_SELECTOR = 'p, div, ul, ol, li, table, blockquote, pre, h1, 
 const sameLinkText = (a: string, b: string): boolean =>
   a.replace(/[\r\n]+/g, '') === b.replace(/[\r\n]+/g, '');
 
+/**
+ * "Open in new window/tab" as attributes. A link that opens in the same tab needs no target at all (that is what a
+ * link does); writing target="_self" on every link only added noise to the saved HTML.
+ */
+const applyLinkTarget = (link: HTMLAnchorElement, target: LinkData['target']): void => {
+  if (target === '_blank') {
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+  } else {
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+  }
+};
+
 const dispatchContentInput = (contentEl: HTMLElement | null): void => {
   contentEl?.dispatchEvent(new Event('input', { bubbles: true }));
 };
@@ -221,13 +235,7 @@ const handleInsertLink = (linkData: LinkData): void => {
     if (editingLinkElement.textContent !== linkData.text) {
       editingLinkElement.textContent = linkData.text;
     }
-    editingLinkElement.target = linkData.target;
-    
-    if (linkData.target === '_blank') {
-      editingLinkElement.setAttribute('rel', 'noopener noreferrer');
-    } else {
-      editingLinkElement.removeAttribute('rel');
-    }
+    applyLinkTarget(editingLinkElement, linkData.target);
     
     if (linkData.title) {
       editingLinkElement.title = linkData.title;
@@ -248,12 +256,8 @@ const handleInsertLink = (linkData: LinkData): void => {
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', linkData.url);
     linkElement.textContent = linkData.text;
-    linkElement.target = linkData.target;
-    
-    if (linkData.target === '_blank') {
-      linkElement.setAttribute('rel', 'noopener noreferrer');
-    }
-    
+    applyLinkTarget(linkElement, linkData.target);
+
     if (linkData.title) {
       linkElement.title = linkData.title;
     }
@@ -278,10 +282,7 @@ const handleInsertLink = (linkData: LinkData): void => {
 
       contentEl.querySelectorAll('a').forEach((created) => {
         if (existing.has(created)) return;
-        created.setAttribute('target', linkData.target);
-        if (linkData.target === '_blank') {
-          created.setAttribute('rel', 'noopener noreferrer');
-        }
+        applyLinkTarget(created, linkData.target);
         if (linkData.title) {
           created.setAttribute('title', linkData.title);
         }
