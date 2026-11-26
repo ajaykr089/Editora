@@ -5,6 +5,7 @@ import {
   liftListsOutOfParagraphs,
   removeEmptyParagraphsAroundLists,
   restoreCaretOffsetInBlock,
+  retagSelectedLists,
   unwrapSelectedListItems,
 } from './listMarkup';
 import { installListKeys } from './listKeys';
@@ -135,8 +136,10 @@ function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'):
   const beforeHTML = content.innerHTML;
   const caretOffset = getCaretOffsetInBlock(content);
   content.focus({ preventScroll: true });
-  // Switching a list off is done here: the browsers join the items into one paragraph.
-  if (unwrapSelectedListItems(content, command === 'insertUnorderedList' ? 'UL' : 'OL')) {
+  // Switching a list off, or between bullets and numbers, is done here: the browsers join the items into one
+  // paragraph, and convert item by item (Chromium adding a span with the editor's font to each).
+  const tag = command === 'insertUnorderedList' ? 'UL' : 'OL';
+  if (unwrapSelectedListItems(content, tag) || retagSelectedLists(content, tag)) {
     recordDomHistory(content, beforeHTML);
     content.dispatchEvent(new Event('input', { bubbles: true }));
     return true;

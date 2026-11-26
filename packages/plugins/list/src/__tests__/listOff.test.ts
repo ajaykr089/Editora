@@ -68,13 +68,11 @@ describe('switching a list off', () => {
     expect(root.innerHTML).toBe('<p>a</p><ul><li>x</li></ul><p><br></p>');
   });
 
-  it('leaves switching the list type, and a selection that is not only list items, to the browser', () => {
+  it('leaves a selection that is not only list items to the browser', () => {
     const root = setUp('<ul><li>a</li></ul><p>b</p>');
-    select(root, 'a');
-    toggleOrderedList();
     select(root, 'a', 'b', true);
     toggleBulletList();
-    expect(browserCommands).toEqual(['insertOrderedList', 'insertUnorderedList']);
+    expect(browserCommands).toEqual(['insertUnorderedList']);
   });
 
   it('keeps an item\'s own list and the rest of a bullet list as one list', () => {
@@ -98,3 +96,24 @@ describe('switching a list off', () => {
   });
 });
 
+// Switching between bullets and numbers was the browser's too: it converts item by item, splitting the list, and
+// Chromium wraps each converted item in a span with the editor's font.
+describe('switching between bullets and numbers', () => {
+  it('switches the whole list, keeping its items and the selection', () => {
+    const root = setUp('<ul class="x"><li>alpha</li><li>beta</li></ul>');
+    select(root, 'beta', 'beta', true);
+    toggleOrderedList();
+    expect(root.innerHTML).toBe('<ol class="x"><li>alpha</li><li>beta</li></ol>');
+    expect(window.getSelection()!.getRangeAt(0).toString()).toBe('beta');
+    toggleBulletList();
+    expect(root.innerHTML).toBe('<ul class="x"><li>alpha</li><li>beta</li></ul>');
+    expect(browserCommands).toEqual([]);
+  });
+
+  it('drops the numbering attributes on the way to bullets', () => {
+    const root = setUp('<ol start="4"><li>a</li></ol>');
+    select(root, 'a');
+    toggleBulletList();
+    expect(root.innerHTML).toBe('<ul><li>a</li></ul>');
+  });
+});

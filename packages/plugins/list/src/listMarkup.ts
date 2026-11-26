@@ -363,3 +363,40 @@ export function unwrapSelectedListItems(root: HTMLElement, tag: 'UL' | 'OL'): No
   return made;
 }
 
+/**
+ * Switches the lists the selection is in between bullets and numbers, whole lists at a time. The browsers' own
+ * command converts item by item, splitting the list, and Chromium wraps each converted item in a span with the
+ * editor's font. Returns false, leaving everything as it is, unless the selection is only in items of lists of the
+ * other kind.
+ */
+export function retagSelectedLists(root: HTMLElement, tag: 'UL' | 'OL'): boolean {
+  const selection = root.ownerDocument.defaultView?.getSelection();
+  if (!selection || selection.rangeCount === 0) return false;
+  const range = selection.getRangeAt(0);
+  if (!root.contains(range.commonAncestorContainer)) return false;
+
+  const items = selectedListItems(root, range);
+  if (!items || items.length === 0) return false;
+  const lists = new Set<HTMLElement>();
+  for (const item of items) {
+    const list = item.parentElement;
+    if (!list || list.getAttribute('data-type') === 'checklist') return false;
+    if (list.tagName === tag) return false;
+    if (list.tagName !== 'UL' && list.tagName !== 'OL') return false;
+    lists.add(list);
+  }
+
+  const saved = saveBoundaries(root, range);
+  lists.forEach((list) => {
+    const replacement = root.ownerDocument.createElement(tag.toLowerCase());
+    Array.from(list.attributes).forEach((attribute) => {
+      // Numbering attributes mean nothing on a bullet list.
+      if (tag === 'UL' && (attribute.name === 'start' || attribute.name === 'reversed' || attribute.name === 'type')) return;
+      replacement.setAttribute(attribute.name, attribute.value);
+    });
+    while (list.firstChild) replacement.appendChild(list.firstChild);
+    list.parentNode!.replaceChild(replacement, list);
+  });
+  restoreBoundaries(root, saved);
+  return true;
+}
