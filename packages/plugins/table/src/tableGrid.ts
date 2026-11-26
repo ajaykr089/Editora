@@ -56,7 +56,15 @@ export function buildGrid(table: HTMLTableElement): {
   return { grid, places, width };
 }
 
-export type CellFactory = (rowElement: HTMLTableRowElement, sameColumnAs: HTMLTableCellElement | null) => HTMLTableCellElement;
+/** Where a new cell goes: the section of its row, and the cell next to it on the side it was added from. */
+export interface NewCellContext {
+  adding: 'row' | 'column';
+  section: Element | null;
+  /** For a new row, the cell in the same column of the row it was added beside; for a new column, the cell beside it. */
+  neighbour: HTMLTableCellElement | null;
+}
+
+export type CellFactory = (context: NewCellContext) => HTMLTableCellElement;
 
 /** Puts `cell` into `row` at grid column `col`: before the first cell of that row that starts at or after it. */
 function placeInRow(row: HTMLTableRowElement, cell: HTMLTableCellElement, col: number, places: Map<HTMLTableCellElement, CellPlace>): void {
@@ -78,6 +86,7 @@ export function insertRow(table: HTMLTableElement, cell: HTMLTableCellElement, w
   const at = where === 'above' ? place.row : place.row + place.rowSpan;
   const reference = rows[where === 'above' ? at : at - 1];
   const newRow = document.createElement('tr');
+  const section = rows[at]?.parentElement ?? reference.parentElement;
   const grown = new Set<HTMLTableCellElement>();
   for (let col = 0; col < width; col++) {
     const before = at > 0 ? grid[at - 1]?.[col] : undefined;
@@ -90,7 +99,7 @@ export function insertRow(table: HTMLTableElement, cell: HTMLTableCellElement, w
       }
       continue;
     }
-    newRow.appendChild(makeCell(newRow, grid[where === 'above' ? at : at - 1]?.[col] ?? null));
+    newRow.appendChild(makeCell({ adding: 'row', section, neighbour: grid[where === 'above' ? at : at - 1]?.[col] ?? null }));
   }
 
   // In front of the row that follows, in that row's section: a row added below the header row is a body row.
@@ -127,7 +136,7 @@ export function insertColumn(table: HTMLTableElement, cell: HTMLTableCellElement
       }
       return;
     }
-    additions.push({ row, cell: makeCell(row, grid[r][where === 'left' ? at : at - 1] ?? null) });
+    additions.push({ row, cell: makeCell({ adding: 'column', section: row.parentElement, neighbour: grid[r][where === 'left' ? at : at - 1] ?? null }) });
   });
   // Inserted once every place is known, so the positions above are not thrown off by the new cells.
   additions.forEach(({ row, cell: added }) => placeInRow(row, added, at, places));

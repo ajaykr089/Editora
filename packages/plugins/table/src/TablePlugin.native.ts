@@ -217,9 +217,22 @@ export const insertTableCommand = () => {
 // TABLE OPERATIONS (10 COMMANDS)
 // ============================================
 
-/** A new, empty cell, as the insert-table command makes them. */
-const makeEmptyCell: CellFactory = () => {
-  const cell = document.createElement('td');
+const isHeaderRow = (row: HTMLTableRowElement | null): boolean =>
+  !!row && (row.parentElement?.tagName === 'THEAD' || Array.from(row.cells).every((cell) => cell.tagName === 'TH'));
+
+/**
+ * A new, empty cell, as the insert-table command makes them: a header cell where the row or column it joins is a
+ * header (a row in the table head, a row of header cells, a column of header cells), a data cell elsewhere.
+ * Without this a column added to a table with a header row put a data cell into the header.
+ */
+const makeEmptyCell: CellFactory = ({ adding, section, neighbour }) => {
+  const neighbourRow = neighbour?.parentElement as HTMLTableRowElement | null;
+  const header =
+    section?.tagName === 'THEAD' ||
+    (adding === 'column'
+      ? isHeaderRow(neighbourRow)
+      : neighbour?.tagName === 'TH' && !isHeaderRow(neighbourRow));
+  const cell = document.createElement(header ? 'th' : 'td');
   const paragraph = document.createElement('p');
   paragraph.innerHTML = '<br>';
   cell.appendChild(paragraph);
