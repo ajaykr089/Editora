@@ -70,7 +70,7 @@ const style = `
     line-height: 1.4;
   }
   .required { color: var(--ui-color-danger-text, var(--ui-color-danger, #b91c1c)); margin-inline-start: 2px; }
-  .description { margin: -4px 0 0; color: var(--ui-color-muted, #526175); font-size: var(--ui-font-size-sm, 0.8125rem); }
+  .description { margin: 0; color: var(--ui-color-muted, #526175); font-size: var(--ui-font-size-sm, 0.8125rem); }
 
   .choices { display: grid; gap: 6px; }
   .choice {

@@ -96,6 +96,8 @@ const style = `
   .content {
     display: flex;
     flex-direction: column;
+    /* Full width even when the body aligns to the end, so bubbles measure their cap against it. */
+    align-self: stretch;
     gap: 4px;
     min-inline-size: 0;
     max-inline-size: 100%;

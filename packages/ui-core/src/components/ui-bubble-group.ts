@@ -11,6 +11,7 @@ const style = `
     display: flex;
     flex-direction: column;
     gap: 2px;
+    align-self: stretch;
     min-inline-size: 0;
   }
   :host([hidden]) { display: none; }

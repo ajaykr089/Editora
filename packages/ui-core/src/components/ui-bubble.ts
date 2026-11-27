@@ -29,6 +29,8 @@ const style = `
     --ui-bubble-max-width: min(80%, 42rem);
     color-scheme: light dark;
     display: flex;
+    /* Span the message so the 80% cap is measured against it, not against a shrink-wrapped host. */
+    align-self: stretch;
     min-inline-size: 0;
     max-inline-size: 100%;
     font-family: var(--ui-font-family, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
