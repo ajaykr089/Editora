@@ -711,17 +711,30 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       return;
     }
 
-    const manager = new KeyboardShortcutManager();
+    // The loaded plugins' keymaps, not the built-in list: that list ran its commands without the plugins for them,
+    // blocking Cmd/Ctrl+P, Cmd+[ and more for nothing, and a plugin's own keys never ran.
+    const manager = new KeyboardShortcutManager({ defaults: false });
     const el = contentRef.current;
+    const plugins: any[] = editor?.pluginManager?.plugins ?? [];
+    const keymapContext = {
+      get editorElement() { return el.closest('[data-editora-editor]') as HTMLElement | null; },
+      contentElement: el,
+    };
+    manager.blockNativeFormattingKeys();
+    plugins.forEach((plugin) => manager.registerKeymap(plugin?.keymap, keymapContext));
+    const hasCommand = (command: string) => plugins.some((plugin) => typeof plugin?.commands?.[command] === 'function');
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      manager.handleKeyDown(event, (command, params) => {
-        if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
+      manager.handleKeyDown(
+        event,
+        (command, params) => {
+          if (typeof window === 'undefined' || !(window as any).executeEditorCommand) return false;
           const editorContainer = contentRef.current?.closest('[data-editora-editor]') as HTMLElement | null;
           (window as any).__editoraCommandEditorRoot = editorContainer || null;
-          (window as any).executeEditorCommand(command, params);
-        }
-      });
+          return (window as any).executeEditorCommand(command, params) === false ? false : true;
+        },
+        hasCommand,
+      );
     };
 
     el.addEventListener('keydown', handleKeyDown as any);
@@ -729,7 +742,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     return () => {
       el.removeEventListener('keydown', handleKeyDown as any);
     };
-  }, [accessibilityConfig?.keyboardNavigation, readonly]);
+  }, [accessibilityConfig?.keyboardNavigation, readonly, editor]);
 
   return (
     <div
