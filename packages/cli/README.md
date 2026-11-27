@@ -145,6 +145,32 @@ How names are read:
   `ui-react`, `ui-core`, `ui-sortable`, `ui-editor` and `ui-testing`.
 - `toast` is the notification package, `@editora/toast`; `ui-toast` is the toast component of `@editora/ui-react`.
 
+## Copy the source instead
+
+`--copy` writes a component's source into your project, so you own it and can change anything, the way shadcn/ui works. You get the component and exactly the files it imports, nothing else:
+
+```bash
+npx @editora/cli add button message-scroller --copy
+```
+
+```text
+Copied Button, MessageScroller into src/components/editora
+
+  + src/components/editora/core/components/ui-button.ts
+  + src/components/editora/react/components/Button.tsx
+  …
+Elements are named app-* (app-button, app-icon, app-message-scroller); the theme tokens (--ui-*) are shared.
+```
+
+- **Where:** `src/components/editora` (or `components/editora` without a `src` folder); `--dir` picks another folder.
+- **React or not:** in a React project you get the React component and the custom element under it; elsewhere, or with `--elements`, just the custom element.
+- **Element names:** the copied custom elements are renamed to your prefix (`app-button`, `--prefix acme` for `acme-button`), so your edited copy never collides with an installed `@editora/ui-core` on the same page. Theme tokens keep their `--ui-*` names, so one theme styles both.
+- **Where the files come from:** the exact commit this CLI was built from, and each file is checked against its SHA-256 before anything is written. `--source <checkout>` reads from a local clone instead (offline).
+- **Running it again:** `editora.json` in the project root remembers the folder, the prefix and a hash of every file written. A later copy updates files you have not touched and keeps the ones you changed (`--overwrite` replaces them too). `--dry-run` shows the plan and writes nothing.
+- **Packages:** the copied files still import a few packages (for example `@editora/icons`); the CLI installs them, or prints the command with `--no-install`.
+
+The copied files are TypeScript.
+
 ## Several at once
 
 Give as many names as you like. The packages are installed with one command, a package that two names share is
