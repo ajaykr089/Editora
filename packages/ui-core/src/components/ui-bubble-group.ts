@@ -4,6 +4,7 @@ import './ui-bubble';
 /**
  * Consecutive bubbles from one sender, stacked close together with the inner corners tightened
  * so they read as one turn. Set `align` on each bubble (or on the enclosing message), not here.
+ * Presentational: no role of its own (an unnamed group only adds noise to a screen reader).
  */
 const style = `
   :host {
@@ -19,11 +20,6 @@ const style = `
 `;
 
 export class UIBubbleGroup extends ElementBase {
-  override connectedCallback(): void {
-    if (!this.hasAttribute('role')) this.setAttribute('role', 'group');
-    super.connectedCallback();
-  }
-
   protected override render(): void {
     this.setContent(`<style>${style}</style><slot></slot>`);
   }

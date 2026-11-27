@@ -202,6 +202,7 @@ export class UITraceItem extends ElementBase {
     const description = this.root.querySelector('slot[name="description"]') as HTMLSlotElement | null;
     const hasDescription = !!this.getAttribute('description') || (!!description && description.assignedNodes().length > 0);
     this.root.querySelector('.description')?.toggleAttribute('data-empty', !hasDescription);
+    this.root.querySelector('.sep')?.toggleAttribute('hidden', !hasDescription);
   }
 
   protected override render(): void {
@@ -213,12 +214,14 @@ export class UITraceItem extends ElementBase {
     const expandable = !href && this.hasDetails();
     const newTab = target === '_blank';
 
-    const parts = `
-      <span class="icon" part="icon" aria-hidden="true" data-empty><slot name="icon"></slot></span>
-      <span class="title" part="title"><slot name="title">${escapeHtml(label)}</slot></span>
-      <span class="sr">${escapeHtml(STATUS_TEXT[status] || '')}${newTab ? ' (opens in a new tab)' : ''}</span>
-      <span class="description" part="description"><slot name="description">${escapeHtml(description)}</slot></span>
-    `;
+    // No whitespace between the parts: it would be read as a stray space ("logs , 3 matches").
+    const parts = [
+      '<span class="icon" part="icon" aria-hidden="true" data-empty><slot name="icon"></slot></span>',
+      `<span class="title" part="title"><slot name="title">${escapeHtml(label)}</slot></span>`,
+      `<span class="sr">${escapeHtml(STATUS_TEXT[status] || '')}${newTab ? ' (opens in a new tab)' : ''}</span>`,
+      '<span class="sr sep">, </span>',
+      `<span class="description" part="description"><slot name="description">${escapeHtml(description)}</slot></span>`,
+    ].join('');
     let line: string;
     if (href) {
       line = `<a class="line" part="line" href="${escapeHtml(href)}"${target ? ` target="${escapeHtml(target)}"` : ''}${newTab ? ' rel="noopener noreferrer"' : ''}>${parts}${newTab ? EXTERNAL : ''}</a>`;

@@ -93,10 +93,10 @@ describe('ui-bubble', () => {
     expect(el.shadowRoot!.querySelector('.reactions')!.hasAttribute('data-empty')).toBe(false);
   });
 
-  it('groups bubbles in a group', async () => {
+  it('stacks bubbles without adding an unnamed group', async () => {
     const el = mount('<ui-bubble-group><ui-bubble>a</ui-bubble><ui-bubble>b</ui-bubble></ui-bubble-group>');
     await flush();
-    expect(el.getAttribute('role')).toBe('group');
+    expect(el.hasAttribute('role')).toBe(false);
   });
 });
 
@@ -203,6 +203,15 @@ describe('ui-trace', () => {
     el.appendChild(added);
     await flush();
     expect(added.getAttribute('role')).toBe('listitem');
+  });
+
+  it('pauses between title and description only when there is one', async () => {
+    const el = mount('<ui-trace-item label="Read a file" description="42 lines"></ui-trace-item>');
+    await flush();
+    expect(el.shadowRoot!.querySelector('.sep')!.hasAttribute('hidden')).toBe(false);
+    el.removeAttribute('description');
+    await flush();
+    expect(el.shadowRoot!.querySelector('.sep')!.hasAttribute('hidden')).toBe(true);
   });
 
   it('is plain text without details and speaks its status', async () => {

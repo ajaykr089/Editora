@@ -62,6 +62,16 @@ describe('ui-questionnaire', () => {
     expect((q(el).querySelector('[data-action="skip"]') as HTMLElement).hidden).toBe(true);
   });
 
+  it('names a choice by its label and describes it by its description', async () => {
+    const el = mount();
+    await flush();
+    const api = q(el).querySelector('input[value="api"]') as HTMLInputElement;
+    const label = q(el).getElementById(api.getAttribute('aria-labelledby')!)!;
+    expect(label.textContent).toBe('An API');
+    const described = api.getAttribute('aria-describedby')!.split(' ').map((id) => q(el).getElementById(id)!.textContent);
+    expect(described[0]).toBe('REST');
+  });
+
   it('blocks a required question, marks the answers invalid and focuses one', async () => {
     const el = mount();
     await flush();

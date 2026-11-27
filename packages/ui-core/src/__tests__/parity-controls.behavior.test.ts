@@ -146,6 +146,13 @@ describe('ui-item', () => {
     expect(link.querySelector('.title')?.textContent).toContain('Ada');
   });
 
+  it('keeps decorative media out of the link name', async () => {
+    const el = mount('<ui-item href="/a" label="Ada" description="ada@example.com"><span slot="media">AL</span></ui-item>');
+    await flush();
+    expect(el.shadowRoot!.querySelector('.media')!.getAttribute('aria-hidden')).toBe('true');
+    expect(el.shadowRoot!.querySelector('.sep')!.textContent).toBe(', ');
+  });
+
   it('adds rel for new-tab links and disables the link', async () => {
     const el = mount('<ui-item href="https://example.com" target="_blank" label="Docs" disabled></ui-item>');
     await flush();

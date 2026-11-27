@@ -135,6 +135,16 @@ const itemStyle = `
   :host([size="sm"]) .title { font-size: var(--ui-font-size-sm, 0.8125rem); }
   :host([size="sm"]) .description { font-size: 0.75rem; }
 
+  /* A spoken pause between title and description ("Ada Lovelace, ada@example.com"), never shown. */
+  .sep {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .content { position: relative; }
   .title[data-empty],
   .description[data-empty],
   .extra[data-empty],
@@ -202,14 +212,16 @@ export class UIItem extends ElementBase {
     const target = this.getAttribute('target');
     const rel = this.getAttribute('rel') || (target === '_blank' ? 'noopener noreferrer' : '');
 
-    const inner = `
-      <span class="media" part="media"><slot name="media"></slot></span>
-      <span class="content" part="content">
-        <span class="title" part="title"><slot name="title">${escapeHtml(label)}</slot></span>
-        <span class="description" part="description"><slot name="description">${escapeHtml(description)}</slot></span>
-        <span class="extra" part="extra"><slot></slot></span>
-      </span>
-    `;
+    // No whitespace between title, pause and description: it would be read as a stray space.
+    const inner = [
+      `<span class="media" part="media"${href ? ' aria-hidden="true"' : ''}><slot name="media"></slot></span>`,
+      '<span class="content" part="content">',
+      `<span class="title" part="title"><slot name="title">${escapeHtml(label)}</slot></span>`,
+      '<span class="sep">, </span>',
+      `<span class="description" part="description"><slot name="description">${escapeHtml(description)}</slot></span>`,
+      '<span class="extra" part="extra"><slot></slot></span>',
+      '</span>',
+    ].join('');
     const main = href
       ? `<a class="main" part="main link" href="${escapeHtml(href)}"${target ? ` target="${escapeHtml(target)}"` : ''}${rel ? ` rel="${escapeHtml(rel)}"` : ''}${disabled ? ' aria-disabled="true" tabindex="-1"' : ''}>${inner}</a>`
       : `<div class="main" part="main">${inner}</div>`;
@@ -237,6 +249,19 @@ export class UIItem extends ElementBase {
       const fallback = name === 'title' ? label : name === 'description' ? description : '';
       const filled = !!fallback || slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === 1 || (node.textContent || '').trim());
       wrapper.toggleAttribute('data-empty', !filled);
+      if (name === 'description') this.root.querySelector('.sep')?.toggleAttribute('hidden', !filled);
+    }
+    // Media is decorative inside a link (an avatar's initials would join the link's name); marked on
+    // the elements themselves, as Chrome names a link from slotted content regardless of the wrapper.
+    const linked = this.hasAttribute('href');
+    for (const media of Array.from(this.querySelectorAll(':scope > [slot="media"]'))) {
+      if (linked && media.getAttribute('aria-hidden') !== 'true') {
+        media.setAttribute('aria-hidden', 'true');
+        media.setAttribute('data-item-hidden', '');
+      } else if (!linked && media.hasAttribute('data-item-hidden')) {
+        media.removeAttribute('aria-hidden');
+        media.removeAttribute('data-item-hidden');
+      }
     }
     const extraSlot = this.root.querySelector('slot:not([name])') as HTMLSlotElement | null;
     const extra = wrapperOf('extra');

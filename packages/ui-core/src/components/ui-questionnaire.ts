@@ -438,8 +438,8 @@ export class UIQuestionnaire extends ElementBase {
       const otherChecked = otherValue !== '';
       const choices = item.options.map((option, i) => `
         <label class="choice" part="choice">
-          <input class="choice-input" type="${inputType}" name="${escapeHtml(`${item.name}-${index}`)}" value="${escapeHtml(option.value)}"${selected.has(option.value) ? ' checked' : ''}${option.disabled ? ' disabled' : ''} aria-describedby="${describedby}" />
-          <span class="choice-text"><span>${escapeHtml(option.label)}</span>${option.description ? `<span class="choice-description">${escapeHtml(option.description)}</span>` : ''}</span>
+          <input class="choice-input" type="${inputType}" name="${escapeHtml(`${item.name}-${index}`)}" value="${escapeHtml(option.value)}"${selected.has(option.value) ? ' checked' : ''}${option.disabled ? ' disabled' : ''} aria-labelledby="${id}-o${i}" aria-describedby="${[option.description ? `${id}-o${i}-d` : '', `${id}-error`].filter(Boolean).join(' ')}" />
+          <span class="choice-text"><span id="${id}-o${i}">${escapeHtml(option.label)}</span>${option.description ? `<span class="choice-description" id="${id}-o${i}-d">${escapeHtml(option.description)}</span>` : ''}</span>
           ${shortcuts && i < 9 ? `<span class="key" aria-hidden="true">${i + 1}</span>` : ''}
         </label>`).join('');
       const other = item.allowOther
