@@ -199,7 +199,7 @@ export class UITraceItem extends ElementBase {
   private syncSlots(): void {
     const icon = this.root.querySelector('slot[name="icon"]') as HTMLSlotElement | null;
     this.root.querySelector('.icon')?.toggleAttribute('data-empty', !icon || icon.assignedNodes().length === 0);
-    for (const node of icon?.assignedElements() || []) node.setAttribute('aria-hidden', 'true');
+    for (const node of Array.from(this.querySelectorAll(':scope > [slot="icon"]'))) node.setAttribute('aria-hidden', 'true');
     const description = this.root.querySelector('slot[name="description"]') as HTMLSlotElement | null;
     const hasDescription = !!this.getAttribute('description') || (!!description && description.assignedNodes().length > 0);
     this.root.querySelector('.description')?.toggleAttribute('data-empty', !hasDescription);

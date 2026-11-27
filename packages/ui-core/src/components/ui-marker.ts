@@ -113,7 +113,7 @@ export class UIMarker extends ElementBase {
   private syncIcon(): void {
     const slot = this.root.querySelector('slot[name="icon"]') as HTMLSlotElement | null;
     this.root.querySelector('.icon')?.toggleAttribute('data-empty', !slot || slot.assignedNodes().length === 0);
-    for (const node of slot?.assignedElements() || []) node.setAttribute('aria-hidden', 'true');
+    for (const node of Array.from(this.querySelectorAll(':scope > [slot="icon"]'))) node.setAttribute('aria-hidden', 'true');
   }
 
   protected override render(): void {
