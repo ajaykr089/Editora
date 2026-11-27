@@ -1142,13 +1142,21 @@ function handleTableShortcut(event: KeyboardEvent): void {
   if (event.key !== 'Enter' || event.defaultPrevented || !(event.ctrlKey || event.metaKey)) return;
   const action = event.shiftKey && !event.altKey ? 'addRowBelow' : event.altKey && !event.shiftKey ? 'addColumnRight' : null;
   if (!action) return;
+  if (runTableShortcut(action, event.target)) event.preventDefault();
+}
+
+/**
+ * Runs a table shortcut with the caret in an editable table cell, and says whether it did: outside a table the key
+ * is left to the editor and the browser.
+ */
+function runTableShortcut(action: string, target: EventTarget | null | undefined): boolean {
   const tableInfo = getTableInfoFromDOM();
-  if (!tableInfo?.cell || !isTableEditable(tableInfo.table)) return;
+  if (!tableInfo?.cell || !isTableEditable(tableInfo.table)) return false;
   // Only a key pressed in that editor: not one typed into a dialog that happens to be open over it.
   const host = tableInfo.table.closest('[contenteditable]');
-  if (!host || !(event.target instanceof Node) || !host.contains(event.target)) return;
-  event.preventDefault();
+  if (!host || !(target instanceof Node) || !host.contains(target)) return false;
   executeTableCommand(action);
+  return true;
 }
 
 function executeTableCommand(action: string): void {
@@ -1431,13 +1439,8 @@ export const TablePlugin = (): Plugin => ({
   },
 
   keymap: {
-    "Mod-Shift-Enter": () => {
-      executeTableCommand('addRowBelow');
-      return true;
-    },
-    "Mod-Alt-Enter": () => {
-      executeTableCommand('addColumnRight');
-      return true;
-    },
+    "Mod-Shift-Alt-t": "insertTable",
+    "Mod-Shift-Enter": (event?: KeyboardEvent) => runTableShortcut('addRowBelow', event?.target),
+    "Mod-Alt-Enter": (event?: KeyboardEvent) => runTableShortcut('addColumnRight', event?.target),
   },
 });

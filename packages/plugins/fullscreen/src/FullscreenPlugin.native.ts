@@ -251,6 +251,7 @@ export const FullscreenPlugin = (): Plugin => ({
   },
   
   keymap: {
+    'F11': 'toggleFullscreen',
     'Escape': () => {
       // Check if any editor is in fullscreen mode
       const fullscreenEditors = document.querySelectorAll('[data-editora-editor]');

@@ -241,5 +241,11 @@ export const TextAlignmentPlugin = (): Plugin => ({
     setTextAlignment: setTextAlignmentCommand
   },
 
-  keymap: {}
+  // As in Google Docs (center is Mod+Shift+Alt+E: Mod+Shift+E is the embed plugin's).
+  keymap: {
+    'Mod-Shift-l': { command: 'setTextAlignment', params: 'left' },
+    'Mod-Shift-Alt-e': { command: 'setTextAlignment', params: 'center' },
+    'Mod-Shift-r': { command: 'setTextAlignment', params: 'right' },
+    'Mod-Shift-j': { command: 'setTextAlignment', params: 'justify' },
+  }
 });

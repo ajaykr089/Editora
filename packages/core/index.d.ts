@@ -74,7 +74,11 @@ export interface Plugin {
   marks?: Record<string, NodeSpec>;
   commands?: Record<string, PluginCommand>;
   toolbar?: ToolbarItem[];
-  keymap?: Record<string, string | ((...args: unknown[]) => unknown)>;
+  /**
+   * Keyboard shortcuts, run by the editor while this plugin is loaded: `{ 'Mod-Shift-x': 'toggleStrikethrough' }`.
+   * `Mod` is Cmd on a Mac and Ctrl elsewhere. See `KeymapBinding`.
+   */
+  keymap?: Record<string, KeymapBinding>;
   context?: PluginContext;
   config?: PluginConfig;
   init?: (...args: any[]) => void | Promise<void>;
@@ -128,22 +132,48 @@ export interface KeyboardShortcut {
   params?: unknown;
   description?: string;
   preventDefault?: boolean;
+  /** Runs instead of `command`; returning `false` means it did nothing, so the key is left to the browser. */
+  run?: (event: KeyboardEvent) => boolean | void;
 }
 
 export interface KeyboardShortcutConfig {
   shortcuts?: KeyboardShortcut[];
   enabled?: boolean;
   customShortcuts?: Record<string, KeyboardShortcut>;
+  /** The built-in list (Mod+B bold, ...). On by default; the editors turn it off and use plugin keymaps. */
+  defaults?: boolean;
 }
+
+/**
+ * A plugin keymap value: a command name, a command with its argument, or a function called with the key event and
+ * the editor's context (`{ editorElement, contentElement }`) that returns `false` when it did nothing.
+ */
+export type KeymapBinding =
+  | string
+  | { command: string; params?: unknown }
+  | ((event?: KeyboardEvent, ...args: any[]) => boolean | void | unknown);
 
 export class KeyboardShortcutManager {
   constructor(config?: KeyboardShortcutConfig);
   registerShortcut(shortcut: KeyboardShortcut): void;
   unregisterShortcut(key: string): boolean;
+  /**
+   * Runs the shortcut for `event`. The key is blocked only when something ran: `canRun(command)` returning false,
+   * or the handler or a keymap function returning `false`, leaves it to the browser. Handled events are left alone.
+   */
   handleKeyDown(
     event: KeyboardEvent,
-    commandHandler?: (command: string, params?: unknown) => void,
+    commandHandler?: (command: string, params?: unknown) => boolean | void,
+    canRun?: (command: string) => boolean,
   ): boolean;
+  /** Parses a keymap key such as `Mod-Shift-Enter`, `Shift-Tab` or `F7`; null when it cannot. */
+  parseKeymapKey(spec: string): Omit<KeyboardShortcut, 'command'> | null;
+  /** Registers a plugin's keymap; its entries replace whatever was on the same keys. */
+  registerKeymap(keymap: Record<string, KeymapBinding> | undefined, context?: unknown): void;
+  /** Keeps Mod+B, Mod+I and Mod+U from the browser (which would format the text itself) until a keymap uses them. */
+  blockNativeFormattingKeys(): void;
+  /** Removes every shortcut. */
+  clear(): void;
   enable(): void;
   disable(): void;
   isEnabled(): boolean;

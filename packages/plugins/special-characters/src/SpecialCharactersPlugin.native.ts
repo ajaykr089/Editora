@@ -648,5 +648,7 @@ export const SpecialCharactersPlugin = (): Plugin => ({
     }
   },
   
-  keymap: {}
+  keymap: {
+    'Mod-Shift-Alt-s': 'insertSpecialCharacter',
+  }
 });

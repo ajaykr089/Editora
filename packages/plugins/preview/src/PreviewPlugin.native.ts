@@ -455,5 +455,7 @@ export const PreviewPlugin = (): Plugin => ({
     }
   },
   
-  keymap: {}
+  keymap: {
+    'Mod-Shift-p': 'togglePreview'
+  }
 });

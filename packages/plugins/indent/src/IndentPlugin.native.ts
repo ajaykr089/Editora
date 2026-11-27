@@ -299,10 +299,9 @@ export const IndentPlugin = (): Plugin => ({
     decreaseIndent
   },
   
+  // No Tab: it is how keyboard users leave the editor (in a list, the list plugin nests items with it).
   keymap: {
     'Mod-]': 'increaseIndent',
-    'Mod-[': 'decreaseIndent',
-    'Tab': 'increaseIndent',
-    'Shift-Tab': 'decreaseIndent'
+    'Mod-[': 'decreaseIndent'
   }
 });

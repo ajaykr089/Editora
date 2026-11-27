@@ -11,7 +11,7 @@ export type { PluginRuntimeContext } from './plugins/PluginRuntime';
 
 // Keyboard Shortcuts
 export { KeyboardShortcutManager } from './KeyboardShortcuts';
-export type { KeyboardShortcut, KeyboardShortcutConfig } from './KeyboardShortcuts';
+export type { KeyboardShortcut, KeyboardShortcutConfig, KeymapBinding } from './KeyboardShortcuts';
 
 // Enterprise plugin scaffolds - deprecated, non-functional (see plugins/enterprise/index.ts)
 export { SpellcheckPlugin, MediaPlugin } from './plugins/enterprise';
