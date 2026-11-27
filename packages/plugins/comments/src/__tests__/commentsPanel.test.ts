@@ -575,9 +575,9 @@ describe('the shortcut', () => {
   const chord = (init: KeyboardEventInit) =>
     content.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM', key: 'µ', altKey: true, bubbles: true, cancelable: true, ...init }));
 
-  it('Ctrl+Alt+M starts a comment on the selection (by key code, since Alt changes the key on a Mac)', () => {
+  it('Ctrl+Alt+M starts a comment on the selection', () => {
     select('Epsilon');
-    expect(chord({ ctrlKey: true })).toBe(false); // prevented
+    expect(chord({ ctrlKey: true, key: 'm' })).toBe(false); // prevented
     expect(panel().querySelector('.rte-comment-composer .rte-comment-selection')!.textContent).toBe('Epsilon');
     expect(document.activeElement).toBe(composerField());
   });
@@ -585,6 +585,13 @@ describe('the shortcut', () => {
   it('Cmd+Alt+M does the same, and with nothing selected it starts a note', () => {
     expect(chord({ metaKey: true })).toBe(false);
     expect(panel().querySelector('.rte-comment-composer-hint')).not.toBeNull();
+  });
+
+  // Windows and Linux report AltGr as Ctrl+Alt: AltGr+M types "µ" on a German keyboard, and that is typing.
+  it('lets AltGr+M type its character', () => {
+    select('Epsilon');
+    expect(chord({ ctrlKey: true, key: 'µ' })).toBe(true); // not prevented
+    expect(panel().querySelector('.rte-comment-composer')).toBeNull();
   });
 
   it('ignores the chord without Alt, or with Shift', () => {
