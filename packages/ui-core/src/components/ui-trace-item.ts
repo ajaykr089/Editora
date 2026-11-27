@@ -88,7 +88,6 @@ const style = `
   :host(:dir(rtl)[open]) .chevron { transform: rotate(90deg); }
 
   :host([status="pending"]) .line { color: var(--ui-trace-muted); }
-  :host([status="pending"]) .title { opacity: 0.8; }
   :host([status="error"]) .line { color: var(--ui-color-danger-text, var(--ui-color-danger, #b91c1c)); }
   :host([status="error"]) .icon { color: inherit; }
 
