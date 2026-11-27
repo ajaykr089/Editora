@@ -36,11 +36,21 @@ export function MyPlugin() {
       },
     },
     keymap: {
-      "Mod-Shift-M": "myCommand",
+      "Mod-Alt-Shift-o": "myCommand",
     },
   };
 }
 ```
+
+## Keyboard shortcuts
+
+The editor runs the `keymap` of every plugin it loads; a later plugin's key replaces an earlier one's. A key is written as modifiers and a key joined by `-`: `Mod` (Cmd on a Mac, Ctrl elsewhere), `Ctrl`, `Cmd`, `Alt`, `Shift`, then a character (`b`, `1`, `.`, `/`) or a key name (`Enter`, `Escape`, `ArrowLeft`, `F7`, `Space`). A value is:
+
+- a command name: `"Mod-Shift-x": "toggleStrikethrough"`;
+- a command with its argument: `"Mod-Shift-l": { command: "setTextAlignment", params: "left" }`;
+- a function, called with the key event and the editor's context (`{ editorElement, contentElement }`). Return `false` when it did nothing, so the key is left to the browser.
+
+The key is blocked only when the command ran. Check the [shortcut list](./keyboard-shortcuts.md) before you pick one, and keep clear of keys the browser or the system keep (Mod+T, Mod+Shift+T, Mod+N, Mod+W, Mod+Shift+Q on a Mac).
 
 ## Plugin types
 

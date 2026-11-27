@@ -44,7 +44,7 @@ function EmojisDemo() {
 
 | Action | Command | Shortcut | Toolbar |
 | --- | --- | --- | --- |
-| Open emoji picker | `openEmojiDialog` | `Mod-Shift-j` | `Insert Emoji` |
+| Open emoji picker | `openEmojiDialog` | `Mod-Shift-;` | `Insert Emoji` |
 | Insert emoji | `insertEmoji` | None | Via dialog interaction |
 
 ## Config Options
