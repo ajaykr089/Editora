@@ -99,13 +99,13 @@ const style = `
 
   /* Filled buttons have no border to share: a hairline keeps them readable as separate buttons.
      It is the later button's outer shadow, painted over the 1px it overlaps the previous one. */
-  :host(:not([detached])) ::slotted(ui-button:not(:first-child):not([variant="secondary"]):not([variant="ghost"]):not([variant="outline"])) {
+  :host(:not([detached])) ::slotted(ui-button:not(:first-child):not([variant="secondary"]):not([variant="ghost"]):not([variant="outline"]):not([variant="link"])) {
     box-shadow: -1px 0 0 0 var(--ui-button-group-divider, color-mix(in srgb, var(--ui-color-background, #ffffff) 45%, transparent));
   }
-  :host(:not([detached]):dir(rtl)) ::slotted(ui-button:not(:first-child):not([variant="secondary"]):not([variant="ghost"]):not([variant="outline"])) {
+  :host(:not([detached]):dir(rtl)) ::slotted(ui-button:not(:first-child):not([variant="secondary"]):not([variant="ghost"]):not([variant="outline"]):not([variant="link"])) {
     box-shadow: 1px 0 0 0 var(--ui-button-group-divider, color-mix(in srgb, var(--ui-color-background, #ffffff) 45%, transparent));
   }
-  :host([orientation="vertical"]:not([detached])) ::slotted(ui-button:not(:first-child):not([variant="secondary"]):not([variant="ghost"]):not([variant="outline"])) {
+  :host([orientation="vertical"]:not([detached])) ::slotted(ui-button:not(:first-child):not([variant="secondary"]):not([variant="ghost"]):not([variant="outline"]):not([variant="link"])) {
     box-shadow: 0 -1px 0 0 var(--ui-button-group-divider, color-mix(in srgb, var(--ui-color-background, #ffffff) 45%, transparent));
   }
 
