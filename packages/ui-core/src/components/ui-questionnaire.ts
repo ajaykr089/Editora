@@ -423,6 +423,9 @@ export class UIQuestionnaire extends ElementBase {
     const describedby = [item.description ? `${id}-description` : '', `${id}-error`].filter(Boolean).join(' ');
     const shortcuts = this.hasAttribute('shortcuts');
     const otherLabel = item.otherLabel || this.getAttribute('other-label') || 'Other';
+    // A single choice is a radio group, which can carry aria-required; other fieldsets say
+    // "(required)" in their legend instead (aria-required is not allowed on a plain group).
+    const singleChoice = item.type !== 'multiple' && item.type !== 'text' && !!item.options?.length;
     let body: string;
 
     if (item.type === 'text' || !item.options?.length) {
@@ -449,7 +452,7 @@ export class UIQuestionnaire extends ElementBase {
     }
 
     return `
-      <fieldset part="question" tabindex="-1" aria-describedby="${describedby}"${item.required ? ' aria-required="true"' : ''}>
+      <fieldset part="question" tabindex="-1" aria-describedby="${describedby}"${singleChoice ? ` role="radiogroup"${item.required ? ' aria-required="true"' : ''}` : ''}>
         <legend part="title">${escapeHtml(item.label)}${item.required ? '<span class="required" aria-hidden="true">*</span><span class="sr"> (required)</span>' : ''}</legend>
         ${item.description ? `<p class="description" part="description" id="${id}-description">${escapeHtml(item.description)}</p>` : ''}
         ${body}
