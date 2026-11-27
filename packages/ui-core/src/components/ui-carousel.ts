@@ -453,7 +453,8 @@ export class UICarousel extends ElementBase {
       viewport: this.root.querySelector('.viewport') as HTMLElement,
       track: this.root.querySelector('.track') as HTMLElement,
     });
-    this.root.addEventListener('pointerdown', (event) => {
+    this.root.addEventListener('pointerdown', (raw) => {
+      const event = raw as PointerEvent;
       const { viewport } = parts();
       if (!viewport || !event.composedPath().includes(viewport)) return;
       if (event.button !== 0 || this.slides.length < 2 || event.pointerType === 'mouse' && (event.target as Element | null)?.closest?.('a, button, input, textarea, select')) return;
@@ -467,7 +468,8 @@ export class UICarousel extends ElementBase {
         active: false,
       };
     });
-    this.root.addEventListener('pointermove', (event) => {
+    this.root.addEventListener('pointermove', (raw) => {
+      const event = raw as PointerEvent;
       const { viewport, track } = parts();
       const drag = this.drag;
       if (!drag || drag.id !== event.pointerId) return;
@@ -487,7 +489,8 @@ export class UICarousel extends ElementBase {
       const axis = vertical() ? 'Y' : 'X';
       track.style.transform = `translate${axis}(calc(${-this._index * 100 * dir}% + ${drag.delta}px))`;
     });
-    const end = (event: PointerEvent) => {
+    const end = (raw: Event) => {
+      const event = raw as PointerEvent;
       const { track } = parts();
       const drag = this.drag;
       if (!drag || drag.id !== event.pointerId) return;

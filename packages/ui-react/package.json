@@ -835,6 +835,138 @@
       "import": "./dist/Wizard.esm.js",
       "require": "./dist/Wizard.cjs.js",
       "default": "./dist/Wizard.esm.js"
+    },
+    "./AccessibleIcon": {
+      "types": "./dist/components/AccessibleIcon.d.ts",
+      "import": "./dist/AccessibleIcon.esm.js",
+      "require": "./dist/AccessibleIcon.cjs.js",
+      "default": "./dist/AccessibleIcon.esm.js"
+    },
+    "./Announcer": {
+      "types": "./dist/components/Announcer.d.ts",
+      "import": "./dist/Announcer.esm.js",
+      "require": "./dist/Announcer.cjs.js",
+      "default": "./dist/Announcer.esm.js"
+    },
+    "./Attachment": {
+      "types": "./dist/components/Attachment.d.ts",
+      "import": "./dist/Attachment.esm.js",
+      "require": "./dist/Attachment.cjs.js",
+      "default": "./dist/Attachment.esm.js"
+    },
+    "./AttachmentGroup": {
+      "types": "./dist/components/AttachmentGroup.d.ts",
+      "import": "./dist/AttachmentGroup.esm.js",
+      "require": "./dist/AttachmentGroup.cjs.js",
+      "default": "./dist/AttachmentGroup.esm.js"
+    },
+    "./Bubble": {
+      "types": "./dist/components/Bubble.d.ts",
+      "import": "./dist/Bubble.esm.js",
+      "require": "./dist/Bubble.cjs.js",
+      "default": "./dist/Bubble.esm.js"
+    },
+    "./BubbleGroup": {
+      "types": "./dist/components/BubbleGroup.d.ts",
+      "import": "./dist/BubbleGroup.esm.js",
+      "require": "./dist/BubbleGroup.cjs.js",
+      "default": "./dist/BubbleGroup.esm.js"
+    },
+    "./ButtonGroup": {
+      "types": "./dist/components/ButtonGroup.d.ts",
+      "import": "./dist/ButtonGroup.esm.js",
+      "require": "./dist/ButtonGroup.cjs.js",
+      "default": "./dist/ButtonGroup.esm.js"
+    },
+    "./Heading": {
+      "types": "./dist/components/Heading.d.ts",
+      "import": "./dist/Heading.esm.js",
+      "require": "./dist/Heading.cjs.js",
+      "default": "./dist/Heading.esm.js"
+    },
+    "./InputGroup": {
+      "types": "./dist/components/InputGroup.d.ts",
+      "import": "./dist/InputGroup.esm.js",
+      "require": "./dist/InputGroup.cjs.js",
+      "default": "./dist/InputGroup.esm.js"
+    },
+    "./Item": {
+      "types": "./dist/components/Item.d.ts",
+      "import": "./dist/Item.esm.js",
+      "require": "./dist/Item.cjs.js",
+      "default": "./dist/Item.esm.js"
+    },
+    "./ItemGroup": {
+      "types": "./dist/components/ItemGroup.d.ts",
+      "import": "./dist/ItemGroup.esm.js",
+      "require": "./dist/ItemGroup.cjs.js",
+      "default": "./dist/ItemGroup.esm.js"
+    },
+    "./Marker": {
+      "types": "./dist/components/Marker.d.ts",
+      "import": "./dist/Marker.esm.js",
+      "require": "./dist/Marker.cjs.js",
+      "default": "./dist/Marker.esm.js"
+    },
+    "./Message": {
+      "types": "./dist/components/Message.d.ts",
+      "import": "./dist/Message.esm.js",
+      "require": "./dist/Message.cjs.js",
+      "default": "./dist/Message.esm.js"
+    },
+    "./MessageScroller": {
+      "types": "./dist/components/MessageScroller.d.ts",
+      "import": "./dist/MessageScroller.esm.js",
+      "require": "./dist/MessageScroller.cjs.js",
+      "default": "./dist/MessageScroller.esm.js"
+    },
+    "./NativeSelect": {
+      "types": "./dist/components/NativeSelect.d.ts",
+      "import": "./dist/NativeSelect.esm.js",
+      "require": "./dist/NativeSelect.cjs.js",
+      "default": "./dist/NativeSelect.esm.js"
+    },
+    "./Prose": {
+      "types": "./dist/components/Prose.d.ts",
+      "import": "./dist/Prose.esm.js",
+      "require": "./dist/Prose.cjs.js",
+      "default": "./dist/Prose.esm.js"
+    },
+    "./Question": {
+      "types": "./dist/components/Question.d.ts",
+      "import": "./dist/Question.esm.js",
+      "require": "./dist/Question.cjs.js",
+      "default": "./dist/Question.esm.js"
+    },
+    "./Questionnaire": {
+      "types": "./dist/components/Questionnaire.d.ts",
+      "import": "./dist/Questionnaire.esm.js",
+      "require": "./dist/Questionnaire.cjs.js",
+      "default": "./dist/Questionnaire.esm.js"
+    },
+    "./Spinner": {
+      "types": "./dist/components/Spinner.d.ts",
+      "import": "./dist/Spinner.esm.js",
+      "require": "./dist/Spinner.cjs.js",
+      "default": "./dist/Spinner.esm.js"
+    },
+    "./Text": {
+      "types": "./dist/components/Text.d.ts",
+      "import": "./dist/Text.esm.js",
+      "require": "./dist/Text.cjs.js",
+      "default": "./dist/Text.esm.js"
+    },
+    "./Trace": {
+      "types": "./dist/components/Trace.d.ts",
+      "import": "./dist/Trace.esm.js",
+      "require": "./dist/Trace.cjs.js",
+      "default": "./dist/Trace.esm.js"
+    },
+    "./TraceItem": {
+      "types": "./dist/components/TraceItem.d.ts",
+      "import": "./dist/TraceItem.esm.js",
+      "require": "./dist/TraceItem.cjs.js",
+      "default": "./dist/TraceItem.esm.js"
     }
   },
   "files": [

@@ -343,6 +343,7 @@ export { UIAttachmentGroup } from './components/ui-attachment-group';
 export { UITrace } from './components/ui-trace';
 export { UITraceItem } from './components/ui-trace-item';
 export { UIQuestion } from './components/ui-question';
+export type { QuestionDefinition, QuestionOption } from './components/ui-question';
 export { UIQuestionnaire } from './components/ui-questionnaire';
 export { UISpinner } from './components/ui-spinner';
 export { UIKbd } from './components/ui-kbd';
