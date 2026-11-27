@@ -18,11 +18,14 @@ export const PRELOAD_CSS = `@layer editora-preload {
   ui-alert-dialog:not(:defined),
   ui-app-header:not(:defined),
   ui-aspect-ratio:not(:defined),
+  ui-attachment-group:not(:defined),
   ui-box:not(:defined),
   ui-breadcrumb:not(:defined),
   ui-calendar:not(:defined),
   ui-card:not(:defined),
+  ui-carousel:not(:defined),
   ui-chart:not(:defined),
+  ui-code-block:not(:defined),
   ui-collapsible:not(:defined),
   ui-container:not(:defined),
   ui-context-menu:not(:defined),
@@ -39,10 +42,16 @@ export const PRELOAD_CSS = `@layer editora-preload {
   ui-file-upload:not(:defined),
   ui-form:not(:defined),
   ui-gantt:not(:defined),
+  ui-heading:not(:defined),
   ui-inline-edit:not(:defined),
   ui-input:not(:defined),
+  ui-input-group:not(:defined),
+  ui-item:not(:defined),
   ui-layout:not(:defined),
+  ui-marker:not(:defined),
   ui-masonry-grid:not(:defined),
+  ui-message:not(:defined),
+  ui-message-scroller:not(:defined),
   ui-meter:not(:defined),
   ui-metric-card:not(:defined),
   ui-multi-select:not(:defined),
@@ -56,6 +65,8 @@ export const PRELOAD_CSS = `@layer editora-preload {
   ui-pin-input:not(:defined),
   ui-plugin-panel:not(:defined),
   ui-progress:not(:defined),
+  ui-prose:not(:defined),
+  ui-questionnaire:not(:defined),
   ui-quick-actions:not(:defined),
   ui-radio-group:not(:defined),
   ui-scroll-area:not(:defined),
@@ -70,17 +81,23 @@ export const PRELOAD_CSS = `@layer editora-preload {
   ui-table:not(:defined),
   ui-tabs:not(:defined),
   ui-tags-input:not(:defined),
+  ui-text:not(:defined),
   ui-time-field:not(:defined),
   ui-timeline:not(:defined),
   ui-toast:not(:defined),
   ui-toolbar:not(:defined),
+  ui-trace-item:not(:defined),
   ui-transfer-list:not(:defined),
   ui-tree:not(:defined),
   ui-tree-item:not(:defined) {
     display: block;
   }
 
-  ui-flex:not(:defined) {
+  ui-bubble:not(:defined),
+  ui-bubble-group:not(:defined),
+  ui-flex:not(:defined),
+  ui-item-group:not(:defined),
+  ui-trace:not(:defined) {
     display: flex;
   }
 
@@ -90,6 +107,7 @@ export const PRELOAD_CSS = `@layer editora-preload {
     display: grid;
   }
 
+  ui-attachment:not(:defined),
   ui-avatar:not(:defined),
   ui-color-picker:not(:defined),
   ui-combobox:not(:defined),
@@ -98,18 +116,23 @@ export const PRELOAD_CSS = `@layer editora-preload {
     display: inline-block;
   }
 
+  ui-accessible-icon:not(:defined),
   ui-anchor:not(:defined),
   ui-badge:not(:defined),
   ui-block-controls:not(:defined),
   ui-button:not(:defined),
+  ui-button-group:not(:defined),
   ui-checkbox:not(:defined),
   ui-hover-card:not(:defined),
+  ui-kbd:not(:defined),
   ui-label:not(:defined),
+  ui-native-select:not(:defined),
   ui-odometer:not(:defined),
   ui-pagination:not(:defined),
   ui-radio:not(:defined),
   ui-rating:not(:defined),
   ui-slot:not(:defined),
+  ui-spinner:not(:defined),
   ui-switch:not(:defined),
   ui-toggle:not(:defined),
   ui-toggle-group:not(:defined) {
@@ -139,8 +162,10 @@ export const PRELOAD_CSS = `@layer editora-preload {
     display: contents;
   }
 
+  ui-announcer:not(:defined),
   ui-command-palette:not(:defined),
   ui-floating-toolbar:not(:defined),
+  ui-question:not(:defined),
   ui-selection-popup:not(:defined) {
     display: none;
   }
@@ -164,6 +189,11 @@ export const PRELOAD_CSS = `@layer editora-preload {
   ui-alert-dialog:not(:defined),
   ui-drawer:not(:defined),
   ui-toast:not(:defined) {
+    display: none;
+  }
+
+  /* A carousel shows one slide at a time. */
+  ui-carousel:not(:defined) > :not(:first-child) {
     display: none;
   }
 
