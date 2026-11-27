@@ -1,5 +1,14 @@
 # @editora/comments
 
+## 1.1.1
+
+### Patch Changes
+
+- 15992a1: AltGr+M types its character again on Windows and Linux (`µ` on a German keyboard). AltGr is reported as Ctrl+Alt, so it started a comment (Ctrl+Alt+M) instead.
+- Updated dependencies [e807319]
+- Updated dependencies [44438ee]
+  - @editora/core@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes

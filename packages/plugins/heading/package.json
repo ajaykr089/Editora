@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-heading",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Heading plugin for Rich Text Editor",
   "keywords": [
     "editora",
@@ -30,7 +30,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.2.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

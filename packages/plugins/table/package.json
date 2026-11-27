@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-table",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Table plugin for Rich Text Editor",
   "keywords": [
     "editora",
@@ -29,7 +29,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.1.2"
+    "@editora/core": "^1.2.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

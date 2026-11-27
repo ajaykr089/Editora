@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.1.2
+
+### Patch Changes
+
+- 18d9bb0: `<EditoraEditor>` now runs the keyboard shortcuts in its plugins' `keymap`s, as `<editora-editor>` does, and leaves a key to the browser when no plugin handles it (Cmd/Ctrl+P prints). Mod+B, Mod+I and Mod+U without the plugin for them still do nothing, so the browser does not format the text itself. It ran only the core's fixed list before.
+- Updated dependencies [15992a1]
+- Updated dependencies [e807319]
+- Updated dependencies [44438ee]
+- Updated dependencies [8978921]
+  - @editora/plugins@1.2.10
+  - @editora/core@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes

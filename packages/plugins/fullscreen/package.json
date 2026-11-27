@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-fullscreen",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Fullscreen plugin for Rich Text Editor",
   "keywords": [
     "editora",
@@ -27,7 +27,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.2.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
