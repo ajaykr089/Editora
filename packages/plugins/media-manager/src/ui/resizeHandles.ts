@@ -120,8 +120,11 @@ export class ResizeHandles {
     width = Math.max(MIN_SIZE, width);
     height = Math.max(MIN_SIZE, height);
 
+    // The attributes give the shape; the height follows the width, so a page that narrows pictures to the screen
+    // (max-width: 100%) does not squash this one.
     media.style.width = `${width}px`;
-    media.style.height = `${height}px`;
+    media.style.height = 'auto';
+    media.style.maxWidth = '100%';
     media.setAttribute('width', String(Math.round(width)));
     media.setAttribute('height', String(Math.round(height)));
 

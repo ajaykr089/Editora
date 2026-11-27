@@ -81,6 +81,9 @@ describe('the figure around media', () => {
     expect(media.getAttribute('width')).toBe('100');
     expect(media.getAttribute('height')).toBe('50');
     expect(media.style.width).toBe('100px');
+    // The attributes give the shape; the style lets the height follow the width when a page narrows the picture.
+    expect(media.style.height).toBe('auto');
+    expect(media.style.maxWidth).toBe('100%');
     setWidth(media, null);
     expect(media.hasAttribute('width')).toBe(false);
     expect(media.style.width).toBe('');
