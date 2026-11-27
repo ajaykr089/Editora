@@ -2,12 +2,15 @@ import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import { PRELOAD_CSS } from './src/preload';
+import { TAILWIND_V4_CSS } from './src/tailwind';
 
 // Emits dist/preload.css (`@editora/ui-core/preload.css`) from the same string the JS entry exports.
 const preloadCss = (): Plugin => ({
   name: 'editora-preload-css',
   generateBundle() {
     this.emitFile({ type: 'asset', fileName: 'preload.css', source: PRELOAD_CSS });
+    // `@editora/ui-core/tailwind.css`: the theme tokens for Tailwind v4 (src/tailwind.ts).
+    this.emitFile({ type: 'asset', fileName: 'tailwind.css', source: TAILWIND_V4_CSS });
   }
 });
 
