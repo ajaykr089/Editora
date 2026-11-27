@@ -967,6 +967,12 @@
       "import": "./dist/TraceItem.esm.js",
       "require": "./dist/TraceItem.cjs.js",
       "default": "./dist/TraceItem.esm.js"
+    },
+    "./Headless": {
+      "types": "./dist/components/Headless.d.ts",
+      "import": "./dist/Headless.esm.js",
+      "require": "./dist/Headless.cjs.js",
+      "default": "./dist/Headless.esm.js"
     }
   },
   "files": [

@@ -113,3 +113,6 @@ export { TraceItem } from './components/TraceItem';
 export type { TraceItemProps, TraceItemStatus } from './components/TraceItem';
 export { announce, clearAnnouncements } from './components/Announcer';
 export type { AnnounceOptions, AnnouncePoliteness } from './components/Announcer';
+// Headless hooks: WAI-ARIA behaviour on your own markup and styles
+export { useHeadlessDialog, useHeadlessPopover, useHeadlessMenu, useHeadlessTabs, useHeadlessListbox } from './components/Headless';
+export type { UseHeadlessDialogOptions, UseHeadlessDialogResult, UseHeadlessPopoverOptions, UseHeadlessMenuOptions, UseHeadlessMenuResult, UseHeadlessTabsOptions, UseHeadlessTabsResult, UseHeadlessListboxOptions, UseHeadlessListboxResult } from './components/Headless';

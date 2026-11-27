@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest';
 //   import { Checkbox } from '@editora/ui-react/Checkbox'
 // A default import of an entry that only had a named export rendered "Element type is invalid".
 const pkg = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf8')) as { exports: Record<string, unknown> };
-// Modules that group several components under one entry: no single default makes sense.
-const GROUPS = new Set(['FieldSemantics']);
+// Modules that group several components (or hooks) under one entry: no single default makes sense.
+const GROUPS = new Set(['FieldSemantics', 'Headless']);
 const entries = Object.keys(pkg.exports)
   .map((key) => /^\.\/([A-Z][A-Za-z]+)$/.exec(key)?.[1])
   .filter((name): name is string => !!name && !GROUPS.has(name));

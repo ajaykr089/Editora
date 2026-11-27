@@ -19,8 +19,10 @@ const outDir = join(root, 'examples/editora-docs/docs/ui-react/api');
 const check = process.argv.includes('--check');
 
 const registry = JSON.parse(readFileSync(join(root, 'components.json'), 'utf8'));
+// Modules of hooks, documented by a guide rather than a props table.
+const NOT_COMPONENTS = new Set(['Headless']);
 const components = registry.components
-  .filter((entry) => entry.package === '@editora/ui-react' && entry.framework === 'react')
+  .filter((entry) => entry.package === '@editora/ui-react' && entry.framework === 'react' && !NOT_COMPONENTS.has(entry.name))
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const program = ts.createProgram(
