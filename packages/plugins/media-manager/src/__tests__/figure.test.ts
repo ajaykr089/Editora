@@ -136,9 +136,10 @@ describe('putting a figure at a caret', () => {
     range.setStart(host.children[1], 0);
     range.collapse(true);
     insertBlocks(range, host, [figureNode()]);
-    expect(tags()).toEqual(['P', 'FIGURE', 'P', 'P']);
+    // The paragraph below is where to type next: no empty one is left behind.
+    expect(tags()).toEqual(['P', 'FIGURE', 'P']);
     expect(host.children[0].textContent).toBe('One');
-    expect(host.children[3].textContent).toBe('Two');
+    expect(host.children[2].textContent).toBe('Two');
   });
 
   it('puts several in order, as a run', () => {
