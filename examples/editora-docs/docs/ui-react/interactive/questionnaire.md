@@ -1,7 +1,7 @@
 ---
-title: Questionnaire
-description: Asks a few questions one at a time: choices, free text, other answers, required, skippable and conditional questions.
-sidebar_label: Questionnaire
+title: "Questionnaire"
+description: "Asks a few questions one at a time: choices, free text, other answers, required, skippable and conditional questions."
+sidebar_label: "Questionnaire"
 ---
 
 # Questionnaire

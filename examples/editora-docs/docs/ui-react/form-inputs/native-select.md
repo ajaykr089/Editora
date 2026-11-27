@@ -1,7 +1,7 @@
 ---
-title: NativeSelect
-description: A styled native select: the platform picker, native forms and autofill, with the library field look.
-sidebar_label: NativeSelect
+title: "NativeSelect"
+description: "A styled native select: the platform picker, native forms and autofill, with the library field look."
+sidebar_label: "NativeSelect"
 ---
 
 # NativeSelect

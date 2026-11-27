@@ -1,7 +1,7 @@
 ---
-title: Announcer
-description: Screen-reader announcements: the announce() function and the declarative Announcer component.
-sidebar_label: Announcer
+title: "Announcer"
+description: "Screen-reader announcements: the announce() function and the declarative Announcer component."
+sidebar_label: "Announcer"
 ---
 
 # Announcer

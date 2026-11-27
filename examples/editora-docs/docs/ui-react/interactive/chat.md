@@ -1,7 +1,7 @@
 ---
-title: Chat components
-description: Message, Bubble, Marker, MessageScroller, Attachment, Trace and Questionnaire: the parts of a chat or agent UI.
-sidebar_label: Chat components
+title: "Chat components"
+description: "Message, Bubble, Marker, MessageScroller, Attachment, Trace and Questionnaire: the parts of a chat or agent UI."
+sidebar_label: "Chat components"
 ---
 
 # Chat components

@@ -1,7 +1,7 @@
 ---
-title: ButtonGroup
-description: Joins related buttons, inputs and selects into one control.
-sidebar_label: ButtonGroup
+title: "ButtonGroup"
+description: "Joins related buttons, inputs and selects into one control."
+sidebar_label: "ButtonGroup"
 ---
 
 # ButtonGroup

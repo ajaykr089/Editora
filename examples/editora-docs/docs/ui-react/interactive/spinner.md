@@ -1,7 +1,7 @@
 ---
-title: Spinner
-description: Loading indicator that screen readers announce once, with sizes, tones and three shapes.
-sidebar_label: Spinner
+title: "Spinner"
+description: "Loading indicator that screen readers announce once, with sizes, tones and three shapes."
+sidebar_label: "Spinner"
 ---
 
 # Spinner

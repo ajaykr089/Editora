@@ -1,7 +1,7 @@
 ---
-title: Typography
-description: Heading, Text and Prose: the type scale as components, and styles for rich HTML such as editor output.
-sidebar_label: Typography
+title: "Typography"
+description: "Heading, Text and Prose: the type scale as components, and styles for rich HTML such as editor output."
+sidebar_label: "Typography"
 ---
 
 # Typography

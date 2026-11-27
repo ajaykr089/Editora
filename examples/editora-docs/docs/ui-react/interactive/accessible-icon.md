@@ -1,7 +1,7 @@
 ---
-title: AccessibleIcon
-description: Gives an icon-only control a name screen readers read, and hides the icon itself.
-sidebar_label: AccessibleIcon
+title: "AccessibleIcon"
+description: "Gives an icon-only control a name screen readers read, and hides the icon itself."
+sidebar_label: "AccessibleIcon"
 ---
 
 # AccessibleIcon

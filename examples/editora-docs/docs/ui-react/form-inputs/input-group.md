@@ -1,7 +1,7 @@
 ---
-title: InputGroup
-description: One field frame around a text control and its addons: icons, units, buttons, keyboard hints, toolbars.
-sidebar_label: InputGroup
+title: "InputGroup"
+description: "One field frame around a text control and its addons: icons, units, buttons, keyboard hints, toolbars."
+sidebar_label: "InputGroup"
 ---
 
 # InputGroup

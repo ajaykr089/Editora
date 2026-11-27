@@ -1,7 +1,7 @@
 ---
-title: Item
-description: A list row with media, title, description and actions, for settings, members, files and results lists.
-sidebar_label: Item
+title: "Item"
+description: "A list row with media, title, description and actions, for settings, members, files and results lists."
+sidebar_label: "Item"
 ---
 
 # Item
