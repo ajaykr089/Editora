@@ -13,6 +13,7 @@ import {
   isResizable,
   type MediaElement,
 } from '../model/figure';
+import { removeFromGallery } from '../model/gallery';
 import { isTypeAllowed } from '../uploadService';
 import type { MediaManagerConfig } from '../types/media';
 import { FloatingToolbar } from './floatingToolbar';
@@ -154,6 +155,7 @@ export class MediaController {
     document.addEventListener('click', this.onClick);
     document.addEventListener('keydown', this.onKeyDown, true);
     document.addEventListener('paste', this.onPaste, true);
+    document.addEventListener('cut', this.onCut, true);
     document.addEventListener('dragover', this.onDragOver, true);
     document.addEventListener('drop', this.onDrop, true);
     document.addEventListener('focusin', this.onFocusIn, true);
@@ -172,6 +174,7 @@ export class MediaController {
     document.removeEventListener('click', this.onClick);
     document.removeEventListener('keydown', this.onKeyDown, true);
     document.removeEventListener('paste', this.onPaste, true);
+    document.removeEventListener('cut', this.onCut, true);
     document.removeEventListener('dragover', this.onDragOver, true);
     document.removeEventListener('drop', this.onDrop, true);
     document.removeEventListener('focusin', this.onFocusIn, true);
@@ -408,6 +411,7 @@ export class MediaController {
       return;
     }
 
+    if (this.editAroundMedia(event)) return;
     this.arrowOntoMedia(event, target);
 
     const caption = target?.closest<HTMLElement>('figure.rte-media > figcaption');
@@ -441,6 +445,144 @@ export class MediaController {
       this.select(media);
       this.returnFocus();
     }
+  };
+
+  /**
+   * The keys that change the text around media. Left to them, the browsers each mishandle a block that is not
+   * editable in their own way: Backspace and Delete on a selected picture merged the paragraphs on either side
+   * (Chromium wrapping the second in a styled span, Firefox leaving a <br>), a typed letter glued them together or
+   * landed outside any paragraph, Enter deleted the picture, and Backspace at the start of the paragraph after it
+   * deleted it and merged the two as well.
+   *
+   * - On a selected picture: Backspace and Delete remove it (just it: one picture of a gallery, or a link that wraps
+   *   only it), Enter starts a paragraph below it, and a typed character replaces it with a paragraph.
+   * - Backspace at the start of the paragraph after a picture, and Delete at the end of the one before, select it
+   *   (taking that paragraph away first when it is empty); the next press removes it.
+   */
+  private editAroundMedia(event: KeyboardEvent): boolean {
+    if (event.defaultPrevented || event.isComposing) return false;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+    const range = selection.getRangeAt(0);
+    const key = event.key;
+    const typing = key.length === 1 && !event.ctrlKey && !event.metaKey;
+
+    const media = this.mediaInRange(range);
+    if (media) {
+      const host = hostOf(media);
+      if (!host) return false;
+      if (key === 'Backspace' || key === 'Delete') {
+        event.preventDefault();
+        this.removeMedia(media, key === 'Backspace' ? 'before' : 'after');
+        return true;
+      }
+      if (key === 'Enter' || typing) {
+        if (isGalleryItem(media)) return false;
+        event.preventDefault();
+        const root = this.wrapperOf(media);
+        const paragraph = document.createElement('p');
+        if (typing) paragraph.textContent = key;
+        else paragraph.innerHTML = '<br>';
+        this.commit(media, () => (typing ? root.replaceWith(paragraph) : root.after(paragraph)));
+        this.deselect();
+        const caret = document.createRange();
+        if (typing) caret.setStart(paragraph.firstChild!, 1);
+        else caret.setStart(paragraph, 0);
+        caret.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(caret);
+        return true;
+      }
+      return false;
+    }
+
+    if ((key !== 'Backspace' && key !== 'Delete') || !range.collapsed || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) {
+      return false;
+    }
+    const host = hostOf(range.startContainer);
+    const block = host ? topBlockOf(range.startContainer, host) : null;
+    if (!host || !block || isPlainMedia(block)) return false;
+    const backward = key === 'Backspace';
+    const neighbour = backward ? block.previousElementSibling : block.nextElementSibling;
+    if (!neighbour || !isPlainMedia(neighbour) || !atEdgeOf(range, block, backward ? 'start' : 'end')) return false;
+    const target = neighbour.querySelector<Media>(MEDIA_SELECTOR);
+    if (!target) return false;
+
+    event.preventDefault();
+    const empty = !block.textContent?.trim() && !block.querySelector('img, video, audio, iframe, table, hr');
+    if (empty) this.commit(target, () => block.remove());
+    this.select(target);
+    this.placeNodeSelection(target);
+    return true;
+  }
+
+  /** What goes with media when it is removed: its figure (caption and all), a link around only it, or itself. */
+  private wrapperOf(media: Media): HTMLElement {
+    const link = media.closest('a');
+    return figureOf(media) ?? (link && link.children.length === 1 && !link.textContent?.trim() ? link : media);
+  }
+
+  /** Removes media as one undo step and puts the caret beside where it was, at the text `toward` that side. */
+  private removeMedia(media: Media, toward: 'before' | 'after'): void {
+    const selection = window.getSelection();
+    if (isGalleryItem(media)) {
+      const gallery = figureOf(media);
+      this.commit(media, () => removeFromGallery(media));
+      this.deselect();
+      if (gallery?.isConnected) {
+        const range = document.createRange();
+        range.selectNode(gallery);
+        range.collapse(toward === 'before');
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+      return;
+    }
+    const wrapper = this.wrapperOf(media);
+    const host = hostOf(wrapper);
+    let caret: Range;
+    this.commit(media, () => {
+      if (!host || wrapper.parentElement !== host) {
+        // Inline, in a paragraph: the caret goes where it was.
+        caret = document.createRange();
+        caret.setStartBefore(wrapper);
+        caret.collapse(true);
+        wrapper.remove();
+        return;
+      }
+      const before = wrapper.previousElementSibling;
+      const after = wrapper.nextElementSibling;
+      const beside = toward === 'before' ? before ?? after : after ?? before;
+      if (beside && !isPlainMedia(beside)) {
+        caret = edgeRange(beside, beside === before ? 'end' : 'start');
+        wrapper.remove();
+      } else {
+        // Nothing to put the caret in beside it: a paragraph takes its place.
+        const paragraph = document.createElement('p');
+        paragraph.innerHTML = '<br>';
+        wrapper.replaceWith(paragraph);
+        caret = document.createRange();
+        caret.setStart(paragraph, 0);
+        caret.collapse(true);
+      }
+    });
+    this.deselect();
+    selection?.removeAllRanges();
+    selection?.addRange(caret!);
+  }
+
+  /** Cut with media selected: the browser's own cut would take it the way Delete does (see editAroundMedia). */
+  private readonly onCut = (event: ClipboardEvent): void => {
+    const selection = window.getSelection();
+    if (event.defaultPrevented || !selection || selection.rangeCount === 0 || !event.clipboardData) return;
+    const media = this.mediaInRange(selection.getRangeAt(0));
+    if (!media) return;
+    const copy = (isGalleryItem(media) ? media : this.wrapperOf(media)).cloneNode(true) as HTMLElement;
+    [copy, ...Array.from(copy.querySelectorAll<HTMLElement>('*'))].forEach((el) => el.removeAttribute('contenteditable'));
+    event.preventDefault();
+    event.clipboardData.setData('text/html', copy.outerHTML);
+    event.clipboardData.setData('text/plain', media.getAttribute('alt') ?? '');
+    this.removeMedia(media, 'after');
   };
 
   /**
