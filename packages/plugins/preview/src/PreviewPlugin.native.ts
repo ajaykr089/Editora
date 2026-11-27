@@ -455,7 +455,8 @@ export const PreviewPlugin = (): Plugin => ({
     }
   },
   
+  // Mod+Shift+P opens a private window in Firefox and never reaches the page.
   keymap: {
-    'Mod-Shift-p': 'togglePreview'
+    'Mod-Alt-p': 'togglePreview'
   }
 });

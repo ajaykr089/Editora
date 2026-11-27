@@ -955,20 +955,11 @@ function getKeyboardEventKey(event: KeyboardEvent): string {
   return typeof event.key === 'string' ? event.key.toLowerCase() : '';
 }
 
+// Mod+Alt+Shift+D opens the dialog. Its F7 was spell check's; Preview is on the toolbar (its keys, Mod+Alt+Shift+B
+// and F8, are the blocks library's and the version diff's).
 function isOpenDialogShortcut(event: KeyboardEvent): boolean {
-  const hasPrimary = event.metaKey || event.ctrlKey;
   const key = getKeyboardEventKey(event);
-  const modShortcut = hasPrimary && event.altKey && event.shiftKey && key === 'd';
-  const fallbackShortcut = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && key === 'f7';
-  return modShortcut || fallbackShortcut;
-}
-
-function isTogglePreviewShortcut(event: KeyboardEvent): boolean {
-  const hasPrimary = event.metaKey || event.ctrlKey;
-  const key = getKeyboardEventKey(event);
-  const modShortcut = hasPrimary && event.altKey && event.shiftKey && key === 'b';
-  const fallbackShortcut = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && key === 'f8';
-  return modShortcut || fallbackShortcut;
+  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'd';
 }
 
 function openDataBindingDialog(
@@ -1250,14 +1241,6 @@ function bindGlobalHandlers(options: ResolvedDataBindingOptions): void {
         }
         return;
       }
-
-      if (isTogglePreviewShortcut(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const nextEnabled = !(previewEnabledByEditor.get(editor) === true);
-        void applyPreviewState(editor, resolvedOptions, nextEnabled);
-      }
     };
 
     document.addEventListener('keydown', globalKeydownHandler, true);
@@ -1489,11 +1472,6 @@ export const DataBindingPlugin = (rawOptions: DataBindingPluginOptions = {}): Pl
 
     keymap: {
       'Mod-Alt-Shift-d': 'openDataBindingDialog',
-      'Mod-Alt-Shift-D': 'openDataBindingDialog',
-      'Mod-Alt-Shift-b': 'toggleDataBindingPreview',
-      'Mod-Alt-Shift-B': 'toggleDataBindingPreview',
-      F7: 'openDataBindingDialog',
-      F8: 'toggleDataBindingPreview',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

@@ -74,8 +74,9 @@ export const MediaManagerPlugin = (config?: Partial<MediaManagerConfig>): Plugin
       },
     },
 
+    // Mod+Shift+I opens the developer tools in Chrome and Firefox on Windows and Linux.
     keymap: {
-      'Mod-Shift-i': 'insertImage',
+      'Mod-Shift-g': 'insertImage',
     },
   };
 };

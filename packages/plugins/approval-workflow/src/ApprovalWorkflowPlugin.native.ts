@@ -110,7 +110,7 @@ const defaultLabels: Required<ApprovalWorkflowLabels> = {
   noSignoffsText: 'No sign-offs yet.',
   summaryPrefix: 'Workflow',
   lockedSuffix: 'Locked',
-  shortcutText: 'Shortcuts: Ctrl/Cmd+Alt+Shift+A/R/P/D',
+  shortcutText: 'Shortcuts: Ctrl/Cmd+Alt+Shift+W (panel), Ctrl/Cmd+Alt+Shift+P (approve)',
   approveCommentRequiredText: 'Approval comment is required.',
 };
 
@@ -868,22 +868,12 @@ function getKeyboardEventKey(event: KeyboardEvent): string {
 
 function isToggleShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'a';
-}
-
-function isRequestReviewShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'r';
+  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'w';
 }
 
 function isApproveShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'p';
-}
-
-function isReopenShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'd';
 }
 
 function bindGlobalHandlers(options: ResolvedApprovalWorkflowOptions): void {
@@ -914,13 +904,13 @@ function bindGlobalHandlers(options: ResolvedApprovalWorkflowOptions): void {
     globalKeydownHandler = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
 
+      // Mod+Alt+Shift+W opens the panel and P approves. A (the accessibility checker's), R (content rules') and
+      // D (data binding's) were taken; Request Review and Reopen Draft are in the panel and the toolbar.
       const isToggle = isToggleShortcut(event);
-      const isRequestReview = isRequestReviewShortcut(event);
       const isApprove = isApproveShortcut(event);
-      const isReopen = isReopenShortcut(event);
       const isEscape = event.key === 'Escape';
 
-      if (!isEscape && !isToggle && !isRequestReview && !isApprove && !isReopen) {
+      if (!isEscape && !isToggle && !isApprove) {
         return;
       }
 
@@ -955,28 +945,10 @@ function bindGlobalHandlers(options: ResolvedApprovalWorkflowOptions): void {
         return;
       }
 
-      if (isRequestReview) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (setStatus(editor, 'review', resolved, resolved.defaultActor)) {
-          showPanel(editor);
-        }
-        return;
-      }
-
       if (isApprove) {
         event.preventDefault();
         event.stopPropagation();
         if (approve(editor, resolved, resolved.defaultActor, 'Approved via keyboard shortcut.')) {
-          showPanel(editor);
-        }
-        return;
-      }
-
-      if (isReopen) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (state.status !== 'draft' && setStatus(editor, 'draft', resolved, resolved.defaultActor)) {
           showPanel(editor);
         }
       }
@@ -1459,14 +1431,13 @@ export const ApprovalWorkflowPlugin = (rawOptions: ApprovalWorkflowPluginOptions
             id: 'approvalWorkflow',
             label: 'Approval Workflow',
             command: 'toggleApprovalWorkflowPanel',
-            shortcut: 'Mod-Alt-Shift-a',
+            shortcut: 'Mod-Alt-Shift-w',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="m16.5 16 1.8 1.8 3.2-3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           },
           {
             id: 'approvalRequestReview',
             label: 'Request Review',
             command: 'requestApprovalReview',
-            shortcut: 'Mod-Alt-Shift-r',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M11 8v3l2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M17.5 17.5 20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
           },
           {
@@ -1480,7 +1451,6 @@ export const ApprovalWorkflowPlugin = (rawOptions: ApprovalWorkflowPluginOptions
             id: 'approvalReopen',
             label: 'Reopen Draft',
             command: 'reopenDraft',
-            shortcut: 'Mod-Alt-Shift-d',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M8 8H4v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5 12a7 7 0 1 0 2-4.95" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
           },
         ],
@@ -1663,14 +1633,8 @@ export const ApprovalWorkflowPlugin = (rawOptions: ApprovalWorkflowPluginOptions
     },
 
     keymap: {
-      'Mod-Alt-Shift-a': 'toggleApprovalWorkflowPanel',
-      'Mod-Alt-Shift-A': 'toggleApprovalWorkflowPanel',
-      'Mod-Alt-Shift-r': 'requestApprovalReview',
-      'Mod-Alt-Shift-R': 'requestApprovalReview',
+      'Mod-Alt-Shift-w': 'toggleApprovalWorkflowPanel',
       'Mod-Alt-Shift-p': 'approveDocument',
-      'Mod-Alt-Shift-P': 'approveDocument',
-      'Mod-Alt-Shift-d': 'reopenDraft',
-      'Mod-Alt-Shift-D': 'reopenDraft',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

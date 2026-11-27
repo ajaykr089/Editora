@@ -928,7 +928,6 @@ export const SlashCommandsPlugin = (rawOptions: SlashCommandsPluginOptions = {})
 
     keymap: {
       'Mod-/': 'openSlashCommands',
-      'Mod-Shift-7': 'openSlashCommands',
     },
 
     init: () => {

@@ -145,7 +145,7 @@ const defaultLabels: Required<BlocksLibraryLabels> = {
   loadingText: 'Loading blocks...',
   loadErrorText: 'Unable to load blocks right now.',
   readonlyMessage: 'Editor is read-only. Block insertion is disabled.',
-  shortcutText: 'Shortcuts: Ctrl/Cmd+Alt+Shift+B (panel), Ctrl/Cmd+Alt+Shift+L (insert last)',
+  shortcutText: 'Shortcut: Ctrl/Cmd+Alt+Shift+B (panel)',
   helperText: 'Use Arrow keys to move through blocks, Enter to insert, Esc to close.',
   lastInsertedPrefix: 'Last inserted',
   resultsListLabel: 'Block results',
@@ -1523,14 +1523,11 @@ function getKeyboardEventKey(event: KeyboardEvent): string {
   return typeof event.key === 'string' ? event.key.toLowerCase() : '';
 }
 
+// Mod+Alt+Shift+B opens the panel. Insert Last is in the panel and the toolbar: its key (L) is the translation
+// workflow panel's.
 function isTogglePanelShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'b';
-}
-
-function isInsertLastShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'l';
 }
 
 function bindGlobalHandlers(options: ResolvedBlocksLibraryOptions): void {
@@ -1599,12 +1596,6 @@ function bindGlobalHandlers(options: ResolvedBlocksLibraryOptions): void {
         event.stopPropagation();
         togglePanel(editor);
         return;
-      }
-
-      if (isInsertLastShortcut(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        insertLastBlock(editor);
       }
     };
 
@@ -2106,7 +2097,6 @@ export const BlocksLibraryPlugin = (rawOptions: BlocksLibraryPluginOptions = {})
             id: 'insertLastBlockSnippet',
             label: 'Insert Last Block',
             command: 'insertLastBlockSnippet',
-            shortcut: 'Mod-Alt-Shift-l',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M7 5.5h10a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 17 18.5H7A1.5 1.5 0 0 1 5.5 17V7A1.5 1.5 0 0 1 7 5.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M12 8.5v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 12h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
           },
         ],
@@ -2282,9 +2272,6 @@ export const BlocksLibraryPlugin = (rawOptions: BlocksLibraryPluginOptions = {})
 
     keymap: {
       'Mod-Alt-Shift-b': 'toggleBlocksLibraryPanel',
-      'Mod-Alt-Shift-B': 'toggleBlocksLibraryPanel',
-      'Mod-Alt-Shift-l': 'insertLastBlockSnippet',
-      'Mod-Alt-Shift-L': 'insertLastBlockSnippet',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

@@ -181,7 +181,7 @@ const defaultLabels: Required<SmartPasteLabels> = {
   lastPasteRemovedLabel: 'Removed',
   lastPasteCharsLabel: 'Output Chars',
   closeText: 'Close',
-  shortcutText: 'Shortcuts: Ctrl/Cmd+Alt+Shift+S/V/G',
+  shortcutText: 'Shortcut: Ctrl/Cmd+Alt+Shift+V (panel)',
   readonlyMessage: 'Editor is read-only. Smart paste was skipped.',
 };
 
@@ -1459,19 +1459,11 @@ function getKeyboardEventKey(event: KeyboardEvent): string {
   return typeof event.key === 'string' ? event.key.toLowerCase() : '';
 }
 
+// Mod+Alt+Shift+V opens the panel (S is Insert Special Character's). Cycle Profile and On/Off are in the panel and
+// the toolbar: their keys clashed with the translation workflow's and the document schema's.
 function isTogglePanelShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 's';
-}
-
-function isCycleProfileShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'v';
-}
-
-function isToggleEnabledShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'g';
 }
 
 function bindGlobalHandlers(options: ResolvedSmartPasteOptions): void {
@@ -1528,25 +1520,6 @@ function bindGlobalHandlers(options: ResolvedSmartPasteOptions): void {
         event.preventDefault();
         event.stopPropagation();
         togglePanel(editor);
-        return;
-      }
-
-      if (isCycleProfileShortcut(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        const state = ensureEditorState(editor, resolved);
-        state.profile = cycleProfile(state.profile);
-        refreshPanel(editor);
-        return;
-      }
-
-      if (isToggleEnabledShortcut(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        const state = ensureEditorState(editor, resolved);
-        state.enabled = !state.enabled;
-        updateToolbarState(editor);
-        refreshPanel(editor);
       }
     };
 
@@ -2003,21 +1976,19 @@ export const SmartPastePlugin = (rawOptions: SmartPastePluginOptions = {}): Plug
             id: 'smartPaste',
             label: 'Smart Paste Panel',
             command: 'toggleSmartPastePanel',
-            shortcut: 'Mod-Alt-Shift-s',
+            shortcut: 'Mod-Alt-Shift-v',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M8.5 4.5h7l3 3V18a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 6.5 18V7a2.5 2.5 0 0 1 2-2.45Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15.5 4.5V8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.3 12h5.4M9.3 15h5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
           },
           {
             id: 'smartPasteProfile',
             label: 'Cycle Smart Paste Profile',
             command: 'cycleSmartPasteProfile',
-            shortcut: 'Mod-Alt-Shift-v',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M4.5 7.5h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="17.5" cy="7.5" r="2" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 12h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12.5" cy="12" r="2" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 16.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.5" cy="16.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
           },
           {
             id: 'smartPasteToggle',
             label: 'Toggle Smart Paste',
             command: 'toggleSmartPasteEnabled',
-            shortcut: 'Mod-Alt-Shift-g',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><rect x="3.5" y="8" width="17" height="8" rx="4" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="12" r="2.6" fill="currentColor"/><path d="M14.5 12h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
           },
         ],
@@ -2178,12 +2149,7 @@ export const SmartPastePlugin = (rawOptions: SmartPastePluginOptions = {}): Plug
     },
 
     keymap: {
-      'Mod-Alt-Shift-s': 'toggleSmartPastePanel',
-      'Mod-Alt-Shift-S': 'toggleSmartPastePanel',
-      'Mod-Alt-Shift-v': 'cycleSmartPasteProfile',
-      'Mod-Alt-Shift-V': 'cycleSmartPasteProfile',
-      'Mod-Alt-Shift-g': 'toggleSmartPasteEnabled',
-      'Mod-Alt-Shift-G': 'toggleSmartPasteEnabled',
+      'Mod-Alt-Shift-v': 'toggleSmartPastePanel',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

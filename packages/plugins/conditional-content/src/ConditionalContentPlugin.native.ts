@@ -1884,24 +1884,23 @@ function openConditionalDialog(
   conditionInput?.focus();
 }
 
+// Mod+Alt+Shift+N or F9 opens the dialog, F10 toggles the preview. Mod+Alt+Shift+C is the citations panel's and
+// Mod+Alt+Shift+P approves a document (approval workflow).
 function isOpenDialogShortcut(event: KeyboardEvent): boolean {
   const hasPrimary = event.metaKey || event.ctrlKey;
   const rawKey = typeof event.key === 'string' ? event.key : '';
   const key = rawKey.toLowerCase();
   const code = typeof event.code === 'string' ? event.code.toLowerCase() : '';
-  const modShortcut = hasPrimary && event.altKey && event.shiftKey && (key === 'c' || code === 'keyc');
+  const modShortcut = hasPrimary && event.altKey && event.shiftKey && (key === 'n' || code === 'keyn');
   const fallbackShortcut = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && (key === 'f9' || code === 'f9');
   return modShortcut || fallbackShortcut;
 }
 
 function isTogglePreviewShortcut(event: KeyboardEvent): boolean {
-  const hasPrimary = event.metaKey || event.ctrlKey;
   const rawKey = typeof event.key === 'string' ? event.key : '';
   const key = rawKey.toLowerCase();
   const code = typeof event.code === 'string' ? event.code.toLowerCase() : '';
-  const modShortcut = hasPrimary && event.altKey && event.shiftKey && (key === 'p' || code === 'keyp');
-  const fallbackShortcut = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && (key === 'f10' || code === 'f10');
-  return modShortcut || fallbackShortcut;
+  return !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && (key === 'f10' || code === 'f10');
 }
 
 function bindGlobalHandlers(options: ResolvedConditionalContentPluginOptions): void {
@@ -2172,14 +2171,14 @@ export const ConditionalContentPlugin = (rawOptions: ConditionalContentPluginOpt
             label: 'Conditional Rule',
             command: 'openConditionalDialog',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M6 5h12a1 1 0 0 1 1 1v3h-2V7H7v3H5V6a1 1 0 0 1 1-1Zm-1 9h2v3h10v-3h2v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-4Zm3-2a1 1 0 0 1 1-1h2.6l1.8-2.4a1 1 0 1 1 1.6 1.2L13.8 11H15a1 1 0 1 1 0 2h-2.7l-1.9 2.5a1 1 0 1 1-1.6-1.2L10.1 13H9a1 1 0 0 1-1-1Z" fill="currentColor"></path></svg>',
-            shortcut: 'Mod-Alt-Shift-c',
+            shortcut: 'Mod-Alt-Shift-n',
           },
           {
             id: 'conditionalPreview',
             label: 'Conditional Preview',
             command: 'toggleConditionalPreview',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M4 6h16a1 1 0 0 1 1 1v3h-2V8H5v8h14v-2h2v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Zm5 3h2v2H9V9Zm0 4h2v2H9v-2Zm4-4h6v2h-6V9Zm0 4h6v2h-6v-2Z" fill="currentColor"></path></svg>',
-            shortcut: 'Mod-Alt-Shift-p',
+            shortcut: 'F10',
           },
         ],
       },
@@ -2341,10 +2340,7 @@ export const ConditionalContentPlugin = (rawOptions: ConditionalContentPluginOpt
     },
 
     keymap: {
-      'Mod-Alt-Shift-c': 'openConditionalDialog',
-      'Mod-Alt-Shift-C': 'openConditionalDialog',
-      'Mod-Alt-Shift-p': 'toggleConditionalPreview',
-      'Mod-Alt-Shift-P': 'toggleConditionalPreview',
+      'Mod-Alt-Shift-n': 'openConditionalDialog',
       F9: 'openConditionalDialog',
       F10: 'toggleConditionalPreview',
     },

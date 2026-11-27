@@ -1298,7 +1298,7 @@ export const TrackChangesPlugin = (options: TrackChangesPluginOptions = {}): Plu
             label: 'Track Changes',
             command: 'toggleTrackChanges',
             icon: '<svg width="24" height="24" focusable="false"><path d="M4 6h10a1 1 0 1 1 0 2H4a1 1 0 1 1 0-2Zm0 5h7a1 1 0 1 1 0 2H4a1 1 0 1 1 0-2Zm0 5h8a1 1 0 1 1 0 2H4a1 1 0 1 1 0-2Zm13.3-3.6 1.3 1.3 2.9-2.9a1 1 0 1 1 1.4 1.4l-3.6 3.6a1 1 0 0 1-1.4 0l-2-2a1 1 0 1 1 1.4-1.4Z"></path></svg>',
-            shortcut: 'Mod-Shift-t',
+            shortcut: 'Mod-Alt-Shift-x',
           },
           {
             label: 'Accept All Changes',
@@ -1368,9 +1368,9 @@ export const TrackChangesPlugin = (options: TrackChangesPluginOptions = {}): Plu
       },
     },
 
+    // As Google Docs' suggesting mode. Mod+Shift+T reopens the last closed tab and never reaches the page.
     keymap: {
-      'Mod-Shift-t': 'toggleTrackChanges',
-      'Mod-Shift-T': 'toggleTrackChanges',
+      'Mod-Alt-Shift-x': 'toggleTrackChanges',
     },
 
     destroy: () => {
