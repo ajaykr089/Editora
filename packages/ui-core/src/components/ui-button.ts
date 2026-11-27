@@ -2,7 +2,9 @@ import { ElementBase } from '../ElementBase';
 import { requestNavigate } from '../primitives/navigate';
 import './ui-icon';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning' | 'link';
+/** Variant names other libraries use for a look that is a recipe here: `variant="outline"` = recipe outline. */
+const VARIANT_RECIPES = new Set(['outline', 'soft', 'surface', 'classic']);
 type ButtonSize = 'sm' | 'md' | 'lg';
 type ButtonAnimation = 'scale' | 'pulse' | 'none';
 type ButtonTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -86,7 +88,7 @@ const style = `
   }
 
   /* Recipes restyle the coloured variants (primary, danger, success, warning); secondary and ghost stay neutral. */
-  :host([recipe="classic"]) .btn--solid:not([disabled]) {
+  :host([data-appearance="classic"]) .btn--solid:not([disabled]) {
     background-image: linear-gradient(180deg, color-mix(in srgb, white 18%, transparent), color-mix(in srgb, black 10%, transparent));
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, white 52%, transparent),
@@ -94,43 +96,43 @@ const style = `
       0 1px 2px rgba(15, 23, 42, 0.12);
   }
 
-  :host([recipe="soft"]) .btn--solid {
+  :host([data-appearance="soft"]) .btn--solid {
     background: color-mix(in srgb, var(--ui-btn-accent) 16%, var(--ui-btn-surface));
     color: var(--ui-btn-accent-text);
     border-color: transparent;
   }
 
-  :host([recipe="soft"]) .btn--solid:hover:not([disabled]) {
+  :host([data-appearance="soft"]) .btn--solid:hover:not([disabled]) {
     background: color-mix(in srgb, var(--ui-btn-accent) 24%, var(--ui-btn-surface));
   }
 
-  :host([recipe="surface"]) .btn--solid {
+  :host([data-appearance="surface"]) .btn--solid {
     background: color-mix(in srgb, var(--ui-btn-accent) 7%, var(--ui-btn-surface));
     color: var(--ui-btn-accent-text);
     border-color: color-mix(in srgb, var(--ui-btn-accent) 40%, transparent);
   }
 
-  :host([recipe="surface"]) .btn--solid:hover:not([disabled]) {
+  :host([data-appearance="surface"]) .btn--solid:hover:not([disabled]) {
     background: color-mix(in srgb, var(--ui-btn-accent) 13%, var(--ui-btn-surface));
   }
 
-  :host([recipe="outline"]) .btn--solid {
+  :host([data-appearance="outline"]) .btn--solid {
     background: transparent;
     color: var(--ui-btn-accent-text);
     border-color: color-mix(in srgb, var(--ui-btn-accent) 55%, transparent);
   }
 
-  :host([recipe="outline"]) .btn--solid:hover:not([disabled]) {
+  :host([data-appearance="outline"]) .btn--solid:hover:not([disabled]) {
     background: color-mix(in srgb, var(--ui-btn-accent) 10%, transparent);
   }
 
-  :host([recipe="ghost"]) .btn--solid {
+  :host([data-appearance="ghost"]) .btn--solid {
     background: transparent;
     color: var(--ui-btn-accent-text);
     border-color: transparent;
   }
 
-  :host([recipe="ghost"]) .btn--solid:hover:not([disabled]) {
+  :host([data-appearance="ghost"]) .btn--solid:hover:not([disabled]) {
     background: color-mix(in srgb, var(--ui-btn-accent) 14%, transparent);
   }
 
@@ -313,6 +315,23 @@ const style = `
 
   .btn--ghost:hover:not([disabled]) {
     background: color-mix(in srgb, var(--ui-btn-accent) 12%, transparent);
+  }
+
+  /* Link: looks like inline text link, keeps button semantics (or <a> with href). */
+  .btn--link {
+    background: transparent;
+    color: var(--ui-btn-accent-text);
+    border-color: transparent;
+    box-shadow: none;
+    padding-inline: 2px;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .btn--link:hover:not([disabled]) {
+    text-decoration-color: currentColor;
   }
 
   :host([size="sm"]) {
@@ -532,7 +551,7 @@ function isTruthyAttr(value: string | null): boolean {
 }
 
 function toVariant(value: string | null): ButtonVariant {
-  if (value === 'secondary' || value === 'ghost' || value === 'danger' || value === 'success' || value === 'warning') {
+  if (value === 'secondary' || value === 'ghost' || value === 'danger' || value === 'success' || value === 'warning' || value === 'link') {
     return value;
   }
   return 'primary';
@@ -851,6 +870,11 @@ export class UIButton extends ElementBase {
 
     if (recipe) this.setAttribute('recipe', recipe);
     else this.removeAttribute('recipe');
+    // The look: an explicit recipe, else a variant named after one (outline, soft, surface, classic).
+    const rawVariant = readHostString(this, 'variant');
+    const appearance = recipe || (rawVariant && VARIANT_RECIPES.has(rawVariant) ? rawVariant : null);
+    if (appearance) this.setAttribute('data-appearance', appearance);
+    else this.removeAttribute('data-appearance');
 
     if (rawShape != null) {
       if (shape) this.setAttribute('shape', shape);
@@ -905,7 +929,7 @@ export class UIButton extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       <${tag}
-        class="btn btn--${variant}${variant === 'secondary' || variant === 'ghost' ? '' : ' btn--solid'}"
+        class="btn btn--${variant}${variant === 'secondary' || variant === 'ghost' || variant === 'link' ? '' : ' btn--solid'}"
         part="button"
         ${isLink ? linkAttrs : 'type="button"'}
         data-ui-button="true"

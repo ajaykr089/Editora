@@ -5,7 +5,11 @@ import { useNavigationContext } from './NavigationProvider';
 
 export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
+  /**
+   * `outline`, `soft` and `surface` are the same looks as the `recipe` of that name (in the accent
+   * colour, or the `tone`); `link` looks like a text link.
+   */
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning' | 'outline' | 'soft' | 'surface' | 'link';
   size?: 'sm' | 'md' | 'lg';
   recipe?: 'classic' | 'solid' | 'soft' | 'surface' | 'outline' | 'ghost';
   radius?: number | string;

@@ -18,6 +18,7 @@ npx @editora/cli add button data-table toast # several at once, one install
 npx @editora/cli add @editora/docx           # a package name works too
 npx @editora/cli list date                   # every name, or a search
 npx @editora/cli add editor --dry-run        # show what it would do, install nothing
+npx @editora/cli add button --copy           # copy the source into your project to own it
 ```
 
 ## What a dry run prints
@@ -42,6 +43,32 @@ button, data-table:
 
   import { Button, DataTable } from '@editora/ui-react';
 ```
+
+## Copy the source instead (`--copy`)
+
+`--copy` writes a component's source into your project, so you own it and can change anything, the way shadcn/ui works. You get the component and exactly the files it imports, nothing else:
+
+```bash
+npx @editora/cli add button message-scroller --copy
+```
+
+```text
+Copied Button, MessageScroller into src/components/editora
+
+  + src/components/editora/core/components/ui-button.ts
+  + src/components/editora/react/components/Button.tsx
+  …
+Elements are named app-* (app-button, app-icon, app-message-scroller); the theme tokens (--ui-*) are shared.
+```
+
+- **Where:** `src/components/editora` (or `components/editora` without a `src` folder); `--dir` picks another folder.
+- **React or not:** in a React project you get the React component and the custom element under it; elsewhere, or with `--elements`, just the custom element.
+- **Element names:** the copied custom elements are renamed to your prefix (`app-button`, `--prefix acme` for `acme-button`), so your edited copy never collides with an installed `@editora/ui-core` on the same page. Theme tokens keep their `--ui-*` names, so one theme styles both.
+- **Where the files come from:** the exact commit this CLI was built from, and each file is checked against its SHA-256 before anything is written. `--source <checkout>` reads from a local clone instead (offline).
+- **Running it again:** `editora.json` in the project root remembers the folder, the prefix and a hash of every file written. A later copy updates files you have not touched and keeps the ones you changed (`--overwrite` replaces them too). `--dry-run` shows the plan and writes nothing.
+- **Packages:** the copied files still import a few packages (for example `@editora/icons`); the CLI installs them, or prints the command with `--no-install`.
+
+The copied files are TypeScript.
 
 ## Names
 

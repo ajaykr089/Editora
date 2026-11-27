@@ -43,10 +43,12 @@ const present = entries.filter((e) => fs.existsSync(path.join(repoRoot, e.file))
 const outcomes = new Map<string, Outcome>();
 
 describe('importing the built packages in plain Node (no DOM)', () => {
+  // One Node process per entry (about 1,100 of them): the whole set takes close to a minute on a fast
+  // machine, more on a CI runner, so the hook gets time for the workload, not the 60 s default.
   beforeAll(async () => {
     const done = await mapLimit(present, 6, load);
     present.forEach((e, i) => outcomes.set(`${e.name} [${e.kind}]`, done[i]));
-  });
+  }, 10 * 60_000);
 
   // Locally the packages may not be built; CI builds before it tests, so a missing file there is a real failure.
   it('finds the built files', () => {

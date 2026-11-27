@@ -5,6 +5,7 @@ const { spawnSync } = require("child_process");
 const path = require("path");
 const packageJson = require("../package.json");
 const { uiReactComponents, uiReactExportName, specialRegistry, groupOrder } = require("../lib/registry");
+const { copyComponents } = require("../lib/copy");
 const {
   SUPPORTED_PACKAGE_MANAGERS,
   findProject,
@@ -18,6 +19,7 @@ Editora CLI
 
 Usage:
   editora add <name> [name...]   Install what a name needs, then show how to use it
+  editora add <name> --copy      Copy the component's source into your project, to own and edit it
   editora init [name...]         Detect the project, pick what to set up, and install it
   editora list [search]          Show every name you can add
 
@@ -28,8 +30,17 @@ Examples:
   npx @editora/cli init
   npx @editora/cli list date
 
+  npx @editora/cli add button message-scroller --copy
+
 Options:
-  --dry-run              Show what would be installed, and install nothing
+  --dry-run              Show what would be installed or copied, and change nothing
+  --copy                 Copy the source (and what it imports) instead of installing the package
+  --dir <folder>         With --copy: where the files go (default src/components/editora)
+  --prefix <name>        With --copy: element name prefix, app-button instead of ui-button (default app)
+  --elements             With --copy: copy the custom element only, not the React component
+  --overwrite            With --copy: replace files you changed since they were copied
+  --source <checkout>    With --copy: read from a local Editora checkout instead of downloading
+  --no-install           With --copy: only print the install command for the packages the files need
   --package-manager <pm> Use npm, pnpm, yarn or bun (by default, the one your lock file belongs to)
   --json                 With list: print the names as JSON
   -h, --help             Show this help text
@@ -187,6 +198,13 @@ function parseArgs(argv) {
     dryRun: false,
     packageManager: undefined,
     json: false,
+    copy: false,
+    elements: false,
+    overwrite: false,
+    noInstall: false,
+    dir: undefined,
+    prefix: undefined,
+    source: undefined,
     help: false,
     version: false,
     unknownOptions: []
@@ -217,6 +235,33 @@ function parseArgs(argv) {
     if (arg === "--json") {
       parsed.json = true;
       index += 1;
+      continue;
+    }
+    if (arg === "--no-install") {
+      parsed.noInstall = true;
+      index += 1;
+      continue;
+    }
+    if (arg === "--copy" || arg === "--elements" || arg === "--overwrite") {
+      parsed[arg.slice(2)] = true;
+      index += 1;
+      continue;
+    }
+    const valueOption = ["--dir", "--prefix", "--source"].find((name) => arg === name || arg.startsWith(`${name}=`));
+    if (valueOption) {
+      const key = valueOption.slice(2);
+      const inline = arg.includes("=") ? arg.slice(arg.indexOf("=") + 1) : undefined;
+      const next = argv[index + 1];
+      if (inline) {
+        parsed[key] = inline;
+        index += 1;
+      } else if (next && !next.startsWith("-")) {
+        parsed[key] = next;
+        index += 2;
+      } else {
+        parsed.unknownOptions.push(arg);
+        index += 1;
+      }
       continue;
     }
     if (arg === "-h" || arg === "--help") {
@@ -683,7 +728,94 @@ function run(argv, options = {}) {
     return 1;
   }
 
+  if (args.copy) return copy(out, args, options);
+  if (args.dir || args.prefix || args.source || args.elements || args.overwrite) {
+    out.error("--dir, --prefix, --source, --elements and --overwrite only work with --copy.");
+    return 1;
+  }
+
   return install(out, args, args.targets, options);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// --copy
+
+async function copy(out, args, options) {
+  const cwd = options.cwd || process.cwd();
+  const project = findProject(cwd);
+  if (!project) {
+    out.error(`No package.json in ${cwd} or any folder above it: --copy writes into a project.`);
+    return 1;
+  }
+  const react = !args.elements && Boolean(project.dependencies.react);
+  let report;
+  try {
+    report = await copyComponents(args.targets, {
+      projectDir: project.dir,
+      react,
+      dir: args.dir,
+      prefix: args.prefix,
+      overwrite: args.overwrite,
+      dryRun: args.dryRun,
+      source: args.source,
+      indexFile: options.copyIndexFile,
+      fetch: options.fetch,
+    });
+  } catch (error) {
+    out.error(`${out.red("Could not copy:")} ${error.message}`);
+    return 1;
+  }
+  if (report.unknown) {
+    unknownTargets(out, report.unknown);
+    return 1;
+  }
+
+  const counts = {};
+  for (const item of report.files) counts[item.status] = (counts[item.status] || 0) + 1;
+  out.log("");
+  out.log(`${out.bold(args.dryRun ? "Would copy" : "Copied")} ${report.labels.join(", ")} ${out.dim(`into ${report.dir}`)}`);
+  out.log("");
+  const marks = { create: out.green("+"), update: out.cyan("~"), overwrite: out.yellow("!"), unchanged: out.dim("="), skip: out.yellow("-") };
+  for (const item of report.files) out.log(`  ${marks[item.status]} ${item.file}${item.status === "skip" ? out.yellow("  (you changed it: kept; --overwrite replaces it)") : ""}`);
+  out.log("");
+  out.log(out.dim(Object.entries(counts).map(([status, n]) => `${n} ${status}`).join(", ")));
+  if (report.tags.length) {
+    out.log(`Elements are named ${out.bold(`${report.prefix}-*`)} (${report.tags.slice(0, 3).map((tag) => tag.replace(/^ui-/, `${report.prefix}-`)).join(", ")}${report.tags.length > 3 ? ", …" : ""}); the theme tokens (--ui-*) are shared.`);
+  }
+  if (!report.typescript) out.log(`${out.yellow("Note:")} the copied files are TypeScript and this project has no tsconfig.json.`);
+
+  if (report.packages.length) {
+    let pm = args.packageManager;
+    if (!pm) ({ name: pm } = findPackageManager({ cwd, env: options.env }));
+    const [cmd, cmdArgs] = installCommand(pm, report.packages);
+    out.log("");
+    out.log(`They need ${report.packages.join(", ")}:`);
+    out.log(`  ${[cmd, ...cmdArgs].join(" ")}`);
+    if (!args.dryRun && !args.noInstall) {
+      const result = spawnInstall(cmd, cmdArgs, { ...options, cwd: project.dir });
+      const status = result && result.status == null ? 1 : result ? result.status : 0;
+      if (result && (result.error || status !== 0)) {
+        out.error(`${out.red("The install failed;")} run the command above yourself.`);
+        return status || 1;
+      }
+    }
+  }
+
+  if (!args.dryRun) {
+    const base = report.dir.split(path.sep).join("/");
+    out.log("");
+    out.log(out.bold("Use it:"));
+    for (const label of report.labels) {
+      if (/^ui-/.test(label)) {
+        out.log(`  import './${base}/core/components/${label}';`);
+        out.log(`  <${label.replace(/^ui-/, `${report.prefix}-`)}></${label.replace(/^ui-/, `${report.prefix}-`)}>`);
+      } else {
+        out.log(`  import { ${label} } from './${base}/react/components/${label}';`);
+      }
+    }
+    out.log(out.dim("(paths from the project root; editora.json remembers the folder and prefix for next time)"));
+  }
+  return 0;
 }
 
 if (require.main === module) {

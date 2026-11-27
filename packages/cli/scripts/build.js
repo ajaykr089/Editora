@@ -31,3 +31,34 @@ const mjs = [
 fs.writeFileSync(path.join(dist, 'index.cjs'), cjs);
 fs.writeFileSync(path.join(dist, 'index.mjs'), mjs);
 console.log('editora cli: wrote dist/index.cjs and dist/index.mjs');
+
+// The index `editora add --copy` downloads from (lib/copy-index.js): the import graph and hashes of the ui-core and
+// ui-react sources at this commit. Published builds run in CI on a pushed commit, which the files are fetched from.
+const { execFileSync } = require('child_process');
+const { buildIndex } = require('../lib/copy-index');
+let commit = process.env.EDITORA_COPY_COMMIT || null;
+if (!commit) {
+  try {
+    commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: __dirname, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    commit = null;
+  }
+}
+// Sources that differ from the commit would fail their hash check when downloaded: record no commit then.
+if (commit && !process.env.EDITORA_COPY_COMMIT) {
+  try {
+    const dirty = execFileSync('git', ['status', '--porcelain', '--', '../ui-core/src', '../ui-react/src'], { cwd: path.join(__dirname, '..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    if (dirty) {
+      console.warn('editora cli: ui-core/ui-react sources have uncommitted changes; the copy index records no commit (use --source).');
+      commit = null;
+    }
+  } catch {
+    commit = null;
+  }
+}
+const packagesDir = path.join(__dirname, '..', '..');
+if (fs.existsSync(path.join(packagesDir, 'ui-core', 'src'))) {
+  const index = buildIndex(packagesDir, { commit });
+  fs.writeFileSync(path.join(dist, 'copy-index.json'), JSON.stringify(index));
+  console.log(`editora cli: wrote dist/copy-index.json (${Object.keys(index.files).length} files, commit ${commit || 'none'})`);
+}

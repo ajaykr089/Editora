@@ -40,7 +40,7 @@ import { Button } from '@editora/ui-react';
 | `theme` | `'default' \| 'dark' \| 'brand'` |   |
 | `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` |   |
 | `type` | `'button' \| 'submit' \| 'reset'` |   |
-| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'danger' \| 'success' \| 'warning'` |   |
+| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'danger' \| 'success' \| 'warning' \| 'outline' \| 'soft' \| 'surface' \| 'link'` | `outline`, `soft` and `surface` are the same looks as the `recipe` of that name (in the accent colour, or the `tone`); `link` looks like a text link. |
 
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 

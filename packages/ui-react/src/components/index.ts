@@ -342,3 +342,51 @@ export {
   useAnimatedNumber,
   useAnimatedNumberValue,
 } from './AnimatedNumber';
+
+// shadcn/ui and Radix parity: typography, groups, item and chat components
+export { AccessibleIcon } from './AccessibleIcon';
+export type { AccessibleIconProps } from './AccessibleIcon';
+export { Announcer } from './Announcer';
+export type { AnnouncerProps } from './Announcer';
+export { Attachment } from './Attachment';
+export type { AttachmentProps, AttachmentState, AttachmentRemoveDetail } from './Attachment';
+export { AttachmentGroup } from './AttachmentGroup';
+export type { AttachmentGroupProps } from './AttachmentGroup';
+export { Bubble } from './Bubble';
+export type { BubbleProps } from './Bubble';
+export { BubbleGroup } from './BubbleGroup';
+export type { BubbleGroupProps } from './BubbleGroup';
+export { ButtonGroup } from './ButtonGroup';
+export type { ButtonGroupProps } from './ButtonGroup';
+export { Heading } from './Heading';
+export type { HeadingProps } from './Heading';
+export { InputGroup } from './InputGroup';
+export type { InputGroupProps } from './InputGroup';
+export { Item } from './Item';
+export type { ItemProps } from './Item';
+export { ItemGroup } from './ItemGroup';
+export type { ItemGroupProps } from './ItemGroup';
+export { Marker } from './Marker';
+export type { MarkerProps } from './Marker';
+export { Message } from './Message';
+export type { MessageProps } from './Message';
+export { MessageScroller } from './MessageScroller';
+export type { MessageScrollerProps, MessageScrollerElement } from './MessageScroller';
+export { NativeSelect } from './NativeSelect';
+export type { NativeSelectProps } from './NativeSelect';
+export { Prose } from './Prose';
+export type { ProseProps } from './Prose';
+export { Question } from './Question';
+export type { QuestionProps } from './Question';
+export { Questionnaire } from './Questionnaire';
+export type { QuestionnaireProps, QuestionnaireElement, QuestionnaireValue, QuestionnaireValues, QuestionnaireChangeDetail, QuestionnaireStepDetail, QuestionDefinition, QuestionOption } from './Questionnaire';
+export { Spinner } from './Spinner';
+export type { SpinnerProps } from './Spinner';
+export { Text } from './Text';
+export type { TextProps } from './Text';
+export { Trace } from './Trace';
+export type { TraceProps } from './Trace';
+export { TraceItem } from './TraceItem';
+export type { TraceItemProps, TraceItemStatus } from './TraceItem';
+export { announce, clearAnnouncements } from './Announcer';
+export type { AnnounceOptions, AnnouncePoliteness } from './Announcer';
