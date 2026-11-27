@@ -1826,10 +1826,15 @@ function ensureGlobalTracking(): void {
   window.addEventListener('resize', () => bubbleRoot && scheduleBubbleUpdate());
 
   // Cmd/Ctrl+Alt+M, as in Google Docs. By key code: with Alt held the key produces another character on a Mac.
+  // Windows and Linux report AltGr as Ctrl+Alt, so a Ctrl+Alt+M that types a character ("µ" on a German keyboard)
+  // is typing.
   document.addEventListener(
     'keydown',
     (event) => {
       if (event.code !== 'KeyM' || !event.altKey || event.shiftKey || !(event.metaKey || event.ctrlKey)) return;
+      const altGr = event.getModifierState?.('AltGraph') ||
+        (event.ctrlKey && !event.metaKey && event.key.length === 1 && event.key.toLowerCase() !== 'm');
+      if (altGr) return;
       const root = event.target instanceof Node ? getEditorRootFromNode(event.target) : null;
       if (!root || !isCommentingEnabled(root)) return;
       event.preventDefault();

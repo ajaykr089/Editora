@@ -213,7 +213,9 @@ export class RichTextEditorElement extends ElementBase {
   private buildGeneration = 0;
   private autosaveTimer?: ReturnType<typeof setInterval>;
   private contentChangeDebounceTimer?: ReturnType<typeof setTimeout>;
-  private keyboardShortcutManager = new KeyboardShortcutManager();
+  // Only the keys of the plugins this editor loads (see registerPluginKeymaps): the built-in list ran its commands
+  // without those plugins, blocking Cmd+P, Cmd+D, Cmd+[ and more for nothing, and overrode plugins' own keys.
+  private keyboardShortcutManager = new KeyboardShortcutManager({ defaults: false });
   private lastAutosavedContent = '';
   // Live content captured by destroy() so the next initialize() (the element being moved in the
   // DOM, or setConfig()) resumes from it instead of from the original data-initial-content.
@@ -459,6 +461,7 @@ export class RichTextEditorElement extends ElementBase {
     // A newer build started, or the editor was destroyed or removed, while plugins were loading.
     if (generation !== this.buildGeneration || !this.isConnected) return;
     this.loadedPlugins = plugins;
+    this.registerPluginKeymaps(plugins);
     
     // Initialize plugins (call init hooks)
     plugins.forEach(plugin => {
@@ -862,6 +865,25 @@ export class RichTextEditorElement extends ElementBase {
     const browserSpellcheckEnabled = spellcheck.enabled && spellcheck.provider === 'browser';
     this.contentElement.spellcheck = browserSpellcheckEnabled;
     this.contentElement.setAttribute('spellcheck', browserSpellcheckEnabled ? 'true' : 'false');
+  }
+
+  /** The keyboard shortcuts of the loaded plugins, in load order (a later plugin's key wins). */
+  private registerPluginKeymaps(plugins: Plugin[]): void {
+    const manager = this.keyboardShortcutManager;
+    const editor = this;
+    const context = {
+      editorElement: this,
+      get contentElement() { return editor.contentElement; },
+    };
+    manager.clear();
+    manager.blockNativeFormattingKeys();
+    for (const plugin of plugins) manager.registerKeymap(plugin.keymap as any, context);
+  }
+
+  /** True when a loaded plugin (or the engine) has `command`, so a shortcut for it does something. */
+  private hasCommand(command: string): boolean {
+    if (this.loadedPlugins.some((plugin) => typeof plugin.commands?.[command] === 'function')) return true;
+    return typeof (this.engine as any)?.commands?.[command] === 'function';
   }
 
   private executeCommand(command: string, ...args: any[]): boolean {
@@ -1481,9 +1503,11 @@ export class RichTextEditorElement extends ElementBase {
     this.contentElement.addEventListener('keydown', (event: KeyboardEvent) => {
       const accessibility = this.getAccessibilityConfig();
       if (!accessibility.keyboardNavigation || this.isEditorDisabled()) return;
-      shortcutManager.handleKeyDown(event, (command, params) => {
-        this.executeCommand(command, params);
-      });
+      shortcutManager.handleKeyDown(
+        event,
+        (command, params) => this.executeCommand(command, params),
+        (command) => this.hasCommand(command),
+      );
     });
     
     // Selection change for floating toolbar and status bar

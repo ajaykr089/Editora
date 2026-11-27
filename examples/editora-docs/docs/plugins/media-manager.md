@@ -43,7 +43,7 @@ With no configuration, uploaded files are embedded in the document as data URLs.
 
 | Action | Command | Shortcut | Toolbar |
 | --- | --- | --- | --- |
-| Insert image | `insertImage` | `Mod-Shift-i` | `Image` |
+| Insert image | `insertImage` | `Mod-Shift-g` | `Image` |
 | Insert video | `insertVideo` | None | `Video` |
 
 ## Config Options

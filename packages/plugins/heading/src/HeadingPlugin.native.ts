@@ -423,6 +423,9 @@ export const HeadingPlugin = (): Plugin => {
       'Mod-Alt-1': 'setHeading1',
       'Mod-Alt-2': 'setHeading2',
       'Mod-Alt-3': 'setHeading3',
+      'Mod-Alt-4': { command: 'setBlockType', params: 'h4' },
+      'Mod-Alt-5': { command: 'setBlockType', params: 'h5' },
+      'Mod-Alt-6': { command: 'setBlockType', params: 'h6' },
       'Mod-Alt-0': 'setParagraph'
     }
   };

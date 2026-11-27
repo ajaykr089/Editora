@@ -250,7 +250,9 @@ export const FullscreenPlugin = (): Plugin => ({
     toggleFullscreen
   },
   
+  // F11 is the browser's own full screen on Windows and Linux, and Show Desktop on a Mac.
   keymap: {
+    'Mod-Alt-Shift-f': 'toggleFullscreen',
     'Escape': () => {
       // Check if any editor is in fullscreen mode
       const fullscreenEditors = document.querySelectorAll('[data-editora-editor]');

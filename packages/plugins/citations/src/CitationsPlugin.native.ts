@@ -1493,19 +1493,11 @@ function getKeyboardEventKey(event: KeyboardEvent): string {
   return typeof event.key === 'string' ? event.key.toLowerCase() : '';
 }
 
+// Mod+Alt+Shift+C opens the panel. Refresh and Cycle Style are in the panel and the toolbar: their keys (B, J) are
+// the blocks library's and the document schema's.
 function isOpenShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'c';
-}
-
-function isRefreshShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'b';
-}
-
-function isStyleShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'j';
 }
 
 function bindGlobalHandlers(options: ResolvedCitationsOptions): void {
@@ -1582,21 +1574,6 @@ function bindGlobalHandlers(options: ResolvedCitationsOptions): void {
         event.preventDefault();
         event.stopPropagation();
         togglePanel(editor);
-        return;
-      }
-
-      if (isRefreshShortcut(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        refreshCitations(editor, resolvedOptions, true);
-        showPanel(editor);
-        return;
-      }
-
-      if (isStyleShortcut(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        cycleStyle(editor, resolvedOptions);
       }
     };
 
@@ -2180,14 +2157,12 @@ export const CitationsPlugin = (rawOptions: CitationsPluginOptions = {}): Plugin
             id: 'citationsRefresh',
             label: 'Refresh Citations',
             command: 'refreshCitations',
-            shortcut: 'Mod-Alt-Shift-b',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M20 4v6h-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           },
           {
             id: 'citationsStyle',
             label: 'Cycle Citation Style',
             command: 'cycleCitationStyle',
-            shortcut: 'Mod-Alt-Shift-j',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M5 6h14M5 10h8M5 14h14M5 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="18" cy="10" r="2" stroke="currentColor" stroke-width="1.6"/></svg>',
           },
         ],
@@ -2404,11 +2379,6 @@ export const CitationsPlugin = (rawOptions: CitationsPluginOptions = {}): Plugin
 
     keymap: {
       'Mod-Alt-Shift-c': 'toggleCitationsPanel',
-      'Mod-Alt-Shift-C': 'toggleCitationsPanel',
-      'Mod-Alt-Shift-b': 'refreshCitations',
-      'Mod-Alt-Shift-B': 'refreshCitations',
-      'Mod-Alt-Shift-j': 'cycleCitationStyle',
-      'Mod-Alt-Shift-J': 'cycleCitationStyle',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

@@ -13,13 +13,38 @@ export interface KeyboardShortcut {
   params?: any;
   description?: string;
   preventDefault?: boolean;
+  /**
+   * Runs instead of `command` (a plugin keymap entry that is a function). Returning `false` means it did nothing, so
+   * the key is left to the browser.
+   */
+  run?: (event: KeyboardEvent) => boolean | void;
 }
 
 export interface KeyboardShortcutConfig {
   shortcuts?: KeyboardShortcut[];
   enabled?: boolean;
   customShortcuts?: Record<string, KeyboardShortcut>;
+  /**
+   * The built-in list (Mod+B bold, Mod+Alt+1 heading 1, ...). On by default. The editors turn it off and use the
+   * keymaps of the plugins they load, so a key does something only when a plugin for it is there.
+   */
+  defaults?: boolean;
 }
+
+/** A plugin keymap value: a command name, a command with its argument, or a function (see `KeyboardShortcut.run`). */
+export type KeymapBinding =
+  | string
+  | { command: string; params?: unknown }
+  | ((event?: KeyboardEvent, ...args: any[]) => boolean | void);
+
+/** Keymap keys name the event key: `Tab`, `Enter`, `ArrowLeft`, `F7`, `Space`. Other names they may use: */
+const KEYMAP_KEY_NAMES: Record<string, string> = { space: ' ', esc: 'escape', del: 'delete', left: 'arrowleft', right: 'arrowright', up: 'arrowup', down: 'arrowdown' };
+
+/** The character a punctuation key cap types without Shift, by `event.code`. */
+const PUNCTUATION_CODES: Record<string, string> = {
+  Period: '.', Comma: ',', Semicolon: ';', Slash: '/', Backslash: '\\', BracketLeft: '[', BracketRight: ']',
+  Quote: "'", Minus: '-', Equal: '=', Backquote: '`',
+};
 
 export class KeyboardShortcutManager {
   private shortcuts: Map<string, KeyboardShortcut> = new Map();
@@ -27,15 +52,15 @@ export class KeyboardShortcutManager {
   private isMac: boolean;
 
   constructor(config?: KeyboardShortcutConfig) {
-    this.isMac = typeof navigator !== 'undefined' && 
+    this.isMac = typeof navigator !== 'undefined' &&
                  navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-    
+
     if (config?.enabled === false) {
       this.enabled = false;
     }
 
     // Register default shortcuts
-    this.registerDefaultShortcuts();
+    if (config?.defaults !== false) this.registerDefaultShortcuts();
 
     // Register custom shortcuts
     if (config?.shortcuts) {
@@ -404,6 +429,64 @@ export class KeyboardShortcutManager {
     this.shortcuts.set(key, shortcut);
   }
 
+  /**
+   * Parses a keymap key such as `Mod-Shift-Enter`, `Mod-Alt-1`, `Shift-Tab` or `F7`. `Mod` is Cmd on a Mac and Ctrl
+   * elsewhere; `Ctrl`, `Cmd`/`Meta`, `Alt`/`Option` and `Shift` mean those keys. Returns null for a key it cannot read.
+   */
+  parseKeymapKey(spec: string): Omit<KeyboardShortcut, 'command'> | null {
+    const parts = spec.split(/-(?!$)/);
+    const keyName = parts.pop();
+    if (!keyName) return null;
+    const shortcut: Omit<KeyboardShortcut, 'command'> = { key: '' };
+    for (const part of parts) {
+      switch (part.toLowerCase()) {
+        case 'mod': if (this.isMac) shortcut.meta = true; else shortcut.ctrl = true; break;
+        case 'ctrl': case 'control': shortcut.ctrl = true; break;
+        case 'cmd': case 'meta': shortcut.meta = true; break;
+        case 'alt': case 'option': shortcut.alt = true; break;
+        case 'shift': shortcut.shift = true; break;
+        default: return null;
+      }
+    }
+    const lower = keyName.toLowerCase();
+    shortcut.key = KEYMAP_KEY_NAMES[lower] ?? lower;
+    return shortcut;
+  }
+
+  /**
+   * Registers a plugin's `keymap`. Its entries replace whatever was on the same keys. Function entries are called
+   * with the event and `context` (the editor they run in).
+   */
+  registerKeymap(keymap: Record<string, KeymapBinding> | undefined, context?: unknown): void {
+    if (!keymap) return;
+    for (const [spec, binding] of Object.entries(keymap)) {
+      const parsed = this.parseKeymapKey(spec);
+      if (!parsed || binding == null) continue;
+      if (typeof binding === 'function') {
+        this.registerShortcut({ ...parsed, command: spec, run: (event) => binding(event, context) });
+      } else if (typeof binding === 'string') {
+        this.registerShortcut({ ...parsed, command: binding });
+      } else if (typeof binding === 'object' && typeof binding.command === 'string') {
+        this.registerShortcut({ ...parsed, command: binding.command, params: binding.params });
+      }
+    }
+  }
+
+  /** Removes every shortcut. */
+  clear(): void {
+    this.shortcuts.clear();
+  }
+
+  /**
+   * Keeps Mod+B, Mod+I and Mod+U from the browser when no plugin uses them: in an editable area Chromium and WebKit
+   * format the text themselves, which would add bold, italic or underline to an editor that has none. A plugin's
+   * keymap registered afterwards replaces these.
+   */
+  blockNativeFormattingKeys(): void {
+    const keep = () => true;
+    this.registerKeymap({ 'Mod-b': keep, 'Mod-i': keep, 'Mod-u': keep });
+  }
+
   unregisterShortcut(shortcut: KeyboardShortcut): void {
     const key = this.getShortcutKey(shortcut);
     this.shortcuts.delete(key);
@@ -436,32 +519,58 @@ export class KeyboardShortcutManager {
   private keyFromCode(code: string | undefined): string | null {
     if (!code) return null;
     const match = /^(?:Digit|Key)([0-9A-Z])$/.exec(code);
-    return match ? match[1].toLowerCase() : null;
+    if (match) return match[1].toLowerCase();
+    return PUNCTUATION_CODES[code] ?? null;
   }
 
-  handleKeyDown(event: KeyboardEvent, commandExecutor: (command: string, params?: any) => void): boolean {
-    if (!this.enabled) return false;
+  /**
+   * True when the key types a character with AltGr, which Windows and Linux report as Ctrl+Alt: "{" for AltGr+7 and
+   * "€" for AltGr+E on a German keyboard. That is typing, not Ctrl+Alt+7 or Ctrl+Alt+E.
+   */
+  private typesWithAltGr(event: KeyboardEvent, physical: string): boolean {
+    if (typeof event.getModifierState === 'function' && event.getModifierState('AltGraph')) return true;
+    return event.ctrlKey && event.altKey && !event.metaKey && event.key.length === 1 && event.key.toLowerCase() !== physical;
+  }
+
+  /**
+   * Runs the shortcut for `event`, if there is one. The key is blocked (preventDefault) only when something ran:
+   * - `canRun(command)` returning false (no loaded plugin has that command) leaves the key to the browser, so Cmd+P
+   *   still prints and Cmd+[ still goes back in an editor without those plugins;
+   * - so does `commandExecutor` or a keymap function returning `false`;
+   * - an event a plugin already handled (`defaultPrevented`) is left alone.
+   */
+  handleKeyDown(
+    event: KeyboardEvent,
+    commandExecutor: (command: string, params?: any) => boolean | void,
+    canRun?: (command: string) => boolean,
+  ): boolean {
+    if (!this.enabled || event.defaultPrevented) return false;
 
     // The character first, so layouts where it differs from the key cap keep their shortcuts; then the key itself,
     // with a modifier held. Cmd/Ctrl+Shift+7 and +8 (numbered and bullet list) never matched before: with Shift,
     // `event.key` is "&" and "*".
     let shortcut = this.shortcuts.get(this.getEventKey(event));
     const physical = this.keyFromCode(event.code);
-    if (!shortcut && physical && (event.ctrlKey || event.metaKey || event.altKey)) {
+    if (!shortcut && physical && (event.ctrlKey || event.metaKey || event.altKey) && !this.typesWithAltGr(event, physical)) {
       shortcut = this.shortcuts.get(this.getEventKey(event, physical));
     }
 
-    if (shortcut) {
-      if (shortcut.preventDefault !== false) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      
-      commandExecutor(shortcut.command, shortcut.params);
-      return true;
-    }
+    if (!shortcut) return false;
 
-    return false;
+    let result: boolean | void;
+    if (shortcut.run) {
+      result = shortcut.run(event);
+    } else {
+      if (canRun && !canRun(shortcut.command)) return false;
+      result = commandExecutor(shortcut.command, shortcut.params);
+    }
+    if (result === false) return false;
+
+    if (shortcut.preventDefault !== false) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    return true;
   }
 
   enable(): void {

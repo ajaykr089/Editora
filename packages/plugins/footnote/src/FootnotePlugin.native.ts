@@ -750,6 +750,9 @@ export const FootnotePlugin = (): Plugin => {
     commands: {
       insertFootnote: () => insertFootnoteCommand(),
     },
-    keymap: {},
+    // As in Word.
+    keymap: {
+      'Mod-Alt-f': 'insertFootnote',
+    },
   };
 };

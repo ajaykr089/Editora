@@ -58,7 +58,13 @@ export interface Plugin {
   marks?: Record<string, NodeSpec>;
   commands?: Record<string, PluginCommand>;
   toolbar?: ToolbarItem[];
-  keymap?: Record<string, string | ((...args: any[]) => any)>;
+  /**
+   * Keyboard shortcuts, run by the editor while this plugin is loaded: `{ 'Mod-Shift-x': 'toggleStrikethrough' }`.
+   * A value is a command name, `{ command, params }`, or a function called with the key event and the editor's
+   * context (return `false` when it did nothing, so the key is left to the browser). `Mod` is Cmd on a Mac and Ctrl
+   * elsewhere. These replace the editor's built-in list.
+   */
+  keymap?: Record<string, string | { command: string; params?: unknown } | ((...args: any[]) => any)>;
   context?: PluginContext;
   config?: PluginConfig;
   init?: (...args: any[]) => void | Promise<void>;

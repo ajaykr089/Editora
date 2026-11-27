@@ -44,7 +44,7 @@ function CodeSampleDemo() {
 
 | Action | Command | Shortcut | Toolbar |
 | --- | --- | --- | --- |
-| Insert code block | `insertCodeBlock` | `Mod-Shift-C` | `Insert Code` |
+| Insert code block | `insertCodeBlock` | `Mod-Alt-e` | `Insert Code` |
 
 ## Config Options
 

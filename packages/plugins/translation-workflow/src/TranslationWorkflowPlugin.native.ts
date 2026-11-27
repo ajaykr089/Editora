@@ -248,7 +248,7 @@ const defaultLabels: Required<TranslationWorkflowLabels> = {
   sourcePreviewLabel: 'Source',
   targetPreviewLabel: 'Target',
   helperText: 'Select segments, lock finalized ones, and run locale validation before handoff.',
-  shortcutText: 'Shortcuts: Ctrl/Cmd+Alt+Shift+L (panel), Ctrl/Cmd+Alt+Shift+V (validate), Ctrl/Cmd+Alt+Shift+K (lock segment)',
+  shortcutText: 'Shortcuts: Ctrl/Cmd+Alt+Shift+L (panel), Ctrl/Cmd+Alt+Shift+K (lock segment)',
   readonlySegmentMessage: 'This segment is locked. Unlock before editing.',
   sourceCapturedMessage: 'Source snapshot captured from current content.',
   selectedSegmentPrefix: 'Selected Segment',
@@ -1492,11 +1492,6 @@ function isTogglePanelShortcut(event: KeyboardEvent): boolean {
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'l';
 }
 
-function isRunValidationShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'v';
-}
-
 function isToggleLockShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'k';
@@ -1789,14 +1784,15 @@ function bindGlobalHandlers(options: ResolvedTranslationWorkflowOptions): void {
       if (targetPanel && event.key !== 'Escape' && !NAVIGATION_KEYS.has(event.key)) return;
 
       const isEscape = event.key === 'Escape';
+      // Mod+Alt+Shift+L opens the panel, K locks a segment. Validate is in the panel and the toolbar: its key (V)
+      // opens the smart paste panel.
       const toggleShortcut = isTogglePanelShortcut(event);
-      const runShortcut = isRunValidationShortcut(event);
       const lockShortcut = isToggleLockShortcut(event);
       const lockedSegment = getLockedSegmentFromTarget(target);
 
       // Avoid touching editor DOM on unrelated keydown events (especially Enter),
       // so native list behavior remains stable.
-      if (!isEscape && !toggleShortcut && !runShortcut && !lockShortcut && !lockedSegment) {
+      if (!isEscape && !toggleShortcut && !lockShortcut && !lockedSegment) {
         return;
       }
 
@@ -1825,13 +1821,6 @@ function bindGlobalHandlers(options: ResolvedTranslationWorkflowOptions): void {
         event.preventDefault();
         event.stopPropagation();
         togglePanel(editor);
-        return;
-      }
-
-      if (runShortcut) {
-        event.preventDefault();
-        event.stopPropagation();
-        runValidation(editor, 'shortcut', true);
         return;
       }
 
@@ -2544,7 +2533,6 @@ export const TranslationWorkflowPlugin = (rawOptions: TranslationWorkflowPluginO
             id: 'runTranslationLocaleValidation',
             label: 'Run Locale Validation',
             command: 'runTranslationLocaleValidation',
-            shortcut: 'Mod-Alt-Shift-v',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><rect x="4.5" y="4" width="12" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h5.5M8 11h4M8 14h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m15.5 15.5 1.7 1.7 3.3-3.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           },
           {
@@ -2762,11 +2750,7 @@ export const TranslationWorkflowPlugin = (rawOptions: TranslationWorkflowPluginO
 
     keymap: {
       'Mod-Alt-Shift-l': 'toggleTranslationWorkflowPanel',
-      'Mod-Alt-Shift-L': 'toggleTranslationWorkflowPanel',
-      'Mod-Alt-Shift-v': 'runTranslationLocaleValidation',
-      'Mod-Alt-Shift-V': 'runTranslationLocaleValidation',
       'Mod-Alt-Shift-k': 'toggleTranslationSegmentLock',
-      'Mod-Alt-Shift-K': 'toggleTranslationSegmentLock',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

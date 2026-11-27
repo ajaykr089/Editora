@@ -317,9 +317,9 @@ export const CapitalizationPlugin = (): Plugin => {
     },
 
     keymap: {
+      // Lower and Title Case are on the toolbar: their keys were the anchor plugin's (Mod+Shift+K) and the browser's
+      // (Mod+Shift+T reopens the last closed tab).
       "Mod-Shift-u": "toUpperCase",
-      "Mod-Shift-k": "toLowerCase",
-      "Mod-Shift-t": "toTitleCase",
     },
   };
 };

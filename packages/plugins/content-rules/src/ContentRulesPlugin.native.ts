@@ -959,19 +959,11 @@ function getKeyboardEventKey(event: KeyboardEvent): string {
   return typeof event.key === 'string' ? event.key.toLowerCase() : '';
 }
 
+// Mod+Alt+Shift+R opens the panel. Run Audit and Realtime are in the panel and the toolbar: their keys (L, T) are
+// the translation workflow panel's and Insert Table's.
 function isOpenPanelShortcut(event: KeyboardEvent): boolean {
   const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'r';
-}
-
-function isRunAuditShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'l';
-}
-
-function isToggleRealtimeShortcut(event: KeyboardEvent): boolean {
-  const key = getKeyboardEventKey(event);
-  return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 't';
 }
 
 function ensureStylesInjected(): void {
@@ -1416,11 +1408,9 @@ function bindGlobalHandlers(options: ResolvedContentRulesOptions): void {
 
       const isEscape = event.key === 'Escape';
       const openShortcut = isOpenPanelShortcut(event);
-      const runShortcut = isRunAuditShortcut(event);
-      const realtimeShortcut = isToggleRealtimeShortcut(event);
 
       // Keep native typing/Enter flow untouched for non-plugin keys.
-      if (!isEscape && !openShortcut && !runShortcut && !realtimeShortcut) {
+      if (!isEscape && !openShortcut) {
         return;
       }
 
@@ -1441,33 +1431,6 @@ function bindGlobalHandlers(options: ResolvedContentRulesOptions): void {
         event.preventDefault();
         event.stopPropagation();
         togglePanel(editor);
-        return;
-      }
-
-      if (runShortcut) {
-        event.preventDefault();
-        event.stopPropagation();
-        void runAudit(editor, resolvedOptions, true);
-        showPanel(editor);
-        return;
-      }
-
-      if (realtimeShortcut) {
-        event.preventDefault();
-        event.stopPropagation();
-        const next = !getRealtimeEnabled(editor, resolvedOptions);
-        realtimeEnabledByEditor.set(editor, next);
-
-        const panel = panelByEditor.get(editor);
-        if (panel) {
-          updateRealtimeButtonText(editor, panel, resolvedOptions);
-        }
-
-        setCommandButtonActiveState(editor, 'toggleContentRulesRealtime', next);
-
-        if (next) {
-          void runAudit(editor, resolvedOptions, true);
-        }
       }
     };
 
@@ -1551,14 +1514,12 @@ export const ContentRulesPlugin = (rawOptions: ContentRulesPluginOptions = {}): 
             id: 'contentRulesAudit',
             label: 'Run Rules Audit',
             command: 'runContentRulesAudit',
-            shortcut: 'Mod-Alt-Shift-l',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M4 12h4l2 5 4-10 2 5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg>',
           },
           {
             id: 'contentRulesRealtime',
             label: 'Toggle Realtime Rules',
             command: 'toggleContentRulesRealtime',
-            shortcut: 'Mod-Alt-Shift-t',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true"><path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/></svg>',
           },
         ],
@@ -1710,11 +1671,6 @@ export const ContentRulesPlugin = (rawOptions: ContentRulesPluginOptions = {}): 
 
     keymap: {
       'Mod-Alt-Shift-r': 'toggleContentRulesPanel',
-      'Mod-Alt-Shift-R': 'toggleContentRulesPanel',
-      'Mod-Alt-Shift-l': 'runContentRulesAudit',
-      'Mod-Alt-Shift-L': 'runContentRulesAudit',
-      'Mod-Alt-Shift-t': 'toggleContentRulesRealtime',
-      'Mod-Alt-Shift-T': 'toggleContentRulesRealtime',
     },
 
     init: function init(this: any, context?: { editorElement?: HTMLElement }) {

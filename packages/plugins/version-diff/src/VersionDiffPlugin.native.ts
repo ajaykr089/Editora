@@ -451,14 +451,16 @@ function renderSideDiffHtml(
   };
 }
 
+// Mod+Alt+Shift+H (history) or F8. It was Mod+Alt+D, which on a Mac shows and hides the Dock and never reaches
+// the page.
 function isOpenVersionDiffShortcut(event: KeyboardEvent): boolean {
   const hasPrimaryModifier = event.metaKey || event.ctrlKey;
   const rawKey = typeof event.key === 'string' ? event.key : '';
   const key = rawKey.toLowerCase();
   const code = typeof event.code === 'string' ? event.code.toLowerCase() : '';
-  const modAltD = hasPrimaryModifier && event.altKey && !event.shiftKey && (key === 'd' || code === 'keyd');
+  const modAltShiftH = hasPrimaryModifier && event.altKey && event.shiftKey && (key === 'h' || code === 'keyh');
   const fallbackF8 = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && (key === 'f8' || code === 'f8');
-  return modAltD || fallbackF8;
+  return modAltShiftH || fallbackF8;
 }
 
 function ensureStylesInjected(): void {
@@ -924,7 +926,7 @@ function renderDialog(
     </div>
 
     <footer class="rte-version-diff-footer">
-      <small>Shortcut: Ctrl/Cmd + Alt + D (fallback: F8)</small>
+      <small>Shortcut: Ctrl/Cmd + Alt + Shift + H (or F8)</small>
       <small>Esc: close</small>
     </footer>
   `;
@@ -1209,8 +1211,7 @@ export const VersionDiffPlugin = (rawOptions: VersionDiffPluginOptions = {}): Pl
     },
 
     keymap: {
-      'Mod-Alt-d': 'openVersionDiff',
-      'Mod-Alt-D': 'openVersionDiff',
+      'Mod-Alt-Shift-h': 'openVersionDiff',
       'F8': 'openVersionDiff',
     },
 
