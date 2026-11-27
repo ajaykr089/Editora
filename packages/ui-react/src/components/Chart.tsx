@@ -29,7 +29,7 @@ export type ChartPointSelectDetail = {
   tone?: string;
   series?: string;
   seriesValues?: ChartSeriesValueDetail[];
-  type: 'line' | 'area' | 'bar' | 'donut' | 'step' | 'scatter' | 'radial';
+  type: 'line' | 'area' | 'bar' | 'donut' | 'pie' | 'step' | 'scatter' | 'radial' | 'radar';
   total: number;
   min: number;
   max: number;
@@ -41,7 +41,7 @@ export type ChartProps = React.HTMLAttributes<HTMLElement> & {
   series?: ChartSeries[];
   values?: number[];
   labels?: string[];
-  type?: 'line' | 'area' | 'bar' | 'donut' | 'step' | 'scatter' | 'radial';
+  type?: 'line' | 'area' | 'bar' | 'donut' | 'pie' | 'step' | 'scatter' | 'radial' | 'radar';
   variant?: 'default' | 'contrast' | 'minimal';
   title?: string;
   subtitle?: string;

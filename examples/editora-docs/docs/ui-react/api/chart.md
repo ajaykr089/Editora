@@ -34,7 +34,7 @@ import { Chart } from '@editora/ui-react';
 | `state` | `ChartState` |   |
 | `subtitle` | `string` |   |
 | `title` | `string` |   |
-| `type` | `'line' \| 'area' \| 'bar' \| 'donut' \| 'step' \| 'scatter' \| 'radial'` |   |
+| `type` | `'line' \| 'area' \| 'bar' \| 'donut' \| 'pie' \| 'step' \| 'scatter' \| 'radial' \| 'radar'` |   |
 | `valuePrefix` | `string` |   |
 | `values` | `number[]` |   |
 | `valueSuffix` | `string` |   |
@@ -64,7 +64,7 @@ Also accepts the standard HTML and React props of the element it renders (`class
 | `state` | `ChartState` |   |
 | `subtitle` | `string` |   |
 | `title` | `string` |   |
-| `type` | `'line' \| 'area' \| 'bar' \| 'donut' \| 'step' \| 'scatter' \| 'radial'` |   |
+| `type` | `'line' \| 'area' \| 'bar' \| 'donut' \| 'pie' \| 'step' \| 'scatter' \| 'radial' \| 'radar'` |   |
 | `valuePrefix` | `string` |   |
 | `values` | `number[]` |   |
 | `valueSuffix` | `string` |   |
