@@ -381,5 +381,32 @@ export const AllTypes = () => (
     <Chart type="bar" title="Bar" subtitle="Category compare" data={throughputSeries} />
     <Chart type="donut" title="Donut" subtitle="Share split" data={allocationSeries} />
     <Chart type="radial" title="Radial" subtitle="Multi-axis spread" data={throughputSeries} />
+    <Chart type="pie" title="Pie" subtitle="Share of a whole" data={allocationSeries} />
+    <Chart type="radar" title="Radar" subtitle="Dimensions compared" data={throughputSeries} />
+  </Grid>
+);
+
+export const PieAndRadar = () => (
+  <Grid style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+    <Chart
+      type="pie"
+      title="Traffic sources"
+      subtitle="Last 30 days"
+      data={[
+        { label: 'Search', value: 48 },
+        { label: 'Direct', value: 26 },
+        { label: 'Social', value: 16 },
+        { label: 'Email', value: 10 },
+      ]}
+      valueSuffix="%"
+    />
+    <Chart
+      type="radar"
+      title="Team skills"
+      series={[
+        { name: 'Ada', data: [{ label: 'Speed', value: 8 }, { label: 'Quality', value: 6 }, { label: 'Scope', value: 9 }, { label: 'Cost', value: 4 }, { label: 'Support', value: 7 }] },
+        { name: 'Grace', data: [{ label: 'Speed', value: 5 }, { label: 'Quality', value: 9 }, { label: 'Scope', value: 7 }, { label: 'Cost', value: 6 }, { label: 'Support', value: 8 }] },
+      ]}
+    />
   </Grid>
 );
