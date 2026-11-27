@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [bb0be84]
+  - @editora/ui-core@0.7.0
+
 ## 0.1.14
 
 ### Patch Changes
