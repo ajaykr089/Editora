@@ -12,7 +12,7 @@ import {
   type Align,
   type MediaElement,
 } from '../model/figure';
-import { GALLERY_COLUMNS, getColumns, removeFromGallery, setColumns } from '../model/gallery';
+import { GALLERY_COLUMNS, getColumns, setColumns } from '../model/gallery';
 import type { MediaManagerConfig } from '../types/media';
 import { showAltTextDialog } from './altTextDialog';
 import { editImage } from './imageEditor/editImage';
@@ -33,8 +33,11 @@ export interface ToolbarHooks {
   commit: (media: HTMLElement, change: () => void, before?: string) => void;
   /** The media was changed in a way that needs the selection frame and the toolbar redrawn. */
   refresh: () => void;
-  /** The media was taken out of the document. */
-  removed: () => void;
+  /**
+   * Take the media out of the document (`whole`: its whole gallery) as one undo step, with the caret left in the text
+   * beside it.
+   */
+  remove: (media: HTMLElement, whole: boolean) => void;
   /** Leave the toolbar for the editor, with the media still selected. */
   returnFocus: () => void;
   /** A caption was just added: put the caret in it. */
@@ -199,18 +202,7 @@ export class FloatingToolbar {
         context: media,
       });
       if (!confirmed || !media.isConnected) return;
-      if (inGallery && !whole) {
-        // One picture of a gallery: the gallery stays (unless that was its last).
-        hooks.commit(media, () => removeFromGallery(media));
-        hooks.removed();
-        return;
-      }
-      // What goes with the media: its figure (caption and all), or a link that wraps only this media.
-      const link = media.closest('a');
-      const wrapper =
-        figureOf(media) ?? (link && link.children.length === 1 && !link.textContent?.trim() ? link : media);
-      hooks.commit(media, () => wrapper.remove());
-      hooks.removed();
+      hooks.remove(media, whole);
     };
     on('.btn-remove', () => void remove(false));
     on('.btn-remove-gallery', () => void remove(true));

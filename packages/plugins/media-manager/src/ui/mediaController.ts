@@ -205,7 +205,7 @@ export class MediaController {
       config: () => this.config(),
       commit: (target, change, before) => this.commit(target, change, before),
       refresh: () => this.refresh(),
-      removed: () => this.deselect(),
+      remove: (target, whole) => this.removeMedia(target as Media, 'after', whole),
       returnFocus: () => this.returnFocus(),
       focusCaption: (caption) => this.focusCaption(caption),
     });
@@ -522,10 +522,15 @@ export class MediaController {
     return figureOf(media) ?? (link && link.children.length === 1 && !link.textContent?.trim() ? link : media);
   }
 
-  /** Removes media as one undo step and puts the caret beside where it was, at the text `toward` that side. */
-  private removeMedia(media: Media, toward: 'before' | 'after'): void {
+  /**
+   * Removes media (`whole`: its whole gallery) as one undo step and puts the caret beside where it was, in the text
+   * `toward` that side, with the editor focused (the toolbar's Remove comes from a dialog).
+   */
+  private removeMedia(media: Media, toward: 'before' | 'after', whole = false): void {
     const selection = window.getSelection();
-    if (isGalleryItem(media)) {
+    const editable = hostOf(media);
+    if (editable && !editable.contains(document.activeElement)) editable.focus({ preventScroll: true });
+    if (isGalleryItem(media) && !whole) {
       const gallery = figureOf(media);
       this.commit(media, () => removeFromGallery(media));
       this.deselect();

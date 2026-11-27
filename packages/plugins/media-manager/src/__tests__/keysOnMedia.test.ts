@@ -170,3 +170,33 @@ describe('Backspace and Delete next to a picture', () => {
     expect(keydown('Backspace').defaultPrevented).toBe(false);
   });
 });
+
+describe("the toolbar's Remove", () => {
+  // It left the caret between the paragraphs, so the next letter typed went outside any paragraph (Firefox) or was
+  // glued onto the text before (WebKit).
+  const confirmRemove = async () => {
+    (document.querySelector('.media-floating-toolbar .btn-remove') as HTMLElement).click();
+    const button = () => [...document.querySelectorAll('button')].find((b) => /^remove$/i.test(b.textContent?.trim() ?? ''));
+    await vi.waitFor(() => expect(button()).toBeTruthy());
+    button()!.click();
+    await vi.waitFor(() => expect(editor.querySelector('figure')).toBeNull());
+  };
+
+  it('puts the caret in the paragraph after the picture, with the editor focused', async () => {
+    setUp(`<p>Before</p>${PICTURE}<p>After it.</p>`);
+    selectNode(figure());
+    await confirmRemove();
+    expect(blocks()).toEqual(['p:Before', 'p:After it.']);
+    expect(caret()).toBe('After it.@0');
+    expect(document.activeElement).toBe(editor);
+    expect(recorded).toHaveLength(1);
+  });
+
+  it('leaves a paragraph to type in when the picture was all there was', async () => {
+    setUp(PICTURE);
+    selectNode(figure());
+    await confirmRemove();
+    expect(editor.innerHTML).toBe('<p><br></p>');
+    expect(caret()).toBe('P@0');
+  });
+});
