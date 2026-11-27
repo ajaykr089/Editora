@@ -24,4 +24,17 @@ describe('KeyboardShortcutManager', () => {
     expect(press(manager, { ...mod, key: 'b', code: 'KeyB' })).toEqual(['toggleBold']);
     expect(press(manager, { shiftKey: true, key: '*', code: 'Digit8' })).toEqual([]);
   });
+
+  // On Windows and Linux, AltGr arrives as Ctrl+Alt with the character it types. Matching its key cap instead made
+  // AltGr+7 on a German keyboard ("{") the paragraph shortcut (Ctrl+Alt+7) and AltGr+E ("€") the code block one.
+  it('lets AltGr type its characters', () => {
+    const pc = new KeyboardShortcutManager();
+    (pc as any).isMac = false;
+    expect(press(pc, { ctrlKey: true, altKey: true, key: '{', code: 'Digit7' })).toEqual([]);
+    expect(press(pc, { ctrlKey: true, altKey: true, key: '€', code: 'KeyE' })).toEqual([]);
+    expect(press(pc, { ctrlKey: true, altKey: true, key: 'ę', code: 'KeyE' })).toEqual([]);
+    // Ctrl+Alt on a layout where it types nothing still runs the shortcut.
+    expect(press(pc, { ctrlKey: true, altKey: true, key: '7', code: 'Digit7' })).toEqual(['setBlockType']);
+    expect(press(pc, { ctrlKey: true, altKey: true, key: 'e', code: 'KeyE' })).toEqual(['insertCodeBlock']);
+  });
 });

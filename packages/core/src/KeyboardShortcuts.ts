@@ -439,6 +439,15 @@ export class KeyboardShortcutManager {
     return match ? match[1].toLowerCase() : null;
   }
 
+  /**
+   * True when the key types a character with AltGr, which Windows and Linux report as Ctrl+Alt: "{" for AltGr+7 and
+   * "€" for AltGr+E on a German keyboard. That is typing, not Ctrl+Alt+7 or Ctrl+Alt+E.
+   */
+  private typesWithAltGr(event: KeyboardEvent, physical: string): boolean {
+    if (typeof event.getModifierState === 'function' && event.getModifierState('AltGraph')) return true;
+    return event.ctrlKey && event.altKey && !event.metaKey && event.key.length === 1 && event.key.toLowerCase() !== physical;
+  }
+
   handleKeyDown(event: KeyboardEvent, commandExecutor: (command: string, params?: any) => void): boolean {
     if (!this.enabled) return false;
 
@@ -447,7 +456,7 @@ export class KeyboardShortcutManager {
     // `event.key` is "&" and "*".
     let shortcut = this.shortcuts.get(this.getEventKey(event));
     const physical = this.keyFromCode(event.code);
-    if (!shortcut && physical && (event.ctrlKey || event.metaKey || event.altKey)) {
+    if (!shortcut && physical && (event.ctrlKey || event.metaKey || event.altKey) && !this.typesWithAltGr(event, physical)) {
       shortcut = this.shortcuts.get(this.getEventKey(event, physical));
     }
 
