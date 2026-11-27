@@ -967,6 +967,12 @@
       "import": "./dist/TraceItem.esm.js",
       "require": "./dist/TraceItem.cjs.js",
       "default": "./dist/TraceItem.esm.js"
+    },
+    "./DataList": {
+      "types": "./dist/components/DataList.d.ts",
+      "import": "./dist/DataList.esm.js",
+      "require": "./dist/DataList.cjs.js",
+      "default": "./dist/DataList.esm.js"
     }
   },
   "files": [

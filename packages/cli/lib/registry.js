@@ -56,6 +56,7 @@ const uiReactComponents = [
   "context-menu",
   "control-group",
   "copy-button",
+  "data-list",
   "data-table",
   "data-view-toolbar",
   "date-field",

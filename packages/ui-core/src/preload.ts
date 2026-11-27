@@ -30,6 +30,7 @@ export const PRELOAD_CSS = `@layer editora-preload {
   ui-container:not(:defined),
   ui-context-menu:not(:defined),
   ui-control-group:not(:defined),
+  ui-data-list:not(:defined),
   ui-data-table:not(:defined),
   ui-date-field:not(:defined),
   ui-description:not(:defined),
