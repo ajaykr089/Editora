@@ -149,3 +149,17 @@ function AmbientCarousel() {
 - `autoPlay` advances slides automatically, and `pauseOnHover` pauses the timer while the pointer is over the carousel.
 - Swipe gestures are supported for both horizontal and vertical carousels.
 - `Carousel` is client-only and should be imported from `@editora/ui-react` or `@editora/ui-react/client`.
+
+## Without React
+
+`@editora/ui-core` 0.7.0 has a `ui-carousel` custom element for plain HTML and other frameworks. This React component stays a separate implementation.
+
+```html
+<script type="module">import '@editora/ui-core/carousel';</script>
+<ui-carousel label="Featured" loop>
+  <img src="a.jpg" alt="…" />
+  <div label="Pricing">…</div>
+</ui-carousel>
+```
+
+Every element child is a slide; hidden slides are `inert`. It has the same options as the React component as attributes (`index`, `loop`, `autoplay`, `interval`, `orientation`, `transition`, `controls`, `controls-variant`, `controls-position`, `indicators`), swipe, arrow keys, and a pause button first in the tab order while it rotates. Rotation stops on hover, on focus, in a background tab and under reduced motion. Fires `change` with `{ index, previousIndex, reason }`.

@@ -53,3 +53,17 @@ function DocsBlock() {
 - `CodeBlock` is server-safe, so it can be used from `@editora/ui-react/server`.
 - Use `actions` for composed controls like `CopyButton`.
 - `lineNumbers` works when the content comes from the `code` string prop.
+
+## Without React
+
+`@editora/ui-core` 0.7.0 has a `ui-code-block` custom element for plain HTML and other frameworks. This React component stays a separate implementation (server-safe markup).
+
+```html
+<script type="module">import '@editora/ui-core/code-block';</script>
+<ui-code-block filename="app.ts" language="ts" line-numbers highlight="2,4-5"></ui-code-block>
+<script type="module">
+  document.querySelector('ui-code-block').code = "const a = 1;\nconsole.log(a);";
+</script>
+```
+
+The code comes from the `code` property or attribute, or from a child `<pre>`; an already highlighted `<pre>` (Shiki, Prism) is shown as given. It has a copy button (announces "Copied" and fires `code-copy`), `line-numbers`, `highlight`, `wrap`, `max-height` and `no-copy`; the code area is a focusable region so keyboard users can scroll it.

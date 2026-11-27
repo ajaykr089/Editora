@@ -45,6 +45,9 @@ showToast({ message: "Saved", level: "success" });
 | `UIBlockControls`, `UIPluginPanel`, `UIFloatingToolbar`, `UISelectionPopup`, `UICommandPalette` | Class exports | Editor-oriented controls |
 | `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar`, `UIOdometer` | Class exports | Form/data components |
 | `UIColorPicker`, `UIDatePicker`, `UIDateRangePicker`, `UITimePicker`, `UIDateTimePicker`, `UIDateRangeTimePicker`, `UIGantt`, `UIStepper`, `UIWizard`, `UIQuickActions` | Class exports | Advanced input/workflow components |
+| `UISpinner`, `UIKbd`, `UIHeading`, `UIText`, `UIProse`, `UIAccessibleIcon`, `UIAnnouncer`, `UIButtonGroup`, `UIInputGroup`, `UINativeSelect`, `UIItem`, `UIItemGroup`, `UICodeBlock`, `UICarousel` | Class exports (0.7.0) | Typography, groups, list rows, code and carousel |
+| `UIMessage`, `UIBubble`, `UIBubbleGroup`, `UIMarker`, `UIMessageScroller`, `UIAttachment`, `UIAttachmentGroup`, `UITrace`, `UITraceItem`, `UIQuestion`, `UIQuestionnaire` | Class exports (0.7.0) | Chat and agent UI |
+| `announce`, `clearAnnouncements` | Function exports (0.7.0) | Screen-reader announcements through shared live regions |
 | Dialog type contracts (`UIAlertDialog*`, `UIDialog*`) | Type exports | Typed dialog payload/event details |
 
 ## Best Practices

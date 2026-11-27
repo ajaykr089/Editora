@@ -44,3 +44,16 @@ function SaveHint() {
 - `keys` is the clearest API when the list is data-driven.
 - Child-derived keys are helpful when you want to compose richer labels inline.
 - `Kbd` is server-safe, so it can be rendered in docs and RSC shells without client wrappers.
+
+## Without React
+
+`@editora/ui-core` 0.7.0 has a `ui-kbd` custom element for plain HTML and other frameworks. This React component stays a separate implementation (server-safe markup).
+
+```html
+<script type="module">import '@editora/ui-core/kbd';</script>
+<ui-kbd>Esc</ui-kbd>
+<ui-kbd keys="Ctrl+Shift+P"></ui-kbd>
+<ui-kbd keys='["⌘", "K"]' separator=""></ui-kbd>
+```
+
+A shortcut renders as nested `<kbd>` elements. `keys` is "+"-separated (write the plus key as `Ctrl++`) or a JSON array; also `size` (`sm` `md` `lg`), `variant` (`outline` `soft` `ghost`) and `separator`.
