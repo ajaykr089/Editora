@@ -64,8 +64,8 @@ export const Playground = (args: any) => {
             prefix="USD"
           />
           <Box style={showcasePanelStyle}>
-            <strong style={{ color: '#0f172a' }}>Live value</strong>
-            <Box style={{ color: '#526175', fontSize: 13 }}>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Live value</strong>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               {current == null ? 'empty' : current.toLocaleString('en-US')}
             </Box>
           </Box>

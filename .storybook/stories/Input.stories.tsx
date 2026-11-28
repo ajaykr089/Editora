@@ -56,7 +56,7 @@ export const Playground = (args: any) => (
         if (root) root.textContent = `Debounced value: ${next}`;
       }}
     />
-    <Box id="input-playground-value" style={{ marginTop: 8, fontSize: 12, color: '#526175' }}>
+    <Box id="input-playground-value" style={{ marginTop: 8, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>
       Debounced value:
     </Box>
   </Box>
@@ -100,13 +100,13 @@ export const WithSlots = () => (
 export const DesignDirections = () => (
   <Grid style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(3, minmax(240px, 1fr))' }}>
     <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, display: 'grid', gap: 10 }}>
-      <Box style={{ fontSize: 12, color: '#526175' }}>MUI-like</Box>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>MUI-like</Box>
       <Input label="Project" variant="outlined" tone="brand" placeholder="Roadmap V3" />
       <Input label="Version" variant="filled" placeholder="2.1.0" />
     </Box>
 
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, display: 'grid', gap: 10, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
-      <Box style={{ fontSize: 12, color: '#526175' }}>Chakra-like</Box>
+    <Box style={{ color: '#1f2937', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, display: 'grid', gap: 10, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Chakra-like</Box>
       <Input label="Team" variant="soft" tone="success" shape="soft" placeholder="Engineering" />
       <Input label="Channel" variant="soft" tone="brand" shape="soft" placeholder="#release-sync" />
     </Box>
@@ -144,7 +144,7 @@ export const ThemedByTokens = () => (
     tokens={{
       colors: {
         primary: '#0f766e',
-        background: '#f8fafc',
+        background: 'var(--ui-color-surface, #f8fafc)',
         text: '#0f172a'
       },
       radius: '12px'

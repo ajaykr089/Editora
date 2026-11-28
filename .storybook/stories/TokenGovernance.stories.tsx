@@ -10,7 +10,7 @@ const governanceTokens = {
     primary: '#0f62fe',
     primaryHover: '#0043ce',
     foregroundOnPrimary: '#ffffff',
-    background: '#f8fafc',
+    background: 'var(--ui-color-surface, #f8fafc)',
     surface: '#ffffff',
     surfaceAlt: '#eef2ff',
     text: '#0f172a',
@@ -42,8 +42,8 @@ const governanceTokens = {
 function Swatch({ label, value }: { label: string; value: string }) {
   return (
     <Box style={{ display: 'grid', gap: 4 }}>
-      <Box style={{ fontSize: 12, color: '#475569' }}>{label}</Box>
-      <Box style={{ border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 10px', fontSize: 12, background: '#fff' }}>{value}</Box>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #475569)' }}>{label}</Box>
+      <Box style={{ border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 10px', fontSize: 12, background: 'var(--ui-color-surface, #fff)' }}>{value}</Box>
     </Box>
   );
 }

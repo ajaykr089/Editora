@@ -189,7 +189,7 @@ function MenubarPreview(props: {
           minHeight: 120,
           borderRadius: 16,
           border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
-          background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
           display: 'grid',
           placeItems: 'center',
           padding: 24,
@@ -212,7 +212,7 @@ function MenubarPreview(props: {
           <MenubarContent />
         </Menubar>
       </Box>
-      {props.label ? <div style={{ fontSize: 13, color: '#526175', textAlign: 'center' }}>{props.label}</div> : null}
+      {props.label ? <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)', textAlign: 'center' }}>{props.label}</div> : null}
     </Grid>
   );
 
@@ -226,7 +226,7 @@ function MenubarMatrixStory() {
   return (
     <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
       <div>
-        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Menubar</div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: 'var(--ui-color-text, #111827)' }}>Menubar</div>
       </div>
 
       <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
@@ -244,13 +244,13 @@ function MenubarMatrixStory() {
       {tab === 'theme' ? (
         <Grid style={{ gap: 22 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             <MenubarPreview variant="solid" size="md" elevation="low" palette="blue" />
             <MenubarPreview variant="solid" size="md" elevation="low" palette="blue" tone="neutral" />
             <MenubarPreview variant="solid" size="md" elevation="low" palette="gray" />
             <MenubarPreview variant="solid" size="md" elevation="low" palette="gray" tone="neutral" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             <MenubarPreview variant="soft" size="md" elevation="low" palette="blue" />
             <MenubarPreview variant="soft" size="md" elevation="low" palette="blue" tone="neutral" />
             <MenubarPreview variant="soft" size="md" elevation="low" palette="gray" />
@@ -263,11 +263,11 @@ function MenubarMatrixStory() {
         <Grid style={{ gap: 16 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(260px, 1fr))', gap: 18, alignItems: 'start' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
               <React.Fragment key={name}>
-                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)', textTransform: 'capitalize' }}>{name}</div>
                 <MenubarPreview variant="solid" size="md" elevation="low" palette={name} />
                 <MenubarPreview variant="soft" size="md" elevation="low" palette={name} />
               </React.Fragment>
@@ -280,11 +280,11 @@ function MenubarMatrixStory() {
         <Grid style={{ gap: 18 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(280px, 1fr))', gap: 18, alignItems: 'start' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             {(['1', '2', '3'] as const).map((size) => (
               <React.Fragment key={size}>
-                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Size {size}</div>
                 <MenubarPreview variant="solid" size={size} elevation="low" palette="blue" />
                 <MenubarPreview variant="soft" size={size} elevation="low" palette="blue" />
               </React.Fragment>
@@ -318,7 +318,7 @@ export const Playground: Story = {
                 minHeight: 240,
                 borderRadius: 18,
                 border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
-                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
                 display: 'grid',
                 placeItems: 'center',
                 padding: 24,
@@ -382,7 +382,7 @@ export const Vertical: Story = {
         </Menubar.Content>
       </Menubar>
 
-      <Box style={{ fontSize: 13, color: '#526175', maxInlineSize: 280 }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)', maxInlineSize: 280 }}>
         Vertical mode works for command strips, editor side rails, and compact admin tool clusters.
       </Box>
     </Flex>

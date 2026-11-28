@@ -50,7 +50,7 @@ function HeaderChrome(props: React.ComponentProps<typeof AppHeader>) {
               alignItems: 'center',
               justifyContent: 'center',
               background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent)',
-              color: 'var(--ui-color-primary, #2563eb)',
+              color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))',
             }}
           >
             <ShieldIcon size={15} />

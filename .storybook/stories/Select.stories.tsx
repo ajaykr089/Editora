@@ -175,7 +175,7 @@ function SelectPreview(props: {
           minHeight: 148,
           borderRadius: 16,
           border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
-          background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
           display: 'grid',
           placeItems: 'center',
           padding: 20,
@@ -204,7 +204,7 @@ function SelectPreview(props: {
           </Select>
         </Box>
       </Box>
-      {props.caption ? <div style={{ fontSize: 13, color: '#526175', textAlign: 'center' }}>{props.caption}</div> : null}
+      {props.caption ? <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)', textAlign: 'center' }}>{props.caption}</div> : null}
     </Grid>
   );
 
@@ -218,7 +218,7 @@ function ThemeTokenMatrixStory() {
   return (
     <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
       <div>
-        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Select</div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: 'var(--ui-color-text, #111827)' }}>Select</div>
       </div>
 
       <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
@@ -236,25 +236,25 @@ function ThemeTokenMatrixStory() {
       {tab === 'theme' ? (
         <Grid style={{ gap: 22 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Surface</div>
             <SelectPreview variant="surface" size="md" elevation="low" palette="blue" />
             <SelectPreview variant="surface" size="md" elevation="low" palette="gray" />
             <SelectPreview variant="surface" size="md" elevation="low" palette="purple" />
             <SelectPreview variant="surface" size="md" elevation="low" palette="green" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             <SelectPreview variant="soft" size="md" elevation="low" palette="blue" />
             <SelectPreview variant="soft" size="md" elevation="low" palette="gray" />
             <SelectPreview variant="soft" size="md" elevation="low" palette="purple" />
             <SelectPreview variant="soft" size="md" elevation="low" palette="green" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             <SelectPreview variant="solid" size="md" elevation="low" palette="blue" />
             <SelectPreview variant="solid" size="md" elevation="low" palette="gray" />
             <SelectPreview variant="solid" size="md" elevation="low" palette="purple" />
             <SelectPreview variant="solid" size="md" elevation="low" palette="green" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Contrast</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Contrast</div>
             <SelectPreview variant="contrast" size="md" elevation="low" palette="blue" />
             <SelectPreview variant="contrast" size="md" elevation="low" palette="gray" />
             <SelectPreview variant="contrast" size="md" elevation="low" palette="purple" />
@@ -267,12 +267,12 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 16 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
               <React.Fragment key={name}>
-                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)', textTransform: 'capitalize' }}>{name}</div>
                 <SelectPreview variant="surface" size="md" elevation="low" palette={name} />
                 <SelectPreview variant="soft" size="md" elevation="low" palette={name} />
                 <SelectPreview variant="solid" size="md" elevation="low" palette={name} />
@@ -286,12 +286,12 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 18 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             {(['1', '2', '3'] as const).map((size) => (
               <React.Fragment key={size}>
-                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Size {size}</div>
                 <SelectPreview variant="surface" size={size} elevation="low" palette="blue" />
                 <SelectPreview variant="soft" size={size} elevation="low" palette="blue" />
                 <SelectPreview variant="solid" size={size} elevation="low" palette="blue" />
@@ -331,7 +331,7 @@ export const Playground: Story = {
                 minHeight: 220,
                 borderRadius: 18,
                 border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
-                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
                 display: 'grid',
                 placeItems: 'center',
                 padding: 24,
@@ -381,7 +381,7 @@ export const CompositionSlots: Story = {
       <Grid style={{ gap: 20, maxInlineSize: 480 }}>
         {/* Option + OptGroup */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#526175' }}>Option + OptGroup</Box>
+          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Option + OptGroup</Box>
           <Select label="Workflow status" value={value} onChange={setValue} variant="surface">
             <Select.Option value="">Choose a status</Select.Option>
             <Select.OptGroup label="Active">
@@ -397,10 +397,10 @@ export const CompositionSlots: Story = {
 
         {/* Label + Description slots */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#526175' }}>Label + Description slots</Box>
+          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Label + Description slots</Box>
           <Select value={value} onChange={setValue} variant="soft">
             <Select.Label>
-              Workflow status <span style={{ color: '#dc2626' }}>*</span>
+              Workflow status <span style={{ color: 'color-mix(in srgb, var(--ui-color-danger, #dc2626) 45%, var(--ui-color-text, #0f172a))' }}>*</span>
             </Select.Label>
             <Select.Description>Controls publish automation triggers.</Select.Description>
             <Select.Option value="draft">Draft</Select.Option>
@@ -411,7 +411,7 @@ export const CompositionSlots: Story = {
 
         {/* Leading + Trailing slots */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#526175' }}>Leading + Trailing slots</Box>
+          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Leading + Trailing slots</Box>
           <Select label="Assignee" value={value} onChange={setValue} variant="outline">
             <Select.Leading>👤</Select.Leading>
             <Select.Trailing>▾</Select.Trailing>
@@ -423,7 +423,7 @@ export const CompositionSlots: Story = {
 
         {/* Error slot */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#526175' }}>Error slot</Box>
+          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Error slot</Box>
           <Select label="Status" value="" onChange={setValue} variant="surface" validation="error" required>
             <Select.Option value="">Choose a status</Select.Option>
             <Select.Option value="draft">Draft</Select.Option>

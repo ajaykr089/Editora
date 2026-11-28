@@ -93,7 +93,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {
   render: (args) => (
     <Box
-      style={{
+      style={{ color: '#1f2937',
         display: 'grid',
         gap: 20,
         padding: 28,
@@ -105,10 +105,10 @@ export const Playground: Story = {
     >
       <Flex align="center" justify="between" wrap="wrap" gap="14px">
         <div style={{ display: 'grid', gap: 6 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#475569' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #475569)' }}>
             Motion Primitive
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.04em', color: '#0f172a', maxInlineSize: 560 }}>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--ui-color-text, #0f172a)', maxInlineSize: 560 }}>
             Circular type that feels polished enough for hero seals, launch marks, and editorial badges.
           </div>
         </div>
@@ -188,8 +188,8 @@ export const EditorialSeal = () => (
               </SpinningText.Center>
             </SpinningText>
             <div style={{ display: 'grid', gap: 6, textAlign: 'center' }}>
-              <div style={{ fontSize: 18, fontWeight: 760, color: '#0f172a' }}>{entry.title}</div>
-              <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175' }}>
+              <div style={{ fontSize: 18, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>{entry.title}</div>
+              <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)' }}>
                 Tuned for premium launch badges and feature introductions.
               </div>
             </div>

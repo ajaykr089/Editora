@@ -213,7 +213,7 @@ export const FormControls: Story = {
           {['free', 'pro', 'team'].map((v) => <button key={v} data-radio-item data-value={v} style={btn}>{plan.value === v ? '●' : '○'} {v}</button>)}
         </div>
         <div ref={price.rootRef} style={{ position: 'relative', height: 28, margin: '0 10px' }}>
-          <span style={{ position: 'absolute', inset: '12px 0', background: '#ddd', borderRadius: 2 }} />
+          <span style={{ position: 'absolute', inset: '12px 0', background: 'var(--ui-color-surface, #ddd)', borderRadius: 2 }} />
           <span data-slider-range style={{ position: 'absolute', top: 12, bottom: 12, background: '#2563eb' }} />
           <span data-slider-thumb aria-label="Minimum price" style={thumb} />
           <span data-slider-thumb aria-label="Maximum price" style={thumb} />

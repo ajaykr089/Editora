@@ -108,7 +108,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {
   render: (args) => (
     <Box style={{ display: 'grid', gap: 16, maxInlineSize: 960 }}>
-      <div style={{ fontSize: 14, lineHeight: '22px', color: '#475569', maxInlineSize: 720 }}>
+      <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)', maxInlineSize: 720 }}>
         Use the controls to test direction, motion, fade edges, and the new visual variants. The item wrappers below intentionally use
         <code style={{ marginInline: 4 }}>Marquee.Item</code>
         so the story reflects the production composition pattern.
@@ -153,7 +153,7 @@ export const MediaRail = () => (
               <Card.Title as="div">Analytics snapshot</Card.Title>
               <Card.Description as="div">Executive dashboard clip prepared for leadership review.</Card.Description>
             </Card.Header>
-            <Flex justify="between" align="center" style={{ color: '#526175', fontSize: 12 }}>
+            <Flex justify="between" align="center" style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
               <Flex align="center" gap="6px">
                 <PlayCircleIcon size={14} />
                 <span>42 sec preview</span>
@@ -172,7 +172,7 @@ export const MediaRail = () => (
               <Card.Title as="div">Launch narrative</Card.Title>
               <Card.Description as="div">A polished reading card with summary copy and a status marker.</Card.Description>
             </Card.Header>
-            <Flex justify="between" align="center" style={{ color: '#526175', fontSize: 12 }}>
+            <Flex justify="between" align="center" style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
               <Flex align="center" gap="6px">
                 <ImageIcon size={14} />
                 <span>Hero artwork</span>
@@ -191,7 +191,7 @@ export const MediaRail = () => (
               <Card.Title as="div">Campaign playback</Card.Title>
               <Card.Description as="div">Use richer items when the marquee acts like a moving shelf instead of a ticker.</Card.Description>
             </Card.Header>
-            <Flex justify="between" align="center" style={{ color: '#526175', fontSize: 12 }}>
+            <Flex justify="between" align="center" style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
               <Flex align="center" gap="6px">
                 <ClockIcon size={14} />
                 <span>Updated 6m ago</span>
@@ -225,7 +225,7 @@ export const VariantGallery = () => (
           { variant: 'minimal', tone: 'danger', label: 'Minimal' }
         ].map((entry) => (
           <div key={entry.label} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
             <Marquee

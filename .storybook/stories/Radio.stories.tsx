@@ -36,7 +36,7 @@ export const Playground = (args: any) => {
       >
         Email notifications
       </Radio>
-      <Box style={{ fontSize: 13, color: '#475569' }}>Checked: {checked ? 'true' : 'false'}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Checked: {checked ? 'true' : 'false'}</Box>
     </Grid>
   );
 };
@@ -88,7 +88,7 @@ export const GroupedWithSharedName = () => {
       >
         Enterprise
       </Radio>
-      <Box style={{ fontSize: 13, color: '#475569' }}>Selected plan: {value}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Selected plan: {value}</Box>
     </Grid>
   );
 };

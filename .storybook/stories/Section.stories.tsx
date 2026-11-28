@@ -23,9 +23,9 @@ export const Playground = (args: any) => (
     density={args.density}
     inset={args.inset}
   >
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 14, background: '#f8fafc' }}>
+    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 14, background: 'var(--ui-color-surface, #f8fafc)' }}>
       <strong>Section content</strong>
-      <Box style={{ marginTop: 8, fontSize: 13, color: '#475569' }}>
+      <Box style={{ marginTop: 8, fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Use this primitive for page bands, grouped layouts, and themed content zones.
       </Box>
     </Box>

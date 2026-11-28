@@ -188,13 +188,13 @@ export function StructuredComposition() {
               }}
             >
               <Flex align="start" style={{ gap: 8 }}>
-                <CheckCircleIcon size={14} style={{ marginTop: 2, color: 'var(--ui-color-success, #16a34a)' }} />
+                <CheckCircleIcon size={14} style={{ marginTop: 2, color: 'color-mix(in srgb, var(--ui-color-success, #16a34a) 45%, var(--ui-color-text, #0f172a))' }} />
                 <Box style={{ fontSize: 13, lineHeight: 1.5 }}>
                   A signed audit trail entry will be generated automatically for each affected workspace.
                 </Box>
               </Flex>
               <Flex align="start" style={{ gap: 8 }}>
-                <ClockIcon size={14} style={{ marginTop: 2, color: 'var(--ui-color-primary, #2563eb)' }} />
+                <ClockIcon size={14} style={{ marginTop: 2, color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))' }} />
                 <Box style={{ fontSize: 13, lineHeight: 1.5 }}>
                   Policy propagation typically completes across tenants in under 30 seconds.
                 </Box>
@@ -312,13 +312,13 @@ export function EnterpriseIncidentResponse() {
         <AlertDialogContent>
           <Grid style={{ gap: 10 }}>
             <Flex align="start" style={{ gap: 8 }}>
-              <ShieldIcon size={14} style={{ marginTop: 2, color: '#b45309' }} />
+              <ShieldIcon size={14} style={{ marginTop: 2, color: 'color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))' }} />
               <Box style={{ fontSize: 13, lineHeight: 1.5 }}>
                 Active trauma cases will be rerouted to fallback units immediately.
               </Box>
             </Flex>
             <Flex align="start" style={{ gap: 8 }}>
-              <ShieldIcon size={14} style={{ marginTop: 2, color: '#b45309' }} />
+              <ShieldIcon size={14} style={{ marginTop: 2, color: 'color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))' }} />
               <Box style={{ fontSize: 13, lineHeight: 1.5 }}>
                 Audit trail entry will include operator identity and confirmation payload.
               </Box>

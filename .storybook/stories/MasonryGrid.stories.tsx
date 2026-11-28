@@ -147,7 +147,7 @@ type Story = StoryObj<typeof meta>;
 function renderPlayground(args: React.ComponentProps<typeof MasonryGrid>) {
   return (
     <Box
-      style={{
+      style={{ color: '#1f2937',
         maxInlineSize: 1120,
         padding: 28,
         borderRadius: 28,
@@ -165,10 +165,10 @@ function renderPlayground(args: React.ComponentProps<typeof MasonryGrid>) {
         </Flex>
 
         <Box style={{ display: 'grid', gap: 10, maxInlineSize: 760 }}>
-          <Box style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 780, color: '#0f172a' }}>
+          <Box style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 780, color: 'var(--ui-color-text, #0f172a)' }}>
             Build editorial walls and dashboard feeds without the dead air of fixed rows.
           </Box>
-          <Box style={{ fontSize: 15, lineHeight: '24px', color: '#475569' }}>
+          <Box style={{ fontSize: 15, lineHeight: '24px', color: 'var(--ui-color-muted, #475569)' }}>
             This story uses cards with intentionally uneven heights so the balancing behavior is easy to inspect at each breakpoint.
           </Box>
         </Box>
@@ -181,7 +181,7 @@ function renderPlayground(args: React.ComponentProps<typeof MasonryGrid>) {
                 minHeight: card.minHeight,
                 padding: 14,
                 borderRadius: 26,
-                background: 'rgba(255, 255, 255, 0.9)',
+                background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, transparent)',
                 border: '1px solid rgba(148, 163, 184, 0.16)',
                 boxShadow: '0 18px 40px rgba(15, 23, 42, 0.08)',
                 overflow: 'hidden'
@@ -203,14 +203,14 @@ function renderPlayground(args: React.ComponentProps<typeof MasonryGrid>) {
                 <Flex direction="column" gap="12px" style={{ padding: '2px 6px 6px' }}>
                   <Flex align="center" justify="space-between" gap="12px">
                     <Badge variant="soft" tone={card.tone}>{card.stat}</Badge>
-                    <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+                    <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
                       Live module
                     </Box>
                   </Flex>
-                  <Box style={{ fontSize: 20, lineHeight: 1.1, fontWeight: 720, color: '#0f172a' }}>
+                  <Box style={{ fontSize: 20, lineHeight: 1.1, fontWeight: 720, color: 'var(--ui-color-text, #0f172a)' }}>
                     {card.title}
                   </Box>
-                  <Box style={{ fontSize: 14, lineHeight: '22px', color: '#475569' }}>
+                  <Box style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>
                     {card.body}
                   </Box>
                   <Box style={{ marginTop: 'auto', paddingTop: 10 }}>
@@ -293,7 +293,7 @@ export const GalleryStyleLayouts = () => (
               minHeight: Number(height),
               padding: 12,
               borderRadius: 24,
-              background: 'rgba(255,255,255,0.92)',
+              background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, transparent)',
               border: '1px solid rgba(15, 23, 42, 0.08)',
               boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
               overflow: 'hidden'
@@ -307,7 +307,7 @@ export const GalleryStyleLayouts = () => (
               />
               <Flex align="center" justify="space-between" style={{ padding: '0 6px 6px' }}>
                 <Badge variant="soft" tone="neutral">Gallery tile</Badge>
-                <Box style={{ fontSize: 18, fontWeight: 720, color: '#0f172a' }}>{label}</Box>
+                <Box style={{ fontSize: 18, fontWeight: 720, color: 'var(--ui-color-text, #0f172a)' }}>{label}</Box>
               </Flex>
             </Flex>
           </Card>
@@ -332,30 +332,30 @@ export const DashboardContentWalls = () => (
           <Flex direction="column" gap="12px">
             <img src={sceneImage(['#dbeafe', '#bfdbfe', '#c4b5fd'], '#2563eb', 'Revenue', 'peak')} alt="Revenue overview" style={{ width: '100%', height: 132, objectFit: 'cover', borderRadius: 16 }} />
             <Badge variant="soft" tone="brand">Revenue</Badge>
-            <Box style={{ fontSize: 28, fontWeight: 760, color: '#0f172a' }}>$128K</Box>
-            <Box style={{ color: '#475569' }}>Month-to-date performance is ahead of plan.</Box>
+            <Box style={{ fontSize: 28, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>$128K</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #475569)' }}>Month-to-date performance is ahead of plan.</Box>
           </Flex>
         </Card>
         <Card style={{ padding: 14, minHeight: 352, borderRadius: 24, overflow: 'hidden' }}>
           <Flex direction="column" gap="12px">
             <img src={sceneImage(['#cffafe', '#a5f3fc', '#bfdbfe'], '#0891b2', 'Activity', 'grid')} alt="Activity feed" style={{ width: '100%', height: 176, objectFit: 'cover', borderRadius: 16 }} />
             <Badge variant="soft" tone="info">Activity feed</Badge>
-            <Box style={{ color: '#475569' }}>Editorial review, asset sync, analytics refresh, and approval state all live in one taller feed card.</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #475569)' }}>Editorial review, asset sync, analytics refresh, and approval state all live in one taller feed card.</Box>
           </Flex>
         </Card>
         <Card style={{ padding: 14, minHeight: 300, borderRadius: 24, overflow: 'hidden' }}>
           <Flex direction="column" gap="12px">
             <img src={sceneImage(['#fef3c7', '#fde68a', '#fdba74'], '#d97706', 'Approvals', 'ribbon')} alt="Approvals overview" style={{ width: '100%', height: 150, objectFit: 'cover', borderRadius: 16 }} />
             <Badge variant="soft" tone="warning">Approvals</Badge>
-            <Box style={{ fontSize: 28, fontWeight: 760, color: '#0f172a' }}>12 live</Box>
-            <Box style={{ color: '#475569' }}>Pending legal and partner sign-off.</Box>
+            <Box style={{ fontSize: 28, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>12 live</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #475569)' }}>Pending legal and partner sign-off.</Box>
           </Flex>
         </Card>
         <Card style={{ padding: 14, minHeight: 400, borderRadius: 24, overflow: 'hidden' }}>
           <Flex direction="column" gap="12px">
             <img src={sceneImage(['#dcfce7', '#bbf7d0', '#d9f99d'], '#16a34a', 'Summary', 'sun')} alt="Narrative summary" style={{ width: '100%', height: 220, objectFit: 'cover', borderRadius: 16 }} />
             <Badge variant="soft" tone="success">Narrative summary</Badge>
-            <Box style={{ color: '#475569' }}>Longer written analysis can take a taller slot without forcing its neighboring cards to match height.</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #475569)' }}>Longer written analysis can take a taller slot without forcing its neighboring cards to match height.</Box>
           </Flex>
         </Card>
       </MasonryGrid>
@@ -381,7 +381,7 @@ export const VisuallyPackedColumns = () => (
               padding: 10,
               minHeight: 220 + (index % 4) * 44,
               borderRadius: 22,
-              background: 'rgba(255,255,255,0.88)',
+              background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent)',
               border: '1px solid rgba(148, 163, 184, 0.16)',
               overflow: 'hidden'
             }}
@@ -405,8 +405,8 @@ export const VisuallyPackedColumns = () => (
               />
               <Flex direction="column" gap="8px" style={{ padding: '0 6px 6px' }}>
                 <Badge variant="soft" tone="neutral">Column {Math.floor(index / 4) + 1}</Badge>
-                <Box style={{ fontSize: 18, fontWeight: 720, color: '#0f172a' }}>Packed item {index + 1}</Box>
-                <Box style={{ color: '#475569' }}>A compact wall of mixed-height content keeps the eye moving down the columns.</Box>
+                <Box style={{ fontSize: 18, fontWeight: 720, color: 'var(--ui-color-text, #0f172a)' }}>Packed item {index + 1}</Box>
+                <Box style={{ color: 'var(--ui-color-muted, #475569)' }}>A compact wall of mixed-height content keeps the eye moving down the columns.</Box>
               </Flex>
             </Flex>
           </Card>

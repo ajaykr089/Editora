@@ -400,7 +400,7 @@ function EnterpriseClinicalAccordion() {
           borderRadius: 16,
           padding: 16,
           background:
-            'linear-gradient(135deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, #fff) 0%, var(--ui-color-surface, #fff) 42%)',
+            'linear-gradient(135deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-color-surface, #ffffff)) 0%, var(--ui-color-surface, #fff) 42%)',
         }}
       >
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
@@ -436,7 +436,7 @@ function EnterpriseClinicalAccordion() {
               <Grid style={{ gap: 10 }}>
                 {section.points.map((point) => (
                   <Flex key={point} align="start" style={{ gap: 8 }}>
-                    <CheckCircleIcon size={14} style={{ marginTop: 2, color: '#15803d' }} />
+                    <CheckCircleIcon size={14} style={{ marginTop: 2, color: 'color-mix(in srgb, var(--ui-color-success, #15803d) 45%, var(--ui-color-text, #0f172a))' }} />
                     <Box style={{ fontSize: 13, lineHeight: 1.5 }}>{point}</Box>
                   </Flex>
                 ))}
@@ -458,7 +458,7 @@ function EnterpriseClinicalAccordion() {
       >
         <Flex justify="space-between" align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
           <Box style={{ fontWeight: 700 }}>Care Plan Notes</Box>
-          <Flex align="center" style={{ gap: 6, color: '#b45309', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 6, color: 'color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))', fontSize: 12 }}>
             <AlertTriangleIcon size={14} />
             Rich text area powered by @editora/editor
           </Flex>

@@ -17,7 +17,7 @@ import {
 import { AnimatedBeam, Badge, Box, Button, Card, Flex, Grid, type AnimatedBeamElement } from '@editora/ui-react';
 import { ShowcasePage, ShowcaseSection } from './storybook-showcase';
 
-const panelStyle: React.CSSProperties = {
+const panelStyle: React.CSSProperties = { color: '#1f2937',
   display: 'grid',
   gap: 16,
   padding: 28,
@@ -35,7 +35,7 @@ const iconGlyphStyle: React.CSSProperties = {
   display: 'grid',
   placeItems: 'center',
   fontSize: 'inherit',
-  color: '#0f172a'
+  color: 'var(--ui-color-text, #0f172a)'
 };
 
 const hubGlyphStyle: React.CSSProperties = {
@@ -47,7 +47,7 @@ const hubGlyphStyle: React.CSSProperties = {
   justifyContent: 'center',
   gap: 8,
   fontSize: 'inherit',
-  color: '#0f172a',
+  color: 'var(--ui-color-text, #0f172a)',
   textAlign: 'center'
 };
 
@@ -84,7 +84,7 @@ function HubGlyph() {
           lineHeight: 1.2,
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
-          color: '#526175',
+          color: 'var(--ui-color-muted, #526175)',
           fontWeight: 700,
           inlineSize: '100%'
         }}
@@ -187,10 +187,10 @@ export const Playground: Story = {
         </Flex>
 
         <div style={{ display: 'grid', gap: 10, maxInlineSize: 760 }}>
-          <div style={{ fontSize: 34, lineHeight: 1.04, fontWeight: 780, color: '#0f172a' }}>
+          <div style={{ fontSize: 34, lineHeight: 1.04, fontWeight: 780, color: 'var(--ui-color-text, #0f172a)' }}>
             Show how information fans out from one trusted engine into the tools around it.
           </div>
-          <div style={{ fontSize: 14, lineHeight: '22px', color: '#475569' }}>
+          <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>
             Use the controls to tune beam speed, curve style, glow, shell treatment, and layout density.
             This playground keeps the composition close to a launch-page integration hero so motion is easy to evaluate.
           </div>
@@ -422,10 +422,10 @@ export const ColorwayGallery = () => (
           <Card key={entry.label} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.label}
                 </span>
-                <span style={{ fontSize: 14, color: '#0f172a' }}>
+                <span style={{ fontSize: 14, color: 'var(--ui-color-text, #0f172a)' }}>
                   {entry.description}
                 </span>
               </Card.Description>
@@ -532,10 +532,10 @@ export const MotionGallery = () => (
           <Card key={entry.label} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.label}
                 </span>
-                <span style={{ fontSize: 14, color: '#0f172a' }}>
+                <span style={{ fontSize: 14, color: 'var(--ui-color-text, #0f172a)' }}>
                   {entry.description}
                 </span>
               </Card.Description>
@@ -677,13 +677,13 @@ export const SizeGallery = () => (
                     fontSize: 12,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    color: "#526175",
+                    color: "var(--ui-color-muted, #526175)",
                   }}
                 >
                   {entry.label}
                 </span>
                 <span
-                  style={{ fontSize: 14, color: "#0f172a", fontWeight: 700 }}
+                  style={{ fontSize: 14, color: "var(--ui-color-text, #0f172a)", fontWeight: 700 }}
                 >
                   <code>{`size="${entry.size}"`}</code>
                   {entry.alias ? (
@@ -787,10 +787,10 @@ export const NodeEffectGallery = () => (
           <Card key={entry.effect} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.label}
                 </span>
-                <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 700 }}>
+                <span style={{ fontSize: 14, color: 'var(--ui-color-text, #0f172a)', fontWeight: 700 }}>
                   <code>{`nodeEffect="${entry.effect}"`}</code>
                 </span>
               </Card.Description>
@@ -941,10 +941,10 @@ export const ReverseDirection = () => (
           <Card key={entry.label} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.label}
                 </span>
-                <span style={{ fontSize: 14, color: '#0f172a' }}>
+                <span style={{ fontSize: 14, color: 'var(--ui-color-text, #0f172a)' }}>
                   {entry.description}
                 </span>
               </Card.Description>

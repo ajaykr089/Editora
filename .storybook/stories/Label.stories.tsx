@@ -99,7 +99,7 @@ export const DesignDirections = () => (
       <Input id="label-mui" placeholder="Outlined control" variant="outlined" />
     </Box>
 
-    <Box style={{ display: 'grid', gap: 8, border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
+    <Box style={{ color: '#1f2937', display: 'grid', gap: 8, border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
       <Label htmlFor="label-chakra" variant="soft" tone="success" shape="soft">
         <Label.Text>Chakra-like Label</Label.Text>
         <Label.Description>Low-noise form grouping</Label.Description>

@@ -56,10 +56,10 @@ export const Playground = (args: any) => {
         onComplete={(detail) => setEvents((prev) => [`complete -> ${detail.value.toFixed(0)} / ${detail.max.toFixed(0)}`, ...prev].slice(0, 4))}
       />
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         value: {value} / {max} | buffer: {buffer}
       </Box>
-      <Box style={{ fontSize: 12, color: '#526175' }}>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>
         {events.length ? events.join(' | ') : 'No events yet'}
       </Box>
     </Grid>
@@ -100,7 +100,7 @@ export const VisualModes = () => (
       <strong>Contrast + Danger</strong>
       <Progress value={88} showLabel tone="danger" variant="contrast" />
     </Box>
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, background: 'linear-gradient(135deg, #f8fafc, #eef2ff)' }}>
+    <Box style={{ color: '#1f2937', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, background: 'linear-gradient(135deg, #f8fafc, #eef2ff)' }}>
       <strong>Glass + Info</strong>
       <Progress value={34} buffer={62} showLabel tone="info" variant="glass" />
     </Box>

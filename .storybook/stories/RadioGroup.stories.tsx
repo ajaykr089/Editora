@@ -42,7 +42,7 @@ export const Playground = (args: any) => {
           if (detail?.value) setValue(detail.value);
         }}
       />
-      <Box style={{ fontSize: 13, color: '#475569' }}>Selected value: {value}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Selected value: {value}</Box>
     </Grid>
   );
 };
@@ -75,7 +75,7 @@ export const LegacySlottedUsage = () => {
         </div>
       </RadioGroup>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>Selected plan: {value}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Selected plan: {value}</Box>
     </Grid>
   );
 };

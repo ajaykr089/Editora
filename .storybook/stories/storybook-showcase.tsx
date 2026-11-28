@@ -1,20 +1,21 @@
 import React from 'react';
 
 const COLORS = {
-  ink: '#0f172a',
-  inkMuted: '#475569',
-  inkSoft: '#526175',
+  // Theme tokens (with the light values as fallbacks), so the showcases read in dark mode too.
+  ink: 'var(--ui-color-text, #0f172a)',
+  inkMuted: 'var(--ui-color-muted, #475569)',
+  inkSoft: 'var(--ui-color-muted, #526175)',
   border: 'color-mix(in srgb, var(--ui-color-border, #cbd5e1) 82%, transparent)',
   borderStrong: 'color-mix(in srgb, var(--ui-color-border, #cbd5e1) 94%, #94a3b8 6%)',
   surface: 'var(--ui-color-surface, #ffffff)',
   surfaceAlt: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, #eef4ff 4%)',
-  canvas: 'linear-gradient(180deg, #f8fbff 0%, #f3f7fb 100%)',
-  accent: '#2563eb',
-  accentSoft: 'color-mix(in srgb, #2563eb 10%, white)',
-  accentBorder: 'color-mix(in srgb, #2563eb 24%, white)',
-  success: '#15803d',
-  warning: '#b45309',
-  danger: '#b42318'
+  canvas: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 97%, #8ab4ff 3%) 0%, color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, #8ab4ff 5%) 100%)',
+  accent: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))',
+  accentSoft: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-color-surface, #ffffff))',
+  accentBorder: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 24%, var(--ui-color-surface, #ffffff))',
+  success: 'color-mix(in srgb, var(--ui-color-success, #15803d) 45%, var(--ui-color-text, #0f172a))',
+  warning: 'color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))',
+  danger: 'color-mix(in srgb, var(--ui-color-danger, #b42318) 45%, var(--ui-color-text, #0f172a))'
 } as const;
 
 export const showcasePageStyle: React.CSSProperties = {

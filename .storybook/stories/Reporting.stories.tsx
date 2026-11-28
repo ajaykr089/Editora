@@ -23,10 +23,10 @@ export const HospitalOrSchoolModule = () => (
         title="Department Mix"
         subtitle="Current month"
         data={[
-          { label: 'Emergency', value: 40, tone: 'var(--ui-color-primary, #2563eb)' },
-          { label: 'OPD', value: 25, tone: 'var(--ui-color-success, #16a34a)' },
-          { label: 'Lab', value: 20, tone: 'var(--ui-color-warning, #d97706)' },
-          { label: 'Other', value: 15, tone: 'var(--ui-color-danger, #dc2626)' }
+          { label: 'Emergency', value: 40, tone: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))' },
+          { label: 'OPD', value: 25, tone: 'color-mix(in srgb, var(--ui-color-success, #16a34a) 45%, var(--ui-color-text, #0f172a))' },
+          { label: 'Lab', value: 20, tone: 'color-mix(in srgb, var(--ui-color-warning, #d97706) 45%, var(--ui-color-text, #0f172a))' },
+          { label: 'Other', value: 15, tone: 'color-mix(in srgb, var(--ui-color-danger, #dc2626) 45%, var(--ui-color-text, #0f172a))' }
         ]}
       />
     </Grid>

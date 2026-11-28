@@ -312,7 +312,8 @@ const style = `
   }
 
   :host([variant="glass"]) {
-    --ui-dock-label-bg: rgba(255, 255, 255, 0.74);
+    /* Frosted surface in either theme: the label text follows the theme, so must its background. */
+    --ui-dock-label-bg: color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 74%, transparent);
     --ui-dock-label-color: var(--ui-dock-color);
     --ui-dock-label-border: color-mix(in srgb, #ffffff 52%, var(--ui-dock-accent) 18%);
     --ui-dock-label-shadow:

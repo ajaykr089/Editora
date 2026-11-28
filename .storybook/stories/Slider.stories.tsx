@@ -38,7 +38,7 @@ export const Controlled = (args: any) => {
         marks={[0, 25, 50, 75, 100]}
         onInput={setValue}
       />
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Value: {value}
       </Box>
     </Grid>
@@ -86,7 +86,7 @@ export const RangeSelection = () => {
           setWindowEnd(detail.valueEnd);
         }}
       />
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Current range: {windowStart} - {windowEnd}
       </Box>
     </Grid>

@@ -429,8 +429,8 @@ const pageStyle: React.CSSProperties = {
   gridTemplateColumns: 'minmax(0, 1fr) 360px',
   gridTemplateRows: 'auto minmax(0, 1fr)',
   gap: 16,
-  background: '#f6f7f9',
-  color: '#172033',
+  background: 'var(--ui-color-surface, #f6f7f9)',
+  color: 'var(--ui-color-text, #172033)',
   fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
 };
 
@@ -443,8 +443,8 @@ const toolbarStyle: React.CSSProperties = {
 
 const buttonStyle: React.CSSProperties = {
   border: '1px solid #c9d2e3',
-  background: '#ffffff',
-  color: '#172033',
+  background: 'var(--ui-color-surface, #ffffff)',
+  color: 'var(--ui-color-text, #172033)',
   borderRadius: 6,
   minHeight: 34,
   padding: '0 12px',
@@ -457,7 +457,7 @@ const boundaryStyle: React.CSSProperties = {
   minHeight: 560,
   border: '1px solid #bbc6d8',
   borderRadius: 8,
-  background: '#ffffff',
+  background: 'var(--ui-color-surface, #ffffff)',
   boxShadow: '0 18px 60px rgba(23, 32, 51, 0.10)'
 };
 
@@ -525,8 +525,8 @@ const inlineTextStyle: React.CSSProperties = {
   padding: 10,
   border: '1px dashed #5b6b83',
   borderRadius: 6,
-  background: '#f8fafc',
-  color: '#334155'
+  background: 'var(--ui-color-surface, #f8fafc)',
+  color: 'var(--ui-color-text, #334155)'
 };
 
 const readoutStyle: React.CSSProperties = {
@@ -560,7 +560,7 @@ const matrixStyle: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
   gap: 18,
-  background: '#f6f7f9'
+  background: 'var(--ui-color-surface, #f6f7f9)'
 };
 
 const tileStyle: React.CSSProperties = {
@@ -568,7 +568,7 @@ const tileStyle: React.CSSProperties = {
   minHeight: 230,
   border: '1px solid #c9d2e3',
   borderRadius: 8,
-  background: '#ffffff',
+  background: 'var(--ui-color-surface, #ffffff)',
   overflow: 'visible'
 };
 
@@ -604,7 +604,7 @@ const scrollTrackStyle: React.CSSProperties = {
 
 const scrollCopyStyle: React.CSSProperties = {
   maxWidth: 440,
-  color: '#475569',
+  color: 'var(--ui-color-muted, #475569)',
   lineHeight: 1.6
 };
 

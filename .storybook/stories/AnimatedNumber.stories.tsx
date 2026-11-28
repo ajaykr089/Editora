@@ -47,14 +47,14 @@ Playground.args = {
 
 export const Variants = () => (
   <Grid style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-    <Box style={{ padding: 20, borderRadius: 18, background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+    <Box style={{ color: '#1f2937', padding: 20, borderRadius: 18, background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)' }}>
       <Box style={{ marginBottom: 6, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.65 }}>
         Odometer
       </Box>
       <Box style={{ marginBottom: 8, fontSize: 14, opacity: 0.7 }}>Mechanical rolling counter</Box>
       <AnimatedNumber value={12845} variant="odometer" size="lg" animate animateOnMount duration={1200} />
     </Box>
-    <Box style={{ padding: 20, borderRadius: 18, background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', border: '1px solid rgba(148, 163, 184, 0.18)' }}>
+    <Box style={{ color: '#1f2937', padding: 20, borderRadius: 18, background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', border: '1px solid rgba(148, 163, 184, 0.18)' }}>
       <Box style={{ marginBottom: 6, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.65 }}>
         Inline
       </Box>
@@ -68,7 +68,7 @@ export const Variants = () => (
       <Box style={{ marginBottom: 8, fontSize: 14, color: 'rgba(226, 232, 240, 0.68)' }}>Fast, crisp panel response</Box>
       <AnimatedNumber value={12845} variant="digital" size="lg" animate animateOnMount theme="dark" animation="linear" duration={520} />
     </Box>
-    <Box style={{ padding: 20, borderRadius: 18, background: 'linear-gradient(180deg, #f8f4e8 0%, #ede0c8 100%)', border: '1px solid rgba(120, 92, 55, 0.18)' }}>
+    <Box style={{ color: '#1f2937', padding: 20, borderRadius: 18, background: 'linear-gradient(180deg, #f8f4e8 0%, #ede0c8 100%)', border: '1px solid rgba(120, 92, 55, 0.18)' }}>
       <Box style={{ marginBottom: 6, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(63, 47, 30, 0.75)' }}>
         Analog
       </Box>
@@ -112,11 +112,11 @@ export const AutoStart = () => {
 
   return (
     <Grid style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-      <Box style={{ padding: 20, borderRadius: 18, background: '#f8fafc' }}>
+      <Box style={{ padding: 20, borderRadius: 18, background: 'var(--ui-color-surface, #f8fafc)' }}>
         <Box style={{ marginBottom: 8, fontWeight: 600 }}>Mount Animation</Box>
         <AnimatedNumber value={value} variant="odometer" size="lg" animate animateOnMount duration={1400} />
       </Box>
-      <Box style={{ padding: 20, borderRadius: 18, background: '#ffffff', border: '1px solid rgba(148, 163, 184, 0.18)' }}>
+      <Box style={{ padding: 20, borderRadius: 18, background: 'var(--ui-color-surface, #ffffff)', border: '1px solid rgba(148, 163, 184, 0.18)' }}>
         <Box style={{ marginBottom: 8, fontWeight: 600 }}>Inline Count Up</Box>
         <AnimatedNumber value={value / 100} variant="inline" format="percent" fractionDigits={1} animate animateOnMount duration={1400} />
       </Box>
@@ -124,7 +124,7 @@ export const AutoStart = () => {
         <Box style={{ marginBottom: 8, fontWeight: 600, color: 'rgba(226, 232, 240, 0.82)' }}>Digital Panel</Box>
         <AnimatedNumber value={value} variant="digital" size="lg" theme="dark" animate animateOnMount animation="linear" duration={520} />
       </Box>
-      <Box style={{ padding: 20, borderRadius: 18, background: '#f8f4e8', border: '1px solid rgba(120, 92, 55, 0.18)' }}>
+      <Box style={{ color: '#1f2937', padding: 20, borderRadius: 18, background: '#f8f4e8', border: '1px solid rgba(120, 92, 55, 0.18)' }}>
         <Box style={{ marginBottom: 8, fontWeight: 600, color: 'rgba(63, 47, 30, 0.82)' }}>Analog Instrument</Box>
         <AnimatedNumber value={value / 10} variant="analog" size="lg" fractionDigits={1} animate animateOnMount animation="ease-out" duration={1500} />
       </Box>
@@ -136,7 +136,7 @@ export const Interactive = () => {
   const [value, setValue] = useState(4200);
 
   return (
-    <Box style={{ padding: 24, borderRadius: 20, background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', border: '1px solid rgba(148, 163, 184, 0.18)' }}>
+    <Box style={{ color: '#1f2937', padding: 24, borderRadius: 20, background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', border: '1px solid rgba(148, 163, 184, 0.18)' }}>
       <Box style={{ marginBottom: 14, fontWeight: 600 }}>Live Value Update</Box>
       <Flex style={{ gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <Button onClick={() => setValue((current) => current - 125)}>Decrease</Button>

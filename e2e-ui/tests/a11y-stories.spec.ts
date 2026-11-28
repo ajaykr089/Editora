@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-// axe over every story in the Storybook build, unthemed and with the real light theme injected
+// axe over every story in the Storybook build, unthemed and with the real light and dark themes injected
 // (Storybook applies no theme, so the unthemed pass only sees fallback colours).
 const require = createRequire(import.meta.url);
 const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
@@ -19,30 +19,38 @@ const DISABLED_RULES = ['region', 'landmark-one-main', 'landmark-unique', 'landm
 let themeStyle = '';
 
 test.beforeAll(async ({ browser }, info) => {
-  if (info.project.metadata?.theme !== 'light') return;
-  const page = await browser.newPage();
-  await page.goto(`http://127.0.0.1:${appPort}/theme-dump.html?mode=light`);
+  const theme = info.project.metadata?.theme as 'light' | 'dark' | undefined;
+  if (!theme) return;
+  // The dump page applies the system theme, which follows the colour scheme it is opened with.
+  const page = await browser.newPage({ colorScheme: theme });
+  await page.goto(`http://127.0.0.1:${appPort}/theme-dump.html`);
   await page.waitForFunction(() => (window as any).themeStyle !== undefined);
   themeStyle = await page.evaluate(() => (window as any).themeStyle);
   await page.close();
   expect(themeStyle).toContain('--ui-color-primary');
 });
 
+// The rich-text editor has its own themes (data-theme on the editor, @editora/themes): in the UI kit's
+// dark mode its stories still render the light editor theme, so the dark pass does not apply to them.
+const themedSeparately = (id: string) => /^editor-/.test(id);
+
 for (const id of stories) {
   test(id, async ({ page }, info) => {
+    test.skip(info.project.name === 'dark' && themedSeparately(id), 'the editor themes itself (data-theme)');
+    const mode = (info.project.metadata?.theme as string | undefined) || 'light';
     // Stories that render thousands of rows or animate on load need more than the default time.
     if (/large-dataset|10000|virtualized|animated/.test(id)) test.slow();
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(String(error)));
     if (themeStyle) {
-      await page.addInitScript((style) => {
+      await page.addInitScript(([style, uiMode]) => {
         document.addEventListener('DOMContentLoaded', () => {
           document.documentElement.setAttribute('style', style);
-          document.documentElement.setAttribute('data-ui-mode', 'light');
+          document.documentElement.setAttribute('data-ui-mode', uiMode);
           document.body.style.background = 'var(--ui-color-background)';
           document.body.style.color = 'var(--ui-color-text)';
         });
-      }, themeStyle);
+      }, [themeStyle, mode] as const);
     }
     await page.goto(`/iframe.html?id=${id}&viewMode=story`);
     await page.waitForSelector('body.sb-show-main', { timeout: info.timeout / 2 });

@@ -94,8 +94,8 @@ export const Playground = (args: any) => {
             placeholder="Filter teams"
           />
           <div style={showcasePanelStyle}>
-            <strong style={{ color: '#0f172a' }}>Selected teams</strong>
-            <div style={{ color: '#526175', fontSize: 13 }}>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Selected teams</strong>
+            <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               {value.length ? value.join(', ') : 'No teams selected'}
             </div>
           </div>
@@ -245,8 +245,8 @@ export const DenseFilterBuilder = () => {
           clearable
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Selected values</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Selected values</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             {value.length ? value.join(', ') : 'No teams selected'}
           </Box>
           <p style={showcaseCaptionStyle}>Keep the summary adjacent when the selected values change downstream rules or routing.</p>
@@ -293,7 +293,7 @@ export const LargeDataset = () => (
         placeholder="Search 320 services"
       />
       <Box style={showcasePanelStyle}>
-        <strong style={{ color: '#0f172a' }}>Why this exists</strong>
+        <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Why this exists</strong>
         <p style={showcaseCaptionStyle}>This is the current performance guard: render a bounded subset, preserve search, and guide the user to narrow the result set.</p>
       </Box>
     </Grid>

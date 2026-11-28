@@ -45,16 +45,16 @@ export const Default = (args: any) => {
         }}
       >
         <Grid gap="10px">
-          <Box variant="surface" p="10px" radius="sm" color="#475569">
+          <Box variant="surface" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
             This action updates the shared workspace for all collaborators.
           </Box>
-          <Box variant="outline" p="10px" radius="sm" color="#475569">
+          <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
             Press <strong>Tab</strong> / <strong>Shift+Tab</strong> to verify focus trapping.
           </Box>
         </Grid>
       </Dialog>
 
-      <Box variant="surface" p="10px" radius="sm" color="#475569">
+      <Box variant="surface" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
         Request reason: <strong>{requestReason}</strong> | Close result: <strong>{result}</strong>
       </Box>
     </Grid>
@@ -110,7 +110,7 @@ export const Large = () => {
         </Grid>
       </Dialog>
 
-      <Box variant="surface" p="10px" radius="sm" color="#475569">
+      <Box variant="surface" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
         Last form data: {submittedData ? JSON.stringify(submittedData) : 'none'}
       </Box>
     </Grid>
@@ -137,7 +137,7 @@ export const NonDismissable = () => {
         submitText="I Understand"
         onDialogClose={() => setOpen(false)}
       >
-        <Box variant="outline" p="10px" radius="sm" color="#475569">
+        <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
           Confirm to continue with protected operation.
         </Box>
       </Dialog>
@@ -151,7 +151,7 @@ export const AccessibilityKeyboardMap = () => {
 
   return (
     <Grid gap="12px">
-      <Box variant="outline" tone="brand" p="12px" radius="lg" color="#1e3a8a">
+      <Box variant="outline" tone="brand" p="12px" radius="lg" color="color-mix(in srgb, var(--ui-color-primary, #1e3a8a) 45%, var(--ui-color-text, #0f172a))">
         Focus trap keys: <strong>Tab / Shift+Tab</strong>.
         Dismiss keys: <strong>Escape</strong> and overlay click (if enabled).
         RTL: verify mirrored layout with <code>dir="rtl"</code>.

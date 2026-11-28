@@ -87,7 +87,7 @@ export const Playground = (args: any) => {
         </Menu.Trigger>
         {menuContent()}
       </Menu>
-      <Box style={{ marginTop: 12, fontSize: 13, color: '#475569' }}>Last action: {lastAction}</Box>
+      <Box style={{ marginTop: 12, fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Last action: {lastAction}</Box>
     </Box>
   );
 };
@@ -125,13 +125,13 @@ export const VariantGallery = () => (
 export const SizeGallery = () => (
   <Grid style={{ display: 'grid', gridTemplateColumns: '160px repeat(3, minmax(240px, 1fr))', gap: 18, padding: 20, alignItems: 'start' }}>
     <div />
-    <div style={{ textAlign: 'center', color: '#526175' }}>Surface</div>
-    <div style={{ textAlign: 'center', color: '#526175' }}>Soft</div>
-    <div style={{ textAlign: 'center', color: '#526175' }}>Solid</div>
+    <div style={{ textAlign: 'center', color: 'var(--ui-color-muted, #526175)' }}>Surface</div>
+    <div style={{ textAlign: 'center', color: 'var(--ui-color-muted, #526175)' }}>Soft</div>
+    <div style={{ textAlign: 'center', color: 'var(--ui-color-muted, #526175)' }}>Solid</div>
 
     {(['sm', 'md', 'lg'] as const).map((size) => (
       <React.Fragment key={size}>
-        <div style={{ fontSize: 18, color: '#526175', alignSelf: 'center' }}>{size.toUpperCase()}</div>
+        <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #526175)', alignSelf: 'center' }}>{size.toUpperCase()}</div>
         <PreviewMenu label="Open menu" menuProps={{ size, variant: 'surface' }} />
         <PreviewMenu label="Open menu" menuProps={{ size, variant: 'soft' }} />
         <PreviewMenu label="Open menu" menuProps={{ size, variant: 'solid' }} />
@@ -166,7 +166,7 @@ export const SelectionModes = () => {
           </Menu.Item>
         </Menu.Content>
       </Menu>
-      <Box style={{ fontSize: 13, color: '#475569' }}>Last action: {last}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Last action: {last}</Box>
     </Flex>
   );
 };

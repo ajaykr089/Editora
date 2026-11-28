@@ -54,8 +54,8 @@ export const Playground = (args: any) => {
           </div>
           <FileUpload {...args} onChange={(files) => setNames(files.map((file) => file.name))} />
           <Box style={showcasePanelStyle}>
-            <strong style={{ color: '#0f172a' }}>Selected files</strong>
-            <Box style={{ color: '#526175', fontSize: 13 }}>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Selected files</strong>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               {names.length ? names.join(', ') : 'none'}
             </Box>
           </Box>
@@ -109,8 +109,8 @@ export const DragAndDropSurface = () => {
           }}
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Queued files</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Queued files</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             {files.length ? files.join(', ') : 'Drop files to populate the queue.'}
           </Box>
           <p style={showcaseCaptionStyle}>Use the side summary when the upload outcome drives a review or submission step nearby.</p>
@@ -154,8 +154,8 @@ export const UploadWorkflow = () => {
           onUploadError={(detail) => setEvents((current) => [`Failed ${detail.file?.name}: ${detail.error}`, ...current].slice(0, 5))}
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Recent lifecycle events</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Recent lifecycle events</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             {events.length ? events.join(' | ') : 'Select files and start the upload to inspect the lifecycle.'}
           </Box>
           <p style={showcaseCaptionStyle}>Use this pattern when files must be reviewed before hitting the server.</p>
@@ -185,8 +185,8 @@ export const AutoUploadQueue = () => {
           onUploadComplete={() => setSummary('All uploads finished')}
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Queue status</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>{summary}</Box>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Queue status</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>{summary}</Box>
           <p style={showcaseCaptionStyle}>Auto-start is best when there is no separate review gate.</p>
         </Box>
       </Grid>
@@ -214,8 +214,8 @@ export const FailureAndRetry = () => {
           }}
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Failure contract</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Failure contract</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             First run returns a server error. Use the per-file retry action or the queue-level retry button to recover.
           </Box>
         </Box>

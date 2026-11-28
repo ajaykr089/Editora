@@ -433,7 +433,7 @@ export const HandleVariations: Story = {
               <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
                 <strong style={{ fontSize: 14 }}>{item.label}</strong>
                 {item.description && (
-                  <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
+                  <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--ui-color-muted, #526175)' }}>
                     {item.description}
                   </div>
                 )}
@@ -449,7 +449,7 @@ export const HandleVariations: Story = {
                   borderRadius: 12,
                   border: '1px solid #cbd5e1',
                   background: context.selected ? '#ecfeff' : '#f8fafc',
-                  color: '#0f766e',
+                  color: 'color-mix(in srgb, var(--ui-color-success, #0f766e) 45%, var(--ui-color-text, #0f172a))',
                   cursor: 'grab',
                   flexShrink: 0,
                 }}
@@ -808,16 +808,16 @@ export const CustomCards: Story = {
             </span>
           </div>
           {item.description && (
-            <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--ui-color-muted, #526175)' }}>
               {item.description}
             </div>
           )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, color: '#0f766e', fontWeight: 700 }}>
+            <span style={{ fontSize: 11, color: 'color-mix(in srgb, var(--ui-color-success, #0f766e) 45%, var(--ui-color-text, #0f172a))', fontWeight: 700 }}>
               {context.list?.label}
             </span>
             {context.dragDisabled && (
-              <span style={{ fontSize: 11, color: '#b45309', fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: 'color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))', fontWeight: 700 }}>
                 Pinned
               </span>
             )}
@@ -852,7 +852,7 @@ export const CustomHandleSelector: Story = {
             <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
               <strong style={{ fontSize: 14 }}>{item.label}</strong>
               {item.description && (
-                <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--ui-color-muted, #526175)' }}>
                   {item.description}
                 </div>
               )}
@@ -868,7 +868,7 @@ export const CustomHandleSelector: Story = {
                 borderRadius: 12,
                 border: '1px solid #cbd5e1',
                 background: context.selected ? '#ecfeff' : '#f8fafc',
-                color: '#0f766e',
+                color: 'color-mix(in srgb, var(--ui-color-success, #0f766e) 45%, var(--ui-color-text, #0f172a))',
                 cursor: 'grab',
                 flexShrink: 0,
               }}
@@ -918,7 +918,7 @@ export const CustomLists: Story = {
               {context.itemCount} items
             </span>
           </div>
-          <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
+          <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--ui-color-muted, #526175)' }}>
             {list.description}
           </div>
         </div>
@@ -930,13 +930,13 @@ export const CustomLists: Story = {
             gap: 8,
             padding: 12,
             borderRadius: 16,
-            background: '#f8fafc',
+            background: 'var(--ui-color-surface, #f8fafc)',
             border: '1px dashed #cbd5e1',
-            color: '#526175',
+            color: 'var(--ui-color-muted, #526175)',
             fontSize: 12,
           }}
         >
-          <strong style={{ color: '#0f172a' }}>No items in {list.label}</strong>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>No items in {list.label}</strong>
           <span>Drag templates here to start assembling a plan.</span>
         </div>
       )}

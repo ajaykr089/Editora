@@ -6,7 +6,7 @@ export default {
   component: Checkbox,
 };
 
-const shellStyle: React.CSSProperties = {
+const shellStyle: React.CSSProperties = { color: '#1f2937',
   border: '1px solid #e2e8f0',
   borderRadius: 14,
   padding: 14,
@@ -51,7 +51,7 @@ export const Controlled = () => {
         <Checkbox checked={checked} onCheckedChange={(next) => setChecked(next)}>
           Controlled ({checked ? 'On' : 'Off'})
         </Checkbox>
-        <Box style={{ fontSize: 12, color: '#526175' }}>Value: {String(checked)}</Box>
+        <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Value: {String(checked)}</Box>
       </Flex>
     </Box>
   );

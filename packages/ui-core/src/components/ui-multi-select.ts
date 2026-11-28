@@ -467,18 +467,18 @@ const style = `
   }
 
   :host([variant="soft"]) {
-    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-accent) 8%, #ffffff);
+    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-accent) 8%, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-border-color: color-mix(in srgb, var(--ui-multi-select-accent) 26%, var(--ui-color-border, #cbd5e1));
   }
 
   :host([variant="outline"]) {
-    --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, #ffffff));
+    --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --base-multi-select-shadow: none;
   }
 
   :host([variant="solid"]),
   :host([variant="filled"]) {
-    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-accent) 9%, #ffffff);
+    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-accent) 9%, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-border-color: color-mix(in srgb, var(--ui-multi-select-accent) 24%, transparent);
   }
 

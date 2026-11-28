@@ -55,7 +55,7 @@ const menuButton: React.CSSProperties = {
   border: 0,
   borderRadius: 10,
   background: 'transparent',
-  color: '#0f172a',
+  color: 'var(--ui-color-text, #0f172a)',
   textAlign: 'left',
   cursor: 'pointer'
 };
@@ -67,7 +67,7 @@ const shortcut: React.CSSProperties = {
   background: 'rgba(15, 23, 42, 0.04)',
   fontSize: 12,
   fontFamily: 'IBM Plex Mono, SFMono-Regular, monospace',
-  color: '#526175'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 export const CollectionAndListbox = () => {
@@ -153,7 +153,7 @@ export const CollectionAndListbox = () => {
               <div data-collection-item data-value="duplicate">Duplicate release</div>
               <div data-collection-item data-value="archive">Archive draft</div>
             </Collection>
-            <div style={{ fontSize: 13, color: '#526175' }}>{collectionInfo}</div>
+            <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>{collectionInfo}</div>
           </Box>
 
           <Box style={panel}>
@@ -179,7 +179,7 @@ export const CollectionAndListbox = () => {
                 </button>
               ))}
             </Listbox>
-            <div style={{ fontSize: 13, color: '#526175' }}>Active value: <code>{activeValue}</code></div>
+            <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>Active value: <code>{activeValue}</code></div>
           </Box>
         </div>
       </ShowcaseSection>
@@ -194,10 +194,10 @@ export const RovingFocusToolbar = () => {
   return (
     <Box style={shell}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
           Roving Focus Group
         </div>
-        <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: '#0f172a' }}>
+        <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: 'var(--ui-color-text, #0f172a)' }}>
           Test directional focus management over a toolbar-style surface
         </div>
       </div>
@@ -223,8 +223,8 @@ export const RovingFocusToolbar = () => {
                   padding: '0 14px',
                   borderRadius: 10,
                   border: '1px solid #dbe4f0',
-                  background: index === 0 ? '#eff6ff' : '#ffffff',
-                  color: '#0f172a'
+                  background: index === 0 ? 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-color-surface, #ffffff))' : 'var(--ui-color-surface, #ffffff)',
+                  color: 'var(--ui-color-text, #0f172a)'
                 }}
                 onClick={(event) => (ref.current as any)?.setActiveItem?.(event.currentTarget, { focus: true })}
               >
@@ -233,7 +233,7 @@ export const RovingFocusToolbar = () => {
             ))}
           </Flex>
         </RovingFocusGroup>
-        <div style={{ fontSize: 13, color: '#526175' }}>Active tool: <code>{active}</code></div>
+        <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>Active tool: <code>{active}</code></div>
       </Box>
     </Box>
   );
@@ -246,16 +246,16 @@ export const LayerAndFocusScope = () => {
   return (
     <Box style={shell}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
           Dismissable Layer + Focus Scope
         </div>
-        <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: '#0f172a' }}>
+        <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: 'var(--ui-color-text, #0f172a)' }}>
           Test outside dismissal, Escape handling, and trapped focus
         </div>
       </div>
 
       <Button size="sm" onClick={() => setOpen(true)}>Open test layer</Button>
-      <div style={{ fontSize: 13, color: '#526175' }}>Event log: <code>{log}</code></div>
+      <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>Event log: <code>{log}</code></div>
 
       {open ? (
         <DismissableLayer
@@ -292,14 +292,14 @@ export const LayerAndFocusScope = () => {
                 width: 360,
                 padding: 20,
                 borderRadius: 16,
-                background: '#ffffff',
+                background: 'var(--ui-color-surface, #ffffff)',
                 boxShadow: '0 24px 48px rgba(15, 23, 42, 0.18)',
                 display: 'grid',
                 gap: 12
               }}
             >
               <strong>Primitive test surface</strong>
-              <div style={{ fontSize: 13, color: '#526175' }}>Use Tab and Escape here to validate focus containment and dismissal behavior.</div>
+              <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>Use Tab and Escape here to validate focus containment and dismissal behavior.</div>
               <input placeholder="First field" style={{ minHeight: 38, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1' }} />
               <input placeholder="Second field" style={{ minHeight: 38, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1' }} />
               <Flex style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -321,10 +321,10 @@ export const PositionerAndAnchor = () => {
   return (
     <Box style={shell}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
           Positioner + Anchor
         </div>
-        <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: '#0f172a' }}>
+        <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: 'var(--ui-color-text, #0f172a)' }}>
           Test anchored floating layout with live placement updates
         </div>
       </div>
@@ -341,7 +341,7 @@ export const PositionerAndAnchor = () => {
           minHeight: 260,
           borderRadius: 18,
           border: '1px dashed #94a3b8',
-          background: 'linear-gradient(180deg, #f8fafc, #eef2ff)',
+          background: 'linear-gradient(180deg, var(--ui-color-surface, #f8fafc), color-mix(in srgb, var(--ui-color-primary, #4f46e5) 6%, var(--ui-color-surface, #eef2ff)))',
           display: 'grid',
           placeItems: 'center',
           padding: 24
@@ -358,12 +358,12 @@ export const PositionerAndAnchor = () => {
               padding: 14,
               borderRadius: 14,
               border: '1px solid #cbd5e1',
-              background: '#ffffff',
+              background: 'var(--ui-color-surface, #ffffff)',
               boxShadow: '0 22px 48px rgba(15, 23, 42, 0.14)'
             }}
           >
             <strong>Positioned surface</strong>
-            <div style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>
+            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Current placement: <code>{placement}</code>
             </div>
           </Box>

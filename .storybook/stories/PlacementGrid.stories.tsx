@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Badge, Box, Button, Card, Flex, PlacementGrid } from '@editora/ui-react';
 import { ShowcasePage, ShowcaseSection } from './storybook-showcase';
 
-const shellStyle: React.CSSProperties = {
+const shellStyle: React.CSSProperties = { color: '#1f2937',
   display: 'grid',
   gap: 20,
   padding: 28,
@@ -17,7 +17,7 @@ const shellStyle: React.CSSProperties = {
 const cardStyle: React.CSSProperties = {
   padding: 18,
   borderRadius: 22,
-  background: 'rgba(255,255,255,0.88)',
+  background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent)',
   border: '1px solid rgba(148, 163, 184, 0.16)',
   boxShadow: '0 14px 36px rgba(15, 23, 42, 0.08)'
 };
@@ -38,12 +38,12 @@ function Tile({
       <Flex direction="column" gap="10px">
         <Flex align="center" justify="space-between" gap="8px">
           <Badge variant="soft" tone={tone}>{stat}</Badge>
-          <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+          <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
             Grid item
           </Box>
         </Flex>
-        <Box style={{ fontSize: 20, lineHeight: 1.08, fontWeight: 750, color: '#0f172a' }}>{title}</Box>
-        <Box style={{ fontSize: 14, lineHeight: '22px', color: '#475569' }}>{body}</Box>
+        <Box style={{ fontSize: 20, lineHeight: 1.08, fontWeight: 750, color: 'var(--ui-color-text, #0f172a)' }}>{title}</Box>
+        <Box style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>{body}</Box>
       </Flex>
     </Card>
   );

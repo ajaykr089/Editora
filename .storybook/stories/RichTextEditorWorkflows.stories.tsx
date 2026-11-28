@@ -26,17 +26,17 @@ type Story = StoryObj<typeof meta>;
 export const FrameworkIndependence: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#f3e5f5', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#f3e5f5', borderRadius: '4px' }}>
         <h3 style={{ margin: '0 0 10px 0' }}>Framework Independence</h3>
         <p style={{ margin: 0, fontSize: '14px' }}>
           The same editor works in React, Vue, Angular, Svelte, or vanilla JavaScript.
         </p>
 
         <Grid style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '13px' }}>
-          <Box style={{ padding: '10px', background: 'white', borderRadius: '4px' }}><strong>React:</strong><br /><code style={{ fontSize: '11px' }}>&lt;EditoraEditor /&gt;</code></Box>
-          <Box style={{ padding: '10px', background: 'white', borderRadius: '4px' }}><strong>Vanilla JS:</strong><br /><code style={{ fontSize: '11px' }}>&lt;editora-editor&gt;</code></Box>
-          <Box style={{ padding: '10px', background: 'white', borderRadius: '4px' }}><strong>Vue:</strong><br /><code style={{ fontSize: '11px' }}>&lt;editora-editor&gt;</code></Box>
-          <Box style={{ padding: '10px', background: 'white', borderRadius: '4px' }}><strong>Angular:</strong><br /><code style={{ fontSize: '11px' }}>&lt;editora-editor&gt;</code></Box>
+          <Box style={{ padding: '10px', background: 'var(--ui-color-surface, white)', borderRadius: '4px' }}><strong>React:</strong><br /><code style={{ fontSize: '11px' }}>&lt;EditoraEditor /&gt;</code></Box>
+          <Box style={{ padding: '10px', background: 'var(--ui-color-surface, white)', borderRadius: '4px' }}><strong>Vanilla JS:</strong><br /><code style={{ fontSize: '11px' }}>&lt;editora-editor&gt;</code></Box>
+          <Box style={{ padding: '10px', background: 'var(--ui-color-surface, white)', borderRadius: '4px' }}><strong>Vue:</strong><br /><code style={{ fontSize: '11px' }}>&lt;editora-editor&gt;</code></Box>
+          <Box style={{ padding: '10px', background: 'var(--ui-color-surface, white)', borderRadius: '4px' }}><strong>Angular:</strong><br /><code style={{ fontSize: '11px' }}>&lt;editora-editor&gt;</code></Box>
         </Grid>
       </Box>
 
@@ -64,7 +64,7 @@ export const FrameworkIndependence: Story = {
 export const DocSchemaWorkflow: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '16px', padding: '14px', background: '#ecfdf5', borderRadius: '8px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '16px', padding: '14px', background: '#ecfdf5', borderRadius: '8px' }}>
         <h4 style={{ margin: '0 0 8px 0' }}>Doc Schema Workflow</h4>
         <p style={{ margin: 0, fontSize: '13px' }}>
           Use <code>Ctrl/Cmd+Alt+Shift+G</code> to open schema validation, review missing sections, and normalize structure.
@@ -89,7 +89,7 @@ export const DocSchemaWorkflow: Story = {
 export const TranslationWorkflowScenario: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '16px', padding: '14px', background: '#eff6ff', borderRadius: '8px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '16px', padding: '14px', background: '#eff6ff', borderRadius: '8px' }}>
         <h4 style={{ margin: '0 0 8px 0' }}>Translation Workflow</h4>
         <p style={{ margin: 0, fontSize: '13px' }}>
           Use <code>Ctrl/Cmd+Alt+Shift+L</code> to open translation QA, capture source, and lock approved segments.

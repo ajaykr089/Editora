@@ -27,7 +27,7 @@ type Story = StoryObj<typeof meta>;
 export const AllPluginsShowcase: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#e3f2fd', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#e3f2fd', borderRadius: '4px' }}>
         <h3 style={{ margin: '0 0 10px 0' }}>All Native Plugins Loaded</h3>
         <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', fontSize: '13px' }}>
           <div><strong>Basic Formatting:</strong><br />Bold, Italic, Underline, Strikethrough, ClearFormatting</div>
@@ -78,7 +78,7 @@ export const AllPluginsShowcase: Story = {
 export const MathEquations: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#e1f5fe', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#e1f5fe', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Math Plugin</h4>
         <p style={{ margin: 0, fontSize: '14px' }}>Insert mathematical equations using LaTeX notation.</p>
       </Box>
@@ -102,7 +102,7 @@ export const MathEquations: Story = {
 export const SpecialContent: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#fce4ec', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#fce4ec', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Special Characters & Emojis</h4>
         <p style={{ margin: 0, fontSize: '14px' }}>Insert special characters and emojis from the editor tool surface.</p>
       </Box>
@@ -132,7 +132,7 @@ export const SpecialContent: Story = {
 export const Tables: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#f1f8e9', borderRadius: '4px' }}>
+      <Box style={{ marginBottom: '20px', padding: '15px', background: 'var(--ui-color-surface, #f1f8e9)', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Table Plugin</h4>
         <p style={{ margin: 0, fontSize: '14px' }}>Create and edit structured tables in the editor.</p>
       </Box>
@@ -187,7 +187,7 @@ export const EventHandling: Story = {
           `}
         />
 
-        <Box style={{ marginTop: '20px', padding: '15px', background: '#e8f5e9', borderRadius: '4px' }}>
+        <Box style={{ marginTop: '20px', padding: '15px', background: 'var(--ui-color-surface, #e8f5e9)', borderRadius: '4px' }}>
           <h3 style={{ margin: '0 0 10px 0' }}>Statistics</h3>
           <p style={{ margin: '5px 0' }}>Words: <strong>{wordCount}</strong></p>
           <p style={{ margin: '5px 0' }}>Characters: <strong>{charCount}</strong></p>

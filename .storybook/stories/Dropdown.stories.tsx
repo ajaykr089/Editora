@@ -230,7 +230,7 @@ function DropdownPreview(props: {
           borderRadius: 16,
           border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
           background:
-            'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+            'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
           display: 'grid',
           placeItems: 'center',
           padding: 20,
@@ -259,7 +259,7 @@ function DropdownPreview(props: {
                 appearance: 'none',
                 borderRadius: 10,
                 border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 35%, transparent)',
-                background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, white)',
+                background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, var(--ui-color-surface, #ffffff))',
                 color: 'var(--ui-color-text, #0f172a)',
                 fontWeight: 600,
                 padding: '10px 14px',
@@ -273,7 +273,7 @@ function DropdownPreview(props: {
         </Box>
       </Box>
       <Flex justify="space-between" align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
-        {props.caption ? <div style={{ fontSize: 13, color: '#526175' }}>{props.caption}</div> : <span />}
+        {props.caption ? <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>{props.caption}</div> : <span />}
         <Badge tone="neutral">last action: {lastAction}</Badge>
       </Flex>
     </Grid>
@@ -293,7 +293,7 @@ function ThemeTokenMatrixStory() {
   return (
     <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
       <div>
-        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Dropdown</div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: 'var(--ui-color-text, #111827)' }}>Dropdown</div>
       </div>
 
       <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
@@ -311,25 +311,25 @@ function ThemeTokenMatrixStory() {
       {tab === 'theme' ? (
         <Grid style={{ gap: 22 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Surface</div>
             <DropdownPreview variant="surface" size="md" elevation="low" palette="blue" />
             <DropdownPreview variant="surface" size="md" elevation="low" palette="gray" />
             <DropdownPreview variant="surface" size="md" elevation="low" palette="purple" />
             <DropdownPreview variant="surface" size="md" elevation="low" palette="green" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             <DropdownPreview variant="soft" size="md" elevation="low" palette="blue" />
             <DropdownPreview variant="soft" size="md" elevation="low" palette="gray" />
             <DropdownPreview variant="soft" size="md" elevation="low" palette="purple" />
             <DropdownPreview variant="soft" size="md" elevation="low" palette="green" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             <DropdownPreview variant="solid" size="md" elevation="low" palette="blue" />
             <DropdownPreview variant="solid" size="md" elevation="low" palette="gray" />
             <DropdownPreview variant="solid" size="md" elevation="low" palette="purple" />
             <DropdownPreview variant="solid" size="md" elevation="low" palette="green" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Contrast</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Contrast</div>
             <DropdownPreview variant="contrast" size="md" elevation="low" palette="blue" />
             <DropdownPreview variant="contrast" size="md" elevation="low" palette="gray" />
             <DropdownPreview variant="contrast" size="md" elevation="low" palette="purple" />
@@ -342,12 +342,12 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 16 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
               <React.Fragment key={name}>
-                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)', textTransform: 'capitalize' }}>{name}</div>
                 <DropdownPreview variant="surface" size="md" elevation="low" palette={name} />
                 <DropdownPreview variant="soft" size="md" elevation="low" palette={name} />
                 <DropdownPreview variant="solid" size="md" elevation="low" palette={name} />
@@ -361,12 +361,12 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 18 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             {(['1', '2', '3'] as const).map((size) => (
               <React.Fragment key={size}>
-                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Size {size}</div>
                 <DropdownPreview variant="surface" size={size} elevation="low" palette="blue" />
                 <DropdownPreview variant="soft" size={size} elevation="low" palette="blue" />
                 <DropdownPreview variant="solid" size={size} elevation="low" palette="blue" />
@@ -412,7 +412,7 @@ export const ReactComposition: Story = {
               appearance: 'none',
               borderRadius: 10,
               border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 35%, transparent)',
-              background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, white)',
+              background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, var(--ui-color-surface, #ffffff))',
               color: 'var(--ui-color-text, #0f172a)',
               fontWeight: 600,
               padding: '10px 14px',

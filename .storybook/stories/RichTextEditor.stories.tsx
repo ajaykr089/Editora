@@ -92,7 +92,7 @@ export const WebComponentAPI: Story = {
 
     return (
       <div>
-        <Box style={{ marginBottom: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '4px' }}>
+        <Box style={{ marginBottom: '20px', padding: '15px', background: 'var(--ui-color-surface, #f5f5f5)', borderRadius: '4px' }}>
           <h4 style={{ margin: '0 0 10px 0' }}>Global Editora API</h4>
           <p style={{ margin: '5px 0' }}>Version: <strong>{version}</strong></p>
           <p style={{ margin: '5px 0' }}>Plugins Available: <strong>{pluginCount}</strong></p>
@@ -115,7 +115,7 @@ export const WebComponentAPI: Story = {
         </div>
 
         {output ? (
-          <Box style={{ marginTop: '20px', padding: '15px', background: '#e8f5e9', borderRadius: '4px' }}>
+          <Box style={{ marginTop: '20px', padding: '15px', background: 'var(--ui-color-surface, #e8f5e9)', borderRadius: '4px' }}>
             <h4 style={{ margin: '0 0 10px 0' }}>Output</h4>
             <pre style={{ overflow: 'auto', fontSize: '12px' }}>{output}</pre>
           </Box>
@@ -128,7 +128,7 @@ export const WebComponentAPI: Story = {
 export const CustomToolbar: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#fff3e0', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#fff3e0', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Custom Toolbar</h4>
         <p style={{ margin: 0, fontSize: '14px' }}>Only essential formatting tools are shown in the toolbar.</p>
       </Box>
@@ -163,7 +163,7 @@ export const ReadonlyMode: Story = {
 
     return (
       <div>
-        <Box style={{ marginBottom: '20px', padding: '15px', background: '#f3e5f5', borderRadius: '4px' }}>
+        <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#f3e5f5', borderRadius: '4px' }}>
           <h4 style={{ margin: '0 0 10px 0' }}>Readonly Mode</h4>
           <button onClick={() => setReadonly(!readonly)} style={{ padding: '8px 16px' }}>
             {readonly ? 'Enable Editing' : 'Disable Editing'}

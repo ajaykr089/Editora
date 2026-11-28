@@ -186,8 +186,8 @@ export const AccessibilityKeyboardMap = () => {
         style={{
           border: '1px solid #dbeafe',
           borderRadius: 12,
-          background: '#f8fbff',
-          color: '#1e3a8a',
+          background: 'var(--ui-color-surface, #f8fbff)',
+          color: 'color-mix(in srgb, var(--ui-color-primary, #1e3a8a) 45%, var(--ui-color-text, #0f172a))',
           fontSize: 13,
           padding: 12,
           lineHeight: 1.5

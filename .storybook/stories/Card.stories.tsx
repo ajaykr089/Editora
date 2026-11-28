@@ -36,7 +36,7 @@ function InsetArtwork() {
           position: 'absolute',
           inset: '14% 18%',
           transform: 'rotate(-12deg)',
-          background: '#ffffff',
+          background: 'var(--ui-color-surface, #ffffff)',
           borderRadius: 8,
           boxShadow: '0 22px 50px rgba(15, 23, 42, 0.12)',
           display: 'grid',
@@ -46,8 +46,8 @@ function InsetArtwork() {
         }}
       >
         <div style={{ borderRight: '1px solid rgba(15, 23, 42, 0.08)', paddingRight: 12 }}>
-          <div style={{ fontSize: 54, lineHeight: 1, fontWeight: 700, color: '#111827' }}>A</div>
-          <div style={{ marginTop: 10, fontSize: 10, lineHeight: '14px', color: '#526175', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <div style={{ fontSize: 54, lineHeight: 1, fontWeight: 700, color: 'var(--ui-color-text, #111827)' }}>A</div>
+          <div style={{ marginTop: 10, fontSize: 10, lineHeight: '14px', color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Editorial layout
           </div>
         </div>
@@ -55,7 +55,7 @@ function InsetArtwork() {
           <div style={{ inlineSize: 110, blockSize: 34, background: '#1f2937', color: '#ffffff', display: 'grid', placeItems: 'center', fontWeight: 700 }}>
             FACTURES
           </div>
-          <div style={{ fontSize: 11, lineHeight: '16px', color: '#475569' }}>
+          <div style={{ fontSize: 11, lineHeight: '16px', color: 'var(--ui-color-muted, #475569)' }}>
             Typography is the art and technique of arranging type to make written language legible and expressive.
           </div>
         </div>
@@ -82,10 +82,10 @@ export const Playground = {
           Launch health and release readiness.
         </Card.Description>
       </Card.Header>
-      <div style={{ fontSize: 14, lineHeight: '20px', color: '#334155' }}>
+      <div style={{ fontSize: 14, lineHeight: '20px', color: 'var(--ui-color-text, #334155)' }}>
         Track migration progress, QA handoff, and final release blockers from one place.
       </div>
-      <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, lineHeight: '18px', color: '#526175' }}>
+      <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
         <span>Updated 2m ago</span>
         <span>12 items</span>
       </Card.Footer>
@@ -108,7 +108,7 @@ export const WithInsetContent = () => (
           <Card.Title as="div">
             Typography is the art and technique of arranging type.
           </Card.Title>
-          <div style={{ fontSize: 15, lineHeight: '24px', color: '#334155' }}>
+          <div style={{ fontSize: 15, lineHeight: '24px', color: 'var(--ui-color-text, #334155)' }}>
             Use inset sections when imagery, charts, or media should sit flush against the card frame while the rest of the content stays comfortably padded.
           </div>
         </div>
@@ -131,7 +131,7 @@ export const VariantGallery = () => (
         ].map(([variant, title]) => (
           <Card key={variant} variant={variant as any} size="md" radius={8} style={{ minBlockSize: 132 }}>
             <Card.Header>
-              <div style={{ fontSize: 14, lineHeight: '18px', color: '#526175', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{variant}</div>
+              <div style={{ fontSize: 14, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{variant}</div>
               <Card.Title as="div">{title}</Card.Title>
             </Card.Header>
             <Card.Description as="div">
@@ -162,8 +162,8 @@ export const SizeGallery = () => (
                   borderRadius: 999,
                   display: 'grid',
                   placeItems: 'center',
-                  background: '#e2e8f0',
-                  color: '#3358c5',
+                  background: 'var(--ui-color-surface, #e2e8f0)',
+                  color: 'color-mix(in srgb, var(--ui-color-primary, #3358c5) 45%, var(--ui-color-text, #0f172a))',
                   fontSize: (avatar as number) * 0.45,
                   lineHeight: 1
                 }}
@@ -211,14 +211,14 @@ export const StructuredComposition = () => (
         </Card.Media>
         <Card.Header>
           <Card.Title>Quarterly planning workspace</Card.Title>
-          <Card.Description style={{ color: '#475569' }}>
+          <Card.Description style={{ color: 'var(--ui-color-muted, #475569)' }}>
             Centralize milestones, owner updates, and launch decisions for the quarter.
           </Card.Description>
         </Card.Header>
-        <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
+        <div style={{ color: 'var(--ui-color-text, #334155)', fontSize: 14, lineHeight: '22px' }}>
           Use the convenience exports when teams want a clear authoring model without remembering slot names for every section.
         </div>
-        <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#526175', fontSize: 13, lineHeight: '18px' }}>
+        <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ui-color-muted, #526175)', fontSize: 13, lineHeight: '18px' }}>
           <span>6 active workstreams</span>
           <span>Updated today</span>
         </Card.Footer>
@@ -250,7 +250,7 @@ export const InteractiveStates = () => (
             <Card.Title>Interactive project summary</Card.Title>
             <Card.Description>Press Enter or Space after focusing the card to activate it.</Card.Description>
           </Card.Header>
-          <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
+          <div style={{ color: 'var(--ui-color-text, #334155)', fontSize: 14, lineHeight: '22px' }}>
             This is the production interaction model for clickable cards.
           </div>
         </Card>
@@ -260,7 +260,7 @@ export const InteractiveStates = () => (
             <Card.Title>Disabled state</Card.Title>
             <Card.Description>The disabled card is not focusable and exposes aria-disabled.</Card.Description>
           </Card.Header>
-          <div style={{ color: '#526175', fontSize: 14, lineHeight: '22px' }}>
+          <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 14, lineHeight: '22px' }}>
             Use disabled when the whole card surface should be unavailable.
           </div>
         </Card>
@@ -282,10 +282,10 @@ export const ComposedComponentPattern = () => (
             <Card.Title>Project Dashboard</Card.Title>
             <Card.Description>Overview of current project status and metrics.</Card.Description>
           </Card.Header>
-          <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
+          <div style={{ color: 'var(--ui-color-text, #334155)', fontSize: 14, lineHeight: '22px' }}>
             This demonstrates the composed component pattern where all sub-components are accessed as properties of the main Card component.
           </div>
-          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#526175', fontSize: 13, lineHeight: '18px' }}>
+          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ui-color-muted, #526175)', fontSize: 13, lineHeight: '18px' }}>
             <span>Updated 5m ago</span>
             <span>4 metrics</span>
           </Card.Footer>
@@ -311,7 +311,7 @@ export const ComposedComponentPattern = () => (
             <Card.Title>Content Preview</Card.Title>
             <Card.Description>Preview of the media content with structured layout.</Card.Description>
           </Card.Header>
-          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#526175', fontSize: 13, lineHeight: '18px' }}>
+          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ui-color-muted, #526175)', fontSize: 13, lineHeight: '18px' }}>
             <span>Preview mode</span>
             <span>Click to view</span>
           </Card.Footer>
@@ -320,17 +320,17 @@ export const ComposedComponentPattern = () => (
         <Card variant="surface" size="md" radius={10} style={{ minBlockSize: 200 }}>
           <Card.Inset>
             <div
-              style={{
+              style={{ color: '#1f2937',
                 padding: 16,
                 background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
                 borderRadius: 8,
                 border: '1px solid rgba(15, 23, 42, 0.08)'
               }}
             >
-              <div style={{ fontSize: 12, color: '#526175', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                 Inset Content
               </div>
-              <div style={{ fontSize: 14, color: '#334155', lineHeight: '20px' }}>
+              <div style={{ fontSize: 14, color: 'var(--ui-color-text, #334155)', lineHeight: '20px' }}>
                 This content sits flush against the card edges while maintaining proper spacing.
               </div>
             </div>

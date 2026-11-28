@@ -156,7 +156,7 @@ function PremiumSidebarStructure({ value }: { value: string }) {
               width: 38,
               height: 38,
               borderRadius: 4,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 10%, transparent)',
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)'
             }}
           >
@@ -500,7 +500,7 @@ export const SubmenuMotionAndCustomIcons = () => {
         border: '1px solid var(--ui-color-border, #d6dce6)',
         borderRadius: 28,
         overflow: 'hidden',
-        background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 3%, #ffffff), #f8fafc)'
+        background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 3%, var(--ui-color-surface, #ffffff)), var(--ui-color-surface-alt, #f8fafc))'
       }}
     >
       <Sidebar

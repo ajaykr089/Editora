@@ -143,7 +143,7 @@ export const SecurityComplianceReview: Story = {
 
     return (
       <Grid style={{ display: "grid", gap: 16 }}>
-        <Box style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 14, background: "#f8fafc" }}>
+        <Box style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 14, background: "var(--ui-color-surface, #f8fafc)" }}>
           <h3 style={{ margin: 0 }}>Dummy Scenario: Incident Memo Pre-Share PII Sweep</h3>
           <p style={{ margin: "8px 0 12px", lineHeight: 1.45 }}>
             Use the plugin before export/share to detect and redact sensitive values.
@@ -189,13 +189,13 @@ export const SecurityComplianceReview: Story = {
             </div>
           </Grid>
 
-          <Box style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 12, background: "#ffffff" }}>
+          <Box style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 12, background: "var(--ui-color-surface, #ffffff)" }}>
             <h4 style={{ margin: "0 0 8px" }}>PII Event Log</h4>
-            <p style={{ margin: "0 0 12px", fontSize: 12, color: "#475569" }}>
+            <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--ui-color-muted, #475569)" }}>
               Tracks scan/findings/redaction events from both editors.
             </p>
             {events.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 13, color: "#526175" }}>No PII events captured yet.</p>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--ui-color-muted, #526175)" }}>No PII events captured yet.</p>
             ) : (
               <ol style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 8 }}>
                 {events.map((entry, index) => (

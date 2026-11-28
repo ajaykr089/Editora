@@ -167,7 +167,7 @@ function ThemeMatrixStory() {
     gridTemplateColumns: '120px repeat(6, minmax(120px, 1fr))',
     gap: 10,
     alignItems: 'center',
-    color: '#5b6672',
+    color: 'var(--ui-color-muted, #5b6672)',
     fontSize: 13,
     lineHeight: '20px',
     fontWeight: 600
@@ -184,7 +184,7 @@ function ThemeMatrixStory() {
     fontSize: 14,
     lineHeight: '20px',
     fontWeight: 600,
-    color: '#5b6672'
+    color: 'var(--ui-color-muted, #5b6672)'
   };
 
   const tabsSurfaceStyle: React.CSSProperties = {
@@ -215,8 +215,8 @@ function ThemeMatrixStory() {
 
   const matrixTabButtonStyle = (active: boolean): React.CSSProperties => ({
     border: '1px solid transparent',
-    background: active ? '#ffffff' : 'transparent',
-    color: active ? '#111827' : '#5b6672',
+    background: active ? 'var(--ui-color-surface, #ffffff)' : 'transparent',
+    color: active ? 'var(--ui-color-text, #111827)' : 'var(--ui-color-muted, #5b6672)',
     borderColor: active ? 'rgba(37, 99, 235, 0.35)' : 'transparent',
     borderRadius: 8,
     padding: '8px 14px',
@@ -232,7 +232,7 @@ function ThemeMatrixStory() {
     gridTemplateColumns: '72px repeat(6, minmax(170px, 1fr))',
     gap: 14,
     alignItems: 'center',
-    color: '#5b6672',
+    color: 'var(--ui-color-muted, #5b6672)',
     fontSize: 12,
     lineHeight: '18px',
     fontWeight: 600
@@ -258,7 +258,7 @@ function ThemeMatrixStory() {
     gridTemplateColumns: '72px repeat(5, minmax(140px, 1fr))',
     gap: 22,
     alignItems: 'center',
-    color: '#5b6672',
+    color: 'var(--ui-color-muted, #5b6672)',
     fontSize: 12,
     lineHeight: '18px',
     fontWeight: 600
@@ -361,7 +361,7 @@ function ThemeMatrixStory() {
               lineHeight: '18px',
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              color: '#526175',
+              color: 'var(--ui-color-muted, #526175)',
               fontWeight: 700
             }}
           >

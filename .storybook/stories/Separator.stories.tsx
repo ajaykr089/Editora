@@ -8,11 +8,11 @@ export default {
 
 export const Horizontal = () => (
   <Box style={{ maxWidth: 560 }}>
-    <Box style={{ fontSize: 13, color: '#334155' }}>Pipeline overview</Box>
+    <Box style={{ fontSize: 13, color: 'var(--ui-color-text, #334155)' }}>Pipeline overview</Box>
     <Separator label="Milestone" variant="gradient" tone="brand" />
-    <Box style={{ fontSize: 13, color: '#334155' }}>Live environments</Box>
+    <Box style={{ fontSize: 13, color: 'var(--ui-color-text, #334155)' }}>Live environments</Box>
     <Separator variant="dashed" tone="warning" inset="sm" />
-    <Box style={{ fontSize: 13, color: '#334155' }}>Archived releases</Box>
+    <Box style={{ fontSize: 13, color: 'var(--ui-color-text, #334155)' }}>Archived releases</Box>
   </Box>
 );
 

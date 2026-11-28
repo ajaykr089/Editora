@@ -21,6 +21,7 @@ export default defineConfig({
   projects: [
     { name: 'unthemed' },
     { name: 'light', metadata: { theme: 'light' } },
+    { name: 'dark', metadata: { theme: 'dark' }, use: { colorScheme: 'dark' } },
   ],
   webServer: [
     { command: `node serve-static.mjs "${sbDir}" ${sbPort}`, url: `http://127.0.0.1:${sbPort}/index.json`, reuseExistingServer: !process.env.CI },

@@ -15,19 +15,19 @@ const Card = ({ title, value, delta, tone = 'neutral' }: CardProps) => (
     radius="md"
     style={{
       border: '1px solid #e2e8f0',
-      background: '#ffffff'
+      background: 'var(--ui-color-surface, #ffffff)'
     }}
   >
-    <div style={{ fontSize: 12, color: '#526175', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+    <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {title}
     </div>
-    <div style={{ fontSize: 28, fontWeight: 700, color: '#0f172a', lineHeight: 1.1 }}>{value}</div>
+    <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ui-color-text, #0f172a)', lineHeight: 1.1 }}>{value}</div>
     <div
       style={{
         marginTop: 8,
         fontSize: 13,
         fontWeight: 600,
-        color: tone === 'success' ? '#15803d' : tone === 'danger' ? '#b91c1c' : '#475569'
+        color: tone === 'success' ? 'color-mix(in srgb, var(--ui-color-success, #15803d) 45%, var(--ui-color-text, #0f172a))' : tone === 'danger' ? 'color-mix(in srgb, var(--ui-color-danger, #b91c1c) 45%, var(--ui-color-text, #0f172a))' : 'var(--ui-color-muted, #475569)'
       }}
     >
       {delta}
@@ -88,8 +88,8 @@ export const EnterpriseOps = () => {
 
       <Flex justify="between" align="center" wrap="wrap" gap="10px">
         <Box>
-          <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>SaaS Operations Dashboard</h2>
-          <p style={{ margin: '6px 0 0 0', color: '#526175' }}>Monitor subscriptions, incident risk, and deployment health.</p>
+          <h2 style={{ margin: 0, fontSize: 28, color: 'var(--ui-color-text, #0f172a)' }}>SaaS Operations Dashboard</h2>
+          <p style={{ margin: '6px 0 0 0', color: 'var(--ui-color-muted, #526175)' }}>Monitor subscriptions, incident risk, and deployment health.</p>
         </Box>
         <Flex gap="8px">
           <Button onClick={handleSync}>{isSyncing ? 'Syncing...' : 'Sync Data'}</Button>
@@ -113,7 +113,7 @@ export const EnterpriseOps = () => {
           </div>
           <div slot="panel">
             <Grid gap="8px">
-              <div style={{ color: '#334155' }}>Revenue velocity improved after pricing page experiment.</div>
+              <div style={{ color: 'var(--ui-color-text, #334155)' }}>Revenue velocity improved after pricing page experiment.</div>
               <Button size="sm" onClick={() => showToast('Quarterly summary exported', 'success')}>
                 Export Summary
               </Button>
@@ -125,7 +125,7 @@ export const EnterpriseOps = () => {
           </div>
           <div slot="panel">
             <Grid gap="8px">
-              <div style={{ color: '#334155' }}>Latest release passed health checks in all regions.</div>
+              <div style={{ color: 'var(--ui-color-text, #334155)' }}>Latest release passed health checks in all regions.</div>
               <Button size="sm" variant="secondary" onClick={() => setModalOpen(true)}>
                 Review Approval
               </Button>
@@ -137,7 +137,7 @@ export const EnterpriseOps = () => {
           </div>
           <div slot="panel">
             <Grid gap="8px">
-              <div style={{ color: '#334155' }}>One account reached API quota threshold.</div>
+              <div style={{ color: 'var(--ui-color-text, #334155)' }}>One account reached API quota threshold.</div>
               <Button size="sm" variant="danger" onClick={() => showToast('Escalation sent to on-call', 'error')}>
                 Escalate Incident
               </Button>
@@ -148,7 +148,7 @@ export const EnterpriseOps = () => {
 
       <Modal open={modalOpen} title="Deployment Approval" onClose={() => setModalOpen(false)}>
         <Grid gap="10px">
-          <Box variant="outline" p="10px" radius="sm" color="#475569">
+          <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
             Release <strong>v1.2.8</strong> includes billing retries, SOC2 audit logging, and dashboard performance fixes.
           </Box>
           <Flex gap="8px" wrap="wrap">

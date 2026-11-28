@@ -57,8 +57,8 @@ const linkTypes = ['e2s', 's2s', 'e2e', 's2e'] as const;
 const shellButtonStyle: React.CSSProperties = {
   border: '1px solid var(--ui-color-border, #dbe4ef)',
   borderRadius: 8,
-  background: '#ffffff',
-  color: '#0f172a',
+  background: 'var(--ui-color-surface, #ffffff)',
+  color: 'var(--ui-color-text, #0f172a)',
   fontSize: 12,
   fontWeight: 700,
   padding: '8px 10px'
@@ -67,7 +67,7 @@ const shellButtonStyle: React.CSSProperties = {
 const metricStyle: React.CSSProperties = {
   border: '1px solid #dbe4ef',
   borderRadius: 8,
-  background: '#ffffff',
+  background: 'var(--ui-color-surface, #ffffff)',
   padding: 12,
   minHeight: 74
 };
@@ -75,7 +75,7 @@ const metricStyle: React.CSSProperties = {
 const panelStyle: React.CSSProperties = {
   border: '1px solid #dbe4ef',
   borderRadius: 8,
-  background: '#ffffff'
+  background: 'var(--ui-color-surface, #ffffff)'
 };
 
 const fieldStyle: React.CSSProperties = {
@@ -340,11 +340,11 @@ export const FullPageWorkspace = () => {
   };
 
   return (
-    <div style={{ minHeight: 760, background: '#f6f8fb', color: '#0f172a', padding: 20, fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ minHeight: 760, background: 'var(--ui-color-surface, #f6f8fb)', color: 'var(--ui-color-text, #0f172a)', padding: 20, fontFamily: 'Inter, system-ui, sans-serif' }}>
       <div style={{ maxWidth: 1440, margin: '0 auto', display: 'grid', gap: 16 }}>
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
           <div>
-            <div style={{ fontSize: 12, color: '#526175', fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0 }}>Program control</div>
+            <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0 }}>Program control</div>
             <h1 style={{ margin: '4px 0 0', fontSize: 30, lineHeight: 1.12 }}>Release Planning Workspace</h1>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -356,10 +356,10 @@ export const FullPageWorkspace = () => {
         </header>
 
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
-          <div style={metricStyle}><div style={{ color: '#526175', fontSize: 12, fontWeight: 700 }}>Completion</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{complete}%</strong></div>
-          <div style={metricStyle}><div style={{ color: '#526175', fontSize: 12, fontWeight: 700 }}>Tracked tasks</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{items.length}</strong></div>
-          <div style={metricStyle}><div style={{ color: '#526175', fontSize: 12, fontWeight: 700 }}>Milestones</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{milestones}</strong></div>
-          <div style={metricStyle}><div style={{ color: '#526175', fontSize: 12, fontWeight: 700 }}>Critical path</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{criticalTaskIds.size}</strong><span style={{ color: '#526175', fontSize: 12 }}>{delayed} risks</span></div>
+          <div style={metricStyle}><div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, fontWeight: 700 }}>Completion</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{complete}%</strong></div>
+          <div style={metricStyle}><div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, fontWeight: 700 }}>Tracked tasks</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{items.length}</strong></div>
+          <div style={metricStyle}><div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, fontWeight: 700 }}>Milestones</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{milestones}</strong></div>
+          <div style={metricStyle}><div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, fontWeight: 700 }}>Critical path</div><strong style={{ display: 'block', marginTop: 8, fontSize: 26 }}>{criticalTaskIds.size}</strong><span style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>{delayed} risks</span></div>
         </section>
 
         <main style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 14, alignItems: 'start' }}>
@@ -367,9 +367,9 @@ export const FullPageWorkspace = () => {
             <div style={{ padding: '12px 14px', borderBottom: '1px solid #dbe4ef', display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <div>
                 <strong style={{ fontSize: 14 }}>Cross-functional plan</strong>
-                <div style={{ color: '#526175', fontSize: 12, marginTop: 2 }}>Drag task bars to reschedule, drag milestone diamonds to move checkpoints.</div>
+                <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, marginTop: 2 }}>Drag task bars to reschedule, drag milestone diamonds to move checkpoints.</div>
               </div>
-              <span style={{ color: '#526175', fontSize: 12, fontWeight: 700 }}>{lastChange}</span>
+              <span style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, fontWeight: 700 }}>{lastChange}</span>
             </div>
             <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 150px 150px', gap: 8, borderBottom: '1px solid #dbe4ef' }}>
               <input aria-label="Filter by task or owner" style={fieldStyle} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter by task or owner" />
@@ -408,19 +408,19 @@ export const FullPageWorkspace = () => {
 
           <aside style={{ display: 'grid', gap: 12 }}>
             <section style={{ ...panelStyle, padding: 14 }}>
-              <div style={{ color: '#526175', fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0 }}>Selected task</div>
+              <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0 }}>Selected task</div>
               <input aria-label="Task name" style={{ ...fieldStyle, width: '100%', marginTop: 8, fontWeight: 700 }} value={selected.label} onChange={(event) => updateSelected({ label: event.target.value })} />
               <input aria-label="Assignee" style={{ ...fieldStyle, width: '100%', marginTop: 8 }} value={selected.assignee || ''} onChange={(event) => updateSelected({ assignee: event.target.value })} placeholder="Owner" />
               <div style={{ display: 'grid', gap: 8, marginTop: 16 }}>
-                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#526175' }}>Start<input style={fieldStyle} type="date" value={selected.start} onChange={(event) => updateSelected({ start: event.target.value })} /></label>
-                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#526175' }}>End<input style={fieldStyle} type="date" value={selected.end} onChange={(event) => updateSelected({ end: event.target.value })} /></label>
-                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#526175' }}>Progress<input style={fieldStyle} type="number" min={0} max={100} value={selected.progress ?? 0} onChange={(event) => updateSelected({ progress: Number(event.target.value) })} /></label>
-                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#526175' }}>Status<select style={fieldStyle} value={selected.tone || 'default'} onChange={(event) => updateSelected({ tone: event.target.value })}><option value="default">Default</option><option value="success">Success</option><option value="warning">Warning</option><option value="danger">Danger</option><option value="info">Info</option></select></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Start<input style={fieldStyle} type="date" value={selected.start} onChange={(event) => updateSelected({ start: event.target.value })} /></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>End<input style={fieldStyle} type="date" value={selected.end} onChange={(event) => updateSelected({ end: event.target.value })} /></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Progress<input style={fieldStyle} type="number" min={0} max={100} value={selected.progress ?? 0} onChange={(event) => updateSelected({ progress: Number(event.target.value) })} /></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Status<select style={fieldStyle} value={selected.tone || 'default'} onChange={(event) => updateSelected({ tone: event.target.value })}><option value="default">Default</option><option value="success">Success</option><option value="warning">Warning</option><option value="danger">Danger</option><option value="info">Info</option></select></label>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
                 <button style={shellButtonStyle} onClick={() => setItems((current) => reorder(current, Math.max(0, current.findIndex((task) => task.id === selected.id)), Math.max(0, current.findIndex((task) => task.id === selected.id) - 1)))}>Move up</button>
                 <button style={shellButtonStyle} onClick={() => setItems((current) => reorder(current, current.findIndex((task) => task.id === selected.id), Math.min(current.length - 1, current.findIndex((task) => task.id === selected.id) + 1)))}>Move down</button>
-                <button style={{ ...shellButtonStyle, gridColumn: '1 / -1', color: '#b91c1c' }} onClick={deleteSelected}>Delete task</button>
+                <button style={{ ...shellButtonStyle, gridColumn: '1 / -1', color: 'color-mix(in srgb, var(--ui-color-danger, #b91c1c) 45%, var(--ui-color-text, #0f172a))' }} onClick={deleteSelected}>Delete task</button>
               </div>
             </section>
             <section style={{ ...panelStyle, padding: 14 }}>
@@ -443,17 +443,17 @@ export const FullPageWorkspace = () => {
               ) : null}
               {dependencyLinks.slice(-5).map((link) => (
                 <div key={link.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '8px 0', borderTop: '1px solid #edf2f7', fontSize: 12 }}>
-                  <button style={{ border: 0, background: 'transparent', padding: 0, textAlign: 'left', color: selectedLinkId === link.id ? '#1d4ed8' : '#0f172a', cursor: 'pointer' }} onClick={() => setSelectedLinkId(link.id)}>{link.source} to {link.target} <span style={{ color: '#526175' }}>({link.type || 'e2s'})</span></button>
-                  <button style={{ border: 0, background: 'transparent', color: '#b91c1c', cursor: 'pointer' }} onClick={() => setDependencyLinks((current) => current.filter((item) => item.id !== link.id))}>Delete</button>
+                  <button style={{ border: 0, background: 'transparent', padding: 0, textAlign: 'left', color: selectedLinkId === link.id ? 'color-mix(in srgb, var(--ui-color-primary, #1d4ed8) 45%, var(--ui-color-text, #0f172a))' : 'var(--ui-color-text, #0f172a)', cursor: 'pointer' }} onClick={() => setSelectedLinkId(link.id)}>{link.source} to {link.target} <span style={{ color: 'var(--ui-color-muted, #526175)' }}>({link.type || 'e2s'})</span></button>
+                  <button style={{ border: 0, background: 'transparent', color: 'color-mix(in srgb, var(--ui-color-danger, #b91c1c) 45%, var(--ui-color-text, #0f172a))', cursor: 'pointer' }} onClick={() => setDependencyLinks((current) => current.filter((item) => item.id !== link.id))}>Delete</button>
                 </div>
               ))}
             </section>
             <section style={{ ...panelStyle, padding: 14 }}>
               <strong style={{ fontSize: 14 }}>Risk queue</strong>
               {items.filter((task) => task.tone === 'warning' || task.tone === 'danger').slice(0, 5).map((task) => (
-                <button key={task.id} onClick={() => setSelectedId(task.id)} style={{ display: 'block', width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #edf2f7', background: 'transparent', padding: '10px 0', color: '#0f172a' }}>
+                <button key={task.id} onClick={() => setSelectedId(task.id)} style={{ display: 'block', width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #edf2f7', background: 'transparent', padding: '10px 0', color: 'var(--ui-color-text, #0f172a)' }}>
                   <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>{task.label}</span>
-                  <span style={{ color: '#526175', fontSize: 12 }}>{task.assignee || 'PMO'} - {task.progress ?? 0}%</span>
+                  <span style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>{task.assignee || 'PMO'} - {task.progress ?? 0}%</span>
                 </button>
               ))}
             </section>

@@ -58,7 +58,7 @@ export const Playground = (args: any) => {
         </Box>
       </Presence>
 
-      <Box style={{ fontSize: 12, color: '#526175' }}>{events.length ? events.join(' | ') : 'No motion events yet.'}</Box>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>{events.length ? events.join(' | ') : 'No motion events yet.'}</Box>
     </Grid>
   );
 };
@@ -90,7 +90,7 @@ export const MotionModes = () => (
       <Box style={{ padding: 12, borderRadius: 10, border: '1px solid #e2e8f0' }}>Slide Right</Box>
     </Presence>
     <Presence present mode="blur" variant="glass">
-      <Box style={{ padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', background: 'linear-gradient(135deg, #f8fafc, #eef2ff)' }}>
+      <Box style={{ color: '#1f2937', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', background: 'linear-gradient(135deg, #f8fafc, #eef2ff)' }}>
         Blur
       </Box>
     </Presence>
@@ -110,7 +110,7 @@ export const KeepMounted = () => {
         Toggle (keep-mounted)
       </Button>
       <Presence present={present} keepMounted mode="slide-down">
-        <Box style={{ padding: 14, borderRadius: 10, border: '1px solid #dbeafe', background: '#f8fbff' }}>
+        <Box style={{ padding: 14, borderRadius: 10, border: '1px solid #dbeafe', background: 'var(--ui-color-surface, #f8fbff)' }}>
           This node stays mounted in DOM even after exit transitions.
         </Box>
       </Presence>

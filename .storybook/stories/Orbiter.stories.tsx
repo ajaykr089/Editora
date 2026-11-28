@@ -24,7 +24,7 @@ const itemGlyphStyle: React.CSSProperties = {
   justifyContent: 'center'
 };
 
-const panelStyle: React.CSSProperties = {
+const panelStyle: React.CSSProperties = { color: '#1f2937',
   display: 'grid',
   gap: 16,
   padding: 28,
@@ -125,10 +125,10 @@ export const Playground: Story = {
         <div style={panelStyle}>
           <div style={{ display: 'grid', gap: 10, maxInlineSize: 720 }}>
             <Badge variant="soft" tone="info">Orbital motion primitive</Badge>
-            <div style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 760, color: '#0f172a' }}>
+            <div style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>
               Orbit status, apps, or signals around a center of gravity.
             </div>
-            <div style={{ fontSize: 14, lineHeight: '22px', color: '#475569' }}>
+            <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>
               Use the controls to tune ring count, orbital radius, motion profile, direction, shell styling, and hover
               pause behavior. This version also lets you click orbit items so the interaction model is visible during review.
             </div>
@@ -147,11 +147,11 @@ export const Playground: Story = {
             <Orbiter {...args}>
               <Orbiter.Center>
                 <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                  <Box style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
+                  <Box style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                     Mission Control
                   </Box>
                   <Box style={{ fontSize: 26, lineHeight: 1.02, fontWeight: 780 }}>24</Box>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>{selected} selected</Box>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>{selected} selected</Box>
                 </Box>
               </Orbiter.Center>
 
@@ -210,7 +210,7 @@ export const HeroControlCenter = () => (
                 fontSize: 30,
                 lineHeight: 1.06,
                 fontWeight: 760,
-                color: "#0f172a",
+                color: "var(--ui-color-text, #0f172a)",
               }}
             >
               Every critical workflow anchored around one high-trust control
@@ -220,7 +220,7 @@ export const HeroControlCenter = () => (
               style={{
                 fontSize: 14,
                 lineHeight: "22px",
-                color: "#526175",
+                color: "var(--ui-color-muted, #526175)",
                 maxInlineSize: 620,
               }}
             >
@@ -235,7 +235,7 @@ export const HeroControlCenter = () => (
               style={{
                 padding: 14,
                 borderRadius: 18,
-                background: "rgba(255,255,255,0.74)",
+                background: "color-mix(in srgb, var(--ui-color-surface, #ffffff) 74%, transparent)",
                 border: "1px solid rgba(148,163,184,0.22)",
               }}
             >
@@ -244,7 +244,7 @@ export const HeroControlCenter = () => (
                   fontSize: 12,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "#526175",
+                  color: "var(--ui-color-muted, #526175)",
                   fontWeight: 700,
                 }}
               >
@@ -255,7 +255,7 @@ export const HeroControlCenter = () => (
                   fontSize: 24,
                   lineHeight: 1.1,
                   fontWeight: 760,
-                  color: "#0f172a",
+                  color: "var(--ui-color-text, #0f172a)",
                 }}
               >
                 182 tasks/min
@@ -265,7 +265,7 @@ export const HeroControlCenter = () => (
               style={{
                 padding: 14,
                 borderRadius: 18,
-                background: "rgba(255,255,255,0.74)",
+                background: "color-mix(in srgb, var(--ui-color-surface, #ffffff) 74%, transparent)",
                 border: "1px solid rgba(148,163,184,0.22)",
               }}
             >
@@ -274,7 +274,7 @@ export const HeroControlCenter = () => (
                   fontSize: 12,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "#526175",
+                  color: "var(--ui-color-muted, #526175)",
                   fontWeight: 700,
                 }}
               >
@@ -286,7 +286,7 @@ export const HeroControlCenter = () => (
                   alignItems: "center",
                   gap: 8,
                   fontSize: 16,
-                  color: "#0f172a",
+                  color: "var(--ui-color-text, #0f172a)",
                   fontWeight: 700,
                 }}
               >
@@ -319,7 +319,7 @@ export const HeroControlCenter = () => (
                     fontSize: 11,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    color: "#526175",
+                    color: "var(--ui-color-muted, #526175)",
                     fontWeight: 700,
                   }}
                 >
@@ -331,7 +331,7 @@ export const HeroControlCenter = () => (
                   Ready
                 </Box>
                 <Box
-                  style={{ fontSize: 12, lineHeight: "16px", color: "#526175" }}
+                  style={{ fontSize: 12, lineHeight: "16px", color: "var(--ui-color-muted, #526175)" }}
                 >
                   16 services coordinated
                 </Box>
@@ -372,7 +372,7 @@ export const LogoOrbit = () => (
     >
       <Flex justify="center">
         <div
-          style={{
+          style={{ color: '#1f2937',
             padding: 24,
             minBlockSize: 620,
             inlineSize: '100%',
@@ -413,15 +413,15 @@ export const LogoOrbit = () => (
               </Box>
             </Orbiter.Item>
             <Orbiter.Item aria-label="Notion">
-              <Box style={{ fontSize: 52, fontWeight: 800, lineHeight: 1, color: '#111111' }}>N</Box>
+              <Box style={{ fontSize: 52, fontWeight: 800, lineHeight: 1, color: 'var(--ui-color-text, #111111)' }}>N</Box>
             </Orbiter.Item>
             <Orbiter.Item aria-label="OpenAI">
-              <Box style={{ color: '#111111' }}>
+              <Box style={{ color: 'var(--ui-color-text, #111111)' }}>
                 <SparklesIcon size={40} />
               </Box>
             </Orbiter.Item>
             <Orbiter.Item aria-label="Drive">
-              <Box style={{ color: '#2563eb' }}>
+              <Box style={{ color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))' }}>
                 <FolderIcon size={42} />
               </Box>
             </Orbiter.Item>
@@ -444,15 +444,15 @@ export const LogoOrbit = () => (
               </Box>
             </Orbiter.Item>
             <Orbiter.Item aria-label="Notion secondary">
-              <Box style={{ fontSize: 40, fontWeight: 800, lineHeight: 1, color: '#111111' }}>N</Box>
+              <Box style={{ fontSize: 40, fontWeight: 800, lineHeight: 1, color: 'var(--ui-color-text, #111111)' }}>N</Box>
             </Orbiter.Item>
             <Orbiter.Item aria-label="OpenAI secondary">
-              <Box style={{ color: '#111111' }}>
+              <Box style={{ color: 'var(--ui-color-text, #111111)' }}>
                 <SparklesIcon size={34} />
               </Box>
             </Orbiter.Item>
             <Orbiter.Item aria-label="Drive secondary">
-              <Box style={{ color: '#2563eb' }}>
+              <Box style={{ color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))' }}>
                 <FolderIcon size={34} />
               </Box>
             </Orbiter.Item>
@@ -576,8 +576,8 @@ export const NetworkMap = () => {
   const actionButtonStyle: React.CSSProperties = {
     border: '1px solid #cbd5e1',
     borderRadius: 12,
-    background: '#ffffff',
-    color: '#0f172a',
+    background: 'var(--ui-color-surface, #ffffff)',
+    color: 'var(--ui-color-text, #0f172a)',
     padding: '10px 14px',
     fontWeight: 600,
     cursor: 'pointer'
@@ -615,7 +615,7 @@ export const NetworkMap = () => {
             >
               <Orbiter.Center>
                 <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>Network</Box>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>Network</Box>
                   <Box style={{ fontSize: 26, lineHeight: 1.02, fontWeight: 780 }}>Synced</Box>
                 </Box>
               </Orbiter.Center>
@@ -708,7 +708,7 @@ export const InteractionModes = () => {
               <Orbiter variant="soft" tone="brand" rings={1} radius={88} iconSize={44} path pauseOnItemHover>
                 <Orbiter.Center>
                   <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                    <Box style={{ fontSize: 11, lineHeight: '16px', color: '#526175' }}>Selected</Box>
+                    <Box style={{ fontSize: 11, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>Selected</Box>
                     <Box style={{ fontSize: 22, lineHeight: 1.04, fontWeight: 760 }}>{selected}</Box>
                   </Box>
                 </Orbiter.Center>
@@ -772,7 +772,7 @@ export const InteractiveOrbit = () => {
             >
               <Orbiter.Center>
                 <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>Selected</Box>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>Selected</Box>
                   <Box style={{ fontSize: 24, lineHeight: 1.04, fontWeight: 760 }}>{selected}</Box>
                 </Box>
               </Orbiter.Center>

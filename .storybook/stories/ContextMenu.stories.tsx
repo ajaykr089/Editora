@@ -153,7 +153,7 @@ function ContextZone(props: {
         borderRadius: 14,
         border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent)',
         color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 70%, var(--ui-color-text, #0f172a))',
-        background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+        background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
         fontSize: 17,
         lineHeight: '24px',
       }}
@@ -185,7 +185,7 @@ function ThemeTokenMatrixStory() {
   return (
     <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
       <div>
-        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Context Menu</div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: 'var(--ui-color-text, #111827)' }}>Context Menu</div>
       </div>
 
       <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
@@ -198,19 +198,19 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 22 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(240px, 1fr)) repeat(2, minmax(240px, 1fr))', gap: 18, alignItems: 'center' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Accent</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Accent</div>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Gray</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Gray</div>
             <div />
           </Grid>
           <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'center' }}>
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
             <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="blue" />
             <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="blue" tone="neutral" />
             <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="gray" />
             <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="gray" tone="neutral" />
 
-            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="blue" />
             <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="blue" tone="neutral" />
             <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="gray" />
@@ -223,11 +223,11 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 16 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(260px, 1fr))', gap: 18, alignItems: 'center' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
               <React.Fragment key={name}>
-                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)', textTransform: 'capitalize' }}>{name}</div>
                 <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette={name} />
                 <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette={name} />
               </React.Fragment>
@@ -240,11 +240,11 @@ function ThemeTokenMatrixStory() {
         <Grid style={{ gap: 18 }}>
           <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(280px, 1fr))', gap: 18, alignItems: 'center' }}>
             <div />
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
-            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Soft</div>
             {(['1', '2', '3'] as const).map((size) => (
               <React.Fragment key={size}>
-                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <div style={{ fontSize: 18, color: 'var(--ui-color-muted, #5b6574)' }}>Size {size}</div>
                 <ContextZone label="Right-click here" variant="solid" size={size} elevation="low" palette="blue" />
                 <ContextZone label="Right-click here" variant="soft" size={size} elevation="low" palette="blue" />
               </React.Fragment>
@@ -284,7 +284,7 @@ export const Playground: Story = {
                 minHeight: 220,
                 borderRadius: 18,
                 border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent)',
-                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--ui-color-surface, #ffffff)) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, var(--ui-color-surface, #ffffff)) 100%)',
                 display: 'grid',
                 placeItems: 'center',
                 padding: 24,
@@ -295,7 +295,7 @@ export const Playground: Story = {
                   <ShieldIcon size={16} />
                   <span style={{ fontWeight: 700 }}>Critical Escalation Workspace</span>
                 </Flex>
-                <div style={{ maxInlineSize: 560, color: '#526175', fontSize: 14, lineHeight: 1.6 }}>
+                <div style={{ maxInlineSize: 560, color: 'var(--ui-color-muted, #526175)', fontSize: 14, lineHeight: 1.6 }}>
                   Right-click anywhere in this surface to open the context menu. The component is portaled, typeahead-aware, submenu-capable, and theme-token driven.
                 </div>
                 <Badge tone="info">Right-click here</Badge>
@@ -359,7 +359,7 @@ export const StructuredComposition: Story = {
                 border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent)',
                 display: 'grid',
                 placeItems: 'center',
-                color: '#334155',
+                color: 'var(--ui-color-text, #334155)',
               }}
             >
               <Flex align="center" style={{ gap: 10 }}>

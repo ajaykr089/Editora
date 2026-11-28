@@ -67,11 +67,11 @@ export const Playground = (args: any) => {
             />
           </Box>
           <Box style={showcasePanelStyle}>
-            <strong style={{ color: '#0f172a' }}>Live state</strong>
-            <Box style={{ color: '#526175', fontSize: 13 }}>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Live state</strong>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               Visibility: {revealed ? 'visible' : 'hidden'}
             </Box>
-            <Box style={{ color: '#526175', fontSize: 13 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               Characters: {length}
             </Box>
             <p style={showcaseCaptionStyle}>Use `showStrength` for signup, recovery, or admin-reset flows where quality feedback is part of the product contract.</p>
@@ -184,8 +184,8 @@ export const EnterprisePolicy = () => {
           onStrengthChange={(detail) => setLabel(detail.label)}
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Current strength label</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>{label}</Box>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Current strength label</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>{label}</Box>
           <p style={showcaseCaptionStyle}>This is the integration path for products with their own password policy language or compliance requirements.</p>
         </Box>
       </Grid>
@@ -215,7 +215,7 @@ export const VariantGallery = () => {
       <Grid style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
         {variants.map(([variant, title]) => (
           <Box key={variant} style={{ display: 'grid', gap: 10 }}>
-            <strong style={{ color: '#0f172a', fontSize: 13 }}>{title}</strong>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)', fontSize: 13 }}>{title}</strong>
             {(() => {
               const field = (
                 <PasswordField
