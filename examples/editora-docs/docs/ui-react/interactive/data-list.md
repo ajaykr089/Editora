@@ -8,6 +8,31 @@ sidebar_label: "DataList"
 
 `DataList` shows label and value pairs: the details panel of a record, an order summary, metadata. It renders a native description list (`dl`, `dt`, `dd`), which screen readers announce as terms and their descriptions.
 
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <DataList>
+        <DataList.Item>
+          <DataList.Label>Status</DataList.Label>
+          <DataList.Value><Badge tone="success">Authorized</Badge></DataList.Value>
+        </DataList.Item>
+        <DataList.Item>
+          <DataList.Label>ID</DataList.Label>
+          <DataList.Value><code>u_2J89JSA4GJ</code></DataList.Value>
+        </DataList.Item>
+        <DataList.Item>
+          <DataList.Label>Email</DataList.Label>
+          <DataList.Value><a href="#mail">vlad@example.com</a></DataList.Value>
+        </DataList.Item>
+      </DataList>
+    </ThemeProvider>
+  );
+}
+```
+
 ```tsx
 import { Badge, Button, DataList } from '@editora/ui-react';
 

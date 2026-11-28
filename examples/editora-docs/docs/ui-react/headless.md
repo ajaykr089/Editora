@@ -8,6 +8,38 @@ sidebar_label: "Headless hooks"
 
 When you want Editora's behaviour but your own markup and styles (Tailwind, CSS modules, a design system of your own), use the headless hooks. They render nothing: you put their refs on your elements, and the elements get the WAI-ARIA roles and states, keyboard handling, focus management and dismissal. A `data-state` attribute (`open` / `closed`, `active` / `inactive`, `checked` / `unchecked`) is the styling hook, so `data-[state=open]:` works in Tailwind.
 
+## Try it
+
+```tsx live
+function Example() {
+  const [chosen, setChosen] = React.useState('nothing yet');
+  const menu = useHeadlessMenu({ onSelect: (item) => setChosen(item.textContent) });
+  const tabs = useHeadlessTabs({ defaultValue: 'account' });
+  return (
+    <ThemeProvider>
+      <div style={{ display: 'grid', gap: 16 }}>
+        <div>
+          <button ref={menu.triggerRef} style={{ minHeight: 28 }}>Actions</button>
+          <div ref={menu.menuRef} hidden style={{ background: 'var(--ui-color-surface)', border: '1px solid var(--ui-color-border)', borderRadius: 8, padding: 4, display: 'grid' }}>
+            <button data-menu-item style={{ minHeight: 28 }}>Edit</button>
+            <button data-menu-item style={{ minHeight: 28 }}>Archive</button>
+          </div>
+          <p>Chose: {chosen}</p>
+        </div>
+        <div>
+          <div ref={tabs.tablistRef} aria-label="Settings" style={{ display: 'flex', gap: 8 }}>
+            <button data-tab data-value="account" style={{ minHeight: 28 }}>Account</button>
+            <button data-tab data-value="billing" style={{ minHeight: 28 }}>Billing</button>
+          </div>
+          <div data-panel data-value="account">Account settings (try the arrow keys on the tabs)</div>
+          <div data-panel data-value="billing">Billing settings</div>
+        </div>
+      </div>
+    </ThemeProvider>
+  );
+}
+```
+
 They are built on the same primitives as the styled components (focus scope, dismissable layer, positioner), and the same behaviour is available without React from `@editora/ui-core/headless`.
 
 ## Dialog

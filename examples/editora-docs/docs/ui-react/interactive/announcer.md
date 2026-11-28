@@ -6,10 +6,25 @@ sidebar_label: "Announcer"
 
 # Announcer
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 Some changes are only visible: "3 results", "Saved", "Connection lost". `announce()` tells screen-reader users too.
+
+## Try it
+
+```tsx live
+function Example() {
+  const [count, setCount] = React.useState(0);
+  return (
+    <ThemeProvider>
+      <Flex style={{ gap: 8, alignItems: 'center' }}>
+        <Button onClick={() => setCount((value) => value + 1)}>Add a result</Button>
+        <Button variant="secondary" onClick={() => announce('Saved')}>announce("Saved")</Button>
+        <span>{count} results</span>
+        <Announcer quiet>{`${count} results`}</Announcer>
+      </Flex>
+    </ThemeProvider>
+  );
+}
+```
 
 ```tsx
 import { announce } from '@editora/ui-react'; // or '@editora/ui-core'

@@ -6,10 +6,29 @@ sidebar_label: "Typography"
 
 # Typography
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 Three components cover text: `Heading` for headings, `Text` for body copy, and `Prose` for HTML you do not write element by element (Markdown, a CMS field, Editora editor output).
+
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Box style={{ display: 'grid', gap: 10 }}>
+        <Heading level={2}>Billing</Heading>
+        <Text variant="lead">Everything you need to understand what you pay for.</Text>
+        <Text>Body text with <Text inline variant="code">inline code</Text>.</Text>
+        <Text variant="muted" size="sm">Last edited 2 minutes ago</Text>
+        <Prose>
+          <h3>Release notes</h3>
+          <ul><li>Faster search</li><li>Dark mode for charts</li></ul>
+          <blockquote>Prose styles HTML you do not write element by element.</blockquote>
+        </Prose>
+      </Box>
+    </ThemeProvider>
+  );
+}
+```
 
 ## Heading
 

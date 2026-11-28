@@ -6,8 +6,21 @@ sidebar_label: "AccessibleIcon"
 
 # AccessibleIcon
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Button variant="secondary">
+        <AccessibleIcon label="Close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m4 4 8 8m0-8-8 8" /></svg>
+        </AccessibleIcon>
+      </Button>
+    </ThemeProvider>
+  );
+}
+```
 
 ```tsx
 import { AccessibleIcon } from '@editora/ui-react';

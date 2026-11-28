@@ -6,10 +6,43 @@ sidebar_label: "Chat components"
 
 # Chat components
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 These components build a conversation UI: a human chat, or an AI agent that thinks, calls tools and asks questions. They handle the hard parts (scrolling while text streams, announcing new messages to screen readers, upload states) and leave messages, transport and model state to you.
+
+## Try it
+
+```tsx live
+function Example() {
+  const [messages, setMessages] = React.useState([
+    { id: '1', mine: true, text: 'Why does the build fail?' },
+    { id: '2', mine: false, text: 'Vite 7 needs Node 20.19 or later, and CI runs Node 18.' },
+  ]);
+  const [draft, setDraft] = React.useState('');
+  const send = () => {
+    if (!draft.trim()) return;
+    setMessages((list) => [...list, { id: String(list.length + 1), mine: true, text: draft }]);
+    setDraft('');
+  };
+  return (
+    <ThemeProvider>
+      <div style={{ display: 'grid', gap: 10, maxWidth: 560 }}>
+        <div style={{ height: 260, border: '1px solid var(--ui-color-border)', borderRadius: 12 }}>
+          <MessageScroller>
+            {messages.map((message) => (
+              <Message key={message.id} name={message.mine ? 'You' : 'Assistant'} align={message.mine ? 'end' : 'start'} scroll-anchor={message.mine ? '' : undefined}>
+                <Bubble variant={message.mine ? 'default' : 'ghost'}>{message.text}</Bubble>
+              </Message>
+            ))}
+          </MessageScroller>
+        </div>
+        <InputGroup>
+          <input aria-label="Message" value={draft} placeholder="Type and press Enter" onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} />
+          <Button slot="end" size="sm" onClick={send}>Send</Button>
+        </InputGroup>
+      </div>
+    </ThemeProvider>
+  );
+}
+```
 
 ```tsx
 import {

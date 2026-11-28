@@ -6,10 +6,25 @@ sidebar_label: "Spinner"
 
 # Spinner
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 `Spinner` shows that something is loading. It is a polite status: screen readers say its label ("Loading" unless you set `label`) when it appears.
+
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Flex style={{ gap: 20, alignItems: 'center' }}>
+        <Spinner />
+        <Spinner size="lg" tone="brand" label="Loading invoices" />
+        <Spinner size="lg" variant="dots" />
+        <Spinner size="lg" variant="bars" tone="success" />
+        <Button disabled><Spinner decorative size="sm" /> Saving</Button>
+      </Flex>
+    </ThemeProvider>
+  );
+}
+```
 
 ```tsx
 import { Spinner } from '@editora/ui-react';
