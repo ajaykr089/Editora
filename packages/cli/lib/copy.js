@@ -103,9 +103,12 @@ function closure(index, roots) {
 function destinationOf(file, dir) {
   // ui-core/src/components/ui-button.ts -> <dir>/core/components/ui-button.ts
   // ui-react/blocks/block-login.tsx    -> <dir>/blocks/block-login.tsx
+  // Any other registry's file keeps its own path:   components/Button.tsx -> <dir>/components/Button.tsx
   const [pkg, root, ...rest] = file.split("/");
   if (pkg === "ui-react" && root === "blocks") return path.join(dir, "blocks", ...rest);
-  return path.join(dir, pkg === "ui-core" ? "core" : pkg === "ui-react" ? "react" : pkg, ...rest);
+  if (pkg === "ui-core" && root === "src") return path.join(dir, "core", ...rest);
+  if (pkg === "ui-react" && root === "src") return path.join(dir, "react", ...rest);
+  return path.join(dir, ...file.split("/"));
 }
 
 function download(url, timeoutMs = 20000) {
@@ -278,7 +281,7 @@ async function copyComponents(names, options) {
       else if (recorded[relDest] && recorded[relDest] === currentHash) status = "update";
       else status = "skip";
     }
-    report.files.push({ file: relDest, status });
+    report.files.push(options.collect ? { file: relDest, status, content, hash } : { file: relDest, status });
     if (options.dryRun || status === "unchanged" || status === "skip") {
       if (status === "unchanged") recorded[relDest] = hash;
       continue;

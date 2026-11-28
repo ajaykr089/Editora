@@ -6,6 +6,8 @@ const path = require("path");
 const packageJson = require("../package.json");
 const { uiReactComponents, uiReactExportName, specialRegistry, groupOrder } = require("../lib/registry");
 const { copyComponents } = require("../lib/copy");
+const { buildRegistry } = require("../lib/registry-build");
+const { diffCopies } = require("../lib/diff");
 const {
   SUPPORTED_PACKAGE_MANAGERS,
   findProject,
@@ -23,6 +25,8 @@ Usage:
   editora init [name...]         Detect the project, pick what to set up, and install it
   editora list [search]          Show every name you can add
   editora mcp                    Run an MCP server so AI coding tools can find, read and copy components
+  editora diff [name...]         Compare copied components with their source: your edits and upstream changes
+  editora registry build <dir>   Make a copy index of your own components, for: add <name> --copy --registry <url>
 
 Examples:
   npx @editora/cli add editor
@@ -44,6 +48,10 @@ Options:
   --no-install           With --copy: only print the install command for the packages the files need
   --js                   With --copy: write JavaScript (.js/.jsx), compiled with the project's TypeScript
   --registry <url|file>  With --copy: copy from another registry's index (same format) instead of Editora's
+  --check                With diff: exit 1 when anything differs (for CI)
+  --out <file>           With registry build: where the index goes (default <dir>/registry.json)
+  --base-url <url>       With registry build: where the files are served from (default: next to the index)
+  --name <name>          With registry build: the registry's name, shown to people who copy from it
 
 Blocks (page sections, always copied): editora add block-login block-dashboard
   block-login, block-settings-profile, block-dashboard, block-app-shell, block-chat
@@ -231,6 +239,10 @@ function parseArgs(argv) {
     noInstall: false,
     js: undefined,
     registry: undefined,
+    check: false,
+    out: undefined,
+    baseUrl: undefined,
+    name: undefined,
     dir: undefined,
     prefix: undefined,
     source: undefined,
@@ -276,14 +288,19 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
+    if (arg === "--check") {
+      parsed.check = true;
+      index += 1;
+      continue;
+    }
     if (arg === "--copy" || arg === "--elements" || arg === "--overwrite") {
       parsed[arg.slice(2)] = true;
       index += 1;
       continue;
     }
-    const valueOption = ["--dir", "--prefix", "--source", "--registry"].find((name) => arg === name || arg.startsWith(`${name}=`));
+    const valueOption = ["--dir", "--prefix", "--source", "--registry", "--out", "--base-url", "--name"].find((name) => arg === name || arg.startsWith(`${name}=`));
     if (valueOption) {
-      const key = valueOption.slice(2);
+      const key = valueOption === "--base-url" ? "baseUrl" : valueOption.slice(2);
       const inline = arg.includes("=") ? arg.slice(arg.indexOf("=") + 1) : undefined;
       const next = argv[index + 1];
       if (inline) {
@@ -765,6 +782,10 @@ function run(argv, options = {}) {
     });
   }
 
+  if (args.command === "registry") return registryCommand(out, args);
+
+  if (args.command === "diff") return diff(out, args, options);
+
   if (args.command !== "add") {
     out.error(`Unknown command: ${args.command || "<missing>"}`);
     out.log(formatHelpText());
@@ -880,6 +901,82 @@ async function copy(out, args, options) {
     out.log(out.dim("(paths from the project root; editora.json remembers the folder and prefix for next time)"));
   }
   return 0;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// registry build
+
+function registryCommand(out, args) {
+  const [sub, dir] = args.targets;
+  if (sub !== "build" || !dir) {
+    out.error("Usage: editora registry build <dir> [--out <file>] [--base-url <url>] [--name <name>]");
+    return 1;
+  }
+  const outFile = path.resolve(args.out || path.join(dir, "registry.json"));
+  let result;
+  try {
+    result = buildRegistry(dir, { baseUrl: args.baseUrl, name: args.name, exclude: [outFile] });
+  } catch (error) {
+    out.error(`${out.red("Could not build the registry:")} ${error.message}`);
+    return 1;
+  }
+  const { index, warnings } = result;
+  const count = (obj) => Object.keys(obj).length;
+  if (!args.dryRun) {
+    require("fs").mkdirSync(path.dirname(outFile), { recursive: true });
+    require("fs").writeFileSync(outFile, `${JSON.stringify(index, null, 2)}\n`);
+  }
+  out.log(`${out.bold(args.dryRun ? "Would write" : "Wrote")} ${path.relative(process.cwd(), outFile) || outFile}: ${count(index.files)} files, ${count(index.react)} React components, ${count(index.elements)} elements, ${count(index.blocks)} blocks.`);
+  for (const warning of warnings) out.log(`  ${out.yellow("!")} ${warning}`);
+  const names = [...Object.keys(index.react), ...Object.keys(index.elements), ...Object.keys(index.blocks)].slice(0, 3);
+  if (names.length) {
+    out.log("");
+    out.log(`Serve ${dir} with the index ${args.baseUrl ? `(files from ${args.baseUrl})` : "next to its files"}, then:`);
+    out.log(`  npx @editora/cli add ${names.join(" ")} --copy --registry <url of ${path.basename(outFile)}>`);
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// diff
+
+async function diff(out, args, options) {
+  const cwd = options.cwd || process.cwd();
+  const project = findProject(cwd);
+  if (!project) {
+    out.error(`No package.json in ${cwd} or any folder above it.`);
+    return 1;
+  }
+  let report;
+  try {
+    report = await diffCopies(args.targets, { projectDir: project.dir, source: args.source, registry: args.registry, indexFile: options.copyIndexFile, fetch: options.fetch });
+  } catch (error) {
+    out.error(`${out.red("Could not diff:")} ${error.message}`);
+    return 1;
+  }
+  if (args.json) {
+    out.log(JSON.stringify(report, null, 2));
+    return args.check && report.files.some((f) => f.status !== "up-to-date") ? 1 : 0;
+  }
+  const marks = { "up-to-date": out.dim("="), update: out.cyan("~"), local: out.green("*"), conflict: out.red("!"), missing: out.yellow("-"), new: out.cyan("+") };
+  const notes = { update: "upstream changed; copying again updates it", local: "you changed it", conflict: "you and upstream both changed it", missing: "deleted here", new: "new upstream file" };
+  out.log("");
+  out.log(`${out.bold("Copied components:")} ${report.components.join(", ")}`);
+  out.log("");
+  for (const file of report.files) out.log(`  ${marks[file.status]} ${file.file}${notes[file.status] ? out.dim(`  (${notes[file.status]})`) : ""}`);
+  for (const file of report.files) {
+    if (!file.patch) continue;
+    out.log("");
+    for (const line of file.patch.replace(/\n$/, "").split("\n")) {
+      out.log(line.startsWith("+") && !line.startsWith("+++") ? out.green(line) : line.startsWith("-") && !line.startsWith("---") ? out.red(line) : line.startsWith("@@") ? out.cyan(line) : line);
+    }
+  }
+  out.log("");
+  out.log(out.dim(Object.entries(report.counts).map(([status, n]) => `${n} ${status}`).join(", ")));
+  const updatable = report.files.filter((f) => f.status === "update" || f.status === "new" || f.status === "missing").length;
+  if (updatable) out.log(`Take upstream changes to files you have not edited: ${out.bold(`editora add ${report.components.join(" ")} --copy`)}`);
+  if (report.counts.conflict) out.log(`Files changed on both sides are kept; merge them by hand, or add ${out.bold("--overwrite")} to take upstream.`);
+  return args.check && report.files.some((f) => f.status !== "up-to-date") ? 1 : 0;
 }
 
 if (require.main === module) {
