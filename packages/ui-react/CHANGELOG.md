@@ -1,5 +1,21 @@
 # Change Log
 
+## 0.8.0
+
+### Minor Changes
+
+- 2d54245: `Chart` has two new types: `pie` (filled wedges, one per point) and `radar` (one spoke per label and one polygon per series, for comparing several series across the same dimensions). Series and slice colours now come from `--ui-chart-1` to `--ui-chart-6`, which a theme can set; the defaults are six distinct hues. Before, the palette used the status colours, and in the default theme primary and warning are both amber, so the 1st and 3rd slices of a donut were the same colour.
+- b7ecc22: New `DataList` (and `ui-data-list`): label and value pairs (record details, order summaries, metadata) as a native description list, which screen readers announce as terms and their descriptions. Horizontal or vertical, sizes, a fixed label column (`labelWidth`), `divided` rows, label alignment, and an `items` shortcut for plain text; a horizontal list stacks when its container is narrower than 30rem. `editora add data-list` knows the new name.
+- 4cab00f: Headless behaviour, for your own markup and styles: `createDialog`, `createPopover`, `createMenu`, `createTabs` and `createListbox` (`@editora/ui-core/headless`) and the React hooks `useHeadlessDialog`, `useHeadlessPopover`, `useHeadlessMenu`, `useHeadlessTabs` and `useHeadlessListbox`. Each sets the WAI-ARIA roles and states and handles keyboard, focus (trap and return), dismissal and positioning, with `data-state` for styling, built on the same primitives as the styled components. See the "Headless hooks" docs page.
+
+### Patch Changes
+
+- Updated dependencies [2d54245]
+- Updated dependencies [b7ecc22]
+- Updated dependencies [4cab00f]
+- Updated dependencies [7c363b8]
+  - @editora/ui-core@0.8.0
+
 ## 0.7.0
 
 ### Minor Changes

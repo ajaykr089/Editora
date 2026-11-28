@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.3.0
+
+### Minor Changes
+
+- 797d36a: `editora add block-login` (and `block-settings-profile`, `block-dashboard`, `block-app-shell`, `block-chat`) copies a ready-made page section built from `@editora/ui-react` into your project. `--copy --js` writes JavaScript instead of TypeScript, compiled with the project's own TypeScript, and is remembered. `--copy --registry <url|file>` copies from another registry's index in the same format, with every file checked against its hash. `editora.json` no longer records version numbers, which were those of the release before the copied sources; it keeps the commit.
+- aa590a1: `editora mcp` runs a Model Context Protocol server over stdio for AI coding tools (Claude Code, Cursor, VS Code, Windsurf): `list_components`, `get_component_docs` (the API reference of a component), `get_component_source` (the files a copy would write), `copy_components` (as `add --copy`) and `install_command`. Add it with `{ "command": "npx", "args": ["-y", "@editora/cli", "mcp"] }`.
+
+### Patch Changes
+
+- b7ecc22: New `DataList` (and `ui-data-list`): label and value pairs (record details, order summaries, metadata) as a native description list, which screen readers announce as terms and their descriptions. Horizontal or vertical, sizes, a fixed label column (`labelWidth`), `divided` rows, label alignment, and an `items` shortcut for plain text; a horizontal list stacks when its container is narrower than 30rem. `editora add data-list` knows the new name.
+
 ## 1.2.0
 
 ### Minor Changes
