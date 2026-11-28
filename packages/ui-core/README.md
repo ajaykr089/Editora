@@ -800,6 +800,12 @@ Working examples:
 [guide](https://github.com/ajaykr089/Editora/blob/main/packages/ui-core/docs/FRAMEWORK_DIRECT_USAGE.md). For React,
 use [`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react).
 
+Typed templates: add `"types": ["@editora/ui-core/vue"]` (Vue, `vue-tsc`) or `"types": ["@editora/ui-core/svelte"]`
+(Svelte, `svelte-check`) to your tsconfig, and attribute values and event handlers are checked. The package also ships
+a [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-manifest) (`custom-elements.json`, linked
+from `package.json`) and VS Code HTML completion data (`html-custom-data.json`). See
+[Frameworks](https://editora-ecosystem.netlify.app/docs/ui-core/frameworks).
+
 `@editora/ui-vue`, `@editora/ui-svelte` and `@editora/ui-angular` are deprecated: they never grew past a few stub
 components. Use `@editora/ui-core` directly instead.
 
