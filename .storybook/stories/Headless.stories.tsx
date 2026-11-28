@@ -14,11 +14,11 @@ export const Dialog: Story = {
     const dialog = useHeadlessDialog();
     return (
       <div>
-        <button ref={dialog.triggerRef}>Delete file</button>
+        <button ref={dialog.triggerRef} style={{ minHeight: 28 }}>Delete file</button>
         <div ref={dialog.contentRef} hidden style={{ ...panel, position: 'fixed', inset: 0, margin: 'auto', height: 'fit-content', width: 320 }}>
           <h2 style={{ marginTop: 0 }}>Delete file?</h2>
           <p data-dialog-description>This cannot be undone.</p>
-          <button data-dialog-close>Cancel</button>
+          <button data-dialog-close style={{ minHeight: 28 }}>Cancel</button>
         </div>
       </div>
     );
@@ -31,11 +31,11 @@ export const Menu: Story = {
     const menu = useHeadlessMenu({ onSelect: (item) => setLast(item.textContent || '') });
     return (
       <div>
-        <button ref={menu.triggerRef}>Actions</button>
+        <button ref={menu.triggerRef} style={{ minHeight: 28 }}>Actions</button>
         <div ref={menu.menuRef} hidden style={{ ...panel, padding: 4, display: 'grid' }}>
-          <button data-menu-item>Edit</button>
-          <button data-menu-item aria-disabled="true">Duplicate</button>
-          <button data-menu-item>Archive</button>
+          <button data-menu-item style={{ minHeight: 28 }}>Edit</button>
+          <button data-menu-item aria-disabled="true" style={{ minHeight: 28 }}>Duplicate</button>
+          <button data-menu-item style={{ minHeight: 28 }}>Archive</button>
         </div>
         <p>{last ? `Chose ${last}` : 'Nothing chosen'}</p>
       </div>
@@ -49,8 +49,9 @@ export const Tabs: Story = {
     return (
       <div>
         <div ref={tabs.tablistRef} aria-label="Settings" style={{ display: 'flex', gap: 8 }}>
-          <button data-tab data-value="account">Account</button>
-          <button data-tab data-value="billing">Billing</button>
+          {/* 24px minimum target size (WCAG 2.5.8): plain buttons are smaller. */}
+          <button data-tab data-value="account" style={{ minHeight: 28, padding: '0 12px' }}>Account</button>
+          <button data-tab data-value="billing" style={{ minHeight: 28, padding: '0 12px' }}>Billing</button>
         </div>
         <div data-panel data-value="account" style={panel}>Account settings</div>
         <div data-panel data-value="billing" style={panel}>Billing settings</div>
@@ -65,9 +66,9 @@ export const Listbox: Story = {
     return (
       <div>
         <div ref={list.listboxRef} aria-label="Labels" style={{ ...panel, padding: 4, width: 200 }}>
-          <div data-option data-value="bug">Bug</div>
-          <div data-option data-value="feature">Feature</div>
-          <div data-option data-value="docs">Docs</div>
+          <div data-option data-value="bug" style={{ minHeight: 28 }}>Bug</div>
+          <div data-option data-value="feature" style={{ minHeight: 28 }}>Feature</div>
+          <div data-option data-value="docs" style={{ minHeight: 28 }}>Docs</div>
         </div>
         <p>Selected: {list.value.join(', ') || 'none'}</p>
       </div>
