@@ -150,6 +150,7 @@ import './components/ui-trace';
 import './components/ui-trace-item';
 import './components/ui-question';
 import './components/ui-questionnaire';
+import './components/ui-data-list';
 import { showToast } from './toast';
 
 export { showToast };
@@ -333,6 +334,8 @@ export { UIWizard } from './components/ui-wizard';
 export { UIQuickActions } from './components/ui-quick-actions';
 export { UIRating } from './components/ui-rating';
 export { UIOdometer } from './components/ui-odometer';
+export { UIDataList } from './components/ui-data-list';
+export type { DataListItem } from './components/ui-data-list';
 export { UIMessage } from './components/ui-message';
 export { UIBubble } from './components/ui-bubble';
 export { UIBubbleGroup } from './components/ui-bubble-group';
