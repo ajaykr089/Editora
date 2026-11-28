@@ -3,6 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import {
   useHeadlessAccordion,
   useHeadlessCheckbox,
+  useHeadlessCombobox,
+  useHeadlessContextMenu,
+  useHeadlessNavigationMenu,
+  useHeadlessScrollArea,
+  useHeadlessSelect,
+  useHeadlessToaster,
   useHeadlessRadioGroup,
   useHeadlessSlider,
   useHeadlessSwitch,
@@ -219,6 +225,124 @@ export const FormControls: Story = {
         </div>
         <output>{sent}</output>
       </form>
+    );
+  },
+};
+
+const option: React.CSSProperties = { padding: '6px 10px', borderRadius: 6, cursor: 'default', minHeight: 24 };
+const popup: React.CSSProperties = { ...panel, padding: 4, minWidth: 160 };
+
+export const Select: Story = {
+  render: function Render() {
+    const select = useHeadlessSelect({ placeholder: 'Choose a fruit' });
+    return (
+      <div>
+        <button ref={select.triggerRef} style={{ ...btn, minWidth: 180, textAlign: 'start' }}><span data-select-value /> ▾</button>
+        <div ref={select.listboxRef} hidden aria-label="Fruit" style={popup}>
+          {['Apple', 'Banana', 'Cherry', 'Grape'].map((f) => <div key={f} data-option data-value={f.toLowerCase()} style={option}>{f}</div>)}
+        </div>
+        <p>Value: {select.value || 'none'}</p>
+      </div>
+    );
+  },
+};
+
+export const Combobox: Story = {
+  render: function Render() {
+    const combo = useHeadlessCombobox();
+    return (
+      <div>
+        <label htmlFor="country">Country</label>{' '}
+        <input id="country" ref={combo.inputRef} style={{ minHeight: 28 }} />
+        <div ref={combo.listboxRef} hidden style={popup}>
+          {['France', 'Germany', 'Greece', 'India', 'Italy', 'Japan'].map((c) => <div key={c} data-option data-value={c.toLowerCase()} style={option}>{c}</div>)}
+          <div data-combobox-empty style={option}>No matches</div>
+        </div>
+        <p>Value: {combo.value || 'none'}</p>
+      </div>
+    );
+  },
+};
+
+export const ContextMenu: Story = {
+  render: function Render() {
+    const [last, setLast] = React.useState('');
+    const ctx = useHeadlessContextMenu({ onSelect: (item) => setLast(item.textContent || '') });
+    return (
+      <div>
+        <div ref={ctx.targetRef} tabIndex={0} style={{ ...panel, height: 120, display: 'grid', placeItems: 'center', borderStyle: 'dashed' }}>
+          Right click, long press, or focus and press Shift+F10
+        </div>
+        <div ref={ctx.menuRef} hidden style={{ ...popup, display: 'grid' }}>
+          <button data-menu-item style={btn}>Copy</button>
+          <button data-menu-item style={btn}>Paste</button>
+          <button data-menu-item aria-disabled="true" style={btn}>Delete</button>
+        </div>
+        <p>{last ? `Chose ${last}` : 'Nothing chosen'}</p>
+      </div>
+    );
+  },
+};
+
+export const NavigationMenu: Story = {
+  render: function Render() {
+    const nav = useHeadlessNavigationMenu();
+    const link: React.CSSProperties = { display: 'block', padding: '6px 8px', minHeight: 24 };
+    return (
+      <nav ref={nav.rootRef} aria-label="Main">
+        <ul style={{ display: 'flex', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}>
+          <li data-nav-item data-value="products" style={{ position: 'relative' }}>
+            <button data-nav-trigger style={btn}>Products ▾</button>
+            <div data-nav-content style={{ ...popup, position: 'absolute', top: '100%', marginTop: 4, zIndex: 1 }}>
+              <a href="#editor" style={link}>Editor</a>
+              <a href="#charts" style={link}>Charts</a>
+            </div>
+          </li>
+          <li data-nav-item data-value="docs" style={{ position: 'relative' }}>
+            <button data-nav-trigger style={btn}>Docs ▾</button>
+            <div data-nav-content style={{ ...popup, position: 'absolute', top: '100%', marginTop: 4, zIndex: 1 }}>
+              <a href="#guide" style={link}>Guide</a>
+              <a href="#api" style={link}>API</a>
+            </div>
+          </li>
+          <li data-nav-item><a href="#blog" style={{ ...link, lineHeight: '16px' }}>Blog</a></li>
+        </ul>
+      </nav>
+    );
+  },
+};
+
+export const ScrollArea: Story = {
+  render: function Render() {
+    const area = useHeadlessScrollArea();
+    return (
+      <div ref={area.rootRef} style={{ position: 'relative', width: 280, height: 180, ...panel, padding: 0, overflow: 'hidden' }}>
+        <div data-scroll-viewport aria-label="Release notes" style={{ height: '100%', padding: 12, boxSizing: 'border-box' }}>
+          {Array.from({ length: 20 }, (_, i) => <p key={i} style={{ margin: '0 0 8px' }}>Release note {i + 1}</p>)}
+        </div>
+        <div data-scrollbar="vertical" style={{ position: 'absolute', top: 2, right: 2, bottom: 2, width: 8 }}>
+          <div data-scroll-thumb style={{ width: 8, borderRadius: 4, background: 'rgba(0,0,0,.35)' }} />
+        </div>
+      </div>
+    );
+  },
+};
+
+export const Toaster: Story = {
+  render: function Render() {
+    const toaster = useHeadlessToaster<{ title: string }>();
+    return (
+      <div>
+        <button style={btn} onClick={() => toaster.toast({ title: `Saved at ${new Date().toLocaleTimeString()}` })}>Save</button>
+        <ol ref={toaster.regionRef} style={{ position: 'fixed', right: 16, bottom: 16, display: 'grid', gap: 8, listStyle: 'none', margin: 0, padding: 0, width: 280 }}>
+          {toaster.toasts.map((t) => (
+            <li key={t.id} ref={toaster.toastRef(t.id)} style={{ ...panel, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transform: 'translateX(var(--toast-swipe, 0))' }}>
+              {t.title}
+              <button data-toast-close aria-label="Close" style={btn}>×</button>
+            </li>
+          ))}
+        </ol>
+      </div>
     );
   },
 };

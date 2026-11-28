@@ -1,6 +1,6 @@
 ---
 title: "Headless hooks"
-description: "Dialog, popover, menu, tabs, listbox, collapsible, accordion, tooltip, hover card, toggle group, toolbar, checkbox, switch, radio group and slider behaviour on your own markup and styles: WAI-ARIA roles, keyboard, focus and dismissal, no custom elements."
+description: "Dialog, popover, menu, tabs, listbox, collapsible, accordion, tooltip, hover card, toggle group, toolbar, checkbox, switch, radio group, slider, select, combobox, context menu, navigation menu, scroll area and toast behaviour on your own markup and styles: WAI-ARIA roles, keyboard, focus and dismissal, no custom elements."
 sidebar_label: "Headless hooks"
 ---
 
@@ -228,6 +228,93 @@ One thumb or two (a range). Thumbs are `role="slider"` with `aria-valuenow`, `ar
 
 Give any of these a `name` and they join the surrounding `<form>`: a hidden input carries the value into `FormData` and form submission (a range slider submits `name[]` twice), `required` works with the browser's validation, and a reset puts them back to their defaults.
 
+## Select
+
+```tsx
+const fruit = useHeadlessSelect({ placeholder: 'Choose a fruit', name: 'fruit' });
+<button ref={fruit.triggerRef}><span data-select-value /> ▾</button>
+<div ref={fruit.listboxRef} hidden aria-label="Fruit" className="rounded-lg border bg-white p-1 shadow">
+  <div data-option data-value="apple" className="data-[highlighted]:bg-gray-100">Apple</div>
+  <div data-option data-value="cherry">Cherry</div>
+</div>
+```
+
+This is the WAI-ARIA "select-only combobox". Focus stays on the trigger, and `aria-activedescendant` points at the active option. While it is closed, the arrow keys, Enter and Space open it, and typing jumps to a matching option. While it is open, the arrows, Home/End, PageUp/PageDown and typing move; Enter, Space or a click choose; Escape closes; Tab chooses and moves on. The chosen option's text goes into `data-select-value`, and the trigger has `data-placeholder` while nothing is chosen. `value` / `defaultValue` / `onValueChange`, `disabled`, `required`, `name`.
+
+## Combobox
+
+```tsx
+const country = useHeadlessCombobox();
+<label htmlFor="country">Country</label>
+<input id="country" ref={country.inputRef} />
+<div ref={country.listboxRef} hidden>
+  <div data-option data-value="fr">France</div>
+  <div data-option data-value="gr">Greece</div>
+  <div data-combobox-empty>No matches</div>
+</div>
+```
+
+An editable combobox with list autocomplete. Typing opens the list and filters it, and the first match becomes active. Arrow Down and Arrow Up move through the list while focus stays in the input. Enter chooses and puts the option's text in the input; a click also chooses. Escape closes the list, or clears the text when the list is already closed. Blur closes it. With `filter="none"` you filter the options yourself in `onInputChange` (for example from a server) and call `refresh()`.
+
+## Context menu
+
+```tsx
+const ctx = useHeadlessContextMenu({ onSelect: (item) => run(item.dataset.action) });
+<div ref={ctx.targetRef} tabIndex={0}>Right click here</div>
+<div ref={ctx.menuRef} hidden className="rounded-lg border bg-white p-1 shadow">
+  <button data-menu-item data-action="copy">Copy</button>
+</div>
+```
+
+The menu opens at the pointer on right click, and on a long press with touch (iOS Safari has no `contextmenu` event). From the keyboard, Shift+F10 or the ContextMenu key opens it while focus is in the target. The menu then has the menu button's keyboard, and focus returns to where it was when the menu closes.
+
+## Navigation menu
+
+```tsx
+const nav = useHeadlessNavigationMenu();
+<nav ref={nav.rootRef} aria-label="Main">
+  <ul>
+    <li data-nav-item data-value="products">
+      <button data-nav-trigger>Products</button>
+      <div data-nav-content><a href="/editor">Editor</a> <a href="/charts">Charts</a></div>
+    </li>
+    <li data-nav-item><a href="/blog">Blog</a></li>
+  </ul>
+</nav>
+```
+
+This is site navigation in the disclosure pattern, the one WAI-ARIA recommends for websites. It is not `role="menu"`: the links stay links. Each trigger is a button with `aria-expanded`, and one panel is open at a time. Hovering opens a panel after `openDelay` (200 ms; `-1` means click only), and moving to another entry switches at once. Escape closes the panel and returns focus to its trigger; focus or a click leaving the nav closes it too. Left and Right move between entries, and Arrow Down enters a panel, where Up and Down move between its links.
+
+## Scroll area
+
+```tsx
+const area = useHeadlessScrollArea({ type: 'hover' });
+<div ref={area.rootRef} className="relative h-48 overflow-hidden">
+  <div data-scroll-viewport aria-label="Release notes" className="h-full">…</div>
+  <div data-scrollbar="vertical" className="absolute inset-y-0 right-0 w-2 data-[state=hidden]:opacity-0">
+    <div data-scroll-thumb className="w-2 rounded bg-black/30" />
+  </div>
+</div>
+```
+
+Your own scrollbars over native scrolling. The viewport scrolls as usual with the wheel, touch, the keyboard and assistive technology. Its native scrollbar is hidden, and your thumbs are sized and moved to match. Dragging a thumb scrolls, and pressing a track pages. The viewport is focusable so keyboard users can scroll it; give it an `aria-label`. The tracks are `aria-hidden`. `type` decides when the tracks have `data-state="visible"`: `hover` (the default), `scroll`, `auto` or `always`.
+
+## Toast
+
+```tsx
+const toaster = useHeadlessToaster<{ title: string }>();
+<button onClick={() => toaster.toast({ title: 'Saved' })}>Save</button>
+<ol ref={toaster.regionRef} className="fixed bottom-4 right-4 grid gap-2">
+  {toaster.toasts.map((t) => (
+    <li key={t.id} ref={toaster.toastRef(t.id)} className="translate-x-[var(--toast-swipe,0)]">
+      {t.title} <button data-toast-close aria-label="Close">×</button>
+    </li>
+  ))}
+</ol>
+```
+
+The list becomes a region named "Notifications (F8)", and F8 moves focus to the toasts. Each toast's text is read out through live regions that exist before any toast appears, which is what makes screen readers announce it reliably; close buttons are left out of the announcement. Timers pause while the pointer or focus is in the region and while the window is in the background. Escape dismisses the focused toast, a `data-toast-close` button dismisses its own, and a swipe dismisses one with touch or mouse: `--toast-swipe` follows the drag, and `swipeDirection` and `swipeThreshold` tune it. If a toast has an exit animation, it is removed when the animation ends. `toast(data, { duration, type: 'background' })` announces politely.
+
 ## Without React
 
 ```ts
@@ -237,5 +324,6 @@ const dialog = createDialog({ trigger: button, content: panel, overlay: backdrop
 const menu = createMenu({ trigger: menuButton, menu: menuPanel, onSelect: (item) => console.log(item) });
 // dialog.open(), dialog.close(), dialog.destroy() …
 // Also: createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar,
-// createCheckbox, createSwitch, createRadioGroup, createSlider
+// createCheckbox, createSwitch, createRadioGroup, createSlider,
+// createSelect, createCombobox, createContextMenu, createNavigationMenu, createScrollArea, createToaster
 ```

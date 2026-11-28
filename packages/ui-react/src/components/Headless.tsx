@@ -15,6 +15,18 @@ import {
   createSwitch,
   createRadioGroup,
   createSlider,
+  createContextMenu,
+  createSelect,
+  createCombobox,
+  createNavigationMenu,
+  createScrollArea,
+  createToaster,
+  type ContextMenuController,
+  type SelectController,
+  type ComboboxController,
+  type NavigationMenuController,
+  type ScrollAreaController,
+  type ToasterController,
   type CheckboxController,
   type CheckedState,
   type RadioGroupController,
@@ -906,4 +918,405 @@ export function useHeadlessSlider(options: UseHeadlessSliderOptions = {}): UseHe
   }, [latest, setInner]);
 
   return { rootRef, value, setValue };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+/** Wires a string-valued controller (select, combobox, navigation menu) to controlled or uncontrolled state. */
+function useStringController<C extends { value: string; setValue(v: string): void; destroy(): void }>(
+  ready: boolean,
+  options: { value?: string; defaultValue?: string; onValueChange?: (value: string) => void },
+  create: (defaultValue: string, onValueChange: (next: string) => void) => C,
+  deps: unknown[],
+): { value: string; setValue: (value: string) => void; controller: React.MutableRefObject<C | null> } {
+  const [value, setInner, controlled] = useControllable(options.value, options.defaultValue ?? '');
+  const latest = useLatest({ options, value, controlled });
+  const controller = React.useRef<C | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!ready) return undefined;
+    const ctl = create(latest.current.value, (next) => {
+      if (!latest.current.controlled) setInner(next);
+      latest.current.options.onValueChange?.(next);
+      queueMicrotask(() => {
+        if (latest.current.controlled && controller.current && controller.current.value !== latest.current.value) {
+          controller.current.setValue(latest.current.value);
+        }
+      });
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [ready, ...deps]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (controller.current && controller.current.value !== value) controller.current.setValue(value);
+  }, [value]);
+
+  const setValue = React.useCallback((next: string) => {
+    if (latest.current.controlled) latest.current.options.onValueChange?.(next);
+    else setInner(next);
+  }, [latest, setInner]);
+
+  return { value, setValue, controller };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessContextMenuOptions = {
+  onSelect?: (item: HTMLElement) => void;
+  onOpenChange?: (open: boolean) => void;
+  closeOnSelect?: boolean;
+  /** Touch long press, ms (default 700; 0 turns it off). */
+  longPressDelay?: number;
+};
+
+export type UseHeadlessContextMenuResult = {
+  /** The area that opens the menu. Make it focusable (`tabIndex={0}`) so Shift+F10 works there. */
+  targetRef: ElementRef;
+  /** The menu panel (`hidden` at first); items are `data-menu-item`. */
+  menuRef: ElementRef;
+  open: boolean;
+  close: () => void;
+  refresh: () => void;
+};
+
+/** Context menu behaviour: right click, Shift+F10, the ContextMenu key or a long press opens a WAI-ARIA menu at the pointer. */
+export function useHeadlessContextMenu(options: UseHeadlessContextMenuOptions = {}): UseHeadlessContextMenuResult {
+  const [target, targetRef] = useElement();
+  const [menu, menuRef] = useElement();
+  const [open, setOpen] = React.useState(false);
+  const latest = useLatest(options);
+  const controller = React.useRef<ContextMenuController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!target || !menu) return undefined;
+    const ctl = createContextMenu({
+      target,
+      menu,
+      closeOnSelect: options.closeOnSelect,
+      longPressDelay: options.longPressDelay,
+      onSelect: (item) => latest.current.onSelect?.(item),
+      onOpenChange: (next) => {
+        setOpen(next);
+        latest.current.onOpenChange?.(next);
+      },
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [target, menu, options.closeOnSelect, options.longPressDelay]);
+
+  return {
+    targetRef,
+    menuRef,
+    open,
+    close: React.useCallback(() => controller.current?.close(), []),
+    refresh: React.useCallback(() => controller.current?.refresh(), []),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessSelectOptions = {
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
+  placeholder?: string;
+  placement?: Parameters<typeof createSelect>[0]['placement'];
+  offset?: number;
+  disabled?: boolean;
+  required?: boolean;
+  name?: string;
+};
+
+export type UseHeadlessSelectResult = {
+  /** A `<button>`; a `data-select-value` element inside it shows the chosen text. */
+  triggerRef: ElementRef;
+  /** The popup (`hidden` at first) with `data-option` children carrying `data-value`. */
+  listboxRef: ElementRef;
+  value: string;
+  setValue: (value: string) => void;
+  open: boolean;
+  /** Call after rendering a different set of options. */
+  refresh: () => void;
+};
+
+/** Select behaviour (select-only combobox): focus stays on the trigger, arrows/typeahead, form value and reset. */
+export function useHeadlessSelect(options: UseHeadlessSelectOptions = {}): UseHeadlessSelectResult {
+  const [trigger, triggerRef] = useElement();
+  const [listbox, listboxRef] = useElement();
+  const [open, setOpen] = React.useState(false);
+  const onOpenChange = useLatest(options.onOpenChange);
+  const state = useStringController<SelectController>(
+    !!trigger && !!listbox,
+    options,
+    (defaultValue, onValueChange) => createSelect({
+      trigger: trigger!,
+      listbox: listbox!,
+      defaultValue,
+      onValueChange,
+      placeholder: options.placeholder,
+      placement: options.placement,
+      offset: options.offset,
+      disabled: options.disabled,
+      required: options.required,
+      name: options.name,
+      onOpenChange: (next) => {
+        setOpen(next);
+        onOpenChange.current?.(next);
+      },
+    }),
+    [trigger, listbox, options.placeholder, options.placement, options.offset, options.required, options.name],
+  );
+
+  useIsomorphicLayoutEffect(() => {
+    state.controller.current?.setDisabled(!!options.disabled);
+  }, [options.disabled]);
+
+  return {
+    triggerRef,
+    listboxRef,
+    value: state.value,
+    setValue: state.setValue,
+    open,
+    refresh: React.useCallback(() => state.controller.current?.refresh(), [state.controller]),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessComboboxOptions = {
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  /** Every keystroke: filter your options here when `filter="none"`. */
+  onInputChange?: (text: string) => void;
+  onOpenChange?: (open: boolean) => void;
+  filter?: 'auto' | 'none';
+  openOnFocus?: boolean;
+  placement?: Parameters<typeof createCombobox>[0]['placement'];
+  offset?: number;
+  name?: string;
+};
+
+export type UseHeadlessComboboxResult = {
+  /** The `<input>` (give it a `<label>`). */
+  inputRef: (el: HTMLInputElement | null) => void;
+  /** The popup (`hidden` at first) with `data-option` children; `data-combobox-empty` shows when nothing matches. */
+  listboxRef: ElementRef;
+  value: string;
+  setValue: (value: string) => void;
+  open: boolean;
+  /** Call after rendering different options (with `filter="none"`). */
+  refresh: () => void;
+};
+
+/** Combobox behaviour: an input with list autocomplete, `aria-activedescendant`, Enter to choose, Escape to close or clear. */
+export function useHeadlessCombobox(options: UseHeadlessComboboxOptions = {}): UseHeadlessComboboxResult {
+  const [input, inputRef] = useElement();
+  const [listbox, listboxRef] = useElement();
+  const [open, setOpen] = React.useState(false);
+  const callbacks = useLatest({ onOpenChange: options.onOpenChange, onInputChange: options.onInputChange });
+  const state = useStringController<ComboboxController>(
+    !!input && !!listbox,
+    options,
+    (defaultValue, onValueChange) => createCombobox({
+      input: input as HTMLInputElement,
+      listbox: listbox!,
+      defaultValue,
+      onValueChange,
+      filter: options.filter,
+      openOnFocus: options.openOnFocus,
+      placement: options.placement,
+      offset: options.offset,
+      name: options.name,
+      onInputChange: (text) => callbacks.current.onInputChange?.(text),
+      onOpenChange: (next) => {
+        setOpen(next);
+        callbacks.current.onOpenChange?.(next);
+      },
+    }),
+    [input, listbox, options.filter, options.openOnFocus, options.placement, options.offset, options.name],
+  );
+
+  return {
+    inputRef: inputRef as (el: HTMLInputElement | null) => void,
+    listboxRef,
+    value: state.value,
+    setValue: state.setValue,
+    open,
+    refresh: React.useCallback(() => state.controller.current?.refresh(), [state.controller]),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessNavigationMenuOptions = {
+  /** The open entry's `data-value` ('' for none). */
+  value?: string;
+  onValueChange?: (value: string) => void;
+  openDelay?: number;
+  closeDelay?: number;
+  orientation?: 'horizontal' | 'vertical';
+};
+
+export type UseHeadlessNavigationMenuResult = {
+  /** On the `<nav>`: `data-nav-item` entries, each with a `data-nav-trigger` button and a `data-nav-content` panel, or just a link. */
+  rootRef: ElementRef;
+  value: string;
+  setValue: (value: string) => void;
+  refresh: () => void;
+};
+
+/** Site navigation behaviour (disclosure pattern): hover or click opens one panel, Escape and leaving close it, arrows between entries. */
+export function useHeadlessNavigationMenu(options: UseHeadlessNavigationMenuOptions = {}): UseHeadlessNavigationMenuResult {
+  const [root, rootRef] = useElement();
+  const state = useStringController<NavigationMenuController>(
+    !!root,
+    { value: options.value, onValueChange: options.onValueChange },
+    (_defaultValue, onValueChange) => createNavigationMenu({
+      root: root!,
+      openDelay: options.openDelay,
+      closeDelay: options.closeDelay,
+      orientation: options.orientation,
+      onValueChange,
+    }),
+    [root, options.openDelay, options.closeDelay, options.orientation],
+  );
+  return {
+    rootRef,
+    value: state.value,
+    setValue: state.setValue,
+    refresh: React.useCallback(() => state.controller.current?.refresh(), [state.controller]),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessScrollAreaOptions = {
+  type?: 'hover' | 'scroll' | 'auto' | 'always';
+  hideDelay?: number;
+};
+
+export type UseHeadlessScrollAreaResult = {
+  /** Around a `data-scroll-viewport` and `data-scrollbar="vertical"` / `"horizontal"` tracks with a `data-scroll-thumb` each. */
+  rootRef: ElementRef;
+  /** Re-measure (size changes are also watched). */
+  update: () => void;
+};
+
+/** Custom scrollbars over native scrolling. */
+export function useHeadlessScrollArea(options: UseHeadlessScrollAreaOptions = {}): UseHeadlessScrollAreaResult {
+  const [root, rootRef] = useElement();
+  const controller = React.useRef<ScrollAreaController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!root) return undefined;
+    const ctl = createScrollArea({ root, type: options.type, hideDelay: options.hideDelay });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [root, options.type, options.hideDelay]);
+
+  return { rootRef, update: React.useCallback(() => controller.current?.update(), []) };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessToasterOptions = {
+  label?: string;
+  hotkey?: string[];
+  duration?: number;
+  swipeDirection?: 'left' | 'right' | 'up' | 'down';
+  swipeThreshold?: number;
+};
+
+export type HeadlessToast<T> = T & { id: string };
+
+export type UseHeadlessToasterResult<T> = {
+  /** On the list the toasts render into (an `<ol>`). */
+  regionRef: ElementRef;
+  /** The toasts to render, oldest first. */
+  toasts: Array<HeadlessToast<T>>;
+  /** Adds a toast; returns its id. */
+  toast: (data: T, options?: { duration?: number; type?: 'foreground' | 'background'; id?: string }) => string;
+  dismiss: (id: string) => void;
+  /** On each rendered toast element: `ref={toaster.toastRef(t.id)}`. A `data-toast-close` button inside dismisses it. */
+  toastRef: (id: string) => ElementRef;
+};
+
+/** Toast behaviour on your own markup: F8 to reach them, reliable announcements, pause on hover/focus, Escape, close button, swipe. */
+export function useHeadlessToaster<T extends object = { title?: React.ReactNode; description?: React.ReactNode }>(
+  options: UseHeadlessToasterOptions = {},
+): UseHeadlessToasterResult<T> {
+  const [region, regionRef] = useElement();
+  const [toasts, setToasts] = React.useState<Array<HeadlessToast<T>>>([]);
+  const controller = React.useRef<ToasterController | null>(null);
+  const pending = React.useRef(new Map<string, { duration?: number; type?: 'foreground' | 'background' }>());
+  const added = React.useRef(new Set<string>());
+  const refs = React.useRef(new Map<string, ElementRef>());
+  const counter = React.useRef(0);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!region) return undefined;
+    const ctl = createToaster({
+      region,
+      label: options.label,
+      hotkey: options.hotkey,
+      duration: options.duration,
+      swipeDirection: options.swipeDirection,
+      swipeThreshold: options.swipeThreshold,
+      onDismiss: (el, id) => {
+        const remove = () => {
+          added.current.delete(id);
+          refs.current.delete(id);
+          setToasts((list) => list.filter((t) => t.id !== id));
+        };
+        const name = typeof getComputedStyle === 'function' ? getComputedStyle(el).animationName : 'none';
+        if (name && name !== 'none') el.addEventListener('animationend', remove, { once: true });
+        else remove();
+      },
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+      added.current.clear();
+    };
+  }, [region, options.label, options.duration, options.swipeDirection, options.swipeThreshold, (options.hotkey || []).join('+')]);
+
+  const toast = React.useCallback((data: T, opts: { duration?: number; type?: 'foreground' | 'background'; id?: string } = {}) => {
+    counter.current += 1;
+    const id = opts.id ?? `headless-toast-${counter.current}`;
+    pending.current.set(id, { duration: opts.duration, type: opts.type });
+    setToasts((list) => [...list.filter((t) => t.id !== id), { ...data, id }]);
+    return id;
+  }, []);
+
+  const dismiss = React.useCallback((id: string) => controller.current?.dismiss(id), []);
+
+  const toastRef = React.useCallback((id: string): ElementRef => {
+    let ref = refs.current.get(id);
+    if (!ref) {
+      ref = (el: HTMLElement | null) => {
+        if (!el || added.current.has(id) || !controller.current) return;
+        added.current.add(id);
+        el.setAttribute('data-toast-id', id);
+        controller.current.add(el, pending.current.get(id));
+        pending.current.delete(id);
+      };
+      refs.current.set(id, ref);
+    }
+    return ref;
+  }, []);
+
+  return { regionRef, toasts, toast, dismiss, toastRef };
 }

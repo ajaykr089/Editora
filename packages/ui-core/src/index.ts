@@ -363,7 +363,7 @@ export { UIItemGroup } from './components/ui-item-group';
 export { UICodeBlock } from './components/ui-code-block';
 export { UICarousel } from './components/ui-carousel';
 // Headless behaviour (also `@editora/ui-core/headless`, where the types have short names).
-export { createDialog, createPopover, createMenu, createTabs, createListbox, createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar, createCheckbox, createSwitch, createRadioGroup, createSlider } from './headless';
+export { createDialog, createPopover, createMenu, createTabs, createListbox, createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar, createCheckbox, createSwitch, createRadioGroup, createSlider, createContextMenu, createSelect, createCombobox, createNavigationMenu, createScrollArea, createToaster } from './headless';
 export type {
   DialogOptions as HeadlessDialogOptions,
   DialogController as HeadlessDialogController,
@@ -398,4 +398,17 @@ export type {
   RadioGroupController as HeadlessRadioGroupController,
   SliderOptions as HeadlessSliderOptions,
   SliderController as HeadlessSliderController,
+  ContextMenuOptions as HeadlessContextMenuOptions,
+  ContextMenuController as HeadlessContextMenuController,
+  SelectOptions as HeadlessSelectOptions,
+  SelectController as HeadlessSelectController,
+  ComboboxOptions as HeadlessComboboxOptions,
+  ComboboxController as HeadlessComboboxController,
+  NavigationMenuOptions as HeadlessNavigationMenuOptions,
+  NavigationMenuController as HeadlessNavigationMenuController,
+  ScrollAreaOptions as HeadlessScrollAreaOptions,
+  ScrollAreaController as HeadlessScrollAreaController,
+  ToasterOptions as HeadlessToasterOptions,
+  ToasterController as HeadlessToasterController,
+  ToastAddOptions as HeadlessToastAddOptions,
 } from './headless';
