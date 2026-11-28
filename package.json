@@ -49,6 +49,7 @@
     "check:components": "npm run generate:components && git diff --exit-code -- components.json components.schema.json examples/editora-docs/static/components.json examples/editora-docs/static/components.schema.json",
     "generate:elements": "node scripts/generate-custom-elements.mjs",
     "check:elements": "node scripts/generate-custom-elements.mjs --check",
+    "check:package-exports": "node scripts/check-package-exports.mjs",
     "generate:api-docs": "node scripts/generate-api-docs.mjs",
     "check:api-docs": "node scripts/generate-api-docs.mjs --check",
     "check:element-registrations": "node scripts/check-custom-element-registrations.js",

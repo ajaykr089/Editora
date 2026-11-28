@@ -27,6 +27,7 @@
   "types": "index.d.ts",
   "style": "src/index.css",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",

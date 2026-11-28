@@ -22,6 +22,7 @@
     "rich-text-convert": "bin/rich-text-convert.js"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",

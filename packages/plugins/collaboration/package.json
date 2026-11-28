@@ -46,6 +46,7 @@
     "@editora/core": "^1.0.32"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",

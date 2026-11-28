@@ -38,6 +38,7 @@
   "jsdelivr": "dist/editora.min.js",
   "types": "index.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./index.d.ts",
       "browser": "./dist/index.esm.js",
