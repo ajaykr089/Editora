@@ -5,6 +5,7 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "customElements": "custom-elements.json",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -26,6 +27,14 @@
     },
     "./preload.css": "./dist/preload.css",
     "./tailwind.css": "./dist/tailwind.css",
+    "./custom-elements.json": "./custom-elements.json",
+    "./html-custom-data.json": "./html-custom-data.json",
+    "./vue": {
+      "types": "./types/vue.d.ts"
+    },
+    "./svelte": {
+      "types": "./types/svelte.d.ts"
+    },
     "./*": {
       "types": "./dist/standalone/*.d.ts",
       "import": "./dist/*.esm.js",
@@ -34,7 +43,10 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "custom-elements.json",
+    "html-custom-data.json",
+    "types"
   ],
   "scripts": {
     "build:tsc": "npm --prefix ../icons run build:tsc && tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
