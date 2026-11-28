@@ -80,7 +80,8 @@ const hasContent = (element: HTMLElement) =>
  * Put block-level nodes (figures) at a caret. A figure may not sit inside a paragraph or a heading, and a browser
  * that parses the saved HTML again would tear it out, so the block is split around the caret: what is before it
  * stays, the nodes go in after it, and what was after it moves to a new block of the same kind (an empty one when
- * there was nothing, so that there is somewhere to type below the media). Returns that block, for the caret.
+ * there was nothing, so that there is somewhere to type below the media; but not when a paragraph or heading below
+ * already is). Returns the block to put the caret in.
  */
 export const insertBlocks = (range: Range, host: HTMLElement, nodes: HTMLElement[]): HTMLElement | null => {
   range.deleteContents();
@@ -109,9 +110,16 @@ export const insertBlocks = (range: Range, host: HTMLElement, nodes: HTMLElement
   const tail = block.cloneNode(false) as HTMLElement;
   tail.removeAttribute('id');
   tail.append(rest.extractContents());
-  if (!hasContent(tail)) tail.innerHTML = '<br>';
-
+  const tailIsEmpty = !hasContent(tail);
   const headIsEmpty = !hasContent(block);
+  const next = block.nextElementSibling;
+  if (tailIsEmpty && next instanceof HTMLElement && TEXT_BLOCKS.has(next.tagName)) {
+    block.after(...nodes);
+    if (headIsEmpty) block.remove();
+    return next;
+  }
+  if (tailIsEmpty) tail.innerHTML = '<br>';
+
   block.after(...nodes, tail);
   if (headIsEmpty) block.remove();
   return tail;

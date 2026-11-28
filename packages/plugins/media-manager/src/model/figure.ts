@@ -189,16 +189,17 @@ export const setWidth = (media: MediaElement, width: number | null): void => {
     media.removeAttribute('height');
     media.style.removeProperty('width');
     media.style.removeProperty('height');
+    media.style.removeProperty('max-width');
     return;
   }
   const rect = media.getBoundingClientRect();
   const ratio = rect.width && rect.height ? rect.height / rect.width : null;
   const w = Math.max(1, Math.round(width));
+  // The attributes give the shape; the height follows the width (a fixed one squashed the picture on a page that
+  // narrows pictures to the screen), and it never runs off a narrow screen.
   media.style.width = `${w}px`;
+  media.style.height = 'auto';
+  media.style.maxWidth = '100%';
   media.setAttribute('width', String(w));
-  if (ratio) {
-    const h = Math.round(w * ratio);
-    media.style.height = `${h}px`;
-    media.setAttribute('height', String(h));
-  }
+  if (ratio) media.setAttribute('height', String(Math.round(w * ratio)));
 };

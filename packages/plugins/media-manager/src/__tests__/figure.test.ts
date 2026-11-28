@@ -81,6 +81,9 @@ describe('the figure around media', () => {
     expect(media.getAttribute('width')).toBe('100');
     expect(media.getAttribute('height')).toBe('50');
     expect(media.style.width).toBe('100px');
+    // The attributes give the shape; the style lets the height follow the width when a page narrows the picture.
+    expect(media.style.height).toBe('auto');
+    expect(media.style.maxWidth).toBe('100%');
     setWidth(media, null);
     expect(media.hasAttribute('width')).toBe(false);
     expect(media.style.width).toBe('');
@@ -136,9 +139,10 @@ describe('putting a figure at a caret', () => {
     range.setStart(host.children[1], 0);
     range.collapse(true);
     insertBlocks(range, host, [figureNode()]);
-    expect(tags()).toEqual(['P', 'FIGURE', 'P', 'P']);
+    // The paragraph below is where to type next: no empty one is left behind.
+    expect(tags()).toEqual(['P', 'FIGURE', 'P']);
     expect(host.children[0].textContent).toBe('One');
-    expect(host.children[3].textContent).toBe('Two');
+    expect(host.children[2].textContent).toBe('Two');
   });
 
   it('puts several in order, as a run', () => {

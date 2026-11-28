@@ -194,7 +194,10 @@ describe('resizing', () => {
     handle.dispatchEvent(pointer('pointermove', 310, 115));
     handle.dispatchEvent(pointer('pointermove', 410, 120));
     expect(img.style.width).toBe('400px');
-    expect(img.style.height).toBe('200px');
+    // The height follows the width (a fixed one squashed the picture on a page that narrows images to the screen).
+    expect(img.style.height).toBe('auto');
+    expect(img.style.maxWidth).toBe('100%');
+    expect(img.getAttribute('height')).toBe('200');
     expect(recorded).not.toHaveBeenCalled();
 
     handle.dispatchEvent(pointer('pointerup', 410, 120));

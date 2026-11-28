@@ -20,6 +20,13 @@ interface Pending {
   bar: HTMLElement;
   label: HTMLElement;
   config: Partial<MediaManagerConfig> | undefined;
+  /**
+   * The document (without placeholders) before and right after the block was split for the placeholders. A finished
+   * upload is undone back to `beforeInsert` when nothing changed in between, and a failed or cancelled one puts it
+   * back: the split was never a step of its own, so undo could not take it back.
+   */
+  beforeInsert?: string;
+  afterInsert?: string;
 }
 
 const PENDING_ATTRIBUTE = 'data-rte-media-pending';
@@ -76,7 +83,10 @@ export class PendingUploads {
             end.collapse(false);
             return end;
           })();
+    const beforeInsert = withoutPending(host.innerHTML);
     insertBlocks(target, host, created.map((item) => item.placeholder));
+    const afterInsert = withoutPending(host.innerHTML);
+    created.forEach((item) => Object.assign(item, { beforeInsert, afterInsert }));
     host.dispatchEvent(new Event('input', { bubbles: true }));
 
     const queue = new UploadQueue({ config, onChange: () => this.sync() });
@@ -203,16 +213,32 @@ export class PendingUploads {
         { figure: config.wrapInFigure !== false },
       );
       if (node) {
-        // Undo goes back to the document as it was without this file: what was typed meanwhile stays.
-        const before = withoutPending(host.innerHTML);
+        // Undo goes back to the document as it was without this file: what was typed meanwhile stays. With nothing
+        // typed, that is the document from before the paste, with its paragraph in one piece.
+        const current = withoutPending(host.innerHTML);
+        const before = current === pending.afterInsert && pending.beforeInsert !== undefined ? pending.beforeInsert : current;
         placeholder.replaceWith(node);
         if (node.tagName === 'FIGURE') adoptFigure(node);
         recordDomHistory(host, before, withoutPending(host.innerHTML));
         host.dispatchEvent(new Event('input', { bubbles: true }));
       }
     }
+    const succeeded = Boolean(entry?.item) && !placeholder.hasAttribute(PENDING_ATTRIBUTE);
     this.release(pending, false);
+    if (!succeeded) this.unsplit(pending);
     if (this.pending.size === 0) this.stopTimer();
+  }
+
+  /**
+   * After a failed or cancelled upload: when nothing else changed since the placeholders went in, and none of them is
+   * still waiting, the document goes back to how it was, with the paragraph that was split for them whole again.
+   */
+  private unsplit(pending: Pending): void {
+    const { host, beforeInsert, afterInsert } = pending;
+    if (beforeInsert === undefined || !host.isConnected || host.querySelector(`[${PENDING_ATTRIBUTE}]`)) return;
+    if (host.innerHTML !== afterInsert || beforeInsert === afterInsert) return;
+    host.innerHTML = beforeInsert;
+    host.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   private release(pending: Pending, dropPlaceholder: boolean): void {
