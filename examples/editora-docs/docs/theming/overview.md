@@ -8,6 +8,8 @@ keywords: [theming, dark mode, tokens, css variables]
 
 Theme architecture for light, dark, and custom token-driven styles in Editora.
 
+To make a theme for the UI components without writing tokens by hand, use the [theme builder](./theme-builder): pick a colour, mode, radius, density and font, check the contrast, and copy the result.
+
 ## Package-Level Model
 
 Editora theming is split into two layers:

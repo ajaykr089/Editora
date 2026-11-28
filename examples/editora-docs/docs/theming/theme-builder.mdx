@@ -1,0 +1,20 @@
+---
+title: "Theme builder"
+description: "Pick an accent or your brand colour, light or dark, corner radius, density and font, preview the Editora components, and copy the theme as React or CSS."
+sidebar_label: "Theme builder"
+keywords: [theme builder, design tokens, brand colour, dark mode, css variables]
+---
+
+import ThemeBuilder from '@site/src/components/ThemeBuilder';
+
+# Theme builder
+
+Choose the settings on the left; the preview shows real Editora components with that theme, and the contrast figures check text against its background (WCAG AA needs 4.5:1 for body text). Copy the result as a React snippet, or as CSS variables for apps without React.
+
+<ThemeBuilder />
+
+## Use the result
+
+In React, pass the tokens to `ThemeProvider` once, around your app. Without React, put the CSS in your stylesheet: every element reads the `--ui-*` variables, including inside its shadow root.
+
+The tokens come from `createThemeTokens()` in `@editora/ui-core`, which fills in everything you do not set from the light or dark base theme. To scope a theme to part of a page, use `themeToCss(tokens, '.your-class')` and put the class on a container. See [Custom theme](./custom-theme) and [Dark mode](./dark-mode) for the details.
