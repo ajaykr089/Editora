@@ -2687,7 +2687,7 @@ declare module 'svelte/elements' {
     'ui-toast': Omit<HTMLAttributes<HTMLElement>, 'headless' | 'max-visible' | 'position'> & {
       headless?: boolean | '' | 'true' | 'false' | null;
       'max-visible'?: number | `${number}` | null;
-      position?: string | true | null;
+      position?: 'bottom-center' | 'bottom-left' | 'bottom-right' | 'center' | 'top-center' | 'top-left' | 'top-right' | null;
       'on:hide'?: (event: CustomEvent) => void;
       onhide?: (event: CustomEvent) => void;
       'on:show'?: (event: CustomEvent) => void;

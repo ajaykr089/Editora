@@ -26859,7 +26859,7 @@
             {
               "name": "position",
               "type": {
-                "text": "string"
+                "text": "'bottom-center' | 'bottom-left' | 'bottom-right' | 'center' | 'top-center' | 'top-left' | 'top-right'"
               }
             }
           ],

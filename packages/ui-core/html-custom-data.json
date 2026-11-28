@@ -13910,7 +13910,30 @@
           "name": "max-visible"
         },
         {
-          "name": "position"
+          "name": "position",
+          "values": [
+            {
+              "name": "bottom-center"
+            },
+            {
+              "name": "bottom-left"
+            },
+            {
+              "name": "bottom-right"
+            },
+            {
+              "name": "center"
+            },
+            {
+              "name": "top-center"
+            },
+            {
+              "name": "top-left"
+            },
+            {
+              "name": "top-right"
+            }
+          ]
         }
       ],
       "references": [

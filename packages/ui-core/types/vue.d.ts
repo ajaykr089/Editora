@@ -2394,7 +2394,7 @@ declare module 'vue' {
     'ui-toast': DefineComponent<{
       headless?: boolean | '' | 'true' | 'false';
       maxVisible?: number | `${number}`;
-      position?: string | true;
+      position?: 'bottom-center' | 'bottom-left' | 'bottom-right' | 'center' | 'top-center' | 'top-left' | 'top-right';
       onHide?: (event: CustomEvent) => void;
       onShow?: (event: CustomEvent) => void;
     }>;

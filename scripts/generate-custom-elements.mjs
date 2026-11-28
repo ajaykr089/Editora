@@ -45,6 +45,11 @@ const program = ts.createProgram(
       '@editora/ui-core/*': ['packages/ui-core/src/standalone/*', 'packages/ui-core/src/*'],
       '@editora/icons': ['packages/icons/src/index.ts'],
       '@editora/icons/*': ['packages/icons/src/*'],
+      // Every workspace package from source, so the types do not depend on which ones are built.
+      '@editora/toast': ['packages/editora-toast/src/index.ts'],
+      '@editora/toast/*': ['packages/editora-toast/src/*'],
+      '@editora/react-icons': ['packages/react-icons/src/index.ts'],
+      '@editora/react-icons/*': ['packages/react-icons/src/*'],
     },
   },
 );
