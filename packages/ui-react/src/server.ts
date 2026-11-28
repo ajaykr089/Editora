@@ -68,3 +68,5 @@ export { Text } from './components/server/Text';
 export type { TextProps } from './components/server/Text';
 export { Trace } from './components/server/Trace';
 export type { TraceProps } from './components/server/Trace';
+export { DataList } from './components/server/DataList';
+export type { DataListProps } from './components/server/DataList';
