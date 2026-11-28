@@ -301,7 +301,12 @@ for (const [path, content] of outputs) {
   if (current === content) continue;
   if (check) {
     stale += 1;
-    console.error(`out of date: ${path.slice(root.length + 1)}`);
+    const was = (current ?? '').split('\n');
+    const now = content.split('\n');
+    const line = now.findIndex((text, i) => text !== was[i]);
+    console.error(`out of date: ${path.slice(root.length + 1)} (first difference at line ${line + 1})`);
+    console.error(`  committed: ${(was[line] ?? '<end of file>').slice(0, 200)}`);
+    console.error(`  generated: ${(now[line] ?? '<end of file>').slice(0, 200)}`);
   } else {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content);
