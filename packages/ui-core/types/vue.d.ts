@@ -152,7 +152,7 @@ declare module 'vue' {
       delay?: number | `${number}` | string | true;
       duration?: number | `${number}` | string | true;
       effect?: string | true;
-      effectDirection?: 'alternate-reverse' | 'alternate' | 'normal' | 'reverse';
+      effectDirection?: 'alternate' | 'alternate-reverse' | 'normal' | 'reverse';
       effectFillMode?: 'backwards' | 'both' | 'forwards' | 'none';
       effectIterationCount?: number | `${number}` | string | true;
       effectTiming?: string | true;
@@ -1566,7 +1566,7 @@ declare module 'vue' {
       currencyDisplay?: 'code' | 'name' | 'narrowSymbol' | 'symbol';
       delay?: number | `${number}` | string | true;
       duration?: number | `${number}` | string | true;
-      easing?: 'bounce' | 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'overshoot' | 'spring';
+      easing?: 'bounce' | 'ease-in' | 'ease-in-out' | 'ease-out' | 'linear' | 'overshoot' | 'spring';
       fontSize?: number | `${number}` | string | true;
       fontWeight?: number | `${number}` | string | true;
       formatStyle?: 'currency' | 'decimal';
@@ -1595,7 +1595,7 @@ declare module 'vue' {
     'ui-odometer': DefineComponent<{
       animate?: boolean | '' | 'true' | 'false';
       animateOnMount?: boolean | '' | 'true' | 'false';
-      animation?: 'ease-in-out' | 'ease-in' | 'ease-out' | 'ease' | 'linear' | 'spring';
+      animation?: 'ease' | 'ease-in' | 'ease-in-out' | 'ease-out' | 'linear' | 'spring';
       autoFormat?: string | true;
       countUp?: boolean | '' | 'true' | 'false';
       currency?: string | true;
@@ -1743,7 +1743,7 @@ declare module 'vue' {
       flip?: boolean | '' | 'true' | 'false';
       offset?: number | `${number}`;
       open?: boolean | '' | 'true' | 'false';
-      placement?: 'bottom-end' | 'bottom-start' | 'bottom' | 'left-end' | 'left-start' | 'left' | 'right-end' | 'right-start' | 'right' | 'top-end' | 'top-start' | 'top';
+      placement?: 'bottom' | 'bottom-end' | 'bottom-start' | 'left' | 'left-end' | 'left-start' | 'right' | 'right-end' | 'right-start' | 'top' | 'top-end' | 'top-start';
       radius?: number | `${number}` | string | true;
       shift?: boolean | '' | 'true' | 'false';
       size?: '1' | '2' | '3' | 'lg' | 'md' | 'sm';
@@ -1777,7 +1777,7 @@ declare module 'vue' {
       matchWidth?: boolean | '' | 'true' | 'false';
       offset?: number | `${number}`;
       open?: boolean | '' | 'true' | 'false';
-      placement?: 'bottom-end' | 'bottom-start' | 'bottom' | 'left-end' | 'left-start' | 'left' | 'right-end' | 'right-start' | 'right' | 'top-end' | 'top-start' | 'top';
+      placement?: 'bottom' | 'bottom-end' | 'bottom-start' | 'left' | 'left-end' | 'left-start' | 'right' | 'right-end' | 'right-start' | 'top' | 'top-end' | 'top-start';
       shift?: boolean | '' | 'true' | 'false';
       strategy?: 'absolute' | 'fixed';
       onPositionChange?: (event: CustomEvent) => void;
@@ -2272,7 +2272,7 @@ declare module 'vue' {
       stretched?: boolean | '' | 'true' | 'false';
       tone?: 'brand' | 'danger' | 'success' | 'warning';
       value?: string | true;
-      variant?: 'cards' | 'contrast' | 'default' | 'ghost' | 'glass' | 'indicator-line' | 'indicator' | 'line' | 'minimal' | 'outline' | 'segmented' | 'soft' | 'solid' | 'underline';
+      variant?: 'cards' | 'contrast' | 'default' | 'ghost' | 'glass' | 'indicator' | 'indicator-line' | 'line' | 'minimal' | 'outline' | 'segmented' | 'soft' | 'solid' | 'underline';
       onChange?: (event: CustomEvent) => void;
       onFocus?: (event: CustomEvent) => void;
       onSelect?: (event: CustomEvent) => void;

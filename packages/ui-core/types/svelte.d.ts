@@ -166,7 +166,7 @@ declare module 'svelte/elements' {
       delay?: number | `${number}` | string | true | null;
       duration?: number | `${number}` | string | true | null;
       effect?: string | true | null;
-      'effect-direction'?: 'alternate-reverse' | 'alternate' | 'normal' | 'reverse' | null;
+      'effect-direction'?: 'alternate' | 'alternate-reverse' | 'normal' | 'reverse' | null;
       'effect-fill-mode'?: 'backwards' | 'both' | 'forwards' | 'none' | null;
       'effect-iteration-count'?: number | `${number}` | string | true | null;
       'effect-timing'?: string | true | null;
@@ -1759,7 +1759,7 @@ declare module 'svelte/elements' {
       'currency-display'?: 'code' | 'name' | 'narrowSymbol' | 'symbol' | null;
       delay?: number | `${number}` | string | true | null;
       duration?: number | `${number}` | string | true | null;
-      easing?: 'bounce' | 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'overshoot' | 'spring' | null;
+      easing?: 'bounce' | 'ease-in' | 'ease-in-out' | 'ease-out' | 'linear' | 'overshoot' | 'spring' | null;
       'font-size'?: number | `${number}` | string | true | null;
       'font-weight'?: number | `${number}` | string | true | null;
       'format-style'?: 'currency' | 'decimal' | null;
@@ -1788,7 +1788,7 @@ declare module 'svelte/elements' {
     'ui-odometer': Omit<HTMLAttributes<HTMLElement>, 'animate' | 'animate-on-mount' | 'animation' | 'auto-format' | 'count-up' | 'currency' | 'decimal-separator' | 'decimals' | 'direction' | 'duration' | 'format' | 'group-separator' | 'label' | 'locale' | 'max' | 'maximum-fraction-digits' | 'min' | 'minimum-fraction-digits' | 'notation' | 'prefix' | 'separator' | 'size' | 'suffix' | 'theme' | 'tone' | 'value' | 'variant'> & {
       animate?: boolean | '' | 'true' | 'false' | null;
       'animate-on-mount'?: boolean | '' | 'true' | 'false' | null;
-      animation?: 'ease-in-out' | 'ease-in' | 'ease-out' | 'ease' | 'linear' | 'spring' | null;
+      animation?: 'ease' | 'ease-in' | 'ease-in-out' | 'ease-out' | 'linear' | 'spring' | null;
       'auto-format'?: string | true | null;
       'count-up'?: boolean | '' | 'true' | 'false' | null;
       currency?: string | true | null;
@@ -1953,7 +1953,7 @@ declare module 'svelte/elements' {
       flip?: boolean | '' | 'true' | 'false' | null;
       offset?: number | `${number}` | null;
       open?: boolean | '' | 'true' | 'false' | null;
-      placement?: 'bottom-end' | 'bottom-start' | 'bottom' | 'left-end' | 'left-start' | 'left' | 'right-end' | 'right-start' | 'right' | 'top-end' | 'top-start' | 'top' | null;
+      placement?: 'bottom' | 'bottom-end' | 'bottom-start' | 'left' | 'left-end' | 'left-start' | 'right' | 'right-end' | 'right-start' | 'top' | 'top-end' | 'top-start' | null;
       radius?: number | `${number}` | string | true | null;
       shift?: boolean | '' | 'true' | 'false' | null;
       size?: '1' | '2' | '3' | 'lg' | 'md' | 'sm' | null;
@@ -1994,7 +1994,7 @@ declare module 'svelte/elements' {
       'match-width'?: boolean | '' | 'true' | 'false' | null;
       offset?: number | `${number}` | null;
       open?: boolean | '' | 'true' | 'false' | null;
-      placement?: 'bottom-end' | 'bottom-start' | 'bottom' | 'left-end' | 'left-start' | 'left' | 'right-end' | 'right-start' | 'right' | 'top-end' | 'top-start' | 'top' | null;
+      placement?: 'bottom' | 'bottom-end' | 'bottom-start' | 'left' | 'left-end' | 'left-start' | 'right' | 'right-end' | 'right-start' | 'top' | 'top-end' | 'top-start' | null;
       shift?: boolean | '' | 'true' | 'false' | null;
       strategy?: 'absolute' | 'fixed' | null;
       'on:position-change'?: (event: CustomEvent) => void;
@@ -2550,7 +2550,7 @@ declare module 'svelte/elements' {
       stretched?: boolean | '' | 'true' | 'false' | null;
       tone?: 'brand' | 'danger' | 'success' | 'warning' | null;
       value?: string | true | null;
-      variant?: 'cards' | 'contrast' | 'default' | 'ghost' | 'glass' | 'indicator-line' | 'indicator' | 'line' | 'minimal' | 'outline' | 'segmented' | 'soft' | 'solid' | 'underline' | null;
+      variant?: 'cards' | 'contrast' | 'default' | 'ghost' | 'glass' | 'indicator' | 'indicator-line' | 'line' | 'minimal' | 'outline' | 'segmented' | 'soft' | 'solid' | 'underline' | null;
       'on:change'?: (event: CustomEvent) => void;
       onchange?: (event: CustomEvent) => void;
       'on:focus'?: (event: CustomEvent) => void;

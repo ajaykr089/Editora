@@ -70,7 +70,7 @@ function attributeType(type) {
   }
   if (!out.size) return null;
   // `string & {}` style escape hatches leave both literals and string: keep the literals for completion.
-  return [...out].sort((a, b) => (a === 'string') - (b === 'string') || a.localeCompare(b)).join(' | ');
+  return [...out].sort((a, b) => (a === 'string') - (b === 'string') || (a < b ? -1 : a > b ? 1 : 0)).join(' | ');
 }
 
 /** prop name -> { type, description } for the wrapper of `tag`. */

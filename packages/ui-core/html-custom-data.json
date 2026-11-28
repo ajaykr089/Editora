@@ -999,10 +999,10 @@
           "name": "effect-direction",
           "values": [
             {
-              "name": "alternate-reverse"
+              "name": "alternate"
             },
             {
-              "name": "alternate"
+              "name": "alternate-reverse"
             },
             {
               "name": "normal"
@@ -9098,10 +9098,10 @@
               "name": "bounce"
             },
             {
-              "name": "ease-in-out"
+              "name": "ease-in"
             },
             {
-              "name": "ease-in"
+              "name": "ease-in-out"
             },
             {
               "name": "ease-out"
@@ -9314,16 +9314,16 @@
           "name": "animation",
           "values": [
             {
-              "name": "ease-in-out"
+              "name": "ease"
             },
             {
               "name": "ease-in"
             },
             {
-              "name": "ease-out"
+              "name": "ease-in-out"
             },
             {
-              "name": "ease"
+              "name": "ease-out"
             },
             {
               "name": "linear"
@@ -10144,13 +10144,16 @@
           "name": "placement",
           "values": [
             {
+              "name": "bottom"
+            },
+            {
               "name": "bottom-end"
             },
             {
               "name": "bottom-start"
             },
             {
-              "name": "bottom"
+              "name": "left"
             },
             {
               "name": "left-end"
@@ -10159,7 +10162,7 @@
               "name": "left-start"
             },
             {
-              "name": "left"
+              "name": "right"
             },
             {
               "name": "right-end"
@@ -10168,16 +10171,13 @@
               "name": "right-start"
             },
             {
-              "name": "right"
+              "name": "top"
             },
             {
               "name": "top-end"
             },
             {
               "name": "top-start"
-            },
-            {
-              "name": "top"
             }
           ]
         },
@@ -10351,13 +10351,16 @@
           "name": "placement",
           "values": [
             {
+              "name": "bottom"
+            },
+            {
               "name": "bottom-end"
             },
             {
               "name": "bottom-start"
             },
             {
-              "name": "bottom"
+              "name": "left"
             },
             {
               "name": "left-end"
@@ -10366,7 +10369,7 @@
               "name": "left-start"
             },
             {
-              "name": "left"
+              "name": "right"
             },
             {
               "name": "right-end"
@@ -10375,16 +10378,13 @@
               "name": "right-start"
             },
             {
-              "name": "right"
+              "name": "top"
             },
             {
               "name": "top-end"
             },
             {
               "name": "top-start"
-            },
-            {
-              "name": "top"
             }
           ]
         },
@@ -13383,10 +13383,10 @@
               "name": "glass"
             },
             {
-              "name": "indicator-line"
+              "name": "indicator"
             },
             {
-              "name": "indicator"
+              "name": "indicator-line"
             },
             {
               "name": "line"

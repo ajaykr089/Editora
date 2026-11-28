@@ -1780,7 +1780,7 @@
             {
               "name": "effect-direction",
               "type": {
-                "text": "'alternate-reverse' | 'alternate' | 'normal' | 'reverse'"
+                "text": "'alternate' | 'alternate-reverse' | 'normal' | 'reverse'"
               }
             },
             {
@@ -17637,7 +17637,7 @@
             {
               "name": "easing",
               "type": {
-                "text": "'bounce' | 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'overshoot' | 'spring'"
+                "text": "'bounce' | 'ease-in' | 'ease-in-out' | 'ease-out' | 'linear' | 'overshoot' | 'spring'"
               }
             },
             {
@@ -17876,7 +17876,7 @@
             {
               "name": "animation",
               "type": {
-                "text": "'ease-in-out' | 'ease-in' | 'ease-out' | 'ease' | 'linear' | 'spring'"
+                "text": "'ease' | 'ease-in' | 'ease-in-out' | 'ease-out' | 'linear' | 'spring'"
               }
             },
             {
@@ -19692,7 +19692,7 @@
             {
               "name": "placement",
               "type": {
-                "text": "'bottom-end' | 'bottom-start' | 'bottom' | 'left-end' | 'left-start' | 'left' | 'right-end' | 'right-start' | 'right' | 'top-end' | 'top-start' | 'top'"
+                "text": "'bottom' | 'bottom-end' | 'bottom-start' | 'left' | 'left-end' | 'left-start' | 'right' | 'right-end' | 'right-start' | 'top' | 'top-end' | 'top-start'"
               }
             },
             {
@@ -20013,7 +20013,7 @@
             {
               "name": "placement",
               "type": {
-                "text": "'bottom-end' | 'bottom-start' | 'bottom' | 'left-end' | 'left-start' | 'left' | 'right-end' | 'right-start' | 'right' | 'top-end' | 'top-start' | 'top'"
+                "text": "'bottom' | 'bottom-end' | 'bottom-start' | 'left' | 'left-end' | 'left-start' | 'right' | 'right-end' | 'right-start' | 'top' | 'top-end' | 'top-start'"
               }
             },
             {
@@ -25556,7 +25556,7 @@
             {
               "name": "variant",
               "type": {
-                "text": "'cards' | 'contrast' | 'default' | 'ghost' | 'glass' | 'indicator-line' | 'indicator' | 'line' | 'minimal' | 'outline' | 'segmented' | 'soft' | 'solid' | 'underline'"
+                "text": "'cards' | 'contrast' | 'default' | 'ghost' | 'glass' | 'indicator' | 'indicator-line' | 'line' | 'minimal' | 'outline' | 'segmented' | 'soft' | 'solid' | 'underline'"
               }
             }
           ],
