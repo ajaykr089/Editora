@@ -363,7 +363,7 @@ export { UIItemGroup } from './components/ui-item-group';
 export { UICodeBlock } from './components/ui-code-block';
 export { UICarousel } from './components/ui-carousel';
 // Headless behaviour (also `@editora/ui-core/headless`, where the types have short names).
-export { createDialog, createPopover, createMenu, createTabs, createListbox, createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar } from './headless';
+export { createDialog, createPopover, createMenu, createTabs, createListbox, createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar, createCheckbox, createSwitch, createRadioGroup, createSlider } from './headless';
 export type {
   DialogOptions as HeadlessDialogOptions,
   DialogController as HeadlessDialogController,
@@ -389,4 +389,13 @@ export type {
   ToggleGroupController as HeadlessToggleGroupController,
   ToolbarOptions as HeadlessToolbarOptions,
   ToolbarController as HeadlessToolbarController,
+  CheckboxOptions as HeadlessCheckboxOptions,
+  CheckboxController as HeadlessCheckboxController,
+  CheckedState as HeadlessCheckedState,
+  SwitchOptions as HeadlessSwitchOptions,
+  SwitchController as HeadlessSwitchController,
+  RadioGroupOptions as HeadlessRadioGroupOptions,
+  RadioGroupController as HeadlessRadioGroupController,
+  SliderOptions as HeadlessSliderOptions,
+  SliderController as HeadlessSliderController,
 } from './headless';

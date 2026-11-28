@@ -2,6 +2,10 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   useHeadlessAccordion,
+  useHeadlessCheckbox,
+  useHeadlessRadioGroup,
+  useHeadlessSlider,
+  useHeadlessSwitch,
   useHeadlessCollapsible,
   useHeadlessDialog,
   useHeadlessHoverCard,
@@ -176,6 +180,45 @@ export const Toolbar: Story = {
         <input aria-label="Font size" defaultValue="14" style={{ width: 48, minHeight: 28 }} />
         <button style={btn}>Link</button>
       </div>
+    );
+  },
+};
+
+export const FormControls: Story = {
+  render: function Render() {
+    const terms = useHeadlessCheckbox({ name: 'terms', required: true });
+    const wifi = useHeadlessSwitch({ name: 'wifi', defaultChecked: true });
+    const plan = useHeadlessRadioGroup({ name: 'plan', defaultValue: 'free' });
+    const price = useHeadlessSlider({ name: 'price', defaultValue: [20, 80], minStepsBetweenThumbs: 5 });
+    const [sent, setSent] = React.useState('');
+    const box: React.CSSProperties = { ...btn, display: 'inline-flex', alignItems: 'center', gap: 6 };
+    const thumb: React.CSSProperties = { position: 'absolute', top: '50%', marginTop: -10, width: 20, height: 20, borderRadius: '50%', background: '#2563eb', border: '2px solid #fff', boxShadow: '0 0 0 1px #2563eb' };
+    return (
+      <form
+        style={{ display: 'grid', gap: 16, maxWidth: 360 }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSent(new URLSearchParams(new FormData(event.currentTarget) as unknown as Record<string, string>).toString());
+        }}
+      >
+        <button ref={terms.ref} style={box}>{terms.checked === true ? '☑' : '☐'} Accept the terms</button>
+        <button ref={wifi.ref} style={box}>Wi-Fi: {wifi.checked ? 'on' : 'off'}</button>
+        <div ref={plan.rootRef} aria-label="Plan" style={{ display: 'flex', gap: 4 }}>
+          {['free', 'pro', 'team'].map((v) => <button key={v} data-radio-item data-value={v} style={btn}>{plan.value === v ? '●' : '○'} {v}</button>)}
+        </div>
+        <div ref={price.rootRef} style={{ position: 'relative', height: 28, margin: '0 10px' }}>
+          <span style={{ position: 'absolute', inset: '12px 0', background: '#ddd', borderRadius: 2 }} />
+          <span data-slider-range style={{ position: 'absolute', top: 12, bottom: 12, background: '#2563eb' }} />
+          <span data-slider-thumb aria-label="Minimum price" style={thumb} />
+          <span data-slider-thumb aria-label="Maximum price" style={thumb} />
+        </div>
+        <p>Price {price.value.join(' to ')}</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="submit" style={btn}>Submit</button>
+          <button type="reset" style={btn}>Reset</button>
+        </div>
+        <output>{sent}</output>
+      </form>
     );
   },
 };

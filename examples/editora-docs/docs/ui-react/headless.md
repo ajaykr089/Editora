@@ -1,6 +1,6 @@
 ---
 title: "Headless hooks"
-description: "Dialog, popover, menu, tabs, listbox, collapsible, accordion, tooltip, hover card, toggle group and toolbar behaviour on your own markup and styles: WAI-ARIA roles, keyboard, focus and dismissal, no custom elements."
+description: "Dialog, popover, menu, tabs, listbox, collapsible, accordion, tooltip, hover card, toggle group, toolbar, checkbox, switch, radio group and slider behaviour on your own markup and styles: WAI-ARIA roles, keyboard, focus and dismissal, no custom elements."
 sidebar_label: "Headless hooks"
 ---
 
@@ -186,6 +186,48 @@ const toolbar = useHeadlessToolbar();
 
 `role="toolbar"` with one tab stop: arrow keys move between its controls, Home and End jump, and disabled controls are skipped. Inside a text input the arrow keys keep moving the caret. Call `refresh()` after rendering different controls.
 
+## Checkbox and switch
+
+```tsx
+const terms = useHeadlessCheckbox({ name: 'terms', required: true });
+<button ref={terms.ref} className="data-[state=checked]:bg-blue-600">Accept the terms</button>
+
+const wifi = useHeadlessSwitch({ defaultChecked: true, onCheckedChange: save });
+<button ref={wifi.ref} className="data-[state=checked]:bg-green-600">Wi-Fi</button>
+```
+
+`role="checkbox"` or `role="switch"` with `aria-checked`. Space toggles and Enter does not, as for a native checkbox. A checkbox can be `'indeterminate'` (`aria-checked="mixed"`, `data-state="indeterminate"`); clicking it then checks it. `checked` / `defaultChecked` / `onCheckedChange`, `disabled`, `required`.
+
+## Radio group
+
+```tsx
+const plan = useHeadlessRadioGroup({ name: 'plan', defaultValue: 'free' });
+<div ref={plan.rootRef} aria-label="Plan">
+  <button data-radio-item data-value="free">Free</button>
+  <button data-radio-item data-value="pro">Pro</button>
+</div>
+```
+
+One tab stop, on the checked item. The arrow keys move focus and check as they go, Home and End jump to the ends, and Space checks the focused item. Disabled items are skipped. `value` / `defaultValue` / `onValueChange`, `disabled`, `required`, `loop`.
+
+## Slider
+
+```tsx
+const price = useHeadlessSlider({ defaultValue: [20, 80], step: 5, minStepsBetweenThumbs: 2 });
+<div ref={price.rootRef} className="relative h-5">
+  <span className="absolute inset-x-0 top-2 h-1 bg-gray-200" />
+  <span data-slider-range className="absolute top-2 h-1 bg-blue-600" />
+  <span data-slider-thumb aria-label="Minimum price" className="absolute top-0 size-5 rounded-full bg-white shadow" />
+  <span data-slider-thumb aria-label="Maximum price" className="absolute top-0 size-5 rounded-full bg-white shadow" />
+</div>
+```
+
+One thumb or two (a range). Thumbs are `role="slider"` with `aria-valuenow`, `aria-valuemin` and `aria-valuemax`. A range thumb's limits are the other thumb's value. The arrow keys move one `step`; PageUp, PageDown and Shift+Arrow move `largeStep` steps; Home and End go to the ends. Pressing the track moves the nearest thumb there and drags it. The controller positions the thumbs and the range (and sets `--slider-percent`). `onValueChange` fires on every change, `onValueCommit` when a drag ends or a key is pressed. `getValueText` gives screen readers words instead of the number. Also `min`, `max`, `orientation` and `disabled`.
+
+### In a form
+
+Give any of these a `name` and they join the surrounding `<form>`: a hidden input carries the value into `FormData` and form submission (a range slider submits `name[]` twice), `required` works with the browser's validation, and a reset puts them back to their defaults.
+
 ## Without React
 
 ```ts
@@ -194,5 +236,6 @@ import { createDialog, createMenu } from '@editora/ui-core/headless';
 const dialog = createDialog({ trigger: button, content: panel, overlay: backdrop });
 const menu = createMenu({ trigger: menuButton, menu: menuPanel, onSelect: (item) => console.log(item) });
 // dialog.open(), dialog.close(), dialog.destroy() …
-// Also: createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar
+// Also: createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar,
+// createCheckbox, createSwitch, createRadioGroup, createSlider
 ```

@@ -11,6 +11,14 @@ import {
   createHoverCard,
   createToggleGroup,
   createToolbar,
+  createCheckbox,
+  createSwitch,
+  createRadioGroup,
+  createSlider,
+  type CheckboxController,
+  type CheckedState,
+  type RadioGroupController,
+  type SliderController,
   type CollapsibleController,
   type AccordionController,
   type TooltipController,
@@ -650,4 +658,252 @@ export function useHeadlessToolbar(options: UseHeadlessToolbarOptions = {}): Use
   }, [root, options.orientation, options.loop]);
 
   return { rootRef, refresh: React.useCallback(() => controller.current?.refresh(), []) };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessCheckboxOptions = {
+  checked?: CheckedState;
+  defaultChecked?: CheckedState;
+  onCheckedChange?: (checked: CheckedState) => void;
+  disabled?: boolean;
+  required?: boolean;
+  /** Joins the surrounding form under this name (a hidden checkbox input). */
+  name?: string;
+  value?: string;
+};
+
+export type UseHeadlessCheckboxResult = {
+  /** On a `<button>` (or any element: it gets `tabindex="0"`). */
+  ref: ElementRef;
+  checked: CheckedState;
+  setChecked: (checked: CheckedState) => void;
+};
+
+function useCheckControl(
+  kind: 'checkbox' | 'switch',
+  options: UseHeadlessCheckboxOptions,
+): UseHeadlessCheckboxResult {
+  const [root, ref] = useElement();
+  const [checked, setInner, controlled] = useControllable<CheckedState>(options.checked, options.defaultChecked ?? false);
+  const latest = useLatest({ options, checked, controlled });
+  const controller = React.useRef<CheckboxController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!root) return undefined;
+    const create = kind === 'switch' ? (createSwitch as unknown as typeof createCheckbox) : createCheckbox;
+    const ctl = create({
+      root,
+      defaultChecked: latest.current.checked,
+      disabled: latest.current.options.disabled,
+      required: options.required,
+      name: options.name,
+      value: options.value,
+      onCheckedChange: (next) => {
+        if (!latest.current.controlled) setInner(next);
+        latest.current.options.onCheckedChange?.(next);
+        queueMicrotask(() => {
+          if (latest.current.controlled && controller.current && controller.current.checked !== latest.current.checked) {
+            controller.current.setChecked(latest.current.checked);
+          }
+        });
+      },
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [root, options.required, options.name, options.value]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (controller.current && controller.current.checked !== checked) controller.current.setChecked(checked);
+  }, [checked]);
+
+  useIsomorphicLayoutEffect(() => {
+    controller.current?.setDisabled(!!options.disabled);
+  }, [options.disabled]);
+
+  const setChecked = React.useCallback((next: CheckedState) => {
+    if (latest.current.controlled) latest.current.options.onCheckedChange?.(next);
+    else setInner(next);
+  }, [latest, setInner]);
+
+  return { ref, checked, setChecked };
+}
+
+/** Checkbox behaviour: checked, unchecked or `'indeterminate'` (`aria-checked="mixed"`), Space toggles, form value and reset. */
+export function useHeadlessCheckbox(options: UseHeadlessCheckboxOptions = {}): UseHeadlessCheckboxResult {
+  return useCheckControl('checkbox', options);
+}
+
+export type UseHeadlessSwitchOptions = {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  required?: boolean;
+  name?: string;
+  value?: string;
+};
+
+export type UseHeadlessSwitchResult = {
+  ref: ElementRef;
+  checked: boolean;
+  setChecked: (checked: boolean) => void;
+};
+
+/** Switch behaviour (`role="switch"`, on / off), form value and reset. */
+export function useHeadlessSwitch(options: UseHeadlessSwitchOptions = {}): UseHeadlessSwitchResult {
+  return useCheckControl('switch', options as UseHeadlessCheckboxOptions) as UseHeadlessSwitchResult;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessRadioGroupOptions = {
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  orientation?: 'horizontal' | 'vertical';
+  disabled?: boolean;
+  required?: boolean;
+  name?: string;
+  loop?: boolean;
+};
+
+export type UseHeadlessRadioGroupResult = {
+  /** On the element around the `data-radio-item` buttons (each with a `data-value`). Give it an `aria-label`. */
+  rootRef: ElementRef;
+  value: string;
+  setValue: (value: string) => void;
+  refresh: () => void;
+};
+
+/** Radio group behaviour: one tab stop, arrows move and check, Space checks, form value and reset. */
+export function useHeadlessRadioGroup(options: UseHeadlessRadioGroupOptions = {}): UseHeadlessRadioGroupResult {
+  const [root, rootRef] = useElement();
+  const [value, setInner, controlled] = useControllable(options.value, options.defaultValue ?? '');
+  const latest = useLatest({ options, value, controlled });
+  const controller = React.useRef<RadioGroupController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!root) return undefined;
+    const ctl = createRadioGroup({
+      root,
+      defaultValue: latest.current.value,
+      orientation: options.orientation,
+      disabled: options.disabled,
+      required: options.required,
+      name: options.name,
+      loop: options.loop,
+      onValueChange: (next) => {
+        if (!latest.current.controlled) setInner(next);
+        latest.current.options.onValueChange?.(next);
+        queueMicrotask(() => {
+          if (latest.current.controlled && controller.current && controller.current.value !== latest.current.value) {
+            controller.current.setValue(latest.current.value);
+          }
+        });
+      },
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [root, options.orientation, options.disabled, options.required, options.name, options.loop]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (controller.current && controller.current.value !== value) controller.current.setValue(value);
+  }, [value]);
+
+  const setValue = React.useCallback((next: string) => {
+    if (latest.current.controlled) latest.current.options.onValueChange?.(next);
+    else setInner(next);
+  }, [latest, setInner]);
+
+  return { rootRef, value, setValue, refresh: React.useCallback(() => controller.current?.refresh(), []) };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessSliderOptions = {
+  value?: number[];
+  defaultValue?: number[];
+  onValueChange?: (value: number[]) => void;
+  /** When a drag ends or a key changes the value. */
+  onValueCommit?: (value: number[]) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  largeStep?: number;
+  minStepsBetweenThumbs?: number;
+  orientation?: 'horizontal' | 'vertical';
+  disabled?: boolean;
+  name?: string;
+  getValueText?: (value: number, index: number) => string;
+};
+
+export type UseHeadlessSliderResult = {
+  /** On the track (`position: relative`), containing one `data-slider-thumb` per value and optionally a `data-slider-range`. Render the thumbs before calling. */
+  rootRef: ElementRef;
+  value: number[];
+  setValue: (value: number[]) => void;
+};
+
+const sameNumbers = (a: number[], b: number[]) => a.length === b.length && a.every((v, i) => v === b[i]);
+
+/** Slider behaviour (single or range): keyboard steps, pointer drag, `role="slider"` thumbs, form value and reset. */
+export function useHeadlessSlider(options: UseHeadlessSliderOptions = {}): UseHeadlessSliderResult {
+  const [root, rootRef] = useElement();
+  const [value, setInner, controlled] = useControllable(options.value, options.defaultValue ?? [options.min ?? 0]);
+  const latest = useLatest({ options, value, controlled });
+  const controller = React.useRef<SliderController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!root) return undefined;
+    const ctl = createSlider({
+      root,
+      defaultValue: latest.current.value,
+      min: options.min,
+      max: options.max,
+      step: options.step,
+      largeStep: options.largeStep,
+      minStepsBetweenThumbs: options.minStepsBetweenThumbs,
+      orientation: options.orientation,
+      disabled: latest.current.options.disabled,
+      name: options.name,
+      getValueText: (v, i) => latest.current.options.getValueText?.(v, i) ?? '',
+      onValueChange: (next) => {
+        if (!latest.current.controlled) setInner(next);
+        latest.current.options.onValueChange?.(next);
+        queueMicrotask(() => {
+          if (latest.current.controlled && controller.current && !sameNumbers(controller.current.value, latest.current.value)) {
+            controller.current.setValue(latest.current.value);
+          }
+        });
+      },
+      onValueCommit: (next) => latest.current.options.onValueCommit?.(next),
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [root, options.min, options.max, options.step, options.largeStep, options.minStepsBetweenThumbs, options.orientation, options.name]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (controller.current && !sameNumbers(controller.current.value, value)) controller.current.setValue(value);
+  }, [value.join(',')]);
+
+  useIsomorphicLayoutEffect(() => {
+    controller.current?.setDisabled(!!options.disabled);
+  }, [options.disabled]);
+
+  const setValue = React.useCallback((next: number[]) => {
+    if (latest.current.controlled) latest.current.options.onValueChange?.(next);
+    else setInner(next);
+  }, [latest, setInner]);
+
+  return { rootRef, value, setValue };
 }
