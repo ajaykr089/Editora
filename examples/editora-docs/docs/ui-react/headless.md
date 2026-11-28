@@ -1,12 +1,12 @@
 ---
 title: "Headless hooks"
-description: "Dialog, popover, menu, tabs and listbox behaviour on your own markup and styles: WAI-ARIA roles, keyboard, focus and dismissal, no custom elements."
+description: "Dialog, popover, menu, tabs, listbox, collapsible, accordion, tooltip, hover card, toggle group and toolbar behaviour on your own markup and styles: WAI-ARIA roles, keyboard, focus and dismissal, no custom elements."
 sidebar_label: "Headless hooks"
 ---
 
 # Headless hooks
 
-When you want Editora's behaviour but your own markup and styles (Tailwind, CSS modules, a design system of your own), use the headless hooks. They render nothing: you put their refs on your elements, and the elements get the WAI-ARIA roles and states, keyboard handling, focus management and dismissal. A `data-state` attribute (`open` / `closed`, `active` / `inactive`, `checked` / `unchecked`) is the styling hook, so `data-[state=open]:` works in Tailwind.
+When you want Editora's behaviour but your own markup and styles (Tailwind, CSS modules, a design system of your own), use the headless hooks. They render nothing: you put their refs on your elements, and the elements get the WAI-ARIA roles and states, keyboard handling, focus management and dismissal. A `data-state` attribute (`open` / `closed`, `active` / `inactive`, `checked` / `unchecked`, `on` / `off`) is the styling hook, so `data-[state=open]:` works in Tailwind.
 
 ## Try it
 
@@ -116,6 +116,76 @@ const list = useHeadlessListbox({ multiple: true, onValueChange: setTags });
 
 Arrows, Home and End, typeahead; single select follows focus; in a multiple list Space or click toggles, Shift+Arrow extends and Ctrl/Cmd+A selects all. `value` / `defaultValue` / `onValueChange`.
 
+## Collapsible
+
+```tsx
+const details = useHeadlessCollapsible();
+<button ref={details.triggerRef}>Shipping details</button>
+<div ref={details.contentRef} className="data-[state=closed]:hidden">…</div>
+```
+
+The disclosure pattern: the button gets `aria-expanded` and `aria-controls`, the region is `hidden` while closed. `open` / `defaultOpen` / `onOpenChange`, `disabled`.
+
+## Accordion
+
+```tsx
+const faq = useHeadlessAccordion({ type: 'single', collapsible: true });
+<div ref={faq.rootRef}>
+  <div data-accordion-item data-value="shipping">
+    <h3><button data-accordion-trigger>Shipping</button></h3>
+    <div data-accordion-content>Orders ship within two days.</div>
+  </div>
+  …
+</div>
+```
+
+Each panel is a `region` labelled by its header button. `type="single"` keeps one open (`collapsible={false}` stops the open one from closing), `type="multiple"` allows several. Arrow Up/Down (or Left/Right with `orientation="horizontal"`), Home and End move between headers. `value` / `defaultValue` / `onValueChange` hold the open items' `data-value`s.
+
+## Tooltip
+
+```tsx
+const tip = useHeadlessTooltip({ placement: 'top' });
+<button ref={tip.triggerRef} aria-label="Save"><SaveIcon /></button>
+<div ref={tip.contentRef} className="rounded bg-black px-2 py-1 text-white">Save (Ctrl+S)</div>
+```
+
+`role="tooltip"`, linked with `aria-describedby`. It shows after `delay` (600 ms) on hover and at once on keyboard focus, never on touch; it hides on Escape, blur and pointer down. The pointer can move onto it without it closing (WCAG 1.4.13), and only one tooltip is open at a time. Keep its content to text: it is a description, not a place for buttons.
+
+## Hover card
+
+```tsx
+const card = useHeadlessHoverCard();
+<a ref={card.triggerRef} href="/u/ada">@ada</a>
+<div ref={card.contentRef} className="rounded-lg border bg-white p-3 shadow">…profile preview…</div>
+```
+
+A preview for sighted pointer users of what a link points to: it opens after `openDelay` (700 ms) on hover or focus and stays while hovered. It is hidden from assistive technology, so the link itself must make sense without it.
+
+## Toggle group
+
+```tsx
+const align = useHeadlessToggleGroup({ type: 'single', defaultValue: ['left'] });
+<div ref={align.rootRef} aria-label="Text alignment">
+  <button data-toggle-item data-value="left" className="data-[state=on]:bg-gray-200">Left</button>
+  <button data-toggle-item data-value="center">Center</button>
+</div>
+```
+
+`type="single"` is a radio group (`aria-checked`, one or none chosen); `type="multiple"` gives each button `aria-pressed`. One tab stop with arrow keys (`rovingFocus={false}` turns that off). `value` / `defaultValue` / `onValueChange`.
+
+## Toolbar
+
+```tsx
+const toolbar = useHeadlessToolbar();
+<div ref={toolbar.rootRef} aria-label="Formatting">
+  <button>Bold</button>
+  <button>Italic</button>
+  <input aria-label="Font size" />
+</div>
+```
+
+`role="toolbar"` with one tab stop: arrow keys move between its controls, Home and End jump, and disabled controls are skipped. Inside a text input the arrow keys keep moving the caret. Call `refresh()` after rendering different controls.
+
 ## Without React
 
 ```ts
@@ -124,4 +194,5 @@ import { createDialog, createMenu } from '@editora/ui-core/headless';
 const dialog = createDialog({ trigger: button, content: panel, overlay: backdrop });
 const menu = createMenu({ trigger: menuButton, menu: menuPanel, onSelect: (item) => console.log(item) });
 // dialog.open(), dialog.close(), dialog.destroy() …
+// Also: createCollapsible, createAccordion, createTooltip, createHoverCard, createToggleGroup, createToolbar
 ```

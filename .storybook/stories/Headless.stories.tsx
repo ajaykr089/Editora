@@ -1,6 +1,17 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { useHeadlessDialog, useHeadlessListbox, useHeadlessMenu, useHeadlessTabs } from '@editora/ui-react';
+import {
+  useHeadlessAccordion,
+  useHeadlessCollapsible,
+  useHeadlessDialog,
+  useHeadlessHoverCard,
+  useHeadlessListbox,
+  useHeadlessMenu,
+  useHeadlessTabs,
+  useHeadlessToggleGroup,
+  useHeadlessToolbar,
+  useHeadlessTooltip,
+} from '@editora/ui-react';
 
 const meta: Meta = { title: 'UI/Headless hooks' };
 export default meta;
@@ -71,6 +82,99 @@ export const Listbox: Story = {
           <div data-option data-value="docs" style={{ minHeight: 28 }}>Docs</div>
         </div>
         <p>Selected: {list.value.join(', ') || 'none'}</p>
+      </div>
+    );
+  },
+};
+
+const btn: React.CSSProperties = { minHeight: 28, minWidth: 28 };
+
+export const Collapsible: Story = {
+  render: function Render() {
+    const c = useHeadlessCollapsible();
+    return (
+      <div>
+        <button ref={c.triggerRef} style={btn}>{c.open ? 'Hide' : 'Show'} details</button>
+        <div ref={c.contentRef} style={{ ...panel, marginTop: 8 }}>Shipping takes 3–5 working days.</div>
+      </div>
+    );
+  },
+};
+
+export const Accordion: Story = {
+  render: function Render() {
+    const acc = useHeadlessAccordion({ defaultValue: ['shipping'] });
+    const items = [
+      ['shipping', 'Shipping', 'Orders ship within two working days.'],
+      ['returns', 'Returns', 'Return anything within 30 days.'],
+      ['warranty', 'Warranty', 'Two years on every product.'],
+    ];
+    return (
+      <div ref={acc.rootRef} style={{ ...panel, maxWidth: 420, padding: 8 }}>
+        {items.map(([value, title, body]) => (
+          <div key={value} data-accordion-item data-value={value}>
+            <h3 style={{ margin: 0 }}>
+              <button data-accordion-trigger style={{ ...btn, width: '100%', textAlign: 'start' }}>{title}</button>
+            </h3>
+            <div data-accordion-content style={{ padding: '4px 8px 12px' }}>{body}</div>
+          </div>
+        ))}
+      </div>
+    );
+  },
+};
+
+export const Tooltip: Story = {
+  render: function Render() {
+    const tip = useHeadlessTooltip({ placement: 'top' });
+    return (
+      <div style={{ paddingTop: 48 }}>
+        <button ref={tip.triggerRef} style={btn}>Save</button>
+        <div ref={tip.contentRef} style={{ background: '#111', color: '#fff', borderRadius: 6, padding: '4px 8px', fontSize: 13 }}>Saves the draft (Ctrl+S)</div>
+      </div>
+    );
+  },
+};
+
+export const HoverCard: Story = {
+  render: function Render() {
+    const card = useHeadlessHoverCard();
+    return (
+      <div>
+        <p>Written by <a ref={card.triggerRef} href="#ada">@ada</a>.</p>
+        <div ref={card.contentRef} style={{ ...panel, width: 240 }}><strong>Ada Lovelace</strong><br />Wrote the first program.</div>
+      </div>
+    );
+  },
+};
+
+export const ToggleGroup: Story = {
+  render: function Render() {
+    const align = useHeadlessToggleGroup({ defaultValue: ['left'] });
+    const marks = useHeadlessToggleGroup({ type: 'multiple' });
+    return (
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div ref={align.rootRef} aria-label="Text alignment" style={{ display: 'flex', gap: 4 }}>
+          {['left', 'center', 'right'].map((v) => <button key={v} data-toggle-item data-value={v} style={btn}>{v}</button>)}
+        </div>
+        <div ref={marks.rootRef} aria-label="Formatting" style={{ display: 'flex', gap: 4 }}>
+          {['bold', 'italic', 'underline'].map((v) => <button key={v} data-toggle-item data-value={v} style={btn}>{v}</button>)}
+        </div>
+        <p>Alignment: {align.value.join(', ') || 'none'}; formatting: {marks.value.join(', ') || 'none'}</p>
+      </div>
+    );
+  },
+};
+
+export const Toolbar: Story = {
+  render: function Render() {
+    const tb = useHeadlessToolbar();
+    return (
+      <div ref={tb.rootRef} aria-label="Formatting" style={{ ...panel, display: 'flex', gap: 4, padding: 4, width: 'fit-content' }}>
+        <button style={btn}>Bold</button>
+        <button style={btn}>Italic</button>
+        <input aria-label="Font size" defaultValue="14" style={{ width: 48, minHeight: 28 }} />
+        <button style={btn}>Link</button>
       </div>
     );
   },

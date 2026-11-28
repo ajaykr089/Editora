@@ -5,6 +5,18 @@ import {
   createMenu,
   createPopover,
   createTabs,
+  createCollapsible,
+  createAccordion,
+  createTooltip,
+  createHoverCard,
+  createToggleGroup,
+  createToolbar,
+  type CollapsibleController,
+  type AccordionController,
+  type TooltipController,
+  type HoverCardController,
+  type ToggleGroupController,
+  type ToolbarController,
   type DialogController,
   type ListboxController,
   type MenuController,
@@ -345,4 +357,297 @@ export function useHeadlessListbox(options: UseHeadlessListboxOptions = {}): Use
   }, [latest, setInner]);
 
   return { listboxRef, value, setValue, refresh: React.useCallback(() => controller.current?.refresh(), []) };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+const sameList = (a: string[], b: string[]) => a.join('\u0000') === b.join('\u0000');
+
+/** Wires a list-valued controller (accordion, toggle group) to controlled or uncontrolled React state. */
+function useListController<C extends { value: string[]; setValue(v: string[]): void; refresh(): void; destroy(): void }>(
+  root: HTMLElement | null,
+  options: { value?: string[]; defaultValue?: string[]; onValueChange?: (value: string[]) => void },
+  create: (root: HTMLElement, defaultValue: string[], onValueChange: (next: string[]) => void) => C,
+  deps: unknown[],
+): { value: string[]; setValue: (value: string[]) => void; refresh: () => void } {
+  const [value, setInner, controlled] = useControllable(options.value, options.defaultValue ?? []);
+  const latest = useLatest({ options, value, controlled });
+  const controller = React.useRef<C | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!root) return undefined;
+    const ctl = create(root, latest.current.value, (next) => {
+      if (!latest.current.controlled) setInner(next);
+      latest.current.options.onValueChange?.(next);
+      queueMicrotask(() => {
+        if (latest.current.controlled && controller.current && !sameList(controller.current.value, latest.current.value)) {
+          controller.current.setValue(latest.current.value);
+        }
+      });
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [root, ...deps]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (controller.current && !sameList(controller.current.value, value)) controller.current.setValue(value);
+  }, [value.join('\u0000')]);
+
+  const setValue = React.useCallback((next: string[]) => {
+    if (latest.current.controlled) latest.current.options.onValueChange?.(next);
+    else setInner(next);
+  }, [latest, setInner]);
+
+  return { value, setValue, refresh: React.useCallback(() => controller.current?.refresh(), []) };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessCollapsibleOptions = {
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  disabled?: boolean;
+};
+
+/** Disclosure behaviour: a button that shows and hides a region (`aria-expanded`, `aria-controls`, `hidden`). */
+export function useHeadlessCollapsible(options: UseHeadlessCollapsibleOptions = {}): UseHeadlessDialogResult {
+  const [trigger, triggerRef] = useElement();
+  const [content, contentRef] = useElement();
+  const [open, setInner, controlled] = useControllable(options.open, options.defaultOpen ?? false);
+  const latest = useLatest({ options, open, controlled });
+  const controller = React.useRef<CollapsibleController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!trigger || !content) return undefined;
+    const ctl = createCollapsible({
+      trigger,
+      content,
+      disabled: options.disabled,
+      defaultOpen: latest.current.open,
+      onOpenChange: (next) => {
+        if (!latest.current.controlled) setInner(next);
+        latest.current.options.onOpenChange?.(next);
+        queueMicrotask(() => {
+          if (latest.current.controlled && controller.current && controller.current.isOpen !== latest.current.open) {
+            controller.current.setOpen(latest.current.open);
+          }
+        });
+      },
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [trigger, content, options.disabled]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (controller.current && controller.current.isOpen !== open) controller.current.setOpen(open);
+  }, [open]);
+
+  const setOpen = React.useCallback((next: boolean) => {
+    if (latest.current.controlled) latest.current.options.onOpenChange?.(next);
+    else setInner(next);
+  }, [latest, setInner]);
+
+  return { triggerRef, contentRef, open, setOpen };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessAccordionOptions = {
+  value?: string[];
+  defaultValue?: string[];
+  onValueChange?: (value: string[]) => void;
+  type?: 'single' | 'multiple';
+  collapsible?: boolean;
+  orientation?: 'vertical' | 'horizontal';
+};
+
+export type UseHeadlessAccordionResult = {
+  /** On the element around the items: `data-accordion-item` (with `data-value`), each holding a `data-accordion-trigger` button and a `data-accordion-content` panel. */
+  rootRef: ElementRef;
+  value: string[];
+  setValue: (value: string[]) => void;
+  /** Call after rendering a different set of items. */
+  refresh: () => void;
+};
+
+/** Accordion behaviour: one or several sections open, arrows/Home/End between headers, labelled regions. */
+export function useHeadlessAccordion(options: UseHeadlessAccordionOptions = {}): UseHeadlessAccordionResult {
+  const [root, rootRef] = useElement();
+  const state = useListController<AccordionController>(
+    root,
+    options,
+    (el, defaultValue, onValueChange) => createAccordion({
+      root: el,
+      type: options.type,
+      collapsible: options.collapsible,
+      orientation: options.orientation,
+      defaultValue,
+      onValueChange,
+    }),
+    [options.type, options.collapsible, options.orientation],
+  );
+  return { rootRef, ...state };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessTooltipOptions = {
+  placement?: Parameters<typeof createTooltip>[0]['placement'];
+  offset?: number;
+  /** Hover delay before showing, ms (default 600). Keyboard focus shows it at once. */
+  delay?: number;
+  closeDelay?: number;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export type UseHeadlessHoverResult = {
+  triggerRef: ElementRef;
+  contentRef: ElementRef;
+  open: boolean;
+  show: () => void;
+  hide: () => void;
+};
+
+/** Tooltip behaviour: `role="tooltip"` + `aria-describedby`, hover with delay, focus-visible, Escape, hoverable, one at a time. */
+export function useHeadlessTooltip(options: UseHeadlessTooltipOptions = {}): UseHeadlessHoverResult {
+  return useHoverController<TooltipController>(options, (trigger, content, onOpenChange) => createTooltip({
+    trigger,
+    content,
+    placement: options.placement,
+    offset: options.offset,
+    delay: options.delay,
+    closeDelay: options.closeDelay,
+    onOpenChange,
+  }), [options.placement, options.offset, options.delay, options.closeDelay]);
+}
+
+export type UseHeadlessHoverCardOptions = {
+  placement?: Parameters<typeof createHoverCard>[0]['placement'];
+  offset?: number;
+  openDelay?: number;
+  closeDelay?: number;
+  onOpenChange?: (open: boolean) => void;
+};
+
+/** Hover card behaviour: a preview shown on hover or focus of a link, for sighted pointer users (hidden from assistive technology). */
+export function useHeadlessHoverCard(options: UseHeadlessHoverCardOptions = {}): UseHeadlessHoverResult {
+  return useHoverController<HoverCardController>(options, (trigger, content, onOpenChange) => createHoverCard({
+    trigger,
+    content,
+    placement: options.placement,
+    offset: options.offset,
+    openDelay: options.openDelay,
+    closeDelay: options.closeDelay,
+    onOpenChange,
+  }), [options.placement, options.offset, options.openDelay, options.closeDelay]);
+}
+
+function useHoverController<C extends { isOpen: boolean; show(): void; hide(): void; destroy(): void }>(
+  options: { onOpenChange?: (open: boolean) => void },
+  create: (trigger: HTMLElement, content: HTMLElement, onOpenChange: (open: boolean) => void) => C,
+  deps: unknown[],
+): UseHeadlessHoverResult {
+  const [trigger, triggerRef] = useElement();
+  const [content, contentRef] = useElement();
+  const [open, setOpen] = React.useState(false);
+  const latest = useLatest(options);
+  const controller = React.useRef<C | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!trigger || !content) return undefined;
+    const ctl = create(trigger, content, (next) => {
+      setOpen(next);
+      latest.current.onOpenChange?.(next);
+    });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [trigger, content, ...deps]);
+
+  return {
+    triggerRef,
+    contentRef,
+    open,
+    show: React.useCallback(() => controller.current?.show(), []),
+    hide: React.useCallback(() => controller.current?.hide(), []),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessToggleGroupOptions = {
+  value?: string[];
+  defaultValue?: string[];
+  onValueChange?: (value: string[]) => void;
+  type?: 'single' | 'multiple';
+  orientation?: 'horizontal' | 'vertical';
+  rovingFocus?: boolean;
+};
+
+export type UseHeadlessToggleGroupResult = {
+  /** On the element around the `data-toggle-item` buttons (each with a `data-value`). Give it an `aria-label`. */
+  rootRef: ElementRef;
+  value: string[];
+  setValue: (value: string[]) => void;
+  refresh: () => void;
+};
+
+/** Toggle group behaviour: single (radio group) or multiple (pressed buttons), one tab stop with arrow keys. */
+export function useHeadlessToggleGroup(options: UseHeadlessToggleGroupOptions = {}): UseHeadlessToggleGroupResult {
+  const [root, rootRef] = useElement();
+  const state = useListController<ToggleGroupController>(
+    root,
+    options,
+    (el, defaultValue, onValueChange) => createToggleGroup({
+      root: el,
+      type: options.type,
+      orientation: options.orientation,
+      rovingFocus: options.rovingFocus,
+      defaultValue,
+      onValueChange,
+    }),
+    [options.type, options.orientation, options.rovingFocus],
+  );
+  return { rootRef, ...state };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export type UseHeadlessToolbarOptions = {
+  orientation?: 'horizontal' | 'vertical';
+  loop?: boolean;
+};
+
+export type UseHeadlessToolbarResult = {
+  /** On the toolbar element. Give it an `aria-label`. */
+  rootRef: ElementRef;
+  /** Call after rendering a different set of controls. */
+  refresh: () => void;
+};
+
+/** Toolbar behaviour: `role="toolbar"`, one tab stop, arrow keys between controls (text inputs keep theirs). */
+export function useHeadlessToolbar(options: UseHeadlessToolbarOptions = {}): UseHeadlessToolbarResult {
+  const [root, rootRef] = useElement();
+  const controller = React.useRef<ToolbarController | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!root) return undefined;
+    const ctl = createToolbar({ root, orientation: options.orientation, loop: options.loop });
+    controller.current = ctl;
+    return () => {
+      ctl.destroy();
+      controller.current = null;
+    };
+  }, [root, options.orientation, options.loop]);
+
+  return { rootRef, refresh: React.useCallback(() => controller.current?.refresh(), []) };
 }

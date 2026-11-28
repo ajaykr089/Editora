@@ -393,5 +393,5 @@ export type { AnnounceOptions, AnnouncePoliteness } from './Announcer';
 export { DataList } from './DataList';
 export type { DataListProps, DataListItemProps, DataListLabelProps, DataListValueProps } from './DataList';
 // Headless hooks: WAI-ARIA behaviour on your own markup and styles
-export { useHeadlessDialog, useHeadlessPopover, useHeadlessMenu, useHeadlessTabs, useHeadlessListbox } from './Headless';
-export type { UseHeadlessDialogOptions, UseHeadlessDialogResult, UseHeadlessPopoverOptions, UseHeadlessMenuOptions, UseHeadlessMenuResult, UseHeadlessTabsOptions, UseHeadlessTabsResult, UseHeadlessListboxOptions, UseHeadlessListboxResult } from './Headless';
+export { useHeadlessDialog, useHeadlessPopover, useHeadlessMenu, useHeadlessTabs, useHeadlessListbox, useHeadlessCollapsible, useHeadlessAccordion, useHeadlessTooltip, useHeadlessHoverCard, useHeadlessToggleGroup, useHeadlessToolbar } from './Headless';
+export type { UseHeadlessDialogOptions, UseHeadlessDialogResult, UseHeadlessPopoverOptions, UseHeadlessMenuOptions, UseHeadlessMenuResult, UseHeadlessTabsOptions, UseHeadlessTabsResult, UseHeadlessListboxOptions, UseHeadlessListboxResult, UseHeadlessCollapsibleOptions, UseHeadlessAccordionOptions, UseHeadlessAccordionResult, UseHeadlessTooltipOptions, UseHeadlessHoverCardOptions, UseHeadlessHoverResult, UseHeadlessToggleGroupOptions, UseHeadlessToggleGroupResult, UseHeadlessToolbarOptions, UseHeadlessToolbarResult } from './Headless';
