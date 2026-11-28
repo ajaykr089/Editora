@@ -100,6 +100,8 @@ export function createToaster(options: ToasterOptions): ToasterController {
     if (entry.timer) clearTimeout(entry.timer);
     entries.delete(id);
     const { el } = entry;
+    // The region shrinks under a still pointer without a pointerleave: the last toast going ends the hover pause.
+    if (!entries.size) hovering = false;
     // Keep focus in the region when the focused toast goes.
     if (el.contains(document.activeElement)) {
       const next = [...entries.values()][0]?.el;
@@ -240,6 +242,10 @@ export function createToaster(options: ToasterOptions): ToasterController {
       const entry: Entry = { id, el, remaining: addOptions.duration ?? defaultDuration, started: 0, timer: null };
       entries.set(id, entry);
       announce(el, addOptions.type ?? 'foreground');
+      // Re-read where the pointer and focus are: pointerleave and focusout do not fire for removed toasts.
+      hovering = hoverIn(region);
+      focused = region.contains(document.activeElement);
+      paused = hovering || focused || windowBlurred;
       startTimer(entry);
       return id;
     },
@@ -267,4 +273,12 @@ function spokenText(el: HTMLElement): string {
     parts.push(node.textContent || '');
   }
   return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function hoverIn(el: HTMLElement): boolean {
+  try {
+    return el.matches(':hover');
+  } catch {
+    return false;
+  }
 }

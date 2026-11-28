@@ -40,6 +40,8 @@ function Example() {
 }
 ```
 
+Closed parts are hidden with the `hidden` attribute. A class that sets `display` (`.panel { display: grid }`, Tailwind's `grid`) wins over it, so the part would stay visible: add `[hidden] { display: none !important; }` to your CSS, or use `data-[state=closed]:hidden`.
+
 They are built on the same primitives as the styled components (focus scope, dismissable layer, positioner), and the same behaviour is available without React from `@editora/ui-core/headless`.
 
 ## Dialog

@@ -322,4 +322,27 @@ describe('createToaster', () => {
     toaster.destroy();
     expect(document.querySelector('[data-toast-announcer]')).toBe(null);
   });
+
+  it('a toast closed under the pointer does not leave the next one paused', () => {
+    vi.useFakeTimers();
+    const host = html('<section id="r"></section>');
+    const region = host.querySelector('#r') as HTMLElement;
+    const toaster = createToaster({ region, duration: 1000 });
+    const make = () => {
+      const li = document.createElement('div');
+      li.innerHTML = 'Saved <button data-toast-close>Close</button>';
+      region.appendChild(li);
+      toaster.add(li);
+      return li;
+    };
+    const first = make();
+    region.dispatchEvent(pe('pointerenter', { bubbles: false }));
+    (first.querySelector('[data-toast-close]') as HTMLElement).click();
+    // No pointerleave: the region emptied under the pointer.
+    (document.activeElement as HTMLElement | null)?.blur();
+    const second = make();
+    vi.advanceTimersByTime(1000);
+    expect(second.isConnected).toBe(false);
+  });
 });
+
