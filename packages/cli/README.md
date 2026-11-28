@@ -177,6 +177,16 @@ The copied files are TypeScript unless you add `--js`.
 
 **Other registries.** `--registry <url or file>` copies from someone else's index instead of Editora's. It is a JSON file in the same format: `{ "schema": 1, "files": { "<path>": { "sha256": "…", "imports": ["<path>"], "packages": ["react"] } }, "elements": { "ui-x": "<path>" }, "react": { "X": "<path>" }, "blocks": { "block-x": { "file": "<path>", "description": "…" } }, "baseUrl": "https://…/" }`. Files are fetched from `baseUrl` (default: next to the index) and checked against their hash; the CLI says whose code it is copying.
 
+## Use it from an AI coding tool (MCP)
+
+`editora mcp` runs a Model Context Protocol server over stdio, so Claude Code, Cursor, VS Code or Windsurf can list components, read their API, read their source and copy them into your project:
+
+```json
+{ "mcpServers": { "editora": { "command": "npx", "args": ["-y", "@editora/cli", "mcp"] } } }
+```
+
+Tools: `list_components`, `get_component_docs`, `get_component_source`, `copy_components`, `install_command`.
+
 ## Several at once
 
 Give as many names as you like. The packages are installed with one command, a package that two names share is

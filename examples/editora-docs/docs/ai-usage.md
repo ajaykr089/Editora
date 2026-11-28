@@ -62,6 +62,30 @@ const Card = (props) => <Box variant="surface" {...props} />;
 const Modal = (props) => <Dialog {...props} />;
 ```
 
+## MCP server
+
+`@editora/cli` includes a [Model Context Protocol](https://modelcontextprotocol.io) server, so an AI coding tool can look up Editora components, read their API and copy them into your project while it works. Add it to the tool's MCP settings as a stdio server:
+
+```json
+{
+  "mcpServers": {
+    "editora": { "command": "npx", "args": ["-y", "@editora/cli", "mcp"] }
+  }
+}
+```
+
+(Claude Code: `claude mcp add editora -- npx -y @editora/cli mcp`.)
+
+| Tool | What it does |
+| --- | --- |
+| `list_components` | Lists React components, custom elements and blocks, optionally filtered by a word ("date", "chat") or a kind. |
+| `get_component_docs` | The API page of a component: props with types and descriptions, and the attributes and events of its element. |
+| `get_component_source` | The files a copy would write: the component and everything it imports. |
+| `copy_components` | Copies components or blocks into the project as editable source (as `editora add --copy`); returns the install command for the packages they need. |
+| `install_command` | The command that installs the packages instead, for the project's package manager. |
+
+It runs in the folder the tool starts it in, reads the same sources the CLI copies (one commit of the repository, checked by hash), and writes files only through `copy_components`. It needs no API key and sends nothing anywhere except the GitHub requests that fetch sources and docs.
+
 ## CLI quick add
 
 ```bash
