@@ -31,7 +31,7 @@ const pageStyle: React.CSSProperties = {
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: 22,
   fontWeight: 700,
-  color: '#0f172a',
+  color: 'var(--ui-color-text, #0f172a)',
   margin: 0,
 };
 
@@ -39,7 +39,7 @@ const sectionTextStyle: React.CSSProperties = {
   margin: '8px 0 0 0',
   fontSize: 14,
   lineHeight: 1.6,
-  color: '#475569',
+  color: 'var(--ui-color-muted, #475569)',
   maxWidth: 780,
 };
 
@@ -56,7 +56,7 @@ const darkCardStyle: React.CSSProperties = {
   alignContent: 'space-between',
 };
 
-const colorCardStyle: React.CSSProperties = {
+const colorCardStyle: React.CSSProperties = { color: '#1f2937',
   minHeight: 120,
   padding: 18,
   borderRadius: 18,
@@ -105,7 +105,7 @@ function DarkThemeExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#f8fafc' }}>Neutral icons on dark UI</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Default recommendation: give icons a light foreground color on dark panels.
             </div>
           </div>
@@ -119,7 +119,7 @@ function DarkThemeExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#f8fafc' }}>Semantic colors still work</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Success, warning, and danger hues stay readable when saturation is balanced against the dark background.
             </div>
           </div>
@@ -133,7 +133,7 @@ function DarkThemeExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#f8fafc' }}>Accent icons for emphasis</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Bright accent colors are fine as long as the background remains low-noise and dark enough for contrast.
             </div>
           </div>
@@ -154,8 +154,8 @@ function ColoredIconExamples(): React.ReactElement {
             <XCircleIcon color="#dc2626" ariaLabel="Red error icon" />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Status colors</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>Status colors</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Pass `color` directly to a named component when you want semantic feedback icons.
             </div>
           </div>
@@ -168,8 +168,8 @@ function ColoredIconExamples(): React.ReactElement {
             <LogoGoogleDriveIcon color="#2563eb" ariaLabel="Google Drive accent color" />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Brand or feature colors</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>Brand or feature colors</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Logos and product icons can use explicit brand tones when your UI allows colored marks.
             </div>
           </div>
@@ -180,16 +180,16 @@ function ColoredIconExamples(): React.ReactElement {
             <div style={{ color: '#7c3aed', display: 'flex', alignItems: 'center' }}>
               <SparklesIcon ariaLabel="Inherited purple color" />
             </div>
-            <div style={{ color: '#0f766e', display: 'flex', alignItems: 'center' }}>
+            <div style={{ color: 'color-mix(in srgb, var(--ui-color-success, #0f766e) 45%, var(--ui-color-text, #0f172a))', display: 'flex', alignItems: 'center' }}>
               <ChartLineIcon ariaLabel="Inherited teal color" />
             </div>
-            <div style={{ color: '#ea580c', display: 'flex', alignItems: 'center' }}>
+            <div style={{ color: 'color-mix(in srgb, var(--ui-color-warning, #ea580c) 45%, var(--ui-color-text, #0f172a))', display: 'flex', alignItems: 'center' }}>
               <ShieldIcon ariaLabel="Inherited orange color" />
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Inherited color works too</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>Inherited color works too</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Icons use `currentColor`, so they can inherit from parent text color without extra props.
             </div>
           </div>
@@ -200,7 +200,7 @@ function ColoredIconExamples(): React.ReactElement {
 }
 
 function WeightVariationExamples(): React.ReactElement {
-  const cardStyle: React.CSSProperties = {
+  const cardStyle: React.CSSProperties = { color: '#1f2937',
     minHeight: 136,
     padding: 18,
     borderRadius: 18,
@@ -221,8 +221,8 @@ function WeightVariationExamples(): React.ReactElement {
             <SparklesIcon ariaLabel="Thin sparkles icon" />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Thin</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>Thin</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Best when the default outline feels too heavy in dense or refined UI surfaces.
             </div>
           </div>
@@ -237,8 +237,8 @@ function WeightVariationExamples(): React.ReactElement {
             <SparklesIcon ariaLabel="Regular sparkles icon" />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Regular</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>Regular</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Balanced default weight for most surfaces and matches the current library baseline.
             </div>
           </div>
@@ -253,8 +253,8 @@ function WeightVariationExamples(): React.ReactElement {
             <SparklesIcon ariaLabel="Bold sparkles icon" />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Bold</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>Bold</div>
+            <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
               Useful for stronger presence, small touch targets, or low-contrast surfaces.
             </div>
           </div>

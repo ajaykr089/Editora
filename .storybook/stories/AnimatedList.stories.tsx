@@ -147,7 +147,7 @@ export const Playground: Story = {
         ))}
       </AnimatedList>
 
-      <Box style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: '#526175' }}>
+      <Box style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)' }}>
         Use the controls to test effect direction, motion profile, sequential spacing, surface variants, and looping behavior.
         The component is designed for landing-page activity feeds, notification stacks, and launch storytelling where each item
         should enter with a controlled delay instead of all at once.
@@ -397,8 +397,8 @@ export const ManualPlayback = () => {
   const actionButtonStyle: React.CSSProperties = {
     border: '1px solid #cbd5e1',
     borderRadius: 12,
-    background: '#ffffff',
-    color: '#0f172a',
+    background: 'var(--ui-color-surface, #ffffff)',
+    color: 'var(--ui-color-text, #0f172a)',
     padding: '10px 14px',
     fontWeight: 600,
     cursor: 'pointer'

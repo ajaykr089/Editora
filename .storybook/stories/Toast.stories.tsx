@@ -63,17 +63,17 @@ const btn: React.CSSProperties = {
   padding: "8px 14px",
   borderRadius: 8,
   border: "1px solid #d6d3d1",
-  background: "#fff",
+  background: "var(--ui-color-surface, #fff)",
   fontSize: 13,
   fontWeight: 500,
   cursor: "pointer",
   fontFamily: "inherit",
 };
 const btnPrimary: React.CSSProperties = { ...btn, background: "#1c1917", color: "#fafaf9", border: "1px solid #1c1917" };
-const btnBlue:    React.CSSProperties = { ...btn, color: "#2563eb", borderColor: "rgba(37,99,235,.3)" };
-const btnGreen:   React.CSSProperties = { ...btn, color: "#15803d", borderColor: "rgba(22,163,74,.3)" };
-const btnRed:     React.CSSProperties = { ...btn, color: "#dc2626", borderColor: "rgba(220,38,38,.3)" };
-const btnAmber:   React.CSSProperties = { ...btn, color: "#b45309", borderColor: "rgba(217,119,6,.3)" };
+const btnBlue:    React.CSSProperties = { ...btn, color: "color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-color-text, #0f172a))", borderColor: "rgba(37,99,235,.3)" };
+const btnGreen:   React.CSSProperties = { ...btn, color: "color-mix(in srgb, var(--ui-color-success, #15803d) 45%, var(--ui-color-text, #0f172a))", borderColor: "rgba(22,163,74,.3)" };
+const btnRed:     React.CSSProperties = { ...btn, color: "color-mix(in srgb, var(--ui-color-danger, #dc2626) 45%, var(--ui-color-text, #0f172a))", borderColor: "rgba(220,38,38,.3)" };
+const btnAmber:   React.CSSProperties = { ...btn, color: "color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))", borderColor: "rgba(217,119,6,.3)" };
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
@@ -169,15 +169,15 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <Box style={{ marginBottom: 40 }}>
-    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#78716c", margin: "0 0 4px" }}>{label}</p>
+    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ui-color-muted, #78716c)", margin: "0 0 4px" }}>{label}</p>
     <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 4px" }}>{title}</h2>
-    {desc && <p style={{ fontSize: 13, color: "#78716c", margin: "0 0 16px" }}>{desc}</p>}
+    {desc && <p style={{ fontSize: 13, color: "var(--ui-color-muted, #78716c)", margin: "0 0 16px" }}>{desc}</p>}
     {children}
   </Box>
 );
 
 const Card = ({ title, children }: { title?: string; children: React.ReactNode }) => (
-  <div style={{ background: "#fff", border: "1px solid #e7e5e4", borderRadius: 10, padding: 20, marginBottom: 16 }}>
+  <div style={{ background: "var(--ui-color-surface, #fff)", border: "1px solid #e7e5e4", borderRadius: 10, padding: 20, marginBottom: 16 }}>
     {title && <p style={{ fontSize: 13, fontWeight: 600, margin: "0 0 12px" }}>{title}</p>}
     {children}
   </div>
@@ -213,7 +213,7 @@ export const ToastShowcase: Story = {
         <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 4 }}>
           Editora Toast
         </h1>
-        <p style={{ color: "#78716c", marginBottom: 32 }}>
+        <p style={{ color: "var(--ui-color-muted, #78716c)", marginBottom: 32 }}>
           Use the Controls panel to change theme, position, RTL, and swipe settings.
         </p>
 
@@ -1235,7 +1235,7 @@ export const AccessibilityFeatures: Story = {
           </Card>
 
           <Card title="Keyboard-closable">
-            <p style={{ fontSize: 12, color: "#78716c", marginBottom: 8 }}>Tab to focus the toast, then press Escape or Enter to close.</p>
+            <p style={{ fontSize: 12, color: "var(--ui-color-muted, #78716c)", marginBottom: 8 }}>Tab to focus the toast, then press Escape or Enter to close.</p>
             <button style={btn} onClick={() => toastAdvanced.show({ message: "Focus me and press Escape", level: "info", closable: true, duration: 10000 })}>Show</button>
           </Card>
 
@@ -1244,7 +1244,7 @@ export const AccessibilityFeatures: Story = {
           </Card>
 
           <Card title="Reduced motion (CSS)">
-            <p style={{ fontSize: 12, color: "#78716c", marginBottom: 8 }}>Toasts respect <code>prefers-reduced-motion</code> — all transitions collapse to a simple opacity fade.</p>
+            <p style={{ fontSize: 12, color: "var(--ui-color-muted, #78716c)", marginBottom: 8 }}>Toasts respect <code>prefers-reduced-motion</code> — all transitions collapse to a simple opacity fade.</p>
             <button style={btn} onClick={() => toastAdvanced.info("Respects prefers-reduced-motion")}>Show</button>
           </Card>
 
@@ -1667,7 +1667,7 @@ export const PluginSystem: Story = {
           <Grid style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 12 }}>
 
             <Card title="Analytics plugin">
-              <p style={{ fontSize: 12, color: "#78716c", marginBottom: 10 }}>Logs every toast to the console with level, message, and timestamp. Check the browser console.</p>
+              <p style={{ fontSize: 12, color: "var(--ui-color-muted, #78716c)", marginBottom: 10 }}>Logs every toast to the console with level, message, and timestamp. Check the browser console.</p>
               <BtnRow>
                 <button style={installed.includes("analytics") ? btnGreen : btn} onClick={() => {
                   if (installed.includes("analytics")) return;
@@ -1685,7 +1685,7 @@ export const PluginSystem: Story = {
             </Card>
 
             <Card title="Logger plugin">
-              <p style={{ fontSize: 12, color: "#78716c", marginBottom: 10 }}>Structured log with JSON payload for every toast lifecycle event.</p>
+              <p style={{ fontSize: 12, color: "var(--ui-color-muted, #78716c)", marginBottom: 10 }}>Structured log with JSON payload for every toast lifecycle event.</p>
               <BtnRow>
                 <button style={installed.includes("logger") ? btnGreen : btn} onClick={() => {
                   if (installed.includes("logger")) return;
@@ -1704,7 +1704,7 @@ export const PluginSystem: Story = {
             </Card>
 
             <Card title="Rate-limiter plugin (demo)">
-              <p style={{ fontSize: 12, color: "#78716c", marginBottom: 10 }}>Throttles duplicate messages to prevent spam. Click rapidly to see it in action.</p>
+              <p style={{ fontSize: 12, color: "var(--ui-color-muted, #78716c)", marginBottom: 10 }}>Throttles duplicate messages to prevent spam. Click rapidly to see it in action.</p>
               <BtnRow>
                 <button style={installed.includes("ratelimit") ? btnGreen : btn} onClick={() => {
                   if (installed.includes("ratelimit")) return;
@@ -2599,7 +2599,7 @@ export const KitchenSink: Story = {
   render: () => (
     <Box style={{ padding: 20, maxWidth: 900 }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 4 }}>Kitchen Sink</h1>
-      <p style={{ color: "#78716c", marginBottom: 32 }}>Every feature, one page.</p>
+      <p style={{ color: "var(--ui-color-muted, #78716c)", marginBottom: 32 }}>Every feature, one page.</p>
 
       {/* ── Basic ── */}
       <Section label="01" title="Basic types">

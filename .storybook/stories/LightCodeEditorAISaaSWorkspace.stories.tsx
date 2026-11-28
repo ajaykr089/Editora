@@ -43,7 +43,7 @@ const Modal = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
     }}
     onDialogClose={onClose}
   >
-    <Box variant="outline" p="10px" radius="sm" color="#475569">
+    <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
       Checks: naming conventions, export policy, and readonly review mode compliance.
     </Box>
   </Dialog>
@@ -88,8 +88,8 @@ export const DeveloperCodeWorkspace: Story = {
       <Grid gap="14px" style={{ maxWidth: 1120, margin: '0 auto', padding: 8 }}>
         <Flex justify="between" align="center" wrap="wrap" gap="10px">
           <Box>
-            <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>Light Code Editor Workspace</h2>
-            <p style={{ margin: '6px 0 0 0', color: '#526175' }}>SaaS developer workspace for source review and policy-safe publishing.</p>
+            <h2 style={{ margin: 0, fontSize: 28, color: 'var(--ui-color-text, #0f172a)' }}>Light Code Editor Workspace</h2>
+            <p style={{ margin: '6px 0 0 0', color: 'var(--ui-color-muted, #526175)' }}>SaaS developer workspace for source review and policy-safe publishing.</p>
           </Box>
           <Flex gap="8px">
             <Button
@@ -117,15 +117,15 @@ export const DeveloperCodeWorkspace: Story = {
 
         <Grid columns={{ initial: '1fr', md: '1fr 1fr 1fr' }} gap="10px">
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 12, color: '#526175' }}>Characters</div>
+            <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Characters</div>
             <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700 }}>{chars}</div>
           </Box>
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 12, color: '#526175' }}>Theme</div>
+            <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Theme</div>
             <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700 }}>Dark</div>
           </Box>
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 12, color: '#526175' }}>Mode</div>
+            <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Mode</div>
             <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700 }}>{readonly ? 'Readonly' : 'Editable'}</div>
           </Box>
         </Grid>

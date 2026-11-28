@@ -35,7 +35,7 @@ export const Interactive = (args: any) => {
         }}
       />
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Page {page} of {count} • last action: {lastReason}
       </Box>
     </Grid>
@@ -60,7 +60,7 @@ export const VariantGallery = () => (
   <Grid style={{ display: 'grid', gap: 18 }}>
     {(['classic', 'flat', 'outline', 'solid'] as const).map((variant) => (
       <Flex key={variant} style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-        <Box style={{ width: 72, fontSize: 13, color: '#475569', textTransform: 'capitalize' }}>{variant}</Box>
+        <Box style={{ width: 72, fontSize: 13, color: 'var(--ui-color-muted, #475569)', textTransform: 'capitalize' }}>{variant}</Box>
         <Pagination page={4} count={18} variant={variant} />
       </Flex>
     ))}

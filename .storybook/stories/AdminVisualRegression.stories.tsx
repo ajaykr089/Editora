@@ -24,7 +24,7 @@ const lightTokens = {
     primary: '#2563eb',
     primaryHover: '#1d4ed8',
     foregroundOnPrimary: '#ffffff',
-    background: '#f8fafc',
+    background: 'var(--ui-color-surface, #f8fafc)',
     surface: '#ffffff',
     surfaceAlt: '#f1f5f9',
     text: '#0f172a',
@@ -62,7 +62,7 @@ const highContrastTokens = {
     primary: '#0033ff',
     primaryHover: '#001fd1',
     foregroundOnPrimary: '#ffffff',
-    background: '#ffffff',
+    background: 'var(--ui-color-surface, #ffffff)',
     surface: '#ffffff',
     surfaceAlt: '#ffffff',
     text: '#000000',
@@ -233,7 +233,7 @@ export default {
 
 export const LightDarkHighContrastMatrix = () => (
   <Box
-    style={{
+    style={{ color: '#1f2937',
       background: 'linear-gradient(145deg, #e2e8f0 0%, #f8fafc 58%, #ffffff 100%)',
       minHeight: '100vh',
       padding: 20

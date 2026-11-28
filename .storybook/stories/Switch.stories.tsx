@@ -37,7 +37,7 @@ export const Controlled = (args: any) => {
         <Switch.Description>Run triggers when publishing or archiving content.</Switch.Description>
       </Switch>
 
-      <Box variant="surface" p="10px" style={{ fontSize: 13, color: '#475569' }}>
+      <Box variant="surface" p="10px" style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Current state: <strong>{checked ? 'on' : 'off'}</strong>
       </Box>
     </Grid>

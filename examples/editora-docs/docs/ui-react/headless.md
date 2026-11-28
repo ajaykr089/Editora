@@ -269,7 +269,7 @@ const ctx = useHeadlessContextMenu({ onSelect: (item) => run(item.dataset.action
 </div>
 ```
 
-The menu opens at the pointer on right click, and on a long press with touch (iOS Safari has no `contextmenu` event). From the keyboard, Shift+F10 or the ContextMenu key opens it while focus is in the target. The menu then has the menu button's keyboard, and focus returns to where it was when the menu closes.
+The menu opens at the pointer on right click, and on a long press with touch (iOS Safari has no `contextmenu` event). Give the target a name (`aria-label`, or a heading inside it) and, if it is not otherwise interactive, mention the menu in its description: nothing in the markup tells a screen reader that a context menu exists. From the keyboard, Shift+F10 or the ContextMenu key opens it while focus is in the target. The menu then has the menu button's keyboard, and focus returns to where it was when the menu closes.
 
 ## Navigation menu
 

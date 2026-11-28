@@ -61,7 +61,7 @@ export const ControlledWithDebounce = () => {
         <Textarea.Description>Debounced output updates after 320ms</Textarea.Description>
       </Textarea>
 
-      <Box variant="surface" p="10px" style={{ fontSize: 13, color: '#475569' }}>
+      <Box variant="surface" p="10px" style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         <div><strong>Live:</strong> {value || '(empty)'}</div>
         <div><strong>Debounced:</strong> {debounced || '(empty)'}</div>
       </Box>

@@ -85,7 +85,7 @@ Svelte compiles custom elements as they are; register them and add the types:
 <ui-dialog {open} title="Edit profile" onclose={() => (open = false)}>…</ui-dialog>
 ```
 
-`svelte-check` checks attribute values and event handlers in components with `<script lang="ts">`. Both event syntaxes are typed: `onclose` (Svelte 5) and `on:close` (Svelte 4).
+`svelte-check` checks attribute values and event handlers in components with `<script lang="ts">`. Both event syntaxes are typed: `onclose` (Svelte 5, checked with svelte-check 4) and `on:close` (Svelte 4, checked with svelte-check 3).
 
 Svelte's accessibility lints do not know that `<ui-button>` is interactive (its real `<button>` is inside its shadow root), so they warn about click handlers on it. This filter silences those two warnings for `ui-*` elements only:
 
@@ -101,6 +101,24 @@ export default {
       const line = warning.frame.split('\n').find((l) => l.startsWith(prefix)) ?? '';
       return !line.slice(prefix.length + warning.start.column).startsWith('<ui-');
     },
+  },
+};
+```
+
+Svelte 4 has no `warningFilter`; the same check goes in `onwarn`, with the codes spelled with hyphens:
+
+```js
+// svelte.config.js (Svelte 4)
+const CODES = ['a11y-click-events-have-key-events', 'a11y-no-static-element-interactions'];
+
+export default {
+  onwarn: (warning, handler) => {
+    if (CODES.includes(warning.code) && warning.frame && warning.start) {
+      const prefix = `${warning.start.line}: `;
+      const line = warning.frame.split('\n').find((l) => l.startsWith(prefix)) ?? '';
+      if (line.slice(prefix.length + warning.start.column).startsWith('<ui-')) return;
+    }
+    handler(warning);
   },
 };
 ```

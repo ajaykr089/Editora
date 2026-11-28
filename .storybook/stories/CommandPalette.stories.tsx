@@ -50,7 +50,7 @@ export const Default = (args: any) => {
         ))}
       </CommandPalette>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Selected: {selected || 'none'} • query: {query || 'empty'}
       </Box>
     </Grid>
@@ -99,7 +99,7 @@ export const FilteredList = () => {
         ))}
       </CommandPalette>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Palette is {open ? 'open' : 'closed'} • Filtered results: {filtered.length}
       </Box>
     </Grid>

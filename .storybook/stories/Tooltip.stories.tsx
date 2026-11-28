@@ -75,7 +75,7 @@ export const ControlledOpen = () => {
 export const Headless = () => (
   <Box style={{ padding: 30 }}>
     <Tooltip text="Headless tooltip" headless>
-      <button style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid #cbd5e1', background: 'white' }}>
+      <button style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid #cbd5e1', background: 'var(--ui-color-surface, white)' }}>
         Headless trigger
       </button>
     </Tooltip>

@@ -184,7 +184,7 @@ const style = `
       color-mix(in srgb, var(--ui-animated-list-accent) 18%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
     --ui-animated-list-shadow: none;
     --ui-animated-list-item-bg:
-      color-mix(in srgb, var(--ui-animated-list-accent) 10%, rgba(255, 255, 255, 0.82));
+      color-mix(in srgb, var(--ui-animated-list-accent) 10%, color-mix(in srgb, var(--ui-color-surface, #ffffff) 82%, transparent));
     --ui-animated-list-item-border:
       1px solid color-mix(in srgb, var(--ui-animated-list-accent) 20%, transparent);
     --ui-animated-list-item-shadow: none;
@@ -205,8 +205,8 @@ const style = `
     --ui-animated-list-item-bg:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--ui-animated-list-accent) 14%, rgba(255, 255, 255, 0.92)),
-        color-mix(in srgb, var(--ui-animated-list-accent) 8%, rgba(255, 255, 255, 0.84))
+        color-mix(in srgb, var(--ui-animated-list-accent) 14%, color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, transparent)),
+        color-mix(in srgb, var(--ui-animated-list-accent) 8%, color-mix(in srgb, var(--ui-color-surface, #ffffff) 84%, transparent))
       );
     --ui-animated-list-item-border:
       1px solid color-mix(in srgb, var(--ui-animated-list-accent) 28%, transparent);
@@ -216,7 +216,7 @@ const style = `
     --ui-animated-list-bg:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 84%, #ffffff 16%),
+        var(--ui-color-surface, #ffffff),
         color-mix(in srgb, var(--ui-color-surface, #ffffff) 74%, transparent)
       );
     --ui-animated-list-border-color:
@@ -225,8 +225,9 @@ const style = `
       0 1px 3px rgba(15, 23, 42, 0.08),
       0 24px 48px rgba(15, 23, 42, 0.12);
     --ui-animated-list-backdrop: blur(16px) saturate(1.08);
-    --ui-animated-list-item-bg: color-mix(in srgb, #ffffff 48%, transparent);
-    --ui-animated-list-item-border: 1px solid color-mix(in srgb, #ffffff 36%, transparent);
+    /* Frosted in either theme: the item text follows the theme, so its surface must too. */
+    --ui-animated-list-item-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 48%, transparent);
+    --ui-animated-list-item-border: 1px solid color-mix(in srgb, var(--ui-color-surface, #ffffff) 36%, transparent);
     --ui-animated-list-item-backdrop: blur(10px) saturate(1.05);
   }
 

@@ -19,7 +19,7 @@ export default {
   }
 };
 
-const cardStyle: React.CSSProperties = {
+const cardStyle: React.CSSProperties = { color: '#1f2937',
   border: '1px solid #e2e8f0',
   borderRadius: 12,
   padding: 10,
@@ -37,7 +37,7 @@ const iconFrameStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: '#0f172a',
+  color: 'var(--ui-color-text, #0f172a)',
   lineHeight: 0,
   overflow: 'visible'
 };
@@ -53,7 +53,7 @@ export const AllIcons = (args: any) => {
 
   return (
     <Box style={{ display: 'grid', gap: 12 }}>
-      <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#475569' }}>
+      <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--ui-color-muted, #475569)' }}>
         <span>Showing {filteredNames.length} / {iconNameList.length} icons</span>
         <span>Source: @editora/icons</span>
       </Box>
@@ -92,7 +92,7 @@ export const AllIcons = (args: any) => {
                 decorative={false}
               />
             </Box>
-            {/* <Box style={{ fontSize: 11, color: '#334155', lineHeight: 1.25, wordBreak: 'break-word' }}>{name}</Box> */}
+            {/* <Box style={{ fontSize: 11, color: 'var(--ui-color-text, #334155)', lineHeight: 1.25, wordBreak: 'break-word' }}>{name}</Box> */}
           </Box>
         ))}
       </Grid>

@@ -28,7 +28,7 @@ type Story = StoryObj<typeof meta>;
 export const PlaceholderPatterns: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#e3f2fd', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#e3f2fd', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Placeholder Patterns</h4>
         <p style={{ margin: 0, fontSize: '14px' }}>Simple, detailed, and prefilled placeholder states are grouped here instead of the main docs page.</p>
       </Box>
@@ -82,7 +82,7 @@ export const ThemeSwitcherEditorOnly: Story = {
 
     return (
       <div>
-        <Box style={{ marginBottom: '20px', padding: '15px', background: '#ede7f6', borderRadius: '4px' }}>
+        <Box style={{ marginBottom: '20px', padding: '15px', background: 'var(--ui-color-surface, #ede7f6)', borderRadius: '4px' }}>
           <h4 style={{ margin: '0 0 10px 0' }}>Theme Switcher (Editor Only)</h4>
           <p style={{ margin: '0 0 12px 0', fontSize: '14px' }}>
             Switch only the editor theme wrappers without changing the Storybook page theme.
@@ -119,7 +119,7 @@ export const MultipleEditors: Story = {
 
     return (
       <div>
-        <Box style={{ marginBottom: '20px', padding: '15px', background: '#fff9c4', borderRadius: '4px' }}>
+        <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#fff9c4', borderRadius: '4px' }}>
           <h4 style={{ margin: '0 0 10px 0' }}>Multiple Editors</h4>
           <p style={{ margin: '0 0 10px 0', fontSize: '14px' }}>Two independent editor instances with content synchronization.</p>
           <Flex style={{ display: 'flex', gap: '10px' }}>
@@ -165,7 +165,7 @@ export const ControlledEditor: Story = {
 
     return (
       <div>
-        <Box style={{ marginBottom: '20px', padding: '15px', background: '#e0f2f1', borderRadius: '4px' }}>
+        <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#e0f2f1', borderRadius: '4px' }}>
           <h4 style={{ margin: '0 0 10px 0' }}>Controlled Component</h4>
           <Flex style={{ display: 'flex', gap: '10px' }}>
             <button onClick={() => setValue(`<h2>Reset!</h2><p>Content was reset at ${new Date().toLocaleTimeString()}</p>`)} style={{ padding: '8px 16px' }}>
@@ -199,7 +199,7 @@ export const LiveHtmlOutput: Story = {
 
     return (
       <div>
-        <Box style={{ marginBottom: '20px', padding: '15px', background: '#ecfeff', borderRadius: '4px' }}>
+        <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#ecfeff', borderRadius: '4px' }}>
           <h4 style={{ margin: '0 0 10px 0' }}>Live HTML output</h4>
           <p style={{ margin: 0, fontSize: '14px' }}>Edit the document and inspect the emitted HTML in real time.</p>
         </Box>

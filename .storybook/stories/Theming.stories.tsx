@@ -20,14 +20,14 @@ function Demo() {
   const setTokens = theme?.setTokens || (() => {});
   const tokens = theme?.tokens;
   const safeTokens = tokens || {
-    colors: { primary: '#2563eb', background: '#ffffff', text: '#111827' }
+    colors: { primary: '#2563eb', background: 'var(--ui-color-surface, #ffffff)', text: '#111827' }
   };
   const toggle = () => {
     const dark = safeTokens.colors.background === '#111827';
     setTokens({
       ...safeTokens,
       colors: dark
-        ? { ...safeTokens.colors, background: '#ffffff', text: '#111827', primary: '#2563eb' }
+        ? { ...safeTokens.colors, background: 'var(--ui-color-surface, #ffffff)', text: '#111827', primary: '#2563eb' }
         : { ...safeTokens.colors, background: '#111827', text: '#f8fafc', primary: '#7c3aed' }
     });
   };
@@ -51,7 +51,7 @@ export const Interactive = (args: any = {}) => (
     <Demo />
   </ThemeProvider>
 );
-Interactive.args = { primary: '#2563eb', background: '#ffffff', text: '#111827', radius: '6px', fontSizeMd: '14px' };
+Interactive.args = { primary: '#2563eb', background: 'var(--ui-color-surface, #ffffff)', text: '#111827', radius: '6px', fontSizeMd: '14px' };
 Interactive.parameters = { controls: { expanded: true } };
 
 export const Default = () => (

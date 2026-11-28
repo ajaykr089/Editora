@@ -59,7 +59,7 @@ const heroCanvasStyle: React.CSSProperties = {
   background: 'linear-gradient(120deg, #4361d9 0%, #6165dc 38%, #8756cf 100%)'
 };
 
-const heroGlowStyle: React.CSSProperties = {
+const heroGlowStyle: React.CSSProperties = { color: '#1f2937',
   position: 'absolute',
   inset: 'auto 10% 12% 10%',
   height: 220,
@@ -78,7 +78,7 @@ const codeWindowStyle: React.CSSProperties = {
   borderRadius: 22,
   overflow: 'hidden',
   border: '1px solid rgba(15, 23, 42, 0.14)',
-  background: '#f8f7fb',
+  background: 'var(--ui-color-surface, #f8f7fb)',
   boxShadow: '0 22px 70px rgba(15, 23, 42, 0.18)'
 };
 
@@ -89,14 +89,14 @@ const codeTabsStyle: React.CSSProperties = {
   height: 54,
   padding: '0 20px',
   borderBottom: '1px solid rgba(148, 163, 184, 0.22)',
-  background: 'rgba(255,255,255,0.86)'
+  background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 86%, transparent)'
 };
 
 const codeTabStyle: React.CSSProperties = {
   fontSize: 13,
   lineHeight: '20px',
   fontWeight: 600,
-  color: '#475569'
+  color: 'var(--ui-color-muted, #475569)'
 };
 
 const codeBodyStyle: React.CSSProperties = {
@@ -107,19 +107,19 @@ const codeBodyStyle: React.CSSProperties = {
 
 const codeSidebarStyle: React.CSSProperties = {
   borderRight: '1px solid rgba(148, 163, 184, 0.18)',
-  background: 'rgba(255,255,255,0.72)'
+  background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 72%, transparent)'
 };
 
 const codePanelStyle: React.CSSProperties = {
   padding: '26px 34px',
   fontSize: 16,
   lineHeight: 1.55,
-  background: 'rgba(255,255,255,0.84)'
+  background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 84%, transparent)'
 };
 
 const codeLineStyle: React.CSSProperties = {
   margin: 0,
-  color: '#334155'
+  color: 'var(--ui-color-text, #334155)'
 };
 
 const panelGridStyle: React.CSSProperties = {
@@ -152,14 +152,14 @@ const sectionTitleStyle: React.CSSProperties = {
   fontSize: 24,
   lineHeight: 1.15,
   fontWeight: 700,
-  color: '#1f2937'
+  color: 'var(--ui-color-text, #1f2937)'
 };
 
 const sectionBodyStyle: React.CSSProperties = {
   margin: 0,
   fontSize: 18,
   lineHeight: 1.45,
-  color: '#6b7280'
+  color: 'var(--ui-color-muted, #6b7280)'
 };
 
 const galleryFrameStyle: React.CSSProperties = {
@@ -171,7 +171,7 @@ const galleryFrameStyle: React.CSSProperties = {
   padding: '28px 20px 360px',
   borderRadius: 24,
   border: '1px solid rgba(148, 163, 184, 0.18)',
-  background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,247,251,0.98) 100%)',
+  background: 'linear-gradient(180deg, var(--ui-color-surface, #ffffff) 0%, color-mix(in srgb, var(--ui-color-surface, #f8f7fb) 96%, #7c3aed 4%) 100%)',
   boxSizing: 'border-box',
   overflow: 'visible'
 };
@@ -322,7 +322,7 @@ export const VariantGallery: Story = {
       <div style={{ display: 'grid', gap: 20 }}>
         {(['surface', 'soft', 'solid', 'outline', 'flat', 'contrast'] as const).map((variant) => (
           <div key={variant} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{variant}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ui-color-muted, #475569)', textTransform: 'capitalize' }}>{variant}</div>
             <GalleryNavigationPreview variant={variant} size="md" elevation={variant === 'flat' ? 'none' : 'low'} />
           </div>
         ))}
@@ -341,7 +341,7 @@ export const SizeGallery: Story = {
       <div style={{ display: 'grid', gap: 22 }}>
         {(['sm', 'md', 'lg'] as const).map((size) => (
           <div key={size} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{size}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ui-color-muted, #475569)', textTransform: 'capitalize' }}>{size}</div>
             <GalleryNavigationPreview size={size} frameStyle={compactGalleryFrameStyle} />
           </div>
         ))}
@@ -360,7 +360,7 @@ export const ToneGallery: Story = {
       <div style={{ display: 'grid', gap: 22 }}>
         {(['neutral', 'info', 'success', 'warning', 'danger'] as const).map((tone) => (
           <div key={tone} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{tone}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ui-color-muted, #475569)', textTransform: 'capitalize' }}>{tone}</div>
             <GalleryNavigationPreview tone={tone} variant="soft" />
           </div>
         ))}
@@ -380,7 +380,7 @@ export const ColorPaletteGallery: Story = {
         {(['blue', 'amber', 'green', 'red', 'gray'] as const).map((palette) => (
           <ThemeProvider key={palette} tokens={paletteTokens(palette)}>
             <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{palette}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ui-color-muted, #475569)', textTransform: 'capitalize' }}>{palette}</div>
               <GalleryNavigationPreview variant="soft" />
             </div>
           </ThemeProvider>

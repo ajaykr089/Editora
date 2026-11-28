@@ -29,14 +29,14 @@ export const NamedSlot = () => {
         <span>Document title</span>
         <Slot ref={ref as any} name="badge" variant="chip" tone="brand" fallback="No badge">
           {showBadge ? (
-            <span slot="badge" style={{ padding: '2px 8px', borderRadius: 999, background: '#dbeafe', fontSize: 12 }}>
+            <span slot="badge" style={{ color: '#1f2937', padding: '2px 8px', borderRadius: 999, background: '#dbeafe', fontSize: 12 }}>
               Beta
             </span>
           ) : null}
         </Slot>
       </Flex>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>slotchange fired: {changes}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>slotchange fired: {changes}</Box>
     </Grid>
   );
 };
@@ -83,7 +83,7 @@ export const RequiredState = () => {
         {value ? <span slot="status">Ready</span> : null}
       </Slot>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Required slot resolved: {resolved ? 'yes' : 'no'}
       </Box>
     </Grid>

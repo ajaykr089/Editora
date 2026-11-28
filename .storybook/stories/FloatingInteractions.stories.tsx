@@ -385,8 +385,8 @@ const pageStyle: React.CSSProperties = {
   minHeight: '100vh',
   display: 'grid',
   placeItems: 'center',
-  background: '#f5f7fb',
-  color: '#111827',
+  background: 'var(--ui-color-surface, #f5f7fb)',
+  color: 'var(--ui-color-text, #111827)',
   fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
 };
 
@@ -397,7 +397,7 @@ const toolbarStyle: React.CSSProperties = {
   padding: 16,
   border: '1px solid #d9e0ea',
   borderRadius: 8,
-  background: '#ffffff',
+  background: 'var(--ui-color-surface, #ffffff)',
   boxShadow: '0 20px 50px rgba(15, 23, 42, 0.12)'
 };
 
@@ -418,7 +418,7 @@ const compositeStyle: React.CSSProperties = {
   padding: 4,
   border: '1px solid #d1d5db',
   borderRadius: 6,
-  background: '#f9fafb'
+  background: 'var(--ui-color-surface, #f9fafb)'
 };
 
 const nestedWrapStyle: React.CSSProperties = {
@@ -432,8 +432,8 @@ const toolButtonStyle: React.CSSProperties = {
   minHeight: 32,
   border: '1px solid transparent',
   borderRadius: 5,
-  background: '#ffffff',
-  color: '#374151',
+  background: 'var(--ui-color-surface, #ffffff)',
+  color: 'var(--ui-color-text, #374151)',
   cursor: 'pointer'
 };
 
@@ -447,14 +447,14 @@ const panelStyle: React.CSSProperties = {
   padding: 8,
   border: '1px solid #111827',
   borderRadius: 8,
-  background: '#ffffff',
+  background: 'var(--ui-color-surface, #ffffff)',
   boxShadow: '0 18px 50px rgba(15, 23, 42, 0.22)',
   transformOrigin: 'top left'
 };
 
 const panelHeaderStyle: React.CSSProperties = {
   padding: '6px 8px 8px',
-  color: '#6b7280',
+  color: 'var(--ui-color-muted, #6b7280)',
   fontSize: 12,
   fontWeight: 700,
   textTransform: 'uppercase'
@@ -468,7 +468,7 @@ const itemStyle: React.CSSProperties = {
   border: 0,
   borderRadius: 6,
   background: 'transparent',
-  color: '#111827',
+  color: 'var(--ui-color-text, #111827)',
   textAlign: 'left',
   cursor: 'pointer'
 };

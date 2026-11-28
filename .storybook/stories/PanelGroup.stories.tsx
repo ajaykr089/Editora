@@ -17,7 +17,7 @@ const panelShell: React.CSSProperties = {
   boxSizing: 'border-box',
   borderRadius: 14,
   border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)',
-  background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, #f8fafc 4%), var(--ui-color-surface, #ffffff))',
+  background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, var(--ui-color-surface-alt, #f8fafc) 4%), var(--ui-color-surface, #ffffff))',
   padding: 16,
   display: 'grid',
   gap: 10
@@ -158,7 +158,7 @@ export const CollapsibleConsole = () => {
           </Panel>
         </PanelGroup>
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Why this pattern matters</strong>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Why this pattern matters</strong>
           <p style={showcaseCaptionStyle}>Console regions need a believable collapsed state because they spend most of their time secondary to the primary editing surface.</p>
         </Box>
       </Box>

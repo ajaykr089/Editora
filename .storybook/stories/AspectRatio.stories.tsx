@@ -140,21 +140,21 @@ export const MediaOpsWorkflow: Story = {
 
         <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
           <AspectRatio ratio="1/1" tone="success" variant="soft" showRatioBadge radius={12}>
-            <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#0f172a' }}>
+            <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'var(--ui-color-text, #0f172a)' }}>
               <CheckCircleIcon size={16} />
               Approved thumbnail
             </Flex>
           </AspectRatio>
 
           <AspectRatio ratio="4/3" tone="warning" variant="soft" showRatioBadge radius={0}>
-            <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#0f172a' }}>
+            <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'var(--ui-color-text, #0f172a)' }}>
               <CameraIcon size={16} />
               Capture queue
             </Flex>
           </AspectRatio>
 
           <AspectRatio ratio="16/9" tone="danger" variant="soft" showRatioBadge radius={12}>
-            <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#0f172a' }}>
+            <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'var(--ui-color-text, #0f172a)' }}>
               <PlayCircleIcon size={16} />
               Pending review
             </Flex>

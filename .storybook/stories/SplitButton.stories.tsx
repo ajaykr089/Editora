@@ -18,10 +18,10 @@ export default {
 function ActionEcho({ value }: { value: string }) {
   return (
     <div style={{ ...showcasePanelStyle, gap: 8 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
         Last action
       </div>
-      <div style={{ fontSize: 15, color: '#0f172a' }}>
+      <div style={{ fontSize: 15, color: 'var(--ui-color-text, #0f172a)' }}>
         <code style={showcaseMonoStyle}>{value || '(none)'}</code>
       </div>
     </div>
@@ -309,7 +309,7 @@ export const MenuListboxVariations = () => {
       <Box style={{ display: 'grid', gap: 20 }}>
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
           <Box style={{ display: 'grid', gap: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>Flat</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ui-color-muted, #475569)' }}>Flat</div>
             <p style={showcaseCaptionStyle}>Tight list density for flatter workhorse layouts.</p>
             <SplitButton
               label="Flat menu"
@@ -324,7 +324,7 @@ export const MenuListboxVariations = () => {
           </Box>
 
           <Box style={{ display: 'grid', gap: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>Comfortable</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ui-color-muted, #475569)' }}>Comfortable</div>
             <p style={showcaseCaptionStyle}>Balanced default for most dashboard and editor surfaces.</p>
             <SplitButton
               label="Comfortable menu"
@@ -336,7 +336,7 @@ export const MenuListboxVariations = () => {
           </Box>
 
           <Box style={{ display: 'grid', gap: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>Airy</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ui-color-muted, #475569)' }}>Airy</div>
             <p style={showcaseCaptionStyle}>Looser spacing for premium actions and lower-frequency menus.</p>
             <SplitButton
               label="Airy menu"

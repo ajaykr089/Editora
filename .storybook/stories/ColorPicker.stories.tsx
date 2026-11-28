@@ -42,7 +42,7 @@ const enterprisePresets = [
   '#111827',
 ];
 
-const cardStyle: React.CSSProperties = {
+const cardStyle: React.CSSProperties = { color: '#1f2937',
   border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent)',
   borderRadius: 16,
   padding: 16,

@@ -65,6 +65,9 @@ export function createContextMenu(options: ContextMenuOptions): ContextMenuContr
   const delay = options.longPressDelay ?? 700;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let start: { x: number; y: number } | null = null;
+  // After a long press opened the menu, the finger lifting must not reach the page: its compatibility
+  // mouse events (mousedown, click) would move focus out of the menu and close it.
+  let swallowRelease = false;
   const cancel = () => {
     if (timer) clearTimeout(timer);
     timer = null;
@@ -75,7 +78,10 @@ export function createContextMenu(options: ContextMenuOptions): ContextMenuContr
       if (event.pointerType !== 'touch') return;
       start = { x: event.clientX, y: event.clientY };
       timer = setTimeout(() => {
-        if (start) openAt(start.x, start.y);
+        if (start) {
+          swallowRelease = true;
+          openAt(start.x, start.y);
+        }
         cancel();
       }, delay);
     });
@@ -85,6 +91,30 @@ export function createContextMenu(options: ContextMenuOptions): ContextMenuContr
     cleanup.listen(target, 'pointerup', cancel);
     cleanup.listen(target, 'pointercancel', cancel);
     cleanup.add(cancel);
+    cleanup.listen(
+      target,
+      'touchend',
+      (event: TouchEvent) => {
+        if (!swallowRelease) return;
+        // Cancelling touchend stops the browser synthesising mousedown/mouseup/click for this touch.
+        if (event.cancelable) event.preventDefault();
+        setTimeout(() => {
+          swallowRelease = false;
+        }, 400);
+      },
+      { passive: false },
+    );
+    cleanup.listen(
+      target,
+      'click',
+      (event: MouseEvent) => {
+        if (!swallowRelease) return;
+        event.preventDefault();
+        event.stopPropagation();
+        swallowRelease = false;
+      },
+      { capture: true },
+    );
   }
 
   return {

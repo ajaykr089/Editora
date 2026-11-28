@@ -18,10 +18,10 @@ type CardProps = {
 };
 
 const Card = ({ title, value, note }: CardProps) => (
-  <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0', background: '#fff' }}>
-    <div style={{ fontSize: 12, color: '#526175', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
-    <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{value}</div>
-    <div style={{ marginTop: 6, fontSize: 13, color: '#475569' }}>{note}</div>
+  <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0', background: 'var(--ui-color-surface, #fff)' }}>
+    <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
+    <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700, color: 'var(--ui-color-text, #0f172a)' }}>{value}</div>
+    <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>{note}</div>
   </Box>
 );
 
@@ -39,7 +39,7 @@ const Modal = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
     onDialogClose={onClose}
   >
     <Grid gap="8px">
-      <Box variant="outline" p="10px" radius="sm" color="#475569">
+      <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
         Default position: bottom-right. Max visible: 4. Promise mode enabled.
       </Box>
     </Grid>
@@ -55,8 +55,8 @@ export const NotificationCommandCenter: Story = {
       <Grid gap="14px" style={{ maxWidth: 1040, margin: '0 auto', padding: 8 }}>
         <Flex justify="between" align="center" wrap="wrap" gap="10px">
           <Box>
-            <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>Toast Notification Center</h2>
-            <p style={{ margin: '6px 0 0 0', color: '#526175' }}>SaaS-grade delivery patterns with grouped and promise toasts.</p>
+            <h2 style={{ margin: 0, fontSize: 28, color: 'var(--ui-color-text, #0f172a)' }}>Toast Notification Center</h2>
+            <p style={{ margin: '6px 0 0 0', color: 'var(--ui-color-muted, #526175)' }}>SaaS-grade delivery patterns with grouped and promise toasts.</p>
           </Box>
           <Flex gap="8px">
             <Button

@@ -91,14 +91,14 @@ export const Playground: Story = {
       <div style={boundedFrameStyle}>
         <AnimatedText {...args} />
       </div>
-      <Flex wrap="wrap" gap="10px" style={{ color: '#475569', fontSize: 13 }}>
+      <Flex wrap="wrap" gap="10px" style={{ color: 'var(--ui-color-muted, #475569)', fontSize: 13 }}>
         <Badge variant="soft" tone="brand">Effect-driven</Badge>
         <Badge variant="soft" tone="success">Reduced-motion safe</Badge>
         <Badge variant="soft" tone="info">Manual + visible triggers</Badge>
         <Badge variant="soft" tone="neutral">Bounded-frame safe</Badge>
         <Badge variant="soft" tone="warning">Custom keyframes supported</Badge>
       </Flex>
-      <div style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: '#526175' }}>
+      <div style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)' }}>
         Use the controls to test reveal style, split strategy, looping, and surface treatment. The bounded frame above is
         intentional: it gives us a quick regression check for right-edge and baseline clipping in tighter containers. The
         component is text-first, so it intentionally flattens slotted content into animated text rather than preserving nested markup.
@@ -180,8 +180,8 @@ export const ManualControl = () => {
   const actionButtonStyle: React.CSSProperties = {
     border: '1px solid #cbd5e1',
     borderRadius: 12,
-    background: '#ffffff',
-    color: '#0f172a',
+    background: 'var(--ui-color-surface, #ffffff)',
+    color: 'var(--ui-color-text, #0f172a)',
     padding: '10px 14px',
     fontWeight: 600,
     cursor: 'pointer'
@@ -355,7 +355,7 @@ export const TightFrameRegression = () => (
     >
       <Grid style={{ gap: 18, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         <Card variant="surface" radius={24} style={{ overflow: 'hidden', padding: 18, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
             Gradient hero
           </div>
           <div style={{ ...boundedFrameStyle, padding: 14 }}>
@@ -374,7 +374,7 @@ export const TightFrameRegression = () => (
               padding: 14,
               borderRadius: 18,
               border: '1px dashed rgba(255,255,255,0.22)',
-              background: 'rgba(255,255,255,0.06)',
+              background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 6%, transparent)',
               overflow: 'hidden'
             }}
           >
@@ -385,7 +385,7 @@ export const TightFrameRegression = () => (
         </Card>
 
         <Card variant="soft" tone="success" radius={24} style={{ overflow: 'hidden', padding: 18, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
             Supporting copy
           </div>
           <div style={{ ...boundedFrameStyle, padding: 12 }}>
@@ -429,7 +429,7 @@ export const EditorialHero = () => (
           Use it for onboarding, release callouts, publishing workflows, and narrative dashboard copy.
         </AnimatedText>
 
-        <Flex wrap="wrap" gap="18px" style={{ color: '#475569', fontSize: 13 }}>
+        <Flex wrap="wrap" gap="18px" style={{ color: 'var(--ui-color-muted, #475569)', fontSize: 13 }}>
           <Flex align="center" gap="8px">
             <ShieldIcon size={15} />
             <span>Reduced-motion aware</span>

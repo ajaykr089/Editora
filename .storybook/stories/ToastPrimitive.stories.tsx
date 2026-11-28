@@ -174,7 +174,7 @@ export const Playground = () => {
         </Button>
       </Flex>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Last event: {lastEvent} {lastToastId != null ? `(id: ${lastToastId})` : ''}
       </Box>
     </Grid>

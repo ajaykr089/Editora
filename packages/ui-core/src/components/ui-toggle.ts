@@ -206,6 +206,12 @@ const style = `
     --ui-toggle-active-border: var(--ui-toggle-active-bg);
   }
 
+  /* Also inside a group's track, whose pressed segment is otherwise the theme surface: in dark mode that
+     surface is dark, under the contrast variant's dark pressed text. */
+  :host([data-in-track][data-in-track][variant="contrast"][pressed]) {
+    --ui-toggle-pressed-bg: var(--ui-toggle-active-bg);
+  }
+
   :host([variant="contrast"][pressed]) .control:hover {
     background: color-mix(in srgb, var(--ui-toggle-active-bg) 86%, #ffffff);
   }

@@ -2194,7 +2194,7 @@ export const FeatureShowcase: Story = {
         <Flex style={{
           display: "flex",
           borderBottom: "1px solid #ddd",
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "var(--ui-color-surface, #f8f9fa)",
           padding: "0 20px"
         }}>
           {tabs.map((tab) => (
@@ -2208,7 +2208,7 @@ export const FeatureShowcase: Story = {
                 borderBottom: activeTab === tab.id ? "2px solid #007acc" : "2px solid transparent",
                 cursor: "pointer",
                 fontWeight: activeTab === tab.id ? "bold" : "normal",
-                color: activeTab === tab.id ? "#007acc" : "#666"
+                color: activeTab === tab.id ? "#007acc" : "var(--ui-color-muted, #666)"
               }}
             >
               {tab.label}
@@ -2219,10 +2219,10 @@ export const FeatureShowcase: Story = {
         {/* Tab Description */}
         <Box style={{
           padding: "10px 20px",
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "var(--ui-color-surface, #f8f9fa)",
           borderBottom: "1px solid #ddd",
           fontSize: "14px",
-          color: "#666"
+          color: "var(--ui-color-muted, #666)"
         }}>
           {tabs.find(tab => tab.id === activeTab)?.description}
         </Box>

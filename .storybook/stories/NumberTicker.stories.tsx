@@ -74,7 +74,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {
   render: (args) => (
     <Box
-      style={{
+      style={{ color: '#1f2937',
         display: 'grid',
         gap: 22,
         padding: 30,
@@ -88,10 +88,10 @@ export const Playground: Story = {
       <Flex justify="between" align="start" wrap="wrap" gap="16px">
         <div style={{ display: 'grid', gap: 8, maxInlineSize: 620 }}>
           <Badge variant="soft" tone="brand">Motion metric primitive</Badge>
-          <div style={{ fontSize: 34, lineHeight: 1.02, fontWeight: 820, color: '#0f172a' }}>
+          <div style={{ fontSize: 34, lineHeight: 1.02, fontWeight: 820, color: 'var(--ui-color-text, #0f172a)' }}>
             Animate KPIs with clean formatting, reduced-motion safety, and production-ready controls.
           </div>
-          <div style={{ fontSize: 14, lineHeight: '22px', color: '#475569' }}>
+          <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>
             NumberTicker is built for dashboards, hero metrics, growth summaries, and operational surfaces where a number should feel alive without looking noisy.
           </div>
         </div>
@@ -106,7 +106,7 @@ export const Playground: Story = {
       <Card
         radius={30}
         variant="surface"
-        style={{
+        style={{ color: '#1f2937',
           padding: 28,
           display: 'grid',
           gap: 14,
@@ -114,11 +114,11 @@ export const Playground: Story = {
             'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.94), rgba(255,255,255,0.76) 46%, rgba(248,250,252,0.9) 100%)',
         }}
       >
-        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#526175' }}>
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
           Current monthly revenue
         </div>
         <NumberTicker {...args} />
-        <div style={{ fontSize: 15, lineHeight: '24px', color: '#475569', maxInlineSize: 560 }}>
+        <div style={{ fontSize: 15, lineHeight: '24px', color: 'var(--ui-color-muted, #475569)', maxInlineSize: 560 }}>
           Use the controls to tune format, duration, compact notation, fraction digits, and alignment for the exact metric treatment you want.
         </div>
       </Card>
@@ -188,10 +188,10 @@ export const MetricsWall = () => (
           <Card key={entry.title} radius={28} variant="surface" style={{ padding: 22, display: 'grid', gap: 14 }}>
             <Flex align="center" justify="between">
               <div style={{ display: 'grid', gap: 4 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#526175' }}>
+                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.title}
                 </div>
-                <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175' }}>
+                <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.copy}
                 </div>
               </div>
@@ -269,7 +269,7 @@ export const FormattingGallery = () => (
           },
         ].map((entry, index) => (
           <Card key={entry.label} radius={26} variant="surface" style={{ padding: 20, display: 'grid', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               <ActivityIcon size={16} />
               {entry.label}
             </div>
@@ -298,7 +298,7 @@ export const AdvancedVariations = () => (
     >
       <Grid style={{ gap: 18, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
         <Card radius={28} variant="surface" style={{ padding: 22, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#526175' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
             Odometer revenue
           </div>
           <NumberTicker
@@ -313,16 +313,16 @@ export const AdvancedVariations = () => (
             tone="brand"
             size="xl"
           />
-          <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175' }}>
+          <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)' }}>
             Per-digit rolling motion with a softer spring finish.
           </div>
         </Card>
 
         <Card radius={28} variant="surface" style={{ padding: 22, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#526175' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
             Visible-on-entry milestone
           </div>
-          <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175', maxInlineSize: 280 }}>
+          <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)', maxInlineSize: 280 }}>
             This ticker waits for viewport entry before it starts, which keeps long editorial or dashboard pages from animating offscreen.
           </div>
           <div style={{ minBlockSize: 12 }} />
@@ -341,7 +341,7 @@ export const AdvancedVariations = () => (
         </Card>
 
         <Card radius={28} variant="surface" style={{ padding: 22, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#526175' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
             Custom formatter
           </div>
           <NumberTicker
@@ -356,7 +356,7 @@ export const AdvancedVariations = () => (
             size="xl"
             formatter={(value, context) => `${context.intl} weekly seats`}
           />
-          <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175' }}>
+          <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)' }}>
             React can attach a formatter callback directly to the custom element for lightweight product-specific labels.
           </div>
         </Card>

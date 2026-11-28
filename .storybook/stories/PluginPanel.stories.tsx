@@ -33,7 +33,7 @@ export const Default = (args: any) => {
       >
         <Box style={{ padding: 12, minWidth: 220 }}>
           <strong>Plugin Panel</strong>
-          <p style={{ margin: '8px 0 0', color: '#475569' }}>Position: {position}</p>
+          <p style={{ margin: '8px 0 0', color: 'var(--ui-color-muted, #475569)' }}>Position: {position}</p>
         </Box>
       </PluginPanel>
     </Grid>

@@ -61,7 +61,7 @@ export const EnterpriseWorkspace = (args: any) => {
         <Tabs.Panel>Delivery retries, endpoint errors, and queue throughput analytics.</Tabs.Panel>
       </Tabs>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Selected tab index: <strong>{selected}</strong>
       </Box>
     </Grid>

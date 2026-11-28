@@ -123,7 +123,7 @@ function EnterpriseAlertCenter() {
           borderRadius: 16,
           padding: 16,
           background:
-            'linear-gradient(135deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, #fff) 0%, var(--ui-color-surface, #fff) 42%)',
+            'linear-gradient(135deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, var(--ui-color-surface, #ffffff)) 0%, var(--ui-color-surface, #fff) 42%)',
         }}
       >
         <Flex align="center" justify="space-between" style={{ gap: 10, flexWrap: 'wrap' }}>
@@ -253,7 +253,7 @@ function EnterpriseAlertCenter() {
             <BellIcon size={14} />
             <Box style={{ fontWeight: 700, fontSize: 14 }}>Responder Notes</Box>
           </Flex>
-          <Flex align="center" style={{ gap: 6, color: '#15803d', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 6, color: 'color-mix(in srgb, var(--ui-color-success, #15803d) 45%, var(--ui-color-text, #0f172a))', fontSize: 12 }}>
             <CheckCircleIcon size={14} />
             Rich text editor integration
           </Flex>

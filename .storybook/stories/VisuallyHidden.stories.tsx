@@ -7,7 +7,7 @@ export default {
 };
 
 export const AccessibilityLabel = () => (
-  <button style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #cbd5e1', background: '#fff' }}>
+  <button style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #cbd5e1', background: 'var(--ui-color-surface, #fff)' }}>
     <span aria-hidden>🔍</span>
     <VisuallyHidden>Search documents</VisuallyHidden>
   </button>

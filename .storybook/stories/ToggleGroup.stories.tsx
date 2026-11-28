@@ -31,7 +31,7 @@ export const SingleSelect = () => {
         <ToggleGroup.Item value="right">Right</ToggleGroup.Item>
       </ToggleGroup>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>Alignment: <strong>{value}</strong></Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Alignment: <strong>{value}</strong></Box>
     </Grid>
   );
 };
@@ -55,7 +55,7 @@ export const MultipleSelect = () => {
         <ToggleGroup.Item value="strike">Strike</ToggleGroup.Item>
       </ToggleGroup>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Active styles: <strong>{value.join(', ') || 'none'}</strong>
       </Box>
     </Grid>

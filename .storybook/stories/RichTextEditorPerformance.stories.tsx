@@ -41,7 +41,7 @@ function generateLargeContent() {
 export const LargeDocument: Story = {
   render: () => (
     <div>
-      <Box style={{ marginBottom: '20px', padding: '15px', background: '#ffebee', borderRadius: '4px' }}>
+      <Box style={{ color: '#1f2937', marginBottom: '20px', padding: '15px', background: '#ffebee', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 10px 0' }}>Performance Test</h4>
         <p style={{ margin: 0, fontSize: '14px' }}>
           This story is intentionally isolated because it mounts a large document and is meant for performance validation, not for the default docs page.

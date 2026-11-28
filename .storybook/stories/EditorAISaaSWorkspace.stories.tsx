@@ -27,12 +27,12 @@ const Card = ({ title, value, note }: CardProps) => (
     radius="md"
     style={{
       border: '1px solid #e2e8f0',
-      background: '#fff'
+      background: 'var(--ui-color-surface, #fff)'
     }}
   >
-    <div style={{ fontSize: 12, color: '#526175', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
-    <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{value}</div>
-    <div style={{ marginTop: 6, fontSize: 13, color: '#475569' }}>{note}</div>
+    <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
+    <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700, color: 'var(--ui-color-text, #0f172a)' }}>{value}</div>
+    <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>{note}</div>
   </Box>
 );
 
@@ -56,10 +56,10 @@ const Modal = ({ open, onClose, onPublish }: ModalProps) => (
     onDialogClose={onClose}
   >
     <Grid gap="10px">
-      <Box variant="outline" p="10px" radius="sm" color="#475569">
+      <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
         This release updates customer-facing workflows and internal policy wording.
       </Box>
-      <Box variant="surface" p="10px" radius="sm" color="#334155">
+      <Box variant="surface" p="10px" radius="sm" color="var(--ui-color-text, #334155)">
         Ensure terminology and risk statements pass content rules before approval.
       </Box>
     </Grid>
@@ -118,8 +118,8 @@ export const EnterpriseEditorOps: Story = {
 
         <Flex justify="between" align="center" wrap="wrap" gap="10px">
           <Box>
-            <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>Editorial Operations Workspace</h2>
-            <p style={{ margin: '6px 0 0 0', color: '#526175' }}>
+            <h2 style={{ margin: 0, fontSize: 28, color: 'var(--ui-color-text, #0f172a)' }}>Editorial Operations Workspace</h2>
+            <p style={{ margin: '6px 0 0 0', color: 'var(--ui-color-muted, #526175)' }}>
               AI-assisted release drafting, review workflows, and policy-safe publishing.
             </p>
           </Box>
@@ -154,7 +154,7 @@ export const EnterpriseEditorOps: Story = {
             <div slot="tab" data-value="review">Review</div>
             <div slot="panel">
               <Grid gap="8px">
-                <Box variant="outline" p="10px" radius="sm" color="#475569">
+                <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
                   Reviewer queue: Product, Legal, Security.
                 </Box>
                 <Button size="sm" onClick={() => notify('Review checklist refreshed', 'info')}>
@@ -166,7 +166,7 @@ export const EnterpriseEditorOps: Story = {
             <div slot="tab" data-value="publish">Publish</div>
             <div slot="panel">
               <Grid gap="8px">
-                <Box variant="outline" p="10px" radius="sm" color="#475569">
+                <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
                   Final release gating passed. You can publish this document now.
                 </Box>
                 <Button size="sm" onClick={() => setPublishOpen(true)}>

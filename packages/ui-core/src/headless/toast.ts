@@ -56,6 +56,9 @@ export function createToaster(options: ToasterOptions): ToasterController {
   if (region.tagName !== 'OL' && region.tagName !== 'UL') region.setAttribute('role', 'region');
   region.setAttribute('aria-label', `${label} (${hotkey.join('+').replace('Key', '')})`);
   region.tabIndex = -1;
+  // Horizontal swipes dismiss; vertical ones still scroll the page (and the reverse for up/down).
+  const vertical = options.swipeDirection === 'up' || options.swipeDirection === 'down';
+  if (!region.style.touchAction) region.style.touchAction = vertical ? 'pan-x' : 'pan-y';
 
   const live = (['polite', 'assertive'] as const).map((politeness) => {
     const el = document.createElement('div');

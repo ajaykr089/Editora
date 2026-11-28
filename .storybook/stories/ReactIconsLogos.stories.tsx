@@ -207,11 +207,11 @@ const canvasStyle: React.CSSProperties = { padding: 24 };
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: 18,
   fontWeight: 600,
-  color: '#0f172a',
+  color: 'var(--ui-color-text, #0f172a)',
   marginBottom: 16,
 };
 
-const cardStyle: React.CSSProperties = {
+const cardStyle: React.CSSProperties = { color: '#1f2937',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -231,7 +231,7 @@ const iconFrameStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: '#0f172a',
+  color: 'var(--ui-color-text, #0f172a)',
   overflow: 'visible',
 };
 
@@ -245,8 +245,8 @@ function LogoCard({ Icon, name, category }: LogoItem): React.ReactElement {
       <Box style={iconFrameStyle}>
         <Icon />
       </Box>
-      <div style={{ fontSize: 11, color: '#526175', textAlign: 'center' }}>{name}</div>
-      <div style={{ fontSize: 10, color: '#526175', textTransform: 'uppercase' }}>
+      <div style={{ fontSize: 11, color: 'var(--ui-color-muted, #526175)', textAlign: 'center' }}>{name}</div>
+      <div style={{ fontSize: 10, color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase' }}>
         {category}
       </div>
     </Box>
@@ -276,7 +276,7 @@ function renderStory(sections: LogoSection[], heading?: string): React.ReactElem
     <IconProvider value={{ size: 24, strokeWidth: 1.5 }}>
       <Box style={canvasStyle}>
         {heading ? (
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#0f172a', marginBottom: 24 }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ui-color-text, #0f172a)', marginBottom: 24 }}>
             {heading}
           </div>
         ) : null}

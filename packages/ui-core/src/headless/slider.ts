@@ -80,6 +80,9 @@ export function createSlider(options: SliderOptions): SliderController {
   for (const input of inputs) cleanup.add(() => input.remove());
 
   root.setAttribute('data-orientation', vertical ? 'vertical' : 'horizontal');
+  // Without this the browser takes a touch drag for scrolling and cancels the pointer (pointercancel).
+  if (!root.style.touchAction) root.style.touchAction = 'none';
+  for (const thumb of thumbs) if (!thumb.style.touchAction) thumb.style.touchAction = 'none';
   const rtl = () => !vertical && getComputedStyle(root).direction === 'rtl';
   const percent = (v: number) => (max === min ? 0 : ((v - min) / (max - min)) * 100);
 

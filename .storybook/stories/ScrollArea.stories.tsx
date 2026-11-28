@@ -54,7 +54,7 @@ export const Playground = (args: any) => {
         ))}
       </ScrollArea>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>{status}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>{status}</Box>
     </Grid>
   );
 };
@@ -75,7 +75,7 @@ export const HorizontalAndBoth = () => (
       <ScrollArea orientation="horizontal" variant="inset" tone="brand" style={{ maxHeight: 110 }}>
         <Grid style={{ display: 'grid', gridAutoFlow: 'column', gridAutoColumns: '220px', gap: 10, padding: 8 }}>
           {Array.from({ length: 10 }).map((_, idx) => (
-            <Box key={idx} style={{ border: '1px solid #dbeafe', borderRadius: 10, padding: 10, background: '#eff6ff' }}>
+            <Box key={idx} style={{ color: '#1f2937', border: '1px solid #dbeafe', borderRadius: 10, padding: 10, background: '#eff6ff' }}>
               Card {idx + 1}
             </Box>
           ))}
@@ -88,7 +88,7 @@ export const HorizontalAndBoth = () => (
       <ScrollArea orientation="both" variant="default" tone="info" style={{ maxHeight: 180 }}>
         <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 180px)', gap: 8, padding: 8 }}>
           {Array.from({ length: 24 }).map((_, idx) => (
-            <Box key={idx} style={{ border: '1px solid #bae6fd', borderRadius: 8, padding: 10, background: '#f0f9ff' }}>
+            <Box key={idx} style={{ border: '1px solid #bae6fd', borderRadius: 8, padding: 10, background: 'var(--ui-color-surface, #f0f9ff)' }}>
               Item {idx + 1}
             </Box>
           ))}

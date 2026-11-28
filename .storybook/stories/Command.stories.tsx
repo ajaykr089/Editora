@@ -17,7 +17,7 @@ const commandSurface: React.CSSProperties = {
 const statusCard: React.CSSProperties = {
   border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)',
   borderRadius: 14,
-  background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, #f8fafc 4%), var(--ui-color-surface, #ffffff))',
+  background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, var(--ui-color-surface-alt, #f8fafc) 4%), var(--ui-color-surface, #ffffff))',
   padding: 16
 };
 
@@ -113,7 +113,7 @@ export const WorkspaceActions = () => {
           </Box>
 
           <Box style={{ ...showcasePanelStyle, maxWidth: 680, marginInline: 'auto' }}>
-            <strong style={{ color: '#0f172a' }}>Command state</strong>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Command state</strong>
             <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               Query: {query || 'empty'}
             </Box>

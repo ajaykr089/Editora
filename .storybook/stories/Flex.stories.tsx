@@ -8,9 +8,9 @@ export default {
 
 export const Default = () => (
   <Flex gap="8px" align="center" justify="space-between" style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
-    <Box style={{ background: '#e2e8f0', padding: 8, borderRadius: 8 }}>Left</Box>
-    <Box style={{ background: '#e2e8f0', padding: 8, borderRadius: 8 }}>Center</Box>
-    <Box style={{ background: '#e2e8f0', padding: 8, borderRadius: 8 }}>Right</Box>
+    <Box style={{ background: 'var(--ui-color-surface, #e2e8f0)', padding: 8, borderRadius: 8 }}>Left</Box>
+    <Box style={{ background: 'var(--ui-color-surface, #e2e8f0)', padding: 8, borderRadius: 8 }}>Center</Box>
+    <Box style={{ background: 'var(--ui-color-surface, #e2e8f0)', padding: 8, borderRadius: 8 }}>Right</Box>
   </Flex>
 );
 
@@ -21,8 +21,8 @@ export const ResponsiveProps = () => (
     align={{ initial: 'stretch', md: 'center' } as any}
     style={{ border: '1px dashed #cbd5e1', borderRadius: 10, padding: 12 }}
   >
-    <Box style={{ background: '#dbeafe', padding: 10, borderRadius: 8 }}>Card A</Box>
-    <Box style={{ background: '#dcfce7', padding: 10, borderRadius: 8 }}>Card B</Box>
-    <Box style={{ background: '#fef3c7', padding: 10, borderRadius: 8 }}>Card C</Box>
+    <Box style={{ color: '#1f2937', background: '#dbeafe', padding: 10, borderRadius: 8 }}>Card A</Box>
+    <Box style={{ color: '#1f2937', background: '#dcfce7', padding: 10, borderRadius: 8 }}>Card B</Box>
+    <Box style={{ color: '#1f2937', background: '#fef3c7', padding: 10, borderRadius: 8 }}>Card C</Box>
   </Flex>
 );

@@ -69,6 +69,28 @@ describe('createContextMenu', () => {
     vi.advanceTimersByTime(1000);
     expect(ctx.isOpen).toBe(false);
   });
+
+  it('lifting the finger after a long press does not close the menu', () => {
+    vi.useFakeTimers();
+    const host = html(markup);
+    const ctx = createContextMenu({ target: host.querySelector('#area') as HTMLElement, menu: host.querySelector('#menu') as HTMLElement });
+    const area = host.querySelector('#area') as HTMLElement;
+    area.dispatchEvent(pe('pointerdown', { pointerType: 'touch', clientX: 10, clientY: 10 }));
+    vi.advanceTimersByTime(700);
+    expect(ctx.isOpen).toBe(true);
+    const end = new Event('touchend', { bubbles: true, cancelable: true });
+    area.dispatchEvent(end);
+    expect(end.defaultPrevented).toBe(true);
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    area.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(ctx.isOpen).toBe(true);
+    // A later, ordinary click is not swallowed.
+    vi.advanceTimersByTime(500);
+    const later = new MouseEvent('click', { bubbles: true, cancelable: true });
+    area.dispatchEvent(later);
+    expect(later.defaultPrevented).toBe(false);
+  });
 });
 
 describe('createSelect', () => {
@@ -83,6 +105,9 @@ describe('createSelect', () => {
     expect(t.getAttribute('role')).toBe('combobox');
     expect(t.getAttribute('aria-haspopup')).toBe('listbox');
     expect(t.getAttribute('aria-labelledby')).toBe(host.querySelector('label')!.id);
+    // An author's own name on the list is kept.
+    expect(host.querySelector('#l')!.getAttribute('aria-label')).toBe('Fruit');
+    expect(host.querySelector('#l')!.hasAttribute('aria-labelledby')).toBe(false);
     expect(t.textContent).toBe('Pick a fruit');
     expect(t.hasAttribute('data-placeholder')).toBe(true);
     t.focus();
@@ -99,6 +124,13 @@ describe('createSelect', () => {
     expect(opts[2].getAttribute('aria-selected')).toBe('true');
     expect(new FormData(host.querySelector('#f') as HTMLFormElement).get('fruit')).toBe('cherry');
     expect(onValueChange).toHaveBeenCalledWith('cherry');
+  });
+
+  it('an unnamed list is named by the trigger\'s label', () => {
+    const host = html('<label for="t2">Colour</label><button id="t2"></button><div id="l2"><div data-option>Red</div></div>');
+    createSelect({ trigger: host.querySelector('#t2') as HTMLElement, listbox: host.querySelector('#l2') as HTMLElement });
+    // aria-labelledby is not followed through the trigger, so the list points at the label itself.
+    expect(host.querySelector('#l2')!.getAttribute('aria-labelledby')).toBe(host.querySelector('label')!.id);
   });
 
   it('typing while closed selects; the keyboard click after Enter does not reopen; Escape closes', () => {

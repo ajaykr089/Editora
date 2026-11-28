@@ -30,7 +30,7 @@ export const Controlled = (args: any) => {
       >
         Bold
       </Toggle>
-      <Box style={{ fontSize: 13, color: '#475569' }}>Pressed: <strong>{String(pressed)}</strong></Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Pressed: <strong>{String(pressed)}</strong></Box>
     </Grid>
   );
 };

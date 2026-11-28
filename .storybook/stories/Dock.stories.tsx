@@ -14,7 +14,7 @@ import {
 import { Badge, Box, Card, Dock, Flex, Grid, type DockElement } from '@editora/ui-react';
 import { ShowcasePage, ShowcaseSection } from './storybook-showcase';
 
-const dockSurfaceStyle: React.CSSProperties = {
+const dockSurfaceStyle: React.CSSProperties = { color: '#1f2937',
   display: 'grid',
   gap: 20,
   padding: 28,
@@ -38,7 +38,7 @@ const appTileStyle: React.CSSProperties = {
   gap: 4,
   padding: 14,
   borderRadius: 18,
-  background: 'rgba(255, 255, 255, 0.68)',
+  background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 68%, transparent)',
   border: '1px solid rgba(148, 163, 184, 0.22)',
   boxShadow: '0 10px 26px rgba(15, 23, 42, 0.08)'
 };
@@ -115,10 +115,10 @@ export const Playground: Story = {
       <div style={dockSurfaceStyle}>
         <div style={panelStyle}>
           <Badge variant="soft" tone="info">MacOS-style magnification</Badge>
-          <div style={{ fontSize: 34, lineHeight: 1.08, fontWeight: 750, color: '#0f172a' }}>
+          <div style={{ fontSize: 34, lineHeight: 1.08, fontWeight: 750, color: 'var(--ui-color-text, #0f172a)' }}>
             Motion-heavy launchers without losing keyboard discipline.
           </div>
-          <div style={{ maxInlineSize: 620, fontSize: 14, lineHeight: '22px', color: '#475569' }}>
+          <div style={{ maxInlineSize: 620, fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>
             Use the controls to tune magnification, distance, lift, named motion presets, and shell sizing. The dock below
             uses the real `Dock.Item` composition you would ship in a product shell, including the new main-axis spreading
             that keeps icons from colliding as they magnify.
@@ -134,10 +134,10 @@ export const Playground: Story = {
               ['Policy drift', '2 alerts']
             ].map(([label, value]) => (
               <div key={label} style={appTileStyle}>
-                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
+                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                   {label}
                 </div>
-                <div style={{ fontSize: 26, lineHeight: 1.1, color: '#0f172a', fontWeight: 750 }}>{value}</div>
+                <div style={{ fontSize: 26, lineHeight: 1.1, color: 'var(--ui-color-text, #0f172a)', fontWeight: 750 }}>{value}</div>
               </div>
             ))}
           </Grid>
@@ -186,10 +186,10 @@ export const ApplicationLauncher = () => {
           <Grid style={{ gap: 16, gridTemplateColumns: 'minmax(0, 1.4fr) minmax(240px, 0.9fr)' }}>
             <div style={{ display: 'grid', gap: 10 }}>
               <Badge variant="soft" tone="brand">Docked workspace</Badge>
-              <div style={{ fontSize: 30, lineHeight: 1.08, fontWeight: 760, color: '#0f172a' }}>
+              <div style={{ fontSize: 30, lineHeight: 1.08, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>
                 {active === 'library' ? 'Editorial library synced and ready.' : `Focused on ${active}.`}
               </div>
-              <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175', maxInlineSize: 640 }}>
+              <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)', maxInlineSize: 640 }}>
                 Use dock items for high-frequency destinations that should feel tactile and immediate. Labels stay out of the
                 way until motion or focus brings them forward.
               </div>
@@ -197,16 +197,16 @@ export const ApplicationLauncher = () => {
 
             <div style={{ display: 'grid', gap: 12 }}>
               <div style={appTileStyle}>
-                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
+                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                   Active destination
                 </div>
-                <div style={{ fontSize: 20, lineHeight: 1.1, color: '#0f172a', fontWeight: 720 }}>{active}</div>
+                <div style={{ fontSize: 20, lineHeight: 1.1, color: 'var(--ui-color-text, #0f172a)', fontWeight: 720 }}>{active}</div>
               </div>
               <div style={appTileStyle}>
-                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
+                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                   Activity
                 </div>
-                <Flex align="center" gap="8px" style={{ color: '#475569', fontSize: 14 }}>
+                <Flex align="center" gap="8px" style={{ color: 'var(--ui-color-muted, #475569)', fontSize: 14 }}>
                   <ActivityIcon size={16} />
                   18 collaborative edits in the last 5 minutes
                 </Flex>
@@ -291,7 +291,7 @@ export const ScaleGallery = () => (
           { size: 'xl', label: 'XL' }
         ].map((entry) => (
           <div key={entry.size} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
             <Dock size={entry.size as any} variant="glass" tone="brand" labelMode="always" labelPlacement="bottom">
@@ -330,7 +330,7 @@ export const MotionGallery = () => (
           { animation: 'bouncy', tone: 'warning', label: 'Bouncy' }
         ].map((entry) => (
           <div key={entry.animation} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
             <Dock
@@ -381,7 +381,7 @@ export const VariantGallery = () => (
           { variant: 'minimal', tone: 'danger', label: 'Minimal' }
         ].map((entry) => (
           <div key={entry.label} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
             <Dock
@@ -423,7 +423,7 @@ export const VariantGallery = () => (
           { size: 'xl', label: 'XL' }
         ].map((entry) => (
           <div key={entry.size} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
             <Dock
@@ -461,7 +461,7 @@ export const VariantGallery = () => (
           { animation: 'bouncy', tone: 'warning', label: 'Bouncy' }
         ].map((entry) => (
           <div key={entry.animation} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
             <Dock
@@ -504,8 +504,8 @@ export const ImperativeFocus = () => {
   const buttonStyle: React.CSSProperties = {
     border: '1px solid #cbd5e1',
     borderRadius: 12,
-    background: '#ffffff',
-    color: '#0f172a',
+    background: 'var(--ui-color-surface, #ffffff)',
+    color: 'var(--ui-color-text, #0f172a)',
     padding: '10px 14px',
     fontWeight: 600,
     cursor: 'pointer'

@@ -31,7 +31,7 @@ export const Playground = (args: any) => {
 
       <Box
         id={anchorId}
-        style={{ margin: 42, padding: 18, border: '1px dashed #94a3b8', borderRadius: 12, display: 'inline-block', background: '#f8fafc' }}
+        style={{ margin: 42, padding: 18, border: '1px dashed #94a3b8', borderRadius: 12, display: 'inline-block', background: 'var(--ui-color-surface, #f8fafc)' }}
       >
         Highlight this paragraph region to trigger formatting actions.
       </Box>
@@ -54,7 +54,7 @@ export const Playground = (args: any) => {
         </SelectionPopup.Content>
       </SelectionPopup>
 
-      <Box style={{ fontSize: 13, color: '#475569' }}>{message}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>{message}</Box>
     </Grid>
   );
 };
@@ -76,11 +76,11 @@ export const CompositionSlots = () => {
 
   return (
     <Grid style={{ display: 'grid', gap: 16, padding: 16 }}>
-      <Box style={{ fontSize: 12, color: '#526175' }}>SelectionPopup.Content slot</Box>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>SelectionPopup.Content slot</Box>
 
       <Box
         id="comp-anchor"
-        style={{ padding: 20, border: '1px dashed #94a3b8', borderRadius: 10, background: '#f8fafc', display: 'inline-block' }}
+        style={{ padding: 20, border: '1px dashed #94a3b8', borderRadius: 10, background: 'var(--ui-color-surface, #f8fafc)', display: 'inline-block' }}
       >
         Selected text region — popup anchors here.
       </Box>
@@ -104,7 +104,7 @@ export const CompositionSlots = () => {
 
       <Flex style={{ display: 'flex', gap: 8 }}>
         <Button size="sm" onClick={() => setOpen(true)}>Reopen</Button>
-        <Box style={{ fontSize: 13, color: '#475569', alignSelf: 'center' }}>Last action: <strong>{message}</strong></Box>
+        <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)', alignSelf: 'center' }}>Last action: <strong>{message}</strong></Box>
       </Flex>
     </Grid>
   );
@@ -140,7 +140,7 @@ export const PlacementMatrix = () => {
           <Box
             key={item.id}
             id={item.id}
-            style={{ minWidth: 130, padding: 14, borderRadius: 10, border: '1px solid #cbd5e1', background: '#ffffff' }}
+            style={{ minWidth: 130, padding: 14, borderRadius: 10, border: '1px solid #cbd5e1', background: 'var(--ui-color-surface, #ffffff)' }}
           >
             Anchor: {item.label}
             <SelectionPopup
@@ -181,7 +181,7 @@ export const Variants = () => {
 
       <Flex style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
         {variants.map((v) => (
-          <Box key={v} id={`variant-anchor-${v}`} style={{ padding: 14, borderRadius: 10, border: '1px solid #e2e8f0', background: '#f8fafc' }}>
+          <Box key={v} id={`variant-anchor-${v}`} style={{ padding: 14, borderRadius: 10, border: '1px solid #e2e8f0', background: 'var(--ui-color-surface, #f8fafc)' }}>
             {v}
             <SelectionPopup
               anchorId={`variant-anchor-${v}`}

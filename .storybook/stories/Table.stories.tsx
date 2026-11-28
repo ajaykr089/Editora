@@ -79,7 +79,7 @@ export const Sortable = () => {
       <Table sortable striped onSortChange={(detail) => setSort(`${detail.key} (${detail.direction})`)}>
         <TeamMarkup />
       </Table>
-      <Box style={{ fontSize: 13, color: '#475569' }}>Current sort: {sort}</Box>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Current sort: {sort}</Box>
     </Grid>
   );
 };
@@ -91,7 +91,7 @@ export const SelectableRows = () => {
       <Table selectable multiSelect striped hover onRowSelect={(detail) => setSelection(detail.indices)}>
         <TeamMarkup />
       </Table>
-      <Box style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>
         Selected row indices: {selection.length ? selection.join(', ') : 'none'}
       </Box>
     </Grid>

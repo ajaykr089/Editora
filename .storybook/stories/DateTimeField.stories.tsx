@@ -58,8 +58,8 @@ export const Playground = () => {
             />
           </Grid>
           <Box style={showcasePanelStyle}>
-            <strong style={{ color: '#0f172a' }}>Value snapshot</strong>
-            <Box style={{ color: '#526175', fontSize: 13 }}>
+            <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Value snapshot</strong>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               {date || 'empty'} {time || 'empty'}
             </Box>
           </Box>
@@ -111,8 +111,8 @@ export const BoundedRange = () => {
           max="2026-12-31"
         />
         <Box style={showcasePanelStyle}>
-          <strong style={{ color: '#0f172a' }}>Bounded value</strong>
-          <Box style={{ color: '#526175', fontSize: 13 }}>{date}</Box>
+          <strong style={{ color: 'var(--ui-color-text, #0f172a)' }}>Bounded value</strong>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>{date}</Box>
         </Box>
         <p style={showcaseCaptionStyle}>If the range widens, the year segment should step normally again. This story shows the intentionally clamped case.</p>
       </Grid>

@@ -145,7 +145,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-number-ticker-color: #526175;
+    --ui-number-ticker-color: var(--ui-color-muted, #526175);
   }
 
   :host([tone="info"]) {

@@ -40,7 +40,7 @@ const nodeGlyphStyle: React.CSSProperties = {
   color: '#0f172a',
 };
 
-const panelStyle: React.CSSProperties = {
+const panelStyle: React.CSSProperties = { color: '#1f2937',
   display: 'grid',
   gap: 18,
   padding: 28,
@@ -143,7 +143,7 @@ export const IdealDemo: Story = {
   render: (args) => (
     <Box style={{ maxInlineSize: 980 }}>
       <div
-        style={{
+        style={{ color: '#1f2937',
           display: 'grid',
           gap: 28,
           padding: 32,
@@ -157,16 +157,16 @@ export const IdealDemo: Story = {
       >
         <div style={{ display: 'grid', gap: 10, maxInlineSize: 680 }}>
           <Badge variant="soft" tone="brand">Ideal demo</Badge>
-          <div style={{ fontSize: 38, lineHeight: 1.02, fontWeight: 820, color: '#0f172a' }}>
+          <div style={{ fontSize: 38, lineHeight: 1.02, fontWeight: 820, color: 'var(--ui-color-text, #0f172a)' }}>
             Small icon nodes make the cloud feel sharper and more convincingly spatial.
           </div>
-          <div style={{ fontSize: 15, lineHeight: '24px', color: '#475569', maxInlineSize: 700 }}>
+          <div style={{ fontSize: 15, lineHeight: '24px', color: 'var(--ui-color-muted, #475569)', maxInlineSize: 700 }}>
             This version keeps the interaction target generous, but the visible orbit nodes are trimmed down to jewel-sized icons so the sphere reads as a 3D cloud instead of a carousel of floating cards.
           </div>
         </div>
 
         <div
-          style={{
+          style={{ color: '#1f2937',
             display: 'grid',
             placeItems: 'center',
             minBlockSize: 500,
@@ -178,7 +178,7 @@ export const IdealDemo: Story = {
           <IconCloud {...args}>
             <IconCloud.Center>
               <Box
-                style={{
+                style={{ color: '#1f2937',
                   display: 'grid',
                   gap: 6,
                   textAlign: 'center',
@@ -192,13 +192,13 @@ export const IdealDemo: Story = {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78), 0 18px 38px rgba(15,23,42,0.12)'
                 }}
               >
-                <Box style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#526175', fontWeight: 800 }}>
+                <Box style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)', fontWeight: 800 }}>
                   Orbit Core
                 </Box>
-                <Box style={{ fontSize: 26, lineHeight: 1, fontWeight: 820, color: '#0f172a' }}>
+                <Box style={{ fontSize: 26, lineHeight: 1, fontWeight: 820, color: 'var(--ui-color-text, #0f172a)' }}>
                   Editora
                 </Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>
                   8 synchronized systems
                 </Box>
               </Box>
@@ -232,10 +232,10 @@ export const Playground: Story = {
         <div style={panelStyle}>
           <div style={{ display: 'grid', gap: 10, maxInlineSize: 760 }}>
             <Badge variant="soft" tone="info">3D interaction primitive</Badge>
-            <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 780, color: '#0f172a' }}>
+            <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 780, color: 'var(--ui-color-text, #0f172a)' }}>
               Cluster apps, systems, or tags into a navigable icon sphere.
             </div>
-            <div style={{ fontSize: 14, lineHeight: '22px', color: '#475569' }}>
+            <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #475569)' }}>
               Use the controls to tune depth, perspective, motion speed, shell styling, and hover pause behavior. The
               pointer interaction is intentionally subtle so the cloud feels responsive without getting twitchy.
             </div>
@@ -252,7 +252,7 @@ export const Playground: Story = {
 
           <Flex justify="center">
             <div
-              style={{
+              style={{ color: '#1f2937',
                 display: 'grid',
                 placeItems: 'center',
                 minBlockSize: 460,
@@ -265,7 +265,7 @@ export const Playground: Story = {
             <IconCloud ref={ref} {...args}>
               <IconCloud.Center>
                 <Box
-                  style={{
+                  style={{ color: '#1f2937',
                     display: 'grid',
                     gap: 4,
                     textAlign: 'center',
@@ -279,13 +279,13 @@ export const Playground: Story = {
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), 0 14px 34px rgba(15,23,42,0.12)'
                   }}
                 >
-                  <Box style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#475569', fontWeight: 700 }}>
+                  <Box style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #475569)', fontWeight: 700 }}>
                     Cloud Core
                   </Box>
-                  <Box style={{ fontSize: 28, lineHeight: 1.02, fontWeight: 800, color: '#0f172a' }}>
+                  <Box style={{ fontSize: 28, lineHeight: 1.02, fontWeight: 800, color: 'var(--ui-color-text, #0f172a)' }}>
                     {selected}
                   </Box>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#475569' }}>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #475569)' }}>
                     8 nodes synchronized
                   </Box>
                 </Box>
@@ -309,21 +309,21 @@ export const Playground: Story = {
 
           <Flex wrap="wrap" gap="10px">
             <button
-              style={{ borderRadius: 12, border: '1px solid #cbd5e1', background: '#fff', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
+              style={{ borderRadius: 12, border: '1px solid #cbd5e1', background: 'var(--ui-color-surface, #fff)', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
               onClick={() => ref.current?.pause()}
               type="button"
             >
               Pause
             </button>
             <button
-              style={{ borderRadius: 12, border: '1px solid #cbd5e1', background: '#fff', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
+              style={{ borderRadius: 12, border: '1px solid #cbd5e1', background: 'var(--ui-color-surface, #fff)', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
               onClick={() => ref.current?.play()}
               type="button"
             >
               Play
             </button>
             <button
-              style={{ borderRadius: 12, border: '1px solid #cbd5e1', background: '#fff', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
+              style={{ borderRadius: 12, border: '1px solid #cbd5e1', background: 'var(--ui-color-surface, #fff)', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
               onClick={() => ref.current?.refresh()}
               type="button"
             >
@@ -355,29 +355,29 @@ export const IntegrationSphere = () => (
         <Grid style={{ gap: 18, gridTemplateColumns: 'minmax(0, 1.1fr) minmax(300px, 0.9fr)' }}>
           <div style={{ display: 'grid', gap: 10, alignContent: 'start' }}>
             <Badge variant="soft" tone="brand">Spatial navigation</Badge>
-            <div style={{ fontSize: 30, lineHeight: 1.06, fontWeight: 760, color: '#0f172a' }}>
+            <div style={{ fontSize: 30, lineHeight: 1.06, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>
               Bring brand systems, search, analytics, trust, and assets into one orbiting cloud.
             </div>
-            <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175', maxInlineSize: 620 }}>
+            <div style={{ fontSize: 14, lineHeight: '22px', color: 'var(--ui-color-muted, #526175)', maxInlineSize: 620 }}>
               Use it when you want a launch surface or dashboard section to feel dimensional and connected, but still
               maintain clear, clickable affordances.
             </div>
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
-            <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,0.74)', border: '1px solid rgba(148,163,184,0.22)' }}>
-              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#526175', fontWeight: 700 }}>
+            <div style={{ padding: 14, borderRadius: 18, background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 74%, transparent)', border: '1px solid rgba(148,163,184,0.22)' }}>
+              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                 Active nodes
               </div>
-              <div style={{ fontSize: 24, lineHeight: 1.1, fontWeight: 760, color: '#0f172a' }}>
+              <div style={{ fontSize: 24, lineHeight: 1.1, fontWeight: 760, color: 'var(--ui-color-text, #0f172a)' }}>
                 8 integrations
               </div>
             </div>
-            <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,0.74)', border: '1px solid rgba(148,163,184,0.22)' }}>
-              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#526175', fontWeight: 700 }}>
+            <div style={{ padding: 14, borderRadius: 18, background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 74%, transparent)', border: '1px solid rgba(148,163,184,0.22)' }}>
+              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                 Status
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 16, color: '#0f172a', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 16, color: 'var(--ui-color-text, #0f172a)', fontWeight: 700 }}>
                 <SparklesIcon size={18} />
                 Ready for exploration
               </div>
@@ -402,13 +402,13 @@ export const IntegrationSphere = () => (
           >
             <IconCloud.Center>
               <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                <Box style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#526175', fontWeight: 700 }}>
+                <Box style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #526175)', fontWeight: 700 }}>
                   Release Core
                 </Box>
                 <Box style={{ fontSize: 30, lineHeight: 1.02, fontWeight: 780 }}>
                   24
                 </Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>
                   Systems connected
                 </Box>
               </Box>
@@ -470,7 +470,7 @@ export const VariantGallery = () => (
                 </IconCloud.Item>
               ))}
             </IconCloud>
-            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ui-color-muted, #526175)' }}>
               {entry.label}
             </div>
           </Card>

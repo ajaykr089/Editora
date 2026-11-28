@@ -33,7 +33,7 @@ export const Playground = (args: any) => (
     <button style={{ padding: '8px 12px' }}>Hover me</button>
     <HoverCard.Content>
       <strong>Editora</strong>
-      <p style={{ margin: '6px 0 0', fontSize: 13, color: '#475569' }}>Composable editor UI primitives.</p>
+      <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--ui-color-muted, #475569)' }}>Composable editor UI primitives.</p>
     </HoverCard.Content>
   </HoverCard>
 );
@@ -63,7 +63,7 @@ export const VisualModes = () => (
       </HoverCard>
     </Box>
 
-    <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
+    <Box style={{ color: '#1f2937', padding: 14, border: '1px solid #e2e8f0', borderRadius: 12, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
       <HoverCard variant="glass" shape="soft" elevation="high" placement="left">
         <button style={{ padding: '8px 12px' }}>Glass / Soft</button>
         <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
@@ -105,7 +105,7 @@ export const VisualModes = () => (
       </HoverCard>
     </Box>
 
-    <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12, background: 'linear-gradient(155deg, #f8fafc, #eef2ff)' }}>
+    <Box style={{ color: '#1f2937', padding: 14, border: '1px solid #e2e8f0', borderRadius: 12, background: 'linear-gradient(155deg, #f8fafc, #eef2ff)' }}>
       <HoverCard variant="elevated" tone="warning" placement="right" elevation="high">
         <button style={{ padding: '8px 12px' }}>Elevated / Warning</button>
         <HoverCard.Content style={{ display: 'grid', gap: 6 }}>

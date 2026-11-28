@@ -22,17 +22,17 @@ const Card = ({
   icon,
   title,
   value,
-  tone = '#0f172a'
+  tone = 'var(--ui-color-text, #0f172a)'
 }: {
   icon: React.ReactNode;
   title: string;
   value: string;
   tone?: string;
 }) => (
-  <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0', background: '#fff' }}>
+  <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0', background: 'var(--ui-color-surface, #fff)' }}>
     <Flex justify="between" align="center">
       <div>
-        <div style={{ fontSize: 12, color: '#526175', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
+        <div style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
         <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700, color: tone }}>{value}</div>
       </div>
       {icon}
@@ -53,7 +53,7 @@ const Modal = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
     }}
     onDialogClose={onClose}
   >
-    <Box variant="outline" p="10px" radius="sm" color="#475569">
+    <Box variant="outline" p="10px" radius="sm" color="var(--ui-color-muted, #475569)">
       Team standard: `IconProvider(size=18, strokeWidth=1.9)` and semantic icon mapping for status.
     </Box>
   </Dialog>
@@ -69,8 +69,8 @@ export const IconDrivenOperations: Story = {
         <Grid gap="14px" style={{ maxWidth: 1040, margin: '0 auto', padding: 8 }}>
           <Flex justify="between" align="center" wrap="wrap" gap="10px">
             <Box>
-              <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>React Icons Operations Dashboard</h2>
-              <p style={{ margin: '6px 0 0 0', color: '#526175' }}>Icon-driven telemetry for enterprise SaaS workflows.</p>
+              <h2 style={{ margin: 0, fontSize: 28, color: 'var(--ui-color-text, #0f172a)' }}>React Icons Operations Dashboard</h2>
+              <p style={{ margin: '6px 0 0 0', color: 'var(--ui-color-muted, #526175)' }}>Icon-driven telemetry for enterprise SaaS workflows.</p>
             </Box>
             <Flex gap="8px">
               <Button
@@ -91,8 +91,8 @@ export const IconDrivenOperations: Story = {
 
           <Grid columns={{ initial: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr 1fr' }} gap="10px">
             <Card icon={<UsersIcon ariaLabel="Users" color="#1d4ed8" />} title="Active Seats" value="1,842" />
-            <Card icon={<CheckCircleIcon ariaLabel="Healthy" color="#15803d" />} title="Healthy Services" value="23" tone="#15803d" />
-            <Card icon={<AlertTriangleIcon ariaLabel="Warning" color="#b45309" />} title="Warnings" value="4" tone="#b45309" />
+            <Card icon={<CheckCircleIcon ariaLabel="Healthy" color="#15803d" />} title="Healthy Services" value="23" tone="color-mix(in srgb, var(--ui-color-success, #15803d) 45%, var(--ui-color-text, #0f172a))" />
+            <Card icon={<AlertTriangleIcon ariaLabel="Warning" color="#b45309" />} title="Warnings" value="4" tone="color-mix(in srgb, var(--ui-color-warning, #b45309) 45%, var(--ui-color-text, #0f172a))" />
             <Card icon={<ShieldIcon ariaLabel="Compliance" color="#475569" />} title="Policy Score" value="98.7%" />
           </Grid>
 
