@@ -102,3 +102,18 @@ export function ControlledDropdown() {
 - `Dropdown.Item` supports `role`, `checked`, `icon`, `caption`, and `shortcut` helpers.
 - `closeOnSelect` and `typeahead` are serialized as string attributes on `ui-dropdown`.
 - Standard `React.HTMLAttributes<HTMLElement>` are supported via passthrough props.
+
+## Your own element (`asChild`)
+
+`Dropdown.Trigger` renders its single child instead of its own element when you pass `asChild`. The part's props are merged into the child's: class names are joined, styles merged, both event handlers run (the child's first) and both refs receive the element.
+
+```tsx
+<Dropdown>
+  <Dropdown.Trigger asChild>
+    <Button variant="ghost">Options</Button>
+  </Dropdown.Trigger>
+  <Dropdown.Content>…</Dropdown.Content>
+</Dropdown>
+```
+
+Your element gets the trigger slot instead of a plain `<button>`.

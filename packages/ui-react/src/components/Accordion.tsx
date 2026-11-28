@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import '@editora/ui-core/accordion';
+import { SlotClone } from './_slot';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 import { createUIElement, warnIfElementNotRegistered, hostOnly, flushElementRender } from './_internals';
 
@@ -27,7 +28,10 @@ export interface AccordionItemProps extends React.HTMLAttributes<HTMLDivElement>
   badge?: string;
 }
 
-export interface AccordionTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+export interface AccordionTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
+}
 
 export interface AccordionPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -130,9 +134,12 @@ const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps>(funct
 AccordionItem.displayName = 'AccordionItem';
 
 const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerProps>(function AccordionTrigger(
-  { type, children, ...rest },
+  { type, children, asChild, ...rest },
   forwardedRef
 ) {
+  if (asChild) {
+    return <SlotClone ref={forwardedRef as React.Ref<HTMLElement>} data-ui-accordion-trigger="" {...rest}>{children}</SlotClone>;
+  }
   return React.createElement(
     'button',
     {

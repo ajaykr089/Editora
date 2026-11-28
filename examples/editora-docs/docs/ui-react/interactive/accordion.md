@@ -97,3 +97,18 @@ All Accordion sub-components are available as properties on the main Accordion c
 
 - `open` is index-based (`number | number[]`), not string-value based.
 - `radius` is the primary corner-control prop. `shape` remains available for compatibility with older usage.
+
+## Your own element (`asChild`)
+
+`Accordion.Trigger` renders its single child instead of its own element when you pass `asChild`. The part's props are merged into the child's: class names are joined, styles merged, both event handlers run (the child's first) and both refs receive the element.
+
+```tsx
+<Accordion.Item>
+  <Accordion.Trigger asChild>
+    <button className="faq-question">Shipping</button>
+  </Accordion.Trigger>
+  <Accordion.Panel>…</Accordion.Panel>
+</Accordion.Item>
+```
+
+Your element becomes the header button. Keep it a `<button>` (or give it `role="button"` and `tabIndex={0}`) so the keyboard still reaches it.

@@ -22,3 +22,18 @@ function HoverCardDemo() {
 ## Key Props
 
 `open`, `delay`, `closeDelay`, `placement`, `offset`, `variant`, `tone`, `density`, `shape`, `elevation`, `headless`, `onOpen`, `onClose`, `onChange`
+
+## Your own element (`asChild`)
+
+`HoverCard.Trigger` renders its single child instead of its own element when you pass `asChild`. The part's props are merged into the child's: class names are joined, styles merged, both event handlers run (the child's first) and both refs receive the element.
+
+```tsx
+<HoverCard>
+  <HoverCard.Trigger asChild>
+    <Link href="/u/ada">@ada</Link>
+  </HoverCard.Trigger>
+  <HoverCard.Content>…</HoverCard.Content>
+</HoverCard>
+```
+
+Your link is the trigger, with no wrapper `<div>` around it.

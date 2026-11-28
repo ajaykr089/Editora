@@ -62,3 +62,21 @@ All NavigationMenu sub-components are available as properties on the main Naviga
 ## Key Props
 
 `selected`, `orientation`, `activation`, `variant`, `size`, `radius`, `elevation`, `tone`, `loop`, `collapsible`, `headless`, `onChange`, `onSelect`
+
+## Your own element (`asChild`)
+
+`NavigationMenu.Link` renders its single child instead of its own element when you pass `asChild`. The part's props are merged into the child's: class names are joined, styles merged, both event handlers run (the child's first) and both refs receive the element.
+
+```tsx
+import Link from 'next/link';
+
+<NavigationMenu>
+  <NavigationMenu.Item>
+    <NavigationMenu.Link asChild>
+      <Link href="/blog">Blog</Link>
+    </NavigationMenu.Link>
+  </NavigationMenu.Item>
+</NavigationMenu>
+```
+
+Use this for client-side routing (Next.js, React Router, TanStack Router): the router's link renders the `<a>`, with the menu's item slot on it. `NavigationMenu.Trigger` takes `asChild` too; your element then brings its own content, so add a caret if you want one.

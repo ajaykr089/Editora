@@ -40,6 +40,10 @@ Also accepts the standard HTML and React props of the element it renders (`class
 
 ## Dropdown.Trigger props
 
+| Prop | Type | Description |
+| --- | --- | --- |
+| `asChild` | `boolean` | Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. |
+
 Also accepts the standard HTML and React props of the element it renders (`className`, `style`, `id`, `aria-*`, `data-*`, event handlers).
 
 ## Dropdown.Content props

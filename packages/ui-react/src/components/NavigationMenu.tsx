@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import '@editora/ui-core/navigation-menu';
+import { SlotClone } from './_slot';
 import { createUIElement, useForwardedHostRef, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -36,8 +37,14 @@ export type NavigationMenuItemProps = {
   children?: React.ReactNode;
 };
 
-export type NavigationMenuTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
-export type NavigationMenuLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+export type NavigationMenuTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
+};
+export type NavigationMenuLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
+};
 export type NavigationMenuContentProps = React.HTMLAttributes<HTMLElement>;
 
 type NavigationMenuItemContextValue = {
@@ -151,7 +158,7 @@ function NavigationMenuItem({ children }: NavigationMenuItemProps) {
 }
 
 const NavigationMenuTrigger = React.forwardRef<HTMLButtonElement, NavigationMenuTriggerProps>(function NavigationMenuTrigger(
-  { children, ...rest },
+  { children, asChild, ...rest },
   forwardedRef
 ) {
   const itemContext = React.useContext(NavigationMenuItemContext);
@@ -179,6 +186,14 @@ const NavigationMenuTrigger = React.forwardRef<HTMLButtonElement, NavigationMenu
     return () => observer.disconnect();
   }, []);
 
+  if (asChild) {
+    // The child brings its own content (and caret, if it wants one).
+    return (
+      <SlotClone ref={ref as React.Ref<HTMLElement>} slot="item" data-nav-key={itemContext?.itemKey ?? undefined} {...rest}>
+        {children}
+      </SlotClone>
+    );
+  }
   return (
     <button type="button" ref={ref} slot="item" data-nav-key={itemContext?.itemKey ?? undefined} {...rest}>
       {children}
@@ -214,10 +229,17 @@ const NavigationMenuTrigger = React.forwardRef<HTMLButtonElement, NavigationMenu
 NavigationMenuTrigger.displayName = 'NavigationMenuTrigger';
 
 const NavigationMenuLink = React.forwardRef<HTMLAnchorElement, NavigationMenuLinkProps>(function NavigationMenuLink(
-  { children, ...rest },
+  { children, asChild, ...rest },
   forwardedRef
 ) {
   const itemContext = React.useContext(NavigationMenuItemContext);
+  if (asChild) {
+    return (
+      <SlotClone ref={forwardedRef as React.Ref<HTMLElement>} slot="item" data-nav-key={itemContext?.itemKey ?? undefined} {...rest}>
+        {children}
+      </SlotClone>
+    );
+  }
   return (
     <a ref={forwardedRef} slot="item" data-nav-key={itemContext?.itemKey ?? undefined} {...rest}>
       {children}

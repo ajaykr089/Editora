@@ -13,6 +13,7 @@ function useIconElement(icon: unknown) {
 }
 
 import '@editora/ui-core/dropdown';
+import { SlotClone } from './_slot';
 import { createUIElement, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -57,7 +58,10 @@ export type DropdownProps = BaseProps & {
   onSelect?: (detail: { value?: string; label?: string; checked?: boolean; item?: HTMLElement }) => void;
 };
 
-export type DropdownTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+export type DropdownTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
+};
 
 export type DropdownContentProps = React.HTMLAttributes<HTMLDivElement> & {
   as?: 'div' | 'section' | 'ul' | 'nav';
@@ -209,9 +213,10 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
 DropdownRoot.displayName = 'Dropdown';
 
 export const DropdownTrigger = React.forwardRef<HTMLButtonElement, DropdownTriggerProps>(function DropdownTrigger(
-  props,
+  { asChild, ...props },
   ref
 ) {
+  if (asChild) return <SlotClone {...props} ref={ref as React.Ref<HTMLElement>} slot="trigger" />;
   return <button {...props} ref={ref} slot="trigger" />;
 });
 
