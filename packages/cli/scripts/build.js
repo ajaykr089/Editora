@@ -47,7 +47,7 @@ if (!commit) {
 // Sources that differ from the commit would fail their hash check when downloaded: record no commit then.
 if (commit && !process.env.EDITORA_COPY_COMMIT) {
   try {
-    const dirty = execFileSync('git', ['status', '--porcelain', '--', '../ui-core/src', '../ui-react/src'], { cwd: path.join(__dirname, '..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    const dirty = execFileSync('git', ['status', '--porcelain', '--', '../ui-core/src', '../ui-react/src', '../ui-react/blocks'], { cwd: path.join(__dirname, '..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
     if (dirty) {
       console.warn('editora cli: ui-core/ui-react sources have uncommitted changes; the copy index records no commit (use --source).');
       commit = null;

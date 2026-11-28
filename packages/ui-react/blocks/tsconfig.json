@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "@editora/ui-react": ["../src/index.tsx"],
+      "@editora/ui-core": ["../../ui-core/src/index.ts"],
+      "@editora/ui-core/*": ["../../ui-core/src/standalone/*", "../../ui-core/src/*"],
+      "@editora/toast": ["../../editora-toast/src/index.ts"],
+      "@editora/toast/*": ["../../editora-toast/src/*"],
+      "@editora/icons": ["../../icons/src/index.ts"],
+      "@editora/icons/*": ["../../icons/src/*"]
+    }
+  },
+  "include": ["*.tsx", "../src/custom-elements.d.ts"]
+}

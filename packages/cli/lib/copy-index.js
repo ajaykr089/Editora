@@ -11,7 +11,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SCHEMA = 1;
-const ROOTS = ["ui-core/src", "ui-react/src"];
+const ROOTS = ["ui-core/src", "ui-react/src", "ui-react/blocks"];
 
 function sha256(text) {
   return crypto.createHash("sha256").update(text, "utf8").digest("hex");
@@ -54,6 +54,7 @@ function buildIndex(packagesDir, meta = {}) {
   const files = {};
   const elements = {};
   const react = {};
+  const blocks = {};
   const exists = (rel) => fs.existsSync(path.join(packagesDir, rel));
   const resolveRelative = (fromRel, spec) => {
     const base = path.posix.normalize(path.posix.join(path.posix.dirname(fromRel), spec));
@@ -106,6 +107,12 @@ function buildIndex(packagesDir, meta = {}) {
       }
       const component = /^ui-react\/src\/components\/([A-Z][A-Za-z0-9]*)\.tsx$/.exec(rel);
       if (component) react[component[1]] = rel;
+      const block = /^ui-react\/blocks\/(block-[a-z0-9-]+)\.tsx$/.exec(rel);
+      if (block) {
+        // The first line names what the block is: `// block: A sign-in card…`.
+        const doc = /^\/\/ block: (.+)$/m.exec(source);
+        blocks[block[1]] = { file: rel, description: doc ? doc[1].trim() : "" };
+      }
     }
   }
 
@@ -123,6 +130,7 @@ function buildIndex(packagesDir, meta = {}) {
     dependencyRanges: ranges,
     elements,
     react,
+    blocks,
     files,
   };
 }

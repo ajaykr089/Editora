@@ -43,6 +43,8 @@ jobs:
       
       - name: Run type checking
         run: npm run typecheck
+      - name: Type-check the copyable blocks
+        run: npm run check:blocks
       
       - name: Build packages
         run: npm run build
