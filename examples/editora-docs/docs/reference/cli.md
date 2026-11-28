@@ -19,6 +19,7 @@ npx @editora/cli add @editora/docx           # a package name works too
 npx @editora/cli list date                   # every name, or a search
 npx @editora/cli add editor --dry-run        # show what it would do, install nothing
 npx @editora/cli add button --copy           # copy the source into your project to own it
+npx @editora/cli mcp                         # MCP server for AI coding tools (see AI Usage)
 ```
 
 ## What a dry run prints

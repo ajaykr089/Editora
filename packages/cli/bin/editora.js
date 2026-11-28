@@ -22,6 +22,7 @@ Usage:
   editora add <name> --copy      Copy the component's source into your project, to own and edit it
   editora init [name...]         Detect the project, pick what to set up, and install it
   editora list [search]          Show every name you can add
+  editora mcp                    Run an MCP server so AI coding tools can find, read and copy components
 
 Examples:
   npx @editora/cli add editor
@@ -748,6 +749,21 @@ function run(argv, options = {}) {
   if (args.command === "list" || args.command === "ls") return printList(out, args);
 
   if (args.command === "init") return init(out, args, options);
+
+  if (args.command === "mcp") {
+    const { runMcpServer } = require("../lib/mcp");
+    // stdout is the protocol channel: nothing else may be written to it.
+    return runMcpServer({
+      cwd: options.cwd || process.cwd(),
+      source: args.source,
+      indexFile: options.copyIndexFile,
+      fetch: options.fetch,
+      stdin: options.stdin,
+      stdout: options.stdout,
+      version: getVersion(),
+      cli: { resolveTarget, installCommand, findProject, findPackageManager },
+    });
+  }
 
   if (args.command !== "add") {
     out.error(`Unknown command: ${args.command || "<missing>"}`);

@@ -305,4 +305,4 @@ async function copyComponents(names, options) {
   return report;
 }
 
-module.exports = { copyComponents, rootsFor, closure, transform, toPascal, toKebab, loadIndex, destinationOf, CONFIG_FILE, DEFAULT_PREFIX };
+module.exports = { copyComponents, rootsFor, closure, transform, toPascal, toKebab, loadIndex, readSources, download, destinationOf, CONFIG_FILE, DEFAULT_PREFIX };
