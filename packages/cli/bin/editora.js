@@ -46,7 +46,8 @@ Options:
   --registry <url|file>  With --copy: copy from another registry's index (same format) instead of Editora's
 
 Blocks (page sections, always copied): editora add block-login block-dashboard
-  block-login, block-settings-profile, block-dashboard, block-app-shell, block-chat
+  block-login, block-signup, block-settings-profile, block-dashboard, block-app-shell, block-chat,
+  block-pricing, block-orders, block-checkout, block-team, block-faq, block-empty-state, block-not-found
   --package-manager <pm> Use npm, pnpm, yarn or bun (by default, the one your lock file belongs to)
   --json                 With list: print the names as JSON
   -h, --help             Show this help text

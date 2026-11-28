@@ -38,13 +38,13 @@ export function LoginBlock({ onSubmit, onProvider, error }: LoginBlockProps) {
           <Input name="password" type="password" label="Password" required autoComplete="current-password" />
           <Flex style={{ justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <Checkbox name="remember">Remember me</Checkbox>
-            <a href="#reset" style={{ fontSize: 'var(--ui-font-size-sm, 13px)' }}>Forgot password?</a>
+            <a href="#reset" style={{ fontSize: 'var(--ui-font-size-sm, 13px)', color: 'inherit', textDecoration: 'underline' }}>Forgot password?</a>
           </Flex>
           {error ? <Text tone="danger" role="alert">{error}</Text> : null}
           <Button type="submit" block loading={pending}>Sign in</Button>
         </form>
         <Card.Footer>
-          <Text variant="muted" size="sm">No account? <a href="#signup">Create one</a></Text>
+          <Text variant="muted" size="sm">No account? <a href="#signup" style={{ color: 'inherit', textDecoration: 'underline' }}>Create one</a></Text>
         </Card.Footer>
       </Card>
     </Box>

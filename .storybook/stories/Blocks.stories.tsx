@@ -5,6 +5,14 @@ import { SettingsProfileBlock } from '../../packages/ui-react/blocks/block-setti
 import { DashboardBlock } from '../../packages/ui-react/blocks/block-dashboard';
 import { AppShellBlock } from '../../packages/ui-react/blocks/block-app-shell';
 import { ChatBlock, type ChatMessage } from '../../packages/ui-react/blocks/block-chat';
+import { SignupBlock } from '../../packages/ui-react/blocks/block-signup';
+import { PricingBlock } from '../../packages/ui-react/blocks/block-pricing';
+import { OrdersBlock } from '../../packages/ui-react/blocks/block-orders';
+import { CheckoutBlock } from '../../packages/ui-react/blocks/block-checkout';
+import { TeamBlock } from '../../packages/ui-react/blocks/block-team';
+import { FaqBlock } from '../../packages/ui-react/blocks/block-faq';
+import { EmptyStateBlock } from '../../packages/ui-react/blocks/block-empty-state';
+import { NotFoundBlock } from '../../packages/ui-react/blocks/block-not-found';
 
 // Copyable page sections (`npx @editora/cli add block-<name>`), rendered as they ship.
 const meta: Meta = { title: 'Blocks', parameters: { layout: 'fullscreen' } };
@@ -42,3 +50,12 @@ export const Chat: Story = {
     );
   },
 };
+
+export const Signup: Story = { render: () => <SignupBlock /> };
+export const Pricing: Story = { render: () => <PricingBlock /> };
+export const Orders: Story = { render: () => <div style={{ padding: 16 }}><OrdersBlock /></div> };
+export const Checkout: Story = { render: () => <CheckoutBlock /> };
+export const Team: Story = { render: () => <div style={{ padding: 16 }}><TeamBlock /></div> };
+export const Faq: Story = { render: () => <FaqBlock /> };
+export const EmptyState: Story = { render: () => <div style={{ padding: 16 }}><EmptyStateBlock /></div> };
+export const NotFound: Story = { render: () => <NotFoundBlock /> };
