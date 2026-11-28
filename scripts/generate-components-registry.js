@@ -65,6 +65,8 @@ function buildPayload() {
     ["DialogProvider", null],
     ["FieldSemantics", null],
     ["FiltersBar", null],
+    // Hooks (useHeadlessDialog, …), not a component.
+    ["Headless", null],
     // Its own server component (RSC-safe markup), not a wrapper of the ui-kbd element.
     ["Kbd", null],
     ["PageHeader", null],

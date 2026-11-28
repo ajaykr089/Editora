@@ -973,6 +973,12 @@
       "import": "./dist/DataList.esm.js",
       "require": "./dist/DataList.cjs.js",
       "default": "./dist/DataList.esm.js"
+    },
+    "./Headless": {
+      "types": "./dist/components/Headless.d.ts",
+      "import": "./dist/Headless.esm.js",
+      "require": "./dist/Headless.cjs.js",
+      "default": "./dist/Headless.esm.js"
     }
   },
   "files": [
