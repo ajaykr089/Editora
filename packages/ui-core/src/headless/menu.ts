@@ -1,5 +1,5 @@
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
-import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
+import { createPositioner, type PositionerAnchor, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
 import { createCleanup, createTypeahead, ensureId, firstEnabled, isDisabled, isPrintableKey, lastEnabled, nextEnabled, setState } from './shared';
 
 export interface MenuOptions {
@@ -35,18 +35,81 @@ export interface MenuController {
 export function createMenu(options: MenuOptions): MenuController {
   const { trigger, menu } = options;
   const cleanup = createCleanup();
+
+  const id = ensureId(menu, 'ui-menu');
+  ensureId(trigger, 'ui-menu-trigger');
+  if (!menu.hasAttribute('aria-label') && !menu.hasAttribute('aria-labelledby')) menu.setAttribute('aria-labelledby', trigger.id);
+  trigger.setAttribute('aria-haspopup', 'menu');
+  trigger.setAttribute('aria-controls', id);
+
+  const core = createMenuCore({
+    menu,
+    placement: options.placement || 'bottom-start',
+    offset: options.offset ?? 6,
+    closeOnSelect: options.closeOnSelect,
+    onSelect: options.onSelect,
+    onOpenChange: options.onOpenChange,
+    dismissTrigger: trigger,
+    onSync: (open) => {
+      setState(open ? 'open' : 'closed', trigger);
+      trigger.setAttribute('aria-expanded', String(open));
+    },
+  });
+
+  cleanup.listen(trigger, 'click', (event: MouseEvent) => {
+    event.preventDefault();
+    if (core.isOpen) core.close(trigger);
+    else core.open(trigger, 'first');
+  });
+  cleanup.listen(trigger, 'keydown', (event: KeyboardEvent) => {
+    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      core.open(trigger, 'first');
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      core.open(trigger, 'last');
+    }
+  });
+
+  return {
+    get isOpen() {
+      return core.isOpen;
+    },
+    open: (focus) => core.open(trigger, focus),
+    close: () => core.close(trigger),
+    refresh: core.refresh,
+    destroy() {
+      core.destroy();
+      cleanup.run();
+    },
+  };
+}
+
+/** @internal Options of the menu behaviour shared by the menu button and the context menu. */
+export interface MenuCoreOptions {
+  menu: HTMLElement;
+  placement: PositionerPlacement;
+  offset: number;
+  closeOnSelect?: boolean;
+  onSelect?: (item: HTMLElement) => void;
+  onOpenChange?: (open: boolean) => void;
+  /** Pressing this element does not count as "outside" (the menu button toggles itself). */
+  dismissTrigger?: HTMLElement;
+  onSync?: (open: boolean) => void;
+}
+
+/** @internal The menu panel behaviour: items, keyboard, typeahead, positioning and dismissal. */
+export function createMenuCore(options: MenuCoreOptions) {
+  const { menu } = options;
+  const cleanup = createCleanup();
   const typeahead = createTypeahead();
   let isOpen = false;
   let items: HTMLElement[] = [];
   let layer: DismissableLayerHandle | null = null;
   let positioner: PositionerHandle | null = null;
+  let returnTo: HTMLElement | null = null;
 
-  const id = ensureId(menu, 'ui-menu');
   menu.setAttribute('role', 'menu');
-  ensureId(trigger, 'ui-menu-trigger');
-  if (!menu.hasAttribute('aria-label') && !menu.hasAttribute('aria-labelledby')) menu.setAttribute('aria-labelledby', trigger.id);
-  trigger.setAttribute('aria-haspopup', 'menu');
-  trigger.setAttribute('aria-controls', id);
 
   const readItems = () => {
     items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [data-menu-item]'));
@@ -66,31 +129,39 @@ export function createMenu(options: MenuOptions): MenuController {
 
   const sync = () => {
     menu.hidden = !isOpen;
-    setState(isOpen ? 'open' : 'closed', menu, trigger);
-    trigger.setAttribute('aria-expanded', String(isOpen));
+    setState(isOpen ? 'open' : 'closed', menu);
+    options.onSync?.(isOpen);
   };
 
-  function open(focus: 'first' | 'last' = 'first') {
+  function open(anchor: PositionerAnchor, focus: 'first' | 'last' | 'menu' = 'first', focusReturn: HTMLElement | null = null) {
     readItems();
-    if (!isOpen) {
-      isOpen = true;
-      sync();
-      positioner = createPositioner({ anchor: trigger, floating: menu, placement: options.placement || 'bottom-start', strategy: 'fixed', offset: options.offset ?? 6, flip: true, shift: true });
-      positioner.update();
-      layer = createDismissableLayer({
-        node: menu,
-        trigger,
-        closeOnEscape: true,
-        closeOnPointerOutside: true,
-        closeOnFocusOutside: true,
-        onDismiss: (reason) => close(reason === 'escape-key'),
-      });
-      options.onOpenChange?.(true);
+    returnTo = focusReturn ?? (anchor instanceof HTMLElement ? anchor : (document.activeElement as HTMLElement | null));
+    if (isOpen) {
+      positioner?.destroy();
+      layer?.destroy();
     }
-    focusIndex(focus === 'last' ? lastEnabled(items) : firstEnabled(items));
+    isOpen = true;
+    sync();
+    positioner = createPositioner({ anchor, floating: menu, placement: options.placement, strategy: 'fixed', offset: options.offset, flip: true, shift: true });
+    positioner.update();
+    layer = createDismissableLayer({
+      node: menu,
+      trigger: options.dismissTrigger,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      closeOnFocusOutside: true,
+      onDismiss: (reason) => close(reason === 'escape-key' ? returnTo : null),
+    });
+    options.onOpenChange?.(true);
+    if (focus === 'menu') {
+      if (!menu.hasAttribute('tabindex')) menu.tabIndex = -1;
+      menu.focus();
+    } else {
+      focusIndex(focus === 'last' ? lastEnabled(items) : firstEnabled(items));
+    }
   }
 
-  function close(returnFocus = true) {
+  function close(focusTarget: HTMLElement | null = returnTo) {
     if (!isOpen) return;
     isOpen = false;
     layer?.destroy();
@@ -99,30 +170,16 @@ export function createMenu(options: MenuOptions): MenuController {
     positioner = null;
     items.forEach((item) => item.removeAttribute('data-highlighted'));
     sync();
-    if (returnFocus) trigger.focus();
+    if (focusTarget) focusTarget.focus();
     options.onOpenChange?.(false);
   }
 
   function choose(item: HTMLElement) {
     if (isDisabled(item)) return;
     options.onSelect?.(item);
-    if (options.closeOnSelect !== false) close(true);
+    if (options.closeOnSelect !== false) close(returnTo);
   }
 
-  cleanup.listen(trigger, 'click', (event: MouseEvent) => {
-    event.preventDefault();
-    if (isOpen) close(true);
-    else open('first');
-  });
-  cleanup.listen(trigger, 'keydown', (event: KeyboardEvent) => {
-    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      open('first');
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      open('last');
-    }
-  });
   cleanup.listen(menu, 'keydown', (event: KeyboardEvent) => {
     const index = currentIndex();
     if (event.key === 'ArrowDown') focusIndex(nextEnabled(items, index, 1));
@@ -130,7 +187,7 @@ export function createMenu(options: MenuOptions): MenuController {
     else if (event.key === 'Home') focusIndex(firstEnabled(items));
     else if (event.key === 'End') focusIndex(lastEnabled(items));
     else if (event.key === 'Tab') {
-      close(false);
+      close(null);
       return;
     } else if ((event.key === 'Enter' || event.key === ' ') && index >= 0) {
       event.preventDefault();
@@ -159,7 +216,7 @@ export function createMenu(options: MenuOptions): MenuController {
       return isOpen;
     },
     open,
-    close: () => close(true),
+    close,
     refresh: readItems,
     destroy() {
       layer?.destroy();
