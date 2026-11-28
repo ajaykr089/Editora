@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, render, waitFor } from '@testing-library/react';
 import { Toaster, toast } from '../src/react';
 import { toastAdvanced } from '../src/index';
 
@@ -90,8 +90,9 @@ describe('@editora/toast/react', () => {
     expect(document.querySelector('.editora-toast .editora-toast-icon')).toBeNull();
 
     act(() => custom.querySelector('button')!.click());
-    await settle(400);
-    expect(document.querySelector('[data-testid="custom"]')).toBeNull();
+    // The exit animation runs on timers: wait for its end rather than a fixed time, which a busy CI
+    // runner overran.
+    await waitFor(() => expect(document.querySelector('[data-testid="custom"]')).toBeNull(), { timeout: 3000 });
     expect(toastAdvanced.getToasts().length).toBe(0);
   });
 
@@ -101,8 +102,7 @@ describe('@editora/toast/react', () => {
     await settle();
     expect(document.querySelector('[data-testid="gone"]')).not.toBeNull();
     toast.dismiss(shown.id);
-    await settle(400);
-    expect(document.querySelector('[data-testid="gone"]')).toBeNull();
+    await waitFor(() => expect(document.querySelector('[data-testid="gone"]')).toBeNull(), { timeout: 3000 });
   });
 
   it('follows a promise with JSX for each state, and keeps the loading toast however long it takes', async () => {
