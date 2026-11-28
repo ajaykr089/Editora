@@ -77,6 +77,45 @@ The copied files are TypeScript unless you add `--js`.
 
 **Other registries.** `--registry <url or file>` copies from someone else's index instead of Editora's. It is a JSON file in the same format: `{ "schema": 1, "files": { "<path>": { "sha256": "…", "imports": ["<path>"], "packages": ["react"] } }, "elements": { "ui-x": "<path>" }, "react": { "X": "<path>" }, "blocks": { "block-x": { "file": "<path>", "description": "…" } }, "baseUrl": "https://…/" }`. Files are fetched from `baseUrl` (default: next to the index) and checked against their hash; the CLI says whose code it is copying.
 
+## See what changed in copied components (`diff`)
+
+```bash
+npx @editora/cli diff                 # every component copied here
+npx @editora/cli diff Button Dialog   # just these
+npx @editora/cli diff --check         # exit 1 if anything differs (CI)
+```
+
+For each copied file, `diff` compares three versions: the one written when it was copied (its hash is in `editora.json`), the file as it is now, and what copying again would write. Each file is reported as:
+
+| Mark | Status | Meaning |
+| --- | --- | --- |
+| `=` | up to date | Nobody changed it. |
+| `~` | update | Upstream changed it and you did not: `editora add <name> --copy` updates it. |
+| `*` | local | You changed it, upstream did not. |
+| `!` | conflict | Both changed it. Copying again keeps yours; merge by hand, or add `--overwrite` to take upstream. |
+| `-` | missing | You deleted it. |
+| `+` | new | Upstream now needs a file you do not have. |
+
+For every file that differs, a unified diff from yours to upstream follows. `--json` prints the report as JSON. `diff` uses the same source as the copy: the registry recorded in `editora.json`, or `--source <checkout>`.
+
+## Your own registry (`registry build`)
+
+Teams can share their own components the same way:
+
+```bash
+npx @editora/cli registry build ./registry --name acme
+# serve ./registry (with registry.json) from any static host, then, in another project:
+npx @editora/cli add Badge block-hero --copy --registry https://acme.example.com/registry/registry.json
+```
+
+`registry build` lists every `.ts`, `.tsx`, `.js`, `.jsx` and `.css` file in the folder (tests, stories, `node_modules` and `dist` are left out) with its SHA-256, the files it imports and the packages it needs. Names come from the files:
+
+- `Badge.tsx` (a PascalCase file name) is the React component `Badge`;
+- a file that calls `customElements.define('x-rating', …)` is the element `x-rating`;
+- `block-hero.tsx` is the block `block-hero`, described by its first `// block: …` line.
+
+A file is copied with everything it imports, at the same path under the project's copy folder. Each file is checked against its hash, so a server serving something else is refused. `--base-url <url>` says where the files are when they are not served next to the index, and `--out <file>` writes the index somewhere else. An import that cannot be found inside the folder is reported as a warning. People copying from a registry other than Editora's are told so, and are asked to read the code before they run it.
+
 ## Names
 
 | You type | It installs |

@@ -36,7 +36,7 @@
     "dev": "node -e \"console.log('editora cli: no dev server')\"",
     "clean": "node -e \"console.log('editora cli: no artifacts to clean')\"",
     "lint": "node --check ./bin/editora.js && node --check ./lib/registry.js && node --check ./lib/project.js && node --check ./lib/copy.js && node --check ./lib/copy-index.js && node --check ./lib/mcp.js && node --check ./scripts/build.js",
-    "test": "node --test ./test/cli.test.js ./test/features.test.js ./test/copy.test.js ./test/mcp.test.js",
+    "test": "node --test ./test/cli.test.js ./test/features.test.js ./test/copy.test.js ./test/mcp.test.js ./test/registry-diff.test.js",
     "prepublishOnly": "npm test"
   },
   "keywords": [
