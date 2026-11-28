@@ -54,3 +54,18 @@ All Menu sub-components are available as properties on the main Menu component:
 - `radius` accepts semantic values like `sm`, `md`, `lg`, `full` or direct numeric values like `12`.
 - Use `slot="trigger"` for the trigger and `slot="content"` for the menu content container.
 - `Menu.Item` and `Menu.Separator` provide the expected menu row structure without needing generic layout wrappers.
+
+## Your own element (`asChild`)
+
+`Menu.Trigger` renders its single child instead of its own element when you pass `asChild`. The part's props are merged into the child's: class names are joined, styles merged, both event handlers run (the child's first) and both refs receive the element.
+
+```tsx
+<Menu>
+  <Menu.Trigger asChild>
+    <Button>Actions</Button>
+  </Menu.Trigger>
+  …
+</Menu>
+```
+
+The trigger slot goes on your element and no wrapper `<div>` is rendered.

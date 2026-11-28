@@ -13,6 +13,7 @@ function useIconElement(icon: unknown) {
 }
 
 import '@editora/ui-core/menu';
+import { SlotClone } from './_slot';
 import { createUIElement, hostOnly, flushElementRender } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -69,6 +70,8 @@ type MenuSectionLabelProps = React.HTMLAttributes<HTMLDivElement> & {
 
 type MenuTriggerProps = React.HTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
 };
 
 type MenuContentProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -76,9 +79,10 @@ type MenuContentProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 const MenuTrigger = React.forwardRef<HTMLDivElement, MenuTriggerProps>(function MenuTrigger(
-  { children, ...rest },
+  { children, asChild, ...rest },
   ref
 ) {
+  if (asChild) return <SlotClone {...rest} ref={ref as React.Ref<HTMLElement>} slot="trigger">{children}</SlotClone>;
   return (
     <div {...rest} ref={ref} slot="trigger">
       {children}

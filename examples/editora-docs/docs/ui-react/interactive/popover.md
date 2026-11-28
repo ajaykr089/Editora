@@ -161,3 +161,18 @@ const [open, setOpen] = React.useState(false);
 - Focus is returned to the trigger element when the popover closes.
 - Open popovers resync their portaled content when the source content changes dynamically.
 - For a fully headless floating system use the `useFloating` hook from `@editora/ui-react`.
+
+## Your own element (`asChild`)
+
+`Popover.Trigger` renders its single child instead of its own element when you pass `asChild`. The part's props are merged into the child's: class names are joined, styles merged, both event handlers run (the child's first) and both refs receive the element.
+
+```tsx
+<Popover>
+  <Popover.Trigger asChild>
+    <Button variant="outline">Filters</Button>
+  </Popover.Trigger>
+  <Popover.Content>…</Popover.Content>
+</Popover>
+```
+
+The trigger slot goes on your element and no wrapper `<span>` is rendered.

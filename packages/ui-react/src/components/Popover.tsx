@@ -1,5 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/popover';
+import { SlotClone } from './_slot';
 import { createUIElement, warnIfElementNotRegistered, hostOnly, flushElementRender, useControlledAttribute, whenHandled } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
@@ -27,7 +28,10 @@ export type PopoverElement = HTMLElement & {
   updatePosition: () => void;
 };
 
-export type PopoverTriggerProps = React.HTMLAttributes<HTMLElement>;
+export type PopoverTriggerProps = React.HTMLAttributes<HTMLElement> & {
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
+};
 
 export type PopoverContentProps = React.HTMLAttributes<HTMLElement>;
 
@@ -154,7 +158,8 @@ PopoverRoot.displayName = 'Popover';
  * ```
  */
 const PopoverTrigger = React.forwardRef<HTMLElement, PopoverTriggerProps>(
-  function PopoverTrigger({ children, ...props }, ref) {
+  function PopoverTrigger({ children, asChild, ...props }, ref) {
+    if (asChild) return <SlotClone ref={ref} slot="trigger" {...props}>{children}</SlotClone>;
     return React.createElement('span', { ref, slot: 'trigger', ...props }, children);
   }
 );

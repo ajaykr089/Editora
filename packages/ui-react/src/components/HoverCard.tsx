@@ -1,5 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/hover-card';
+import { SlotClone } from './_slot';
 import {
   createUIElement,
   getCustomEventDetail,
@@ -28,7 +29,10 @@ export type HoverCardProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' 
   onChange?: (open: boolean) => void;
 };
 
-export type HoverCardTriggerProps = React.HTMLAttributes<HTMLElement>;
+export type HoverCardTriggerProps = React.HTMLAttributes<HTMLElement> & {
+  /** Render the single child element instead (a router `<Link>`, your own button), with this part's behaviour and props merged in. */
+  asChild?: boolean;
+};
 
 export type HoverCardContentProps = React.HTMLAttributes<HTMLElement>;
 
@@ -112,8 +116,9 @@ HoverCardRoot.displayName = 'HoverCard';
  * ```
  */
 const HoverCardTrigger = React.forwardRef<HTMLElement, HoverCardTriggerProps>(
-  function HoverCardTrigger({ ...props }, ref) {
-    return React.createElement('div', { ref, ...props });
+  function HoverCardTrigger({ asChild, children, ...props }, ref) {
+    if (asChild) return <SlotClone ref={ref} {...props}>{children}</SlotClone>;
+    return React.createElement('div', { ref, ...props }, children);
   }
 );
 
