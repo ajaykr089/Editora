@@ -237,7 +237,8 @@ export const Select: Story = {
     const select = useHeadlessSelect({ placeholder: 'Choose a fruit' });
     return (
       <div>
-        <button ref={select.triggerRef} style={{ ...btn, minWidth: 180, textAlign: 'start' }}><span data-select-value /> ▾</button>
+        <label htmlFor="fruit-select">Fruit</label>{' '}
+        <button id="fruit-select" ref={select.triggerRef} style={{ ...btn, minWidth: 180, textAlign: 'start' }}><span data-select-value /> ▾</button>
         <div ref={select.listboxRef} hidden aria-label="Fruit" style={popup}>
           {['Apple', 'Banana', 'Cherry', 'Grape'].map((f) => <div key={f} data-option data-value={f.toLowerCase()} style={option}>{f}</div>)}
         </div>
@@ -334,7 +335,8 @@ export const Toaster: Story = {
     return (
       <div>
         <button style={btn} onClick={() => toaster.toast({ title: `Saved at ${new Date().toLocaleTimeString()}` })}>Save</button>
-        <ol ref={toaster.regionRef} style={{ position: 'fixed', right: 16, bottom: 16, display: 'grid', gap: 8, listStyle: 'none', margin: 0, padding: 0, width: 280 }}>
+        <section ref={toaster.regionRef} style={{ position: 'fixed', right: 16, bottom: 16, width: 280 }}>
+        <ol style={{ display: 'grid', gap: 8, listStyle: 'none', margin: 0, padding: 0 }}>
           {toaster.toasts.map((t) => (
             <li key={t.id} ref={toaster.toastRef(t.id)} style={{ ...panel, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transform: 'translateX(var(--toast-swipe, 0))' }}>
               {t.title}
@@ -342,6 +344,7 @@ export const Toaster: Story = {
             </li>
           ))}
         </ol>
+        </section>
       </div>
     );
   },

@@ -232,14 +232,15 @@ Give any of these a `name` and they join the surrounding `<form>`: a hidden inpu
 
 ```tsx
 const fruit = useHeadlessSelect({ placeholder: 'Choose a fruit', name: 'fruit' });
-<button ref={fruit.triggerRef}><span data-select-value /> ▾</button>
+<label htmlFor="fruit">Fruit</label>
+<button id="fruit" ref={fruit.triggerRef}><span data-select-value /> ▾</button>
 <div ref={fruit.listboxRef} hidden aria-label="Fruit" className="rounded-lg border bg-white p-1 shadow">
   <div data-option data-value="apple" className="data-[highlighted]:bg-gray-100">Apple</div>
   <div data-option data-value="cherry">Cherry</div>
 </div>
 ```
 
-This is the WAI-ARIA "select-only combobox". Focus stays on the trigger, and `aria-activedescendant` points at the active option. While it is closed, the arrow keys, Enter and Space open it, and typing jumps to a matching option. While it is open, the arrows, Home/End, PageUp/PageDown and typing move; Enter, Space or a click choose; Escape closes; Tab chooses and moves on. The chosen option's text goes into `data-select-value`, and the trigger has `data-placeholder` while nothing is chosen. `value` / `defaultValue` / `onValueChange`, `disabled`, `required`, `name`.
+This is the WAI-ARIA "select-only combobox". Focus stays on the trigger, and `aria-activedescendant` points at the active option. While it is closed, the arrow keys, Enter and Space open it, and typing jumps to a matching option. While it is open, the arrows, Home/End, PageUp/PageDown and typing move; Enter, Space or a click choose; Escape closes; Tab chooses and moves on. The chosen option's text goes into `data-select-value`, and the trigger has `data-placeholder` while nothing is chosen. A combobox is named by its label, not its text, so give it a `<label for>` (the controller links it with `aria-labelledby`) or an `aria-label`. `value` / `defaultValue` / `onValueChange`, `disabled`, `required`, `name`.
 
 ## Combobox
 
@@ -304,16 +305,18 @@ Your own scrollbars over native scrolling. The viewport scrolls as usual with th
 ```tsx
 const toaster = useHeadlessToaster<{ title: string }>();
 <button onClick={() => toaster.toast({ title: 'Saved' })}>Save</button>
-<ol ref={toaster.regionRef} className="fixed bottom-4 right-4 grid gap-2">
-  {toaster.toasts.map((t) => (
-    <li key={t.id} ref={toaster.toastRef(t.id)} className="translate-x-[var(--toast-swipe,0)]">
-      {t.title} <button data-toast-close aria-label="Close">×</button>
-    </li>
-  ))}
-</ol>
+<section ref={toaster.regionRef} className="fixed bottom-4 right-4">
+  <ol className="grid gap-2">
+    {toaster.toasts.map((t) => (
+      <li key={t.id} ref={toaster.toastRef(t.id)} className="translate-x-[var(--toast-swipe,0)]">
+        {t.title} <button data-toast-close aria-label="Close">×</button>
+      </li>
+    ))}
+  </ol>
+</section>
 ```
 
-The list becomes a region named "Notifications (F8)", and F8 moves focus to the toasts. Each toast's text is read out through live regions that exist before any toast appears, which is what makes screen readers announce it reliably; close buttons are left out of the announcement. Timers pause while the pointer or focus is in the region and while the window is in the background. Escape dismisses the focused toast, a `data-toast-close` button dismisses its own, and a swipe dismisses one with touch or mouse: `--toast-swipe` follows the drag, and `swipeDirection` and `swipeThreshold` tune it. If a toast has an exit animation, it is removed when the animation ends. `toast(data, { duration, type: 'background' })` announces politely.
+The `<section>` becomes a landmark named "Notifications (F8)" (put the ref on the list itself and it is named but stays a list), and F8 moves focus to the toasts. Each toast's text is read out through live regions that exist before any toast appears, which is what makes screen readers announce it reliably; close buttons are left out of the announcement. Timers pause while the pointer or focus is in the region and while the window is in the background. Escape dismisses the focused toast, a `data-toast-close` button dismisses its own, and a swipe dismisses one with touch or mouse: `--toast-swipe` follows the drag, and `swipeDirection` and `swipeThreshold` tune it. If a toast has an exit animation, it is removed when the animation ends. `toast(data, { duration, type: 'background' })` announces politely.
 
 ## Without React
 

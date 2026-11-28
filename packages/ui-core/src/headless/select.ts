@@ -60,6 +60,11 @@ export function createSelect(options: SelectOptions): SelectController {
   trigger.setAttribute('aria-controls', listId);
   if (trigger.tagName === 'BUTTON' && !trigger.hasAttribute('type')) trigger.setAttribute('type', 'button');
   if (options.required) trigger.setAttribute('aria-required', 'true');
+  // A combobox is named by its label, not by its text (which is the chosen value).
+  if (!trigger.hasAttribute('aria-label') && !trigger.hasAttribute('aria-labelledby')) {
+    const labels = Array.from((trigger as HTMLButtonElement).labels ?? []);
+    if (labels.length) trigger.setAttribute('aria-labelledby', labels.map((label) => ensureId(label, 'ui-select-label')).join(' '));
+  }
   listbox.setAttribute('role', 'listbox');
   listbox.tabIndex = -1;
   if (!listbox.hasAttribute('aria-label') && !listbox.hasAttribute('aria-labelledby')) listbox.setAttribute('aria-labelledby', trigger.id);

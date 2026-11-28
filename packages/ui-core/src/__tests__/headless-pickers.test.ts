@@ -75,13 +75,14 @@ describe('createSelect', () => {
   const markup = '<form id="f"><button id="t"><span data-select-value></span></button><div id="l" aria-label="Fruit"><div data-option data-value="apple">Apple</div><div data-option data-value="banana" aria-disabled="true">Banana</div><div data-option data-value="cherry">Cherry</div></div></form>';
 
   it('is a select-only combobox: focus stays on the trigger, active descendant moves', () => {
-    const host = html(markup);
+    const host = html(`<label for="t">Fruit</label>${markup}`);
     const onValueChange = vi.fn();
     const select = createSelect({ trigger: host.querySelector('#t') as HTMLElement, listbox: host.querySelector('#l') as HTMLElement, placeholder: 'Pick a fruit', onValueChange, name: 'fruit' });
     const t = host.querySelector('#t') as HTMLElement;
     const opts = host.querySelectorAll<HTMLElement>('[data-option]');
     expect(t.getAttribute('role')).toBe('combobox');
     expect(t.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(t.getAttribute('aria-labelledby')).toBe(host.querySelector('label')!.id);
     expect(t.textContent).toBe('Pick a fruit');
     expect(t.hasAttribute('data-placeholder')).toBe(true);
     t.focus();
@@ -265,7 +266,7 @@ describe('createScrollArea', () => {
 describe('createToaster', () => {
   it('announces through a live region, times out, pauses while hovered', async () => {
     vi.useFakeTimers();
-    const host = html('<ol id="r"></ol>');
+    const host = html('<section id="r"></section>');
     const region = host.querySelector('#r') as HTMLElement;
     const onDismiss = vi.fn();
     const toaster = createToaster({ region, duration: 1000, onDismiss });
@@ -290,6 +291,8 @@ describe('createToaster', () => {
     const host = html('<ol id="r"></ol>');
     const region = host.querySelector('#r') as HTMLElement;
     const toaster = createToaster({ region, duration: Infinity });
+    expect(region.hasAttribute('role')).toBe(false);
+    expect(region.getAttribute('aria-label')).toBe('Notifications (F8)');
     const make = (text: string) => {
       const li = document.createElement('li');
       li.innerHTML = `<p>${text}</p><button data-toast-close>Close</button>`;

@@ -80,14 +80,16 @@ function Toaster() {
   return (
     <>
       <button onClick={() => toaster.toast({ title: 'Saved' })}>Save</button>
-      <ol ref={toaster.regionRef}>
+      <section ref={toaster.regionRef}>
+        <ol>
         {toaster.toasts.map((t) => (
           <li key={t.id} ref={toaster.toastRef(t.id)}>
             {t.title}
             <button data-toast-close>Close</button>
           </li>
         ))}
-      </ol>
+        </ol>
+      </section>
     </>
   );
 }

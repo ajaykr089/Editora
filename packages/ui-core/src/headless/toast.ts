@@ -1,7 +1,7 @@
 import { createCleanup, setState } from './shared';
 
 export interface ToasterOptions {
-  /** The list the toasts go in (an `<ol>` works well). It becomes a labelled landmark. */
+  /** Where the toasts go: a `<section>` (or `<div>`) becomes a labelled landmark; an `<ol>`/`<ul>` is labelled but stays a list. */
   region: HTMLElement;
   /** Accessible name of the region (default "Notifications"); the hotkey is added to it. */
   label?: string;
@@ -52,7 +52,8 @@ export function createToaster(options: ToasterOptions): ToasterController {
   const threshold = options.swipeThreshold ?? 50;
   const label = options.label ?? 'Notifications';
 
-  region.setAttribute('role', 'region');
+  // A list keeps its list role (role="region" is not allowed on <ol>/<ul>): put it in a <section> for a landmark.
+  if (region.tagName !== 'OL' && region.tagName !== 'UL') region.setAttribute('role', 'region');
   region.setAttribute('aria-label', `${label} (${hotkey.join('+').replace('Key', '')})`);
   region.tabIndex = -1;
 
