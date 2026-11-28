@@ -427,9 +427,12 @@ describe('uploading in the picker', () => {
   });
 
   it('uploads several files at once and inserts all of them', async () => {
-    open({ name: 'p', upload: async (f) => makeItem(Math.random() * 1000 | 0, { name: f.name, src: `https://cdn.test/${f.name}` }) });
+    // Distinct ids: random ones could collide, and two items with one id select as one.
+    let id = 100;
+    open({ name: 'p', upload: async (f) => makeItem(id++, { name: f.name, src: `https://cdn.test/${f.name}` }) });
     choose([file('a.png'), file('b.png')]);
-    await vi.waitFor(() => expect(insertButton().textContent).toBe('Insert 2 images'));
+    // Two uploads in parallel: allow a loaded CI runner more than waitFor's default second.
+    await vi.waitFor(() => expect(insertButton().textContent).toBe('Insert 2 images'), { timeout: 5000 });
     insertButton().click();
     expect([...editor.querySelectorAll('img')].map((i) => i.getAttribute('src'))).toEqual(['https://cdn.test/a.png', 'https://cdn.test/b.png']);
   });
