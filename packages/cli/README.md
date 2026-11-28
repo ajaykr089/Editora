@@ -169,7 +169,13 @@ Elements are named app-* (app-button, app-icon, app-message-scroller); the theme
 - **Running it again:** `editora.json` in the project root remembers the folder, the prefix and a hash of every file written. A later copy updates files you have not touched and keeps the ones you changed (`--overwrite` replaces them too). `--dry-run` shows the plan and writes nothing.
 - **Packages:** the copied files still import a few packages (for example `@editora/icons`); the CLI installs them, or prints the command with `--no-install`.
 
-The copied files are TypeScript.
+The copied files are TypeScript unless you add `--js`.
+
+**Blocks.** Whole page sections are copied the same way (no `--copy` needed): `npx @editora/cli add block-login block-dashboard`. See the list with `editora list block`.
+
+**JavaScript.** `--js` writes `.js` and `.jsx` files instead of TypeScript, compiled with the TypeScript your project already has (`npm i -D typescript` first). The choice is remembered.
+
+**Other registries.** `--registry <url or file>` copies from someone else's index instead of Editora's. It is a JSON file in the same format: `{ "schema": 1, "files": { "<path>": { "sha256": "…", "imports": ["<path>"], "packages": ["react"] } }, "elements": { "ui-x": "<path>" }, "react": { "X": "<path>" }, "blocks": { "block-x": { "file": "<path>", "description": "…" } }, "baseUrl": "https://…/" }`. Files are fetched from `baseUrl` (default: next to the index) and checked against their hash; the CLI says whose code it is copying.
 
 ## Several at once
 

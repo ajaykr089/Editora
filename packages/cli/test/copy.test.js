@@ -182,3 +182,72 @@ test("unknown names and stray copy options are reported", async () => {
   assert.match(stray.errors, /only work with --copy/);
   assert.equal(sha256("a").length, 64);
 });
+
+test("blocks are listed, copied without --copy, and install @editora/ui-react at its latest", async () => {
+  assert.ok(index.blocks["block-login"], "the index lists blocks");
+  assert.match(index.blocks["block-chat"].description, /chat/i);
+  const dir = project();
+  const result = await runIn(dir, ["add", "block-login", "--source", repo]);
+  assert.equal(result.code, 0, result.errors);
+  assert.ok(fs.existsSync(path.join(dir, "src/components/editora/blocks/block-login.tsx")));
+  assert.match(result.logs, /import \{ LoginBlock \} from '\.\/src\/components\/editora\/blocks\/block-login';/);
+  assert.deepEqual(result.spawned, ["npm install @editora/ui-react"]);
+  const mixed = await runIn(dir, ["add", "block-login", "button", "--source", repo]);
+  assert.equal(mixed.code, 1);
+  assert.match(mixed.errors, /separate command/);
+});
+
+test("--js writes JavaScript with the project's TypeScript, and is remembered", async () => {
+  const dir = project();
+  fs.symlinkSync(path.join(repo, "node_modules"), path.join(dir, "node_modules"));
+  const result = await runIn(dir, ["add", "spinner", "--copy", "--js", "--no-install", "--source", repo]);
+  assert.equal(result.code, 0, result.errors);
+  const js = fs.readFileSync(path.join(dir, "src/components/editora/core/components/ui-spinner.js"), "utf8");
+  assert.doesNotMatch(js, /: string|private |protected /);
+  assert.match(js, /customElements\.define\('app-spinner'/);
+  assert.ok(fs.existsSync(path.join(dir, "src/components/editora/react/components/Spinner.jsx")));
+  const config = JSON.parse(fs.readFileSync(path.join(dir, "editora.json"), "utf8"));
+  assert.equal(config.copy.js, true);
+  assert.equal(config.copy.versions, undefined, "no misleading version numbers");
+  const again = await runIn(dir, ["add", "heading", "--copy", "--no-install", "--source", repo]);
+  assert.equal(again.code, 0);
+  assert.ok(fs.existsSync(path.join(dir, "src/components/editora/core/components/ui-heading.js")));
+});
+
+test("--js without TypeScript in the project says how to fix it", async () => {
+  const dir = project();
+  const result = await runIn(dir, ["add", "spinner", "--copy", "--js", "--source", repo]);
+  assert.equal(result.code, 1);
+  assert.match(result.errors, /install it first/);
+});
+
+test("--registry copies from another index and checks its hashes", async () => {
+  const registryDir = fs.mkdtempSync(path.join(os.tmpdir(), "editora-registry-"));
+  const source = "export const hello = (name: string) => `hi ${name}`;\n";
+  fs.mkdirSync(path.join(registryDir, "ui-react", "blocks"), { recursive: true });
+  fs.writeFileSync(path.join(registryDir, "ui-react", "blocks", "block-hello.tsx"), source);
+  const registryIndex = {
+    schema: 1,
+    files: { "ui-react/blocks/block-hello.tsx": { sha256: sha256(source), size: source.length, imports: [], packages: [] } },
+    blocks: { "block-hello": { file: "ui-react/blocks/block-hello.tsx", description: "Says hi" } },
+  };
+  fs.writeFileSync(path.join(registryDir, "index.json"), JSON.stringify(registryIndex));
+  const dir = project();
+  const result = await runIn(dir, ["add", "block-hello", "--registry", path.join(registryDir, "index.json"), "--no-install"]);
+  assert.equal(result.code, 0, result.errors);
+  assert.match(result.logs, /copying code from .*index\.json, not from Editora/);
+  assert.ok(fs.existsSync(path.join(dir, "src/components/editora/blocks/block-hello.tsx")));
+
+  const urls = [];
+  const remote = project();
+  const viaUrl = await runIn(remote, ["add", "block-hello", "--registry", "https://example.com/r/index.json", "--no-install"], {
+    fetch: async (url) => {
+      urls.push(url);
+      if (url.endsWith("index.json")) return JSON.stringify(registryIndex);
+      return "tampered";
+    },
+  });
+  assert.equal(viaUrl.code, 1);
+  assert.match(viaUrl.errors, /does not match the hash/);
+  assert.deepEqual(urls, ["https://example.com/r/index.json", "https://example.com/r/ui-react/blocks/block-hello.tsx"]);
+});

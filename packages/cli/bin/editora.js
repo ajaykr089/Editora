@@ -41,6 +41,11 @@ Options:
   --overwrite            With --copy: replace files you changed since they were copied
   --source <checkout>    With --copy: read from a local Editora checkout instead of downloading
   --no-install           With --copy: only print the install command for the packages the files need
+  --js                   With --copy: write JavaScript (.js/.jsx), compiled with the project's TypeScript
+  --registry <url|file>  With --copy: copy from another registry's index (same format) instead of Editora's
+
+Blocks (page sections, always copied): editora add block-login block-dashboard
+  block-login, block-settings-profile, block-dashboard, block-app-shell, block-chat
   --package-manager <pm> Use npm, pnpm, yarn or bun (by default, the one your lock file belongs to)
   --json                 With list: print the names as JSON
   -h, --help             Show this help text
@@ -154,6 +159,15 @@ function suggestTargets(rawTarget) {
   return [...new Set(scored.map((item) => item.name))].slice(0, 3);
 }
 
+// The blocks the shipped copy index lists (empty for a build without one).
+function copyBlocks() {
+  try {
+    return JSON.parse(require("fs").readFileSync(path.join(__dirname, "..", "dist", "copy-index.json"), "utf8")).blocks || {};
+  } catch {
+    return {};
+  }
+}
+
 // Every name, for `editora list`.
 function listTargets(query) {
   const wanted = query ? String(query).toLowerCase() : "";
@@ -171,6 +185,18 @@ function listTargets(query) {
       dev: Boolean(entry.dev),
       requires: entry.requires || [],
       aliasOf: entry.aliasOf || null
+    });
+  }
+  for (const [name, block] of Object.entries(copyBlocks())) {
+    if (!matches(name, block.description)) continue;
+    items.push({
+      name,
+      group: "Blocks (copied into your project)",
+      description: block.description,
+      packages: ["@editora/ui-react"],
+      dev: false,
+      requires: ["react", "react-dom"],
+      aliasOf: null
     });
   }
   for (const name of uiReactComponents) {
@@ -202,6 +228,8 @@ function parseArgs(argv) {
     elements: false,
     overwrite: false,
     noInstall: false,
+    js: undefined,
+    registry: undefined,
     dir: undefined,
     prefix: undefined,
     source: undefined,
@@ -242,12 +270,17 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
+    if (arg === "--js") {
+      parsed.js = true;
+      index += 1;
+      continue;
+    }
     if (arg === "--copy" || arg === "--elements" || arg === "--overwrite") {
       parsed[arg.slice(2)] = true;
       index += 1;
       continue;
     }
-    const valueOption = ["--dir", "--prefix", "--source"].find((name) => arg === name || arg.startsWith(`${name}=`));
+    const valueOption = ["--dir", "--prefix", "--source", "--registry"].find((name) => arg === name || arg.startsWith(`${name}=`));
     if (valueOption) {
       const key = valueOption.slice(2);
       const inline = arg.includes("=") ? arg.slice(arg.indexOf("=") + 1) : undefined;
@@ -389,7 +422,7 @@ function printList(out, args) {
   for (const item of items) if (item.aliasOf) (aliases[item.aliasOf] = aliases[item.aliasOf] || []).push(item.name);
   const shown = items.filter((item) => !item.aliasOf);
   const width = Math.max(...shown.filter((item) => item.group !== "UI components").map((item) => item.name.length), 0) + 3;
-  const groups = [...groupOrder, "UI components"];
+  const groups = [...groupOrder, "UI components", "Blocks (copied into your project)"];
   let first = true;
   for (const group of groups) {
     const inGroup = shown.filter((item) => item.group === group);
@@ -728,9 +761,17 @@ function run(argv, options = {}) {
     return 1;
   }
 
+  // Blocks are page sections to edit, not packages: they are always copied.
+  if (!args.copy && args.targets.some((target) => /^block-/i.test(target))) {
+    if (args.targets.some((target) => !/^block-/i.test(target))) {
+      out.error("Blocks are copied into your project; add them in a separate command, or add --copy for everything.");
+      return 1;
+    }
+    args.copy = true;
+  }
   if (args.copy) return copy(out, args, options);
-  if (args.dir || args.prefix || args.source || args.elements || args.overwrite) {
-    out.error("--dir, --prefix, --source, --elements and --overwrite only work with --copy.");
+  if (args.dir || args.prefix || args.source || args.registry || args.elements || args.overwrite || args.js) {
+    out.error("--dir, --prefix, --source, --registry, --elements, --overwrite and --js only work with --copy.");
     return 1;
   }
 
@@ -758,6 +799,8 @@ async function copy(out, args, options) {
       overwrite: args.overwrite,
       dryRun: args.dryRun,
       source: args.source,
+      registry: args.registry,
+      js: args.js,
       indexFile: options.copyIndexFile,
       fetch: options.fetch,
     });
@@ -773,7 +816,8 @@ async function copy(out, args, options) {
   const counts = {};
   for (const item of report.files) counts[item.status] = (counts[item.status] || 0) + 1;
   out.log("");
-  out.log(`${out.bold(args.dryRun ? "Would copy" : "Copied")} ${report.labels.join(", ")} ${out.dim(`into ${report.dir}`)}`);
+  if (report.external) out.log(`${out.yellow("Note:")} copying code from ${report.external}, not from Editora. Read it before you run it.`);
+  out.log(`${out.bold(args.dryRun ? "Would copy" : "Copied")} ${report.labels.join(", ")} ${out.dim(`into ${report.dir}${report.js ? " as JavaScript" : ""}`)}`);
   out.log("");
   const marks = { create: out.green("+"), update: out.cyan("~"), overwrite: out.yellow("!"), unchanged: out.dim("="), skip: out.yellow("-") };
   for (const item of report.files) out.log(`  ${marks[item.status]} ${item.file}${item.status === "skip" ? out.yellow("  (you changed it: kept; --overwrite replaces it)") : ""}`);
@@ -782,7 +826,7 @@ async function copy(out, args, options) {
   if (report.tags.length) {
     out.log(`Elements are named ${out.bold(`${report.prefix}-*`)} (${report.tags.slice(0, 3).map((tag) => tag.replace(/^ui-/, `${report.prefix}-`)).join(", ")}${report.tags.length > 3 ? ", …" : ""}); the theme tokens (--ui-*) are shared.`);
   }
-  if (!report.typescript) out.log(`${out.yellow("Note:")} the copied files are TypeScript and this project has no tsconfig.json.`);
+  if (!report.typescript && !report.js) out.log(`${out.yellow("Note:")} the copied files are TypeScript and this project has no tsconfig.json (--js writes JavaScript).`);
 
   if (report.packages.length) {
     let pm = args.packageManager;
@@ -805,8 +849,12 @@ async function copy(out, args, options) {
     const base = report.dir.split(path.sep).join("/");
     out.log("");
     out.log(out.bold("Use it:"));
+    const ext = report.js ? "" : "";
     for (const label of report.labels) {
-      if (/^ui-/.test(label)) {
+      if (/^block-/.test(label)) {
+        const name = `${label.replace(/^block-/, "").split("-").map((part) => part[0].toUpperCase() + part.slice(1)).join("")}Block`;
+        out.log(`  import { ${name} } from './${base}/blocks/${label}${ext}';`);
+      } else if (/^ui-/.test(label)) {
         out.log(`  import './${base}/core/components/${label}';`);
         out.log(`  <${label.replace(/^ui-/, `${report.prefix}-`)}></${label.replace(/^ui-/, `${report.prefix}-`)}>`);
       } else {

@@ -36,7 +36,26 @@ function toKebab(name) {
     .replace(/^ui-/, "");
 }
 
-function loadIndex(options = {}) {
+function isUrl(value) {
+  return /^https?:\/\//i.test(String(value || ""));
+}
+
+async function loadIndex(options = {}) {
+  if (options.registry) {
+    // Someone else's registry: an index in the same format, from a URL or a file, whose files are
+    // fetched from its `baseUrl` (default: next to the index) and checked against their hashes.
+    const location = String(options.registry);
+    const text = isUrl(location) ? await (options.fetch || download)(location) : fs.readFileSync(path.resolve(location), "utf8");
+    let index;
+    try {
+      index = JSON.parse(text);
+    } catch (error) {
+      throw new Error(`--registry ${location} is not a JSON copy index: ${error.message}`);
+    }
+    if (index.schema !== SCHEMA || !index.files) throw new Error(`--registry ${location} is not a copy index (schema ${index.schema}).`);
+    const base = index.baseUrl || (isUrl(location) ? location.replace(/[^/]*$/, "") : path.dirname(path.resolve(location)));
+    return { index: { ...index, elements: index.elements || {}, react: index.react || {}, blocks: index.blocks || {}, baseUrl: base }, packagesDir: isUrl(base) ? null : base, external: location };
+  }
   if (options.source) {
     const packagesDir = path.resolve(options.source, "packages");
     if (!fs.existsSync(path.join(packagesDir, "ui-core", "src"))) {
@@ -53,6 +72,11 @@ function loadIndex(options = {}) {
 
 /** The root files for a name: the React component (when React is wanted) and/or the custom element. */
 function rootsFor(index, name, { react }) {
+  const blockName = String(name).toLowerCase();
+  if (/^block-/.test(blockName)) {
+    const block = (index.blocks || {})[blockName];
+    return { roots: block ? [block.file] : [], label: blockName, block: true };
+  }
   const pascal = toPascal(name);
   const kebab = toKebab(name);
   const roots = [];
@@ -78,8 +102,10 @@ function closure(index, roots) {
 
 function destinationOf(file, dir) {
   // ui-core/src/components/ui-button.ts -> <dir>/core/components/ui-button.ts
-  const [pkg, , ...rest] = file.split("/");
-  return path.join(dir, pkg === "ui-core" ? "core" : "react", ...rest);
+  // ui-react/blocks/block-login.tsx    -> <dir>/blocks/block-login.tsx
+  const [pkg, root, ...rest] = file.split("/");
+  if (pkg === "ui-react" && root === "blocks") return path.join(dir, "blocks", ...rest);
+  return path.join(dir, pkg === "ui-core" ? "core" : pkg === "ui-react" ? "react" : pkg, ...rest);
 }
 
 function download(url, timeoutMs = 20000) {
@@ -114,12 +140,14 @@ async function readSources(index, packagesDir, files, options = {}) {
       let text;
       if (packagesDir) {
         text = fs.readFileSync(path.join(packagesDir, file), "utf8");
+      } else if (index.baseUrl) {
+        text = await fetchText(`${String(index.baseUrl).replace(/\/?$/, "/")}${file}`);
       } else {
         if (!index.commit) throw new Error("The copy index records no commit to download from. Use --source <checkout>.");
         text = await fetchText(`https://raw.githubusercontent.com/${index.repo}/${index.commit}/packages/${file}`);
       }
       // A file that differs from the one the import graph was built from is refused, never written.
-      if (!packagesDir && sha256(text) !== index.files[file].sha256) {
+      if ((!packagesDir || options.registry) && index.files[file].sha256 && sha256(text) !== index.files[file].sha256) {
         throw new Error(`${file} does not match the hash in the copy index; nothing was written.`);
       }
       contents[file] = text;
@@ -189,7 +217,7 @@ async function copyComponents(names, options) {
   const absDir = path.resolve(projectDir, dir);
   if (path.relative(projectDir, absDir).startsWith("..")) throw new Error(`--dir must be inside the project (${dir}).`);
 
-  const { index, packagesDir } = loadIndex(options);
+  const { index, packagesDir, external } = await loadIndex(options);
   const unknown = [];
   const labels = [];
   const roots = [];
@@ -213,12 +241,33 @@ async function copyComponents(names, options) {
     throw new Error("These components import the whole @editora/ui-core catalogue; copy them one by one instead.");
   }
 
+  let ts = null;
+  // A project that copied JavaScript before keeps getting JavaScript.
+  if (options.js === undefined && saved.js) options = { ...options, js: true };
+  if (options.js) {
+    try {
+      ts = require(require.resolve("typescript", { paths: [projectDir] }));
+    } catch {
+      throw new Error("--js compiles the TypeScript sources with the project's own TypeScript: install it first (npm i -D typescript), or copy without --js.");
+    }
+  }
   const recorded = saved.files || {};
-  const report = { dir, prefix, labels, files: [], packages: [...packages].sort().map((pkg) => (index.dependencyRanges[pkg] ? `${pkg}@${index.dependencyRanges[pkg]}` : pkg)), tags };
+  // Blocks import @editora/ui-react itself: install its latest release (the index was built before the
+  // release that numbers these sources, so a range from it could exclude them).
+  const ranges = index.dependencyRanges || {};
+  const report = { dir, prefix, labels, files: [], packages: [...packages].sort().map((pkg) => (ranges[pkg] && !/^@editora\/ui-(core|react)$/.test(pkg) ? `${pkg}@${ranges[pkg]}` : pkg)), tags, external: external || null, js: !!ts };
   for (const file of files) {
-    const destination = destinationOf(file, absDir);
+    let destination = destinationOf(file, absDir);
+    if (ts) destination = destination.replace(/\.tsx$/, ".jsx").replace(/\.ts$/, ".js");
     const relDest = path.relative(projectDir, destination).split(path.sep).join("/");
-    const content = transform(file, sources[file], { dir: absDir, destination, tags, prefix, index });
+    let content = transform(file, sources[file], { dir: absDir, destination: destinationOf(file, absDir), tags, prefix, index });
+    if (ts) {
+      // JSX stays JSX (.jsx), types go; the relative imports have no extension, so they still resolve.
+      content = ts.transpileModule(content, {
+        fileName: file,
+        compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.Preserve, verbatimModuleSyntax: false, removeComments: false },
+      }).outputText;
+    }
     const hash = sha256(content);
     let status = "create";
     if (fs.existsSync(destination)) {
@@ -244,8 +293,9 @@ async function copyComponents(names, options) {
     config.copy = {
       dir,
       prefix,
-      commit: index.commit,
-      versions: index.versions,
+      commit: index.commit || null,
+      ...(external ? { registry: external } : {}),
+      ...(ts ? { js: true } : {}),
       components: [...components].sort(),
       files: Object.fromEntries(Object.entries(recorded).sort(([a], [b]) => a.localeCompare(b))),
     };
