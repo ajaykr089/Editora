@@ -35,6 +35,9 @@ jobs:
       - name: Verify the custom elements manifest and framework typings are up to date
         run: npm run check:elements
 
+      - name: Verify every package exports its package.json
+        run: npm run check:package-exports
+
       - name: Verify custom element registrations are complete
         run: npm run check:element-registrations
 

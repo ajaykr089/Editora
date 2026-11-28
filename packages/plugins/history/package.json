@@ -34,6 +34,7 @@
     "vite": "^7.3.1"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./src/index.ts",
       "import": "./dist/index.esm.js",
