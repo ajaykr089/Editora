@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-editor",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Editor-focused UI extensions for Editora (floating toolbar, command palette, context menus)",
   "keywords": [
     "editora",
@@ -35,10 +35,10 @@
     "prepare": "npm run build"
   },
   "peerDependencies": {
-    "@editora/ui-core": "^0.8.0"
+    "@editora/ui-core": "^0.9.0"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.8.0"
+    "@editora/ui-core": "^0.9.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

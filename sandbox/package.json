@@ -12,8 +12,8 @@
     "@editora/react-icons": "0.2.0",
     "@editora/themes": "1.1.1",
     "@editora/toast": "2.2.0",
-    "@editora/ui-core": "0.8.0",
-    "@editora/ui-react": "0.8.0",
+    "@editora/ui-core": "0.9.0",
+    "@editora/ui-react": "0.9.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.22.0"

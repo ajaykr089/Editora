@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-sortable",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Drag-and-drop for the web: the <ui-sortable> board and list component, or sortable behaviour for your own markup (createSortable and a React useSortable hook), with keyboard, touch, screen-reader announcements and lists that exchange items.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react/interactive/sortable",
   "bugs": {
@@ -54,7 +54,7 @@
     "prepare": "vite build"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.8.0"
+    "@editora/ui-core": "^0.9.0"
   },
   "peerDependencies": {
     "react": ">=16.8 <21",

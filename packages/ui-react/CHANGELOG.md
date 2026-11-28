@@ -1,5 +1,24 @@
 # Change Log
 
+## 0.9.0
+
+### Minor Changes
+
+- 28caba6: `asChild` on trigger parts: `Popover.Trigger`, `HoverCard.Trigger`, `Dropdown.Trigger`, `Menu.Trigger`, `Accordion.Trigger`, `NavigationMenu.Trigger` and `NavigationMenu.Link` render their single child instead of their own element, with props, event handlers and refs merged. Use it for router links (`<NavigationMenu.Link asChild><Link href="/blog">Blog</Link></NavigationMenu.Link>`) or your own buttons. `HoverCard.Trigger`'s documentation already showed `asChild`, but until now the prop did nothing.
+- f425022: Headless collapsible, accordion, tooltip, hover card, toggle group and toolbar. `@editora/ui-core/headless` adds `createCollapsible`, `createAccordion`, `createTooltip`, `createHoverCard`, `createToggleGroup` and `createToolbar`, and `@editora/ui-react` adds the matching `useHeadless*` hooks: WAI-ARIA roles, keyboard handling and `data-state` on your own markup.
+- ad82fd6: Headless checkbox, switch, radio group and slider. `@editora/ui-core/headless` adds `createCheckbox`, `createSwitch`, `createRadioGroup` and `createSlider` (one thumb or a range), and `@editora/ui-react` adds `useHeadlessCheckbox`, `useHeadlessSwitch`, `useHeadlessRadioGroup` and `useHeadlessSlider`. With a `name` they take part in native forms: their values go into FormData, `required` works, and a form reset restores them.
+- 70eedbb: Headless select, combobox, context menu, navigation menu, scroll area and toast. `@editora/ui-core/headless` adds `createSelect`, `createCombobox`, `createContextMenu`, `createNavigationMenu`, `createScrollArea` and `createToaster`, and `@editora/ui-react` adds the matching `useHeadless*` hooks. The menu button and the context menu now share one menu implementation.
+
+### Patch Changes
+
+- Updated dependencies [94288b4]
+- Updated dependencies [f425022]
+- Updated dependencies [ad82fd6]
+- Updated dependencies [70eedbb]
+- Updated dependencies [76430ab]
+- Updated dependencies [fbba4bd]
+  - @editora/ui-core@0.9.0
+
 ## 0.8.0
 
 ### Minor Changes
