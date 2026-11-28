@@ -67,7 +67,11 @@ export function createSelect(options: SelectOptions): SelectController {
   }
   listbox.setAttribute('role', 'listbox');
   listbox.tabIndex = -1;
-  if (!listbox.hasAttribute('aria-label') && !listbox.hasAttribute('aria-labelledby')) listbox.setAttribute('aria-labelledby', trigger.id);
+  if (!listbox.hasAttribute('aria-label') && !listbox.hasAttribute('aria-labelledby')) {
+    // Name the list like the trigger: by the trigger's label (aria-labelledby is not followed twice),
+    // else by the trigger, whose text is then its name.
+    listbox.setAttribute('aria-labelledby', trigger.getAttribute('aria-labelledby') || trigger.id);
+  }
 
   const valueOf = (item: HTMLElement) => item.getAttribute('data-value') || (item.textContent || '').trim();
   const read = () => {

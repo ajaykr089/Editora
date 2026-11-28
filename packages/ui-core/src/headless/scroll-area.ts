@@ -115,6 +115,8 @@ export function createScrollArea(options: ScrollAreaOptions): ScrollAreaControll
     if (!track || !thumb) continue;
     const vertical = bar.axis === 'vertical';
     let drag: { start: number; scroll: number } | null = null;
+    // A touch drag on the thumb moves the thumb, not the page.
+    if (!thumb.style.touchAction) thumb.style.touchAction = 'none';
     cleanup.listen(thumb, 'pointerdown', (event: PointerEvent) => {
       if (event.button !== 0) return;
       event.preventDefault();
