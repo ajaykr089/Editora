@@ -6,11 +6,30 @@ sidebar_label: "Item"
 
 # Item
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 ```tsx
 import { Avatar, Button, Item, ItemGroup, Switch } from '@editora/ui-react';
+
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Box style={{ maxWidth: 520 }}>
+        <ItemGroup divided>
+          <Item href="#ada" label="Ada Lovelace" description="ada@example.com">
+            <Avatar slot="media" initials="AL" />
+            <Button slot="actions" size="sm" variant="ghost">Remove</Button>
+          </Item>
+          <Item label="Notifications" description="Email and push">
+            <Switch slot="actions" aria-label="Notifications" />
+          </Item>
+        </ItemGroup>
+      </Box>
+    </ThemeProvider>
+  );
+}
+```
 
 <ItemGroup divided>
   <Item href="/team/ada" label="Ada Lovelace" description="ada@example.com">

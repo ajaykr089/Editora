@@ -6,10 +6,27 @@ sidebar_label: "Questionnaire"
 
 # Questionnaire
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 For an agent that clarifies a task before starting, and short onboarding flows.
+
+## Try it
+
+```tsx live
+function Example() {
+  const [result, setResult] = React.useState('');
+  return (
+    <ThemeProvider>
+      <Questionnaire shortcuts onSubmit={(values) => setResult(JSON.stringify(values))}>
+        <Question name="scope" label="What should I build?" required>
+          <option value="web">A web app</option>
+          <option value="api">An API</option>
+        </Question>
+        <Question name="notes" label="Anything else?" type="text" placeholder="Optional" />
+        <p slot="complete">Thanks! {result}</p>
+      </Questionnaire>
+    </ThemeProvider>
+  );
+}
+```
 
 ```tsx
 import { Question, Questionnaire } from '@editora/ui-react';

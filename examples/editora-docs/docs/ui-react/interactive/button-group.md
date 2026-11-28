@@ -6,11 +6,34 @@ sidebar_label: "ButtonGroup"
 
 # ButtonGroup
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 ```tsx
 import { Button, ButtonGroup } from '@editora/ui-react';
+
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Flex style={{ gap: 16, flexWrap: 'wrap', alignItems: 'start' }}>
+        <ButtonGroup aria-label="Text alignment">
+          <Button variant="outline">Left</Button>
+          <Button variant="outline">Center</Button>
+          <Button variant="outline">Right</Button>
+        </ButtonGroup>
+        <ButtonGroup aria-label="Save">
+          <Button>Save</Button>
+          <Button>Save as</Button>
+        </ButtonGroup>
+        <ButtonGroup orientation="vertical" aria-label="Order">
+          <Button variant="secondary">Move up</Button>
+          <Button variant="secondary">Move down</Button>
+        </ButtonGroup>
+      </Flex>
+    </ThemeProvider>
+  );
+}
+```
 
 <ButtonGroup aria-label="Text alignment">
   <Button variant="outline">Left</Button>

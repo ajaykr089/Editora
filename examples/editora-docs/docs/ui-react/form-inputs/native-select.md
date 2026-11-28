@@ -6,11 +6,28 @@ sidebar_label: "NativeSelect"
 
 # NativeSelect
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 ```tsx
 import { NativeSelect } from '@editora/ui-react';
+
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Box style={{ maxWidth: 260 }}>
+        <NativeSelect>
+          <select aria-label="Country" defaultValue="in">
+            <option value="in">India</option>
+            <option value="us">United States</option>
+            <option value="de">Germany</option>
+          </select>
+        </NativeSelect>
+      </Box>
+    </ThemeProvider>
+  );
+}
+```
 
 <NativeSelect>
   <select name="country" aria-label="Country" defaultValue="in">

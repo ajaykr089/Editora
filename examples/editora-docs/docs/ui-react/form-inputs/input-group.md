@@ -6,11 +6,35 @@ sidebar_label: "InputGroup"
 
 # InputGroup
 
-:::info New in @editora/ui-react 0.7.0 and @editora/ui-core 0.7.0
-:::
-
 ```tsx
 import { InputGroup, Kbd } from '@editora/ui-react';
+
+## Try it
+
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Box style={{ display: 'grid', gap: 12, maxWidth: 420 }}>
+        <InputGroup>
+          <span slot="start">https://</span>
+          <input aria-label="Website" placeholder="example.com" />
+        </InputGroup>
+        <InputGroup>
+          <input aria-label="Amount" placeholder="0.00" />
+          <span slot="end">USD</span>
+        </InputGroup>
+        <InputGroup>
+          <textarea aria-label="Message" placeholder="Ask anything…" />
+          <div slot="bottom" style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+            <Button size="sm">Send</Button>
+          </div>
+        </InputGroup>
+      </Box>
+    </ThemeProvider>
+  );
+}
+```
 
 <InputGroup>
   <SearchIcon slot="start" />
