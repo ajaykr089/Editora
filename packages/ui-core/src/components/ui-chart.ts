@@ -10,7 +10,12 @@ type ChartSeries = {
   strokeWidth?: number;
   opacity?: number;
 };
-type ChartKind = 'line' | 'area' | 'bar' | 'donut' | 'step' | 'scatter' | 'radial';
+type ChartKind = 'line' | 'area' | 'bar' | 'donut' | 'pie' | 'step' | 'scatter' | 'radial' | 'radar';
+
+/** Charts drawn around a centre: no axes, no horizontal fit width. */
+function isRound(type: ChartKind): boolean {
+  return type === 'donut' || type === 'pie' || type === 'radial' || type === 'radar';
+}
 type ChartState = 'idle' | 'loading' | 'error' | 'success';
 type SeriesValueDetail = {
   series: string;
@@ -769,13 +774,16 @@ function resolveTone(tone: string | undefined): string | undefined {
   return TONE_COLORS[tone.trim().toLowerCase()] || tone;
 }
 
+// Series and slice colours, in order. Each is a token a theme can set (--ui-chart-1 ... -6, as in
+// shadcn/ui); the defaults are distinct hues. The status colours are not used for this on their own:
+// in the default theme primary and warning are both amber, which made neighbouring slices identical.
 const palette = [
-  'var(--ui-color-primary, #2563eb)',
-  'var(--ui-color-success, #15803d)',
-  'var(--ui-color-warning, #b45309)',
-  'var(--ui-color-danger, #dc2626)',
-  'var(--ui-color-info, #0e7490)',
-  'var(--ui-color-accent, #7c3aed)'
+  'var(--ui-chart-1, var(--ui-color-primary, #2563eb))',
+  'var(--ui-chart-2, var(--ui-color-info, #0e7490))',
+  'var(--ui-chart-3, var(--ui-color-success, #15803d))',
+  'var(--ui-chart-4, #8b5cf6)',
+  'var(--ui-chart-5, var(--ui-color-danger, #dc2626))',
+  'var(--ui-chart-6, #db2777)'
 ];
 
 function escapeHtml(value: string): string {
@@ -1089,7 +1097,9 @@ export class UIChart extends ElementBase {
       raw === 'donut' ||
       raw === 'step' ||
       raw === 'scatter' ||
-      raw === 'radial'
+      raw === 'radial' ||
+      raw === 'pie' ||
+      raw === 'radar'
     ) return raw;
     return 'line';
   }
@@ -1817,11 +1827,154 @@ export class UIChart extends ElementBase {
     };
   }
 
+  /** A pie: filled wedges, one per point, sized by its share of the positive total. */
+  private _plotPie(points: ChartPoint[], activeIndex: number | null): PlotRender {
+    const positiveTotal = points.reduce((sum, point) => sum + Math.max(0, point.value), 0);
+    const total = Math.max(1, positiveTotal);
+    const cx = 32;
+    const cy = 32;
+    const r = 24;
+    const at = (angle: number, radius: number) => [cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius];
+    let start = -Math.PI / 2;
+    const geometry = points.map((point) => {
+      const sweep = (Math.max(0, point.value) / total) * Math.PI * 2;
+      const entry = { start, sweep, mid: start + sweep / 2 };
+      start += sweep;
+      return entry;
+    });
+
+    const wedges = points
+      .map((point, index) => {
+        const { start: a0, sweep } = geometry[index];
+        if (sweep <= 0) return '';
+        const tone = escapeHtml(this._pointTone(point, index));
+        const active = activeIndex === index;
+        const opacity = activeIndex == null || active ? '1' : '0.65';
+        // A slice that is the whole pie cannot be drawn as an arc from a point back to itself.
+        if (sweep >= Math.PI * 2 - 1e-6) {
+          return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${tone}" opacity="${opacity}" />`;
+        }
+        // The active wedge moves out along its middle a little (an offset, not a point).
+        const grow = active ? 1.5 : 0;
+        const ox = Math.cos(a0 + sweep / 2) * grow;
+        const oy = Math.sin(a0 + sweep / 2) * grow;
+        const [x0, y0] = at(a0, r);
+        const [x1, y1] = at(a0 + sweep, r);
+        const large = sweep > Math.PI ? 1 : 0;
+        return `<path d="M${(cx).toFixed(3)} ${(cy).toFixed(3)} L${x0.toFixed(3)} ${y0.toFixed(3)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(3)} ${y1.toFixed(3)} Z" transform="translate(${ox.toFixed(3)} ${oy.toFixed(3)})" fill="${tone}" stroke="var(--ui-chart-surface, var(--ui-color-surface, #ffffff))" stroke-width="0.6" stroke-linejoin="round" opacity="${opacity}" />`;
+      })
+      .join('');
+
+    const anchors = geometry.map(({ mid }) => {
+      const [x, y] = at(mid, r * 0.62);
+      return { xPct: clamp((x / 64) * 100, 0, 100), yPct: clamp((y / 64) * 100, 0, 100) };
+    });
+
+    const hits = points
+      .map((point, index) => {
+        const active = activeIndex === index;
+        const pct = positiveTotal > 0 ? (Math.max(0, point.value) / positiveTotal) * 100 : 0;
+        const label = `${point.label}: ${this._formatValue(point.value)} (${this._formatValue(pct, { maximumFractionDigits: 1 })}%)`;
+        return `<button type="button" class="plot-hit" data-role="plot-hit" data-point-index="${index}" data-active="${active ? 'true' : 'false'}" style="--x:${anchors[index].xPct.toFixed(3)};--y:${anchors[index].yPct.toFixed(3)};" aria-label="${escapeHtml(label)}" ${this._isInteractive() ? '' : 'disabled'}></button>`;
+      })
+      .join('');
+
+    return {
+      svg: `
+        <svg class="plot" part="plot" viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="xMidYMid meet">
+          ${positiveTotal > 0 ? wedges : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--ui-chart-grid)" />`}
+        </svg>
+      `,
+      hits,
+      anchors,
+      yTicks: []
+    };
+  }
+
+  /**
+   * A radar (spider) chart: one spoke per label, one closed polygon per series, rings at a
+   * quarter of the largest value each. Compares several series across the same dimensions.
+   */
+  private _plotRadar(data: NormalizedChartData, activeIndex: number | null): PlotRender {
+    const labels = data.labels;
+    const count = labels.length;
+    const cx = 32;
+    const cy = 32;
+    // Room around the rings for the dimension names.
+    const r = 17;
+    if (count === 0) return { svg: '', hits: '', anchors: [], yTicks: [] };
+    const max = Math.max(
+      1e-9,
+      ...data.series.flatMap((series) => series.data.map((point) => (Number.isFinite(point.value) ? point.value : 0)))
+    );
+    const angle = (index: number) => -Math.PI / 2 + (index / count) * Math.PI * 2;
+    const at = (index: number, radius: number) => [cx + Math.cos(angle(index)) * radius, cy + Math.sin(angle(index)) * radius];
+    const ring = (fraction: number) => labels.map((_l, i) => at(i, r * fraction).map((v) => v.toFixed(3)).join(',')).join(' ');
+
+    const grid = [0.25, 0.5, 0.75, 1]
+      .map((fraction) => `<polygon points="${ring(fraction)}" fill="none" stroke="var(--ui-chart-grid)" stroke-width="0.35" />`)
+      .join('');
+    const spokes = labels
+      .map((_label, i) => {
+        const [x, y] = at(i, r);
+        return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(3)}" y2="${y.toFixed(3)}" stroke="var(--ui-chart-grid)" stroke-width="0.35" />`;
+      })
+      .join('');
+    const names = labels
+      .map((label, i) => {
+        const [x, y] = at(i, r + 4.6);
+        const anchor = Math.abs(x - cx) < 1 ? 'middle' : x > cx ? 'start' : 'end';
+        const active = activeIndex === i;
+        return `<text x="${x.toFixed(3)}" y="${(y + 1.2).toFixed(3)}" text-anchor="${anchor}" font-size="2.9" fill="${active ? 'var(--ui-chart-text)' : 'var(--ui-chart-muted)'}"${active ? ' font-weight="700"' : ''}>${escapeHtml(label.length > 14 ? `${label.slice(0, 13)}…` : label)}</text>`;
+      })
+      .join('');
+
+    const shapes = data.series
+      .map((series, seriesIndex) => {
+        const tone = escapeHtml(this._seriesTone(series, seriesIndex));
+        const pts = labels.map((_label, i) => {
+          const value = Math.max(0, Number(series.data[i]?.value) || 0);
+          return at(i, (value / max) * r);
+        });
+        const polygon = pts.map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ');
+        const dots = pts
+          .map(([x, y], i) => `<circle cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${activeIndex === i ? 1.3 : 0.85}" fill="${tone}" />`)
+          .join('');
+        const fillOpacity = series.fill === false ? 0 : data.series.length > 1 ? 0.14 : 0.22;
+        return `<polygon points="${polygon}" fill="${tone}" fill-opacity="${fillOpacity}" stroke="${tone}" stroke-width="${series.strokeWidth ? series.strokeWidth * 0.35 : 0.7}" stroke-linejoin="round"${series.dash ? ` stroke-dasharray="${escapeHtml(series.dash)}"` : ''}${series.opacity != null ? ` opacity="${series.opacity}"` : ''} />${dots}`;
+      })
+      .join('');
+
+    const anchors = labels.map((_label, i) => {
+      const [x, y] = at(i, r);
+      return { xPct: clamp((x / 64) * 100, 0, 100), yPct: clamp((y / 64) * 100, 0, 100) };
+    });
+    const hits = labels
+      .map((label, i) => {
+        const values = data.series.map((series) => `${series.name}: ${this._formatValue(Number(series.data[i]?.value) || 0)}`).join(', ');
+        return `<button type="button" class="plot-hit" data-role="plot-hit" data-point-index="${i}" data-active="${activeIndex === i ? 'true' : 'false'}" style="--x:${anchors[i].xPct.toFixed(3)};--y:${anchors[i].yPct.toFixed(3)};" aria-label="${escapeHtml(`${label}: ${values}`)}" ${this._isInteractive() ? '' : 'disabled'}></button>`;
+      })
+      .join('');
+
+    return {
+      svg: `
+        <svg class="plot" part="plot" viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="xMidYMid meet" overflow="visible">
+          ${grid}${spokes}${shapes}${names}
+        </svg>
+      `,
+      hits,
+      anchors,
+      yTicks: []
+    };
+  }
+
   private _plot(data: NormalizedChartData, type: ChartKind, activeIndex: number | null): PlotRender {
     const primary = this._primarySeries(data);
     if (!primary) return { svg: '', hits: '', anchors: [], yTicks: [] };
     if (type === 'donut') return this._plotDonut(primary.data, activeIndex);
     if (type === 'radial') return this._plotRadial(primary.data, activeIndex);
+    if (type === 'pie') return this._plotPie(primary.data, activeIndex);
+    if (type === 'radar') return this._plotRadar(data, activeIndex);
     return this._plotCartesian(data, type, activeIndex);
   }
 
@@ -1874,7 +2027,7 @@ export class UIChart extends ElementBase {
       // Slices of a whole have no order, so a first-to-last change means nothing: show the
       // largest share instead.
       const type = this._type();
-      if (type === 'donut' || type === 'radial') {
+      if (isRound(type)) {
         const total = primary.data.reduce((sum, point) => sum + Math.max(0, point.value), 0);
         const largest = primary.data.reduce((best, point) => (point.value > best.value ? point : best), primary.data[0]);
         if (!largest || total <= 0) return '';
@@ -2017,7 +2170,7 @@ export class UIChart extends ElementBase {
         data-state="${state}"
         data-disabled="${disabled ? 'true' : 'false'}"
         aria-disabled="${disabled ? 'true' : 'false'}"
-        ${type === 'donut' || type === 'radial' ? '' : `style="--ui-chart-fit-width: ${data.labels.length * 28}px"`}
+        ${isRound(type) ? '' : `style="--ui-chart-fit-width: ${data.labels.length * 28}px"`}
       >
         <div class="sr-only" aria-live="polite">${state === 'idle' ? '' : `${escapeHtml(title)} ${escapeHtml(statusText(state))}`}</div>
 
@@ -2062,7 +2215,7 @@ export class UIChart extends ElementBase {
 
         <section class="plot-shell" part="plot-shell">
           <div class="plot-body">
-            ${type === 'donut' || type === 'radial' ? '' : `
+            ${isRound(type) ? '' : `
               <div class="axis-y" part="axis-y">
                 ${plot.yTicks.map((tick) => `<span>${escapeHtml(tick)}</span>`).join('')}
               </div>
@@ -2073,7 +2226,7 @@ export class UIChart extends ElementBase {
               ${this._tooltipMarkup(data, plot)}
               ${state === 'loading' ? '<div class="loading-overlay" part="loading-overlay" aria-hidden="true"></div>' : ''}
             </div>
-            ${type === 'donut' || type === 'radial' ? '' : `
+            ${isRound(type) ? '' : `
               <div class="axis-x" part="axis-x">
                 ${data.labels
                   .map(

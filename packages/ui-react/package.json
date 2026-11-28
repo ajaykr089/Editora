@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -968,6 +968,12 @@
       "require": "./dist/TraceItem.cjs.js",
       "default": "./dist/TraceItem.esm.js"
     },
+    "./DataList": {
+      "types": "./dist/components/DataList.d.ts",
+      "import": "./dist/DataList.esm.js",
+      "require": "./dist/DataList.cjs.js",
+      "default": "./dist/DataList.esm.js"
+    },
     "./Headless": {
       "types": "./dist/components/Headless.d.ts",
       "import": "./dist/Headless.esm.js",
@@ -1004,7 +1010,7 @@
   },
   "dependencies": {
     "@editora/toast": "^2.2.0",
-    "@editora/ui-core": "^0.6.0"
+    "@editora/ui-core": "^0.7.0"
   },
   "keywords": [
     "editora",

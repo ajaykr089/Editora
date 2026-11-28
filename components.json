@@ -783,6 +783,26 @@
       }
     },
     {
+      "id": "ui-core:ui-data-list",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "data-list",
+      "tagName": "ui-data-list",
+      "source": "packages/ui-core/src/components/ui-data-list.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-data-list--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-data-table",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -3446,6 +3466,17 @@
       "storybookPath": "/story/ui-copy-button--playground",
       "wrapperFor": null,
       "notes": "React composite or provider/API component"
+    },
+    {
+      "id": "ui-react:DataList",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DataList",
+      "reactExport": "DataList",
+      "source": "packages/ui-react/src/components/DataList.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-data-list--playground",
+      "wrapperFor": "ui-data-list"
     },
     {
       "id": "ui-react:DataTable",

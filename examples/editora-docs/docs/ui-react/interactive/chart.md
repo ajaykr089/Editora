@@ -54,6 +54,12 @@ Additional data-display props:
 
 - Use either `data` or paired `values` and `labels`.
 - Use `series` when you need comparison lines, multi-metric tooltips, or grouped bars.
-- `donut` and `radial` currently use the primary series only.
+- `type`: `line`, `area`, `step`, `scatter`, `bar`, `donut`, `pie`, `radial` or `radar`.
+- `donut`, `pie` and `radial` use the primary series only (shares of one whole). `radar` draws every series: one spoke per label, one polygon per series, all on the scale of the largest value, for comparing several series across the same dimensions.
+- Series and slice colours come from `--ui-chart-1` to `--ui-chart-6` (distinct hues by default; the first follows `--ui-color-primary`). Set them in your theme to change the palette:
+
+  ```css
+  :root { --ui-chart-1: #2563eb; --ui-chart-2: #0891b2; --ui-chart-3: #16a34a; }
+  ```
 - `Chart.Header` maps to the chart's `slot="header"` toolbar region.
 - `Chart.Title` and `Chart.Subtitle` map to slotted header text regions and override the `title` / `subtitle` prop fallback.
