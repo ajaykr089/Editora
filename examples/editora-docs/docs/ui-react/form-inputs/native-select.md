@@ -6,9 +6,6 @@ sidebar_label: "NativeSelect"
 
 # NativeSelect
 
-```tsx
-import { NativeSelect } from '@editora/ui-react';
-
 ## Try it
 
 ```tsx live
@@ -28,6 +25,9 @@ function Example() {
   );
 }
 ```
+
+```tsx
+import { NativeSelect } from '@editora/ui-react';
 
 <NativeSelect>
   <select name="country" aria-label="Country" defaultValue="in">

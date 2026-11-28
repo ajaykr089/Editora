@@ -6,9 +6,6 @@ sidebar_label: "AccessibleIcon"
 
 # AccessibleIcon
 
-```tsx
-import { AccessibleIcon } from '@editora/ui-react';
-
 ## Try it
 
 ```tsx live
@@ -24,6 +21,9 @@ function Example() {
   );
 }
 ```
+
+```tsx
+import { AccessibleIcon } from '@editora/ui-react';
 
 <button type="button">
   <AccessibleIcon label="Close"><XIcon /></AccessibleIcon>

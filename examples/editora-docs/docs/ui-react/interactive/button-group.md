@@ -6,9 +6,6 @@ sidebar_label: "ButtonGroup"
 
 # ButtonGroup
 
-```tsx
-import { Button, ButtonGroup } from '@editora/ui-react';
-
 ## Try it
 
 ```tsx live
@@ -34,6 +31,9 @@ function Example() {
   );
 }
 ```
+
+```tsx
+import { Button, ButtonGroup } from '@editora/ui-react';
 
 <ButtonGroup aria-label="Text alignment">
   <Button variant="outline">Left</Button>

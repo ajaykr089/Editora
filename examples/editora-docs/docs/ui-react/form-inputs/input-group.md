@@ -6,9 +6,6 @@ sidebar_label: "InputGroup"
 
 # InputGroup
 
-```tsx
-import { InputGroup, Kbd } from '@editora/ui-react';
-
 ## Try it
 
 ```tsx live
@@ -35,6 +32,9 @@ function Example() {
   );
 }
 ```
+
+```tsx
+import { InputGroup, Kbd } from '@editora/ui-react';
 
 <InputGroup>
   <SearchIcon slot="start" />

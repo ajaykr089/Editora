@@ -6,9 +6,6 @@ sidebar_label: "Item"
 
 # Item
 
-```tsx
-import { Avatar, Button, Item, ItemGroup, Switch } from '@editora/ui-react';
-
 ## Try it
 
 ```tsx live
@@ -30,6 +27,9 @@ function Example() {
   );
 }
 ```
+
+```tsx
+import { Avatar, Button, Item, ItemGroup, Switch } from '@editora/ui-react';
 
 <ItemGroup divided>
   <Item href="/team/ada" label="Ada Lovelace" description="ada@example.com">
