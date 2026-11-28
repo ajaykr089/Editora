@@ -683,6 +683,23 @@ change one control, use `--ui-control-min-height` (buttons) or `--ui-min-height`
 The 24px size is small for touch. Buttons inside a small field (clear, show password, the dropdown arrow) stay 24px
 tall so they still meet the WCAG 2.2 minimum target size, but prefer the default size on touch screens.
 
+### Tailwind CSS
+
+Use the theme tokens as Tailwind classes (`bg-ui-surface`, `text-ui-muted`, `rounded-ui`), so your Tailwind markup and the components share one theme:
+
+```css
+/* Tailwind v4 */
+@import "tailwindcss";
+@import "@editora/ui-core/tailwind.css";
+```
+
+```js
+// Tailwind v3: tailwind.config.js
+module.exports = { presets: [require('@editora/ui-core/tailwind').editoraPreset], content: ['./src/**/*.{ts,tsx}'] };
+```
+
+Component internals are in a shadow root, which utility classes cannot reach: style them through their parts (`part-[button]:rounded-full` in v3, `[&::part(button)]:rounded-full` in v4) or their custom properties. State variants `ui-open:`, `ui-disabled:`, `ui-invalid:` and others match the attributes the components set.
+
 ## Overlays
 
 Popovers, menus, dropdowns, selects, comboboxes, tooltips and dialogs share one set of behaviours.
