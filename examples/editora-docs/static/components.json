@@ -3781,6 +3781,18 @@
       "wrapperFor": "ui-heading"
     },
     {
+      "id": "ui-react:Headless",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Headless",
+      "reactExport": "Headless",
+      "source": "packages/ui-react/src/components/Headless.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-headless--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
+    },
+    {
       "id": "ui-react:HoverCard",
       "package": "@editora/ui-react",
       "framework": "react",
